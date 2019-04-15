@@ -546,6 +546,33 @@ function lib.GetSetInfo(setId)
     return setInfoTable
 end
 
+--Jump to a wayshrine of a set.
+--If it's a crafted set you can specify a fraction ID in order to jump to the selected fraction's zone
+--> Parameters: setId number: The set's setId
+-->             OPTIONAL fractionIndex: The index of the fraction (1=Ebonheart Pact, 2=Admeri Dominion, 3=Daggerfall Covenant)
+function lib.JumpToSetId(setId, fractionIndex)
+    if setId == nil then return false end
+    local jumpToNode = -1
+    --Is a crafted set?
+    if craftedSets[setId] then
+        --Then use the fraction Id 1 to 3
+        fractionIndex = fractionIndex or 1
+        if fractionIndex < 1 or fractionIndex > 3 then fractionIndex = 1 end
+        local craftedSetWSData = setInfo[setId].wayshrines
+        if craftedSetWSData ~= nil and craftedSetWSData[fractionIndex] ~= nil then
+            jumpToNode = craftedSetWSData[fractionIndex]
+        end
+        --Other sets wayshrines
+    else
+        jumpToNode = setInfo[setId].wayshrines[1]
+    end
+    --Jump now?
+    if jumpToNode and jumpToNode > 0 then
+        FastTravelToNode(jumpToNode)
+        return true
+    end
+    return false
+end
 
 --Returns an itemId of an item of the setId provided
 --> Parameters: setId number: The set's setId
@@ -570,35 +597,6 @@ end
 function lib.IsSetsScanning()
     return lib.setsScanning
 end
-
---Jump to a wayshrine of a set.
---If it's a crafted set you can specify a fraction ID in order to jump to the selected fraction's zone
---> Parameters: setId number: The set's setId
--->             OPTIONAL fractionIndex: The index of the fraction (1=Ebonheart Pact, 2=Admeri Dominion, 3=Daggerfall Covenant)
-function lib.JumpToSetId(setId, fractionIndex)
-    if setId == nil then return false end
-    local jumpToNode = -1
-    --Is a crafted set?
-    if craftedSets[setId] then
-        --Then use the fraction Id 1 to 3
-        fractionIndex = fractionIndex or 1
-        if fractionIndex < 1 or fractionIndex > 3 then fractionIndex = 1 end
-        local craftedSetWSData = craftedSetsWayShrines[setId]
-        if craftedSetWSData ~= nil and craftedSetWSData[fractionIndex] ~= nil then
-            jumpToNode = craftedSetWSData[fractionIndex]
-        end
-    --Other sets wayshrines
-    else
-        jumpToNode = setWayShrines[setId]
-    end
-    --Jump now?
-    if jumpToNode and jumpToNode > 0 then
-        FastTravelToNode(jumpToNode)
-        return true
-    end
-    return false
-end
-
 
 ------------------------------------------------------------------------
 --Addon loaded function
