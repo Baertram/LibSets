@@ -370,8 +370,7 @@ function lib.LoadSets(override, fromAddonName)
     --> Change variable numItemIdPackages and increase it to support new added set itemIds
     --> Total itemIds collected: 0 to (numItemIdPackages * numItemIdPackageSize)
     local miliseconds = 0
-    --local numItemIdPackages = 30       -- Increase this to find new added set itemIds after and update
-local numItemIdPackages = 5       -- Increase this to find new added set itemIds after and update
+    local numItemIdPackages = 30       -- Increase this to find new added set itemIds after and update
     local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
     local fromTo = {}
     local fromVal = 0
