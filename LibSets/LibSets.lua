@@ -371,6 +371,7 @@ function lib.LoadSets(override, fromAddonName)
     --> Total itemIds collected: 0 to (numItemIdPackages * numItemIdPackageSize)
     local miliseconds = 0
     local numItemIdPackages = 30       -- Increase this to find new added set itemIds after and update
+
     local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
     local fromTo = {}
     local fromVal = 0
@@ -478,7 +479,8 @@ end
 function lib.GetSetName(setId, lang)
     lang = lang or lib.clientLang
     if setId == nil or not lib.supportedLanguages[lang] or lib.setsData.sets == nil
-        or lib.setsData.sets[tonumber(setId)]["name"] == nil or lib.setsData.sets[tonumber(setId)]["name"][lang] == nil then return end
+        or lib.setsData.sets[tonumber(setId)] == nil or lib.setsData.sets[tonumber(setId)]["name"] == nil
+        or lib.setsData.sets[tonumber(setId)]["name"][lang] == nil then return end
     local setName = lib.setsData.sets[tonumber(setId)]["name"][lang]
     return setName
 end
