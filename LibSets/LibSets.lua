@@ -24,7 +24,7 @@
 
     For more information, please refer to <http://unlicense.org/>
 --]========================================================================]
-local MAJOR, MINOR = "LibSets", 0.05
+local MAJOR, MINOR = "LibSets", 0.06
 LibSets = LibSets or {}
 local lib = LibSets
 
@@ -32,7 +32,7 @@ lib.name        = MAJOR
 lib.version     = MINOR
 --SavedVariables info
 lib.svDataName  = "LibSets_SV_Data"
-lib.svVersion   = 0.5
+lib.svVersion   = 0.6
 lib.setsData    = {
     ["languagesScanned"] = {},
 }
@@ -53,6 +53,7 @@ lib.supportedLanguages = {
 ------------------------------------------------------------------------
 --All sets data
 local sets = {}
+local setIds = {}
 local setsFound = 0
 local setsUpdated = 0
 local itemsScanned = 0
@@ -184,6 +185,60 @@ local setInfo = {
     --TODO
     [31]    = {wayshrines={65}},                                     --Sonnenseide (Stonefalls: Davons Watch, or 41 "Fort Arnad" near to a Worldboss)
 }
+
+local preloaded = {
+    -- lookup this id for the current patch with the following script:
+    -- /script local maxId=147664 for itemId=maxId,200000 do local itemType = GetItemLinkItemType('|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h') if itemType>0 then maxId=itemId end end d(maxId)
+    ["maxItemIdScanned"] = 152154,
+    ["lastSetsCheckAPIVersion"] = 100027,
+    --[[ to generate the following list:
+         * /reloadui with the latest patch version after scan is complete
+         * copy the entire ["sets"] array from the LibSets.lua saved vars into a lua minifier
+         * find/replace the following regex with an empty string in Notepad++
+           ,?\["name"\]=\{[^}]+\},?
+         * find/replace the following regex with \1 in Notepad++
+           \{\["itemId"\]=([0-9]+)\}
+      ]]--
+    ["sets"] = {
+        [19]=22200, [20]=10973, [21]=7664, [22]=2503, [23]=43761, [24]=43764, [25]=43767, [26]=15728, [27]=7661, [28]=15767, [29]=16228, [30]=10885, [31]=1530, 
+        [32]=43788, [33]=10961, [34]=4289, [35]=29065, [36]=1373, [37]=43803, [38]=43807, [39]=43811, [40]=43815, [41]=43819, [43]=43827, [44]=43831, 
+        [46]=22161, [47]=7514, [48]=43847, [49]=70, [50]=43855, [51]=43859, [52]=43863, [53]=33159, [54]=43871, [55]=10067, [56]=7668, [57]=1672, [58]=1088, 
+        [59]=43895, [60]=7295, [61]=139, [62]=7440, [63]=43915, [64]=10878, [65]=471, [66]=7445, [67]=43935, [68]=10861, [69]=1662, [70]=15600, [71]=22182, 
+        [72]=22162, [73]=43965, [74]=43971, [75]=43977, [76]=43983, [77]=33155, [78]=43995, [79]=44001, [80]=44007, [81]=44013, [82]=44019, [83]=44025, 
+        [84]=44031, [85]=44037, [86]=7598, [87]=44049, [88]=44055, [89]=44061, [90]=10239, [91]=44073, [92]=44079, [93]=2474, [94]=15732, [95]=40259, 
+        [96]=7690, [97]=44111, [98]=7292, [99]=15527, [100]=44132, [101]=44139, [102]=33273, [103]=33160, [104]=44160, [105]=3158, [106]=10847, [107]=317, 
+        [108]=44188, [109]=44195, [110]=7717, [111]=44209, [112]=2501, [113]=44223, [114]=10914, [116]=54257, [117]=55379, [118]=55365, [119]=55367, 
+        [120]=54267, [121]=55368, [122]=16047, [123]=23666, [124]=34384, [125]=54287, [126]=54295, [127]=54296, [128]=54300, [129]=54303, [130]=54328, 
+        [131]=54321, [132]=54307, [133]=54314, [134]=16144, [135]=10972, [136]=54874, [137]=54881, [138]=54885, [139]=54889, [140]=54896, [141]=54902, 
+        [142]=54906, [143]=54913, [144]=54917, [145]=54921, [146]=54928, [147]=54935, [148]=54787, [155]=16213, [156]=23731, [157]=22157, [158]=5832,
+        [159]=5831, [160]=23710, [161]=58153, [162]=59380, [163]=59416, [164]=59452, [165]=59488, [166]=59524, [167]=59560, [168]=59596, [169]=59632, 
+        [170]=59668, [171]=59738, [172]=59752, [173]=59745, [176]=59946, [177]=60296, [178]=60646, [179]=68432, [180]=68535, [181]=68615, [183]=68107, 
+        [184]=64760, [185]=66167, [186]=33167, [187]=7476, [188]=33276, [190]=67567, [193]=33176, [194]=16219, [195]=67015, [196]=66440, [197]=28112, 
+        [198]=65335, [199]=68711, [200]=68791, [201]=68872, [204]=55963, [205]=64488, [206]=69281, [207]=69577, [208]=69927, [209]=137543, [210]=68608, 
+        [211]=68784, [212]=68447, [213]=68696, [214]=68623, [215]=68703, [216]=68799, [217]=68527, [218]=68439, [219]=70627, [224]=71791, [225]=72141, 
+        [226]=72491, [227]=72841, [228]=72913, [229]=73011, [230]=72985, [231]=73060, [232]=73037, [234]=73873, [235]=74222, [236]=74149, [237]=73935, 
+        [238]=73997, [239]=74080, [240]=75386, [241]=75736, [242]=76086, [243]=76916, [244]=77076, [245]=77236, [246]=78048, [247]=78328, [248]=78608, 
+        [253]=78906, [256]=82176, [257]=82128, [258]=82411, [259]=82602, [260]=82229, [261]=82966, [262]=83157, [263]=82784, [264]=94452, [265]=94460, 
+        [266]=94468, [267]=94476, [268]=94484, [269]=94492, [270]=94500, [271]=94508, [272]=94516, [273]=94524, [274]=94532, [275]=94540, [276]=94548, 
+        [277]=94556, [278]=94564, [279]=94572, [280]=94580, [281]=1115, [282]=7294, [283]=7508, [284]=7520, [285]=15599, [286]=15594, [287]=1674, [288]=10848, 
+        [289]=15524, [290]=10921, [291]=6900, [292]=4308, [293]=4305, [294]=10150, [295]=29071, [296]=29097, [297]=28122, [298]=15546, [299]=7666, 
+        [300]=15679, [301]=5921, [302]=16042, [303]=16046,  [304]=16044, [305]=33153, [307]=33283, [308]=22156, [309]=22196, [310]=22169, [311]=44728, 
+        [313]=55934, [314]=55935, [315]=55936, [316]=55937, [317]=55938, [318]=55939, [320]=122792, [321]=122983, [322]=122610, [323]=121551, [324]=121901, 
+        [325]=122251, [326]=123166, [327]=123348, [328]=123530, [329]=123721, [330]=123912, [331]=124094, [332]=124276, [333]=124467, [334]=125689, 
+        [335]=127332, [336]=127523, [337]=127150, [338]=127935, [339]=128126, [340]=127753, [341]=127705, [342]=128308, [343]=128554, [344]=128745, 
+        [345]=128372, [346]=129109, [347]=129300, [348]=128927, [349]=129482, [350]=129530, [351]=130370, [352]=130720, [353]=131070, [354]=132848, 
+        [355]=133039, [356]=132666, [357]=133251, [358]=133243, [359]=133247, [360]=133254, [361]=133255, [362]=133258, [363]=133404, [364]=133396, 
+        [365]=133400, [366]=133407, [367]=133408, [368]=133411, [369]=71118, [370]=71106, [371]=71100, [372]=71142, [373]=71152, [374]=71170, [380]=134799, 
+        [381]=134955, [382]=134692, [383]=134701, [384]=134696, [385]=135717, [386]=136067, [387]=136417, [388]=136767, [389]=136949, [390]=137131, 
+        [391]=137322, [392]=137964, [393]=138146, [394]=138328, [395]=138519, [397]=141622, [398]=141670, [399]=140694, [400]=140885, [401]=140512, 
+        [402]=141249, [403]=141440, [404]=141067, [405]=142600, [406]=142418, [407]=142236, [408]=142791, [409]=143161, [410]=143531, [411]=145011, 
+        [412]=145019, [413]=145015, [414]=145022, [415]=145023, [416]=145026, [417]=143901, [418]=144092, [419]=144283, [420]=144465, [421]=144647, 
+        [422]=144829, [423]=145164, [424]=145172, [425]=145168, [426]=145175, [427]=145176, [428]=145179, [429]=146077, [430]=146259, [431]=146441, 
+        [432]=146632, [433]=146680, [434]=146862, [435]=147044, [436]=147235, [437]=147948, [438]=148318, [439]=148688, [440]=149240, [441]=149431, 
+        [442]=149058, [444]=149977, [445]=149795, [446]=149613
+    }
+}
+
 ------------------------------------------------------------------------
 -- 	Local helper functions
 ------------------------------------------------------------------------
@@ -222,43 +277,58 @@ local function checkSet(itemLink)
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
+-- This is the primary set data population function.
+--> Parameters: setItemId number: The item id to use for extracting set data
+--> Returns:    boolean found: true if new set data was extracted
+-->             boolean updated: true if the set was known, but new language name data was extracted
+local function LoadSetByItemId(setItemId)
+    --Generate link for item
+    local itemLink = lib.buildItemLink(setItemId)
+    if not itemLink or itemLink == "" or IsItemLinkCrafted(itemLink) then return end
+    
+    local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+    if not isSet then return end
+    
+    local itemType = GetItemLinkItemType(itemLink)
+    --Some set items are only "containers" ...
+    if not checkItemTypes[itemType] then return end
+    
+    local clientLang = lib.clientLang
+    local found, updated
+    
+    --Only add the first found item of the set as itemId!
+    if sets[setId] == nil then
+        sets[setId] = {}
+        found = true
+        sets[setId]["itemId"] = setItemId
+        --Remove the gender stuff from the setname
+        setName = zo_strformat("<<C:1>>", setName)
+        --Update the Set names table
+        sets[setId]["name"] = sets[setId]["name"] or {}
+        sets[setId]["name"][clientLang] = sets[setId]["name"][clientLang] or setName
+    --Update missing client languages to the set name
+    elseif sets[setId] ~= nil and sets[setId]["name"] ~= nil and sets[setId]["itemId"] ~= nil then
+        --The setId exists in the SavedVars but the translated string is missing for the current clientLanguage?
+        if sets[setId]["name"][clientLang] == nil then
+            --Remove the gender stuff from the setname
+            setName = zo_strformat("<<C:1>>", setName)
+            sets[setId]["name"][clientLang] = setName
+            updated = true
+        end
+    end
+    
+    return found, updated
+end
+
 local function LoadSetsByIds(from, to)
-    local buildItemLink = lib.buildItemLink
     local clientLang = lib.clientLang
     for setItemId=from, to do
         itemsScanned = itemsScanned + 1
-        --Generate link for item
-        local itemLink = buildItemLink(setItemId)
-        if itemLink and itemLink ~= "" then
-            if not IsItemLinkCrafted(itemLink) then
-                local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
-                if isSet then
-                    local itemType = GetItemLinkItemType(itemLink)
-                    --Some set items are only "containers" ...
-                    if checkItemTypes[itemType] then
-                        --Only add the first found item of the set as itemId!
-                        if sets[setId] == nil then
-                            sets[setId] = {}
-                            setsFound = setsFound + 1
-                            sets[setId]["itemId"] = setItemId
-                            --Remove the gender stuff from the setname
-                            setName = zo_strformat("<<C:1>>", setName)
-                            --Update the Set names table
-                            sets[setId]["name"] = sets[setId]["name"] or {}
-                            sets[setId]["name"][clientLang] = sets[setId]["name"][clientLang] or setName
-                        --Update missing client languages to the set name
-                        elseif sets[setId] ~= nil and sets[setId]["name"] ~= nil and sets[setId]["itemId"] ~= nil then
-                            --The setId exists in the SavedVars but the translated string is missing for the current clientLanguage?
-                            if sets[setId]["name"][clientLang] == nil then
-                                --Remove the gender stuff from the setname
-                                setName = zo_strformat("<<C:1>>", setName)
-                                sets[setId]["name"][clientLang] = setName
-                                setsUpdated = setsUpdated + 1
-                            end
-                        end
-                    end
-                end
-            end
+        local setFound, setUpdated = LoadSetByItemId(setItemId)
+        if setFound then
+            setsFound = setsFound + 1
+        elseif setUpdated then
+            setsUpdated = setsUpdated + 1
         end
     end
     d("[LibSets]~~~Scanning sets~~~ items: " .. tostring(itemsScanned) .. ", sets new/updated: " .. tostring(setsFound) .. "/" .. tostring(setsUpdated))
@@ -324,6 +394,38 @@ local function distinguishSetTypes()
     end
 end
 
+-- Loads the setIds array with a sorted list of all set ids
+local function loadSetIds()
+    if lib.setsData and lib.setsData.sets then
+        for setId, _ in pairs(lib.setsData.sets) do
+            table.insert(setIds, setId)
+        end
+    end
+    table.sort(setIds)
+end
+
+-- Populates saved vars for set ids that are known ahead of time in preloaded.sets.
+local function loadPreloadedSetNames()
+    if not lib.setsData then return end
+    if not lib.setsData["preloadedLanguagesScanned"] then
+        lib.setsData["preloadedLanguagesScanned"] = {}
+    end
+    if not lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion] then 
+        lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion] = {}
+    end
+    if lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion][tostring(lib.clientLang)] then
+        return
+    end
+    if lib.setsData.sets == nil then
+        lib.setsData.sets = {}
+    end
+    sets = lib.setsData.sets
+    for _, itemId in pairs(preloaded["sets"]) do
+        LoadSetByItemId(itemId)
+    end
+    lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion][tostring(lib.clientLang)]  = true
+end
+
 
 ------------------------------------------------------------------------
 -- 	Global functions
@@ -374,12 +476,18 @@ function lib.LoadSets(override, fromAddonName)
 
     local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
     local fromTo = {}
-    local fromVal = 0
+    local startVal = preloaded["maxItemIdScanned"] + 1
+    local fromVal = startVal
     for numItemIdPackage = 1, numItemIdPackages, 1 do
         --Set the to value to loop counter muliplied with the package size (e.g. 1*500, 2*5000, 3*5000, ...)
-        local toVal = numItemIdPackage * numItemIdPackageSize
+        local toVal = startVal + numItemIdPackage * numItemIdPackageSize - 1
         --Add the from and to values to the totla itemId check array
         table.insert(fromTo, {from = fromVal, to = toVal})
+        local itemLink = lib.buildItemLink(toVal)
+        -- Break early if toVal isn't a valid item
+        if GetItemLinkItemType(itemLink) == 0 then
+            break
+        end
         --For the next loop: Set the from value to the to value + 1 (e.g. 5000+1, 10000+1, ...)
         fromVal = toVal + 1
     end
@@ -394,7 +502,9 @@ function lib.LoadSets(override, fromAddonName)
         if sets ~= nil then
             d("[LibSets]Scan finished. [Totals]item count: " .. tostring(itemsScanned) .. ", sets found/updated: " .. tostring(setsFound) .."/" .. tostring(setsUpdated) .. "\nAPI version: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
             lib.setsData.sets = sets
+            loadPreloadedSetNames()
             distinguishSetTypes()
+            loadSetIds()
             lib.setsData.monsterSets        = monsterSets
             lib.setsData.dungeonSets        = dungeonSets
             lib.setsData.overlandSets       = overlandSets
@@ -470,6 +580,12 @@ end
 --> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number
 function lib.IsSetByItemLink(itemLink)
     return checkSet(itemLink)
+end
+
+--Returns a sorted array of all set ids
+--> Returns: setIds table
+function lib.GetAllSetIds()
+    return setIds
 end
 
 --Returns the name as String of the setId provided
@@ -586,8 +702,8 @@ end
 --> Returns:    boolean areSetsLoaded
 function lib.AreSetsLoaded()
     local areSetsLoaded = false
-    local lastCheckedSetsAPIVersion = lib.setsData.lastSetsCheckAPIVersion
-    areSetsLoaded = (lib.setsLoaded == true and (lastCheckedSetsAPIVersion ~= nil and lastCheckedSetsAPIVersion == lib.currentAPIVersion)) or false
+    local lastCheckedSetsAPIVersion = math.max( lib.setsData.lastSetsCheckAPIVersion or 0, preloaded.lastSetsCheckAPIVersion )
+    areSetsLoaded = (lib.setsLoaded == true and (lastCheckedSetsAPIVersion >= lib.currentAPIVersion)) or false
     return areSetsLoaded
 end
 
@@ -615,12 +731,12 @@ local function OnLibraryLoaded(event, name)
     lib.AskBeforeReloadUIDialogInitialize(LibSetsAskBeforeReloadUIDialogXML)
 
     --Did the API version change since last sets check? Then rebuild the sets now!
-    local lastCheckedSetsAPIVersion = lib.setsData.lastSetsCheckAPIVersion
+    local lastCheckedSetsAPIVersion = math.max( lib.setsData.lastSetsCheckAPIVersion or 0, preloaded.lastSetsCheckAPIVersion)
     --API version changed?
-    if lastCheckedSetsAPIVersion == nil or lastCheckedSetsAPIVersion ~= lib.currentAPIVersion then
+    if lastCheckedSetsAPIVersion < lib.currentAPIVersion then
         --Delay to chat output works
         zo_callLater(function()
-            d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]API version changed from \'" .. tostring(lastCheckedSetsAPIVersion) .. "\'to \'" .. tostring(lib.currentAPIVersion) .. "\nAll set IDs and names need to be rescanned!\nThis will take about 2 minutes.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nYour client might lag and be hardly responsive during this time!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]API version changed from \'" .. tostring(lastCheckedSetsAPIVersion) .. "\'to \'" .. tostring(lib.currentAPIVersion) .. "\nNew set IDs and names need to be scanned!\nThis will take a few seconds.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             lib.LoadSets(true)
         end, 1000)
     --Client language changed and language is not yet in the SavedVariables?
@@ -629,9 +745,29 @@ local function OnLibraryLoaded(event, name)
             (lib.setsData["languagesScanned"][lib.currentAPIVersion] == nil or (lib.setsData["languagesScanned"][lib.currentAPIVersion] and lib.setsData["languagesScanned"][lib.currentAPIVersion][lib.clientLang] == nil)) then
         --Delay to chat output works
         zo_callLater(function()
-            d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]Sets data for your current client language \'" .. tostring(lib.clientLang) .. "\' and the current API version \'" .. tostring(lib.currentAPIVersion) .. "\' was not added yet.\nAll set IDs and names need to be rescanned!\nThis will take about 2 minutes.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nYour client might lag and be hardly responsive during this time!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]Sets data for your current client language \'" .. tostring(lib.clientLang) .. "\' and the current API version \'" .. tostring(lib.currentAPIVersion) .. "\' was not added yet.\nNew set names need to be scanned!\nThis will take a few seconds.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             lib.LoadSets(false)
         end, 1000)
+    else
+    
+        --Load preloaded set names
+        loadPreloadedSetNames()
+        loadSetIds()
+        if lib.setsData 
+           and (lib.setsData.monsterSets == nil or lib.setsData.dungeonSets == nil or lib.setsData.overlandSets == nil 
+                or lib.setsData.monsterSetsCount == nil or lib.setsData.dungeonSetsCount == nil or lib.setsData.overlandSetsCount == nil
+                or not next(lib.setsData.monsterSets) or not next(lib.setsData.dungeonSets) or not next(lib.setsData.overlandSets)
+                or lib.setsData.monsterSetsCount == 0 or lib.setsData.dungeonSetsCount == 0 or lib.setsData.overlandSetsCount == 0)
+        then
+            distinguishSetTypes()
+            lib.setsData.monsterSets        = monsterSets
+            lib.setsData.dungeonSets        = dungeonSets
+            lib.setsData.overlandSets       = overlandSets
+            lib.setsData.monsterSetsCount   = monsterSetsCount
+            lib.setsData.dungeonSetsCount   = dungeonSetsCount
+            lib.setsData.overlandSetsCount  = overlandSetsCount
+        end
+        lib.setsLoaded = true
     end
     --Provide the library the "list of set types" and counts
     lib.craftedSets         = craftedSets
@@ -642,6 +778,7 @@ local function OnLibraryLoaded(event, name)
     lib.monsterSetsCount    = lib.setsData.monsterSetsCount
     lib.dungeonSetsCount    = lib.setsData.dungeonSetsCount
     lib.overlandSetsCount   = lib.setsData.overlandSetsCount
+    lib.preloaded           = preloaded
 end
 
 --Load the addon now
