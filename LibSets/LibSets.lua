@@ -514,8 +514,7 @@ function lib.GetSetInfo(setId)
     local setInfoFromSV = lib.setsData.sets[tonumber(setId)]
     setInfoTable.setId = setId
     setInfoTable.itemId = setInfoFromSV["itemId"]
-    setInfoTable.names = {}
-    setInfoTable.names = setInfoFromSV["name"]
+    setInfoTable.names = setInfoFromSV["name"] or {}
     setInfoTable.setTypes = {
         ["isCrafted"]   = false,
         ["isDungeon"]   = false,
@@ -523,25 +522,24 @@ function lib.GetSetInfo(setId)
         ["isOverland"]  = false,
     }
     setInfoTable.traitsNeeded   = 0
-    local isCraftedSet = (craftedSets[setId]) or false
+    local isCraftedSet = (lib.craftedSets[setId]) or false
     --Craftable set
+    local setsData = setInfo[setId]
     if isCraftedSet then
-        local craftedSetsData = setInfo[setId]
-        if craftedSetsData then
-            setInfoTable.traitsNeeded   = craftedSetsData.traitsNeeded
-            setInfoTable.wayshrines     = craftedSetsData.wayshrines
+        if setsData then
+            setInfoTable.traitsNeeded   = setsData.traitsNeeded
+            setInfoTable.wayshrines     = setsData.wayshrines
             setInfoTable.setTypes["isCrafted"] = true
         end
     --Non-craftable set
     else
-        local nonCraftedSetsData = setInfo[setId]
-        if nonCraftedSetsData then
-            setInfoTable.wayshrines     = nonCraftedSetsData.wayshrines
-            --Check the type of the set
-            if monsterSets[setId] then      setInfoTable.setTypes["isMonster"]  = true
-            elseif dungeonSets[setId] then  setInfoTable.setTypes["isDungeon"]  = true
-            elseif overlandSets[setId] then setInfoTable.setTypes["isOverland"] = true
-            end
+        if setsData then
+            setInfoTable.wayshrines     = setsData.wayshrines
+        end
+        --Check the type of the set
+        if lib.monsterSets[setId] then      setInfoTable.setTypes["isMonster"]  = true
+        elseif lib.dungeonSets[setId] then  setInfoTable.setTypes["isDungeon"]  = true
+        elseif lib.overlandSets[setId] then setInfoTable.setTypes["isOverland"] = true
         end
     end
     return setInfoTable
