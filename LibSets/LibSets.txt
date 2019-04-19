@@ -1,6 +1,6 @@
 ﻿## Title: LibSets
 ## Author: Baertram
-## APIVersion: 10026 100027
+## APIVersion: 100026 100027
 ## AddOnVersion: 006
 ## Version: 0.0.6
 ## IsLibrary: true
