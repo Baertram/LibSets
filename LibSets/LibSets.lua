@@ -505,9 +505,9 @@ end
 ----> table names ([String lang] = String name),
 ----> table setTypes (table containing booleans for isCrafted, isDungeon, isMonster, isOverland),
 ----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),
-----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, fractionIndex).
+----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).
 ------>The table will contain 1 entry if it's a NON-craftable setId (wayshrines = {[1] = WSNodeNoFraction})
------->and 3 entries (one for each fraction) if it's a craftable setId (wayshrines = {[1] = WSNodeFraction1, [2] = WSNodeFraction2, [3] = WSNodeFraction3})
+------>and 3 entries (one for each faction) if it's a craftable setId (wayshrines = {[1] = WSNodeFraction1, [2] = WSNodeFraction2, [3] = WSNodeFraction3})
 function lib.GetSetInfo(setId)
     if setId == nil or lib.setsData.sets == nil or lib.setsData.sets[tonumber(setId)] == nil then return end
     local setInfoTable = {}
@@ -548,20 +548,20 @@ function lib.GetSetInfo(setId)
 end
 
 --Jump to a wayshrine of a set.
---If it's a crafted set you can specify a fraction ID in order to jump to the selected fraction's zone
+--If it's a crafted set you can specify a faction ID in order to jump to the selected faction's zone
 --> Parameters: setId number: The set's setId
--->             OPTIONAL fractionIndex: The index of the fraction (1=Ebonheart Pact, 2=Admeri Dominion, 3=Daggerfall Covenant)
-function lib.JumpToSetId(setId, fractionIndex)
+-->             OPTIONAL factionIndex: The index of the faction (1=Ebonheart Pact, 2=Admeri Dominion, 3=Daggerfall Covenant)
+function lib.JumpToSetId(setId, factionIndex)
     if setId == nil then return false end
     local jumpToNode = -1
     --Is a crafted set?
     if craftedSets[setId] then
-        --Then use the fraction Id 1 to 3
-        fractionIndex = fractionIndex or 1
-        if fractionIndex < 1 or fractionIndex > 3 then fractionIndex = 1 end
+        --Then use the faction Id 1 to 3
+        factionIndex = factionIndex or 1
+        if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
         local craftedSetWSData = setInfo[setId].wayshrines
-        if craftedSetWSData ~= nil and craftedSetWSData[fractionIndex] ~= nil then
-            jumpToNode = craftedSetWSData[fractionIndex]
+        if craftedSetWSData ~= nil and craftedSetWSData[factionIndex] ~= nil then
+            jumpToNode = craftedSetWSData[factionIndex]
         end
         --Other sets wayshrines
     else
