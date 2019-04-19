@@ -761,7 +761,7 @@ local function OnLibraryLoaded(event, name)
     lib.monsterSetsCount    = lib.setsData.monsterSetsCount
     lib.dungeonSetsCount    = lib.setsData.dungeonSetsCount
     lib.overlandSetsCount   = lib.setsData.overlandSetsCount
-    lib.preloaded           = lib.preloaded
+    lib.preloaded           = preloaded
 end
 
 --Load the addon now
