@@ -272,10 +272,50 @@ local function librarySavedVariables()
     if lib.setsData.sets ~= nil then lib.setsLoaded = true end
 end
 
---Check which setIds were found and compare them to the craftedSets list.
---All non-craftable will be checked if they are head and shoulder and got only 1 or 2 set bonus: monsterSets table
---All non-craftable will be checked if they are bound on pickup but tradeable: dungeonSets table
---All non-craftable will be checked if they are no monster or dungeon set: overlandSets table
+--Update the set types tables for the given set id and data.
+--All non-craftable head and shoulder with only 1 or 2 set bonus: monsterSets table
+--All non-craftable, non-monster sets that are bound on pickup: dungeonSets table
+--All non-craftable, non-monster, non-dungeon set: overlandSets table
+local function distinguishSetType(setId, setData)
+    local buildItemLink = lib.buildItemLink
+    
+    if craftedSets[setId] then return end
+  
+    --Get the itemId stored for the setId and build the itemLink
+    local itemId = setData.itemId
+    if itemId == nil then return end
+    
+    local itemLink = buildItemLink(itemId)
+    if itemLink == nil then return end
+    
+    --Get the maxEquipped attribute of the set
+    local _, _, _, _, maxEquipped, _ = GetItemLinkSetInfo(itemLink)
+    
+    --Check if the item is a monster set
+    if IsItemMonsterSet(maxEquipped) then
+        local equipType = GetItemLinkEquipType(itemLink)
+        if IsHeadOrShoulder(equipType) then
+            --It's a monster set (helm or shoulder with defined number of max bonus)
+            monsterSets[setId] = true
+            monsterSetsCount = monsterSetsCount + 1
+            return
+        end
+    end
+    
+    --Item is no monster set, so check for dungeon or
+    --Is a dungeon set (bound on pickup but tradeable)?
+    if IsItemDungeonSet(itemLink) then
+        dungeonSets[setId] = true
+        dungeonSetsCount = dungeonSetsCount + 1
+    else
+        --Is an overland set
+        overlandSets[setId] = true
+        overlandSetsCount = overlandSetsCount + 1
+    end
+end
+
+-- Populates the various set type arrays (monsterSets, dungeonSets, overlandSets)
+-- and their associated totals (monsterSetsCount, dungeonSetsCount, overlandSetsCount)
 local function distinguishSetTypes()
     monsterSetsCount  = 0
     dungeonSetsCount  = 0
@@ -283,44 +323,8 @@ local function distinguishSetTypes()
     monsterSets = {}
     dungeonSets = {}
     overlandSets = {}
-    local buildItemLink = lib.buildItemLink
-    if craftedSets ~= nil and lib.setsData.sets ~= nil then
-        for setId, setData in pairs(lib.setsData.sets) do
-            local isMonsterSet = false
-            if not craftedSets[setId] then
-                --Get the itemId stored for the setId and build the itemLink
-                local itemId = setData.itemId
-                if itemId ~= nil then
-                    local itemLink = buildItemLink(itemId)
-                    if itemLink ~= nil then
-                        --Get the maxEquipped attribute of the set
-                        local _, _, _, _, maxEquipped, _ = GetItemLinkSetInfo(itemLink)
-                        --Check if the item is a monster set
-                        if IsItemMonsterSet(maxEquipped) then
-                            local equipType = GetItemLinkEquipType(itemLink)
-                            if IsHeadOrShoulder(equipType) then
-                                --It's a monster set (helm or shoulder with defined number of max bonus)
-                                monsterSets[setId] = true
-                                monsterSetsCount = monsterSetsCount + 1
-                                isMonsterSet = true
-                            end
-                        end
-                        --Item is no monster set, so check for dungeon or
-                        if not isMonsterSet then
-                            --Is a dungeon set (bound on pickup but tradeable)?
-                            if IsItemDungeonSet(itemLink) then
-                                dungeonSets[setId] = true
-                                dungeonSetsCount = dungeonSetsCount + 1
-                            else
-                                --Is an overland set
-                                overlandSets[setId] = true
-                                overlandSetsCount = overlandSetsCount + 1
-                            end
-                        end
-                    end
-                end
-            end
-        end
+    for setId, setData in pairs(lib.setsData.sets) do
+        distinguishSetType(setId, setData)
     end
 end
 
