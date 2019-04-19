@@ -187,8 +187,18 @@ local setInfo = {
 }
 
 local preloaded = {
+    -- lookup this id for the current patch with the following script:
+    -- /script local maxId=147664 for itemId=maxId,200000 do local itemType = GetItemLinkItemType('|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h') if itemType>0 then maxId=itemId end end d(maxId)
     ["maxItemIdScanned"] = 152154,
     ["lastSetsCheckAPIVersion"] = 100027,
+    --[[ to generate the following list:
+         * /reloadui with the latest patch version after scan is complete
+         * copy the entire ["sets"] array from the LibSets.lua saved vars into a lua minifier
+         * find/replace the following regex with an empty string in Notepad++
+           ,?\["name"\]=\{[^}]+\},?
+         * find/replace the following regex with \1 in Notepad++
+           \{\["itemId"\]=([0-9]+)\}
+      ]]--
     ["sets"] = {
         [19]=22200, [20]=10973, [21]=7664, [22]=2503, [23]=43761, [24]=43764, [25]=43767, [26]=15728, [27]=7661, [28]=15767, [29]=16228, [30]=10885, [31]=1530, 
         [32]=43788, [33]=10961, [34]=4289, [35]=29065, [36]=1373, [37]=43803, [38]=43807, [39]=43811, [40]=43815, [41]=43819, [43]=43827, [44]=43831, 
@@ -466,12 +476,18 @@ function lib.LoadSets(override, fromAddonName)
 
     local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
     local fromTo = {}
-    local fromVal = preloaded["maxItemIdScanned"] + 1
+    local startVal = preloaded["maxItemIdScanned"] + 1
+    local fromVal = startVal
     for numItemIdPackage = 1, numItemIdPackages, 1 do
         --Set the to value to loop counter muliplied with the package size (e.g. 1*500, 2*5000, 3*5000, ...)
-        local toVal = numItemIdPackage * numItemIdPackageSize
+        local toVal = startVal + numItemIdPackage * numItemIdPackageSize - 1
         --Add the from and to values to the totla itemId check array
         table.insert(fromTo, {from = fromVal, to = toVal})
+        local itemLink = lib.buildItemLink(toVal)
+        -- Break early if toVal isn't a valid item
+        if GetItemLinkItemType(itemLink) == 0 then
+            break
+        end
         --For the next loop: Set the from value to the to value + 1 (e.g. 5000+1, 10000+1, ...)
         fromVal = toVal + 1
     end
@@ -486,6 +502,7 @@ function lib.LoadSets(override, fromAddonName)
         if sets ~= nil then
             d("[LibSets]Scan finished. [Totals]item count: " .. tostring(itemsScanned) .. ", sets found/updated: " .. tostring(setsFound) .."/" .. tostring(setsUpdated) .. "\nAPI version: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
             lib.setsData.sets = sets
+            loadPreloadedSetNames()
             distinguishSetTypes()
             loadSetIds()
             lib.setsData.monsterSets        = monsterSets
@@ -712,9 +729,6 @@ local function OnLibraryLoaded(event, name)
 
     --Initialize the ask before reloadui dialog
     lib.AskBeforeReloadUIDialogInitialize(LibSetsAskBeforeReloadUIDialogXML)
-    
-    --Load preloaded set names
-    loadPreloadedSetNames()
 
     --Did the API version change since last sets check? Then rebuild the sets now!
     local lastCheckedSetsAPIVersion = math.max( lib.setsData.lastSetsCheckAPIVersion or 0, preloaded.lastSetsCheckAPIVersion)
@@ -722,7 +736,7 @@ local function OnLibraryLoaded(event, name)
     if lastCheckedSetsAPIVersion < lib.currentAPIVersion then
         --Delay to chat output works
         zo_callLater(function()
-            d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]API version changed from \'" .. tostring(lastCheckedSetsAPIVersion) .. "\'to \'" .. tostring(lib.currentAPIVersion) .. "\nAll set IDs and names need to be rescanned!\nThis will take about 2 minutes.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nYour client might lag and be hardly responsive during this time!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]API version changed from \'" .. tostring(lastCheckedSetsAPIVersion) .. "\'to \'" .. tostring(lib.currentAPIVersion) .. "\nNew set IDs and names need to be scanned!\nThis will take a few seconds.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             lib.LoadSets(true)
         end, 1000)
     --Client language changed and language is not yet in the SavedVariables?
@@ -731,10 +745,13 @@ local function OnLibraryLoaded(event, name)
             (lib.setsData["languagesScanned"][lib.currentAPIVersion] == nil or (lib.setsData["languagesScanned"][lib.currentAPIVersion] and lib.setsData["languagesScanned"][lib.currentAPIVersion][lib.clientLang] == nil)) then
         --Delay to chat output works
         zo_callLater(function()
-            d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]Sets data for your current client language \'" .. tostring(lib.clientLang) .. "\' and the current API version \'" .. tostring(lib.currentAPIVersion) .. "\' was not added yet.\nAll set IDs and names need to be rescanned!\nThis will take about 2 minutes.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nYour client might lag and be hardly responsive during this time!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]Sets data for your current client language \'" .. tostring(lib.clientLang) .. "\' and the current API version \'" .. tostring(lib.currentAPIVersion) .. "\' was not added yet.\nNew set names need to be scanned!\nThis will take a few seconds.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             lib.LoadSets(false)
         end, 1000)
     else
+    
+        --Load preloaded set names
+        loadPreloadedSetNames()
         loadSetIds()
         if lib.setsData 
            and (lib.setsData.monsterSets == nil or lib.setsData.dungeonSets == nil or lib.setsData.overlandSets == nil 
