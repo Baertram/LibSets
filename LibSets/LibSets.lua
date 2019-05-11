@@ -64,65 +64,170 @@ local checkItemTypes = {
     [ITEMTYPE_ARMOR]  = true,
 }
 
---Current monster set bonus count (maximum)
+--Current monster set bonus count (maximum, e.g. 2 items needed for full set bonus )
 local countMonsterSetBonus = 2
---The monster set setIds (all setIds which are not in the craftedSets table!)
 local monsterSetsCount  = 0
 local dungeonSetsCount  = 0
 local overlandSetsCount = 0
+--The other setIds (non-crafted)
 local monsterSets       = {}
 local dungeonSets       = {}
 local overlandSets      = {}
 
+local dlc_suffix        = " " .. GetString(SI_COLLECTIBLECATEGORYTYPE1)
+local chapter_suffix    = " " .. GetString(SI_COLLECTIBLECATEGORYTYPE22)
+
+--Internal IDs of the ESO DLCs
+local DLCandCHAPTERdata = {
+    [1] = {
+        ["de"] = "Kein",
+        ["en"] = "Imperial city" .. dlc_suffix,
+        ["fr"] = "None",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [2] = {
+        ["de"] = "Kein",
+        ["en"] = "Orsinium" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [3] = {
+        ["de"] = "Kein",
+        ["en"] = "Thieves Guild" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [4] = {
+        ["de"] = "Kein",
+        ["en"] = "Dark Brotherhood" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [5] = {
+        ["de"] = "Kein",
+        ["en"] = "Shadows of the Hist" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [6] = {
+        ["de"] = "Kein",
+        ["en"] = "Morrowind"  .. chapter_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [7] = {
+        ["de"] = "Kein",
+        ["en"] = "Horns of the Reach" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [8] = {
+        ["de"] = "Kein",
+        ["en"] = "Clockwork City" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [9] = {
+        ["de"] = "Kein",
+        ["en"] = "Dragon Bones" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [10] = {
+        ["de"] = "Kein",
+        ["en"] = "Summerset"  .. chapter_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [11] = {
+        ["de"] = "Kein",
+        ["en"] = "Wolfhunter" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [12] = {
+        ["de"] = "Kein",
+        ["en"] = "Murkmire" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [13] = {
+        ["de"] = "Kein",
+        ["en"] = "Wrathstone" .. dlc_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+    [14] = {
+        ["de"] = "Kein",
+        ["en"] = "Elsweyr"  .. chapter_suffix,
+        ["fr"] = "NOne",
+        ["ru"] = "None",
+        ["jp"] = "None",
+    },
+}
+
 --The craftable set setIds
 local craftedSets = {
-    [176]   = true,     --Adelssieg / Noble's Conquest
-    [82]    = true,     --Alessias Bollwerk / Alessia's Bulwark
-    [54]    = true,     --Aschengriff / Ashen Grip
-    [323]   = true,     --Assassinenlist / Assassin's Guile
-    [87]    = true,     --Augen von Mara / Eyes of Mara
-    [51]    = true,     --Blick der Mutter der Nacht / Night Mother's Gaze
-    [324]   = true,     --Daedrische Gaunerei / Daedric Trickery
-    [161]   = true,     --Doppelstern / Twice-Born Star
-    [73]    = true,     --Erinnerung / Oblivion's Foe
-    [226]   = true,     --Ewige Jagd / Eternal Hunt
-    [208]   = true,     --Feuertaufe / Trial by Fire
-    [207]   = true,     --Gesetz von Julianos / LAw of Julianos
-    [240]   = true,     --Gladiator von Kvatch / Kvatch Gladiator
-    [408]   = true,     --Grabpflocksammler / Grave-Stake Collector
-    [78]    = true,     --Histrinde / Hist Bark
-    [80]    = true,     --Hundings Zorn / Hunding's Rage
-    [92]    = true,     --Kagrenacs Hoffnung / Kagrenac's Hope
-    [351]   = true,     --Kernaxiom / Innate Axiom
-    [325]   = true,     --Kettensprenger / Shacklebreaker
-    [386]   = true,     --Kreckenantlitz / Sload's Semblance
-    [44]    = true,     --Kuss des Vampirs / Vampire's Kiss
-    [81]    = true,     --Lied der Lamien / Song of Lamae
-    [410]   = true,     --Macht der verlorenen Legion / Might of the Lost Legion
-    [48]    = true,     --Magnus' Gabe / Magnu's Gift
-    [353]   = true,     --Mechanikblick / Mechanical Acuity
-    [352]   = true,     --Messingpanzer / Fortified Brass
-    [219]   = true,     --Morkuldin / Morkuldin
-    [409]   = true,     --Nagaschamane / Naga Shaman
-    [387]   = true,     --Nocturnals Gunst / Nocturnal's Favor
-    [84]    = true,     --Orgnums Schuppen / Orgnum's Scales
-    [242]   = true,     --Pelinals Talent / Pelinal's Aptitude
-    [43]    = true,     --Rüstung der Verführung / Armor of the Seducer
-    [178]   = true,     --Rüstungsmeister / Armor Master
-    [74]    = true,     --Schemenauge / Spectre's Eye
-    [225]   = true,     --Schlauer Alchemist / Clever Alchemist
-    [95]    = true,     --Shalidors Fluch / Shalidor's Curse
-    [40]    = true,     --Stille der Nacht / Night's Silence
-    [224]   = true,     --Tavas Gunst / Tava's Favor
-    [37]    = true,     --Todeswind / Death's Wind
-    [75]    = true,     --Torugs Pakt / Torug's Pact
-    [177]   = true,     --Umverteilung / Redistributor
-    [241]   = true,     --Varens Erbe / Varen's Legacy
-    [385]   = true,     --Versierter Reiter / Adept Rider
-    [148]   = true,     --Weg der Arnea / Way of the Arena
-    [79]    = true,     --Weidenpfad / Willow's Path
-    [41]    = true,     --Weißplankes Vergeltung / Whitestrake's Retribution
-    [38]    = true,     --Zwielichtkuss / Twilight's Embrace
+    [37] = true,        -- Death's Wind / Todeswind
+    [38] = true,        -- Twilight's Embrace / Zwielichtkuss
+    [40] = true,        -- Night's Silence / Stille der Nacht
+    [41] = true,        -- Whitestrake's Retribution / Weißplankes Vergeltung
+    [43] = true,        -- Armor of the Seducer / Rüstung der Verführung
+    [44] = true,        -- Vampire's Kiss / Kuss des Vampirs
+    [48] = true,        -- Magnu's Gift / Magnus' Gabe
+    [51] = true,        -- Night Mother's Gaze / Blick der Mutter der Nacht
+    [54] = true,        -- Ashen Grip / Aschengriff
+    [73] = true,        -- Oblivion's Foe / Erinnerung
+    [74] = true,        -- Spectre's Eye / Schemenauge
+    [75] = true,        -- Torug's Pact / Torugs Pakt
+    [78] = true,        -- Hist Bark / Histrinde
+    [79] = true,        -- Willow's Path / Weidenpfad
+    [80] = true,        -- Hunding's Rage / Hundings Zorn
+    [81] = true,        -- Song of Lamae / Lied der Lamien
+    [82] = true,        -- Alessia's Bulwark / Alessias Bollwerk
+    [84] = true,        -- Orgnum's Scales / Orgnums Schuppen
+    [87] = true,        -- Eyes of Mara / Augen von Mara
+    [92] = true,        -- Kagrenac's Hope / Kagrenacs Hoffnung
+    [95] = true,        -- Shalidor's Curse / Shalidors Fluch
+    [148] = true,        -- Way of the Arena / Weg der Arnea
+    [161] = true,        -- Twice Born Star / Doppelstern
+    [176] = true,        -- Noble's Conquest / Adelssieg
+    [177] = true,        -- Redistributor / Umverteilung
+    [178] = true,        -- Armor Master / Rüstungsmeister
+    [207] = true,        -- LAw of Julianos / Gesetz von Julianos
+    [208] = true,        -- Trial by Fire / Feuertaufe
+    [219] = true,        -- Morkuldin / Morkuldin
+    [224] = true,        -- Tava's Favor / Tavas Gunst
+    [225] = true,        -- Clever Alchemist / Schlauer Alchemist
+    [226] = true,        -- Eternal Hunt / Ewige Jagd
+    [240] = true,        -- Kvatch Gladiator / Gladiator von Kvatch
+    [241] = true,        -- Varen's Legacy / Varens Erbe
+    [242] = true,        -- Pelinal's Aptitude / Pelinals Talent
+    [323] = true,        -- Assassin's Guile / Assassinenlist
+    [324] = true,        -- Daedric Trickery / Daedrische Gaunerei
+    [325] = true,        -- Shacklebreaker / Kettensprenger
+    [351] = true,        -- Innate Axiom / Kernaxiom
+    [352] = true,        -- Fortified Brass / Messingpanzer
+    [353] = true,        -- Mechanical Acuity / Mechanikblick
+    [385] = true,        -- Adept Rider / Versierter Reiter
+    [386] = true,        -- Sload's Semblance / Kreckenantlitz
+    [387] = true,        -- Nocturnal's Favor / Nocturnals Gunst
+    [408] = true,        -- Grave Stake Collector / Grabpflocksammler
+    [409] = true,        -- Naga Shaman / Nagaschamane
+    [410] = true,        -- Might of the Lost Legion / Macht der verlorenen Legion
 }
 
 --Wayshrine nodes and number of traits needed for sets. All rights and work belongs to the addon "CraftStore" and "WritWorthy"!
@@ -130,61 +235,81 @@ local craftedSets = {
 --https://www.esoui.com/downloads/info1605-WritWorthy.html
 local setInfo = {
     --Crafted Sets (See names of setId (table key) above behind table entries of "craftedSets")
-    [37]    = {wayshrines={1,177,71},        traitsNeeded=2},
-    [38]    = {wayshrines={15,169,205},      traitsNeeded=3},
-    [40]    = {wayshrines={216,121,65},      traitsNeeded=2},
-    [41]    = {wayshrines={82,151,78},       traitsNeeded=4},
-    [43]    = {wayshrines={23,164,32},       traitsNeeded=3},
-    [44]    = {wayshrines={58,101,93},       traitsNeeded=5},
-    [48]    = {wayshrines={13,148,48},       traitsNeeded=4},
-    [51]    = {wayshrines={34,156,118},      traitsNeeded=6},
-    [54]    = {wayshrines={7,175, 77},       traitsNeeded=2},
-    [73]    = {wayshrines={135,135,135},     traitsNeeded=8},
-    [74]    = {wayshrines={133,133,133},     traitsNeeded=8},
-    [75]    = {wayshrines={19,165,24},       traitsNeeded=3},
-    [78]    = {wayshrines={9,154,51},        traitsNeeded=4},
-    [79]    = {wayshrines={35,144,111},      traitsNeeded=6},
-    [80]    = {wayshrines={39,161,113},      traitsNeeded=6},
-    [81]    = {wayshrines={137,103,89},      traitsNeeded=5},
-    [82]    = {wayshrines={155,105, 95},     traitsNeeded=5},
-    [84]    = {wayshrines={-2,-2,-2},        traitsNeeded=8},
-    [87]    = {wayshrines={-1,-1,-1},        traitsNeeded=8},
-    [92]    = {wayshrines={-2,-2,-2},        traitsNeeded=8},
-    [95]    = {wayshrines={-1,-1,-1},        traitsNeeded=8},
-    [148]   = {wayshrines={217,217,217},     traitsNeeded=8},
-    [161]   = {wayshrines={234,234,234},     traitsNeeded=9},
-    [177]   = {wayshrines={199,201,203},     traitsNeeded=5},
-    [176]   = {wayshrines={199,201,203},     traitsNeeded=7},
-    [178]   = {wayshrines={199,201,203},     traitsNeeded=9},
-    [207]   = {wayshrines={241,241,241},     traitsNeeded=6},
-    [208]   = {wayshrines={237,237,237},     traitsNeeded=3},
-    [219]   = {wayshrines={237,237,237},     traitsNeeded=9},
-    [224]   = {wayshrines={257,257,257},     traitsNeeded=5},
-    [225]   = {wayshrines={257,257,257},     traitsNeeded=7},
-    [226]   = {wayshrines={255,255,255},     traitsNeeded=9},
-    [240]   = {wayshrines={254,254,254},     traitsNeeded=5},
-    [241]   = {wayshrines={251,251,251},     traitsNeeded=7},
-    [242]   = {wayshrines={254,254,254},     traitsNeeded=9},
-    [323]   = {wayshrines={276,276,276},     traitsNeeded=3},
-    [324]   = {wayshrines={329,329,329},     traitsNeeded=8},
-    [351]   = {wayshrines={339,339,339},     traitsNeeded=6},
-    [352]   = {wayshrines={337,337,337},     traitsNeeded=2},
-    [353]   = {wayshrines={338,338,338},     traitsNeeded=4},
-    [325]   = {wayshrines={282,282,282},     traitsNeeded=6},
-    [385]   = {wayshrines={359,359,359},     traitsNeeded=3},
-    [386]   = {wayshrines={360,360,360},     traitsNeeded=6},
-    [387]   = {wayshrines={354,354,354},     traitsNeeded=9},
-    --TODO
-    [408]   = {wayshrines={375,375,375},     traitsNeeded=0},
-    [409]   = {wayshrines={379,379,379},     traitsNeeded=0},
-    [410]   = {wayshrines={379,379,379},     traitsNeeded=0},
+    --wayshrines:   table of wayshrine nodeIds to jump to. You'll be near the set's crafting station then. 1st table key=EP, 2nd table key=AD, 3rd table key= DC
+    --> If a table entry is negative (e.g. -1 or -2) the jump won#t work as no wayshrine is knwon or it is a special one like the Mages's guild island Augvea
+    --traitsNeeded: the number of traits you need to research to be able to craft this set
+    --dlcId:        the dlcId from table DLCandCHAPTERdata (key) as the set was added
+------------------------------------------------------------------------------------------------------------------------
+--Content of crafted sets below:
+------------------------------------------------------------------------------------------------------------------------
+    [37] = {wayshrines={1,177,71},        traitsNeeded=2,        dlcId=0},        -- Death's Wind / Todeswind
+    [38] = {wayshrines={15,169,205},        traitsNeeded=3,        dlcId=0},        -- Twilight's Embrace / Zwielichtkuss
+    [40] = {wayshrines={216,121,65},        traitsNeeded=2,        dlcId=0},        -- Night's Silence / Stille der Nacht
+    [41] = {wayshrines={82,151,78},        traitsNeeded=4,        dlcId=0},        -- Whitestrake's Retribution / Weißplankes Vergeltung
+    [43] = {wayshrines={23,164,32},        traitsNeeded=3,        dlcId=0},        -- Armor of the Seducer / Rüstung der Verführung
+    [44] = {wayshrines={58,101,93},        traitsNeeded=5,        dlcId=0},        -- Vampire's Kiss / Kuss des Vampirs
+    [48] = {wayshrines={13,148,48},        traitsNeeded=4,        dlcId=0},        -- Magnu's Gift / Magnus' Gabe
+    [51] = {wayshrines={34,156,118},        traitsNeeded=6,        dlcId=0},        -- Night Mother's Gaze / Blick der Mutter der Nacht
+    [54] = {wayshrines={7,175,77},        traitsNeeded=2,        dlcId=0},        -- Ashen Grip / Aschengriff
+    [73] = {wayshrines={135,135,135},        traitsNeeded=8,        dlcId=0},        -- Oblivion's Foe / Erinnerung
+    [74] = {wayshrines={133,133,133},        traitsNeeded=8,        dlcId=0},        -- Spectre's Eye / Schemenauge
+    [75] = {wayshrines={19,165,24},        traitsNeeded=3,        dlcId=0},        -- Torug's Pact / Torugs Pakt
+    [78] = {wayshrines={9,154,51},        traitsNeeded=4,        dlcId=0},        -- Hist Bark / Histrinde
+    [79] = {wayshrines={35,144,111},        traitsNeeded=6,        dlcId=0},        -- Willow's Path / Weidenpfad
+    [80] = {wayshrines={39,161,113},        traitsNeeded=6,        dlcId=0},        -- Hunding's Rage / Hundings Zorn
+    [81] = {wayshrines={137,103,89},        traitsNeeded=5,        dlcId=0},        -- Song of Lamae / Lied der Lamien
+    [82] = {wayshrines={155,105,95},        traitsNeeded=5,        dlcId=0},        -- Alessia's Bulwark / Alessias Bollwerk
+    [84] = {wayshrines={-2,-2,-2},        traitsNeeded=8,        dlcId=0},        -- Orgnum's Scales / Orgnums Schuppen
+    [87] = {wayshrines={-1,-1,-1},        traitsNeeded=8,        dlcId=0},        -- Eyes of Mara / Augen von Mara
+    [92] = {wayshrines={-2,-2,-2},        traitsNeeded=8,        dlcId=0},        -- Kagrenac's Hope / Kagrenacs Hoffnung
+    [95] = {wayshrines={-1,-1,-1},        traitsNeeded=8,        dlcId=0},        -- Shalidor's Curse / Shalidors Fluch
+    [148] = {wayshrines={217,217,217},        traitsNeeded=8,        dlcId=0},        -- Way of the Arena / Weg der Arnea
+    [161] = {wayshrines={234,234,234},        traitsNeeded=9,        dlcId=0},        -- Twice Born Star / Doppelstern
+    [176] = {wayshrines={199,201,203},        traitsNeeded=7,        dlcId=0},        -- Noble's Conquest / Adelssieg
+    [177] = {wayshrines={199,201,203},        traitsNeeded=5,        dlcId=0},        -- Redistributor / Umverteilung
+    [178] = {wayshrines={199,201,203},        traitsNeeded=9,        dlcId=0},        -- Armor Master / Rüstungsmeister
+    [207] = {wayshrines={241,241,241},        traitsNeeded=6,        dlcId=0},        -- LAw of Julianos / Gesetz von Julianos
+    [208] = {wayshrines={237,237,237},        traitsNeeded=3,        dlcId=0},        -- Trial by Fire / Feuertaufe
+    [219] = {wayshrines={237,237,237},        traitsNeeded=9,        dlcId=0},        -- Morkuldin / Morkuldin
+    [224] = {wayshrines={257,257,257},        traitsNeeded=5,        dlcId=0},        -- Tava's Favor / Tavas Gunst
+    [225] = {wayshrines={257,257,257},        traitsNeeded=7,        dlcId=0},        -- Clever Alchemist / Schlauer Alchemist
+    [226] = {wayshrines={255,255,255},        traitsNeeded=9,        dlcId=0},        -- Eternal Hunt / Ewige Jagd
+    [240] = {wayshrines={254,254,254},        traitsNeeded=5,        dlcId=0},        -- Kvatch Gladiator / Gladiator von Kvatch
+    [241] = {wayshrines={251,251,251},        traitsNeeded=7,        dlcId=0},        -- Varen's Legacy / Varens Erbe
+    [242] = {wayshrines={254,254,254},        traitsNeeded=9,        dlcId=0},        -- Pelinal's Aptitude / Pelinals Talent
+    [323] = {wayshrines={276,276,276},        traitsNeeded=3,        dlcId=0},        -- Assassin's Guile / Assassinenlist
+    [324] = {wayshrines={329,329,329},        traitsNeeded=8,        dlcId=0},        -- Daedric Trickery / Daedrische Gaunerei
+    [325] = {wayshrines={282,282,282},        traitsNeeded=6,        dlcId=0},        -- Shacklebreaker / Kettensprenger
+    [351] = {wayshrines={339,339,339},        traitsNeeded=6,        dlcId=0},        -- Innate Axiom / Kernaxiom
+    [352] = {wayshrines={337,337,337},        traitsNeeded=2,        dlcId=0},        -- Fortified Brass / Messingpanzer
+    [353] = {wayshrines={338,338,338},        traitsNeeded=4,        dlcId=0},        -- Mechanical Acuity / Mechanikblick
+    [385] = {wayshrines={359,359,359},        traitsNeeded=3,        dlcId=0},        -- Adept Rider / Versierter Reiter
+    [386] = {wayshrines={360,360,360},        traitsNeeded=6,        dlcId=0},        -- Sload's Semblance / Kreckenantlitz
+    [387] = {wayshrines={354,354,354},        traitsNeeded=9,        dlcId=0},        -- Nocturnal's Favor / Nocturnals Gunst
+    [408] = {wayshrines={375,375,375},        traitsNeeded=0,        dlcId=0},        -- Grave Stake Collector / Grabpflocksammler
+    [409] = {wayshrines={379,379,379},        traitsNeeded=0,        dlcId=0},        -- Naga Shaman / Nagaschamane
+    [410] = {wayshrines={379,379,379},        traitsNeeded=0,        dlcId=0},        -- Might of the Lost Legion / Macht der verlorenen Legion
 
+
+------------------------------------------------------------------------------------------------------------------------
+--Content of monster sets below
+------------------------------------------------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------------------------------------------------
+--Content of overland sets below
+------------------------------------------------------------------------------------------------------------------------
     --Other sets (Set names can be found inside SavedVariables file LibSets.lua, after scaning of the set names within your client language finished.
     --Search for "["sets"]" inside the SV file and you'll find the ["name"] in the scanned languages e.g. ["de"] or ["en"] and an example itemId of one
     --item of this set which you can use with LibSets.buildItemLink(itemId) to generate an example itemLink of the set item)
     --TODO
-    [31]    = {wayshrines={65}},                                     --Sonnenseide (Stonefalls: Davons Watch, or 41 "Fort Arnad" near to a Worldboss)
+    [31]    = {wayshrines={65},              traitsNeeded=0,    dlcId=0},  --Sonnenseide (Stonefalls: Davons Watch, or 41 "Fort Arnad" near to a Worldboss)
 }
+
+--[[
+    Monster sets
+
+]]
 
 local preloaded = {
     -- lookup this id for the current patch with the following script:
