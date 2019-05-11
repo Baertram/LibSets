@@ -24,7 +24,7 @@
 
     For more information, please refer to <http://unlicense.org/>
 --]========================================================================]
-local MAJOR, MINOR = "LibSets", 0.06
+local MAJOR, MINOR = "LibSets", 0.05
 LibSets = LibSets or {}
 local lib = LibSets
 
@@ -32,7 +32,7 @@ lib.name        = MAJOR
 lib.version     = MINOR
 --SavedVariables info
 lib.svDataName  = "LibSets_SV_Data"
-lib.svVersion   = 0.6
+lib.svVersion   = 0.5
 lib.setsData    = {
     ["languagesScanned"] = {},
 }
@@ -331,7 +331,7 @@ local function LoadSetsByIds(from, to)
             setsUpdated = setsUpdated + 1
         end
     end
-    d("[LibSets]~~~Scanning sets~~~ items: " .. tostring(itemsScanned) .. ", sets new/updated: " .. tostring(setsFound) .. "/" .. tostring(setsUpdated))
+    d("[" .. MAJOR .. "]~~~Scanning sets~~~ items: " .. tostring(itemsScanned) .. ", sets new/updated: " .. tostring(setsFound) .. "/" .. tostring(setsUpdated))
 end
 
 --Load the SavedVariables
@@ -448,9 +448,9 @@ function lib.LoadSets(override, fromAddonName)
     if lib.setsScanning then return end
     lib.setsScanning = true
     if fromAddonName ~= nil and fromAddonName ~= "" then
-        d("[LibSets]Starting set scan initiated by addon \'" .. tostring(fromAddonName) .. "\', APIVersion: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
+        d("[" .. MAJOR .. "]Starting set scan initiated by addon \'" .. tostring(fromAddonName) .. "\', APIVersion: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
     else
-        d("[LibSets]Starting set scan, APIVersion: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
+        d("[" .. MAJOR .. "]Starting set scan, APIVersion: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
     end
     --Clear all set data
     sets = {}
@@ -500,7 +500,7 @@ function lib.LoadSets(override, fromAddonName)
     end
     zo_callLater(function()
         if sets ~= nil then
-            d("[LibSets]Scan finished. [Totals]item count: " .. tostring(itemsScanned) .. ", sets found/updated: " .. tostring(setsFound) .."/" .. tostring(setsUpdated) .. "\nAPI version: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
+            d("[" .. MAJOR .. "]Scan finished. [Totals]item count: " .. tostring(itemsScanned) .. ", sets found/updated: " .. tostring(setsFound) .."/" .. tostring(setsUpdated) .. "\nAPI version: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
             lib.setsData.sets = sets
             loadPreloadedSetNames()
             distinguishSetTypes()
@@ -527,7 +527,7 @@ function lib.LoadSets(override, fromAddonName)
             lib.ShowAskBeforeReloadUIDialog()
         else
             lib.setsScanning = false
-            d("[LibSets]ERROR: Scan not successfull! [Totals]item count: " .. tostring(itemsScanned) .. ", sets found/updated: " .. tostring(setsFound) .."/" .. tostring(setsUpdated) .. "\nAPI version: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'\nSet data could not be saved!\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            d("[" .. MAJOR .. "]ERROR: Scan not successfull! [Totals]item count: " .. tostring(itemsScanned) .. ", sets found/updated: " .. tostring(setsFound) .."/" .. tostring(setsUpdated) .. "\nAPI version: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'\nSet data could not be saved!\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         end
     end, miliseconds + 1000)
 end
@@ -538,6 +538,7 @@ end
 --> Returns:    boolean isCraftedSet
 function lib.IsCraftedSet(setId)
     if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.craftedSets[setId] or false
 end
 
@@ -546,6 +547,7 @@ end
 --> Returns:    boolean isMonsterSet
 function lib.IsMonsterSet(setId)
     if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.monsterSets[setId] or false
 end
 
@@ -554,6 +556,7 @@ end
 --> Returns:    boolean isDungeonSet
 function lib.IsDungeonSet(setId)
     if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.dungeonSets[setId] or false
 end
 
@@ -562,6 +565,7 @@ end
 --> Returns:    boolean isOverlandSet
 function lib.IsOverlandSet(setId)
     if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.overlandSets[setId] or false
 end
 
@@ -585,6 +589,7 @@ end
 --Returns a sorted array of all set ids
 --> Returns: setIds table
 function lib.GetAllSetIds()
+    if not lib.checkIfSetsAreLoadedProperly() then return end
     return setIds
 end
 
@@ -594,7 +599,8 @@ end
 --> Returns:    String setName
 function lib.GetSetName(setId, lang)
     lang = lang or lib.clientLang
-    if setId == nil or not lib.supportedLanguages[lang] or lib.setsData.sets == nil
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if setId == nil or not lib.supportedLanguages[lang]
         or lib.setsData.sets[tonumber(setId)] == nil or lib.setsData.sets[tonumber(setId)]["name"] == nil
         or lib.setsData.sets[tonumber(setId)]["name"][lang] == nil then return end
     local setName = lib.setsData.sets[tonumber(setId)]["name"][lang]
@@ -606,8 +612,9 @@ end
 --> Returns:    table setNames
 ----> Contains a table with the different names of the set, for each scanned language (setNames = {["de"] = String nameDE, ["en"] = String nameEN})
 function lib.GetSetNames(setId)
-    if setId == nil or lib.setsData.sets == nil or lib.setsData.sets[tonumber(setId)] == nil
-        or lib.setsData.sets[tonumber(setId)]["name"] == nil then return end
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if lib.setsData.sets[tonumber(setId)] == nil or lib.setsData.sets[tonumber(setId)]["name"] == nil then return end
     local setNames = {}
     setNames = lib.setsData.sets[tonumber(setId)]["name"]
     return setNames
@@ -625,7 +632,9 @@ end
 ------>The table will contain 1 entry if it's a NON-craftable setId (wayshrines = {[1] = WSNodeNoFraction})
 ------>and 3 entries (one for each faction) if it's a craftable setId (wayshrines = {[1] = WSNodeFraction1, [2] = WSNodeFraction2, [3] = WSNodeFraction3})
 function lib.GetSetInfo(setId)
-    if setId == nil or lib.setsData.sets == nil or lib.setsData.sets[tonumber(setId)] == nil then return end
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if lib.setsData.sets[tonumber(setId)] == nil then return end
     local setInfoTable = {}
     local setInfoFromSV = lib.setsData.sets[tonumber(setId)]
     setInfoTable.setId = setId
@@ -647,7 +656,7 @@ function lib.GetSetInfo(setId)
             setInfoTable.wayshrines     = setsData.wayshrines
             setInfoTable.setTypes["isCrafted"] = true
         end
-    --Non-craftable set
+        --Non-craftable set
     else
         if setsData then
             setInfoTable.wayshrines     = setsData.wayshrines
@@ -667,6 +676,7 @@ end
 -->             OPTIONAL factionIndex: The index of the faction (1=Ebonheart Pact, 2=Admeri Dominion, 3=Daggerfall Covenant)
 function lib.JumpToSetId(setId, factionIndex)
     if setId == nil then return false end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
     local jumpToNode = -1
     --Is a crafted set?
     if craftedSets[setId] then
@@ -694,6 +704,7 @@ end
 --> Returns:    number setItemId
 function lib.GetSetItemId(setId)
     if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
     local setItemId = lib.setsData.sets[tonumber(setId)]["itemId"]
     return setItemId
 end
@@ -711,6 +722,14 @@ end
 --> Returns:    boolean isCurrentlySetsScanning
 function lib.IsSetsScanning()
     return lib.setsScanning
+end
+
+--Returns a boolean value, true if the sets database is properly loaded yet and is not currently scanning
+--or false if not
+function lib.checkIfSetsAreLoadedProperly()
+    if lib.IsSetsScanning() or not lib.AreSetsLoaded() then return false end
+    if not lib.setsData or not lib.setsData.sets then return false end
+    return true
 end
 
 ------------------------------------------------------------------------
@@ -749,7 +768,6 @@ local function OnLibraryLoaded(event, name)
             lib.LoadSets(false)
         end, 1000)
     else
-    
         --Load preloaded set names
         loadPreloadedSetNames()
         loadSetIds()
