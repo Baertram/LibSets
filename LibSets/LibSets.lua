@@ -80,6 +80,7 @@ local chapter_suffix    = " " .. GetString(SI_COLLECTIBLECATEGORYTYPE22)
 --Internal IDs of the ESO DLCs
 local DLCandCHAPTERdata = {
     [1] = {
+        ["name"] = GetCollectibleName(154),
         ["de"] = "Kein",
         ["en"] = "Imperial city" .. dlc_suffix,
         ["fr"] = "None",
@@ -87,6 +88,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [2] = {
+        ["name"] = GetCollectibleName(215),
         ["de"] = "Kein",
         ["en"] = "Orsinium" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -94,6 +96,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [3] = {
+        ["name"] = GetCollectibleName(254),
         ["de"] = "Kein",
         ["en"] = "Thieves Guild" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -101,6 +104,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [4] = {
+        ["name"] = GetCollectibleName(306),
         ["de"] = "Kein",
         ["en"] = "Dark Brotherhood" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -108,6 +112,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [5] = {
+        ["name"] = "",
         ["de"] = "Kein",
         ["en"] = "Shadows of the Hist" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -115,6 +120,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [6] = {
+        ["name"] = GetCollectibleName(593),
         ["de"] = "Kein",
         ["en"] = "Morrowind"  .. chapter_suffix,
         ["fr"] = "NOne",
@@ -122,6 +128,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [7] = {
+        ["name"] = "",
         ["de"] = "Kein",
         ["en"] = "Horns of the Reach" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -129,6 +136,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [8] = {
+        ["name"] = GetCollectibleName(1240),
         ["de"] = "Kein",
         ["en"] = "Clockwork City" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -136,6 +144,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [9] = {
+        ["name"] = "", --No collectible present as only dungeons were added. Achievement name?
         ["de"] = "Kein",
         ["en"] = "Dragon Bones" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -143,6 +152,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [10] = {
+        ["name"] = GetCollectibleName(5107),
         ["de"] = "Kein",
         ["en"] = "Summerset"  .. chapter_suffix,
         ["fr"] = "NOne",
@@ -150,6 +160,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [11] = {
+        ["name"] = "", --No collectible present as only dungeons were added. Achievement name?
         ["de"] = "Kein",
         ["en"] = "Wolfhunter" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -157,6 +168,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [12] = {
+        ["name"] = GetCollectibleName(5755),
         ["de"] = "Kein",
         ["en"] = "Murkmire" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -164,6 +176,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [13] = {
+        ["name"] = "", --No collectible present as only dungeons were added. Achievement name?
         ["de"] = "Kein",
         ["en"] = "Wrathstone" .. dlc_suffix,
         ["fr"] = "NOne",
@@ -171,6 +184,7 @@ local DLCandCHAPTERdata = {
         ["jp"] = "None",
     },
     [14] = {
+        ["name"] = GetCollectibleName(5843),
         ["de"] = "Kein",
         ["en"] = "Elsweyr"  .. chapter_suffix,
         ["fr"] = "NOne",
@@ -883,9 +897,9 @@ local function OnLibraryLoaded(event, name)
             d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]API version changed from \'" .. tostring(lastCheckedSetsAPIVersion) .. "\'to \'" .. tostring(lib.currentAPIVersion) .. "\nNew set IDs and names need to be scanned!\nThis will take a few seconds.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             lib.LoadSets(true)
         end, 1000)
-    --Client language changed and language is not yet in the SavedVariables?
+        --Client language changed and language is not yet in the SavedVariables?
     elseif lib.supportedLanguages and lib.clientLang and lib.supportedLanguages[lib.clientLang] == true
-        and lib.setsData and lib.setsData.sets and lib.setsData["languagesScanned"] and
+            and lib.setsData and lib.setsData.sets and lib.setsData["languagesScanned"] and
             (lib.setsData["languagesScanned"][lib.currentAPIVersion] == nil or (lib.setsData["languagesScanned"][lib.currentAPIVersion] and lib.setsData["languagesScanned"][lib.currentAPIVersion][lib.clientLang] == nil)) then
         --Delay to chat output works
         zo_callLater(function()
@@ -896,8 +910,8 @@ local function OnLibraryLoaded(event, name)
         --Load preloaded set names
         loadPreloadedSetNames()
         loadSetIds()
-        if lib.setsData 
-           and (lib.setsData.monsterSets == nil or lib.setsData.dungeonSets == nil or lib.setsData.overlandSets == nil 
+        if lib.setsData
+                and (lib.setsData.monsterSets == nil or lib.setsData.dungeonSets == nil or lib.setsData.overlandSets == nil
                 or lib.setsData.monsterSetsCount == nil or lib.setsData.dungeonSetsCount == nil or lib.setsData.overlandSetsCount == nil
                 or not next(lib.setsData.monsterSets) or not next(lib.setsData.dungeonSets) or not next(lib.setsData.overlandSets)
                 or lib.setsData.monsterSetsCount == 0 or lib.setsData.dungeonSetsCount == 0 or lib.setsData.overlandSetsCount == 0)
