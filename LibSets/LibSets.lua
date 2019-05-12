@@ -69,128 +69,62 @@ local countMonsterSetBonus = 2
 local monsterSetsCount  = 0
 local dungeonSetsCount  = 0
 local overlandSetsCount = 0
+local arenaSetsCount = 0
+local trialSetsCount = 0
 --The other setIds (non-crafted)
 local monsterSets       = {}
 local dungeonSets       = {}
 local overlandSets      = {}
+local arenaSets = {}
+local trialSets = {}
 
+--DLC & Chapter IDs
 local dlc_suffix        = " " .. GetString(SI_COLLECTIBLECATEGORYTYPE1)
 local chapter_suffix    = " " .. GetString(SI_COLLECTIBLECATEGORYTYPE22)
+--Internal achievement example ids of the ESO DLCs and chapters
+local dlcAndChapterAchievementIds = {
+    --Imperial city
+    [1] = 1267,
+    --Orsinium
+    [2] = 1393,
+    --Thieves Guild
+    [3] = 1413,
+    --Dark Brotherhood
+    [4] = 1421,
+    --Shadows of the Hist
+    [5] = 1520,
+    --Morrowind
+    [6] = 1843,
+    --Horns of the Reach
+    [7] = 1940,
+    --Clockwork City
+    [8] = 2048,
+    --Dragon Bones
+    [9] = 2104,
+    --Summerset
+    [10] = 1845,
+    --Wolfhunter
+    [11] = 2157,
+    --Murkmire
+    [12] = 2340,
+    --Wrathstone
+    [13] = 2265,
+    --Elsweyr
+    [14] = 2463,
+}
+--For each entry in the list of example achievements above get the name of it's parent category (DLC, chapter)
+local DLCandCHAPTERdata = {}
+for dlcId, dlcAchievementId in ipairs(dlcAndChapterAchievementIds) do
+    if dlcId and dlcAchievementId and dlcAchievementId > 0 then
+        DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(dlcAchievementId)))
+    end
+end
 
---Internal IDs of the ESO DLCs
-local DLCandCHAPTERdata = {
-    [1] = {
-        ["name"] = GetCollectibleName(154),
-        ["de"] = "Kein",
-        ["en"] = "Imperial city" .. dlc_suffix,
-        ["fr"] = "None",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [2] = {
-        ["name"] = GetCollectibleName(215),
-        ["de"] = "Kein",
-        ["en"] = "Orsinium" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [3] = {
-        ["name"] = GetCollectibleName(254),
-        ["de"] = "Kein",
-        ["en"] = "Thieves Guild" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [4] = {
-        ["name"] = GetCollectibleName(306),
-        ["de"] = "Kein",
-        ["en"] = "Dark Brotherhood" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [5] = {
-        ["name"] = "",
-        ["de"] = "Kein",
-        ["en"] = "Shadows of the Hist" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [6] = {
-        ["name"] = GetCollectibleName(593),
-        ["de"] = "Kein",
-        ["en"] = "Morrowind"  .. chapter_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [7] = {
-        ["name"] = "",
-        ["de"] = "Kein",
-        ["en"] = "Horns of the Reach" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [8] = {
-        ["name"] = GetCollectibleName(1240),
-        ["de"] = "Kein",
-        ["en"] = "Clockwork City" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [9] = {
-        ["name"] = "", --No collectible present as only dungeons were added. Achievement name?
-        ["de"] = "Kein",
-        ["en"] = "Dragon Bones" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [10] = {
-        ["name"] = GetCollectibleName(5107),
-        ["de"] = "Kein",
-        ["en"] = "Summerset"  .. chapter_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [11] = {
-        ["name"] = "", --No collectible present as only dungeons were added. Achievement name?
-        ["de"] = "Kein",
-        ["en"] = "Wolfhunter" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [12] = {
-        ["name"] = GetCollectibleName(5755),
-        ["de"] = "Kein",
-        ["en"] = "Murkmire" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [13] = {
-        ["name"] = "", --No collectible present as only dungeons were added. Achievement name?
-        ["de"] = "Kein",
-        ["en"] = "Wrathstone" .. dlc_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
-    [14] = {
-        ["name"] = GetCollectibleName(5843),
-        ["de"] = "Kein",
-        ["en"] = "Elsweyr"  .. chapter_suffix,
-        ["fr"] = "NOne",
-        ["ru"] = "None",
-        ["jp"] = "None",
-    },
+--The undaunted chest
+local undauntedChestIds = {
+    [1] = "Gilirion the Redbeard",
+    [2] = "Maj al-Ragath",
+    [3] = "Urgalarg Chief-bane",
 }
 
 --The craftable set setIds
@@ -221,7 +155,7 @@ local craftedSets = {
     [176] = true,        -- Noble's Conquest / Adelssieg
     [177] = true,        -- Redistributor / Umverteilung
     [178] = true,        -- Armor Master / Rüstungsmeister
-    [207] = true,        -- LAw of Julianos / Gesetz von Julianos
+    [207] = true,        -- Law of Julianos / Gesetz von Julianos
     [208] = true,        -- Trial by Fire / Feuertaufe
     [219] = true,        -- Morkuldin / Morkuldin
     [224] = true,        -- Tava's Favor / Tavas Gunst
@@ -282,7 +216,7 @@ local setInfo = {
     [176] = {wayshrines={199,201,203},        traitsNeeded=7,        dlcId=0},        -- Noble's Conquest / Adelssieg
     [177] = {wayshrines={199,201,203},        traitsNeeded=5,        dlcId=0},        -- Redistributor / Umverteilung
     [178] = {wayshrines={199,201,203},        traitsNeeded=9,        dlcId=0},        -- Armor Master / Rüstungsmeister
-    [207] = {wayshrines={241,241,241},        traitsNeeded=6,        dlcId=0},        -- LAw of Julianos / Gesetz von Julianos
+    [207] = {wayshrines={241,241,241},        traitsNeeded=6,        dlcId=0},        -- Law of Julianos / Gesetz von Julianos
     [208] = {wayshrines={237,237,237},        traitsNeeded=3,        dlcId=0},        -- Trial by Fire / Feuertaufe
     [219] = {wayshrines={237,237,237},        traitsNeeded=9,        dlcId=0},        -- Morkuldin / Morkuldin
     [224] = {wayshrines={257,257,257},        traitsNeeded=5,        dlcId=0},        -- Tava's Favor / Tavas Gunst
@@ -316,15 +250,136 @@ local setInfo = {
     --Other sets (Set names can be found inside SavedVariables file LibSets.lua, after scaning of the set names within your client language finished.
     --Search for "["sets"]" inside the SV file and you'll find the ["name"] in the scanned languages e.g. ["de"] or ["en"] and an example itemId of one
     --item of this set which you can use with LibSets.buildItemLink(itemId) to generate an example itemLink of the set item)
-    --TODO
-    [31]    = {wayshrines={65},              traitsNeeded=0,    dlcId=0},  --Sonnenseide (Stonefalls: Davons Watch, or 41 "Fort Arnad" near to a Worldboss)
+    [31]    = {wayshrines={65},              traitsNeeded=0,    dlcId=0},               --Sonnenseide (Stonefalls: Davons Watch, or 41 "Fort Arnad" near to a Worldboss)
+
+
+------------------------------------------------------------------------------------------------------------------------
+--Content of trial sets below
+------------------------------------------------------------------------------------------------------------------------
+--Multi trial sets (Aetherian Archive, Hel Ra Citadel, Sanctum Ophidia)
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false,  isTrial=true,   multiTrialSet=true},--Eternal Warrior
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false,  isTrial=true,   multiTrialSet=true},--Infallible Mage
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false,  isTrial=true,   multiTrialSet=true},--Vicious Serpent
+
+--Aetherian Archive
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Defending Warrior
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Healing Mage
+
+--Asylum Sanctorium normal
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Chaotic Whirlwind
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Concentrated Force (Imperfect)
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Defensive Position
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Disciplined Slash
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Timeless Blessing
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Piercing Spray (Imperfected)
+--Asylum Sanctorium veteran
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Chaotic Whirlwind
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Concentrated Force (Perfected)
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Defensive Position
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Disciplined Slash
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Timeless Blessing
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Piercing Spray (Perfected)
+
+--Cloudrest normal
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Aegis of Galenwe
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Arms of Relequen
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Mantle of Siroria
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Vestment of Olorime
+--Cloudrest veteran
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Aegis of Galenwe
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Arms of Relequen
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Mantle of Siroria
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Vestment of Olorime
+
+--Halls of Fabrication
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Automated Defense
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Inventor's Guard
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Master Architect
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --War Machine
+
+--Hel Ra Citadel
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Berserking Warrior
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Destructive Mage
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Poisonous Serpent
+
+
+--Maw of Lorkhaj
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Lunar Bastion
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Moondancer
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Roar of Alkosh
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Twilight Remedy
+
+--Sanctum Ophidia
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Immortal Warrior
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Twice-Fanged Serpent
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Wise Mage
+
+--Sunspire
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Automated Defense
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Automated Defense
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Automated Defense
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Automated Defense
+
+------------------------------------------------------------------------------------------------------------------------
+--Content of arena sets below
+------------------------------------------------------------------------------------------------------------------------
+--Blackrose Prison
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Gallant Charge
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Mender's Ward
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Radial Uppercut
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Spectral Cloak
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Virulent Shot
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Wild Impulse
+--Blackrose Prison veteran
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Gallant Charge
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Mender's Ward
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Radial Uppercut
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Spectral Cloak
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Virulent Shot
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Wild Impulse
+
+--Dragonstar Arena
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Archer's Mind
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Caustic Arrow
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Destructive Impact
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Footman's Fortune
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Grand Rejuvanation
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Healer's Habit
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Puncturing Remedy
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Robes of Destruction Mastery
+--Dragonstar Arena veteran
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Stinging Slashes
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true}, isArena=true,                       --Titanic Cleave
+
+
+--Maelstrom Arena
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Elemental Succession
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Glorious Defender
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Hunt Leader
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Para Bellum
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Permafrost
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Winterborn
+--Maelstrom weapons
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Axe
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Battle Axe
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Bow
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Dagger
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Greatsword
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Ice Staff
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Inferno Staff
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Lightning Staff
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Mace
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Maul
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Restoration Staff
+[-1]    = {wayshrines={-1},              traitsNeeded=0,    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Sword
+
+------------------------------------------------------------------------------------------------------------------------
+--Content of PVP / AVA sets below
+------------------------------------------------------------------------------------------------------------------------
+
+
 }
-
---[[
-    Monster sets
-
-]]
-
+--Preloaded itemIds of 1 item of the scanned setIds
 local preloaded = {
     -- lookup this id for the current patch with the following script:
     -- /script local maxId=147664 for itemId=maxId,200000 do local itemType = GetItemLinkItemType('|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h') if itemType>0 then maxId=itemId end end d(maxId)
@@ -332,7 +387,7 @@ local preloaded = {
     ["lastSetsCheckAPIVersion"] = 100027,
     --[[ to generate the following list:
          * /reloadui with the latest patch version after scan is complete
-         * copy the entire ["sets"] array from the LibSets.lua saved vars into a lua minifier
+         * copy the entire ["sets"] array from the LibSets.lua saved vars into a lua minifier (e.g. https://mothereff.in/lua-minifier)
          * find/replace the following regex with an empty string in Notepad++
            ,?\["name"\]=\{[^}]+\},?
          * find/replace the following regex with \1 in Notepad++
@@ -424,14 +479,13 @@ local function LoadSetByItemId(setItemId)
     --Generate link for item
     local itemLink = lib.buildItemLink(setItemId)
     if not itemLink or itemLink == "" or IsItemLinkCrafted(itemLink) then return end
-    
+    --itemId check: Is a set?
     local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
     if not isSet then return end
-    
     local itemType = GetItemLinkItemType(itemLink)
     --Some set items are only "containers" ...
     if not checkItemTypes[itemType] then return end
-    
+
     local clientLang = lib.clientLang
     local found, updated
     
@@ -455,7 +509,6 @@ local function LoadSetByItemId(setItemId)
             updated = true
         end
     end
-    
     return found, updated
 end
 
@@ -489,9 +542,13 @@ local function distinguishSetTypes()
     monsterSetsCount  = 0
     dungeonSetsCount  = 0
     overlandSetsCount = 0
+    arenaSetsCount = 0
+    trialSetsCount = 0
     monsterSets = {}
     dungeonSets = {}
     overlandSets = {}
+    arenaSets = {}
+    trialSets = {}
     local buildItemLink = lib.buildItemLink
     if craftedSets ~= nil and lib.setsData.sets ~= nil then
         for setId, setData in pairs(lib.setsData.sets) do
@@ -518,8 +575,28 @@ local function distinguishSetTypes()
                         if not isMonsterSet then
                             --Is a dungeon set (bound on pickup but tradeable)?
                             if IsItemDungeonSet(itemLink) then
-                                dungeonSets[setId] = true
-                                dungeonSetsCount = dungeonSetsCount + 1
+                                --Item binds on pickup, so check if it is in the list of setInfo marked as arena or trial set
+                                local isDungeonSet = false
+                                if setInfo[setId] then
+                                    --Arena set?
+                                    if setInfo[setId]["isArena"] then
+                                        arenaSets[setId] = true
+                                        arenaSetsCount = arenaSetsCount + 1
+                                        --Trial set?
+                                    elseif setInfo[setId]["isTrial"] then
+                                        trialSets[setId] = true
+                                        trialSetsCount = trialSetsCount + 1
+                                    else
+                                        isDungeonSet = true
+                                    end
+                                else
+                                    isDungeonSet = true
+                                end
+                                --Normal dungeon set?
+                                if isDungeonSet then
+                                    dungeonSets[setId] = true
+                                    dungeonSetsCount = dungeonSetsCount + 1
+                                end
                             else
                                 --Is an overland set
                                 overlandSets[setId] = true
@@ -546,18 +623,13 @@ end
 -- Populates saved vars for set ids that are known ahead of time in preloaded.sets.
 local function loadPreloadedSetNames()
     if not lib.setsData then return end
-    if not lib.setsData["preloadedLanguagesScanned"] then
-        lib.setsData["preloadedLanguagesScanned"] = {}
-    end
-    if not lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion] then 
-        lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion] = {}
-    end
+    lib.setsData["preloadedLanguagesScanned"] = lib.setsData["preloadedLanguagesScanned"] or {}
+    lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion] = lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion] or {}
+    --Was this client language already added from the preloaded data for the current API version? Then abort
     if lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion][tostring(lib.clientLang)] then
         return
     end
-    if lib.setsData.sets == nil then
-        lib.setsData.sets = {}
-    end
+    lib.setsData.sets = lib.setsData.sets or {}
     sets = lib.setsData.sets
     for _, itemId in pairs(preloaded["sets"]) do
         LoadSetByItemId(itemId)
@@ -612,9 +684,9 @@ function lib.LoadSets(override, fromAddonName)
     --> Total itemIds collected: 0 to (numItemIdPackages * numItemIdPackageSize)
     local miliseconds = 0
     local numItemIdPackages = 30       -- Increase this to find new added set itemIds after and update
-
     local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
     local fromTo = {}
+    --The start value is the maximum scnaned itemId from the preloaded data + 1
     local startVal = preloaded["maxItemIdScanned"] + 1
     local fromVal = startVal
     for numItemIdPackage = 1, numItemIdPackages, 1 do
@@ -646,13 +718,19 @@ function lib.LoadSets(override, fromAddonName)
             loadSetIds()
             lib.setsData.monsterSets        = monsterSets
             lib.setsData.dungeonSets        = dungeonSets
+            lib.setsData.arenaSets          = arenaSets
+            lib.setsData.trialSets          = trialSets
             lib.setsData.overlandSets       = overlandSets
             lib.setsData.monsterSetsCount   = monsterSetsCount
             lib.setsData.dungeonSetsCount   = dungeonSetsCount
+            lib.setsData.arenaSetsCount     = arenaSetsCount
+            lib.setsData.trialSetsCount     = trialSetsCount
             lib.setsData.overlandSetsCount  = overlandSetsCount
             d(">>> Crafted sets: " .. tostring(craftedSetsCount))
             d(">>> Monster sets: " .. tostring(monsterSetsCount))
             d(">>> Dungeon sets: " .. tostring(dungeonSetsCount))
+            d(">>> Arena sets: " .. tostring(arenaSetsCount))
+            d(">>> Trial sets: " .. tostring(trialSetsCount))
             d(">>> Overland sets: " .. tostring(overlandSetsCount))
             d("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
             --Set the last scanned API version to the SavedVariables
