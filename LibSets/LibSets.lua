@@ -271,120 +271,120 @@ local setInfo = {
 [-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false,  isTrial=true,   multiTrialSet=true},--Vicious Serpent
 
 --Aetherian Archive
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Defending Warrior
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Healing Mage
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Defending Warrior
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Healing Mage
 
 --Asylum Sanctorium normal
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Chaotic Whirlwind
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Concentrated Force (Imperfect)
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Defensive Position
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Disciplined Slash
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Timeless Blessing
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Piercing Spray (Imperfected)
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Chaotic Whirlwind
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Concentrated Force (Imperfect)
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Defensive Position
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Disciplined Slash
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Timeless Blessing
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Piercing Spray (Imperfected)
 --Asylum Sanctorium veteran
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Chaotic Whirlwind
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Concentrated Force (Perfected)
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Defensive Position
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Disciplined Slash
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Timeless Blessing
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Piercing Spray (Perfected)
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Chaotic Whirlwind
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Concentrated Force (Perfected)
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Defensive Position
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Disciplined Slash
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Timeless Blessing
+[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Piercing Spray (Perfected)
 
 --Cloudrest normal
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Aegis of Galenwe
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Arms of Relequen
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Mantle of Siroria
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Vestment of Olorime
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Aegis of Galenwe
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Arms of Relequen
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Mantle of Siroria
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Vestment of Olorime
 --Cloudrest veteran
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Aegis of Galenwe
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Arms of Relequen
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Mantle of Siroria
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfect Vestment of Olorime
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Aegis of Galenwe
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Arms of Relequen
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Mantle of Siroria
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Vestment of Olorime
 
 --Halls of Fabrication
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Automated Defense
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Inventor's Guard
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Master Architect
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --War Machine
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Automated Defense
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Inventor's Guard
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Master Architect
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --War Machine
 
 --Hel Ra Citadel
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Berserking Warrior
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Destructive Mage
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Poisonous Serpent
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Berserking Warrior
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Destructive Mage
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Poisonous Serpent
 
 --Maw of Lorkhaj
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Lunar Bastion
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Moondancer
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Roar of Alkosh
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Twilight Remedy
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Lunar Bastion
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Moondancer
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Roar of Alkosh
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Twilight Remedy
 
 --Sanctum Ophidia
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Immortal Warrior
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Twice-Fanged Serpent
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Wise Mage
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Immortal Warrior
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Twice-Fanged Serpent
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Wise Mage
 
 --Sunspire
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --False God's Devotion
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Eye of Nahviintaas
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Tooth of Lokkestiiz
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isTrial=true,                       --Claw of Yolnakhriin
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --False God's Devotion
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Eye of Nahviintaas
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Tooth of Lokkestiiz
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Claw of Yolnakhriin
 --Sunspire Veteran
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfected False God's Devotion
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfected Tooth of Lokkestiiz
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfected Eye of Nahviintaas
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isTrial=true,                       --Perfected Claw of Yolnakhriin
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfected False God's Devotion
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfected Tooth of Lokkestiiz
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfected Eye of Nahviintaas
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfected Claw of Yolnakhriin
 
 ------------------------------------------------------------------------------------------------------------------------
 --Content of arena sets below
 ------------------------------------------------------------------------------------------------------------------------
 --Blackrose Prison
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Gallant Charge
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Mender's Ward
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Radial Uppercut
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Spectral Cloak
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Virulent Shot
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Wild Impulse
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Gallant Charge
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Mender's Ward
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Radial Uppercut
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Spectral Cloak
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Virulent Shot
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Wild Impulse
 --Blackrose Prison veteran
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Gallant Charge
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Mender's Ward
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Radial Uppercut
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Spectral Cloak
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Virulent Shot
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Perfect Wild Impulse
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Gallant Charge
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Mender's Ward
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Radial Uppercut
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Spectral Cloak
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Virulent Shot
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Wild Impulse
 
 --Dragonstar Arena
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Archer's Mind
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Caustic Arrow
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Destructive Impact
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Footman's Fortune
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Grand Rejuvanation
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Healer's Habit
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Puncturing Remedy
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Robes of Destruction Mastery
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Archer's Mind
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Caustic Arrow
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Destructive Impact
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Footman's Fortune
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Grand Rejuvanation
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Healer's Habit
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Puncturing Remedy
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Robes of Destruction Mastery
 --Dragonstar Arena veteran
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Stinging Slashes
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --Titanic Cleave
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Stinging Slashes
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Titanic Cleave
 
 
 --Maelstrom Arena
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Elemental Succession
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Glorious Defender
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Hunt Leader
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Para Bellum
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Permafrost
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false}, isArena=true,                       --Winterborn
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Elemental Succession
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Glorious Defender
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Hunt Leader
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Para Bellum
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Permafrost
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Winterborn
 --Maelstrom Arena weapons
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Axe
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Battle Axe
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Bow
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Dagger
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Greatsword
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Ice Staff
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Inferno Staff
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Lightning Staff
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Mace
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Maul
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Restoration Staff
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true},  isArena=true,                       --The Maelstrom's Sword
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Axe
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Battle Axe
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Bow
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Dagger
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Greatsword
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Ice Staff
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Inferno Staff
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Lightning Staff
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Mace
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Maul
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Restoration Staff
+[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Sword
 
 ------------------------------------------------------------------------------------------------------------------------
 --Content of PVP / AVA sets below
