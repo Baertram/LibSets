@@ -1052,6 +1052,106 @@ local function OnLibraryLoaded(event, name)
     lib.preloaded           = preloaded
 end
 
+function GetMapNames(lang)
+    lang = lang or GetCVar("language.2")
+d("[GetMapNames]lang: " ..tostring(lang))
+    local lz = LibZone
+    if not lz then d("LibZone must be loaded!") return end
+    local zoneIds = lz.givenZoneData
+    if not zoneIds then d("LibZone givenZoneData is missing!") return end
+    local zoneIdsLocalized = zoneIds[lang]
+    if not zoneIdsLocalized then d("Language \"" .. tostring(lang) .."\" is not scanned yet in LibZone") return end
+    local mapNames = {}
+    for zoneId, zoneNameLocalized in pairs(zoneIdsLocalized) do
+        local mapIndex = GetMapIndexByZoneId(zoneId)
+--d(">zoneId: " ..tostring(zoneId) .. ", mapIndex: " ..tostring(mapIndex))
+        if mapIndex ~= nil then
+            local mapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(mapIndex))
+            if mapName ~= nil then
+                mapNames[mapIndex] = tostring(mapIndex) .. "|" .. mapName .. "|" .. tostring(zoneId) .. "|" .. zoneNameLocalized
+            end
+        end
+    end
+    return mapNames
+end
+
+--Execute in each map to get wayshrine data
+function GetWayshrineInfo()
+    d("GetWayshrineInfo")
+    local wayshrines = {}
+    local currentMapIndex = GetCurrentMapIndex()
+    if currentMapIndex == nil then d("<-Error: map index") return end
+    local currentMapId = GetCurrentMapId()
+    if currentMapId == nil then d("<-Error: map id") return end
+    local currentMapsZoneIndex = GetCurrentMapZoneIndex()
+    if currentMapsZoneIndex == nil then d("<-Error: map zone index") return end
+    local currentZoneId = GetZoneId(currentMapsZoneIndex)
+    if currentZoneId == nil then d("<-Error: map zone id") return end
+    local currentMapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(currentMapIndex))
+    local currentZoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameByIndex(currentMapsZoneIndex))
+    d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
+            ", mapName: " .. tostring(currentMapName) .. ", mapZoneIndex: " ..tostring(currentMapsZoneIndex) .. ", zoneId: " .. tostring(currentZoneId) ..
+            ", zoneName: " ..tostring(currentZoneName))
+    for i=1, GetNumFastTravelNodes(), 1 do
+        local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = GetFastTravelNodeInfo(i)
+        if wsisShownInCurrentMap then
+            local wsNameStripped = ZO_CachedStrFormat("<<C:1>>",wsname)
+            d("->[" .. tostring(i) .. "] " ..tostring(wsNameStripped))
+            --Export for excel split at | char
+            --WayshrineNodeId, mapIndex, mapId, mapName, zoneIndex, zoneId, zoneName, POIType, wayshrineName
+            wayshrines[i] = tostring(i).."|"..tostring(currentMapIndex).."|"..tostring(currentMapId).."|"..tostring(currentMapName).."|"..
+                    tostring(currentMapsZoneIndex).."|"..tostring(currentZoneId).."|"..tostring(currentZoneName).."|"..tostring(wspoiType).."|".. tostring(wsNameStripped)
+        end
+    end
+    return wayshrines
+end
+
+function GetWayshrineNames()
+    d("[GetWayshrineNames]")
+    local wsNames = {}
+    local lang = GetCVar("language.2")
+    wsNames[lang] = {}
+    for wsNodeId=1, GetNumFastTravelNodes(), 1 do
+        --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
+        local _, wsLocalizedName = GetFastTravelNodeInfo()
+        if wsLocalizedName ~= nil then
+            local wsLocalizedNameClean = ZO_CachedStrFormat("<<C:1>>", wsLocalizedName)
+            wsNames[lang][wsNodeId] = tostring(wsNodeId) .. "|" .. wsLocalizedNameClean
+        end
+    end
+    return wsNames
+end
+
+
+function lib.GetMapNames()
+    local maps = GetMapNames(lib.clientLang)
+    if maps ~= nil then
+        lib.setsData.maps = lib.setsData.maps or {}
+        lib.setsData.maps[lib.clientLang] = {}
+        lib.setsData.maps[lib.clientLang] = maps
+    end
+end
+
+function lib.GetWayshrineInfo()
+    local ws = GetWayshrineInfo()
+    if ws ~= nil then
+        lib.setsData.wayshrines = lib.setsData.wayshrines or {}
+        for wsNodeId, wsData in pairs(ws) do
+            lib.setsData.wayshrines[wsNodeId] = wsData
+        end
+    end
+end
+
+function lib.GetWayshrineNames()
+    local wsNames = GetWayshrineNames()
+    if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
+        lib.setsData.wayshrineNames = lib.setsData.wayshrineNames or {}
+        lib.setsData.wayshrineNames[lib.clientLang] = {}
+        lib.setsData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
+    end
+end
+
+
 --Load the addon now
 EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
 EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, OnLibraryLoaded)
