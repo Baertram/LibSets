@@ -790,6 +790,25 @@ function lib.IsDungeonSet(setId)
     return lib.dungeonSets[setId] or false
 end
 
+--Returns true if the setId provided is a trial set
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isDungeonSet
+function lib.IsTrialSet(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    return lib.trialSets[setId] or false
+end
+
+--Returns true if the setId provided is an arena set
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isDungeonSet
+function lib.IsArenaSet(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    return lib.arenaSets[setId] or false
+end
+
+
 --Returns true if the setId provided is an overland set
 --> Parameters: setId number: The set's setId
 --> Returns:    boolean isOverlandSet
@@ -856,7 +875,7 @@ end
 ----> Contains the number setId,
 ----> number itemId of an example setItem (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's example item),
 ----> table names ([String lang] = String name),
-----> table setTypes (table containing booleans for isCrafted, isDungeon, isMonster, isOverland),
+----> table setTypes (table containing booleans for isCrafted, isDungeon, isTrial, isArena, isMonster, isOverland),
 ----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),
 ----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).
 ------>The table will contain 1 entry if it's a NON-craftable setId (wayshrines = {[1] = WSNodeNoFraction})
@@ -873,6 +892,8 @@ function lib.GetSetInfo(setId)
     setInfoTable.setTypes = {
         ["isCrafted"]   = false,
         ["isDungeon"]   = false,
+        ["isTrial"]     = false,
+        ["isArena"]     = false,
         ["isMonster"]   = false,
         ["isOverland"]  = false,
     }
@@ -893,6 +914,8 @@ function lib.GetSetInfo(setId)
         end
         --Check the type of the set
         if lib.monsterSets[setId] then      setInfoTable.setTypes["isMonster"]  = true
+        elseif lib.trialSets[setId] then    setInfoTable.setTypes["isTrial"]    = true
+        elseif lib.arenaSets[setId] then    setInfoTable.setTypes["isArena"]    = true
         elseif lib.dungeonSets[setId] then  setInfoTable.setTypes["isDungeon"]  = true
         elseif lib.overlandSets[setId] then setInfoTable.setTypes["isOverland"] = true
         end
@@ -917,7 +940,7 @@ function lib.JumpToSetId(setId, factionIndex)
         if craftedSetWSData ~= nil and craftedSetWSData[factionIndex] ~= nil then
             jumpToNode = craftedSetWSData[factionIndex]
         end
-        --Other sets wayshrines
+    --Other sets wayshrines
     else
         jumpToNode = setInfo[setId].wayshrines[1]
     end
