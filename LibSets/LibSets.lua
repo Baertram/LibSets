@@ -33,418 +33,51 @@ lib.version     = MINOR
 --SavedVariables info
 lib.svDataName  = "LibSets_SV_Data"
 lib.svVersion   = 0.5
-lib.setsData    = {
-    ["languagesScanned"] = {},
-}
 lib.setsLoaded  = false
 lib.setsScanning = false
-
---The supported languages of this library
-lib.supportedLanguages = {
-    ["de"]  = true,
-    ["en"]  = true,
-    ["fr"]  = true,
-    ["jp"]  = true,
-    ["ru"]  = true,
-}
 
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
 --All sets data
-local sets = {}
-local setIds = {}
-local setsFound = 0
-local setsUpdated = 0
-local itemsScanned = 0
+local sets          = {}
+local setIds        = {}
+local setsFound     = 0
+local setsUpdated   = 0
+local itemsScanned  = 0
 
 --Allowed itemTypes for the set parts
-local checkItemTypes = {
-    [ITEMTYPE_WEAPON] = true,
-    [ITEMTYPE_ARMOR]  = true,
-}
+local checkItemTypes = lib.checkItemTypes
+--The undaunted chest IDs
+local undauntedChestIds = lib.undauntedChestIds
 
 --Current monster set bonus count (maximum, e.g. 2 items needed for full set bonus )
-local countMonsterSetBonus = 2
-local monsterSetsCount  = 0
-local dungeonSetsCount  = 0
-local overlandSetsCount = 0
-local arenaSetsCount = 0
-local trialSetsCount = 0
---The other setIds (non-crafted)
+local countMonsterSetBonus = lib.countMonsterSetBonus
+
+------------The sets--------------
+--The preloaded sets data
+local preloaded         = lib.setItemIdsPreloaded   -- <-- this table contains all itemIds of the sets, preloaded
+--The set data
+local setInfo           = lib.setInfo               -- <--this table contains all set information like setId, type, drop zoneIds, wayshrines, etc.
+--The set types
+local craftedSets       = {}
 local monsterSets       = {}
 local dungeonSets       = {}
 local overlandSets      = {}
-local arenaSets = {}
-local trialSets = {}
+local arenaSets         = {}
+local trialSets         = {}
+local cyrodiilSets      = {}
+local battlegroundSets  = {}
 
---DLC & Chapter IDs
-local dlc_suffix        = " " .. GetString(SI_COLLECTIBLECATEGORYTYPE1)
-local chapter_suffix    = " " .. GetString(SI_COLLECTIBLECATEGORYTYPE22)
---Internal achievement example ids of the ESO DLCs and chapters
-local dlcAndChapterAchievementIds = {
-    --Imperial city
-    [1] = 1267,
-    --Orsinium
-    [2] = 1393,
-    --Thieves Guild
-    [3] = 1413,
-    --Dark Brotherhood
-    [4] = 1421,
-    --Shadows of the Hist
-    [5] = 1520,
-    --Morrowind
-    [6] = 1843,
-    --Horns of the Reach
-    [7] = 1940,
-    --Clockwork City
-    [8] = 2048,
-    --Dragon Bones
-    [9] = 2104,
-    --Summerset
-    [10] = 1845,
-    --Wolfhunter
-    [11] = 2157,
-    --Murkmire
-    [12] = 2340,
-    --Wrathstone
-    [13] = 2265,
-    --Elsweyr
-    [14] = 2463,
-}
---For each entry in the list of example achievements above get the name of it's parent category (DLC, chapter)
-local DLCandCHAPTERdata = {}
-for dlcId, dlcAchievementId in ipairs(dlcAndChapterAchievementIds) do
-    if dlcId and dlcAchievementId and dlcAchievementId > 0 then
-        DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(dlcAchievementId)))
-    end
-end
-
---The undaunted chest
-local undauntedChestIds = {
-    [1] = "Gilirion the Redbeard",
-    [2] = "Maj al-Ragath",
-    [3] = "Urgalarg Chief-bane",
-}
-
---The craftable set setIds
-local craftedSets = {
-    [37] = true,        --Todeswind  /  Death's Wind
-    [38] = true,        --Zwielichtkuss  /  Twilight's Embrace
-    [40] = true,        --Stille der Nacht  /  Night's Silence
-    [41] = true,        --Weißplankes Vergeltung  /  Whitestrake's Retribution
-    [43] = true,        --Rüstung der Verführung  /  Armor of the Seducer
-    [44] = true,        --Kuss des Vampirs  /  Vampire's Kiss
-    [48] = true,        --Magnus' Gabe  /  Magnu's Gift
-    [51] = true,        --Blick der Mutter der Nacht  /  Night Mother's Gaze
-    [54] = true,        --Aschengriff  /  Ashen Grip
-    [73] = true,        --Erinnerung  /  Oblivion's Foe
-    [74] = true,        --Schemenauge  /  Spectre's Eye
-    [75] = true,        --Torugs Pakt  /  Torug's Pact
-    [78] = true,        --Histrinde  /  Hist Bark
-    [79] = true,        --Weidenpfad  /  Willow's Path
-    [80] = true,        --Hundings Zorn  /  Hunding's Rage
-    [81] = true,        --Lied der Lamien  /  Song of Lamae
-    [82] = true,        --Alessias Bollwerk  /  Alessia's Bulwark
-    [84] = true,        --Orgnums Schuppen  /  Orgnum's Scales
-    [87] = true,        --Augen von Mara  /  Eyes of Mara
-    [92] = true,        --Kagrenacs Hoffnung  /  Kagrenac's Hope
-    [95] = true,        --Shalidors Fluch  /  Shalidor's Curse
-    [148] = true,        --Weg der Arnea  /  Way of the Arena
-    [161] = true,        --Doppelstern  /  Twice Born Star
-    [176] = true,        --Adelssieg  /  Noble's Conquest
-    [177] = true,        --Umverteilung  /  Redistributor
-    [178] = true,        --Rüstungsmeister  /  Armor Master
-    [207] = true,        --Gesetz von Julianos  /  LAw of Julianos
-    [208] = true,        --Feuertaufe  /  Trial by Fire
-    [219] = true,        --Morkuldin  /  Morkuldin
-    [224] = true,        --Tavas Gunst  /  Tava's Favor
-    [225] = true,        --Schlauer Alchemist  /  Clever Alchemist
-    [226] = true,        --Ewige Jagd  /  Eternal Hunt
-    [240] = true,        --Gladiator von Kvatch  /  Kvatch Gladiator
-    [241] = true,        --Varens Erbe  /  Varen's Legacy
-    [242] = true,        --Pelinals Talent  /  Pelinal's Aptitude
-    [323] = true,        --Assassinenlist  /  Assassin's Guile
-    [324] = true,        --Daedrische Gaunerei  /  Daedric Trickery
-    [325] = true,        --Kettensprenger  /  Shacklebreaker
-    [351] = true,        --Kernaxiom  /  Innate Axiom
-    [352] = true,        --Messingpanzer  /  Fortified Brass
-    [353] = true,        --Mechanikblick  /  Mechanical Acuity
-    [385] = true,        --Versierter Reiter  /  Adept Rider
-    [386] = true,        --Kreckenantlitz  /  Sload's Semblance
-    [387] = true,        --Nocturnals Gunst  /  Nocturnal's Favor
-    [408] = true,        --Grabpflocksammler  /  Grave Stake Collector
-    [409] = true,        --Nagaschamane  /  Naga Shaman
-    [410] = true,        --Macht der verlorenen Legion  /  Might of the Lost Legion
-    --Elsweyr
-    --[?] = true,        --? / Senche-raht's Grit
-    --[?] = true,        --? / Vastarie's Tutelage
-    --[?] = true,        --? / Coldharbour's Favorite
-}
-
---Wayshrine nodes and number of traits needed for sets. All rights and work belongs to the addon "CraftStore" and "WritWorthy"!
---https://www.esoui.com/downloads/info1590-CraftStoreWrathstone.html
---https://www.esoui.com/downloads/info1605-WritWorthy.html
-local setInfo = {
-    --Crafted Sets (See names of setId (table key) above behind table entries of "craftedSets")
-    --wayshrines:   table of wayshrine nodeIds to jump to. You'll be near the set's crafting station then. 1st table key=EP, 2nd table key=AD, 3rd table key= DC
-    --> If a table entry is negative (e.g. -1 or -2) the jump won#t work as no wayshrine is knwon or it is a special one like the Mages's guild island Augvea
-    --traitsNeeded: the number of traits you need to research to be able to craft this set
-    --dlcId:        the dlcId from table DLCandCHAPTERdata (key) as the set was added
-------------------------------------------------------------------------------------------------------------------------
---Content of crafted sets below:
-------------------------------------------------------------------------------------------------------------------------
-    [37] = {wayshrines={1,177,71},        traitsNeeded=2,        dlcId=0},        -- Death's Wind / Todeswind
-    [38] = {wayshrines={15,169,205},        traitsNeeded=3,        dlcId=0},        -- Twilight's Embrace / Zwielichtkuss
-    [40] = {wayshrines={216,121,65},        traitsNeeded=2,        dlcId=0},        -- Night's Silence / Stille der Nacht
-    [41] = {wayshrines={82,151,78},        traitsNeeded=4,        dlcId=0},        -- Whitestrake's Retribution / Weißplankes Vergeltung
-    [43] = {wayshrines={23,164,32},        traitsNeeded=3,        dlcId=0},        -- Armor of the Seducer / Rüstung der Verführung
-    [44] = {wayshrines={58,101,93},        traitsNeeded=5,        dlcId=0},        -- Vampire's Kiss / Kuss des Vampirs
-    [48] = {wayshrines={13,148,48},        traitsNeeded=4,        dlcId=0},        -- Magnu's Gift / Magnus' Gabe
-    [51] = {wayshrines={34,156,118},        traitsNeeded=6,        dlcId=0},        -- Night Mother's Gaze / Blick der Mutter der Nacht
-    [54] = {wayshrines={7,175,77},        traitsNeeded=2,        dlcId=0},        -- Ashen Grip / Aschengriff
-    [73] = {wayshrines={135,135,135},        traitsNeeded=8,        dlcId=0},        -- Oblivion's Foe / Erinnerung
-    [74] = {wayshrines={133,133,133},        traitsNeeded=8,        dlcId=0},        -- Spectre's Eye / Schemenauge
-    [75] = {wayshrines={19,165,24},        traitsNeeded=3,        dlcId=0},        -- Torug's Pact / Torugs Pakt
-    [78] = {wayshrines={9,154,51},        traitsNeeded=4,        dlcId=0},        -- Hist Bark / Histrinde
-    [79] = {wayshrines={35,144,111},        traitsNeeded=6,        dlcId=0},        -- Willow's Path / Weidenpfad
-    [80] = {wayshrines={39,161,113},        traitsNeeded=6,        dlcId=0},        -- Hunding's Rage / Hundings Zorn
-    [81] = {wayshrines={137,103,89},        traitsNeeded=5,        dlcId=0},        -- Song of Lamae / Lied der Lamien
-    [82] = {wayshrines={155,105,95},        traitsNeeded=5,        dlcId=0},        -- Alessia's Bulwark / Alessias Bollwerk
-    [84] = {wayshrines={-2,-2,-2},        traitsNeeded=8,        dlcId=0},        -- Orgnum's Scales / Orgnums Schuppen
-    [87] = {wayshrines={-1,-1,-1},        traitsNeeded=8,        dlcId=0},        -- Eyes of Mara / Augen von Mara
-    [92] = {wayshrines={-2,-2,-2},        traitsNeeded=8,        dlcId=0},        -- Kagrenac's Hope / Kagrenacs Hoffnung
-    [95] = {wayshrines={-1,-1,-1},        traitsNeeded=8,        dlcId=0},        -- Shalidor's Curse / Shalidors Fluch
-    [148] = {wayshrines={217,217,217},        traitsNeeded=8,        dlcId=0},        -- Way of the Arena / Weg der Arnea
-    [161] = {wayshrines={234,234,234},        traitsNeeded=9,        dlcId=0},        -- Twice Born Star / Doppelstern
-    [176] = {wayshrines={199,201,203},        traitsNeeded=7,        dlcId=0},        -- Noble's Conquest / Adelssieg
-    [177] = {wayshrines={199,201,203},        traitsNeeded=5,        dlcId=0},        -- Redistributor / Umverteilung
-    [178] = {wayshrines={199,201,203},        traitsNeeded=9,        dlcId=0},        -- Armor Master / Rüstungsmeister
-    [207] = {wayshrines={241,241,241},        traitsNeeded=6,        dlcId=0},        -- Law of Julianos / Gesetz von Julianos
-    [208] = {wayshrines={237,237,237},        traitsNeeded=3,        dlcId=0},        -- Trial by Fire / Feuertaufe
-    [219] = {wayshrines={237,237,237},        traitsNeeded=9,        dlcId=0},        -- Morkuldin / Morkuldin
-    [224] = {wayshrines={257,257,257},        traitsNeeded=5,        dlcId=0},        -- Tava's Favor / Tavas Gunst
-    [225] = {wayshrines={257,257,257},        traitsNeeded=7,        dlcId=0},        -- Clever Alchemist / Schlauer Alchemist
-    [226] = {wayshrines={255,255,255},        traitsNeeded=9,        dlcId=0},        -- Eternal Hunt / Ewige Jagd
-    [240] = {wayshrines={254,254,254},        traitsNeeded=5,        dlcId=0},        -- Kvatch Gladiator / Gladiator von Kvatch
-    [241] = {wayshrines={251,251,251},        traitsNeeded=7,        dlcId=0},        -- Varen's Legacy / Varens Erbe
-    [242] = {wayshrines={254,254,254},        traitsNeeded=9,        dlcId=0},        -- Pelinal's Aptitude / Pelinals Talent
-    [323] = {wayshrines={276,276,276},        traitsNeeded=3,        dlcId=0},        -- Assassin's Guile / Assassinenlist
-    [324] = {wayshrines={329,329,329},        traitsNeeded=8,        dlcId=0},        -- Daedric Trickery / Daedrische Gaunerei
-    [325] = {wayshrines={282,282,282},        traitsNeeded=6,        dlcId=0},        -- Shacklebreaker / Kettensprenger
-    [351] = {wayshrines={339,339,339},        traitsNeeded=6,        dlcId=0},        -- Innate Axiom / Kernaxiom
-    [352] = {wayshrines={337,337,337},        traitsNeeded=2,        dlcId=0},        -- Fortified Brass / Messingpanzer
-    [353] = {wayshrines={338,338,338},        traitsNeeded=4,        dlcId=0},        -- Mechanical Acuity / Mechanikblick
-    [385] = {wayshrines={359,359,359},        traitsNeeded=3,        dlcId=0},        -- Adept Rider / Versierter Reiter
-    [386] = {wayshrines={360,360,360},        traitsNeeded=6,        dlcId=0},        -- Sload's Semblance / Kreckenantlitz
-    [387] = {wayshrines={354,354,354},        traitsNeeded=9,        dlcId=0},        -- Nocturnal's Favor / Nocturnals Gunst
-    [408] = {wayshrines={375,375,375},        traitsNeeded=0,        dlcId=0},        -- Grave Stake Collector / Grabpflocksammler
-    [409] = {wayshrines={379,379,379},        traitsNeeded=0,        dlcId=0},        -- Naga Shaman / Nagaschamane
-    [410] = {wayshrines={379,379,379},        traitsNeeded=0,        dlcId=0},        -- Might of the Lost Legion / Macht der verlorenen Legion
-
-
-------------------------------------------------------------------------------------------------------------------------
---Content of monster sets below
-------------------------------------------------------------------------------------------------------------------------
-
-
-------------------------------------------------------------------------------------------------------------------------
---Content of overland sets below
-------------------------------------------------------------------------------------------------------------------------
-    --Other sets (Set names can be found inside SavedVariables file LibSets.lua, after scaning of the set names within your client language finished.
-    --Search for "["sets"]" inside the SV file and you'll find the ["name"] in the scanned languages e.g. ["de"] or ["en"] and an example itemId of one
-    --item of this set which you can use with LibSets.buildItemLink(itemId) to generate an example itemLink of the set item)
-    [31]    = {wayshrines={65},    dlcId=0},               --Sonnenseide (Stonefalls: Davons Watch, or 41 "Fort Arnad" near to a Worldboss)
-
-    --Elsweyr
-    --[?]    = {wayshrines={-1},    dlcId=14},               --Crafty Alfiq (Elsweyr, ...)
-    --[?]    = {wayshrines={-1},    dlcId=14},               --Vesture of Darloc Brae (Elsweyr, ...)
-    --[?]    = {wayshrines={-1},    dlcId=14},               --Call of the Undertaker (Elsweyr, ...)
-
-
-------------------------------------------------------------------------------------------------------------------------
---Content of trial sets below
-------------------------------------------------------------------------------------------------------------------------
---Multi trial sets (Aetherian Archive, Hel Ra Citadel, Sanctum Ophidia)
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false,  isTrial=true,   multiTrialSet=true},--Eternal Warrior
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false,  isTrial=true,   multiTrialSet=true},--Infallible Mage
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false,  isTrial=true,   multiTrialSet=true},--Vicious Serpent
-
---Aetherian Archive
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Defending Warrior
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Healing Mage
-
---Asylum Sanctorium normal
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Chaotic Whirlwind
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Concentrated Force (Imperfect)
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Defensive Position
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Disciplined Slash
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Timeless Blessing
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=false, isTrial=true},                       --Piercing Spray (Imperfected)
---Asylum Sanctorium veteran
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Chaotic Whirlwind
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Concentrated Force (Perfected)
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Defensive Position
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Disciplined Slash
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Timeless Blessing
-[-1]    = {wayshrines={-1},    dlcId=8,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Piercing Spray (Perfected)
-
---Cloudrest normal
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Aegis of Galenwe
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Arms of Relequen
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Mantle of Siroria
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Vestment of Olorime
---Cloudrest veteran
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Aegis of Galenwe
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Arms of Relequen
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Mantle of Siroria
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfect Vestment of Olorime
-
---Halls of Fabrication
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Automated Defense
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Inventor's Guard
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Master Architect
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --War Machine
-
---Hel Ra Citadel
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Berserking Warrior
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Destructive Mage
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Poisonous Serpent
-
---Maw of Lorkhaj
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Lunar Bastion
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Moondancer
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Roar of Alkosh
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Twilight Remedy
-
---Sanctum Ophidia
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Immortal Warrior
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Twice-Fanged Serpent
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Wise Mage
-
---Sunspire
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --False God's Devotion
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Eye of Nahviintaas
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Tooth of Lokkestiiz
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isTrial=true},                       --Claw of Yolnakhriin
---Sunspire Veteran
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfected False God's Devotion
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfected Tooth of Lokkestiiz
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfected Eye of Nahviintaas
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isTrial=true},                       --Perfected Claw of Yolnakhriin
-
-------------------------------------------------------------------------------------------------------------------------
---Content of arena sets below
-------------------------------------------------------------------------------------------------------------------------
---Blackrose Prison
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Gallant Charge
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Mender's Ward
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Radial Uppercut
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Spectral Cloak
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Virulent Shot
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Wild Impulse
---Blackrose Prison veteran
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Gallant Charge
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Mender's Ward
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Radial Uppercut
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Spectral Cloak
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Virulent Shot
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Perfect Wild Impulse
-
---Dragonstar Arena
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Archer's Mind
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Caustic Arrow
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Destructive Impact
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Footman's Fortune
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Grand Rejuvanation
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Healer's Habit
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Puncturing Remedy
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Robes of Destruction Mastery
---Dragonstar Arena veteran
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Stinging Slashes
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --Titanic Cleave
-
-
---Maelstrom Arena
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Elemental Succession
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Glorious Defender
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Hunt Leader
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Para Bellum
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Permafrost
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=false, isArena=true},                       --Winterborn
---Maelstrom Arena weapons
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Axe
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Battle Axe
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Bow
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Dagger
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Greatsword
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Ice Staff
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Inferno Staff
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Lightning Staff
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Mace
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Maul
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Restoration Staff
-[-1]    = {wayshrines={-1},    dlcId=0,    zoneIds={-1},   veteran=true,  isArena=true},                       --The Maelstrom's Sword
-
-------------------------------------------------------------------------------------------------------------------------
---Content of PVP / AVA sets below
-------------------------------------------------------------------------------------------------------------------------
-
-
-}
---Preloaded itemIds of 1 item of the scanned setIds
-local preloaded = {
-    -- lookup this id for the current patch with the following script:
-    -- /script local maxId=147664 for itemId=maxId,200000 do local itemType = GetItemLinkItemType('|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h') if itemType>0 then maxId=itemId end end d(maxId)
-    ["maxItemIdScanned"] = 152154,
-    ["lastSetsCheckAPIVersion"] = 100027,
-    --[[ to generate the following list:
-         * /reloadui with the latest patch version after scan is complete
-         * copy the entire ["sets"] array from the LibSets.lua saved vars into a lua minifier (e.g. https://mothereff.in/lua-minifier)
-         * find/replace the following regex with an empty string in Notepad++
-           ,?\["name"\]=\{[^}]+\},?
-         * find/replace the following regex with \1 in Notepad++
-           \{\["itemId"\]=([0-9]+)\}
-      ]]--
-    ["sets"] = {
-        [19]=22200, [20]=10973, [21]=7664, [22]=2503, [23]=43761, [24]=43764, [25]=43767, [26]=15728, [27]=7661, [28]=15767, [29]=16228, [30]=10885, [31]=1530, 
-        [32]=43788, [33]=10961, [34]=4289, [35]=29065, [36]=1373, [37]=43803, [38]=43807, [39]=43811, [40]=43815, [41]=43819, [43]=43827, [44]=43831, 
-        [46]=22161, [47]=7514, [48]=43847, [49]=70, [50]=43855, [51]=43859, [52]=43863, [53]=33159, [54]=43871, [55]=10067, [56]=7668, [57]=1672, [58]=1088, 
-        [59]=43895, [60]=7295, [61]=139, [62]=7440, [63]=43915, [64]=10878, [65]=471, [66]=7445, [67]=43935, [68]=10861, [69]=1662, [70]=15600, [71]=22182, 
-        [72]=22162, [73]=43965, [74]=43971, [75]=43977, [76]=43983, [77]=33155, [78]=43995, [79]=44001, [80]=44007, [81]=44013, [82]=44019, [83]=44025, 
-        [84]=44031, [85]=44037, [86]=7598, [87]=44049, [88]=44055, [89]=44061, [90]=10239, [91]=44073, [92]=44079, [93]=2474, [94]=15732, [95]=40259, 
-        [96]=7690, [97]=44111, [98]=7292, [99]=15527, [100]=44132, [101]=44139, [102]=33273, [103]=33160, [104]=44160, [105]=3158, [106]=10847, [107]=317, 
-        [108]=44188, [109]=44195, [110]=7717, [111]=44209, [112]=2501, [113]=44223, [114]=10914, [116]=54257, [117]=55379, [118]=55365, [119]=55367, 
-        [120]=54267, [121]=55368, [122]=16047, [123]=23666, [124]=34384, [125]=54287, [126]=54295, [127]=54296, [128]=54300, [129]=54303, [130]=54328, 
-        [131]=54321, [132]=54307, [133]=54314, [134]=16144, [135]=10972, [136]=54874, [137]=54881, [138]=54885, [139]=54889, [140]=54896, [141]=54902, 
-        [142]=54906, [143]=54913, [144]=54917, [145]=54921, [146]=54928, [147]=54935, [148]=54787, [155]=16213, [156]=23731, [157]=22157, [158]=5832,
-        [159]=5831, [160]=23710, [161]=58153, [162]=59380, [163]=59416, [164]=59452, [165]=59488, [166]=59524, [167]=59560, [168]=59596, [169]=59632, 
-        [170]=59668, [171]=59738, [172]=59752, [173]=59745, [176]=59946, [177]=60296, [178]=60646, [179]=68432, [180]=68535, [181]=68615, [183]=68107, 
-        [184]=64760, [185]=66167, [186]=33167, [187]=7476, [188]=33276, [190]=67567, [193]=33176, [194]=16219, [195]=67015, [196]=66440, [197]=28112, 
-        [198]=65335, [199]=68711, [200]=68791, [201]=68872, [204]=55963, [205]=64488, [206]=69281, [207]=69577, [208]=69927, [209]=137543, [210]=68608, 
-        [211]=68784, [212]=68447, [213]=68696, [214]=68623, [215]=68703, [216]=68799, [217]=68527, [218]=68439, [219]=70627, [224]=71791, [225]=72141, 
-        [226]=72491, [227]=72841, [228]=72913, [229]=73011, [230]=72985, [231]=73060, [232]=73037, [234]=73873, [235]=74222, [236]=74149, [237]=73935, 
-        [238]=73997, [239]=74080, [240]=75386, [241]=75736, [242]=76086, [243]=76916, [244]=77076, [245]=77236, [246]=78048, [247]=78328, [248]=78608, 
-        [253]=78906, [256]=82176, [257]=82128, [258]=82411, [259]=82602, [260]=82229, [261]=82966, [262]=83157, [263]=82784, [264]=94452, [265]=94460, 
-        [266]=94468, [267]=94476, [268]=94484, [269]=94492, [270]=94500, [271]=94508, [272]=94516, [273]=94524, [274]=94532, [275]=94540, [276]=94548, 
-        [277]=94556, [278]=94564, [279]=94572, [280]=94580, [281]=1115, [282]=7294, [283]=7508, [284]=7520, [285]=15599, [286]=15594, [287]=1674, [288]=10848, 
-        [289]=15524, [290]=10921, [291]=6900, [292]=4308, [293]=4305, [294]=10150, [295]=29071, [296]=29097, [297]=28122, [298]=15546, [299]=7666, 
-        [300]=15679, [301]=5921, [302]=16042, [303]=16046,  [304]=16044, [305]=33153, [307]=33283, [308]=22156, [309]=22196, [310]=22169, [311]=44728, 
-        [313]=55934, [314]=55935, [315]=55936, [316]=55937, [317]=55938, [318]=55939, [320]=122792, [321]=122983, [322]=122610, [323]=121551, [324]=121901, 
-        [325]=122251, [326]=123166, [327]=123348, [328]=123530, [329]=123721, [330]=123912, [331]=124094, [332]=124276, [333]=124467, [334]=125689, 
-        [335]=127332, [336]=127523, [337]=127150, [338]=127935, [339]=128126, [340]=127753, [341]=127705, [342]=128308, [343]=128554, [344]=128745, 
-        [345]=128372, [346]=129109, [347]=129300, [348]=128927, [349]=129482, [350]=129530, [351]=130370, [352]=130720, [353]=131070, [354]=132848, 
-        [355]=133039, [356]=132666, [357]=133251, [358]=133243, [359]=133247, [360]=133254, [361]=133255, [362]=133258, [363]=133404, [364]=133396, 
-        [365]=133400, [366]=133407, [367]=133408, [368]=133411, [369]=71118, [370]=71106, [371]=71100, [372]=71142, [373]=71152, [374]=71170, [380]=134799, 
-        [381]=134955, [382]=134692, [383]=134701, [384]=134696, [385]=135717, [386]=136067, [387]=136417, [388]=136767, [389]=136949, [390]=137131, 
-        [391]=137322, [392]=137964, [393]=138146, [394]=138328, [395]=138519, [397]=141622, [398]=141670, [399]=140694, [400]=140885, [401]=140512, 
-        [402]=141249, [403]=141440, [404]=141067, [405]=142600, [406]=142418, [407]=142236, [408]=142791, [409]=143161, [410]=143531, [411]=145011, 
-        [412]=145019, [413]=145015, [414]=145022, [415]=145023, [416]=145026, [417]=143901, [418]=144092, [419]=144283, [420]=144465, [421]=144647, 
-        [422]=144829, [423]=145164, [424]=145172, [425]=145168, [426]=145175, [427]=145176, [428]=145179, [429]=146077, [430]=146259, [431]=146441, 
-        [432]=146632, [433]=146680, [434]=146862, [435]=147044, [436]=147235, [437]=147948, [438]=148318, [439]=148688, [440]=149240, [441]=149431, 
-        [442]=149058, [444]=149977, [445]=149795, [446]=149613
-    }
-}
+--The count variables for each set type
+local craftedSetsCount      = 0
+local monsterSetsCount      = 0
+local dungeonSetsCount      = 0
+local overlandSetsCount     = 0
+local arenaSetsCount        = 0
+local trialSetsCount        = 0
+local cyrodiilSetCount      = 0
+local battlegroundSetCount  = 0
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -458,7 +91,7 @@ local function getNonIndexedTableCount(tableName)
     return count
 end
 --Number of possible sets to craft (update this if table above changes!)
-local craftedSetsCount = getNonIndexedTableCount(craftedSets)
+craftedSetsCount = getNonIndexedTableCount(craftedSets)
 
 --Check if the item is a head or a shoulder
 local function IsHeadOrShoulder(equipType)
@@ -466,7 +99,7 @@ local function IsHeadOrShoulder(equipType)
 end
 
 --Check if an item got less or equal "countMonsterSetBonus"
-local function IsItemMonsterSet(maxEquipped)
+local function ItemGotMonsterSetBonusCount(maxEquipped)
     return (maxEquipped <= countMonsterSetBonus) or false
 end
 
@@ -543,8 +176,8 @@ end
 local function librarySavedVariables()
     lib.worldName = GetWorldName()
     local defaultSetsData = {}
-    lib.setsData = ZO_SavedVars:NewAccountWide(lib.svDataName, lib.svVersion, "SetsData", defaultSetsData, lib.worldName)
-    if lib.setsData.sets ~= nil then lib.setsLoaded = true end
+    lib.svData = ZO_SavedVars:NewAccountWide(lib.svDataName, lib.svVersion, "SetsData", defaultSetsData, lib.worldName)
+    if lib.svData.sets ~= nil then lib.setsLoaded = true end
 end
 
 --Check which setIds were found and compare them to the craftedSets list.
@@ -563,8 +196,8 @@ local function distinguishSetTypes()
     arenaSets = {}
     trialSets = {}
     local buildItemLink = lib.buildItemLink
-    if craftedSets ~= nil and lib.setsData.sets ~= nil then
-        for setId, setData in pairs(lib.setsData.sets) do
+    if craftedSets ~= nil and lib.svData.sets ~= nil then
+        for setId, setData in pairs(lib.svData.sets) do
             local isMonsterSet = false
             if not craftedSets[setId] then
                 --Get the itemId stored for the setId and build the itemLink
@@ -575,7 +208,7 @@ local function distinguishSetTypes()
                         --Get the maxEquipped attribute of the set
                         local _, _, _, _, maxEquipped, _ = GetItemLinkSetInfo(itemLink)
                         --Check if the item is a monster set
-                        if IsItemMonsterSet(maxEquipped) then
+                        if ItemGotMonsterSetBonusCount(maxEquipped) then
                             local equipType = GetItemLinkEquipType(itemLink)
                             if IsHeadOrShoulder(equipType) then
                                 --It's a monster set (helm or shoulder with defined number of max bonus)
@@ -625,8 +258,8 @@ end
 
 -- Loads the setIds array with a sorted list of all set ids
 local function loadSetIds()
-    if lib.setsData and lib.setsData.sets then
-        for setId, _ in pairs(lib.setsData.sets) do
+    if lib.svData and lib.svData.sets then
+        for setId, _ in pairs(lib.svData.sets) do
             table.insert(setIds, setId)
         end
     end
@@ -635,19 +268,19 @@ end
 
 -- Populates saved vars for set ids that are known ahead of time in preloaded.sets.
 local function loadPreloadedSetNames()
-    if not lib.setsData then return end
-    lib.setsData["preloadedLanguagesScanned"] = lib.setsData["preloadedLanguagesScanned"] or {}
-    lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion] = lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion] or {}
+    if not lib.svData then return end
+    lib.svData["preloadedLanguagesScanned"] = lib.svData["preloadedLanguagesScanned"] or {}
+    lib.svData["preloadedLanguagesScanned"][lib.currentAPIVersion] = lib.svData["preloadedLanguagesScanned"][lib.currentAPIVersion] or {}
     --Was this client language already added from the preloaded data for the current API version? Then abort
-    if lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion][tostring(lib.clientLang)] then
+    if lib.svData["preloadedLanguagesScanned"][lib.currentAPIVersion][tostring(lib.clientLang)] then
         return
     end
-    lib.setsData.sets = lib.setsData.sets or {}
-    sets = lib.setsData.sets
+    lib.svData.sets = lib.svData.sets or {}
+    sets = lib.svData.sets
     for _, itemId in pairs(preloaded["sets"]) do
         LoadSetByItemId(itemId)
     end
-    lib.setsData["preloadedLanguagesScanned"][lib.currentAPIVersion][tostring(lib.clientLang)]  = true
+    lib.svData["preloadedLanguagesScanned"][lib.currentAPIVersion][tostring(lib.clientLang)]  = true
 end
 
 
@@ -668,20 +301,21 @@ end
 --Load all available sets by the help of itemIds (in package size of 5000 itemIds, and 30 tries = 30 * 5000 itemIds)
 function lib.LoadSets(override, fromAddonName)
     override = override or false
-
     if lib.setsScanning then return end
     lib.setsScanning = true
+    local setScanStringStandard = ", APIVersion: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'"
+    local otherAddonScanString = " initiated by addon \'" .. tostring(fromAddonName) .. "\'"
+    local setScanString = setScanStringStandard
     if fromAddonName ~= nil and fromAddonName ~= "" then
-        d("[" .. MAJOR .. "]Starting set scan initiated by addon \'" .. tostring(fromAddonName) .. "\', APIVersion: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
-    else
-        d("[" .. MAJOR .. "]Starting set scan, APIVersion: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
+        setScanString = otherAddonScanString .. setScanStringStandard
     end
+    d("[" .. MAJOR .. "]Starting set scan" .. setScanString)
     --Clear all set data
     sets = {}
     --Take exisitng SavedVars sets and update them, or override them with a new scan?
     if not override then
-        if lib.setsData ~= nil and lib.setsData.sets ~= nil then
-            sets = lib.setsData.sets
+        if lib.svData ~= nil and lib.svData.sets ~= nil then
+            sets = lib.svData.sets
         end
     end
     setsFound = 0
@@ -725,20 +359,20 @@ function lib.LoadSets(override, fromAddonName)
     zo_callLater(function()
         if sets ~= nil then
             d("[" .. MAJOR .. "]Scan finished. [Totals]item count: " .. tostring(itemsScanned) .. ", sets found/updated: " .. tostring(setsFound) .."/" .. tostring(setsUpdated) .. "\nAPI version: \'" .. tostring(lib.currentAPIVersion) .. "\', language: \'" .. tostring(lib.clientLang) .. "\'")
-            lib.setsData.sets = sets
+            lib.svData.sets = sets
             loadPreloadedSetNames()
             distinguishSetTypes()
             loadSetIds()
-            lib.setsData.monsterSets        = monsterSets
-            lib.setsData.dungeonSets        = dungeonSets
-            lib.setsData.arenaSets          = arenaSets
-            lib.setsData.trialSets          = trialSets
-            lib.setsData.overlandSets       = overlandSets
-            lib.setsData.monsterSetsCount   = monsterSetsCount
-            lib.setsData.dungeonSetsCount   = dungeonSetsCount
-            lib.setsData.arenaSetsCount     = arenaSetsCount
-            lib.setsData.trialSetsCount     = trialSetsCount
-            lib.setsData.overlandSetsCount  = overlandSetsCount
+            lib.svData.monsterSets        = monsterSets
+            lib.svData.dungeonSets        = dungeonSets
+            lib.svData.arenaSets          = arenaSets
+            lib.svData.trialSets          = trialSets
+            lib.svData.overlandSets       = overlandSets
+            lib.svData.monsterSetsCount   = monsterSetsCount
+            lib.svData.dungeonSetsCount   = dungeonSetsCount
+            lib.svData.arenaSetsCount     = arenaSetsCount
+            lib.svData.trialSetsCount     = trialSetsCount
+            lib.svData.overlandSetsCount  = overlandSetsCount
             d(">>> Crafted sets: " .. tostring(craftedSetsCount))
             d(">>> Monster sets: " .. tostring(monsterSetsCount))
             d(">>> Dungeon sets: " .. tostring(dungeonSetsCount))
@@ -747,11 +381,11 @@ function lib.LoadSets(override, fromAddonName)
             d(">>> Overland sets: " .. tostring(overlandSetsCount))
             d("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
             --Set the last scanned API version to the SavedVariables
-            lib.setsData["languagesScanned"] = lib.setsData["languagesScanned"] or {}
-            lib.setsData["languagesScanned"][lib.currentAPIVersion] = lib.setsData["languagesScanned"][lib.currentAPIVersion] or {}
-            lib.setsData["languagesScanned"][lib.currentAPIVersion][lib.clientLang] = true
+            lib.svData["languagesScanned"] = lib.svData["languagesScanned"] or {}
+            lib.svData["languagesScanned"][lib.currentAPIVersion] = lib.svData["languagesScanned"][lib.currentAPIVersion] or {}
+            lib.svData["languagesScanned"][lib.currentAPIVersion][lib.clientLang] = true
             --Set the flag "sets were scanned for current API"
-            lib.setsData.lastSetsCheckAPIVersion = lib.currentAPIVersion
+            lib.svData.lastSetsCheckAPIVersion = lib.currentAPIVersion
             lib.setsScanning = false
             --Start confirmation dialog and let the user do a reloadui so the SetData gets stored to the SavedVars and depending addons will work afterwards
             lib.ShowAskBeforeReloadUIDialog()
@@ -850,9 +484,9 @@ function lib.GetSetName(setId, lang)
     lang = lang or lib.clientLang
     if not lib.checkIfSetsAreLoadedProperly() then return end
     if setId == nil or not lib.supportedLanguages[lang]
-        or lib.setsData.sets[tonumber(setId)] == nil or lib.setsData.sets[tonumber(setId)]["name"] == nil
-        or lib.setsData.sets[tonumber(setId)]["name"][lang] == nil then return end
-    local setName = lib.setsData.sets[tonumber(setId)]["name"][lang]
+        or lib.svData.sets[tonumber(setId)] == nil or lib.svData.sets[tonumber(setId)]["name"] == nil
+        or lib.svData.sets[tonumber(setId)]["name"][lang] == nil then return end
+    local setName = lib.svData.sets[tonumber(setId)]["name"][lang]
     return setName
 end
 
@@ -863,9 +497,9 @@ end
 function lib.GetSetNames(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    if lib.setsData.sets[tonumber(setId)] == nil or lib.setsData.sets[tonumber(setId)]["name"] == nil then return end
+    if lib.svData.sets[tonumber(setId)] == nil or lib.svData.sets[tonumber(setId)]["name"] == nil then return end
     local setNames = {}
-    setNames = lib.setsData.sets[tonumber(setId)]["name"]
+    setNames = lib.svData.sets[tonumber(setId)]["name"]
     return setNames
 end
 
@@ -878,14 +512,14 @@ end
 ----> table setTypes (table containing booleans for isCrafted, isDungeon, isTrial, isArena, isMonster, isOverland),
 ----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),
 ----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).
------->The table will contain 1 entry if it's a NON-craftable setId (wayshrines = {[1] = WSNodeNoFraction})
------->and 3 entries (one for each faction) if it's a craftable setId (wayshrines = {[1] = WSNodeFraction1, [2] = WSNodeFraction2, [3] = WSNodeFraction3})
+------>The table will contain 1 entry if it's a NON-craftable setId (wayshrines = {[1] = WSNodeNoFaction})
+------>and 3 entries (one for each faction) if it's a craftable setId (wayshrines = {[1] = WSNodeFactionAD, [2] = WSNodeFactionDC, [3] = WSNodeFactionEP})
 function lib.GetSetInfo(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    if lib.setsData.sets[tonumber(setId)] == nil then return end
+    if lib.svData.sets[tonumber(setId)] == nil then return end
     local setInfoTable = {}
-    local setInfoFromSV = lib.setsData.sets[tonumber(setId)]
+    local setInfoFromSV = lib.svData.sets[tonumber(setId)]
     setInfoTable.setId = setId
     setInfoTable.itemId = setInfoFromSV["itemId"]
     setInfoTable.names = setInfoFromSV["name"] or {}
@@ -926,14 +560,14 @@ end
 --Jump to a wayshrine of a set.
 --If it's a crafted set you can specify a faction ID in order to jump to the selected faction's zone
 --> Parameters: setId number: The set's setId
--->             OPTIONAL factionIndex: The index of the faction (1=Ebonheart Pact, 2=Admeri Dominion, 3=Daggerfall Covenant)
+-->             OPTIONAL factionIndex: The index of the faction (1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact)
 function lib.JumpToSetId(setId, factionIndex)
     if setId == nil then return false end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local jumpToNode = -1
     --Is a crafted set?
     if craftedSets[setId] then
-        --Then use the faction Id 1 to 3
+        --Then use the faction Id 1 (AD), 2 (DC) to 3 (EP)
         factionIndex = factionIndex or 1
         if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
         local craftedSetWSData = setInfo[setId].wayshrines
@@ -958,7 +592,7 @@ end
 function lib.GetSetItemId(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    local setItemId = lib.setsData.sets[tonumber(setId)]["itemId"]
+    local setItemId = lib.svData.sets[tonumber(setId)]["itemId"]
     return setItemId
 end
 
@@ -966,7 +600,7 @@ end
 --> Returns:    boolean areSetsLoaded
 function lib.AreSetsLoaded()
     local areSetsLoaded = false
-    local lastCheckedSetsAPIVersion = math.max( lib.setsData.lastSetsCheckAPIVersion or 0, preloaded.lastSetsCheckAPIVersion )
+    local lastCheckedSetsAPIVersion = math.max( lib.svData.lastSetsCheckAPIVersion or 0, preloaded.lastSetsCheckAPIVersion )
     areSetsLoaded = (lib.setsLoaded == true and (lastCheckedSetsAPIVersion >= lib.currentAPIVersion)) or false
     return areSetsLoaded
 end
@@ -981,7 +615,7 @@ end
 --or false if not
 function lib.checkIfSetsAreLoadedProperly()
     if lib.IsSetsScanning() or not lib.AreSetsLoaded() then return false end
-    if not lib.setsData or not lib.setsData.sets then return false end
+    if not lib.svData or not lib.svData.sets then return false end
     return true
 end
 
@@ -1003,7 +637,7 @@ local function OnLibraryLoaded(event, name)
     lib.AskBeforeReloadUIDialogInitialize(LibSetsAskBeforeReloadUIDialogXML)
 
     --Did the API version change since last sets check? Then rebuild the sets now!
-    local lastCheckedSetsAPIVersion = math.max( lib.setsData.lastSetsCheckAPIVersion or 0, preloaded.lastSetsCheckAPIVersion)
+    local lastCheckedSetsAPIVersion = math.max( lib.svData.lastSetsCheckAPIVersion or 0, preloaded.lastSetsCheckAPIVersion)
     --API version changed?
     if lastCheckedSetsAPIVersion < lib.currentAPIVersion then
         --Delay to chat output works
@@ -1013,8 +647,8 @@ local function OnLibraryLoaded(event, name)
         end, 1000)
         --Client language changed and language is not yet in the SavedVariables?
     elseif lib.supportedLanguages and lib.clientLang and lib.supportedLanguages[lib.clientLang] == true
-            and lib.setsData and lib.setsData.sets and lib.setsData["languagesScanned"] and
-            (lib.setsData["languagesScanned"][lib.currentAPIVersion] == nil or (lib.setsData["languagesScanned"][lib.currentAPIVersion] and lib.setsData["languagesScanned"][lib.currentAPIVersion][lib.clientLang] == nil)) then
+            and lib.svData and lib.svData.sets and lib.svData["languagesScanned"] and
+            (lib.svData["languagesScanned"][lib.currentAPIVersion] == nil or (lib.svData["languagesScanned"][lib.currentAPIVersion] and lib.svData["languagesScanned"][lib.currentAPIVersion][lib.clientLang] == nil)) then
         --Delay to chat output works
         zo_callLater(function()
             d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[LibSets]Sets data for your current client language \'" .. tostring(lib.clientLang) .. "\' and the current API version \'" .. tostring(lib.currentAPIVersion) .. "\' was not added yet.\nNew set names need to be scanned!\nThis will take a few seconds.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -1024,39 +658,42 @@ local function OnLibraryLoaded(event, name)
         --Load preloaded set names
         loadPreloadedSetNames()
         loadSetIds()
-        if lib.setsData
-                and (lib.setsData.monsterSets == nil or lib.setsData.dungeonSets == nil or lib.setsData.overlandSets == nil
-                or lib.setsData.monsterSetsCount == nil or lib.setsData.dungeonSetsCount == nil or lib.setsData.overlandSetsCount == nil
-                or not next(lib.setsData.monsterSets) or not next(lib.setsData.dungeonSets) or not next(lib.setsData.overlandSets)
-                or lib.setsData.monsterSetsCount == 0 or lib.setsData.dungeonSetsCount == 0 or lib.setsData.overlandSetsCount == 0)
+        if lib.svData
+                and (lib.svData.monsterSets == nil or lib.svData.dungeonSets == nil or lib.svData.overlandSets == nil
+                or lib.svData.monsterSetsCount == nil or lib.svData.dungeonSetsCount == nil or lib.svData.overlandSetsCount == nil
+                or not next(lib.svData.monsterSets) or not next(lib.svData.dungeonSets) or not next(lib.svData.overlandSets)
+                or lib.svData.monsterSetsCount == 0 or lib.svData.dungeonSetsCount == 0 or lib.svData.overlandSetsCount == 0)
         then
             distinguishSetTypes()
-            lib.setsData.monsterSets        = monsterSets
-            lib.setsData.dungeonSets        = dungeonSets
-            lib.setsData.overlandSets       = overlandSets
-            lib.setsData.monsterSetsCount   = monsterSetsCount
-            lib.setsData.dungeonSetsCount   = dungeonSetsCount
-            lib.setsData.overlandSetsCount  = overlandSetsCount
+            lib.svData.monsterSets        = monsterSets
+            lib.svData.dungeonSets        = dungeonSets
+            lib.svData.overlandSets       = overlandSets
+            lib.svData.monsterSetsCount   = monsterSetsCount
+            lib.svData.dungeonSetsCount   = dungeonSetsCount
+            lib.svData.overlandSetsCount  = overlandSetsCount
         end
         lib.setsLoaded = true
     end
     --Provide the library the "list of set types" and counts
     lib.craftedSets         = craftedSets
     lib.craftedSetsCount    = craftedSetsCount
-    lib.monsterSets         = lib.setsData.monsterSets
-    lib.dungeonSets         = lib.setsData.dungeonSets
-    lib.overlandSets        = lib.setsData.overlandSets
-    lib.monsterSetsCount    = lib.setsData.monsterSetsCount
-    lib.dungeonSetsCount    = lib.setsData.dungeonSetsCount
-    lib.overlandSetsCount   = lib.setsData.overlandSetsCount
+    lib.monsterSets         = lib.svData.monsterSets
+    lib.dungeonSets         = lib.svData.dungeonSets
+    lib.overlandSets        = lib.svData.overlandSets
+    lib.monsterSetsCount    = lib.svData.monsterSetsCount
+    lib.dungeonSetsCount    = lib.svData.dungeonSetsCount
+    lib.overlandSetsCount   = lib.svData.overlandSetsCount
     lib.preloaded           = preloaded
 end
 
-------------------------------------------------------------------------------------------------------------------------
--- Data update functions
----------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------
+-- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
+-- e.g. to get the new wayshrines names and zoneNames
+-- Uncomment to use them via the libraries global functions then
+-------------------------------------------------------------------------------------------------------------------------------
 
-function GetAllZoneInfo()
+--[[
+local function GetAllZoneInfo()
     local maxZoneId = 2000
     local zoneData = {}
     local lang = GetCVar("language.2")
@@ -1081,7 +718,7 @@ function GetAllZoneInfo()
 end
 
 --Execute in each map to get wayshrine data
-function GetWayshrineInfo()
+local function GetWayshrineInfo()
     d("GetWayshrineInfo")
     local wayshrines = {}
     local currentMapIndex = GetCurrentMapIndex()
@@ -1111,7 +748,7 @@ function GetWayshrineInfo()
     return wayshrines
 end
 
-function GetWayshrineNames()
+local function GetWayshrineNames()
     d("[GetWayshrineNames]")
     local wsNames = {}
     local lang = GetCVar("language.2")
@@ -1127,7 +764,7 @@ function GetWayshrineNames()
     return wsNames
 end
 
-function GetMapNames(lang)
+local function GetMapNames(lang)
     lang = lang or GetCVar("language.2")
     d("[GetMapNames]lang: " ..tostring(lang))
     local lz = LibZone
@@ -1153,26 +790,26 @@ end
 function lib.GetAllZoneInfo()
     local zoneData = {}
     zoneData = GetAllZoneInfo()
-    lib.setsData.zoneData = lib.setsData.zoneData or {}
-    lib.setsData.zoneData[lib.clientLang] = {}
-    lib.setsData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
+    lib.svData.zoneData = lib.svData.zoneData or {}
+    lib.svData.zoneData[lib.clientLang] = {}
+    lib.svData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
 end
 
 function lib.GetMapNames()
     local maps = GetMapNames(lib.clientLang)
     if maps ~= nil then
-        lib.setsData.maps = lib.setsData.maps or {}
-        lib.setsData.maps[lib.clientLang] = {}
-        lib.setsData.maps[lib.clientLang] = maps
+        lib.svData.maps = lib.svData.maps or {}
+        lib.svData.maps[lib.clientLang] = {}
+        lib.svData.maps[lib.clientLang] = maps
     end
 end
 
 function lib.GetWayshrineInfo()
     local ws = GetWayshrineInfo()
     if ws ~= nil then
-        lib.setsData.wayshrines = lib.setsData.wayshrines or {}
+        lib.svData.wayshrines = lib.svData.wayshrines or {}
         for wsNodeId, wsData in pairs(ws) do
-            lib.setsData.wayshrines[wsNodeId] = wsData
+            lib.svData.wayshrines[wsNodeId] = wsData
         end
     end
 end
@@ -1180,11 +817,12 @@ end
 function lib.GetWayshrineNames()
     local wsNames = GetWayshrineNames()
     if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
-        lib.setsData.wayshrineNames = lib.setsData.wayshrineNames or {}
-        lib.setsData.wayshrineNames[lib.clientLang] = {}
-        lib.setsData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
+        lib.svData.wayshrineNames = lib.svData.wayshrineNames or {}
+        lib.svData.wayshrineNames[lib.clientLang] = {}
+        lib.svData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
     end
 end
+]]
 
 --Load the addon now
 EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
