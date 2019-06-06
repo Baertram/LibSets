@@ -93,6 +93,7 @@ local craftedSets = {
     [78]    = true,     --Histrinde / Hist Bark
     [80]    = true,     --Hundings Zorn / Hunding's Rage
     [92]    = true,     --Kagrenacs Hoffnung / Kagrenac's Hope
+    [437]   = true,     --Kalthafens Günstling / Coldharbour's Favorite 
     [351]   = true,     --Kernaxiom / Innate Axiom
     [325]   = true,     --Kettensprenger / Shacklebreaker
     [386]   = true,     --Kreckenantlitz / Sload's Semblance
@@ -103,6 +104,7 @@ local craftedSets = {
     [353]   = true,     --Mechanikblick / Mechanical Acuity
     [352]   = true,     --Messingpanzer / Fortified Brass
     [219]   = true,     --Morkuldin / Morkuldin
+    [438]   = true,     --Mut des Senche-raht / Senche-Raht's Grit 
     [409]   = true,     --Nagaschamane / Naga Shaman
     [387]   = true,     --Nocturnals Gunst / Nocturnal's Favor
     [84]    = true,     --Orgnums Schuppen / Orgnum's Scales
@@ -118,6 +120,7 @@ local craftedSets = {
     [75]    = true,     --Torugs Pakt / Torug's Pact
     [177]   = true,     --Umverteilung / Redistributor
     [241]   = true,     --Varens Erbe / Varen's Legacy
+    [439]   = true,     --Vastaries Vormundschaft / Vastarie's Tutelage 
     [385]   = true,     --Versierter Reiter / Adept Rider
     [148]   = true,     --Weg der Arnea / Way of the Arena
     [79]    = true,     --Weidenpfad / Willow's Path
@@ -174,11 +177,13 @@ local setInfo = {
     [385]   = {wayshrines={359,359,359},     traitsNeeded=3},
     [386]   = {wayshrines={360,360,360},     traitsNeeded=6},
     [387]   = {wayshrines={354,354,354},     traitsNeeded=9},
-    --TODO
-    [408]   = {wayshrines={375,375,375},     traitsNeeded=0},
-    [409]   = {wayshrines={379,379,379},     traitsNeeded=0},
-    [410]   = {wayshrines={379,379,379},     traitsNeeded=0},
-
+    [408]   = {wayshrines={375,375,375},     traitsNeeded=7}, 
+    [409]   = {wayshrines={379,379,379},     traitsNeeded=2}, 
+    [410]   = {wayshrines={379,379,379},     traitsNeeded=4}, 
+    [437]   = {wayshrines={386,386,386},     traitsNeeded=5}, 
+    [438]   = {wayshrines={397,397,397},     traitsNeeded=8}, 
+    [439]   = {wayshrines={382,382,382},     traitsNeeded=3}, 
+ 
     --Other sets (Set names can be found inside SavedVariables file LibSets.lua, after scaning of the set names within your client language finished.
     --Search for "["sets"]" inside the SV file and you'll find the ["name"] in the scanned languages e.g. ["de"] or ["en"] and an example itemId of one
     --item of this set which you can use with LibSets.buildItemLink(itemId) to generate an example itemLink of the set item)
