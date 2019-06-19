@@ -7,464 +7,463 @@ local lib = LibSets
 --> All information was collected ingame and from different websites by user Baertram
 --The setId is the table key
 --setType parameters is one of the following boolean parameter. The one with true is specifying the set's type:
---				  isArena, isBattleground, isCyrodiil, isImperialCity, isSpecial, isCrafted, isDungeon, isOverland, isMonster, isTrial, isDailyDungeonOrPVPICReward
---wayshrines:	   table of wayshrine nodeIds to jump to. You'll be near the set's crafting station then. 1st table key=EP, 2nd table key=AD, 3rd table key= DC
+--				isArena, isBattleground, isCyrodiil, isImperialCity, isSpecial, isCrafted, isDungeon, isOverland, isMonster, isTrial, isDailyDungeonOrPVPICReward
+--wayshrines:	table of wayshrine nodeIds to jump to. You'll be near the set's crafting station then. 1st table key=EP, 2nd table key=AD, 3rd table key= DC
 --> If a table entry is negative (e.g. -1 or -2) the jump won#t work as no wayshrine is knwon or it is a special one like the Mages's guild island Augvea
---traitsNeeded:	 the number of traits you need to research to be able to craft this set (if isCrafted = true)
---veteran:		  boolean value telling you if you need to do the dungeon in veteran mode to get this set pieces (if the set type is a trial/arena/dungeon where there is normal and veteran mode possible)
--->				 or a table containing the different equipTypes as key, and a boolean value as value to show which of the equipTypes is a veteran dungeon reward (e.g. head and shoulders for monster sets)
---multiTrial:	   boolean value (only if isTrial=true) telling you if this set can be achieved in multiple trials
---dlcId:			the dlcId from table lib.DLCData (key). The set was added with this DLC. 0 if it's the ESO base game
---zoneIds:		  table containing the different drop zoneIds of the game where this set can drop
---names:			table containing the different set names with the languages supported as subtable key, e.g. ["en"] (see LibSets_Constants.lua, variable lib.supportedLanguages)
+--traitsNeeded:	the number of traits you need to research to be able to craft this set (if isCrafted = true)
+--veteran:		boolean value telling you if you need to do the dungeon in veteran mode to get this set pieces (if the set type is a trial/arena/dungeon where there is normal and veteran mode possible)
+-->				or a table containing the different equipTypes as key, and a boolean value as value to show which of the equipTypes is a veteran dungeon reward (e.g. head and shoulders for monster sets)
+--multiTrial:	boolean value (only if isTrial=true) telling you if this set can be achieved in multiple trials
+--dlcId:		the dlcId from table lib.DLCData (key). The set was added with this DLC. 0 if it's the ESO base game
+--zoneIds:		table containing the different drop zoneIds of the game where this set can drop
+--names:		table containing the different set names with the languages supported as subtable key, e.g. ["en"] (see LibSets_Constants.lua, variable lib.supportedLanguages)
 -------
 -------
--------  Example entries:
--------  [setId] = {wayshrines={1,177,71}, isCrafted=true, traitsNeeded=2, zoneIds={121,134,167}, dlcId=0},				 --Crafted set
--------  [setId] = {wayshrines={1,177,71}, isTrial=true, veteran=false, zoneIds={121,134,167}, dlcId=DLC_SUMMERSET},		--Trial set
--------  [setId] = {wayshrines={1,177,71}, isTrial=true, multiTrial=true, veteran=false, zoneIds={121,134,167}, dlcId=0},   --Multi trial set
--------  [setId] = {wayshrines={1,177,71}, isArena=true, veteran=true, zoneIds={121,134,167}, dlcId=DLC_MORROWIND},		 --Arena set
--------  [setId] = {wayshrines={1,177,71}, isDungeon=true, veteran=true, zoneIds={121,134,167}, dlcId=DLC_DARK_BROTHERHOOD},--Dungeon set
--------  [setId] = {wayshrines={1,177,71}, isCyrodiil=true, zoneIds={121,134,167}, dlcId=DLC_BASE_GAME},					--Cyrodiil set
--------  [setId] = {wayshrines={1,177,71}, isOverland=true, zoneIds={121,134,167}, dlcId=DLC_BASE_GAME},					--Overland set
+------- Example entries:
+------- [setId] = {wayshrines={1,177,71}, isCrafted=true, traitsNeeded=2, zoneIds={121,134,167}, dlcId=0},					--Crafted set
+------- [setId] = {wayshrines={1,177,71}, isTrial=true, veteran=false, zoneIds={121,134,167}, dlcId=DLC_SUMMERSET},			--Trial set
+------- [setId] = {wayshrines={1,177,71}, isTrial=true, multiTrial=true, veteran=false, zoneIds={121,134,167}, dlcId=0},	--Multi trial set
+------- [setId] = {wayshrines={1,177,71}, isArena=true, veteran=true, zoneIds={121,134,167}, dlcId=DLC_MORROWIND},			--Arena set
+------- [setId] = {wayshrines={1,177,71}, isDungeon=true, veteran=true, zoneIds={121,134,167}, dlcId=DLC_DARK_BROTHERHOOD},	--Dungeon set
+------- [setId] = {wayshrines={1,177,71}, isCyrodiil=true, zoneIds={121,134,167}, dlcId=DLC_BASE_GAME},						--Cyrodiil set
+------- [setId] = {wayshrines={1,177,71}, isOverland=true, zoneIds={121,134,167}, dlcId=DLC_BASE_GAME},						--Overland set
 
 --The data below is generated from the Excel document containing the set data. The excel map "Sets data" contains the code in the columns
 --AR to AU (AV is not needed/used anymore and only in there for information!)
 --The Excel document can be found here: https://github.com/Baertram/LibSets
 lib.setInfo = {
-	[23] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=false	, isArena=true},	 --Archer's Mind / Schützensinn   [Dragonstar Arena]
-	[24] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=false	, isArena=true},	 --Footman's Fortune / Geschick des Fußsoldaten   [Dragonstar Arena]
-	[32] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=false	, isArena=true},	 --Healer's Habit / Bräuche des Heilers   [Dragonstar Arena]
-	[88] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=false	, isArena=true},	 --Robes of Destruction Mastery / Roben der Zerstörungsbeherrschung   [Dragonstar Arena]
-	[211] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=false	, isArena=true},	 --Permafrost / Permafrost   [Maelstrom Arena]
-	[213] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=false	, isArena=true},	 --Glorious Defender / Ruhmreicher Verteidiger   [Maelstrom Arena]
-	[214] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=false	, isArena=true},	 --Para Bellum / Para Bellum   [Maelstrom Arena]
-	[215] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=false	, isArena=true},	 --Elemental Succession / Elementarfolge   [Maelstrom Arena]
-	[216] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=false	, isArena=true},	 --Hunt Leader / Jagdleiter   [Maelstrom Arena]
-	[217] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=false	, isArena=true},	 --Winterborn / Winterkind   [Maelstrom Arena]
-	[313] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --Titanic Cleave / Titanisches Trennen   [Dragonstar Arena]
-	[314] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --Puncturing Remedy / Durchschlagende Genesung   [Dragonstar Arena]
-	[315] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --Stinging Slashes / Stechende Schnitte   [Dragonstar Arena]
-	[316] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --Caustic Arrow / Beißender Pfeil   [Dragonstar Arena]
-	[317] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --Destructive Impact / Zerstörerischer Einschlag   [Dragonstar Arena]
-	[318] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --Grand Rejuvenation / Große Verjüngung   [Dragonstar Arena]
-	[369] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --Merciless Charge / Gnadenloser Ansturm   [Maelstrom Arena]
-	[370] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --Rampaging Slash / Tobender Schnitt   [Maelstrom Arena]
-	[371] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --Cruel Flurry / Grausamer Schlaghagel   [Maelstrom Arena]
-	[372] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --Thunderous Volley / Donnernde Salve   [Maelstrom Arena]
-	[373] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --Crushing Wall / Zermalmende Mauer   [Maelstrom Arena]
-	[374] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --Precise Regeneration / Präzise Regeneration   [Maelstrom Arena]
-	[411] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=false	, isArena=true},	 --Gallant Charge / Galanter Ansturm   [Blackrose Prison]
-	[412] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=false	, isArena=true},	 --Radial Uppercut / Rundum-Aufwärtsschnitt   [Blackrose Prison]
-	[413] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=false	, isArena=true},	 --Spectral Cloak / Spektraler Mantel   [Blackrose Prison]
-	[414] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=false	, isArena=true},	 --Virulent Shot / Virulenter Schuss   [Blackrose Prison]
-	[415] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=false	, isArena=true},	 --Wild Impulse / Wilder Impuls   [Blackrose Prison]
-	[416] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=false	, isArena=true},	 --Mender's Ward / Schutz des Pflegers   [Blackrose Prison]
-	[423] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=true	, isArena=true},	 --Perfect Gallant Charge / Perfekter galanter Ansturm   [Blackrose Prison]
-	[424] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=true	, isArena=true},	 --Perfect Radial Uppercut / Perfekter Rundum-Aufwärtsschnitt   [Blackrose Prison]
-	[425] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=true	, isArena=true},	 --Perfect Spectral Cloak / Perfekter spektraler Mantel   [Blackrose Prison]
-	[426] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=true	, isArena=true},	 --Perfect Virulent Shot / Perfekter virulenter Schuss   [Blackrose Prison]
-	[427] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=true	, isArena=true},	 --Perfect Wild Impulse / Perfekter wilder Impuls   [Blackrose Prison]
-	[428] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={1082}, veteran=true	, isArena=true},	 --Perfect Mender's Ward / Perfekter Schutz des Pflegers   [Blackrose Prison]
+	[23] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=false, isArena=true}, --Archer's Mind / Schützensinn   [Dragonstar Arena]
+	[24] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=false, isArena=true}, --Footman's Fortune / Geschick des Fußsoldaten   [Dragonstar Arena]
+	[32] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=false, isArena=true}, --Healer's Habit / Bräuche des Heilers   [Dragonstar Arena]
+	[88] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=false, isArena=true}, --Robes of Destruction Mastery / Roben der Zerstörungsbeherrschung   [Dragonstar Arena]
+	[211] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=false, isArena=true}, --Permafrost / Permafrost   [Maelstrom Arena]
+	[213] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=false, isArena=true}, --Glorious Defender / Ruhmreicher Verteidiger   [Maelstrom Arena]
+	[214] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=false, isArena=true}, --Para Bellum / Para Bellum   [Maelstrom Arena]
+	[215] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=false, isArena=true}, --Elemental Succession / Elementarfolge   [Maelstrom Arena]
+	[216] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=false, isArena=true}, --Hunt Leader / Jagdleiter   [Maelstrom Arena]
+	[217] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=false, isArena=true}, --Winterborn / Winterkind   [Maelstrom Arena]
+	[313] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --Titanic Cleave / Titanisches Trennen   [Dragonstar Arena]
+	[314] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --Puncturing Remedy / Durchschlagende Genesung   [Dragonstar Arena]
+	[315] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --Stinging Slashes / Stechende Schnitte   [Dragonstar Arena]
+	[316] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --Caustic Arrow / Beißender Pfeil   [Dragonstar Arena]
+	[317] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --Destructive Impact / Zerstörerischer Einschlag   [Dragonstar Arena]
+	[318] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --Grand Rejuvenation / Große Verjüngung   [Dragonstar Arena]
+	[369] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --Merciless Charge / Gnadenloser Ansturm   [Maelstrom Arena]
+	[370] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --Rampaging Slash / Tobender Schnitt   [Maelstrom Arena]
+	[371] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --Cruel Flurry / Grausamer Schlaghagel   [Maelstrom Arena]
+	[372] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --Thunderous Volley / Donnernde Salve   [Maelstrom Arena]
+	[373] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --Crushing Wall / Zermalmende Mauer   [Maelstrom Arena]
+	[374] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --Precise Regeneration / Präzise Regeneration   [Maelstrom Arena]
+	[411] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=false, isArena=true}, --Gallant Charge / Galanter Ansturm   [Blackrose Prison]
+	[412] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=false, isArena=true}, --Radial Uppercut / Rundum-Aufwärtsschnitt   [Blackrose Prison]
+	[413] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=false, isArena=true}, --Spectral Cloak / Spektraler Mantel   [Blackrose Prison]
+	[414] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=false, isArena=true}, --Virulent Shot / Virulenter Schuss   [Blackrose Prison]
+	[415] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=false, isArena=true}, --Wild Impulse / Wilder Impuls   [Blackrose Prison]
+	[416] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=false, isArena=true}, --Mender's Ward / Schutz des Pflegers   [Blackrose Prison]
+	[423] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=true, isArena=true}, --Perfect Gallant Charge / Perfekter galanter Ansturm   [Blackrose Prison]
+	[424] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=true, isArena=true}, --Perfect Radial Uppercut / Perfekter Rundum-Aufwärtsschnitt   [Blackrose Prison]
+	[425] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=true, isArena=true}, --Perfect Spectral Cloak / Perfekter spektraler Mantel   [Blackrose Prison]
+	[426] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=true, isArena=true}, --Perfect Virulent Shot / Perfekter virulenter Schuss   [Blackrose Prison]
+	[427] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=true, isArena=true}, --Perfect Wild Impulse / Perfekter wilder Impuls   [Blackrose Prison]
+	[428] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={1082}, veteran=true, isArena=true}, --Perfect Mender's Ward / Perfekter Schutz des Pflegers   [Blackrose Prison]
 	--[[
-		[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Axe / Axt des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Battle Axe / Streitaxt des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Bow / Bogen des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Dagger / Dolch des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Greatsword / Bidenhänder des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Ice Staff / Eisstab des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Inferno Staff / Flammenstab des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Lightning Staff / Blitzstab des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Mace / Keule des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Maul / Streitkolben des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Restoration Staff / Heilungsstab des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Shield / Schild des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true},	 --The Master's Sword / Schwert des Meisters   [Dragonstar Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Axe / Axt des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Battle Axe / Streitaxt des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Bow / Bogen des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Dagger / Dolch des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Greatsword / Bidenhänder des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Ice Staff / Froststab des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Inferno Staff / Flammenstab des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Lightning Staff / Blitzstab des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Mace / Keule des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Maul / Streitkolben des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Restoration Staff / Heilungsstab des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Shield / Schild des Mahlstroms   [Maelstrom Arena]
-	[???] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true},	 --The Maelstrom's Sword / Schwert des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Axe / Axt des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Battle Axe / Streitaxt des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Bow / Bogen des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Dagger / Dolch des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Greatsword / Bidenhänder des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Ice Staff / Eisstab des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Inferno Staff / Flammenstab des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Lightning Staff / Blitzstab des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Mace / Keule des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Maul / Streitkolben des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Restoration Staff / Heilungsstab des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Shield / Schild des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={635}, veteran=true, isArena=true}, --The Master's Sword / Schwert des Meisters   [Dragonstar Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Axe / Axt des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Battle Axe / Streitaxt des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Bow / Bogen des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Dagger / Dolch des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Greatsword / Bidenhänder des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Ice Staff / Froststab des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Inferno Staff / Flammenstab des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Lightning Staff / Blitzstab des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Mace / Keule des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Maul / Streitkolben des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Restoration Staff / Heilungsstab des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Shield / Schild des Mahlstroms   [Maelstrom Arena]
+	[???] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={677}, veteran=true, isArena=true}, --The Maelstrom's Sword / Schwert des Mahlstroms   [Maelstrom Arena]
 	]]
+	[37] = {wayshrines={1,177,71,}, traitsNeeded=2, dlcId=0, zoneIds={3,381,41}, veteran=false, isCrafted=true}, --Death's Wind / Todeswind	[Glenumbra, Auridon, Stonefalls]
+	[38] = {wayshrines={15,169,205,}, traitsNeeded=3, dlcId=0, zoneIds={19,383,57}, veteran=false, isCrafted=true}, --Twilight's Embrace / Zwielichtkuss	[Stormhaven, Grahtwood, Deshaan]
+	[40] = {wayshrines={216,121,65,}, traitsNeeded=2, dlcId=0, zoneIds={3,381,41}, veteran=false, isCrafted=true}, --Night's Silence / Stille der Nacht	[Glenumbra, Auridon, Stonefalls]
+	[41] = {wayshrines={82,151,78,}, traitsNeeded=4, dlcId=0, zoneIds={20,108,117}, veteran=false, isCrafted=true}, --Whitestrake's Retribution / Weißplankes Vergeltung	[Rivenspire, Greenshade, Shadowfen]
+	[43] = {wayshrines={23,164,32,}, traitsNeeded=3, dlcId=0, zoneIds={19,383,57}, veteran=false, isCrafted=true}, --Armor of the Seducer / Rüstung der Verführung	[Stormhaven, Grahtwood, Deshaan]
+	[44] = {wayshrines={58,101,93,}, traitsNeeded=5, dlcId=0, zoneIds={104,58,101}, veteran=false, isCrafted=true}, --Vampire's Kiss / Kuss des Vampirs	[Alik'r Desert, Malabal Tor, Eastmarch]
+	[48] = {wayshrines={13,148,48,}, traitsNeeded=4, dlcId=0, zoneIds={20,108,117}, veteran=false, isCrafted=true}, --Magnus' Gift / Magnus' Gabe   [Rivenspire, Greenshade, Shadowfen]
+	[51] = {wayshrines={34,156,118,}, traitsNeeded=6, dlcId=0, zoneIds={92,382,103}, veteran=false, isCrafted=true}, --Night Mother's Gaze / Blick der Mutter der Nacht   [Bangkorai, Reaper's March, The Rift]
+	[54] = {wayshrines={7,175,77,}, traitsNeeded=2, dlcId=0, zoneIds={3,381,41}, veteran=false, isCrafted=true}, --Ashen Grip / Aschengriff   [Glenumbra, Auridon, Stonefalls]
+	[73] = {wayshrines={135,135,135,}, traitsNeeded=8, dlcId=0, zoneIds={347,347,347}, veteran=false, isCrafted=true}, --Oblivion's Foe / Erinnerung   [Coldharbour, Coldharbour, Coldharbour]
+	[74] = {wayshrines={133,133,133,}, traitsNeeded=8, dlcId=0, zoneIds={347,347,347}, veteran=false, isCrafted=true}, --Spectre's Eye / Schemenauge   [Coldharbour, Coldharbour, Coldharbour]
+	[75] = {wayshrines={19,165,24,}, traitsNeeded=3, dlcId=0, zoneIds={19,383,57}, veteran=false, isCrafted=true}, --Torug's Pact / Torugs Pakt   [Stormhaven, Grahtwood, Deshaan]
+	[78] = {wayshrines={9,154,51,}, traitsNeeded=4, dlcId=0, zoneIds={20,108,117}, veteran=false, isCrafted=true}, --Hist Bark / Histrinde   [Rivenspire, Greenshade, Shadowfen]
+	[79] = {wayshrines={35,144,111,}, traitsNeeded=6, dlcId=0, zoneIds={92,382,103}, veteran=false, isCrafted=true}, --Willow's Path / Weidenpfad   [Bangkorai, Reaper's March, The Rift]
+	[80] = {wayshrines={39,161,113,}, traitsNeeded=6, dlcId=0, zoneIds={92,382,103}, veteran=false, isCrafted=true}, --Hunding's Rage / Hundings Zorn   [Bangkorai, Reaper's March, The Rift]
+	[81] = {wayshrines={137,103,89,}, traitsNeeded=5, dlcId=0, zoneIds={104,58,101}, veteran=false, isCrafted=true}, --Song of Lamae / Lied der Lamien   [Alik'r Desert, Malabal Tor, Eastmarch]
+	[82] = {wayshrines={155,105,95,}, traitsNeeded=5, dlcId=0, zoneIds={104,58,101}, veteran=false, isCrafted=true}, --Alessia's Bulwark / Alessias Bollwerk   [Alik'r Desert, Malabal Tor, Eastmarch]
+	[84] = {wayshrines={-2,-2,-2,}, traitsNeeded=8, dlcId=0, zoneIds={208,208,208}, veteran=false, isCrafted=true}, --Orgnum's Scales / Orgnums Schuppen   [The Earth Forge, The Earth Forge, The Earth Forge]
+	[87] = {wayshrines={-1,-1,-1,}, traitsNeeded=8, dlcId=0, zoneIds={267,267,267}, veteran=false, isCrafted=true}, --Eyes of Mara / Augen von Mara   [Eyevea, Eyevea, Eyevea]
+	[92] = {wayshrines={-2,-2,-2,}, traitsNeeded=8, dlcId=0, zoneIds={208,208,208}, veteran=false, isCrafted=true}, --Kagrenac's Hope / Kagrenacs Hoffnung   [The Earth Forge, The Earth Forge, The Earth Forge]
+	[95] = {wayshrines={-1,-1,-1,}, traitsNeeded=8, dlcId=0, zoneIds={267,267,267}, veteran=false, isCrafted=true}, --Shalidor's Curse / Shalidors Fluch   [Eyevea, Eyevea, Eyevea]
+	[148] = {wayshrines={217,217,217,}, traitsNeeded=8, dlcId=0, zoneIds={888,888,888}, veteran=false, isCrafted=true}, --Way of the Arena / Weg der Arena   [Craglorn, Craglorn, Craglorn]
+	[161] = {wayshrines={234,234,234,}, traitsNeeded=9, dlcId=0, zoneIds={888,888,888}, veteran=false, isCrafted=true}, --Twice-Born Star / Doppelstern   [Craglorn, Craglorn, Craglorn]
+	[176] = {wayshrines={199,201,203,}, traitsNeeded=7, dlcId=1, zoneIds={584,584,584}, veteran=false, isCrafted=true}, --Noble's Conquest / Adelssieg   [Imperial City, Imperial City, Imperial City]
+	[177] = {wayshrines={199,201,203,}, traitsNeeded=5, dlcId=1, zoneIds={584,584,584}, veteran=false, isCrafted=true}, --Redistributor / Umverteilung   [Imperial City, Imperial City, Imperial City]
+	[178] = {wayshrines={199,201,203,}, traitsNeeded=9, dlcId=1, zoneIds={584,584,584}, veteran=false, isCrafted=true}, --Armor Master / Rüstungsmeister   [Imperial City, Imperial City, Imperial City]
+	[207] = {wayshrines={241,241,241,}, traitsNeeded=6, dlcId=2, zoneIds={684,684,684}, veteran=false, isCrafted=true}, --Law of Julianos / Gesetz von Julianos   [Wrothgar, Wrothgar, Wrothgar]
+	[208] = {wayshrines={237,237,237,}, traitsNeeded=3, dlcId=2, zoneIds={684,684,684}, veteran=false, isCrafted=true}, --Trial by Fire / Feuertaufe   [Wrothgar, Wrothgar, Wrothgar]
+	[209] = {wayshrines={-1,-1,-1,},					dlcId=0	,						veteran=false, isCrafted=true}, --Armor of the Code / Armor of the Code   [n/a]
+	[219] = {wayshrines={237,237,237,}, traitsNeeded=9, dlcId=2, zoneIds={684,684,684}, veteran=false, isCrafted=true}, --Morkuldin / Morkuldin   [Wrothgar, Wrothgar, Wrothgar]
+	[224] = {wayshrines={257,257,257,}, traitsNeeded=5, dlcId=3, zoneIds={816,816,816}, veteran=false, isCrafted=true}, --Tava's Favor / Tavas Gunst   [Hew's Bane, Hew's Bane, Hew's Bane]
+	[225] = {wayshrines={257,257,257,}, traitsNeeded=7, dlcId=3, zoneIds={816,816,816}, veteran=false, isCrafted=true}, --Clever Alchemist / Schlauer Alchemist   [Hew's Bane, Hew's Bane, Hew's Bane]
+	[226] = {wayshrines={255,255,255,}, traitsNeeded=9, dlcId=3, zoneIds={816,816,816}, veteran=false, isCrafted=true}, --Eternal Hunt / Ewige Jagd   [Hew's Bane, Hew's Bane, Hew's Bane]
+	[240] = {wayshrines={254,254,254,}, traitsNeeded=5, dlcId=4, zoneIds={823,823,823}, veteran=false, isCrafted=true}, --Kvatch Gladiator / Gladiator von Kvatch   [Gold Coast, Gold Coast, Gold Coast]
+	[241] = {wayshrines={251,251,251,}, traitsNeeded=7, dlcId=4, zoneIds={823,823,823}, veteran=false, isCrafted=true}, --Varen's Legacy / Varens Erbe   [Gold Coast, Gold Coast, Gold Coast]
+	[242] = {wayshrines={254,254,254,}, traitsNeeded=9, dlcId=4, zoneIds={823,823,823}, veteran=false, isCrafted=true}, --Pelinal's Aptitude / Pelinals Talent   [Gold Coast, Gold Coast, Gold Coast]
+	[323] = {wayshrines={276,276,276,}, traitsNeeded=3, dlcId=6, zoneIds={849,849,849}, veteran=false, isCrafted=true}, --Assassin's Guile / Assassinenlist   [Vvardenfell, Vvardenfell, Vvardenfell]
+	[324] = {wayshrines={329,329,329,}, traitsNeeded=8, dlcId=6, zoneIds={849,849,849}, veteran=false, isCrafted=true}, --Daedric Trickery / Daedrische Gaunerei   [Vvardenfell, Vvardenfell, Vvardenfell]
+	[325] = {wayshrines={282,282,282,}, traitsNeeded=6, dlcId=6, zoneIds={849,849,849}, veteran=false, isCrafted=true}, --Shacklebreaker / Kettensprenger   [Vvardenfell, Vvardenfell, Vvardenfell]
+	[351] = {wayshrines={339,339,339,}, traitsNeeded=6, dlcId=8, zoneIds={980,980,980}, veteran=false, isCrafted=true}, --Innate Axiom / Kernaxiom   [Clockwork City, Clockwork City, Clockwork City]
+	[352] = {wayshrines={337,337,337,}, traitsNeeded=2, dlcId=8, zoneIds={980,980,980}, veteran=false, isCrafted=true}, --Fortified Brass / Messingpanzer   [Clockwork City, Clockwork City, Clockwork City]
+	[353] = {wayshrines={338,338,338,}, traitsNeeded=4, dlcId=8, zoneIds={980,980,980}, veteran=false, isCrafted=true}, --Mechanical Acuity / Mechanikblick   [Clockwork City, Clockwork City, Clockwork City]
+	[385] = {wayshrines={359,359,359,}, traitsNeeded=3, dlcId=10, zoneIds={1011,1011,1011}, veteran=false, isCrafted=true}, --Adept Rider / Versierter Reiter   [Summerset, Summerset, Summerset]
+	[386] = {wayshrines={360,360,360,}, traitsNeeded=6, dlcId=10, zoneIds={1027,1027,1027}, veteran=false, isCrafted=true}, --Sload's Semblance / Kreckenantlitz   [Artaeum, Artaeum, Artaeum]
+	[387] = {wayshrines={354,354,354,}, traitsNeeded=9, dlcId=10, zoneIds={1011,1011,1011}, veteran=false, isCrafted=true}, --Nocturnal's Favor / Nocturnals Gunst   [Summerset, Summerset, Summerset]
+	[408] = {wayshrines={375,375,375,}, traitsNeeded=7, dlcId=12, zoneIds={726}, veteran=false, isCrafted=true}, --Grave-Stake Collector / Grabpflocksammler   [Murkmire]
+	[409] = {wayshrines={379,379,379,}, traitsNeeded=2, dlcId=12, zoneIds={726}, veteran=false, isCrafted=true}, --Naga Shaman / Nagaschamane   [Murkmire]
+	[410] = {wayshrines={379,379,379,}, traitsNeeded=4, dlcId=12, zoneIds={726}, veteran=false, isCrafted=true}, --Might of the Lost Legion / Macht der Verlorenen Legion   [Murkmire]
+	[437] = {wayshrines={386,386,386,}, traitsNeeded=5, dlcId=14, zoneIds={1086,1086,1086}, veteran=false, isCrafted=true}, --Coldharbour's Favorite / Kalthafens Günstling   [Northern Elsweyr, Northern Elsweyr, Northern Elsweyr]
+	[438] = {wayshrines={397,397,397,}, traitsNeeded=8, dlcId=14, zoneIds={1086,1086,1086}, veteran=false, isCrafted=true}, --Senche-raht's Grit / Mut des Senche-raht   [Northern Elsweyr, Northern Elsweyr, Northern Elsweyr]
+	[439] = {wayshrines={382,382,382,}, traitsNeeded=3, dlcId=14, zoneIds={1086,1086,1086}, veteran=false, isCrafted=true}, --Vastarie's Tutelage / Vastaries Vormundschaft   [Northern Elsweyr, Northern Elsweyr, Northern Elsweyr]
 
-	[37] = {wayshrines={1,177,71,}, traitsNeeded=2, dlcId=0	, zoneIds={3,381,41}, veteran=false	, isCrafted=true},	 --Death's Wind / Todeswind	[Glenumbra, Auridon, Stonefalls]
-	[38] = {wayshrines={15,169,205,}, traitsNeeded=3, dlcId=0	, zoneIds={19,383,57}, veteran=false	, isCrafted=true},	 --Twilight's Embrace / Zwielichtkuss	[Stormhaven, Grahtwood, Deshaan]
-	[40] = {wayshrines={216,121,65,}, traitsNeeded=2, dlcId=0	, zoneIds={3,381,41}, veteran=false	, isCrafted=true},	 --Night's Silence / Stille der Nacht	[Glenumbra, Auridon, Stonefalls]
-	[41] = {wayshrines={82,151,78,}, traitsNeeded=4, dlcId=0	, zoneIds={20,108,117}, veteran=false	, isCrafted=true},	 --Whitestrake's Retribution / Weißplankes Vergeltung	[Rivenspire, Greenshade, Shadowfen]
-	[43] = {wayshrines={23,164,32,}, traitsNeeded=3, dlcId=0	, zoneIds={19,383,57}, veteran=false	, isCrafted=true},	 --Armor of the Seducer / Rüstung der Verführung	[Stormhaven, Grahtwood, Deshaan]
-	[44] = {wayshrines={58,101,93,}, traitsNeeded=5, dlcId=0	, zoneIds={104,58,101}, veteran=false	, isCrafted=true},	 --Vampire's Kiss / Kuss des Vampirs	[Alik'r Desert, Malabal Tor, Eastmarch]
-	[48] = {wayshrines={13,148,48,}, traitsNeeded=4, dlcId=0	, zoneIds={20,108,117}, veteran=false	, isCrafted=true},	 --Magnus' Gift / Magnus' Gabe   [Rivenspire, Greenshade, Shadowfen]
-	[51] = {wayshrines={34,156,118,}, traitsNeeded=6, dlcId=0	, zoneIds={92,382,103}, veteran=false	, isCrafted=true},	 --Night Mother's Gaze / Blick der Mutter der Nacht   [Bangkorai, Reaper's March, The Rift]
-	[54] = {wayshrines={7,175,77,}, traitsNeeded=2, dlcId=0	, zoneIds={3,381,41}, veteran=false	, isCrafted=true},	 --Ashen Grip / Aschengriff   [Glenumbra, Auridon, Stonefalls]
-	[73] = {wayshrines={135,135,135,}, traitsNeeded=8, dlcId=0	, zoneIds={347,347,347}, veteran=false	, isCrafted=true},	 --Oblivion's Foe / Erinnerung   [Coldharbour, Coldharbour, Coldharbour]
-	[74] = {wayshrines={133,133,133,}, traitsNeeded=8, dlcId=0	, zoneIds={347,347,347}, veteran=false	, isCrafted=true},	 --Spectre's Eye / Schemenauge   [Coldharbour, Coldharbour, Coldharbour]
-	[75] = {wayshrines={19,165,24,}, traitsNeeded=3, dlcId=0	, zoneIds={19,383,57}, veteran=false	, isCrafted=true},	 --Torug's Pact / Torugs Pakt   [Stormhaven, Grahtwood, Deshaan]
-	[78] = {wayshrines={9,154,51,}, traitsNeeded=4, dlcId=0	, zoneIds={20,108,117}, veteran=false	, isCrafted=true},	 --Hist Bark / Histrinde   [Rivenspire, Greenshade, Shadowfen]
-	[79] = {wayshrines={35,144,111,}, traitsNeeded=6, dlcId=0	, zoneIds={92,382,103}, veteran=false	, isCrafted=true},	 --Willow's Path / Weidenpfad   [Bangkorai, Reaper's March, The Rift]
-	[80] = {wayshrines={39,161,113,}, traitsNeeded=6, dlcId=0	, zoneIds={92,382,103}, veteran=false	, isCrafted=true},	 --Hunding's Rage / Hundings Zorn   [Bangkorai, Reaper's March, The Rift]
-	[81] = {wayshrines={137,103,89,}, traitsNeeded=5, dlcId=0	, zoneIds={104,58,101}, veteran=false	, isCrafted=true},	 --Song of Lamae / Lied der Lamien   [Alik'r Desert, Malabal Tor, Eastmarch]
-	[82] = {wayshrines={155,105,95,}, traitsNeeded=5, dlcId=0	, zoneIds={104,58,101}, veteran=false	, isCrafted=true},	 --Alessia's Bulwark / Alessias Bollwerk   [Alik'r Desert, Malabal Tor, Eastmarch]
-	[84] = {wayshrines={-2,-2,-2,}, traitsNeeded=8, dlcId=0	, zoneIds={208,208,208}, veteran=false	, isCrafted=true},	 --Orgnum's Scales / Orgnums Schuppen   [The Earth Forge, The Earth Forge, The Earth Forge]
-	[87] = {wayshrines={-1,-1,-1,}, traitsNeeded=8, dlcId=0	, zoneIds={267,267,267}, veteran=false	, isCrafted=true},	 --Eyes of Mara / Augen von Mara   [Eyevea, Eyevea, Eyevea]
-	[92] = {wayshrines={-2,-2,-2,}, traitsNeeded=8, dlcId=0	, zoneIds={208,208,208}, veteran=false	, isCrafted=true},	 --Kagrenac's Hope / Kagrenacs Hoffnung   [The Earth Forge, The Earth Forge, The Earth Forge]
-	[95] = {wayshrines={-1,-1,-1,}, traitsNeeded=8, dlcId=0	, zoneIds={267,267,267}, veteran=false	, isCrafted=true},	 --Shalidor's Curse / Shalidors Fluch   [Eyevea, Eyevea, Eyevea]
-	[148] = {wayshrines={217,217,217,}, traitsNeeded=8, dlcId=0	, zoneIds={888,888,888}, veteran=false	, isCrafted=true},	 --Way of the Arena / Weg der Arena   [Craglorn, Craglorn, Craglorn]
-	[161] = {wayshrines={234,234,234,}, traitsNeeded=9, dlcId=0	, zoneIds={888,888,888}, veteran=false	, isCrafted=true},	 --Twice-Born Star / Doppelstern   [Craglorn, Craglorn, Craglorn]
-	[176] = {wayshrines={199,201,203,}, traitsNeeded=7, dlcId=1	, zoneIds={584,584,584}, veteran=false	, isCrafted=true},	 --Noble's Conquest / Adelssieg   [Imperial City, Imperial City, Imperial City]
-	[177] = {wayshrines={199,201,203,}, traitsNeeded=5, dlcId=1	, zoneIds={584,584,584}, veteran=false	, isCrafted=true},	 --Redistributor / Umverteilung   [Imperial City, Imperial City, Imperial City]
-	[178] = {wayshrines={199,201,203,}, traitsNeeded=9, dlcId=1	, zoneIds={584,584,584}, veteran=false	, isCrafted=true},	 --Armor Master / Rüstungsmeister   [Imperial City, Imperial City, Imperial City]
-	[207] = {wayshrines={241,241,241,}, traitsNeeded=6, dlcId=2	, zoneIds={684,684,684}, veteran=false	, isCrafted=true},	 --Law of Julianos / Gesetz von Julianos   [Wrothgar, Wrothgar, Wrothgar]
-	[208] = {wayshrines={237,237,237,}, traitsNeeded=3, dlcId=2	, zoneIds={684,684,684}, veteran=false	, isCrafted=true},	 --Trial by Fire / Feuertaufe   [Wrothgar, Wrothgar, Wrothgar]
-	[209] = {wayshrines={-1,-1,-1,},					dlcId=0	,						veteran=false	, isCrafted=true},	 --Armor of the Code / Armor of the Code   [n/a]
-	[219] = {wayshrines={237,237,237,}, traitsNeeded=9, dlcId=2	, zoneIds={684,684,684}, veteran=false	, isCrafted=true},	 --Morkuldin / Morkuldin   [Wrothgar, Wrothgar, Wrothgar]
-	[224] = {wayshrines={257,257,257,}, traitsNeeded=5, dlcId=3	, zoneIds={816,816,816}, veteran=false	, isCrafted=true},	 --Tava's Favor / Tavas Gunst   [Hew's Bane, Hew's Bane, Hew's Bane]
-	[225] = {wayshrines={257,257,257,}, traitsNeeded=7, dlcId=3	, zoneIds={816,816,816}, veteran=false	, isCrafted=true},	 --Clever Alchemist / Schlauer Alchemist   [Hew's Bane, Hew's Bane, Hew's Bane]
-	[226] = {wayshrines={255,255,255,}, traitsNeeded=9, dlcId=3	, zoneIds={816,816,816}, veteran=false	, isCrafted=true},	 --Eternal Hunt / Ewige Jagd   [Hew's Bane, Hew's Bane, Hew's Bane]
-	[240] = {wayshrines={254,254,254,}, traitsNeeded=5, dlcId=4	, zoneIds={823,823,823}, veteran=false	, isCrafted=true},	 --Kvatch Gladiator / Gladiator von Kvatch   [Gold Coast, Gold Coast, Gold Coast]
-	[241] = {wayshrines={251,251,251,}, traitsNeeded=7, dlcId=4	, zoneIds={823,823,823}, veteran=false	, isCrafted=true},	 --Varen's Legacy / Varens Erbe   [Gold Coast, Gold Coast, Gold Coast]
-	[242] = {wayshrines={254,254,254,}, traitsNeeded=9, dlcId=4	, zoneIds={823,823,823}, veteran=false	, isCrafted=true},	 --Pelinal's Aptitude / Pelinals Talent   [Gold Coast, Gold Coast, Gold Coast]
-	[323] = {wayshrines={276,276,276,}, traitsNeeded=3, dlcId=6	, zoneIds={849,849,849}, veteran=false	, isCrafted=true},	 --Assassin's Guile / Assassinenlist   [Vvardenfell, Vvardenfell, Vvardenfell]
-	[324] = {wayshrines={329,329,329,}, traitsNeeded=8, dlcId=6	, zoneIds={849,849,849}, veteran=false	, isCrafted=true},	 --Daedric Trickery / Daedrische Gaunerei   [Vvardenfell, Vvardenfell, Vvardenfell]
-	[325] = {wayshrines={282,282,282,}, traitsNeeded=6, dlcId=6	, zoneIds={849,849,849}, veteran=false	, isCrafted=true},	 --Shacklebreaker / Kettensprenger   [Vvardenfell, Vvardenfell, Vvardenfell]
-	[351] = {wayshrines={339,339,339,}, traitsNeeded=6, dlcId=8	, zoneIds={980,980,980}, veteran=false	, isCrafted=true},	 --Innate Axiom / Kernaxiom   [Clockwork City, Clockwork City, Clockwork City]
-	[352] = {wayshrines={337,337,337,}, traitsNeeded=2, dlcId=8	, zoneIds={980,980,980}, veteran=false	, isCrafted=true},	 --Fortified Brass / Messingpanzer   [Clockwork City, Clockwork City, Clockwork City]
-	[353] = {wayshrines={338,338,338,}, traitsNeeded=4, dlcId=8	, zoneIds={980,980,980}, veteran=false	, isCrafted=true},	 --Mechanical Acuity / Mechanikblick   [Clockwork City, Clockwork City, Clockwork City]
-	[385] = {wayshrines={359,359,359,}, traitsNeeded=3, dlcId=10	, zoneIds={1011,1011,1011}, veteran=false	, isCrafted=true},	 --Adept Rider / Versierter Reiter   [Summerset, Summerset, Summerset]
-	[386] = {wayshrines={360,360,360,}, traitsNeeded=6, dlcId=10	, zoneIds={1027,1027,1027}, veteran=false	, isCrafted=true},	 --Sload's Semblance / Kreckenantlitz   [Artaeum, Artaeum, Artaeum]
-	[387] = {wayshrines={354,354,354,}, traitsNeeded=9, dlcId=10	, zoneIds={1011,1011,1011}, veteran=false	, isCrafted=true},	 --Nocturnal's Favor / Nocturnals Gunst   [Summerset, Summerset, Summerset]
-	[408] = {wayshrines={375,375,375,}, traitsNeeded=7, dlcId=12	, zoneIds={726}, veteran=false	, isCrafted=true},	 --Grave-Stake Collector / Grabpflocksammler   [Murkmire]
-	[409] = {wayshrines={379,379,379,}, traitsNeeded=2, dlcId=12	, zoneIds={726}, veteran=false	, isCrafted=true},	 --Naga Shaman / Nagaschamane   [Murkmire]
-	[410] = {wayshrines={379,379,379,}, traitsNeeded=4, dlcId=12	, zoneIds={726}, veteran=false	, isCrafted=true},	 --Might of the Lost Legion / Macht der Verlorenen Legion   [Murkmire]
-	[437] = {wayshrines={386,386,386,}, traitsNeeded=5, dlcId=14	, zoneIds={1086,1086,1086}, veteran=false	, isCrafted=true},	 --Coldharbour's Favorite / Kalthafens Günstling   [Northern Elsweyr, Northern Elsweyr, Northern Elsweyr]
-	[438] = {wayshrines={397,397,397,}, traitsNeeded=8, dlcId=14	, zoneIds={1086,1086,1086}, veteran=false	, isCrafted=true},	 --Senche-raht's Grit / Mut des Senche-raht   [Northern Elsweyr, Northern Elsweyr, Northern Elsweyr]
-	[439] = {wayshrines={382,382,382,}, traitsNeeded=3, dlcId=14	, zoneIds={1086,1086,1086}, veteran=false	, isCrafted=true},	 --Vastarie's Tutelage / Vastaries Vormundschaft   [Northern Elsweyr, Northern Elsweyr, Northern Elsweyr]
+	[204] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isDailyRandomDungeonAndImperialCityReward=true}, --Endurance / Beständigkeit   [Imperial City]
+	[205] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isDailyRandomDungeonAndImperialCityReward=true}, --Willpower / Willenskraft   [Imperial City]
+	[206] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isDailyRandomDungeonAndImperialCityReward=true}, --Agility / Agilität   [Imperial City]
 
-	[204] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isDailyRandomDungeonAndImperialCityReward=true},	 --Endurance / Beständigkeit   [Imperial City]
-	[205] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isDailyRandomDungeonAndImperialCityReward=true},	 --Willpower / Willenskraft   [Imperial City]
-	[206] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isDailyRandomDungeonAndImperialCityReward=true},	 --Agility / Agilität   [Imperial City]
+	[19] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={31}, veteran=false, isDungeon=true}, --Vestments of the Warlock / Gewänder des Hexers   [Selene's Web]
+	[28] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={126,931}, veteran=false, isDungeon=true}, --Barkskin / Borkenhaut   [Elden Hollow I, Elden Hollow II]
+	[29] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={146,933}, veteran=false, isDungeon=true}, --Sergeant's Mail / Rüstung des Feldwebels   [Wayrest Sewers I, Wayrest Sewers II]
+	[33] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={283,934}, veteran=false, isDungeon=true}, --Viper's Sting / Vipernbiss   [Fungal Grotto I, Fungal Grotto II]
+	[35] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={144,936}, veteran=false, isDungeon=true}, --Knightmare / Albtraumritter   [Spindleclutch I, Spindleclutch II]
+	[46] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={64}, veteran=false, isDungeon=true}, --Noble Duelist's Silks / Seide des edlen Duellanten   [Blessed Crucible]
+	[53] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={449}, veteran=false, isDungeon=true}, --The Ice Furnace / Eisschmiede   [Direfrost Keep]
+	[55] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={144,936}, veteran=false, isDungeon=true}, --Prayer Shawl / Gebetstuch   [Spindleclutch I, Spindleclutch II]
+	[61] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={283,934}, veteran=false, isDungeon=true}, --Dreugh King Slayer / Dreughkönigsschlächter   [Fungal Grotto I, Fungal Grotto II]
+	[71] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={31}, veteran=false, isDungeon=true}, --Durok's Bane / Duroks Fluch   [Selene's Web]
+	[72] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={64}, veteran=false, isDungeon=true}, --Nikulas' Heavy Armor / Nikulas' schwere Rüstung   [Blessed Crucible]
+	[77] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={22}, veteran=false, isDungeon=true}, --Crusader / Glaubenskrieger   [Volenfell]
+	[91] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={11}, veteran=false, isDungeon=true}, --Oblivion's Edge / Vorteil des Vergessens   [Vaults of Madness]
+	[96] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={63,930}, veteran=false, isDungeon=true}, --Armor of Truth / Rüstung der Wahrheit   [Darkshade Caverns I, Darkshade Caverns II]
+	[102] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={22}, veteran=false, isDungeon=true}, --Duneripper's Scales / Schuppen des Dünenbrechers   [Volenfell]
+	[103] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={449}, veteran=false, isDungeon=true}, --Magicka Furnace / Magickaschmiede   [Direfrost Keep]
+	[110] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,935}, veteran=false, isDungeon=true}, --Sanctuary / Heiligtum   [The Banished Cells I, The Banished Cells II]
+	[116] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,144,283,146,126,63}, veteran=false, isDungeon=true}, --The Destruction Suite / Garnitur der Zerstörung   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
+	[117] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,144,283,146,126,63}, veteran=false, isDungeon=true}, --Relics of the Physician, Ansur / Relikte des Mediziners Ansur   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
+	[118] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,144,283,146,126,63}, veteran=false, isDungeon=true}, --Treasures of the Earthforge / Schätze der Erdenschmiede   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
+	[119] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,144,283,146,126,63}, veteran=false, isDungeon=true}, --Relics of the Rebellion / Relikte der Rebellion   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
+	[120] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,144,283,146,126,63}, veteran=false, isDungeon=true}, --Arms of Infernace / Waffen Infernals   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
+	[121] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,144,283,146,126,63}, veteran=false, isDungeon=true}, --Arms of the Ancestors / Waffen der Ahnen   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
+	[122] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={130,932}, veteran=false, isDungeon=true}, --Ebon Armory / Ebenerzarsenal   [Crypt of Hearts I, Crypt of Hearts II]
+	[123] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={31}, veteran=false, isDungeon=true}, --Hircine's Veneer / Hircines Schein   [Selene's Web]
+	[124] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={11}, veteran=false, isDungeon=true}, --The Worm's Raiment / Garderobe des Wurms   [Vaults of Madness]
+	[134] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={130,932}, veteran=false, isDungeon=true}, --Shroud of the Lich / Tuch des Lich   [Crypt of Hearts I, Crypt of Hearts II]
+	[155] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={126,931}, veteran=false, isDungeon=true}, --Undaunted Bastion / Unerschrockenen-Bastion   [Elden Hollow I, Elden Hollow II]
+	[156] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={148}, veteran=false, isDungeon=true}, --Undaunted Infiltrator / Unerschrockener Infiltrator   [Arx Corinium]
+	[157] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={38}, veteran=false, isDungeon=true}, --Undaunted Unweaver / Unerschrockener Entflechter   [Blackheart Haven]
+	[158] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={176,681}, veteran=false, isDungeon=true}, --Embershield / Glutschild   [City of Ash I, City of Ash II]
+	[159] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={176,681}, veteran=false, isDungeon=true}, --Sunderflame / Trennflamme   [City of Ash I, City of Ash II]
+	[160] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={176,681}, veteran=false, isDungeon=true}, --Burning Spellweave / Branntzauberweber   [City of Ash I, City of Ash II]
+	[184] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={688}, veteran=false, isDungeon=true}, --Brands of Imperium / Male des Kaiserreichs   [White-Gold Tower]
+	[185] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={688}, veteran=false, isDungeon=true}, --Spell Power Cure / Magiekraftheilung   [White-Gold Tower]
+	[186] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={131}, veteran=false, isDungeon=true}, --Jolting Arms / Rüttelnde Rüstung   [Tempest Island]
+	[188] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={131}, veteran=false, isDungeon=true}, --Storm Master / Sturmmeister   [Tempest Island]
+	[190] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={678}, veteran=false, isDungeon=true}, --Scathing Mage / Verletzender Magier   [Imperial City Prison]
+	[193] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={131}, veteran=false, isDungeon=true}, --Overwhelming Surge / Überwältigende Woge   [Tempest Island]
+	[194] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={146,933}, veteran=false, isDungeon=true}, --Combat Physician / Feldarzt   [Wayrest Sewers I, Wayrest Sewers II]
+	[195] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={678}, veteran=false, isDungeon=true}, --Sheer Venom / Reingift   [Imperial City Prison]
+	[196] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={678}, veteran=false, isDungeon=true}, --Leeching Plate / Auslaugende Rüstung   [Imperial City Prison]
+	[197] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,935}, veteran=false, isDungeon=true}, --Tormentor / Quälender   [The Banished Cells I, The Banished Cells II]
+	[198] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={688}, veteran=false, isDungeon=true}, --Essence Thief / Essenzdieb   [White-Gold Tower]
+	[258] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={843}, veteran=false, isDungeon=true}, --Amber Plasm / Bernsteinplasma   [Ruins of Mazzatun]
+	[259] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={843}, veteran=false, isDungeon=true}, --Heem-Jas' Retribution / Heem-Jas' Vergeltung   [Ruins of Mazzatun]
+	[260] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={843}, veteran=false, isDungeon=true}, --Aspect of Mazzatun / Aspekt von Mazzatun   [Ruins of Mazzatun]
+	[261] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={848}, veteran=false, isDungeon=true}, --Gossamer / Gespinst   [Cradle of Shadows]
+	[262] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={848}, veteran=false, isDungeon=true}, --Widowmaker / Witwenmacher   [Cradle of Shadows]
+	[263] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={848}, veteran=false, isDungeon=true}, --Hand of Mephala / Hand von Mephala   [Cradle of Shadows]
+	[295] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380,935}, veteran=false, isDungeon=true}, --Jailbreaker / Ausbrecher   [The Banished Cells I, The Banished Cells II]
+	[296] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={144,936}, veteran=false, isDungeon=true}, --Spelunker / Höhlenforscher   [Spindleclutch I, Spindleclutch II]
+	[297] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={283,934}, veteran=false, isDungeon=true}, --Spider Cultist Cowl / Spinnenkultistenkutte   [Fungal Grotto I, Fungal Grotto II]
+	[298] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={126,931}, veteran=false, isDungeon=true}, --Light Speaker / Lichtsprecher   [Elden Hollow I, Elden Hollow II]
+	[299] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={146,933}, veteran=false, isDungeon=true}, --Toothrow / Zahnreihe   [Wayrest Sewers I, Wayrest Sewers II]
+	[300] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={63,930}, veteran=false, isDungeon=true}, --Netch's Touch / Berührung des Netch   [Darkshade Caverns I, Darkshade Caverns II]
+	[301] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={63,930}, veteran=false, isDungeon=true}, --Strength of the Automaton / Stärke des Automaten   [Darkshade Caverns I, Darkshade Caverns II]
+	[302] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={130,932}, veteran=false, isDungeon=true}, --Leviathan / Leviathan   [Crypt of Hearts I, Crypt of Hearts II]
+	[303] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={148}, veteran=false, isDungeon=true}, --Lamia's Song / Lied der Lamie   [Arx Corinium]
+	[304] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={148}, veteran=false, isDungeon=true}, --Medusa / Versteinernder Blick   [Arx Corinium]
+	[305] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={22}, veteran=false, isDungeon=true}, --Treasure Hunter / Schatzjäger   [Volenfell]
+	[307] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={449}, veteran=false, isDungeon=true}, --Draugr Hulk / Schwerfälliger Draugr   [Direfrost Keep]
+	[308] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={38}, veteran=false, isDungeon=true}, --Bone Pirate's Tatters / Lumpen des Knochenpiraten   [Blackheart Haven]
+	[309] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={38}, veteran=false, isDungeon=true}, --Knight-errant's Mail / Platten des Wanderritters   [Blackheart Haven]
+	[310] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={64}, veteran=false, isDungeon=true}, --Sword Dancer / Schwerttänzer   [Blessed Crucible]
+	[311] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={11}, veteran=false, isDungeon=true}, --Rattlecage / Klapperkäfig   [Vaults of Madness]
+	[335] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={974}, veteran=false, isDungeon=true}, --Draugr's Rest / Draugrruhe   [Falkreath Hold]
+	[336] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={974}, veteran=false, isDungeon=true}, --Pillar of Nirn / Säulen von Nirn   [Falkreath Hold]
+	[337] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={974}, veteran=false, isDungeon=true}, --Ironblood / Eisenblut   [Falkreath Hold]
+	[338] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={973}, veteran=false, isDungeon=true}, --Flame Blossom / Flammenblüte   [Bloodroot Forge]
+	[339] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={973}, veteran=false, isDungeon=true}, --Blooddrinker / Bluttrinker   [Bloodroot Forge]
+	[340] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={973}, veteran=false, isDungeon=true}, --Hagraven's Garden / Vettelgarten   [Bloodroot Forge]
+	[343] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1009}, veteran=false, isDungeon=true}, --Caluurion's Legacy / Caluurions Erbe   [Fang Lair]
+	[344] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1009}, veteran=false, isDungeon=true}, --Trappings of Invigoration / Stärkungsprunk   [Fang Lair]
+	[345] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1009}, veteran=false, isDungeon=true}, --Ulfnor's Favor / Ulfnors Gunst   [Fang Lair]
+	[346] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1010}, veteran=false, isDungeon=true}, --Jorvuld's Guidance / Jorvulds Führung   [Scalecaller Peak]
+	[347] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1010}, veteran=false, isDungeon=true}, --Plague Slinger / Seuchenschleuder   [Scalecaller Peak]
+	[348] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1010}, veteran=false, isDungeon=true}, --Curse of Doylemish / Fluch von Doylemish   [Scalecaller Peak]
+	[399] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1055}, veteran=false, isDungeon=true}, --Hanu's Compassion / Hanus Mitgefühl   [March of Sacrifices]
+	[400] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1055}, veteran=false, isDungeon=true}, --Blood Moon / Blutmond   [March of Sacrifices]
+	[401] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1055}, veteran=false, isDungeon=true}, --Haven of Ursus / Zuflucht von Ursus   [March of Sacrifices]
+	[402] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1052}, veteran=false, isDungeon=true}, --Moon Hunter / Mondjäger   [Moon Hunter Keep]
+	[403] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1052}, veteran=false, isDungeon=true}, --Savage Werewolf / Wilder Werwolf   [Moon Hunter Keep]
+	[404] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1052}, veteran=false, isDungeon=true}, --Jailer's Tenacity / Tenazität des Kerkermeisters   [Moon Hunter Keep]
+	[429] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1080}, veteran=false, isDungeon=true}, --Mighty Glacier / Mächtiger Gletscher   [Frostvault]
+	[430] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1080}, veteran=false, isDungeon=true}, --Tzogvin's Warband / Tzogvins Kriegstrupp   [Frostvault]
+	[431] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1080}, veteran=false, isDungeon=true}, --Icy Conjuror / Eisiger Anrufer   [Frostvault]
+	[433] = {wayshrines={-1,-1,-1,}, dlcId=4, zoneIds={1081}, veteran=false, isDungeon=true}, --Frozen Watcher / Gefrorener Beobachter   [Depths of Malatar]
+	[434] = {wayshrines={-1,-1,-1,}, dlcId=4, zoneIds={1081}, veteran=false, isDungeon=true}, --Scavenging Demise / Ausbeutender Niedergang   [Depths of Malatar]
+	[435] = {wayshrines={-1,-1,-1,}, dlcId=4, zoneIds={1081}, veteran=false, isDungeon=true}, --Auroran's Thunder / Donner des Auroraners   [Depths of Malatar]
 
-	[19] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={31}, veteran=false	, isDungeon=true},	 --Vestments of the Warlock / Gewänder des Hexers   [Selene's Web]
-	[28] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={126,931}, veteran=false	, isDungeon=true},	 --Barkskin / Borkenhaut   [Elden Hollow I, Elden Hollow II]
-	[29] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={146,933}, veteran=false	, isDungeon=true},	 --Sergeant's Mail / Rüstung des Feldwebels   [Wayrest Sewers I, Wayrest Sewers II]
-	[33] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={283,934}, veteran=false	, isDungeon=true},	 --Viper's Sting / Vipernbiss   [Fungal Grotto I, Fungal Grotto II]
-	[35] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={144,936}, veteran=false	, isDungeon=true},	 --Knightmare / Albtraumritter   [Spindleclutch I, Spindleclutch II]
-	[46] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={64}, veteran=false	, isDungeon=true},	 --Noble Duelist's Silks / Seide des edlen Duellanten   [Blessed Crucible]
-	[53] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={449}, veteran=false	, isDungeon=true},	 --The Ice Furnace / Eisschmiede   [Direfrost Keep]
-	[55] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={144,936}, veteran=false	, isDungeon=true},	 --Prayer Shawl / Gebetstuch   [Spindleclutch I, Spindleclutch II]
-	[61] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={283,934}, veteran=false	, isDungeon=true},	 --Dreugh King Slayer / Dreughkönigsschlächter   [Fungal Grotto I, Fungal Grotto II]
-	[71] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={31}, veteran=false	, isDungeon=true},	 --Durok's Bane / Duroks Fluch   [Selene's Web]
-	[72] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={64}, veteran=false	, isDungeon=true},	 --Nikulas' Heavy Armor / Nikulas' schwere Rüstung   [Blessed Crucible]
-	[77] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={22}, veteran=false	, isDungeon=true},	 --Crusader / Glaubenskrieger   [Volenfell]
-	[91] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={11}, veteran=false	, isDungeon=true},	 --Oblivion's Edge / Vorteil des Vergessens   [Vaults of Madness]
-	[96] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={63,930}, veteran=false	, isDungeon=true},	 --Armor of Truth / Rüstung der Wahrheit   [Darkshade Caverns I, Darkshade Caverns II]
-	[102] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={22}, veteran=false	, isDungeon=true},	 --Duneripper's Scales / Schuppen des Dünenbrechers   [Volenfell]
-	[103] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={449}, veteran=false	, isDungeon=true},	 --Magicka Furnace / Magickaschmiede   [Direfrost Keep]
-	[110] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,935}, veteran=false	, isDungeon=true},	 --Sanctuary / Heiligtum   [The Banished Cells I, The Banished Cells II]
-	[116] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,144,283,146,126,63}, veteran=false	, isDungeon=true},	 --The Destruction Suite / Garnitur der Zerstörung   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
-	[117] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,144,283,146,126,63}, veteran=false	, isDungeon=true},	 --Relics of the Physician, Ansur / Relikte des Mediziners Ansur   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
-	[118] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,144,283,146,126,63}, veteran=false	, isDungeon=true},	 --Treasures of the Earthforge / Schätze der Erdenschmiede   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
-	[119] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,144,283,146,126,63}, veteran=false	, isDungeon=true},	 --Relics of the Rebellion / Relikte der Rebellion   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
-	[120] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,144,283,146,126,63}, veteran=false	, isDungeon=true},	 --Arms of Infernace / Waffen Infernals   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
-	[121] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,144,283,146,126,63}, veteran=false	, isDungeon=true},	 --Arms of the Ancestors / Waffen der Ahnen   [The Banished Cells I, Spindleclutch I, Fungal Grotto I, Wayrest Sewers I, Elden Hollow I, Darkshade Caverns I]
-	[122] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={130,932}, veteran=false	, isDungeon=true},	 --Ebon Armory / Ebenerzarsenal   [Crypt of Hearts I, Crypt of Hearts II]
-	[123] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={31}, veteran=false	, isDungeon=true},	 --Hircine's Veneer / Hircines Schein   [Selene's Web]
-	[124] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={11}, veteran=false	, isDungeon=true},	 --The Worm's Raiment / Garderobe des Wurms   [Vaults of Madness]
-	[134] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={130,932}, veteran=false	, isDungeon=true},	 --Shroud of the Lich / Tuch des Lich   [Crypt of Hearts I, Crypt of Hearts II]
-	[155] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={126,931}, veteran=false	, isDungeon=true},	 --Undaunted Bastion / Unerschrockenen-Bastion   [Elden Hollow I, Elden Hollow II]
-	[156] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={148}, veteran=false	, isDungeon=true},	 --Undaunted Infiltrator / Unerschrockener Infiltrator   [Arx Corinium]
-	[157] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={38}, veteran=false	, isDungeon=true},	 --Undaunted Unweaver / Unerschrockener Entflechter   [Blackheart Haven]
-	[158] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={176,681}, veteran=false	, isDungeon=true},	 --Embershield / Glutschild   [City of Ash I, City of Ash II]
-	[159] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={176,681}, veteran=false	, isDungeon=true},	 --Sunderflame / Trennflamme   [City of Ash I, City of Ash II]
-	[160] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={176,681}, veteran=false	, isDungeon=true},	 --Burning Spellweave / Branntzauberweber   [City of Ash I, City of Ash II]
-	[184] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={688}, veteran=false	, isDungeon=true},	 --Brands of Imperium / Male des Kaiserreichs   [White-Gold Tower]
-	[185] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={688}, veteran=false	, isDungeon=true},	 --Spell Power Cure / Magiekraftheilung   [White-Gold Tower]
-	[186] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={131}, veteran=false	, isDungeon=true},	 --Jolting Arms / Rüttelnde Rüstung   [Tempest Island]
-	[188] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={131}, veteran=false	, isDungeon=true},	 --Storm Master / Sturmmeister   [Tempest Island]
-	[190] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={678}, veteran=false	, isDungeon=true},	 --Scathing Mage / Verletzender Magier   [Imperial City Prison]
-	[193] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={131}, veteran=false	, isDungeon=true},	 --Overwhelming Surge / Überwältigende Woge   [Tempest Island]
-	[194] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={146,933}, veteran=false	, isDungeon=true},	 --Combat Physician / Feldarzt   [Wayrest Sewers I, Wayrest Sewers II]
-	[195] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={678}, veteran=false	, isDungeon=true},	 --Sheer Venom / Reingift   [Imperial City Prison]
-	[196] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={678}, veteran=false	, isDungeon=true},	 --Leeching Plate / Auslaugende Rüstung   [Imperial City Prison]
-	[197] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,935}, veteran=false	, isDungeon=true},	 --Tormentor / Quälender   [The Banished Cells I, The Banished Cells II]
-	[198] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={688}, veteran=false	, isDungeon=true},	 --Essence Thief / Essenzdieb   [White-Gold Tower]
-	[258] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={843}, veteran=false	, isDungeon=true},	 --Amber Plasm / Bernsteinplasma   [Ruins of Mazzatun]
-	[259] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={843}, veteran=false	, isDungeon=true},	 --Heem-Jas' Retribution / Heem-Jas' Vergeltung   [Ruins of Mazzatun]
-	[260] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={843}, veteran=false	, isDungeon=true},	 --Aspect of Mazzatun / Aspekt von Mazzatun   [Ruins of Mazzatun]
-	[261] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={848}, veteran=false	, isDungeon=true},	 --Gossamer / Gespinst   [Cradle of Shadows]
-	[262] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={848}, veteran=false	, isDungeon=true},	 --Widowmaker / Witwenmacher   [Cradle of Shadows]
-	[263] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={848}, veteran=false	, isDungeon=true},	 --Hand of Mephala / Hand von Mephala   [Cradle of Shadows]
-	[295] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380,935}, veteran=false	, isDungeon=true},	 --Jailbreaker / Ausbrecher   [The Banished Cells I, The Banished Cells II]
-	[296] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={144,936}, veteran=false	, isDungeon=true},	 --Spelunker / Höhlenforscher   [Spindleclutch I, Spindleclutch II]
-	[297] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={283,934}, veteran=false	, isDungeon=true},	 --Spider Cultist Cowl / Spinnenkultistenkutte   [Fungal Grotto I, Fungal Grotto II]
-	[298] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={126,931}, veteran=false	, isDungeon=true},	 --Light Speaker / Lichtsprecher   [Elden Hollow I, Elden Hollow II]
-	[299] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={146,933}, veteran=false	, isDungeon=true},	 --Toothrow / Zahnreihe   [Wayrest Sewers I, Wayrest Sewers II]
-	[300] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={63,930}, veteran=false	, isDungeon=true},	 --Netch's Touch / Berührung des Netch   [Darkshade Caverns I, Darkshade Caverns II]
-	[301] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={63,930}, veteran=false	, isDungeon=true},	 --Strength of the Automaton / Stärke des Automaten   [Darkshade Caverns I, Darkshade Caverns II]
-	[302] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={130,932}, veteran=false	, isDungeon=true},	 --Leviathan / Leviathan   [Crypt of Hearts I, Crypt of Hearts II]
-	[303] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={148}, veteran=false	, isDungeon=true},	 --Lamia's Song / Lied der Lamie   [Arx Corinium]
-	[304] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={148}, veteran=false	, isDungeon=true},	 --Medusa / Versteinernder Blick   [Arx Corinium]
-	[305] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={22}, veteran=false	, isDungeon=true},	 --Treasure Hunter / Schatzjäger   [Volenfell]
-	[307] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={449}, veteran=false	, isDungeon=true},	 --Draugr Hulk / Schwerfälliger Draugr   [Direfrost Keep]
-	[308] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={38}, veteran=false	, isDungeon=true},	 --Bone Pirate's Tatters / Lumpen des Knochenpiraten   [Blackheart Haven]
-	[309] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={38}, veteran=false	, isDungeon=true},	 --Knight-errant's Mail / Platten des Wanderritters   [Blackheart Haven]
-	[310] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={64}, veteran=false	, isDungeon=true},	 --Sword Dancer / Schwerttänzer   [Blessed Crucible]
-	[311] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={11}, veteran=false	, isDungeon=true},	 --Rattlecage / Klapperkäfig   [Vaults of Madness]
-	[335] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={974}, veteran=false	, isDungeon=true},	 --Draugr's Rest / Draugrruhe   [Falkreath Hold]
-	[336] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={974}, veteran=false	, isDungeon=true},	 --Pillar of Nirn / Säulen von Nirn   [Falkreath Hold]
-	[337] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={974}, veteran=false	, isDungeon=true},	 --Ironblood / Eisenblut   [Falkreath Hold]
-	[338] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={973}, veteran=false	, isDungeon=true},	 --Flame Blossom / Flammenblüte   [Bloodroot Forge]
-	[339] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={973}, veteran=false	, isDungeon=true},	 --Blooddrinker / Bluttrinker   [Bloodroot Forge]
-	[340] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={973}, veteran=false	, isDungeon=true},	 --Hagraven's Garden / Vettelgarten   [Bloodroot Forge]
-	[343] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1009}, veteran=false	, isDungeon=true},	 --Caluurion's Legacy / Caluurions Erbe   [Fang Lair]
-	[344] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1009}, veteran=false	, isDungeon=true},	 --Trappings of Invigoration / Stärkungsprunk   [Fang Lair]
-	[345] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1009}, veteran=false	, isDungeon=true},	 --Ulfnor's Favor / Ulfnors Gunst   [Fang Lair]
-	[346] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1010}, veteran=false	, isDungeon=true},	 --Jorvuld's Guidance / Jorvulds Führung   [Scalecaller Peak]
-	[347] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1010}, veteran=false	, isDungeon=true},	 --Plague Slinger / Seuchenschleuder   [Scalecaller Peak]
-	[348] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1010}, veteran=false	, isDungeon=true},	 --Curse of Doylemish / Fluch von Doylemish   [Scalecaller Peak]
-	[399] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1055}, veteran=false	, isDungeon=true},	 --Hanu's Compassion / Hanus Mitgefühl   [March of Sacrifices]
-	[400] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1055}, veteran=false	, isDungeon=true},	 --Blood Moon / Blutmond   [March of Sacrifices]
-	[401] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1055}, veteran=false	, isDungeon=true},	 --Haven of Ursus / Zuflucht von Ursus   [March of Sacrifices]
-	[402] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1052}, veteran=false	, isDungeon=true},	 --Moon Hunter / Mondjäger   [Moon Hunter Keep]
-	[403] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1052}, veteran=false	, isDungeon=true},	 --Savage Werewolf / Wilder Werwolf   [Moon Hunter Keep]
-	[404] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1052}, veteran=false	, isDungeon=true},	 --Jailer's Tenacity / Tenazität des Kerkermeisters   [Moon Hunter Keep]
-	[429] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1080}, veteran=false	, isDungeon=true},	 --Mighty Glacier / Mächtiger Gletscher   [Frostvault]
-	[430] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1080}, veteran=false	, isDungeon=true},	 --Tzogvin's Warband / Tzogvins Kriegstrupp   [Frostvault]
-	[431] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1080}, veteran=false	, isDungeon=true},	 --Icy Conjuror / Eisiger Anrufer   [Frostvault]
-	[433] = {wayshrines={-1,-1,-1,}, dlcId=4	, zoneIds={1081}, veteran=false	, isDungeon=true},	 --Frozen Watcher / Gefrorener Beobachter   [Depths of Malatar]
-	[434] = {wayshrines={-1,-1,-1,}, dlcId=4	, zoneIds={1081}, veteran=false	, isDungeon=true},	 --Scavenging Demise / Ausbeutender Niedergang   [Depths of Malatar]
-	[435] = {wayshrines={-1,-1,-1,}, dlcId=4	, zoneIds={1081}, veteran=false	, isDungeon=true},	 --Auroran's Thunder / Donner des Auroraners   [Depths of Malatar]
+	[162] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={934}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Spawn of Mephala / Mephalas Brut   [Fungal Grotto II]
+	[163] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={936}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Blood Spawn / Blutbrut   [Spindleclutch II]
+	[164] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={678}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Lord Warden / Hochwärter   [Imperial City Prison]
+	[165] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={933}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Scourge Harvester / Geißelernter   [Wayrest Sewers II]
+	[166] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={930}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Engine Guardian / Maschinenwächter   [Darkshade Caverns II]
+	[167] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={931}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Nightflame / Nachtflamme   [Elden Hollow II]
+	[168] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={932}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Nerien'eth / Nerien'eth   [Crypt of Hearts II]
+	[169] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={681}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Valkyn Skoria / Valkyn Skoria   [City of Ash II]
+	[170] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={935}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Maw of the Infernal / Schlund des Infernalen   [The Banished Cells II]
+	[183] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={688}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Molag Kena / Molag Kena   [White-Gold Tower]
+	[256] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={843}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Mighty Chudan / Mächtiger Chudan   [Ruins of Mazzatun]
+	[257] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={848}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Velidreth / Velidreth   [Cradle of Shadows]
+	[264] = {wayshrines={-1,-1,-1,}, dlcId=0, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Giant Spider / Riesenspinne   [n/a]
+	[265] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={380}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Shadowrend / Schattenriss   [The Banished Cells I]
+	[266] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={283}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Kra'gh / Kra'gh   [Fungal Grotto I]
+	[267] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={144}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Swarm Mother / Schwarmmutter   [Spindleclutch I]
+	[268] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={63}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Sentinel of Rkugamz / Wachposten von Rkugamz   [Darkshade Caverns I]
+	[269] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={126}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Chokethorn / Würgedorn   [Elden Hollow I]
+	[270] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={146}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Slimecraw / Schleimkropf   [Wayrest Sewers I]
+	[271] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={148}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Sellistrix / Sellistrix   [Arx Corinium]
+	[272] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={176}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Infernal Guardian / Infernaler Wächter   [City of Ash I]
+	[273] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={130}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Ilambris / Ilambris   [Crypt of Hearts I]
+	[274] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={449}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Iceheart / Eisherz   [Direfrost Keep]
+	[275] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={131}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Stormfist / Sturmfaust   [Tempest Island]
+	[276] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1009}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Tremorscale / Bebenschuppe   [Fang Lair]
+	[277] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={38}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Pirate Skeleton / Piratenskelett   [Blackheart Haven]
+	[278] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={22}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --The Troll King / Trollkönig   [Volenfell]
+	[279] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={31}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Selene / Selene   [Selene's Web]
+	[280] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={11}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Grothdarr / Grothdarr   [Vaults of Madness]
+	[341] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={973}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Earthgore / Erdbluter   [Bloodroot Forge]
+	[342] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={974}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Domihaus / Domihaus   [Falkreath Hold]
+	[349] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={64}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Thurvokun / Thurvokun   [Blessed Crucible]
+	[350] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1010}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Zaan / Zaan   [Scalecaller Peak]
+	[397] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1055}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Balorgh / Balorgh   [March of Sacrifices]
+	[398] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1052}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Vykosa / Vykosa   [Moon Hunter Keep]
+	[432] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={1080}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Stonekeeper / Steinwahrer   [Frostvault]
+	[436] = {wayshrines={-1,-1,-1,}, dlcId=4, zoneIds={1081}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}, isMonster=true}, --Symphony of Blades / Sinfonie der Klingen   [Depths of Malatar]
 
-	[162] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={934}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Spawn of Mephala / Mephalas Brut   [Fungal Grotto II]
-	[163] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={936}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Blood Spawn / Blutbrut   [Spindleclutch II]
-	[164] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={678}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Lord Warden / Hochwärter   [Imperial City Prison]
-	[165] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={933}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Scourge Harvester / Geißelernter   [Wayrest Sewers II]
-	[166] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={930}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Engine Guardian / Maschinenwächter   [Darkshade Caverns II]
-	[167] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={931}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Nightflame / Nachtflamme   [Elden Hollow II]
-	[168] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={932}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Nerien'eth / Nerien'eth   [Crypt of Hearts II]
-	[169] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={681}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Valkyn Skoria / Valkyn Skoria   [City of Ash II]
-	[170] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={935}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Maw of the Infernal / Schlund des Infernalen   [The Banished Cells II]
-	[183] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={688}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Molag Kena / Molag Kena   [White-Gold Tower]
-	[256] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={843}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Mighty Chudan / Mächtiger Chudan   [Ruins of Mazzatun]
-	[257] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={848}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Velidreth / Velidreth   [Cradle of Shadows]
-	[264] = {wayshrines={-1,-1,-1,}, dlcId=0	, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Giant Spider / Riesenspinne   [n/a]
-	[265] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={380}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Shadowrend / Schattenriss   [The Banished Cells I]
-	[266] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={283}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Kra'gh / Kra'gh   [Fungal Grotto I]
-	[267] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={144}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Swarm Mother / Schwarmmutter   [Spindleclutch I]
-	[268] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={63}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Sentinel of Rkugamz / Wachposten von Rkugamz   [Darkshade Caverns I]
-	[269] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={126}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Chokethorn / Würgedorn   [Elden Hollow I]
-	[270] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={146}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Slimecraw / Schleimkropf   [Wayrest Sewers I]
-	[271] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={148}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Sellistrix / Sellistrix   [Arx Corinium]
-	[272] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={176}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Infernal Guardian / Infernaler Wächter   [City of Ash I]
-	[273] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={130}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Ilambris / Ilambris   [Crypt of Hearts I]
-	[274] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={449}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Iceheart / Eisherz   [Direfrost Keep]
-	[275] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={131}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Stormfist / Sturmfaust   [Tempest Island]
-	[276] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1009}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Tremorscale / Bebenschuppe   [Fang Lair]
-	[277] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={38}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Pirate Skeleton / Piratenskelett   [Blackheart Haven]
-	[278] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={22}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --The Troll King / Trollkönig   [Volenfell]
-	[279] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={31}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Selene / Selene   [Selene's Web]
-	[280] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={11}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Grothdarr / Grothdarr   [Vaults of Madness]
-	[341] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={973}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Earthgore / Erdbluter   [Bloodroot Forge]
-	[342] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={974}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Domihaus / Domihaus   [Falkreath Hold]
-	[349] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={64}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Thurvokun / Thurvokun   [Blessed Crucible]
-	[350] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1010}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Zaan / Zaan   [Scalecaller Peak]
-	[397] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1055}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Balorgh / Balorgh   [March of Sacrifices]
-	[398] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1052}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Vykosa / Vykosa   [Moon Hunter Keep]
-	[432] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={1080}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Stonekeeper / Steinwahrer   [Frostvault]
-	[436] = {wayshrines={-1,-1,-1,}, dlcId=4	, zoneIds={1081}, veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}	, isMonster=true},	 --Symphony of Blades / Sinfonie der Klingen   [Depths of Malatar]
+	[20] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={103}, veteran=false, isOverland=true}, --Witchman Armor / Hexenwerk   [The Rift]
+	[21] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={101}, veteran=false, isOverland=true}, --Akaviri Dragonguard / Akavirische Drachengarde   [Eastmarch]
+	[22] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={19}, veteran=false, isOverland=true}, --Dreamer's Mantle / Mantel des Träumers   [Stormhaven]
+	[26] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={347}, veteran=false, isOverland=true}, --Prisoner's Rags / Lumpen des Gefangenen   [Coldharbour]
+	[27] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={101}, veteran=false, isOverland=true}, --Fiord's Legacy / Fiords Erbe   [Eastmarch]
+	[30] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={58}, veteran=false, isOverland=true}, --Thunderbug's Carapace / Donnerkäferpanzer   [Malabal Tor]
+	[31] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={41}, veteran=false, isOverland=true}, --Silks of the Sun / Sonnenseide   [Stonefalls]
+	[34] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={57}, veteran=false, isOverland=true}, --Night Mother's Embrace / Umarmung der Mutter der Nacht   [Deshaan]
+	[36] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={381}, veteran=false, isOverland=true}, --Armor of the Veiled Heritance / Rüstung des Schleiererbes   [Auridon]
+	[47] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={104}, veteran=false, isOverland=true}, --Robes of the Withered Hand / Roben der Verdorrten Hand   [Alik'r Desert]
+	[49] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={41}, veteran=false, isOverland=true}, --Shadow of the Red Mountain / Schatten des Roten Berges   [Stonefalls]
+	[56] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={101}, veteran=false, isOverland=true}, --Stendarr's Embrace / Stendarrs Umarmung   [Eastmarch]
+	[57] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={383}, veteran=false, isOverland=true}, --Syrabane's Grip / Syrabanns Griff   [Grahtwood]
+	[58] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={3}, veteran=false, isOverland=true}, --Hide of the Werewolf / Fell des Werwolfs   [Glenumbra]
+	[60] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={20}, veteran=false, isOverland=true}, --Darkstride / Dunkelschritt   [Rivenspire]
+	[62] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={117}, veteran=false, isOverland=true}, --Hatchling's Shell / Schlüpflingspanzer   [Shadowfen]
+	[64] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={108}, veteran=false, isOverland=true}, --Shadow Dancer's Raiment / Kleidung des Schattentänzers   [Greenshade]
+	[65] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={3}, veteran=false, isOverland=true}, --Bloodthorn's Touch / Spur eines Blutdorns   [Glenumbra]
+	[66] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={117}, veteran=false, isOverland=true}, --Robes of the Hist / Roben des Hist   [Shadowfen]
+	[68] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={347}, veteran=false, isOverland=true}, --Stygian / Stygier   [Coldharbour]
+	[69] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={383}, veteran=false, isOverland=true}, --Ranger's Gait / Laufstil des Waldläufers   [Grahtwood]
+	[70] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={92}, veteran=false, isOverland=true}, --Seventh Legion Brute / Rohling der siebten Legion   [Bangkorai]
+	[86] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={381}, veteran=false, isOverland=true}, --Queen's Elegance / Eleganz der Königin   [Auridon]
+	[90] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={382}, veteran=false, isOverland=true}, --Senche's Bite / Biss des Senche   [Reaper's March]
+	[93] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={19}, veteran=false, isOverland=true}, --Storm Knight's Plate / Wut des Sturmritters   [Stormhaven]
+	[94] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={347}, veteran=false, isOverland=true}, --Meridia's Blessed Armor / Meridias gesegnete Rüstung   [Coldharbour]
+	[98] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={20}, veteran=false, isOverland=true}, --Necropotence / Nekropotenz   [Rivenspire]
+	[99] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={58}, veteran=false, isOverland=true}, --Salvation / Erlösung   [Malabal Tor]
+	[105] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={381}, veteran=false, isOverland=true}, --Twin Sisters / Zwillingsschwestern   [Auridon]
+	[106] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={108}, veteran=false, isOverland=true}, --Wilderqueen's Arch / Bogen der Wildkönigin   [Greenshade]
+	[107] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={3}, veteran=false, isOverland=true}, --Wyrd Tree's Blessing / Segen des Wyrdbaums   [Glenumbra]
+	[112] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={19}, veteran=false, isOverland=true}, --Night Terror / Nachtschrecken   [Stormhaven]
+	[114] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={382}, veteran=false, isOverland=true}, --Soulshine / Seelenschein   [Reaper's March]
+	[135] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={103}, veteran=false, isOverland=true}, --Draugr's Heritage / Erbe des Draugrs   [The Rift]
+	[145] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={888}, veteran=false, isOverland=true}, --Way of Fire / Weg des Feuers   [Craglorn]
+	[146] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={888}, veteran=false, isOverland=true}, --Way of Air / Weg der Luft   [Craglorn]
+	[147] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={888}, veteran=false, isOverland=true}, --Way of Martial Knowledge / Weg der Kampfkunst   [Craglorn]
+	[187] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={117}, veteran=false, isOverland=true}, --Swamp Raider / Sumpfräuber   [Shadowfen]
+	[210] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={684}, veteran=false, isOverland=true}, --Mark of the Pariah / Zeichen des Ausgestoßenen   [Wrothgar]
+	[212] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={684}, veteran=false, isOverland=true}, --Briarheart / Dornenherz   [Wrothgar]
+	[218] = {wayshrines={-1,-1,-1,}, dlcId=2, zoneIds={684}, veteran=false, isOverland=true}, --Trinimac's Valor / Trinimacs Heldenmut   [Wrothgar]
+	[227] = {wayshrines={-1,-1,-1,}, dlcId=3, zoneIds={816}, veteran=false, isOverland=true}, --Bahraha's Curse / Bahrahas Fluch   [Hew's Bane]
+	[228] = {wayshrines={-1,-1,-1,}, dlcId=3, zoneIds={816}, veteran=false, isOverland=true}, --Syvarra's Scales / Syvarras Schuppen   [Hew's Bane]
+	[243] = {wayshrines={-1,-1,-1,}, dlcId=4, zoneIds={823}, veteran=false, isOverland=true}, --Hide of Morihaus / Haut von Morihaus   [Gold Coast]
+	[244] = {wayshrines={-1,-1,-1,}, dlcId=4, zoneIds={823}, veteran=false, isOverland=true}, --Flanking Strategist / Flankierender Stratege   [Gold Coast]
+	[245] = {wayshrines={-1,-1,-1,}, dlcId=4, zoneIds={823}, veteran=false, isOverland=true}, --Sithis' Touch / Sithis' Berührung   [Gold Coast]
+	[281] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={534,537,280,280}, veteran=false, isOverland=true}, --Armor of the Trainee / Rüstung des Auszubildenden   [Stros M'Kai, Khenarthi's Roost, Bleakrock Isle, Bleakrock Isle]
+	[282] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={20}, veteran=false, isOverland=true}, --Vampire Cloak / Vampirumhang   [Rivenspire]
+	[283] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={104}, veteran=false, isOverland=true}, --Sword-Singer / Schwertsänger   [Alik'r Desert]
+	[284] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={104}, veteran=false, isOverland=true}, --Order of Diagna / Orden von Diagna   [Alik'r Desert]
+	[285] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={92}, veteran=false, isOverland=true}, --Vampire Lord / Vampirfürst   [Bangkorai]
+	[286] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={92}, veteran=false, isOverland=true}, --Spriggan's Thorns / Dornen des Zweiglings   [Bangkorai]
+	[287] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={383}, veteran=false, isOverland=true}, --Green Pact / Der Grüne Pakt   [Grahtwood]
+	[288] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={108}, veteran=false, isOverland=true}, --Beekeeper's Gear / Werkzeug des Bienenhüters   [Greenshade]
+	[289] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={58}, veteran=false, isOverland=true}, --Spinner's Garments / Gewänder des Webers   [Malabal Tor]
+	[290] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={382}, veteran=false, isOverland=true}, --Skooma Smuggler / Skoomaschmuggler   [Reaper's March]
+	[291] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={41}, veteran=false, isOverland=true}, --Shalk Exoskeleton / Schröterpanzer   [Stonefalls]
+	[292] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={57}, veteran=false, isOverland=true}, --Mother's Sorrow / Muttertränen   [Deshaan]
+	[293] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={57}, veteran=false, isOverland=true}, --Plague Doctor / Seuchendoktor   [Deshaan]
+	[294] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={103}, veteran=false, isOverland=true}, --Ysgramor's Birthright / Ysgramors Geburtsrecht   [The Rift]
+	[320] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={849}, veteran=false, isOverland=true}, --War Maiden / Kriegsjungfer   [Vvardenfell]
+	[321] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={849}, veteran=false, isOverland=true}, --Defiler / Schänder   [Vvardenfell]
+	[322] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={849}, veteran=false, isOverland=true}, --Warrior-Poet / Kriegerpoet   [Vvardenfell]
+	[354] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={980}, veteran=false, isOverland=true}, --Mad Tinkerer / Wahntüftler   [Clockwork City]
+	[355] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={980}, veteran=false, isOverland=true}, --Unfathomable Darkness / Unermessliche Dunkelheit   [Clockwork City]
+	[356] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={980}, veteran=false, isOverland=true}, --Livewire / Stromschlag   [Clockwork City]
+	[382] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1011}, veteran=false, isOverland=true}, --Grace of Gloom / Anmut der Gräue   [Summerset]
+	[383] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1011}, veteran=false, isOverland=true}, --Gryphon's Ferocity / Wildheit des Greifen   [Summerset]
+	[384] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1011}, veteran=false, isOverland=true}, --Wisdom of Vanus / Weisheit von Vanus   [Summerset]
+	[405] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={726}, veteran=false, isOverland=true}, --Bright-Throat's Boast / Hellhalsstolz   [Murkmire]
+	[406] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={726}, veteran=false, isOverland=true}, --Dead-Water's Guile / Totwassertücke   [Murkmire]
+	[407] = {wayshrines={-1,-1,-1,}, dlcId=12, zoneIds={726}, veteran=false, isOverland=true}, --Champion of the Hist / Histchampion   [Murkmire]
+	[440] = {wayshrines={382,382,382,}, dlcId=14, zoneIds={1086}, veteran=false, isOverland=true}, --Crafty Alfiq / Listiger Alfiq   [Northern Elsweyr]
+	[441] = {wayshrines={382,382,382,}, dlcId=14, zoneIds={1086}, veteran=false, isOverland=true}, --Vesture of Darloc Brae / Gewandung von Darloc Brae   [Northern Elsweyr]
+	[442] = {wayshrines={382,382,382,}, dlcId=14, zoneIds={1086}, veteran=false, isOverland=true}, --Call of the Undertaker / Ruf des Totengräbers   [Northern Elsweyr]
 
-	[20] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={103}, veteran=false	, isOverland=true},	 --Witchman Armor / Hexenwerk   [The Rift]
-	[21] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={101}, veteran=false	, isOverland=true},	 --Akaviri Dragonguard / Akavirische Drachengarde   [Eastmarch]
-	[22] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={19}, veteran=false	, isOverland=true},	 --Dreamer's Mantle / Mantel des Träumers   [Stormhaven]
-	[26] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={347}, veteran=false	, isOverland=true},	 --Prisoner's Rags / Lumpen des Gefangenen   [Coldharbour]
-	[27] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={101}, veteran=false	, isOverland=true},	 --Fiord's Legacy / Fiords Erbe   [Eastmarch]
-	[30] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={58}, veteran=false	, isOverland=true},	 --Thunderbug's Carapace / Donnerkäferpanzer   [Malabal Tor]
-	[31] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={41}, veteran=false	, isOverland=true},	 --Silks of the Sun / Sonnenseide   [Stonefalls]
-	[34] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={57}, veteran=false	, isOverland=true},	 --Night Mother's Embrace / Umarmung der Mutter der Nacht   [Deshaan]
-	[36] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={381}, veteran=false	, isOverland=true},	 --Armor of the Veiled Heritance / Rüstung des Schleiererbes   [Auridon]
-	[47] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={104}, veteran=false	, isOverland=true},	 --Robes of the Withered Hand / Roben der Verdorrten Hand   [Alik'r Desert]
-	[49] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={41}, veteran=false	, isOverland=true},	 --Shadow of the Red Mountain / Schatten des Roten Berges   [Stonefalls]
-	[56] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={101}, veteran=false	, isOverland=true},	 --Stendarr's Embrace / Stendarrs Umarmung   [Eastmarch]
-	[57] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={383}, veteran=false	, isOverland=true},	 --Syrabane's Grip / Syrabanns Griff   [Grahtwood]
-	[58] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={3}, veteran=false	, isOverland=true},	 --Hide of the Werewolf / Fell des Werwolfs   [Glenumbra]
-	[60] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={20}, veteran=false	, isOverland=true},	 --Darkstride / Dunkelschritt   [Rivenspire]
-	[62] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={117}, veteran=false	, isOverland=true},	 --Hatchling's Shell / Schlüpflingspanzer   [Shadowfen]
-	[64] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={108}, veteran=false	, isOverland=true},	 --Shadow Dancer's Raiment / Kleidung des Schattentänzers   [Greenshade]
-	[65] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={3}, veteran=false	, isOverland=true},	 --Bloodthorn's Touch / Spur eines Blutdorns   [Glenumbra]
-	[66] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={117}, veteran=false	, isOverland=true},	 --Robes of the Hist / Roben des Hist   [Shadowfen]
-	[68] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={347}, veteran=false	, isOverland=true},	 --Stygian / Stygier   [Coldharbour]
-	[69] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={383}, veteran=false	, isOverland=true},	 --Ranger's Gait / Laufstil des Waldläufers   [Grahtwood]
-	[70] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={92}, veteran=false	, isOverland=true},	 --Seventh Legion Brute / Rohling der siebten Legion   [Bangkorai]
-	[86] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={381}, veteran=false	, isOverland=true},	 --Queen's Elegance / Eleganz der Königin   [Auridon]
-	[90] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={382}, veteran=false	, isOverland=true},	 --Senche's Bite / Biss des Senche   [Reaper's March]
-	[93] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={19}, veteran=false	, isOverland=true},	 --Storm Knight's Plate / Wut des Sturmritters   [Stormhaven]
-	[94] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={347}, veteran=false	, isOverland=true},	 --Meridia's Blessed Armor / Meridias gesegnete Rüstung   [Coldharbour]
-	[98] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={20}, veteran=false	, isOverland=true},	 --Necropotence / Nekropotenz   [Rivenspire]
-	[99] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={58}, veteran=false	, isOverland=true},	 --Salvation / Erlösung   [Malabal Tor]
-	[105] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={381}, veteran=false	, isOverland=true},	 --Twin Sisters / Zwillingsschwestern   [Auridon]
-	[106] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={108}, veteran=false	, isOverland=true},	 --Wilderqueen's Arch / Bogen der Wildkönigin   [Greenshade]
-	[107] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={3}, veteran=false	, isOverland=true},	 --Wyrd Tree's Blessing / Segen des Wyrdbaums   [Glenumbra]
-	[112] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={19}, veteran=false	, isOverland=true},	 --Night Terror / Nachtschrecken   [Stormhaven]
-	[114] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={382}, veteran=false	, isOverland=true},	 --Soulshine / Seelenschein   [Reaper's March]
-	[135] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={103}, veteran=false	, isOverland=true},	 --Draugr's Heritage / Erbe des Draugrs   [The Rift]
-	[145] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={888}, veteran=false	, isOverland=true},	 --Way of Fire / Weg des Feuers   [Craglorn]
-	[146] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={888}, veteran=false	, isOverland=true},	 --Way of Air / Weg der Luft   [Craglorn]
-	[147] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={888}, veteran=false	, isOverland=true},	 --Way of Martial Knowledge / Weg der Kampfkunst   [Craglorn]
-	[187] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={117}, veteran=false	, isOverland=true},	 --Swamp Raider / Sumpfräuber   [Shadowfen]
-	[210] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={684}, veteran=false	, isOverland=true},	 --Mark of the Pariah / Zeichen des Ausgestoßenen   [Wrothgar]
-	[212] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={684}, veteran=false	, isOverland=true},	 --Briarheart / Dornenherz   [Wrothgar]
-	[218] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={684}, veteran=false	, isOverland=true},	 --Trinimac's Valor / Trinimacs Heldenmut   [Wrothgar]
-	[227] = {wayshrines={-1,-1,-1,}, dlcId=3	, zoneIds={816}, veteran=false	, isOverland=true},	 --Bahraha's Curse / Bahrahas Fluch   [Hew's Bane]
-	[228] = {wayshrines={-1,-1,-1,}, dlcId=3	, zoneIds={816}, veteran=false	, isOverland=true},	 --Syvarra's Scales / Syvarras Schuppen   [Hew's Bane]
-	[243] = {wayshrines={-1,-1,-1,}, dlcId=4	, zoneIds={823}, veteran=false	, isOverland=true},	 --Hide of Morihaus / Haut von Morihaus   [Gold Coast]
-	[244] = {wayshrines={-1,-1,-1,}, dlcId=4	, zoneIds={823}, veteran=false	, isOverland=true},	 --Flanking Strategist / Flankierender Stratege   [Gold Coast]
-	[245] = {wayshrines={-1,-1,-1,}, dlcId=4	, zoneIds={823}, veteran=false	, isOverland=true},	 --Sithis' Touch / Sithis' Berührung   [Gold Coast]
-	[281] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={534,537,280,280}, veteran=false	, isOverland=true},	 --Armor of the Trainee / Rüstung des Auszubildenden   [Stros M'Kai, Khenarthi's Roost, Bleakrock Isle, Bleakrock Isle]
-	[282] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={20}, veteran=false	, isOverland=true},	 --Vampire Cloak / Vampirumhang   [Rivenspire]
-	[283] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={104}, veteran=false	, isOverland=true},	 --Sword-Singer / Schwertsänger   [Alik'r Desert]
-	[284] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={104}, veteran=false	, isOverland=true},	 --Order of Diagna / Orden von Diagna   [Alik'r Desert]
-	[285] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={92}, veteran=false	, isOverland=true},	 --Vampire Lord / Vampirfürst   [Bangkorai]
-	[286] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={92}, veteran=false	, isOverland=true},	 --Spriggan's Thorns / Dornen des Zweiglings   [Bangkorai]
-	[287] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={383}, veteran=false	, isOverland=true},	 --Green Pact / Der Grüne Pakt   [Grahtwood]
-	[288] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={108}, veteran=false	, isOverland=true},	 --Beekeeper's Gear / Werkzeug des Bienenhüters   [Greenshade]
-	[289] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={58}, veteran=false	, isOverland=true},	 --Spinner's Garments / Gewänder des Webers   [Malabal Tor]
-	[290] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={382}, veteran=false	, isOverland=true},	 --Skooma Smuggler / Skoomaschmuggler   [Reaper's March]
-	[291] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={41}, veteran=false	, isOverland=true},	 --Shalk Exoskeleton / Schröterpanzer   [Stonefalls]
-	[292] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={57}, veteran=false	, isOverland=true},	 --Mother's Sorrow / Muttertränen   [Deshaan]
-	[293] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={57}, veteran=false	, isOverland=true},	 --Plague Doctor / Seuchendoktor   [Deshaan]
-	[294] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={103}, veteran=false	, isOverland=true},	 --Ysgramor's Birthright / Ysgramors Geburtsrecht   [The Rift]
-	[320] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={849}, veteran=false	, isOverland=true},	 --War Maiden / Kriegsjungfer   [Vvardenfell]
-	[321] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={849}, veteran=false	, isOverland=true},	 --Defiler / Schänder   [Vvardenfell]
-	[322] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={849}, veteran=false	, isOverland=true},	 --Warrior-Poet / Kriegerpoet   [Vvardenfell]
-	[354] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={980}, veteran=false	, isOverland=true},	 --Mad Tinkerer / Wahntüftler   [Clockwork City]
-	[355] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={980}, veteran=false	, isOverland=true},	 --Unfathomable Darkness / Unermessliche Dunkelheit   [Clockwork City]
-	[356] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={980}, veteran=false	, isOverland=true},	 --Livewire / Stromschlag   [Clockwork City]
-	[382] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1011}, veteran=false	, isOverland=true},	 --Grace of Gloom / Anmut der Gräue   [Summerset]
-	[383] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1011}, veteran=false	, isOverland=true},	 --Gryphon's Ferocity / Wildheit des Greifen   [Summerset]
-	[384] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1011}, veteran=false	, isOverland=true},	 --Wisdom of Vanus / Weisheit von Vanus   [Summerset]
-	[405] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={726}, veteran=false	, isOverland=true},	 --Bright-Throat's Boast / Hellhalsstolz   [Murkmire]
-	[406] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={726}, veteran=false	, isOverland=true},	 --Dead-Water's Guile / Totwassertücke   [Murkmire]
-	[407] = {wayshrines={-1,-1,-1,}, dlcId=12	, zoneIds={726}, veteran=false	, isOverland=true},	 --Champion of the Hist / Histchampion   [Murkmire]
-	[440] = {wayshrines={382,382,382,}, dlcId=14	, zoneIds={1086}, veteran=false	, isOverland=true},	 --Crafty Alfiq / Listiger Alfiq   [Northern Elsweyr]
-	[441] = {wayshrines={382,382,382,}, dlcId=14	, zoneIds={1086}, veteran=false	, isOverland=true},	 --Vesture of Darloc Brae / Gewandung von Darloc Brae   [Northern Elsweyr]
-	[442] = {wayshrines={382,382,382,}, dlcId=14	, zoneIds={1086}, veteran=false	, isOverland=true},	 --Call of the Undertaker / Ruf des Totengräbers   [Northern Elsweyr]
+	[326] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={1}, veteran=false, isBattleground=true}, --Vanguard's Challenge / Vorhutdisput   [Battleground]
+	[327] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={1}, veteran=false, isBattleground=true}, --Coward's Gear / Feiglingstracht   [Battleground]
+	[328] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={1}, veteran=false, isBattleground=true}, --Knight Slayer / Ritterschlächter   [Battleground]
+	[329] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={1}, veteran=false, isBattleground=true}, --Wizard's Riposte / Zaubererreplik   [Battleground]
+	[334] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={1}, veteran=false, isBattleground=true}, --Impregnable Armor / Unüberwindliche Rüstung   [Battleground]
 
-	[326] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={1}, veteran=false	, isBattleground=true},	 --Vanguard's Challenge / Vorhutdisput   [Battleground]
-	[327] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={1}, veteran=false	, isBattleground=true},	 --Coward's Gear / Feiglingstracht   [Battleground]
-	[328] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={1}, veteran=false	, isBattleground=true},	 --Knight Slayer / Ritterschlächter   [Battleground]
-	[329] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={1}, veteran=false	, isBattleground=true},	 --Wizard's Riposte / Zaubererreplik   [Battleground]
-	[334] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={1}, veteran=false	, isBattleground=true},	 --Impregnable Armor / Unüberwindliche Rüstung   [Battleground]
+	[25] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Desert Rose / Wüstenrose   [Cyrodiil]
+	[39] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Alessian Order / Alessianischer Orden   [Cyrodiil]
+	[50] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --The Morag Tong / Morag Tong   [Cyrodiil]
+	[52] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Beckoning Steel / Klingender Stahl   [Cyrodiil]
+	[59] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Kyne's Kiss / Kynes Kuss   [Cyrodiil]
+	[63] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --The Juggernaut / Koloss   [Cyrodiil]
+	[67] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Shadow Walker / Schattengänger   [Cyrodiil]
+	[76] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Robes of Alteration Mastery / Roben der Veränderungsbeherrschung   [Cyrodiil]
+	[83] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Elf Bane / Elfenfluch   [Cyrodiil]
+	[85] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Almalexia's Mercy / Almalexias Gnade   [Cyrodiil]
+	[89] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Sentry / Wachposten   [Cyrodiil]
+	[97] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --The Arch-Mage / Erzmagier   [Cyrodiil]
+	[100] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Hawk's Eye / Falkenauge   [Cyrodiil]
+	[101] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Affliction / Elend   [Cyrodiil]
+	[104] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Curse Eater / Fluchfresser   [Cyrodiil]
+	[108] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Ravager / Verwüster   [Cyrodiil]
+	[109] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Light of Cyrodiil / Licht von Cyrodiil   [Cyrodiil]
+	[111] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Ward of Cyrodiil / Schutz von Cyrodiil   [Cyrodiil]
+	[113] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Crest of Cyrodiil / Wappen von Cyrodiil   [Cyrodiil]
+	[125] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Wrath of the Imperium / Zorn des Kaiserreichs   [Cyrodiil]
+	[126] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Grace of the Ancients / Anmut der Uralten   [Cyrodiil]
+	[127] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Deadly Strike / Tödlicher Stoß   [Cyrodiil]
+	[128] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Blessing of the Potentates / Segen des Potentaten   [Cyrodiil]
+	[129] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Vengeance Leech / Saugende Vergeltung   [Cyrodiil]
+	[130] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Eagle Eye / Adlerauge   [Cyrodiil]
+	[131] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Bastion of the Heartland / Bastion des Herzlandes   [Cyrodiil]
+	[132] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Shield of the Valiant / Schild des Tapferen   [Cyrodiil]
+	[133] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Buffer of the Swift / Dämpfer des Geschwinden   [Cyrodiil]
+	[234] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Marksman's Crest / Wappen des Meisterschützen   [Cyrodiil]
+	[235] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Robes of Transmutation / Roben der Transmutation   [Cyrodiil]
+	[236] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Vicious Death / Grausamer Tod   [Cyrodiil]
+	[237] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Leki's Focus / Lekis Fokus   [Cyrodiil]
+	[238] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Fasalla's Guile / Fasallas List   [Cyrodiil]
+	[239] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Warrior's Fury / Raserei des Kriegers   [Cyrodiil]
+	[417] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Indomitable Fury / Unbeugsamer Zorn   [Cyrodiil]
+	[418] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Spell Strategist / Zauberstratege   [Cyrodiil]
+	[419] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Battlefield Acrobat / Schlachtfeldakrobat   [Cyrodiil]
+	[420] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Soldier of Anguish / Soldat der Pein   [Cyrodiil]
+	[421] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Steadfast Hero / Standhafter Held   [Cyrodiil]
+	[422] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={181}, veteran=false, isCyrodiil=true}, --Battalion Defender / Bataillonsverteidiger   [Cyrodiil]
 
-	[25] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Desert Rose / Wüstenrose   [Cyrodiil]
-	[39] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Alessian Order / Alessianischer Orden   [Cyrodiil]
-	[50] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --The Morag Tong / Morag Tong   [Cyrodiil]
-	[52] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Beckoning Steel / Klingender Stahl   [Cyrodiil]
-	[59] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Kyne's Kiss / Kynes Kuss   [Cyrodiil]
-	[63] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --The Juggernaut / Koloss   [Cyrodiil]
-	[67] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Shadow Walker / Schattengänger   [Cyrodiil]
-	[76] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Robes of Alteration Mastery / Roben der Veränderungsbeherrschung   [Cyrodiil]
-	[83] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Elf Bane / Elfenfluch   [Cyrodiil]
-	[85] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Almalexia's Mercy / Almalexias Gnade   [Cyrodiil]
-	[89] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Sentry / Wachposten   [Cyrodiil]
-	[97] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --The Arch-Mage / Erzmagier   [Cyrodiil]
-	[100] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Hawk's Eye / Falkenauge   [Cyrodiil]
-	[101] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Affliction / Elend   [Cyrodiil]
-	[104] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Curse Eater / Fluchfresser   [Cyrodiil]
-	[108] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Ravager / Verwüster   [Cyrodiil]
-	[109] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Light of Cyrodiil / Licht von Cyrodiil   [Cyrodiil]
-	[111] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Ward of Cyrodiil / Schutz von Cyrodiil   [Cyrodiil]
-	[113] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Crest of Cyrodiil / Wappen von Cyrodiil   [Cyrodiil]
-	[125] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Wrath of the Imperium / Zorn des Kaiserreichs   [Cyrodiil]
-	[126] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Grace of the Ancients / Anmut der Uralten   [Cyrodiil]
-	[127] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Deadly Strike / Tödlicher Stoß   [Cyrodiil]
-	[128] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Blessing of the Potentates / Segen des Potentaten   [Cyrodiil]
-	[129] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Vengeance Leech / Saugende Vergeltung   [Cyrodiil]
-	[130] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Eagle Eye / Adlerauge   [Cyrodiil]
-	[131] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Bastion of the Heartland / Bastion des Herzlandes   [Cyrodiil]
-	[132] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Shield of the Valiant / Schild des Tapferen   [Cyrodiil]
-	[133] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Buffer of the Swift / Dämpfer des Geschwinden   [Cyrodiil]
-	[234] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Marksman's Crest / Wappen des Meisterschützen   [Cyrodiil]
-	[235] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Robes of Transmutation / Roben der Transmutation   [Cyrodiil]
-	[236] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Vicious Death / Grausamer Tod   [Cyrodiil]
-	[237] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Leki's Focus / Lekis Fokus   [Cyrodiil]
-	[238] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Fasalla's Guile / Fasallas List   [Cyrodiil]
-	[239] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Warrior's Fury / Raserei des Kriegers   [Cyrodiil]
-	[417] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Indomitable Fury / Unbeugsamer Zorn   [Cyrodiil]
-	[418] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Spell Strategist / Zauberstratege   [Cyrodiil]
-	[419] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Battlefield Acrobat / Schlachtfeldakrobat   [Cyrodiil]
-	[420] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Soldier of Anguish / Soldat der Pein   [Cyrodiil]
-	[421] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Steadfast Hero / Standhafter Held   [Cyrodiil]
-	[422] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={181}, veteran=false	, isCyrodiil=true},	 --Battalion Defender / Bataillonsverteidiger   [Cyrodiil]
+	[179] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Black Rose / Schwarze Rose   [Imperial City]
+	[180] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Powerful Assault / Kraftvoller Ansturm   [Imperial City]
+	[181] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Meritorious Service / Meritorischer Dienst   [Imperial City]
+	[199] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Shield Breaker / Schildbrecher   [Imperial City]
+	[200] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Phoenix / Phönix   [Imperial City]
+	[201] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Reactive Armor / Reaktive Rüstung   [Imperial City]
+	[246] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Galerion's Revenge / Galerions Revanche   [Imperial City]
+	[247] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Vicecanon of Venom / Vizekanoniker des Gifts   [Imperial City]
+	[248] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Thews of the Harbinger / Muskeln des Vorboten   [Imperial City]
+	[253] = {wayshrines={-1,-1,-1,}, dlcId=1, zoneIds={584}, veteran=false, isImperialCity=true}, --Imperial Physique / Kaiserliche Physis   [Imperial City]
 
-	[179] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Black Rose / Schwarze Rose   [Imperial City]
-	[180] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Powerful Assault / Kraftvoller Ansturm   [Imperial City]
-	[181] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Meritorious Service / Meritorischer Dienst   [Imperial City]
-	[199] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Shield Breaker / Schildbrecher   [Imperial City]
-	[200] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Phoenix / Phönix   [Imperial City]
-	[201] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Reactive Armor / Reaktive Rüstung   [Imperial City]
-	[246] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Galerion's Revenge / Galerions Revanche   [Imperial City]
-	[247] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Vicecanon of Venom / Vizekanoniker des Gifts   [Imperial City]
-	[248] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Thews of the Harbinger / Muskeln des Vorboten   [Imperial City]
-	[253] = {wayshrines={-1,-1,-1,}, dlcId=1	, zoneIds={584}, veteran=false	, isImperialCity=true},	 --Imperial Physique / Kaiserliche Physis   [Imperial City]
+	[380] = {wayshrines={-1,-1,-1,}, dlcId=0, veteran=false, isSpecial=true}, --Prophet's / Prophet   [Level up advisor]
+	[381] = {wayshrines={-1,-1,-1,}, dlcId=0, veteran=false, isSpecial=true}, --Broken Soul / Zerbrochene Seele   [Level up advisor]
 
-	[380] = {wayshrines={-1,-1,-1,}, dlcId=0	, veteran=false	, isSpecial=true},	 --Prophet's / Prophet   [Level up advisor]
-	[381] = {wayshrines={-1,-1,-1,}, dlcId=0	, veteran=false	, isSpecial=true},	 --Broken Soul / Zerbrochene Seele   [Level up advisor]
-
-	[136] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={639}, veteran=false	, isTrial=true},	 --Immortal Warrior / Unsterblicher Krieger   [Sanctum Ophidia]
-	[137] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={636}, veteran=false	, isTrial=true},	 --Berserking Warrior / Tobender Krieger   [Hel Ra Citadel]
-	[138] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={638}, veteran=false	, isTrial=true},	 --Defending Warrior / Verteidigender Krieger   [Aetherian Archive]
-	[139] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={639}, veteran=false	, isTrial=true},	 --Wise Mage / Weiser Magier   [Sanctum Ophidia]
-	[140] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={636}, veteran=false	, isTrial=true},	 --Destructive Mage / Zerstörerischer Magier   [Hel Ra Citadel]
-	[141] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={638}, veteran=false	, isTrial=true},	 --Healing Mage / Heilender Magier   [Aetherian Archive]
-	[142] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={638}, veteran=false	, isTrial=true},	 --Quick Serpent / Flinke Schlange   [Aetherian Archive]
-	[143] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={636}, veteran=false	, isTrial=true},	 --Poisonous Serpent / Giftschlange   [Hel Ra Citadel]
-	[144] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={639}, veteran=false	, isTrial=true},	 --Twice-Fanged Serpent / Doppelzüngige Schlange   [Sanctum Ophidia]
-	[171] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={636,639,638}, veteran=false	, isTrial=true, multiTrialSet=true},	 --Eternal Warrior / Ewiger Krieger   [Hel Ra Citadel, Sanctum Ophidia, Aetherian Archive]
-	[172] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={636,639,638}, veteran=false	, isTrial=true, multiTrialSet=true},	 --Infallible Mage / Unfehlbare Magierin   [Hel Ra Citadel, Sanctum Ophidia, Aetherian Archive]
-	[173] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={636,639,638}, veteran=false	, isTrial=true, multiTrialSet=true},	 --Vicious Serpent / Boshafte Schlange   [Hel Ra Citadel, Sanctum Ophidia, Aetherian Archive]
-	[229] = {wayshrines={-1,-1,-1,}, dlcId=3	, zoneIds={725}, veteran=false	, isTrial=true},	 --Twilight Remedy / Zwielichtgenesung   [Maw of Lorkhaj]
-	[230] = {wayshrines={-1,-1,-1,}, dlcId=3	, zoneIds={725}, veteran=false	, isTrial=true},	 --Moondancer / Mondtänzer   [Maw of Lorkhaj]
-	[231] = {wayshrines={-1,-1,-1,}, dlcId=3	, zoneIds={725}, veteran=false	, isTrial=true},	 --Lunar Bastion / Mondbastion   [Maw of Lorkhaj]
-	[232] = {wayshrines={-1,-1,-1,}, dlcId=3	, zoneIds={725}, veteran=false	, isTrial=true},	 --Roar of Alkosh / Brüllen von Alkosh   [Maw of Lorkhaj]
-	[330] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={975}, veteran=false	, isTrial=true},	 --Automated Defense / Automatisierte Verteidigung   [Halls of Fabrication]
-	[331] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={975}, veteran=false	, isTrial=true},	 --War Machine / Kriegsmaschine   [Halls of Fabrication]
-	[332] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={975}, veteran=false	, isTrial=true},	 --Master Architect / Meisterarchitekt   [Halls of Fabrication]
-	[333] = {wayshrines={-1,-1,-1,}, dlcId=6	, zoneIds={975}, veteran=false	, isTrial=true},	 --Inventor's Guard / Erfindergarde   [Halls of Fabrication]
-	[357] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=true	, isTrial=true},	 --Disciplined Slash (Perfected) / Disziplinierter Schnitt (vollendet)   [Asylum Sanctorium]
-	[358] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=true	, isTrial=true},	 --Defensive Position (Perfected) / Defensive Position (vollendet)   [Asylum Sanctorium]
-	[359] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=true	, isTrial=true},	 --Chaotic Whirlwind (Perfected) / Chaotischer Wirbelwind (vollendet)   [Asylum Sanctorium]
-	[360] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=true	, isTrial=true},	 --Piercing Spray (Perfected) / Durchdringende Salve (vollendet)   [Asylum Sanctorium]
-	[361] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=true	, isTrial=true},	 --Concentrated Force (Perfected) / Konzentrierte Kraft (vollendet)   [Asylum Sanctorium]
-	[362] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=true	, isTrial=true},	 --Timeless Blessing (Perfected) / Zeitloser Segen (vollendet)   [Asylum Sanctorium]
-	[363] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=false	, isTrial=true},	 --Disciplined Slash / Disziplinierter Schnitt   [Asylum Sanctorium]
-	[364] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=false	, isTrial=true},	 --Defensive Position / Defensive Position   [Asylum Sanctorium]
-	[365] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=false	, isTrial=true},	 --Chaotic Whirlwind / Chaotischer Wirbelwind   [Asylum Sanctorium]
-	[366] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=false	, isTrial=true},	 --Piercing Spray / Durchdringende Salve   [Asylum Sanctorium]
-	[367] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=false	, isTrial=true},	 --Concentrated Force / Konzentrierte Kraft   [Asylum Sanctorium]
-	[368] = {wayshrines={-1,-1,-1,}, dlcId=8	, zoneIds={1000}, veteran=false	, isTrial=true},	 --Timeless Blessing / Zeitloser Segen   [Asylum Sanctorium]
-	[388] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1051}, veteran=false	, isTrial=true},	 --Aegis of Galenwe / Ägis von Galenwe   [Cloudrest]
-	[389] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1051}, veteran=false	, isTrial=true},	 --Arms of Relequen / Waffen von Relequen   [Cloudrest]
-	[390] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1051}, veteran=false	, isTrial=true},	 --Mantle of Siroria / Mantel von Siroria   [Cloudrest]
-	[391] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1051}, veteran=false	, isTrial=true},	 --Vestment of Olorime / Gewandung von Olorime   [Cloudrest]
-	[392] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1051}, veteran=true	, isTrial=true},	 --Perfect Aegis of Galenwe / Perfekte Ägis von Galenwe   [Cloudrest]
-	[393] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1051}, veteran=true	, isTrial=true},	 --Perfect Arms of Relequen / Perfekte Waffen von Relequen   [Cloudrest]
-	[394] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1051}, veteran=true	, isTrial=true},	 --Perfect Mantle of Siroria / Perfekter Mantel von Siroria   [Cloudrest]
-	[395] = {wayshrines={-1,-1,-1,}, dlcId=10	, zoneIds={1051}, veteran=true	, isTrial=true},	 --Perfect Vestment of Olorime / Perfekte Gewandung von Olorime   [Cloudrest]
-	[443] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=false	, isTrial=true},	 --Eye of Nahviintaas / Auge von Nahviintaas   [Sunspire]
-	[444] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=false	, isTrial=true},	 --False God's Devotion / Ergebenheit des falschen Gottes   [Sunspire]
-	[445] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=false	, isTrial=true},	 --Tooth of Lokkestiiz / Zahn von Lokkestiiz   [Sunspire]
-	[446] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=false	, isTrial=true},	 --Claw of Yolnakhriin / Kralle von Yolnahkriin   [Sunspire]
-	[448] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=true	, isTrial=true},	 --Eye of Nahviintaas / Perfektioniertes Auge von Nahviintaas   [Sunspire]
-	[449] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=true	, isTrial=true},	 --Perfected False God's Devotion / Perfektionierte Ergebenheit zum falschen Gott   [Sunspire]
-	[450] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=true	, isTrial=true},	 --Perfected Tooth of Lokkestiiz / Perfektionierter Zahn von Lokkestiiz   [Sunspire]
-	[451] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=true	, isTrial=true},	 --Perfected Claw of Yolnakhriin / Perfektionierte Kralle von Yolnahkriin   [Sunspire]
+	[136] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={639}, veteran=false, isTrial=true}, --Immortal Warrior / Unsterblicher Krieger   [Sanctum Ophidia]
+	[137] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={636}, veteran=false, isTrial=true}, --Berserking Warrior / Tobender Krieger   [Hel Ra Citadel]
+	[138] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={638}, veteran=false, isTrial=true}, --Defending Warrior / Verteidigender Krieger   [Aetherian Archive]
+	[139] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={639}, veteran=false, isTrial=true}, --Wise Mage / Weiser Magier   [Sanctum Ophidia]
+	[140] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={636}, veteran=false, isTrial=true}, --Destructive Mage / Zerstörerischer Magier   [Hel Ra Citadel]
+	[141] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={638}, veteran=false, isTrial=true}, --Healing Mage / Heilender Magier   [Aetherian Archive]
+	[142] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={638}, veteran=false, isTrial=true}, --Quick Serpent / Flinke Schlange   [Aetherian Archive]
+	[143] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={636}, veteran=false, isTrial=true}, --Poisonous Serpent / Giftschlange   [Hel Ra Citadel]
+	[144] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={639}, veteran=false, isTrial=true}, --Twice-Fanged Serpent / Doppelzüngige Schlange   [Sanctum Ophidia]
+	[171] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={636,639,638}, veteran=false, isTrial=true, multiTrialSet=true}, --Eternal Warrior / Ewiger Krieger   [Hel Ra Citadel, Sanctum Ophidia, Aetherian Archive]
+	[172] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={636,639,638}, veteran=false, isTrial=true, multiTrialSet=true}, --Infallible Mage / Unfehlbare Magierin   [Hel Ra Citadel, Sanctum Ophidia, Aetherian Archive]
+	[173] = {wayshrines={-1,-1,-1,}, dlcId=0, zoneIds={636,639,638}, veteran=false, isTrial=true, multiTrialSet=true}, --Vicious Serpent / Boshafte Schlange   [Hel Ra Citadel, Sanctum Ophidia, Aetherian Archive]
+	[229] = {wayshrines={-1,-1,-1,}, dlcId=3, zoneIds={725}, veteran=false, isTrial=true}, --Twilight Remedy / Zwielichtgenesung   [Maw of Lorkhaj]
+	[230] = {wayshrines={-1,-1,-1,}, dlcId=3, zoneIds={725}, veteran=false, isTrial=true}, --Moondancer / Mondtänzer   [Maw of Lorkhaj]
+	[231] = {wayshrines={-1,-1,-1,}, dlcId=3, zoneIds={725}, veteran=false, isTrial=true}, --Lunar Bastion / Mondbastion   [Maw of Lorkhaj]
+	[232] = {wayshrines={-1,-1,-1,}, dlcId=3, zoneIds={725}, veteran=false, isTrial=true}, --Roar of Alkosh / Brüllen von Alkosh   [Maw of Lorkhaj]
+	[330] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={975}, veteran=false, isTrial=true}, --Automated Defense / Automatisierte Verteidigung   [Halls of Fabrication]
+	[331] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={975}, veteran=false, isTrial=true}, --War Machine / Kriegsmaschine   [Halls of Fabrication]
+	[332] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={975}, veteran=false, isTrial=true}, --Master Architect / Meisterarchitekt   [Halls of Fabrication]
+	[333] = {wayshrines={-1,-1,-1,}, dlcId=6, zoneIds={975}, veteran=false, isTrial=true}, --Inventor's Guard / Erfindergarde   [Halls of Fabrication]
+	[357] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=true, isTrial=true}, --Disciplined Slash (Perfected) / Disziplinierter Schnitt (vollendet)   [Asylum Sanctorium]
+	[358] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=true, isTrial=true}, --Defensive Position (Perfected) / Defensive Position (vollendet)   [Asylum Sanctorium]
+	[359] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=true, isTrial=true}, --Chaotic Whirlwind (Perfected) / Chaotischer Wirbelwind (vollendet)   [Asylum Sanctorium]
+	[360] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=true, isTrial=true}, --Piercing Spray (Perfected) / Durchdringende Salve (vollendet)   [Asylum Sanctorium]
+	[361] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=true, isTrial=true}, --Concentrated Force (Perfected) / Konzentrierte Kraft (vollendet)   [Asylum Sanctorium]
+	[362] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=true, isTrial=true}, --Timeless Blessing (Perfected) / Zeitloser Segen (vollendet)   [Asylum Sanctorium]
+	[363] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=false, isTrial=true}, --Disciplined Slash / Disziplinierter Schnitt   [Asylum Sanctorium]
+	[364] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=false, isTrial=true}, --Defensive Position / Defensive Position   [Asylum Sanctorium]
+	[365] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=false, isTrial=true}, --Chaotic Whirlwind / Chaotischer Wirbelwind   [Asylum Sanctorium]
+	[366] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=false, isTrial=true}, --Piercing Spray / Durchdringende Salve   [Asylum Sanctorium]
+	[367] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=false, isTrial=true}, --Concentrated Force / Konzentrierte Kraft   [Asylum Sanctorium]
+	[368] = {wayshrines={-1,-1,-1,}, dlcId=8, zoneIds={1000}, veteran=false, isTrial=true}, --Timeless Blessing / Zeitloser Segen   [Asylum Sanctorium]
+	[388] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1051}, veteran=false, isTrial=true}, --Aegis of Galenwe / Ägis von Galenwe   [Cloudrest]
+	[389] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1051}, veteran=false, isTrial=true}, --Arms of Relequen / Waffen von Relequen   [Cloudrest]
+	[390] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1051}, veteran=false, isTrial=true}, --Mantle of Siroria / Mantel von Siroria   [Cloudrest]
+	[391] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1051}, veteran=false, isTrial=true}, --Vestment of Olorime / Gewandung von Olorime   [Cloudrest]
+	[392] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1051}, veteran=true, isTrial=true}, --Perfect Aegis of Galenwe / Perfekte Ägis von Galenwe   [Cloudrest]
+	[393] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1051}, veteran=true, isTrial=true}, --Perfect Arms of Relequen / Perfekte Waffen von Relequen   [Cloudrest]
+	[394] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1051}, veteran=true, isTrial=true}, --Perfect Mantle of Siroria / Perfekter Mantel von Siroria   [Cloudrest]
+	[395] = {wayshrines={-1,-1,-1,}, dlcId=10, zoneIds={1051}, veteran=true, isTrial=true}, --Perfect Vestment of Olorime / Perfekte Gewandung von Olorime   [Cloudrest]
+	[443] = {wayshrines={399,399,399,}, dlcId=14, zoneIds={1121}, veteran=false, isTrial=true}, --Eye of Nahviintaas / Auge von Nahviintaas   [Sunspire]
+	[444] = {wayshrines={399,399,399,}, dlcId=14, zoneIds={1121}, veteran=false, isTrial=true}, --False God's Devotion / Ergebenheit des falschen Gottes   [Sunspire]
+	[445] = {wayshrines={399,399,399,}, dlcId=14, zoneIds={1121}, veteran=false, isTrial=true}, --Tooth of Lokkestiiz / Zahn von Lokkestiiz   [Sunspire]
+	[446] = {wayshrines={399,399,399,}, dlcId=14, zoneIds={1121}, veteran=false, isTrial=true}, --Claw of Yolnakhriin / Kralle von Yolnahkriin   [Sunspire]
+	[448] = {wayshrines={399,399,399,}, dlcId=14, zoneIds={1121}, veteran=true, isTrial=true}, --Eye of Nahviintaas / Perfektioniertes Auge von Nahviintaas   [Sunspire]
+	[449] = {wayshrines={399,399,399,}, dlcId=14, zoneIds={1121}, veteran=true, isTrial=true}, --Perfected False God's Devotion / Perfektionierte Ergebenheit zum falschen Gott   [Sunspire]
+	[450] = {wayshrines={399,399,399,}, dlcId=14, zoneIds={1121}, veteran=true, isTrial=true}, --Perfected Tooth of Lokkestiiz / Perfektionierter Zahn von Lokkestiiz   [Sunspire]
+	[451] = {wayshrines={399,399,399,}, dlcId=14, zoneIds={1121}, veteran=true, isTrial=true}, --Perfected Claw of Yolnakhriin / Perfektionierte Kralle von Yolnahkriin   [Sunspire]
 }
 ---------------------------------------------------------------------------------------------------------------------------
 --One itemId to be used to build itemLink etc. for each setId in the game.
@@ -528,406 +527,406 @@ local CHAMPION_POINTS_180 = 68
 
 lib.itemSubType =
 {
-	[0] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[1] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_TRASH },
-	[2] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[3] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[4] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[5] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARTIFACT },
-	[6] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[7] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[8] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARTIFACT },
-	[9] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[10] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[11] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[12] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[13] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[14] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[15] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[16] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[17] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[18] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[19] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[20] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[21] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[22] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[23] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARTIFACT },
-	[24] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[25] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[26] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[27] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[28] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARTIFACT },
-	[29] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[30] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[31] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[32] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[33] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARTIFACT },
-	[34] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[35] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[36] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[37] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[38] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[39] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_MAGIC },
-	[40] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_MAGIC },
-	[41] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_MAGIC },
-	[42] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_MAGIC },
-	[43] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_MAGIC },
-	[44] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_MAGIC },
-	[45] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_MAGIC },
-	[46] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_MAGIC },
-	[47] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_MAGIC },
-	[48] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_MAGIC },
-	[49] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[50] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[51] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_MAGIC },
-	[52] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_MAGIC },
-	[53] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_MAGIC },
-	[54] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_MAGIC },
-	[55] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_MAGIC },
-	[56] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_MAGIC },
-	[57] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_MAGIC },
-	[58] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_MAGIC },
-	[59] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_MAGIC },
-	[60] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_MAGIC },
-	[61] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_ARCANE },
-	[62] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_ARCANE },
-	[63] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_ARCANE },
-	[64] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_ARCANE },
-	[65] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_ARCANE },
-	[66] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_ARCANE },
-	[67] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_ARCANE },
-	[68] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_ARCANE },
-	[69] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_ARCANE },
-	[70] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_ARCANE },
-	[71] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_ARTIFACT },
-	[72] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_ARTIFACT },
-	[73] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_ARTIFACT },
-	[74] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_ARTIFACT },
-	[75] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_ARTIFACT },
-	[76] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_ARTIFACT },
-	[77] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_ARTIFACT },
-	[78] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_ARTIFACT },
-	[79] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_ARTIFACT },
-	[80] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_ARTIFACT },
-	[81] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_ARCANE },
-	[82] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_ARCANE },
-	[83] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_ARCANE },
-	[84] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_ARCANE },
-	[85] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_ARCANE },
-	[86] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_ARCANE },
-	[87] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_ARCANE },
-	[88] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_ARCANE },
-	[89] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_ARCANE },
-	[90] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_ARCANE },
-	[91] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_ARTIFACT },
-	[92] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_ARTIFACT },
-	[93] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_ARTIFACT },
-	[94] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_ARTIFACT },
-	[95] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_ARTIFACT },
-	[96] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_ARTIFACT },
-	[97] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_ARTIFACT },
-	[98] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_ARTIFACT },
-	[99] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_ARTIFACT },
-	[100] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_ARTIFACT },
-	[101] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_LEGENDARY },
-	[102] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_LEGENDARY },
-	[103] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_LEGENDARY },
-	[104] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_LEGENDARY },
-	[105] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_LEGENDARY },
-	[106] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_LEGENDARY },
-	[107] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_LEGENDARY },
-	[108] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_LEGENDARY },
-	[109] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_LEGENDARY },
-	[110] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_LEGENDARY },
-	[111] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_NORMAL },
-	[112] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_NORMAL },
-	[113] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_NORMAL },
-	[114] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_NORMAL },
-	[115] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_NORMAL },
-	[116] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_NORMAL },
-	[117] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_NORMAL },
-	[118] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_NORMAL },
-	[119] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_NORMAL },
-	[120] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_NORMAL },
-	[121] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[122] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[123] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARTIFACT },
-	[124] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[125] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_NORMAL },
-	[126] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_NORMAL },
-	[127] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_NORMAL },
-	[128] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_NORMAL },
-	[129] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_NORMAL },
-	[130] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_NORMAL },
-	[131] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_NORMAL },
-	[132] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_NORMAL },
-	[133] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_NORMAL },
-	[134] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_NORMAL },
-	[135] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_MAGIC },
-	[136] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_MAGIC },
-	[137] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_MAGIC },
-	[138] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_MAGIC },
-	[139] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_MAGIC },
-	[140] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_MAGIC },
-	[141] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_MAGIC },
-	[142] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_MAGIC },
-	[143] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_MAGIC },
-	[144] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_MAGIC },
-	[145] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_ARCANE },
-	[146] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_ARCANE },
-	[147] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_ARCANE },
-	[148] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_ARCANE },
-	[149] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_ARCANE },
-	[150] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_ARCANE },
-	[151] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_ARCANE },
-	[152] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_ARCANE },
-	[153] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_ARCANE },
-	[154] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_ARCANE },
-	[155] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_ARTIFACT },
-	[156] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_ARTIFACT },
-	[157] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_ARTIFACT },
-	[158] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_ARTIFACT },
-	[159] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_ARTIFACT },
-	[160] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_ARTIFACT },
-	[161] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_ARTIFACT },
-	[162] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_ARTIFACT },
-	[163] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_ARTIFACT },
-	[164] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_ARTIFACT },
-	[165] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_LEGENDARY },
-	[166] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_LEGENDARY },
-	[167] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_LEGENDARY },
-	[168] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_LEGENDARY },
-	[169] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_LEGENDARY },
-	[170] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_LEGENDARY },
-	[171] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_LEGENDARY },
-	[172] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_LEGENDARY },
-	[173] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_LEGENDARY },
-	[174] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_LEGENDARY },
-	[175] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[176] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[177] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_TRASH },
-	[178] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_NORMAL },
-	[179] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_NORMAL },
-	[180] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_NORMAL },
-	[181] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_NORMAL },
-	[182] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_NORMAL },
-	[183] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_NORMAL },
-	[184] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_NORMAL },
-	[185] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_NORMAL },
-	[186] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_NORMAL },
-	[187] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_NORMAL },
-	[188] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_MAGIC },
-	[189] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_MAGIC },
-	[190] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_MAGIC },
-	[191] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_MAGIC },
-	[192] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_MAGIC },
-	[193] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_MAGIC },
-	[194] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_MAGIC },
-	[195] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_MAGIC },
-	[196] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_MAGIC },
-	[197] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_MAGIC },
-	[198] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_ARCANE },
-	[199] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_ARCANE },
-	[200] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_ARCANE },
-	[201] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_ARCANE },
-	[202] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_ARCANE },
-	[203] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_ARCANE },
-	[204] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_ARCANE },
-	[205] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_ARCANE },
-	[206] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_ARCANE },
-	[207] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_ARCANE },
-	[208] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_ARTIFACT },
-	[209] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_ARTIFACT },
-	[210] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_ARTIFACT },
-	[211] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_ARTIFACT },
-	[212] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_ARTIFACT },
-	[213] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_ARTIFACT },
-	[214] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_ARTIFACT },
-	[215] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_ARTIFACT },
-	[216] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_ARTIFACT },
-	[217] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_ARTIFACT },
-	[218] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_LEGENDARY },
-	[219] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_LEGENDARY },
-	[220] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_LEGENDARY },
-	[221] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_LEGENDARY },
-	[222] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_LEGENDARY },
-	[223] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_LEGENDARY },
-	[224] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_LEGENDARY },
-	[225] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_LEGENDARY },
-	[226] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_LEGENDARY },
-	[227] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_LEGENDARY },
-	[228] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_MAGIC },
-	[229] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_MAGIC },
-	[230] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_ARCANE },
-	[231] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_ARTIFACT },
-	[232] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_ARCANE },
-	[233] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_ARTIFACT },
-	[234] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_LEGENDARY },
-	[235] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_NORMAL },
-	[236] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_NORMAL },
-	[237] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_MAGIC },
-	[238] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_ARCANE },
-	[239] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_ARTIFACT },
-	[240] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_LEGENDARY },
-	[241] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_NORMAL },
-	[242] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_MAGIC },
-	[243] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_ARCANE },
-	[244] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_ARTIFACT },
-	[245] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_LEGENDARY },
-	[246] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_MAGIC },
-	[247] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_MAGIC },
-	[248] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARCANE },
-	[249] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARTIFACT },
-	[250] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARCANE },
-	[251] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARTIFACT },
-	[252] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_LEGENDARY },
-	[253] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_NORMAL },
-	[254] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_NORMAL },
-	[255] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_MAGIC },
-	[256] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARCANE },
-	[257] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARTIFACT },
-	[258] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_LEGENDARY },
-	[259] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_NORMAL },
-	[260] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_MAGIC },
-	[261] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARCANE },
-	[262] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARTIFACT },
-	[263] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_LEGENDARY },
-	[264] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_MAGIC },
-	[265] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_MAGIC },
-	[266] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_ARCANE },
-	[267] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_ARTIFACT },
-	[268] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_ARCANE },
-	[269] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_ARTIFACT },
-	[270] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_LEGENDARY },
-	[271] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_NORMAL },
-	[272] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_NORMAL },
-	[273] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_MAGIC },
-	[274] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_ARCANE },
-	[275] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_ARTIFACT },
-	[276] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_LEGENDARY },
-	[277] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_NORMAL },
-	[278] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_MAGIC },
-	[279] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_ARCANE },
-	[280] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_ARTIFACT },
-	[281] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_LEGENDARY },
-	[282] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_MAGIC },
-	[283] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_MAGIC },
-	[284] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_ARCANE },
-	[285] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_ARTIFACT },
-	[286] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_ARCANE },
-	[287] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_ARTIFACT },
-	[288] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_LEGENDARY },
-	[289] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_NORMAL },
-	[290] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_NORMAL },
-	[291] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_MAGIC },
-	[292] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_ARCANE },
-	[293] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_ARTIFACT },
-	[294] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_LEGENDARY },
-	[295] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_NORMAL },
-	[296] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_MAGIC },
-	[297] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_ARCANE },
-	[298] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_ARTIFACT },
-	[299] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_LEGENDARY },
-	[300] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_MAGIC },
-	[301] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_MAGIC },
-	[302] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_ARCANE },
-	[303] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_ARTIFACT },
-	[304] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_ARCANE },
-	[305] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_ARTIFACT },
-	[306] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_LEGENDARY },
-	[307] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_NORMAL },
-	[308] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_NORMAL },
-	[309] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_MAGIC },
-	[310] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_ARCANE },
-	[311] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_ARTIFACT },
-	[312] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_LEGENDARY },
-	[313] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_NORMAL },
-	[314] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_MAGIC },
-	[315] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_ARCANE },
-	[316] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_ARTIFACT },
-	[317] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_LEGENDARY },
-	[318] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_TRASH },
-	[319] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[320] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_MAGIC },
-	[321] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARCANE },
-	[322] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_ARTIFACT },
-	[323] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_LEGENDARY },
-	[324] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_NORMAL },
-	[325] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_NORMAL },
-	[326] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_NORMAL },
-	[327] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_NORMAL },
-	[328] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_NORMAL },
-	[329] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_NORMAL },
-	[330] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_NORMAL },
-	[331] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_NORMAL },
-	[332] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_NORMAL },
-	[333] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_NORMAL },
-	[334] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_NORMAL },
-	[335] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_NORMAL },
-	[336] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_NORMAL },
-	[337] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_NORMAL },
-	[338] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_NORMAL },
-	[339] = { level = CHAMPION_POINTS_10, quality = ITEM_QUALITY_MAGIC },
-	[340] = { level = CHAMPION_POINTS_20, quality = ITEM_QUALITY_MAGIC },
-	[341] = { level = CHAMPION_POINTS_30, quality = ITEM_QUALITY_MAGIC },
-	[342] = { level = CHAMPION_POINTS_40, quality = ITEM_QUALITY_MAGIC },
-	[343] = { level = CHAMPION_POINTS_50, quality = ITEM_QUALITY_MAGIC },
-	[344] = { level = CHAMPION_POINTS_60, quality = ITEM_QUALITY_MAGIC },
-	[345] = { level = CHAMPION_POINTS_70, quality = ITEM_QUALITY_MAGIC },
-	[346] = { level = CHAMPION_POINTS_80, quality = ITEM_QUALITY_MAGIC },
-	[347] = { level = CHAMPION_POINTS_90, quality = ITEM_QUALITY_MAGIC },
-	[348] = { level = CHAMPION_POINTS_100, quality = ITEM_QUALITY_MAGIC },
-	[349] = { level = CHAMPION_POINTS_110, quality = ITEM_QUALITY_MAGIC },
-	[350] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_MAGIC },
-	[351] = { level = CHAMPION_POINTS_130, quality = ITEM_QUALITY_MAGIC },
-	[352] = { level = CHAMPION_POINTS_140, quality = ITEM_QUALITY_MAGIC },
-	[353] = { level = CHAMPION_POINTS_150, quality = ITEM_QUALITY_MAGIC },
-	[354] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_ARTIFACT },
-	[355] = { level = CHAMPION_POINTS_120, quality = ITEM_QUALITY_LEGENDARY },
-	[356] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[357] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[358] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_MAGIC },
-	[359] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_MAGIC },
-	[360] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_ARCANE },
-	[361] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_ARTIFACT },
-	[362] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_ARCANE },
-	[363] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_ARTIFACT },
-	[364] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_LEGENDARY },
-	[365] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_NORMAL },
-	[366] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_NORMAL },
-	[367] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_MAGIC },
-	[368] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_ARCANE },
-	[369] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_ARTIFACT },
-	[370] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_LEGENDARY },
-	[371] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_NORMAL },
-	[372] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_MAGIC },
-	[373] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_ARCANE },
-	[374] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_ARTIFACT },
-	[375] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_LEGENDARY },
-	[376] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_NORMAL },
-	[377] = { level = CHAMPION_POINTS_160, quality = ITEM_QUALITY_MAGIC },
-	[378] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[379] = { level = NO_CHAMPION_POINTS, quality = ITEM_QUALITY_NORMAL },
-	[380] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_MAGIC },
-	[381] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_MAGIC },
-	[382] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_ARCANE },
-	[383] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_ARTIFACT },
-	[384] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_ARCANE },
-	[385] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_ARTIFACT },
-	[386] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_LEGENDARY },
-	[387] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_NORMAL },
-	[388] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_NORMAL },
-	[389] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_MAGIC },
-	[390] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_ARCANE },
-	[391] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_ARTIFACT },
-	[392] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_LEGENDARY },
-	[393] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_NORMAL },
-	[394] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_MAGIC },
-	[395] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_ARCANE },
-	[396] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_ARTIFACT },
-	[397] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_LEGENDARY },
-	[398] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_NORMAL },
-	[399] = { level = CHAMPION_POINTS_170, quality = ITEM_QUALITY_MAGIC },
-	[400] = { level = CHAMPION_POINTS_180, quality = ITEM_QUALITY_MAGIC },
+	[0]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[1]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_TRASH},
+	[2]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[3]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[4]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[5]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARTIFACT},
+	[6]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[7]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[8]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARTIFACT},
+	[9]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[10]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[11]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[12]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[13]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[14]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[15]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[16]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[17]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[18]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[19]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[20]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[21]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[22]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[23]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARTIFACT},
+	[24]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[25]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[26]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[27]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[28]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARTIFACT},
+	[29]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[30]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[31]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[32]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[33]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARTIFACT},
+	[34]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[35]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[36]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[37]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[38]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[39]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_MAGIC},
+	[40]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_MAGIC},
+	[41]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_MAGIC},
+	[42]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_MAGIC},
+	[43]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_MAGIC},
+	[44]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_MAGIC},
+	[45]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_MAGIC},
+	[46]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_MAGIC},
+	[47]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_MAGIC},
+	[48]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_MAGIC},
+	[49]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[50]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[51]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_MAGIC},
+	[52]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_MAGIC},
+	[53]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_MAGIC},
+	[54]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_MAGIC},
+	[55]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_MAGIC},
+	[56]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_MAGIC},
+	[57]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_MAGIC},
+	[58]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_MAGIC},
+	[59]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_MAGIC},
+	[60]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_MAGIC},
+	[61]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_ARCANE},
+	[62]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_ARCANE},
+	[63]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_ARCANE},
+	[64]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_ARCANE},
+	[65]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_ARCANE},
+	[66]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_ARCANE},
+	[67]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_ARCANE},
+	[68]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_ARCANE},
+	[69]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_ARCANE},
+	[70]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_ARCANE},
+	[71]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_ARTIFACT},
+	[72]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_ARTIFACT},
+	[73]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_ARTIFACT},
+	[74]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_ARTIFACT},
+	[75]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_ARTIFACT},
+	[76]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_ARTIFACT},
+	[77]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_ARTIFACT},
+	[78]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_ARTIFACT},
+	[79]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_ARTIFACT},
+	[80]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_ARTIFACT},
+	[81]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_ARCANE},
+	[82]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_ARCANE},
+	[83]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_ARCANE},
+	[84]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_ARCANE},
+	[85]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_ARCANE},
+	[86]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_ARCANE},
+	[87]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_ARCANE},
+	[88]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_ARCANE},
+	[89]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_ARCANE},
+	[90]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_ARCANE},
+	[91]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_ARTIFACT},
+	[92]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_ARTIFACT},
+	[93]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_ARTIFACT},
+	[94]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_ARTIFACT},
+	[95]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_ARTIFACT},
+	[96]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_ARTIFACT},
+	[97]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_ARTIFACT},
+	[98]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_ARTIFACT},
+	[99]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_ARTIFACT},
+	[100]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_ARTIFACT},
+	[101]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_LEGENDARY},
+	[102]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_LEGENDARY},
+	[103]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_LEGENDARY},
+	[104]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_LEGENDARY},
+	[105]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_LEGENDARY},
+	[106]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_LEGENDARY},
+	[107]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_LEGENDARY},
+	[108]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_LEGENDARY},
+	[109]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_LEGENDARY},
+	[110]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_LEGENDARY},
+	[111]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_NORMAL},
+	[112]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_NORMAL},
+	[113]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_NORMAL},
+	[114]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_NORMAL},
+	[115]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_NORMAL},
+	[116]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_NORMAL},
+	[117]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_NORMAL},
+	[118]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_NORMAL},
+	[119]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_NORMAL},
+	[120]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_NORMAL},
+	[121]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[122]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[123]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARTIFACT},
+	[124]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[125]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_NORMAL},
+	[126]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_NORMAL},
+	[127]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_NORMAL},
+	[128]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_NORMAL},
+	[129]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_NORMAL},
+	[130]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_NORMAL},
+	[131]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_NORMAL},
+	[132]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_NORMAL},
+	[133]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_NORMAL},
+	[134]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_NORMAL},
+	[135]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_MAGIC},
+	[136]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_MAGIC},
+	[137]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_MAGIC},
+	[138]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_MAGIC},
+	[139]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_MAGIC},
+	[140]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_MAGIC},
+	[141]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_MAGIC},
+	[142]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_MAGIC},
+	[143]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_MAGIC},
+	[144]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_MAGIC},
+	[145]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_ARCANE},
+	[146]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_ARCANE},
+	[147]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_ARCANE},
+	[148]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_ARCANE},
+	[149]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_ARCANE},
+	[150]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_ARCANE},
+	[151]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_ARCANE},
+	[152]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_ARCANE},
+	[153]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_ARCANE},
+	[154]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_ARCANE},
+	[155]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_ARTIFACT},
+	[156]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_ARTIFACT},
+	[157]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_ARTIFACT},
+	[158]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_ARTIFACT},
+	[159]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_ARTIFACT},
+	[160]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_ARTIFACT},
+	[161]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_ARTIFACT},
+	[162]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_ARTIFACT},
+	[163]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_ARTIFACT},
+	[164]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_ARTIFACT},
+	[165]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_LEGENDARY},
+	[166]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_LEGENDARY},
+	[167]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_LEGENDARY},
+	[168]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_LEGENDARY},
+	[169]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_LEGENDARY},
+	[170]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_LEGENDARY},
+	[171]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_LEGENDARY},
+	[172]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_LEGENDARY},
+	[173]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_LEGENDARY},
+	[174]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_LEGENDARY},
+	[175]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[176]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[177]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_TRASH},
+	[178]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_NORMAL},
+	[179]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_NORMAL},
+	[180]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_NORMAL},
+	[181]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_NORMAL},
+	[182]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_NORMAL},
+	[183]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_NORMAL},
+	[184]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_NORMAL},
+	[185]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_NORMAL},
+	[186]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_NORMAL},
+	[187]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_NORMAL},
+	[188]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_MAGIC},
+	[189]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_MAGIC},
+	[190]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_MAGIC},
+	[191]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_MAGIC},
+	[192]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_MAGIC},
+	[193]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_MAGIC},
+	[194]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_MAGIC},
+	[195]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_MAGIC},
+	[196]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_MAGIC},
+	[197]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_MAGIC},
+	[198]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_ARCANE},
+	[199]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_ARCANE},
+	[200]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_ARCANE},
+	[201]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_ARCANE},
+	[202]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_ARCANE},
+	[203]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_ARCANE},
+	[204]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_ARCANE},
+	[205]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_ARCANE},
+	[206]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_ARCANE},
+	[207]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_ARCANE},
+	[208]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_ARTIFACT},
+	[209]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_ARTIFACT},
+	[210]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_ARTIFACT},
+	[211]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_ARTIFACT},
+	[212]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_ARTIFACT},
+	[213]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_ARTIFACT},
+	[214]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_ARTIFACT},
+	[215]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_ARTIFACT},
+	[216]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_ARTIFACT},
+	[217]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_ARTIFACT},
+	[218]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_LEGENDARY},
+	[219]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_LEGENDARY},
+	[220]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_LEGENDARY},
+	[221]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_LEGENDARY},
+	[222]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_LEGENDARY},
+	[223]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_LEGENDARY},
+	[224]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_LEGENDARY},
+	[225]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_LEGENDARY},
+	[226]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_LEGENDARY},
+	[227]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_LEGENDARY},
+	[228]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_MAGIC},
+	[229]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_MAGIC},
+	[230]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_ARCANE},
+	[231]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_ARTIFACT},
+	[232]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_ARCANE},
+	[233]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_ARTIFACT},
+	[234]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_LEGENDARY},
+	[235]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_NORMAL},
+	[236]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_NORMAL},
+	[237]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_MAGIC},
+	[238]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_ARCANE},
+	[239]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_ARTIFACT},
+	[240]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_LEGENDARY},
+	[241]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_NORMAL},
+	[242]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_MAGIC},
+	[243]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_ARCANE},
+	[244]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_ARTIFACT},
+	[245]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_LEGENDARY},
+	[246]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_MAGIC},
+	[247]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_MAGIC},
+	[248]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARCANE},
+	[249]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARTIFACT},
+	[250]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARCANE},
+	[251]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARTIFACT},
+	[252]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_LEGENDARY},
+	[253]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_NORMAL},
+	[254]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_NORMAL},
+	[255]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_MAGIC},
+	[256]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARCANE},
+	[257]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARTIFACT},
+	[258]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_LEGENDARY},
+	[259]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_NORMAL},
+	[260]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_MAGIC},
+	[261]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARCANE},
+	[262]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARTIFACT},
+	[263]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_LEGENDARY},
+	[264]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_MAGIC},
+	[265]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_MAGIC},
+	[266]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_ARCANE},
+	[267]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_ARTIFACT},
+	[268]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_ARCANE},
+	[269]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_ARTIFACT},
+	[270]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_LEGENDARY},
+	[271]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_NORMAL},
+	[272]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_NORMAL},
+	[273]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_MAGIC},
+	[274]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_ARCANE},
+	[275]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_ARTIFACT},
+	[276]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_LEGENDARY},
+	[277]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_NORMAL},
+	[278]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_MAGIC},
+	[279]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_ARCANE},
+	[280]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_ARTIFACT},
+	[281]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_LEGENDARY},
+	[282]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_MAGIC},
+	[283]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_MAGIC},
+	[284]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_ARCANE},
+	[285]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_ARTIFACT},
+	[286]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_ARCANE},
+	[287]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_ARTIFACT},
+	[288]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_LEGENDARY},
+	[289]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_NORMAL},
+	[290]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_NORMAL},
+	[291]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_MAGIC},
+	[292]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_ARCANE},
+	[293]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_ARTIFACT},
+	[294]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_LEGENDARY},
+	[295]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_NORMAL},
+	[296]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_MAGIC},
+	[297]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_ARCANE},
+	[298]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_ARTIFACT},
+	[299]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_LEGENDARY},
+	[300]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_MAGIC},
+	[301]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_MAGIC},
+	[302]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_ARCANE},
+	[303]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_ARTIFACT},
+	[304]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_ARCANE},
+	[305]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_ARTIFACT},
+	[306]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_LEGENDARY},
+	[307]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_NORMAL},
+	[308]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_NORMAL},
+	[309]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_MAGIC},
+	[310]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_ARCANE},
+	[311]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_ARTIFACT},
+	[312]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_LEGENDARY},
+	[313]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_NORMAL},
+	[314]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_MAGIC},
+	[315]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_ARCANE},
+	[316]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_ARTIFACT},
+	[317]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_LEGENDARY},
+	[318]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_TRASH},
+	[319]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[320]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_MAGIC},
+	[321]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARCANE},
+	[322]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_ARTIFACT},
+	[323]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_LEGENDARY},
+	[324]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_NORMAL},
+	[325]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_NORMAL},
+	[326]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_NORMAL},
+	[327]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_NORMAL},
+	[328]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_NORMAL},
+	[329]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_NORMAL},
+	[330]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_NORMAL},
+	[331]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_NORMAL},
+	[332]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_NORMAL},
+	[333]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_NORMAL},
+	[334]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_NORMAL},
+	[335]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_NORMAL},
+	[336]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_NORMAL},
+	[337]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_NORMAL},
+	[338]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_NORMAL},
+	[339]={level=CHAMPION_POINTS_10,quality=ITEM_QUALITY_MAGIC},
+	[340]={level=CHAMPION_POINTS_20,quality=ITEM_QUALITY_MAGIC},
+	[341]={level=CHAMPION_POINTS_30,quality=ITEM_QUALITY_MAGIC},
+	[342]={level=CHAMPION_POINTS_40,quality=ITEM_QUALITY_MAGIC},
+	[343]={level=CHAMPION_POINTS_50,quality=ITEM_QUALITY_MAGIC},
+	[344]={level=CHAMPION_POINTS_60,quality=ITEM_QUALITY_MAGIC},
+	[345]={level=CHAMPION_POINTS_70,quality=ITEM_QUALITY_MAGIC},
+	[346]={level=CHAMPION_POINTS_80,quality=ITEM_QUALITY_MAGIC},
+	[347]={level=CHAMPION_POINTS_90,quality=ITEM_QUALITY_MAGIC},
+	[348]={level=CHAMPION_POINTS_100,quality=ITEM_QUALITY_MAGIC},
+	[349]={level=CHAMPION_POINTS_110,quality=ITEM_QUALITY_MAGIC},
+	[350]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_MAGIC},
+	[351]={level=CHAMPION_POINTS_130,quality=ITEM_QUALITY_MAGIC},
+	[352]={level=CHAMPION_POINTS_140,quality=ITEM_QUALITY_MAGIC},
+	[353]={level=CHAMPION_POINTS_150,quality=ITEM_QUALITY_MAGIC},
+	[354]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_ARTIFACT},
+	[355]={level=CHAMPION_POINTS_120,quality=ITEM_QUALITY_LEGENDARY},
+	[356]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[357]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[358]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_MAGIC},
+	[359]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_MAGIC},
+	[360]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_ARCANE},
+	[361]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_ARTIFACT},
+	[362]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_ARCANE},
+	[363]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_ARTIFACT},
+	[364]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_LEGENDARY},
+	[365]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_NORMAL},
+	[366]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_NORMAL},
+	[367]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_MAGIC},
+	[368]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_ARCANE},
+	[369]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_ARTIFACT},
+	[370]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_LEGENDARY},
+	[371]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_NORMAL},
+	[372]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_MAGIC},
+	[373]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_ARCANE},
+	[374]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_ARTIFACT},
+	[375]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_LEGENDARY},
+	[376]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_NORMAL},
+	[377]={level=CHAMPION_POINTS_160,quality=ITEM_QUALITY_MAGIC},
+	[378]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[379]={level=NO_CHAMPION_POINTS,quality=ITEM_QUALITY_NORMAL},
+	[380]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_MAGIC},
+	[381]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_MAGIC},
+	[382]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_ARCANE},
+	[383]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_ARTIFACT},
+	[384]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_ARCANE},
+	[385]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_ARTIFACT},
+	[386]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_LEGENDARY},
+	[387]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_NORMAL},
+	[388]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_NORMAL},
+	[389]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_MAGIC},
+	[390]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_ARCANE},
+	[391]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_ARTIFACT},
+	[392]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_LEGENDARY},
+	[393]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_NORMAL},
+	[394]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_MAGIC},
+	[395]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_ARCANE},
+	[396]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_ARTIFACT},
+	[397]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_LEGENDARY},
+	[398]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_NORMAL},
+	[399]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_MAGIC},
+	[400]={level=CHAMPION_POINTS_180,quality=ITEM_QUALITY_MAGIC},
 }
 ------------------------------------------------------------------------------------------------------------------------
