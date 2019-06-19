@@ -357,7 +357,7 @@ function lib.GetDLCId(setId)
     return setData.dlcId
 end
 
---Returns the n umber of researched traits needed to craft this set. This will only check the craftable sets!
+--Returns the number of researched traits needed to craft this set. This will only check the craftable sets!
 --> Parameters: setId number: The set's setId
 --> Returns:    traitsNeededToCraft number
 function lib.GetTraitsNeeded(setId)
@@ -366,6 +366,41 @@ function lib.GetTraitsNeeded(setId)
     local setData = setInfo[setId]
     if setData == nil or not setData.isCrafted or setData.traitsNeeded == nil then return end
     return setData.traitsNeeded
+end
+
+--Returns the type of the setId!
+--> Parameters: setId number: The set's setId
+--> Returns:    setType String
+function lib.GetSetType(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setData = setInfo[setId]
+    if setData == nil then return end
+    local setType = ""
+    if     setData.isArena then
+        setType = "Arena"
+    elseif setData.isCrafted then
+        setType = "Crafted"
+    elseif setData.isDailyRandomDungeonAndImperialCityReward then
+        setType = "DailyRandomDungeonAndICReward"
+    elseif setData.isDungeon then
+        setType = "Dungeon"
+    elseif setData.isMonster then
+        setType = "Monster"
+    elseif setData.isOverland then
+        setType = "Overland"
+    elseif setData.isBattleground then
+        setType = "Battleground"
+    elseif setData.isCyrodiil then
+        setType = "Cyrodiil"
+    elseif setData.isImperialCity then
+        setType = "Imperial City"
+    elseif setData.isSpecial then
+        setType = "Special"
+    elseif setData.isTrial then
+        setType = "Trial"
+    end
+    return setType
 end
 
 
