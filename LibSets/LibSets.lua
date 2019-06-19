@@ -30,6 +30,8 @@ local lib = LibSets
 
 lib.name        = MAJOR
 lib.version     = MINOR
+lib.svName      = "LibSets_SV_Data"
+lib.svVersion   = 0.6
 lib.setsLoaded  = false
 lib.setsScanning = false
 
@@ -481,7 +483,7 @@ end
 --Addon loaded function
 local function OnLibraryLoaded(event, name)
     --Only load lib if ingame
-    if name ~= MAJOR or name:find("^ZO_") then return end
+    if name ~= MAJOR then return end
     EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
     lib.setsLoaded = false
     --The actual clients language
@@ -497,6 +499,7 @@ local function OnLibraryLoaded(event, name)
     if lib.libZone == nil and LibStub then
         lib.libZone = LibStub:GetLibrary("LibZone", true)
     end
+
 end
 
 -------------------------------------------------------------------------------------------------------------------------------
@@ -504,8 +507,38 @@ end
 -- e.g. to get the new wayshrines names and zoneNames
 -- Uncomment to use them via the libraries global functions then
 -------------------------------------------------------------------------------------------------------------------------------
-
 --[[
+function lib.BuildSetNames()
+    --Use the SavedVariables to get the setNames of the current client language
+    local defaults = {
+        ["setNames"] = {
+        },
+    }
+    lib.sv = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$InstallationWide")
+    if lib.sv then
+        local setIdsToCheck = lib.GetAllSetIds()
+        if setIdsToCheck then
+            for setIdToCheck, _ in pairs(setIdsToCheck) do
+                local itemIdsToCheck = lib.GetSetItemIds(setIdToCheck)
+                if itemIdsToCheck then
+                    for itemIdToCheck, _ in pairs(itemIdsToCheck) do
+                        if itemIdToCheck then
+                            local isSet, setName, setId = lib.IsSetByItemId(itemIdToCheck)
+                            if isSet and setId == setIdToCheck then
+                                setName = ZO_CachedStrFormat("<<C:1>>", setName)
+                                if setName ~= "" then
+                                    lib.sv["setNames"][setId] = lib.sv["setNames"][setId] or {}
+                                    lib.sv["setNames"][setId][lib.clientLang] = setName
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
 local function GetAllZoneInfo()
     local maxZoneId = 2000
     local zoneData = {}

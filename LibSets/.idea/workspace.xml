@@ -16,8 +16,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LibSets.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="7" column="29" selection-start-line="7" selection-start-column="29" selection-end-line="7" selection-end-column="29" />
+            <state relative-caret-position="136">
+              <caret line="8" column="34" selection-start-line="8" selection-start-column="34" selection-end-line="8" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -31,20 +31,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/LibSets_Data.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2125">
-              <caret line="125" column="85" selection-start-line="125" selection-start-column="85" selection-end-line="125" selection-end-column="85" />
+            <state relative-caret-position="379">
+              <caret line="498" column="77" selection-start-line="498" selection-start-column="77" selection-end-line="498" selection-end-column="77" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LibSets.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="440">
-              <caret line="445" column="33" selection-start-line="445" selection-start-column="33" selection-end-line="445" selection-end-column="33" />
+            <state relative-caret-position="157">
+              <caret line="510" column="28" lean-forward="true" selection-start-line="510" selection-start-column="9" selection-end-line="510" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -53,8 +53,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>AskBeforeReloadUIDialogInitialize</find>
-      <find>cyrodiilSetCount</find>
       <find>[&quot;sets&quot;]</find>
       <find>\[&quot;name&quot;\] \= \&quot;[[()A-Za-z0-9_ÄäÖöÜüß'´`]|\s]*\&quot;[\}\,|\,]</find>
       <find>\[&quot;name&quot;\] \= \&quot;[[()A-Za-z0-9_ÄäÖöÜüß'´`-]|\s]*\&quot;[\}\,|\,]</find>
@@ -83,6 +81,8 @@
       <find>currentAPIVersion</find>
       <find>n/a</find>
       <find>distingu</find>
+      <find>GetSetNames</find>
+      <find>setNames</find>
     </findStrings>
     <replaceStrings>
       <replace>,</replace>
@@ -96,11 +96,11 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/XML/LibSets_AskBeforeReloadUIDialog.lua" />
-        <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch.txt" />
         <option value="$PROJECT_DIR$/LibSets_Constants.lua" />
         <option value="$PROJECT_DIR$/LibSets.txt" />
-        <option value="$PROJECT_DIR$/LibSets_Data.lua" />
+        <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch.txt" />
         <option value="$PROJECT_DIR$/LibSets.lua" />
+        <option value="$PROJECT_DIR$/LibSets_Data.lua" />
       </list>
     </option>
   </component>
@@ -116,9 +116,14 @@
     </navigator>
     <panes>
       <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
+            <path>
+              <item name="LibSets" type="b2602c69:ProjectViewProjectNode" />
+              <item name="LibSets" type="462c0819:PsiDirectoryNode" />
+            </path>
             <path>
               <item name="LibSets" type="b2602c69:ProjectViewProjectNode" />
               <item name="Scratches and Consoles" type="1a2a3e82:ScratchProjectViewPane$MyProjectNode" />
@@ -132,11 +137,10 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../SavedVariables/LibSets.lua" />
     <property name="project.structure.last.edited" value="SDKs" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -214,24 +218,10 @@
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/XML/LibSets_AskBeforeReloadUIDialog.lua" />
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="722">
-          <caret column="820127" selection-start-column="820127" selection-end-column="820127" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../SavedVariables/WishList.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="265">
           <caret line="77006" column="68" selection-start-line="77006" selection-start-column="60" selection-end-line="77006" selection-end-column="68" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/LibSets.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="29" selection-start-line="7" selection-start-column="29" selection-end-line="7" selection-end-column="29" />
         </state>
       </provider>
     </entry>
@@ -242,17 +232,38 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/LibSets_Data.lua">
+    <entry file="file://$PROJECT_DIR$/../../SavedVariables/LibSets.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2125">
-          <caret line="125" column="85" selection-start-line="125" selection-start-column="85" selection-end-line="125" selection-end-column="85" />
+        <state relative-caret-position="275">
+          <caret line="2412" column="36" selection-start-line="60" selection-end-line="2433" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="20" lean-forward="true" selection-end-line="2373" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LibSets.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="34" selection-start-line="8" selection-start-column="34" selection-end-line="8" selection-end-column="34" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/LibSets.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
-          <caret line="445" column="33" selection-start-line="445" selection-start-column="33" selection-end-line="445" selection-end-column="33" />
+        <state relative-caret-position="157">
+          <caret line="510" column="28" lean-forward="true" selection-start-line="510" selection-start-column="9" selection-end-line="510" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LibSets_Data.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="379">
+          <caret line="498" column="77" selection-start-line="498" selection-start-column="77" selection-end-line="498" selection-end-column="77" />
         </state>
       </provider>
     </entry>
