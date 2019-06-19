@@ -470,7 +470,7 @@ lib.setInfo = {
 --One itemId to be used to build itemLink etc. for each setId in the game.
 --Preloaded itemIds of 1 item (or from WishList addon, take all itemIds) of the scanned setIds
 lib.setDataPreloaded = {
-    ["maxItemIdScanned"]        = lib.lastSetsPreloadedMaxItemId,
+    --["maxItemIdScanned"]        = lib.lastSetsPreloadedMaxItemId,
     ["lastSetsCheckAPIVersion"] = lib.lastSetsPreloadedCheckAPIVersion,
     --[[ to generate the following list of ["setItemIds"]:
          * /reloadui with the latest patch version after scan is complete

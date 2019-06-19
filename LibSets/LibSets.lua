@@ -329,11 +329,25 @@ function lib.IsSetByItemLink(itemLink)
     return checkSet(itemLink)
 end
 
+
+------------------------------------------------------------------------
+-- 	Global set get functions
+------------------------------------------------------------------------
 --Returns a sorted array of all set ids
 --> Returns: setIds table
 function lib.GetAllSetIds()
     if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.setIds
+end
+
+--Returns all itemIds of the setId provided
+--> Parameters: setId number: The set's setId
+--> Returns:    table setItemIds
+function lib.GetSetItemIds(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setItemIds = preloaded["setItemIds"][tonumber(setId)]
+    return setItemIds
 end
 
 --Returns the name as String of the setId provided
@@ -391,243 +405,237 @@ function lib.GetSetInfo(setId)
     return setInfoTable
 end
 
-    --Returns the name of the DLC by help of the DLC id
-    --> Parameters: dlcId number: The DLC id given in a set's info
-    --> Returns:    name dlcName
-    function lib.GetDLCName(dlcId)
-        if not lib.DLCData then return end
-        local dlcName = lib.DLCData[dlcId] or ""
-        return dlcName
-    end
-
-    --Returns the name of the DLC by help of the DLC id
-    --> Parameters: undauntedChestId number: The undaunted chest id given in a set's info
-    --> Returns:    name undauntedChestName
-    function lib.GetUndauntedChestName(undauntedChestId)
-        if not lib.undauntedChestIds then return end
-        local undauntedChestName = lib.undauntedChestIds[undauntedChestId] or ""
-        return undauntedChestName
-    end
-
-    --Jump to a wayshrine of a set.
-    --If it's a crafted set you can specify a faction ID in order to jump to the selected faction's zone
-    --> Parameters: setId number: The set's setId
-    -->             OPTIONAL factionIndex: The index of the faction (1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact)
-    function lib.JumpToSetId(setId, factionIndex)
-        if setId == nil then return false end
-        if not lib.checkIfSetsAreLoadedProperly() then return end
-        local jumpToNode = -1
-        --Is a crafted set?
-        if lib.craftedSets[setId] then
-            --Then use the faction Id 1 (AD), 2 (DC) to 3 (EP)
-            factionIndex = factionIndex or 1
-            if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
-            local craftedSetWSData = setInfo[setId].wayshrines
-            if craftedSetWSData ~= nil and craftedSetWSData[factionIndex] ~= nil then
-                jumpToNode = craftedSetWSData[factionIndex]
-            end
-            --Other sets wayshrines
-        else
-            jumpToNode = setInfo[setId].wayshrines[1]
+------------------------------------------------------------------------
+-- 	Global set misc. functions
+------------------------------------------------------------------------
+--Jump to a wayshrine of a set.
+--If it's a crafted set you can specify a faction ID in order to jump to the selected faction's zone
+--> Parameters: setId number: The set's setId
+-->             OPTIONAL factionIndex: The index of the faction (1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact)
+function lib.JumpToSetId(setId, factionIndex)
+    if setId == nil then return false end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local jumpToNode = -1
+    --Is a crafted set?
+    if lib.craftedSets[setId] then
+        --Then use the faction Id 1 (AD), 2 (DC) to 3 (EP)
+        factionIndex = factionIndex or 1
+        if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
+        local craftedSetWSData = setInfo[setId].wayshrines
+        if craftedSetWSData ~= nil and craftedSetWSData[factionIndex] ~= nil then
+            jumpToNode = craftedSetWSData[factionIndex]
         end
-        --Jump now?
-        if jumpToNode and jumpToNode > 0 then
-            FastTravelToNode(jumpToNode)
-            return true
-        end
-        return false
+        --Other sets wayshrines
+    else
+        jumpToNode = setInfo[setId].wayshrines[1]
     end
-
-    --Returns all itemIds of the setId provided
-    --> Parameters: setId number: The set's setId
-    --> Returns:    table setItemIds
-    function lib.GetSetItemIds(setId)
-        if setId == nil then return end
-        if not lib.checkIfSetsAreLoadedProperly() then return end
-        local setItemIds = preloaded["setItemIds"][tonumber(setId)]
-        return setItemIds
-    end
-
-    --Returns a boolean value, true if the sets of the game were already loaded/ false if not
-    --> Returns:    boolean areSetsLoaded
-    function lib.AreSetsLoaded()
-        local areSetsLoaded = false
-        local lastCheckedSetsAPIVersion = preloaded.lastSetsCheckAPIVersion
-        areSetsLoaded = (lib.setsLoaded == true and (lastCheckedSetsAPIVersion >= lib.currentAPIVersion)) or false
-        return areSetsLoaded
-    end
-
-    --Returns a boolean value, true if the sets of the game are currently scanned and added/updated/ false if not
-    --> Returns:    boolean isCurrentlySetsScanning
-    function lib.IsSetsScanning()
-        return lib.setsScanning
-    end
-
-    --Returns a boolean value, true if the sets database is properly loaded yet and is not currently scanning
-    --or false if not
-    function lib.checkIfSetsAreLoadedProperly()
-        if lib.IsSetsScanning() or not lib.AreSetsLoaded() then return false end
+    --Jump now?
+    if jumpToNode and jumpToNode > 0 then
+        FastTravelToNode(jumpToNode)
         return true
     end
+    return false
+end
 
-    ------------------------------------------------------------------------
-    --Addon loaded function
-    local function OnLibraryLoaded(event, name)
-        --Only load lib if ingame
-        if name ~= MAJOR or name:find("^ZO_") then return end
-        EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
-        lib.setsLoaded = false
-        --The actual clients language
-        lib.clientLang = GetCVar("language.2")
-        --Get the texts
-        local langVars = lib.languageVars[lib.clientLang]
-        if langVars == nil then langVars = lib.languageVars[lib.clientLang]["en"] end
-        --The actual API version
-        lib.currentAPIVersion = GetAPIVersion()
-        --Get the different setTypes from the "all sets table" setInfo in file LibSets_Data.lua and put them in their
-        --own tables
-        distinguishSetTypes()
-        lib.setsLoaded = true
-    end
+------------------------------------------------------------------------
+-- 	Global other get functions
+------------------------------------------------------------------------
+--Returns the name of the DLC by help of the DLC id
+--> Parameters: dlcId number: The DLC id given in a set's info
+--> Returns:    name dlcName
+function lib.GetDLCName(dlcId)
+    if not lib.DLCData then return end
+    local dlcName = lib.DLCData[dlcId] or ""
+    return dlcName
+end
 
-    -------------------------------------------------------------------------------------------------------------------------------
-    -- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
-    -- e.g. to get the new wayshrines names and zoneNames
-    -- Uncomment to use them via the libraries global functions then
-    -------------------------------------------------------------------------------------------------------------------------------
+--Returns the name of the DLC by help of the DLC id
+--> Parameters: undauntedChestId number: The undaunted chest id given in a set's info
+--> Returns:    name undauntedChestName
+function lib.GetUndauntedChestName(undauntedChestId)
+    if not lib.undauntedChestIds then return end
+    local undauntedChestName = lib.undauntedChestIds[undauntedChestId] or ""
+    return undauntedChestName
+end
 
-    --[[
-    local function GetAllZoneInfo()
-        local maxZoneId = 2000
-        local zoneData = {}
-        local lang = GetCVar("language.2")
-        zoneData[lang] = {}
-        --zoneIndex1 "Clean Test"'s zoneId
-        local zoneIndex1ZoneId = GetZoneId(1) -- should be: 2
-        for zoneId = 1, maxZoneId, 1 do
-            local zi = GetZoneIndex(zoneId)
-            if zi ~= nil then
-                local pzid = GetParentZoneId(zoneId)
-                --With API100027 Elsywer every non-used zoneIndex will be 1 instead 0 :-(
-                --So we need to check if the zoneIndex is 1 and the zoneId <> the zoneId for index 1
-                if (zi == 1 and zoneId == zoneIndex1ZoneId) or zi ~= 1 then
-                    local zoneNameClean = zo_strformat("<<C:1>>", GetZoneNameByIndex(zi))
-                    if zoneNameClean ~= nil then
-                        zoneData[lang][zoneId] = zoneId .. "|" .. zi .. "|" .. pzid .. "|" ..zoneNameClean
-                    end
-                end
-            end
-        end
-        return zoneData
-    end
+------------------------------------------------------------------------
+-- 	Global library check functions
+------------------------------------------------------------------------
+--Returns a boolean value, true if the sets of the game were already loaded/ false if not
+--> Returns:    boolean areSetsLoaded
+function lib.AreSetsLoaded()
+    local areSetsLoaded = lib.setsLoaded
+    return areSetsLoaded
+end
 
-    --Execute in each map to get wayshrine data
-    local function GetWayshrineInfo()
-        d("GetWayshrineInfo")
-        local wayshrines = {}
-        local currentMapIndex = GetCurrentMapIndex()
-        if currentMapIndex == nil then d("<-Error: map index") return end
-        local currentMapId = GetCurrentMapId()
-        if currentMapId == nil then d("<-Error: map id") return end
-        local currentMapsZoneIndex = GetCurrentMapZoneIndex()
-        if currentMapsZoneIndex == nil then d("<-Error: map zone index") return end
-        local currentZoneId = GetZoneId(currentMapsZoneIndex)
-        if currentZoneId == nil then d("<-Error: map zone id") return end
-        local currentMapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(currentMapIndex))
-        local currentZoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameByIndex(currentMapsZoneIndex))
-        d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
-                ", mapName: " .. tostring(currentMapName) .. ", mapZoneIndex: " ..tostring(currentMapsZoneIndex) .. ", zoneId: " .. tostring(currentZoneId) ..
-                ", zoneName: " ..tostring(currentZoneName))
-        for i=1, GetNumFastTravelNodes(), 1 do
-            local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = GetFastTravelNodeInfo(i)
-            if wsisShownInCurrentMap then
-                local wsNameStripped = ZO_CachedStrFormat("<<C:1>>",wsname)
-                d("->[" .. tostring(i) .. "] " ..tostring(wsNameStripped))
-                --Export for excel split at | char
-                --WayshrineNodeId, mapIndex, mapId, mapName, zoneIndex, zoneId, zoneName, POIType, wayshrineName
-                wayshrines[i] = tostring(i).."|"..tostring(currentMapIndex).."|"..tostring(currentMapId).."|"..tostring(currentMapName).."|"..
-                        tostring(currentMapsZoneIndex).."|"..tostring(currentZoneId).."|"..tostring(currentZoneName).."|"..tostring(wspoiType).."|".. tostring(wsNameStripped)
-            end
-        end
-        return wayshrines
-    end
+--Returns a boolean value, true if the sets of the game are currently scanned and added/updated/ false if not
+--> Returns:    boolean isCurrentlySetsScanning
+function lib.IsSetsScanning()
+    return lib.setsScanning
+end
 
-    local function GetWayshrineNames()
-        d("[GetWayshrineNames]")
-        local wsNames = {}
-        local lang = GetCVar("language.2")
-        wsNames[lang] = {}
-        for wsNodeId=1, GetNumFastTravelNodes(), 1 do
-            --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
-            local _, wsLocalizedName = GetFastTravelNodeInfo(wsNodeId)
-            if wsLocalizedName ~= nil then
-                local wsLocalizedNameClean = ZO_CachedStrFormat("<<C:1>>", wsLocalizedName)
-                wsNames[lang][wsNodeId] = tostring(wsNodeId) .. "|" .. wsLocalizedNameClean
-            end
-        end
-        return wsNames
-    end
+--Returns a boolean value, true if the sets database is properly loaded yet and is not currently scanning
+--or false if not
+function lib.checkIfSetsAreLoadedProperly()
+    if lib.IsSetsScanning() or not lib.AreSetsLoaded() then return false end
+    return true
+end
 
-    local function GetMapNames(lang)
-        lang = lang or GetCVar("language.2")
-        d("[GetMapNames]lang: " ..tostring(lang))
-        local lz = LibZone
-        if not lz then d("LibZone must be loaded!") return end
-        local zoneIds = lz.givenZoneData
-        if not zoneIds then d("LibZone givenZoneData is missing!") return end
-        local zoneIdsLocalized = zoneIds[lang]
-        if not zoneIdsLocalized then d("Language \"" .. tostring(lang) .."\" is not scanned yet in LibZone") return end
-        local mapNames = {}
-        for zoneId, zoneNameLocalized in pairs(zoneIdsLocalized) do
-            local mapIndex = GetMapIndexByZoneId(zoneId)
-            --d(">zoneId: " ..tostring(zoneId) .. ", mapIndex: " ..tostring(mapIndex))
-            if mapIndex ~= nil then
-                local mapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(mapIndex))
-                if mapName ~= nil then
-                    mapNames[mapIndex] = tostring(mapIndex) .. "|" .. mapName .. "|" .. tostring(zoneId) .. "|" .. zoneNameLocalized
-                end
-            end
-        end
-        return mapNames
-    end
-
-    function lib.GetAllZoneInfo()
-        local zoneData = {}
-        zoneData = GetAllZoneInfo()
-        lib.svData.zoneData = lib.svData.zoneData or {}
-        lib.svData.zoneData[lib.clientLang] = {}
-        lib.svData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
-    end
-
-    function lib.GetMapNames()
-        local maps = GetMapNames(lib.clientLang)
-        if maps ~= nil then
-            lib.svData.maps = lib.svData.maps or {}
-            lib.svData.maps[lib.clientLang] = {}
-            lib.svData.maps[lib.clientLang] = maps
-        end
-    end
-
-    function lib.GetWayshrineInfo()
-        local ws = GetWayshrineInfo()
-        if ws ~= nil then
-            lib.svData.wayshrines = lib.svData.wayshrines or {}
-            for wsNodeId, wsData in pairs(ws) do
-                lib.svData.wayshrines[wsNodeId] = wsData
-            end
-        end
-    end
-
-    function lib.GetWayshrineNames()
-        local wsNames = GetWayshrineNames()
-        if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
-            lib.svData.wayshrineNames = lib.svData.wayshrineNames or {}
-            lib.svData.wayshrineNames[lib.clientLang] = {}
-            lib.svData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
-        end
-    end
-    ]]
-
-    --Load the addon now
+------------------------------------------------------------------------
+--Addon loaded function
+local function OnLibraryLoaded(event, name)
+    --Only load lib if ingame
+    if name ~= MAJOR or name:find("^ZO_") then return end
     EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
-    EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, OnLibraryLoaded)
+    lib.setsLoaded = false
+    --The actual clients language
+    lib.clientLang = GetCVar("language.2")
+    --The actual API version
+    lib.currentAPIVersion = GetAPIVersion()
+    --Get the different setTypes from the "all sets table" setInfo in file LibSets_Data.lua and put them in their
+    --own tables
+    distinguishSetTypes()
+    lib.setsLoaded = true
+end
+
+-------------------------------------------------------------------------------------------------------------------------------
+-- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
+-- e.g. to get the new wayshrines names and zoneNames
+-- Uncomment to use them via the libraries global functions then
+-------------------------------------------------------------------------------------------------------------------------------
+
+--[[
+local function GetAllZoneInfo()
+    local maxZoneId = 2000
+    local zoneData = {}
+    local lang = GetCVar("language.2")
+    zoneData[lang] = {}
+    --zoneIndex1 "Clean Test"'s zoneId
+    local zoneIndex1ZoneId = GetZoneId(1) -- should be: 2
+    for zoneId = 1, maxZoneId, 1 do
+        local zi = GetZoneIndex(zoneId)
+        if zi ~= nil then
+            local pzid = GetParentZoneId(zoneId)
+            --With API100027 Elsywer every non-used zoneIndex will be 1 instead 0 :-(
+            --So we need to check if the zoneIndex is 1 and the zoneId <> the zoneId for index 1
+            if (zi == 1 and zoneId == zoneIndex1ZoneId) or zi ~= 1 then
+                local zoneNameClean = zo_strformat("<<C:1>>", GetZoneNameByIndex(zi))
+                if zoneNameClean ~= nil then
+                    zoneData[lang][zoneId] = zoneId .. "|" .. zi .. "|" .. pzid .. "|" ..zoneNameClean
+                end
+            end
+        end
+    end
+    return zoneData
+end
+
+--Execute in each map to get wayshrine data
+local function GetWayshrineInfo()
+    d("GetWayshrineInfo")
+    local wayshrines = {}
+    local currentMapIndex = GetCurrentMapIndex()
+    if currentMapIndex == nil then d("<-Error: map index") return end
+    local currentMapId = GetCurrentMapId()
+    if currentMapId == nil then d("<-Error: map id") return end
+    local currentMapsZoneIndex = GetCurrentMapZoneIndex()
+    if currentMapsZoneIndex == nil then d("<-Error: map zone index") return end
+    local currentZoneId = GetZoneId(currentMapsZoneIndex)
+    if currentZoneId == nil then d("<-Error: map zone id") return end
+    local currentMapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(currentMapIndex))
+    local currentZoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameByIndex(currentMapsZoneIndex))
+    d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
+            ", mapName: " .. tostring(currentMapName) .. ", mapZoneIndex: " ..tostring(currentMapsZoneIndex) .. ", zoneId: " .. tostring(currentZoneId) ..
+            ", zoneName: " ..tostring(currentZoneName))
+    for i=1, GetNumFastTravelNodes(), 1 do
+        local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = GetFastTravelNodeInfo(i)
+        if wsisShownInCurrentMap then
+            local wsNameStripped = ZO_CachedStrFormat("<<C:1>>",wsname)
+            d("->[" .. tostring(i) .. "] " ..tostring(wsNameStripped))
+            --Export for excel split at | char
+            --WayshrineNodeId, mapIndex, mapId, mapName, zoneIndex, zoneId, zoneName, POIType, wayshrineName
+            wayshrines[i] = tostring(i).."|"..tostring(currentMapIndex).."|"..tostring(currentMapId).."|"..tostring(currentMapName).."|"..
+                    tostring(currentMapsZoneIndex).."|"..tostring(currentZoneId).."|"..tostring(currentZoneName).."|"..tostring(wspoiType).."|".. tostring(wsNameStripped)
+        end
+    end
+    return wayshrines
+end
+
+local function GetWayshrineNames()
+    d("[GetWayshrineNames]")
+    local wsNames = {}
+    local lang = GetCVar("language.2")
+    wsNames[lang] = {}
+    for wsNodeId=1, GetNumFastTravelNodes(), 1 do
+        --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
+        local _, wsLocalizedName = GetFastTravelNodeInfo(wsNodeId)
+        if wsLocalizedName ~= nil then
+            local wsLocalizedNameClean = ZO_CachedStrFormat("<<C:1>>", wsLocalizedName)
+            wsNames[lang][wsNodeId] = tostring(wsNodeId) .. "|" .. wsLocalizedNameClean
+        end
+    end
+    return wsNames
+end
+
+local function GetMapNames(lang)
+    lang = lang or GetCVar("language.2")
+    d("[GetMapNames]lang: " ..tostring(lang))
+    local lz = LibZone
+    if not lz then d("LibZone must be loaded!") return end
+    local zoneIds = lz.givenZoneData
+    if not zoneIds then d("LibZone givenZoneData is missing!") return end
+    local zoneIdsLocalized = zoneIds[lang]
+    if not zoneIdsLocalized then d("Language \"" .. tostring(lang) .."\" is not scanned yet in LibZone") return end
+    local mapNames = {}
+    for zoneId, zoneNameLocalized in pairs(zoneIdsLocalized) do
+        local mapIndex = GetMapIndexByZoneId(zoneId)
+        --d(">zoneId: " ..tostring(zoneId) .. ", mapIndex: " ..tostring(mapIndex))
+        if mapIndex ~= nil then
+            local mapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(mapIndex))
+            if mapName ~= nil then
+                mapNames[mapIndex] = tostring(mapIndex) .. "|" .. mapName .. "|" .. tostring(zoneId) .. "|" .. zoneNameLocalized
+            end
+        end
+    end
+    return mapNames
+end
+
+function lib.GetAllZoneInfo()
+    local zoneData = {}
+    zoneData = GetAllZoneInfo()
+    lib.svData.zoneData = lib.svData.zoneData or {}
+    lib.svData.zoneData[lib.clientLang] = {}
+    lib.svData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
+end
+
+function lib.GetMapNames()
+    local maps = GetMapNames(lib.clientLang)
+    if maps ~= nil then
+        lib.svData.maps = lib.svData.maps or {}
+        lib.svData.maps[lib.clientLang] = {}
+        lib.svData.maps[lib.clientLang] = maps
+    end
+end
+
+function lib.GetWayshrineInfo()
+    local ws = GetWayshrineInfo()
+    if ws ~= nil then
+        lib.svData.wayshrines = lib.svData.wayshrines or {}
+        for wsNodeId, wsData in pairs(ws) do
+            lib.svData.wayshrines[wsNodeId] = wsData
+        end
+    end
+end
+
+function lib.GetWayshrineNames()
+    local wsNames = GetWayshrineNames()
+    if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
+        lib.svData.wayshrineNames = lib.svData.wayshrineNames or {}
+        lib.svData.wayshrineNames[lib.clientLang] = {}
+        lib.svData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
+    end
+end
+]]
+
+--Load the addon now
+EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
+EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, OnLibraryLoaded)

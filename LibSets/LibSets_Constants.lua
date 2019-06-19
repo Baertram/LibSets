@@ -4,16 +4,11 @@ local lib = LibSets
 
 -- lookup this "max itemId scanned" for the current patch with the following script:
 -- /script local maxId=147664 for itemId=maxId,250000 do local itemType = GetItemLinkItemType('|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h') if itemType>0 then maxId=itemId end end d(maxId)
-lib.lastSetsPreloadedMaxItemId          = 152255 -- last checked: 2019-06-19, API 1000027
+--lib.lastSetsPreloadedMaxItemId          = 152255 -- last checked: 2019-06-19, API 1000027
 --The last checked API version for the setsData in file LibSets_Data.lua, see "local setItemIdsPreloaded = { ..."
 -->Update here after a new scan of the maximum itemId was done (see above) AND the set item's itemIds were updated in file
 -->LibSets_Data.lua, table setItemIdsPreloaded -> See description in this file above the table (data from WishList addon e.g.)
 lib.lastSetsPreloadedCheckAPIVersion    = 100027 --Elsweyr
-------------------------------------------------------------------------------------------------------------------------
---The setsData
-lib.setsData    = {
-    ["languagesScanned"] = {},
-}
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
 lib.supportedLanguages = {
@@ -23,15 +18,6 @@ lib.supportedLanguages = {
     ["jp"]  = true,
     ["ru"]  = true,
 }
-
-lib.languageVars = {}
-lib.languageVars["de"] = {
-    ["pleaseWait"] = "\nDies dauert ein paar Sekunden.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nBitte warte bis diese Aktion beendet wurde!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-}
-lib.languageVars["en"] = {
-    ["pleaseWait"] = "\nThis will take a few seconds.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPlease just wait for this action to finish.\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-}
-
 ------------------------------------------------------------------------------------------------------------------------
 --Number of currently available set bonus for a monster set piece (2: head, shoulder)
 lib.countMonsterSetBonus = 2
