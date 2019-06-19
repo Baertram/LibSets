@@ -31,7 +31,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LibSets_Data.lua">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="379">
@@ -40,11 +40,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/LibSets.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="157">
-              <caret line="510" column="28" lean-forward="true" selection-start-line="510" selection-start-column="9" selection-end-line="510" selection-end-column="28" />
+            <state relative-caret-position="276">
+              <caret line="344" column="51" selection-start-line="344" selection-start-column="51" selection-end-line="344" selection-end-column="51" />
             </state>
           </provider>
         </entry>
@@ -99,8 +99,8 @@
         <option value="$PROJECT_DIR$/LibSets_Constants.lua" />
         <option value="$PROJECT_DIR$/LibSets.txt" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch.txt" />
-        <option value="$PROJECT_DIR$/LibSets.lua" />
         <option value="$PROJECT_DIR$/LibSets_Data.lua" />
+        <option value="$PROJECT_DIR$/LibSets.lua" />
       </list>
     </option>
   </component>
@@ -253,17 +253,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/LibSets.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="157">
-          <caret line="510" column="28" lean-forward="true" selection-start-line="510" selection-start-column="9" selection-end-line="510" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/LibSets_Data.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="379">
           <caret line="498" column="77" selection-start-line="498" selection-start-column="77" selection-end-line="498" selection-end-column="77" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LibSets.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="276">
+          <caret line="344" column="51" selection-start-line="344" selection-start-column="51" selection-end-line="344" selection-end-column="51" />
         </state>
       </provider>
     </entry>

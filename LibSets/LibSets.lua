@@ -342,7 +342,7 @@ function lib.GetSetName(setId, lang)
     if setId == nil or not lib.supportedLanguages[lang]
         or setNames[tonumber(setId)] == nil
         or setNames[tonumber(setId)][lang] == nil then return end
-    local setName = setNames[lang][tonumber(setId)]
+    local setName = setNames[tonumber(setId)][lang]
     return setName
 end
 
