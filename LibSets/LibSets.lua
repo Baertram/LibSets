@@ -68,7 +68,8 @@ local function checkSet(itemLink)
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
---Check which setIds were found and get the set's info from the preloaded data table "setInfo"
+--Check which setIds were found and get the set's info from the preloaded data table "setInfo",
+--sort them into their appropriate set table and increase the counter for each table
 local function LoadSets()
     if lib.setsScanning then return end
     lib.setsScanning = true
@@ -593,7 +594,7 @@ end
 local function GetMapNames(lang)
     lang = lang or GetCVar("language.2")
     d("[".. MAJOR .. "]GetMapNames]lang: " ..tostring(lang))
-    local lz = lib.LibZone
+    local lz = lib.libZone
     if not lz then d("ERROR: Library LibZone must be loaded!") return end
     local zoneIds = lz.givenZoneData
     if not zoneIds then d("ERROR: Library LibZone givenZoneData is missing!") return end
