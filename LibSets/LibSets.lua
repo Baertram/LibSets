@@ -480,6 +480,8 @@ end
 ------------------------------------------------------------------------
 --Load the SavedVariables
 local function LoadSavedVariables()
+    --SavedVars were loaded already before?
+    if lib.svData ~= nil then return end
     local defaults = {
         ["setNames"]        = {},
         ["zoneData"]        = {},
@@ -499,8 +501,6 @@ local function OnLibraryLoaded(event, name)
     lib.clientLang = GetCVar("language.2")
     --The actual API version
     lib.currentAPIVersion = GetAPIVersion()
-    --Load the SavedVariabels
-    LoadSavedVariables()
     --Get the different setTypes from the "all sets table" setInfo in file LibSets_Data.lua and put them in their
     --own tables
     LoadSets()
@@ -616,6 +616,7 @@ end
 function lib.GetAllZoneInfo()
     local zoneData = GetAllZoneInfo()
     if zoneData ~= nil then
+        LoadSavedVariables()
         lib.svData.zoneData = lib.svData.zoneData or {}
         lib.svData.zoneData[lib.clientLang] = {}
         lib.svData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
@@ -626,6 +627,7 @@ end
 function lib.GetAllMapNames()
     local maps = GetMapNames(lib.clientLang)
     if maps ~= nil then
+        LoadSavedVariables()
         lib.svData.maps = lib.svData.maps or {}
         lib.svData.maps[lib.clientLang] = {}
         lib.svData.maps[lib.clientLang] = maps
@@ -636,6 +638,7 @@ end
 function lib.GetAllWayshrineInfo()
     local ws = GetWayshrineInfo()
     if ws ~= nil then
+        LoadSavedVariables()
         lib.svData.wayshrines = lib.svData.wayshrines or {}
         for wsNodeId, wsData in pairs(ws) do
             lib.svData.wayshrines[wsNodeId] = wsData
@@ -647,6 +650,7 @@ end
 function lib.GetAllWayshrineNames()
     local wsNames = GetWayshrineNames()
     if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
+        LoadSavedVariables()
         lib.svData.wayshrineNames = lib.svData.wayshrineNames or {}
         lib.svData.wayshrineNames[lib.clientLang] = {}
         lib.svData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
@@ -657,6 +661,7 @@ end
 function lib.GetAllSetNames()
     d("[".. MAJOR .. "]GetAllSetNames")
     --Use the SavedVariables to get the setNames of the current client language
+    local svLoadedAlready = false
     local setIdsToCheck = lib.GetAllSetIds()
     if setIdsToCheck then
         local setNamesAdded = 0
@@ -669,6 +674,11 @@ function lib.GetAllSetNames()
                         if isSet and setId == setIdToCheck then
                             setName = ZO_CachedStrFormat("<<C:1>>", setName)
                             if setName ~= "" then
+                                --Load the SV once
+                                if not svLoadedAlready then
+                                    LoadSavedVariables()
+                                    svLoadedAlready = true
+                                end
                                 lib.svData["setNames"][setId] = lib.svData["setNames"][setId] or {}
                                 lib.svData["setNames"][setId][lib.clientLang] = setName
                                 setNamesAdded = setNamesAdded +1
