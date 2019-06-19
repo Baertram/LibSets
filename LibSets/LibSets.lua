@@ -519,9 +519,10 @@ end
 -- e.g. to get the new wayshrines names and zoneNames
 -- Uncomment to use them via the libraries global functions then
 -------------------------------------------------------------------------------------------------------------------------------
+local debugOutputStartLine = "==============================\n"
 local function GetAllZoneInfo()
     local lang = GetCVar("language.2")
-    d("[".. MAJOR .. "]GetAllZoneInfo, language: " ..tostring(lang))
+    d(debugOutputStartLine.."[".. MAJOR .. "]GetAllZoneInfo, language: " ..tostring(lang))
     local maxZoneId = 2000
     local zoneData = {}
     zoneData[lang] = {}
@@ -546,16 +547,17 @@ end
 
 --Execute in each map to get wayshrine data
 local function GetWayshrineInfo()
-    d("[".. MAJOR .. "]GetWayshrineInfo")
+    d(debugOutputStartLine.."[".. MAJOR .. "]GetWayshrineInfo")
+    local errorMapNavigateText = " Please open the map and navigate to a zone map first before running this function!"
     local wayshrines = {}
     local currentMapIndex = GetCurrentMapIndex()
-    if currentMapIndex == nil then d("<-Error: map index") return end
+    if currentMapIndex == nil then d("<-Error: map index missing." .. errorMapNavigateText) return end
     local currentMapId = GetCurrentMapId()
-    if currentMapId == nil then d("<-Error: map id") return end
+    if currentMapId == nil then d("<-Error: map id missing." .. errorMapNavigateText) return end
     local currentMapsZoneIndex = GetCurrentMapZoneIndex()
-    if currentMapsZoneIndex == nil then d("<-Error: map zone index") return end
+    if currentMapsZoneIndex == nil then d("<-Error: map zone index missing." .. errorMapNavigateText) return end
     local currentZoneId = GetZoneId(currentMapsZoneIndex)
-    if currentZoneId == nil then d("<-Error: map zone id") return end
+    if currentZoneId == nil then d("<-Error: map zone id missing." .. errorMapNavigateText) return end
     local currentMapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(currentMapIndex))
     local currentZoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameByIndex(currentMapsZoneIndex))
     --d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
@@ -577,7 +579,7 @@ end
 
 local function GetWayshrineNames()
     local lang = GetCVar("language.2")
-    d("[".. MAJOR .. "]GetWayshrineNames, language: " ..tostring(lang))
+    d(debugOutputStartLine.."[".. MAJOR .. "]GetWayshrineNames, language: " ..tostring(lang))
     local wsNames = {}
     wsNames[lang] = {}
     for wsNodeId=1, GetNumFastTravelNodes(), 1 do
@@ -593,7 +595,7 @@ end
 
 local function GetMapNames(lang)
     lang = lang or GetCVar("language.2")
-    d("[".. MAJOR .. "]GetMapNames, language: " ..tostring(lang))
+    d(debugOutputStartLine.."[".. MAJOR .. "]GetMapNames, language: " ..tostring(lang))
     local lz = lib.libZone
     if not lz then d("ERROR: Library LibZone must be loaded!") return end
     local zoneIds = lz.givenZoneData
@@ -660,7 +662,7 @@ function lib.GetAllWayshrineNames()
 end
 
 function lib.GetAllSetNames()
-    d("[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(lib.clientLang))
+    d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(lib.clientLang))
     --Use the SavedVariables to get the setNames of the current client language
     local svLoadedAlready = false
     local setIdsToCheck = lib.GetAllSetIds()
