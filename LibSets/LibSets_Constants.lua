@@ -100,6 +100,7 @@ local undauntedChestIds = {
 }
 lib.undauntedChestIds = undauntedChestIds
 ------------------------------------------------------------------------------------------------------------------------
+--[[
 --These itemSubTypes are used for item quality and item level definition inside itemLinks
 local NO_CHAMPION_POINTS = 1
 local CHAMPION_POINTS_10 = 51
@@ -524,4 +525,5 @@ lib.itemSubType =
     [399]={level=CHAMPION_POINTS_170,quality=ITEM_QUALITY_MAGIC},
     [400]={level=CHAMPION_POINTS_180,quality=ITEM_QUALITY_MAGIC},
 }
+]]
 ------------------------------------------------------------------------------------------------------------------------
