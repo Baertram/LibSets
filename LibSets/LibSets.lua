@@ -357,7 +357,7 @@ function lib.GetSetNames(setId)
     if setNames[tonumber(setId)] == nil then return end
     local setNamesRead = {}
     setNamesRead = setNames[tonumber(setId)]
-    return setNames
+    return setNamesRead
 end
 
 --Returns the set info as a table
