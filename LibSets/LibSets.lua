@@ -324,6 +324,17 @@ function lib.IsVeteranSet(setId)
     return isVeteranSet
 end
 
+--Returns the wayshrines as table for the setId
+--> Parameters: setId number: The set's setId
+--> Returns:    wayshrineNodeIds table
+function lib.GetWayshrineIds(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setData = setInfo[setId]
+    if setData == nil or setData.wayshrines == nil then return end
+    return setData.wayshrines
+end
+
 --Returns the drop zoneIds as table for the setId
 --> Parameters: setId number: The set's setId
 --> Returns:    zoneIds table
@@ -345,6 +356,7 @@ function lib.GetDLCId(setId)
     if setData == nil or setData.dlcId == nil then return end
     return setData.dlcId
 end
+
 
 
 ------------------------------------------------------------------------
