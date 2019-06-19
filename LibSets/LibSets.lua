@@ -311,6 +311,41 @@ function lib.IsSetByItemLink(itemLink)
     return checkSet(itemLink)
 end
 
+--Returns true/false if the set must be obtained in a veteran mode dungeon/trial/arena
+--> Parameters: setId number: The set's setId
+--> Returns:    isVeteranSet boolean
+function lib.IsVeteranSet(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local isVeteranSet = false
+    local setData = setInfo[setId]
+    if setData == nil then return end
+    isVeteranSet = setData.veteran or false
+    return isVeteranSet
+end
+
+--Returns the drop zoneIds as table for the setId
+--> Parameters: setId number: The set's setId
+--> Returns:    zoneIds table
+function lib.GetZoneIds(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setData = setInfo[setId]
+    if setData == nil or setData.zoneIds == nil then return end
+    return setData.zoneIds
+end
+
+--Returns the drop dlcId as number for the setId
+--> Parameters: setId number: The set's setId
+--> Returns:    dlcId number
+function lib.GetDLCId(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setData = setInfo[setId]
+    if setData == nil or setData.dlcId == nil then return end
+    return setData.dlcId
+end
+
 
 ------------------------------------------------------------------------
 -- 	Global set get functions
