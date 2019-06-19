@@ -83,19 +83,19 @@ end
 --The undaunted chests
 local undauntedChestIds = {
     ["de"] = {
-        [1] = "Gilirion the Redbeard",
+        [1] = "Glirion der Rotbart",
         [2] = "Maj al-Ragath",
-        [3] = "Urgalarg Chief-bane",
+        [3] = "Urgarlag Häuptlingsfluch",
     },
     ["en"] = {
-        [1] = "Gilirion the Redbeard",
+        [1] = "Glirion the Redbeard",
         [2] = "Maj al-Ragath",
-        [3] = "Urgalarg Chief-bane",
+        [3] = "Urgarlag Chief-bane",
     },
     ["fr"] = {
-        [1] = "Gilirion the Redbeard",
+        [1] = "Glirion Barbe-Rousse",
         [2] = "Maj al-Ragath",
-        [3] = "Urgalarg Chief-bane",
+        [3] = "Urgalarg l'Èmasculatrice",
     },
 }
 lib.undauntedChestIds = undauntedChestIds
