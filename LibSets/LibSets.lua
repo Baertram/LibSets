@@ -346,7 +346,7 @@ function lib.GetZoneIds(setId)
     return setData.zoneIds
 end
 
---Returns the drop dlcId as number for the setId
+--Returns the dlcId as number for the setId
 --> Parameters: setId number: The set's setId
 --> Returns:    dlcId number
 function lib.GetDLCId(setId)
@@ -357,6 +357,16 @@ function lib.GetDLCId(setId)
     return setData.dlcId
 end
 
+--Returns the n umber of researched traits needed to craft this set. This will only check the craftable sets!
+--> Parameters: setId number: The set's setId
+--> Returns:    traitsNeededToCraft number
+function lib.GetTraitsNeeded(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setData = setInfo[setId]
+    if setData == nil or not setData.isCrafted or setData.traitsNeeded == nil then return end
+    return setData.traitsNeeded
+end
 
 
 ------------------------------------------------------------------------
