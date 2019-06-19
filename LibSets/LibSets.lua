@@ -69,7 +69,7 @@ local function checkSet(itemLink)
 end
 
 --Check which setIds were found and get the set's info from the preloaded data table "setInfo"
-local function distinguishSetTypes()
+local function LoadSets()
     if lib.setsScanning then return end
     lib.setsScanning = true
 
@@ -327,8 +327,9 @@ end
 function lib.GetSetItemIds(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    local setItemIds = preloaded["setItemIds"][tonumber(setId)]
-    return setItemIds
+    local setItemIds = preloaded["setItemIds"]
+    if setItemIds[tonumber(setId)] == nil then return end
+    return setItemIds[tonumber(setId)]
 end
 
 --Returns the name as String of the setId provided
@@ -342,8 +343,7 @@ function lib.GetSetName(setId, lang)
     if setId == nil or not lib.supportedLanguages[lang]
         or setNames[tonumber(setId)] == nil
         or setNames[tonumber(setId)][lang] == nil then return end
-    local setName = setNames[tonumber(setId)][lang]
-    return setName
+    return setNames[tonumber(setId)][lang]
 end
 
 --Returns all names as String of the setId provided
@@ -355,9 +355,7 @@ function lib.GetSetNames(setId)
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setNames = preloaded["setNames"]
     if setNames[tonumber(setId)] == nil then return end
-    local setNamesRead = {}
-    setNamesRead = setNames[tonumber(setId)]
-    return setNamesRead
+    return setNames[tonumber(setId)]
 end
 
 --Returns the set info as a table
@@ -462,7 +460,7 @@ end
 --Returns a boolean value, true if the sets of the game were already loaded/ false if not
 --> Returns:    boolean areSetsLoaded
 function lib.AreSetsLoaded()
-    local areSetsLoaded = lib.setsLoaded
+    local areSetsLoaded = (lib.setsLoaded and lib.setIds ~= nil) or false
     return areSetsLoaded
 end
 
@@ -480,19 +478,32 @@ function lib.checkIfSetsAreLoadedProperly()
 end
 
 ------------------------------------------------------------------------
+--Load the SavedVariables
+local function LoadSavedVariables()
+    local defaults = {
+        ["setNames"]        = {},
+        ["zoneData"]        = {},
+        ["maps"]            = {},
+        ["wayshrineNames"]  = {},
+    }
+    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$InstallationWide")
+end
+
 --Addon loaded function
 local function OnLibraryLoaded(event, name)
     --Only load lib if ingame
     if name ~= MAJOR then return end
     EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
-    lib.setsLoaded = false
+    lib.setsLoaded = falsez
     --The actual clients language
     lib.clientLang = GetCVar("language.2")
     --The actual API version
     lib.currentAPIVersion = GetAPIVersion()
+    --Load the SavedVariabels
+    LoadSavedVariables()
     --Get the different setTypes from the "all sets table" setInfo in file LibSets_Data.lua and put them in their
     --own tables
-    distinguishSetTypes()
+    LoadSets()
     lib.setsLoaded = true
     --Check for library LibZone
     lib.libZone = LibZone
@@ -507,39 +518,8 @@ end
 -- e.g. to get the new wayshrines names and zoneNames
 -- Uncomment to use them via the libraries global functions then
 -------------------------------------------------------------------------------------------------------------------------------
---[[
-function lib.BuildSetNames()
-    --Use the SavedVariables to get the setNames of the current client language
-    local defaults = {
-        ["setNames"] = {
-        },
-    }
-    lib.sv = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$InstallationWide")
-    if lib.sv then
-        local setIdsToCheck = lib.GetAllSetIds()
-        if setIdsToCheck then
-            for setIdToCheck, _ in pairs(setIdsToCheck) do
-                local itemIdsToCheck = lib.GetSetItemIds(setIdToCheck)
-                if itemIdsToCheck then
-                    for itemIdToCheck, _ in pairs(itemIdsToCheck) do
-                        if itemIdToCheck then
-                            local isSet, setName, setId = lib.IsSetByItemId(itemIdToCheck)
-                            if isSet and setId == setIdToCheck then
-                                setName = ZO_CachedStrFormat("<<C:1>>", setName)
-                                if setName ~= "" then
-                                    lib.sv["setNames"][setId] = lib.sv["setNames"][setId] or {}
-                                    lib.sv["setNames"][setId][lib.clientLang] = setName
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
-
 local function GetAllZoneInfo()
+    d("[".. MAJOR .. "]GetAllZoneInfo")
     local maxZoneId = 2000
     local zoneData = {}
     local lang = GetCVar("language.2")
@@ -565,7 +545,7 @@ end
 
 --Execute in each map to get wayshrine data
 local function GetWayshrineInfo()
-    d("GetWayshrineInfo")
+    d("[".. MAJOR .. "]GetWayshrineInfo")
     local wayshrines = {}
     local currentMapIndex = GetCurrentMapIndex()
     if currentMapIndex == nil then d("<-Error: map index") return end
@@ -577,9 +557,9 @@ local function GetWayshrineInfo()
     if currentZoneId == nil then d("<-Error: map zone id") return end
     local currentMapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(currentMapIndex))
     local currentZoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameByIndex(currentMapsZoneIndex))
-    d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
-            ", mapName: " .. tostring(currentMapName) .. ", mapZoneIndex: " ..tostring(currentMapsZoneIndex) .. ", zoneId: " .. tostring(currentZoneId) ..
-            ", zoneName: " ..tostring(currentZoneName))
+    --d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
+    --        ", mapName: " .. tostring(currentMapName) .. ", mapZoneIndex: " ..tostring(currentMapsZoneIndex) .. ", zoneId: " .. tostring(currentZoneId) ..
+    --        ", zoneName: " ..tostring(currentZoneName))
     for i=1, GetNumFastTravelNodes(), 1 do
         local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = GetFastTravelNodeInfo(i)
         if wsisShownInCurrentMap then
@@ -595,7 +575,7 @@ local function GetWayshrineInfo()
 end
 
 local function GetWayshrineNames()
-    d("[GetWayshrineNames]")
+    d("[".. MAJOR .. "]GetWayshrineNames]")
     local wsNames = {}
     local lang = GetCVar("language.2")
     wsNames[lang] = {}
@@ -612,13 +592,13 @@ end
 
 local function GetMapNames(lang)
     lang = lang or GetCVar("language.2")
-    d("[GetMapNames]lang: " ..tostring(lang))
-    local lz = LibZone
-    if not lz then d("LibZone must be loaded!") return end
+    d("[".. MAJOR .. "]GetMapNames]lang: " ..tostring(lang))
+    local lz = lib.LibZone
+    if not lz then d("ERROR: Library LibZone must be loaded!") return end
     local zoneIds = lz.givenZoneData
-    if not zoneIds then d("LibZone givenZoneData is missing!") return end
+    if not zoneIds then d("ERROR: Library LibZone givenZoneData is missing!") return end
     local zoneIdsLocalized = zoneIds[lang]
-    if not zoneIdsLocalized then d("Language \"" .. tostring(lang) .."\" is not scanned yet in LibZone") return end
+    if not zoneIdsLocalized then d("ERROR: Language \"" .. tostring(lang) .."\" is not scanned yet in library LibZone") return end
     local mapNames = {}
     for zoneId, zoneNameLocalized in pairs(zoneIdsLocalized) do
         local mapIndex = GetMapIndexByZoneId(zoneId)
@@ -634,41 +614,75 @@ local function GetMapNames(lang)
 end
 
 function lib.GetAllZoneInfo()
-    local zoneData = {}
-    zoneData = GetAllZoneInfo()
-    lib.svData.zoneData = lib.svData.zoneData or {}
-    lib.svData.zoneData[lib.clientLang] = {}
-    lib.svData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
+    local zoneData = GetAllZoneInfo()
+    if zoneData ~= nil then
+        lib.svData.zoneData = lib.svData.zoneData or {}
+        lib.svData.zoneData[lib.clientLang] = {}
+        lib.svData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'zoneData\'")
+    end
 end
 
-function lib.GetMapNames()
+function lib.GetAllMapNames()
     local maps = GetMapNames(lib.clientLang)
     if maps ~= nil then
         lib.svData.maps = lib.svData.maps or {}
         lib.svData.maps[lib.clientLang] = {}
         lib.svData.maps[lib.clientLang] = maps
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'maps\'")
     end
 end
 
-function lib.GetWayshrineInfo()
+function lib.GetAllWayshrineInfo()
     local ws = GetWayshrineInfo()
     if ws ~= nil then
         lib.svData.wayshrines = lib.svData.wayshrines or {}
         for wsNodeId, wsData in pairs(ws) do
             lib.svData.wayshrines[wsNodeId] = wsData
         end
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'wayshrines\'")
     end
 end
 
-function lib.GetWayshrineNames()
+function lib.GetAllWayshrineNames()
     local wsNames = GetWayshrineNames()
     if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
         lib.svData.wayshrineNames = lib.svData.wayshrineNames or {}
         lib.svData.wayshrineNames[lib.clientLang] = {}
         lib.svData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'wayshrineNames\'")
     end
 end
-]]
+
+function lib.GetAllSetNames()
+    d("[".. MAJOR .. "]GetAllSetNames")
+    --Use the SavedVariables to get the setNames of the current client language
+    local setIdsToCheck = lib.GetAllSetIds()
+    if setIdsToCheck then
+        local setNamesAdded = 0
+        for setIdToCheck, _ in pairs(setIdsToCheck) do
+            local itemIdsToCheck = lib.GetSetItemIds(setIdToCheck)
+            if itemIdsToCheck then
+                for itemIdToCheck, _ in pairs(itemIdsToCheck) do
+                    if itemIdToCheck then
+                        local isSet, setName, setId = lib.IsSetByItemId(itemIdToCheck)
+                        if isSet and setId == setIdToCheck then
+                            setName = ZO_CachedStrFormat("<<C:1>>", setName)
+                            if setName ~= "" then
+                                lib.svData["setNames"][setId] = lib.svData["setNames"][setId] or {}
+                                lib.svData["setNames"][setId][lib.clientLang] = setName
+                                setNamesAdded = setNamesAdded +1
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        if setNamesAdded > 0 then
+            d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'setNames\'")
+        end
+    end
+end
 
 --Load the addon now
 EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
