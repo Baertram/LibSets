@@ -311,16 +311,36 @@ function lib.IsSetByItemLink(itemLink)
     return checkSet(itemLink)
 end
 
---Returns true/false if the set must be obtained in a veteran mode dungeon/trial/arena
+--Returns true/false if the set must be obtained in a veteran mode dungeon/trial/arena.
+--If the veteran state is not a boolean value, but a table, then this table contains the equipType
+--and the boolean value for each of these equipTypes. e.g. the head is a veteran setItem but the shoulders aren't (monster set).
+--->To check the equiptype you need to specify the 2nd parameter itemlink in this case! Or the return value will be nil
 --> Parameters: setId number: The set's setId
+-->             itemLink String: An itemlink of a setItem, only needed if the veteran data contains equipTypes and should be checked
+-->                              against these.
 --> Returns:    isVeteranSet boolean
-function lib.IsVeteranSet(setId)
+function lib.IsVeteranSet(setId, itemLink)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local isVeteranSet = false
     local setData = setInfo[setId]
     if setData == nil then return end
-    isVeteranSet = setData.veteran or false
+    local veteranData = setData.veteran
+    if veteranData == nil then return false end
+    if type(veteranData) == "table" then
+        if itemLink == nil then return nil end
+        local equipType = GetItemLinkEquipType(itemLink)
+        if equipType == nil then return nil end
+        --veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}
+        for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
+            if equipTypeVeteranCheck == equipType then
+                return isVeteran
+            end
+        end
+        return false
+    else
+        isVeteranSet = veteranData or false
+    end
     return isVeteranSet
 end
 
