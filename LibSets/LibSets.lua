@@ -42,26 +42,6 @@ lib.setsScanning = false
 local preloaded         = lib.setDataPreloaded      -- <-- this table contains all setData (itemIds, names) of the sets, preloaded
 --The set data
 local setInfo           = lib.setInfo               -- <--this table contains all set information like setId, type, drop zoneIds, wayshrines, etc.
-lib.setIds            = {}
---The set types
-lib.craftedSets       = {}
-lib.monsterSets       = {}
-lib.dungeonSets       = {}
-lib.overlandSets      = {}
-lib.arenaSets         = {}
-lib.trialSets         = {}
-lib.cyrodiilSets      = {}
-lib.battlegroundSets  = {}
-
---The count variables for each set type
-lib.craftedSetsCount      = 0
-lib.monsterSetsCount      = 0
-lib.dungeonSetsCount      = 0
-lib.overlandSetsCount     = 0
-lib.arenaSetsCount        = 0
-lib.trialSetsCount        = 0
-lib.cyrodiilSetsCount     = 0
-lib.battlegroundSetsCount = 0
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -193,14 +173,13 @@ local function distinguishSetTypes()
 end
 
 ------------------------------------------------------------------------
--- 	Global functions
+-- 	Global helper functions
 ------------------------------------------------------------------------
 --Create an exmaple itemlink of the setItem's itemId
 function lib.buildItemLink(itemId)
     if itemId == nil or itemId == 0 then return end
     return '|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
 end
-
 
 ------------------------------------------------------------------------
 -- 	Global set check functions
@@ -458,6 +437,23 @@ function lib.GetUndauntedChestName(undauntedChestId)
     return undauntedChestName
 end
 
+--Returns the name of the DLC by help of the DLC id
+--> Parameters: zoneId number: The zone id given in a set's info
+-->             language String: ONLY possible to be used if LibZone is activated
+--> Returns:    name zoneName
+function lib.GetZoneName(zoneId, lang)
+    if not zoneId then return end
+    lang = lang or lib.clientLang
+    local zoneName = ""
+    if lib.libZone ~= nil then
+        zoneName = lib.libZone:GetZoneName(zoneId, lang)
+    else
+        zoneName = GetZoneNameById(zoneId)
+        zoneName = ZO_CachedStrFormat("<<C:1>>", zoneName)
+    end
+    return zoneName
+end
+
 ------------------------------------------------------------------------
 -- 	Global library check functions
 ------------------------------------------------------------------------
@@ -496,6 +492,11 @@ local function OnLibraryLoaded(event, name)
     --own tables
     distinguishSetTypes()
     lib.setsLoaded = true
+    --Check for library LibZone
+    lib.libZone = LibZone
+    if lib.libZone == nil and LibStub then
+        lib.libZone = LibStub:GetLibrary("LibZone", true)
+    end
 end
 
 -------------------------------------------------------------------------------------------------------------------------------
