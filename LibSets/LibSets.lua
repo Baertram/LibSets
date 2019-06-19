@@ -520,10 +520,10 @@ end
 -- Uncomment to use them via the libraries global functions then
 -------------------------------------------------------------------------------------------------------------------------------
 local function GetAllZoneInfo()
-    d("[".. MAJOR .. "]GetAllZoneInfo")
+    local lang = GetCVar("language.2")
+    d("[".. MAJOR .. "]GetAllZoneInfo, language: " ..tostring(lang))
     local maxZoneId = 2000
     local zoneData = {}
-    local lang = GetCVar("language.2")
     zoneData[lang] = {}
     --zoneIndex1 "Clean Test"'s zoneId
     local zoneIndex1ZoneId = GetZoneId(1) -- should be: 2
@@ -576,9 +576,9 @@ local function GetWayshrineInfo()
 end
 
 local function GetWayshrineNames()
-    d("[".. MAJOR .. "]GetWayshrineNames]")
-    local wsNames = {}
     local lang = GetCVar("language.2")
+    d("[".. MAJOR .. "]GetWayshrineNames, language: " ..tostring(lang))
+    local wsNames = {}
     wsNames[lang] = {}
     for wsNodeId=1, GetNumFastTravelNodes(), 1 do
         --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
@@ -593,7 +593,7 @@ end
 
 local function GetMapNames(lang)
     lang = lang or GetCVar("language.2")
-    d("[".. MAJOR .. "]GetMapNames]lang: " ..tostring(lang))
+    d("[".. MAJOR .. "]GetMapNames, language: " ..tostring(lang))
     local lz = lib.libZone
     if not lz then d("ERROR: Library LibZone must be loaded!") return end
     local zoneIds = lz.givenZoneData
@@ -621,7 +621,7 @@ function lib.GetAllZoneInfo()
         lib.svData.zoneData = lib.svData.zoneData or {}
         lib.svData.zoneData[lib.clientLang] = {}
         lib.svData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'zoneData\'")
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'zoneData\', language: \'" ..tostring(lib.clientLang).."\'")
     end
 end
 
@@ -632,7 +632,7 @@ function lib.GetAllMapNames()
         lib.svData.maps = lib.svData.maps or {}
         lib.svData.maps[lib.clientLang] = {}
         lib.svData.maps[lib.clientLang] = maps
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'maps\'")
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'maps\', language: \'" ..tostring(lib.clientLang).."\'")
     end
 end
 
@@ -655,12 +655,12 @@ function lib.GetAllWayshrineNames()
         lib.svData.wayshrineNames = lib.svData.wayshrineNames or {}
         lib.svData.wayshrineNames[lib.clientLang] = {}
         lib.svData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'wayshrineNames\'")
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'wayshrineNames\', language: \'" ..tostring(lib.clientLang).."\'")
     end
 end
 
 function lib.GetAllSetNames()
-    d("[".. MAJOR .. "]GetAllSetNames")
+    d("[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(lib.clientLang))
     --Use the SavedVariables to get the setNames of the current client language
     local svLoadedAlready = false
     local setIdsToCheck = lib.GetAllSetIds()
@@ -690,7 +690,7 @@ function lib.GetAllSetNames()
             end
         end
         if setNamesAdded > 0 then
-            d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'setNames\'")
+            d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'setNames\', language: \'" ..tostring(lib.clientLang).."\'")
         end
     end
 end
