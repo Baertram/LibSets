@@ -432,10 +432,14 @@ end
 --Returns the name of the DLC by help of the DLC id
 --> Parameters: undauntedChestId number: The undaunted chest id given in a set's info
 --> Returns:    name undauntedChestName
-function lib.GetUndauntedChestName(undauntedChestId)
+function lib.GetUndauntedChestName(undauntedChestId, lang)
     if not lib.undauntedChestIds then return end
-    local undauntedChestName = lib.undauntedChestIds[undauntedChestId] or ""
-    return undauntedChestName
+    lang = lang or lib.clientLang
+    local undauntedChestNameLang = lib.undauntedChestIds[lang]
+    --Fallback language "EN"
+    if not undauntedChestNameLang then undauntedChestNameLang = lib.undauntedChestIds["en"] end
+    if not undauntedChestNameLang[undauntedChestId] then return "" end
+    return undauntedChestNameLang[undauntedChestId]
 end
 
 --Returns the name of the DLC by help of the DLC id
