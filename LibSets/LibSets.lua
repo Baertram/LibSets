@@ -178,7 +178,7 @@ end
 ------------------------------------------------------------------------
 -- 	Global helper functions
 ------------------------------------------------------------------------
---Create an exmaple itemlink of the setItem's itemId
+--Create an example itemlink of the setItem's itemId
 function lib.buildItemLink(itemId)
     if itemId == nil or itemId == 0 then return end
     return '|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
@@ -605,7 +605,7 @@ local function LoadSavedVariables()
         ["maps"]            = {},
         ["wayshrineNames"]  = {},
     }
-    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$InstallationWide")
+    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$AllAccounts")
 end
 
 --Addon loaded function
