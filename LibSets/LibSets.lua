@@ -445,6 +445,19 @@ function lib.GetSetItemIds(setId)
     return setItemIds[tonumber(setId)]
 end
 
+--Returns one itemId of the setId provided
+--> Parameters: setId number: The set's setId
+--> Returns:    number setItemId
+function lib.GetSetItemId(setId)
+    if setId == nil then return end
+    local setItemIds = lib.GetSetItemIds(setId)
+    if not setItemIds then return end
+    for setItemId, isCorrect in pairs(setItemIds) do
+        if setItemId ~= nil and isCorrect == 1 then return setItemId end
+    end
+    return
+end
+
 --Returns the name as String of the setId provided
 --> Parameters: setId number: The set's setId
 --> lang String: The language to return the setName in. Can be left empty and the client language will be used then
