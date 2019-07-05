@@ -338,6 +338,9 @@ function lib.IsVeteranSet(setId, itemLink)
 end
 
 
+------------------------------------------------------------------------
+-- 	Global set get data functions
+------------------------------------------------------------------------
 --Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
 --e.g. wayshrines={382,382,382,}. All entries can be the same, or even a negative value which means: No weayshrine is known
 --Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact
@@ -431,10 +434,6 @@ function lib.GetSetType(setId)
     return setType
 end
 
-
-------------------------------------------------------------------------
--- 	Global set get functions
-------------------------------------------------------------------------
 --Returns a sorted array of all set ids. Key is the setId, value is the boolean value true
 --> Returns: setIds table
 function lib.GetAllSetIds()
@@ -629,9 +628,9 @@ function lib.GetUndauntedChestName(undauntedChestId, lang)
     return undauntedChestNameLang[undauntedChestId]
 end
 
---Returns the name of the DLC by help of the DLC id
+--Returns the name of the zone by help of the zoneId
 --> Parameters: zoneId number: The zone id given in a set's info
--->             language String: ONLY possible to be used if LibZone is activated
+-->             language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated
 --> Returns:    name zoneName
 function lib.GetZoneName(zoneId, lang)
     if not zoneId then return end
