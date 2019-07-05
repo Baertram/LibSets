@@ -600,8 +600,8 @@ function lib.JumpToSetId(setId, factionIndex)
     factionIndex = factionIndex or 1
     if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
     local jumpToNode = -1
-    local setWayshrines = setInfo[setId].wayshrines[1]
-    jumpToNode = setInfo[setId].wayshrines
+    local setWayshrines = setInfo[setId].wayshrines
+    jumpToNode = setWayshrines[factionIndex]
     --Jump now?
     if jumpToNode and jumpToNode > 0 then
         FastTravelToNode(jumpToNode)
