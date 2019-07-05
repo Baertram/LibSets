@@ -6,6 +6,7 @@ LibSets = LibSets or {}
 local lib = LibSets
 
 --Library base values
+local MAJOR, MINOR = "LibSets", 0.06
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"

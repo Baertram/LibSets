@@ -24,9 +24,9 @@
 
     For more information, please refer to <http://unlicense.org/>
 --]========================================================================]
-local MAJOR, MINOR = "LibSets", 0.06
 LibSets = LibSets or {}
 local lib = LibSets
+local MAJOR, MINOR = lib.name, lib.version
 
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
