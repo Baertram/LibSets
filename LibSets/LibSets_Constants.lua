@@ -80,7 +80,9 @@ for dlcId, dlcAchievementId in ipairs(dlcAndChapterAchievementIds) do
     end
 end
 ------------------------------------------------------------------------------------------------------------------------
---The undaunted chests
+--The undaunted chest count
+lib.countUndauntedChests = 3
+--The undaunted chest NPC names
 local undauntedChestIds = {
     ["de"] = {
         [1] = "Glirion der Rotbart",
@@ -96,6 +98,18 @@ local undauntedChestIds = {
         [1] = "Glirion Barbe-Rousse",
         [2] = "Maj al-Ragath",
         [3] = "Urgalarg l'Èmasculatrice",
+    },
+    --English translations used at the moment! Todo: Translate
+    --Asked for assistance: https://www.esoui.com/forums/showthread.php?p=38559#post38559
+    ["ru"] = {
+        [1] = "Glirion the Redbeard",
+        [2] = "Maj al-Ragath",
+        [3] = "Urgarlag Chief-bane",
+    },
+    ["jp"] = {
+        [1] = "Glirion the Redbeard",
+        [2] = "Maj al-Ragath",
+        [3] = "Urgarlag Chief-bane",
     },
 }
 lib.undauntedChestIds = undauntedChestIds

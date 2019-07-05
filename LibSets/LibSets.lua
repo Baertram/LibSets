@@ -626,8 +626,10 @@ end
 --> Parameters: undauntedChestId number: The undaunted chest id given in a set's info
 --> Returns:    name undauntedChestName
 function lib.GetUndauntedChestName(undauntedChestId, lang)
-    if not lib.undauntedChestIds then return end
+    if undauntedChestId < 1 or undauntedChestId > lib.countUndauntedChests then return end
+    if lang and not lib.supportedLanguages[lang] then return end
     lang = lang or lib.clientLang
+    if not lib.undauntedChestIds or not lib.undauntedChestIds[lang] or not lib.undauntedChestIds[lang][undauntedChestId] then return end
     local undauntedChestNameLang = lib.undauntedChestIds[lang]
     --Fallback language "EN"
     if not undauntedChestNameLang then undauntedChestNameLang = lib.undauntedChestIds["en"] end
