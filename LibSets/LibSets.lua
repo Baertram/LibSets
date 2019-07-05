@@ -345,7 +345,9 @@ function lib.IsVeteranSet(setId, itemLink)
 end
 
 
---Returns the wayshrines as table for the setId
+--Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
+--e.g. wayshrines={382,382,382,}. All entries can be the same, or even -1 which means: No weayshrine is known
+--Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact
 --> Parameters: setId number: The set's setId
 --> Returns:    wayshrineNodeIds table
 function lib.GetWayshrineIds(setId)
@@ -392,6 +394,18 @@ end
 --Returns the type of the setId!
 --> Parameters: setId number: The set's setId
 --> Returns:    setType String
+---> Possible values are:
+--   setType = "Arena"
+--   setType = "Battleground"
+--   setType = "Crafted"
+--   setType = "Cyrodiil"
+--   setType = "DailyRandomDungeonAndICReward"
+--   setType = "Dungeon"
+--   setType = "Imperial City"
+--   setType = "Monster"
+--   setType = "Overland"
+--   setType = "Special"
+--   setType = "Trial"
 function lib.GetSetType(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
@@ -400,22 +414,22 @@ function lib.GetSetType(setId)
     local setType = ""
     if     setData.isArena then
         setType = "Arena"
+    elseif setData.isBattleground then
+        setType = "Battleground"
     elseif setData.isCrafted then
         setType = "Crafted"
+    elseif setData.isCyrodiil then
+        setType = "Cyrodiil"
     elseif setData.isDailyRandomDungeonAndImperialCityReward then
         setType = "DailyRandomDungeonAndICReward"
     elseif setData.isDungeon then
         setType = "Dungeon"
+    elseif setData.isImperialCity then
+        setType = "Imperial City"
     elseif setData.isMonster then
         setType = "Monster"
     elseif setData.isOverland then
         setType = "Overland"
-    elseif setData.isBattleground then
-        setType = "Battleground"
-    elseif setData.isCyrodiil then
-        setType = "Cyrodiil"
-    elseif setData.isImperialCity then
-        setType = "Imperial City"
     elseif setData.isSpecial then
         setType = "Special"
     elseif setData.isTrial then
@@ -428,14 +442,15 @@ end
 ------------------------------------------------------------------------
 -- 	Global set get functions
 ------------------------------------------------------------------------
---Returns a sorted array of all set ids
+--Returns a sorted array of all set ids. Key is the setId, value is the boolean value true
 --> Returns: setIds table
 function lib.GetAllSetIds()
     if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.setIds
 end
 
---Returns all itemIds of the setId provided
+--Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
+--The key is the itemId and the value is the boolean value true
 --> Parameters: setId number: The set's setId
 --> Returns:    table setItemIds
 function lib.GetSetItemIds(setId)
@@ -446,15 +461,54 @@ function lib.GetSetItemIds(setId)
     return setItemIds[tonumber(setId)]
 end
 
---Returns one itemId of the setId provided
+--If the setId only got 1 itemId this function returns this itemId of the setId provided.
+--If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
+--If the 2nd parameter equipType is not specified: The first random itemId found will be returned
+--If the 2nd parameter equipType is specified:  Each itemId of the setId will be turned into an itemLink where the given equipType is checked against.
+--Only the itemId where the equipType fits will be returned. Else the return value will be nil
 --> Parameters: setId number: The set's setId
+-->             equipType number: The equipType to check the itemId against
 --> Returns:    number setItemId
-function lib.GetSetItemId(setId)
+function lib.GetSetItemId(setId, equipType)
     if setId == nil then return end
+    local equipTypesValid = {
+        --Not allowed
+        [EQUIP_TYPE_INVALID]    = false,
+        [EQUIP_TYPE_COSTUME]    = false,
+        [EQUIP_TYPE_POISON]     = false,
+        --Allowed
+        [EQUIP_TYPE_CHEST]      = true,
+        [EQUIP_TYPE_FEET]       = true,
+        [EQUIP_TYPE_HAND]       = true,
+        [EQUIP_TYPE_HEAD]       = true,
+        [EQUIP_TYPE_LEGS]       = true,
+        [EQUIP_TYPE_MAIN_HAND]  = true,
+        [EQUIP_TYPE_NECK]       = true,
+        [EQUIP_TYPE_OFF_HAND]   = true,
+        [EQUIP_TYPE_ONE_HAND]   = true,
+        [EQUIP_TYPE_RING]       = true,
+        [EQUIP_TYPE_SHOULDERS]  = true,
+        [EQUIP_TYPE_TWO_HAND]   = true,
+        [EQUIP_TYPE_WAIST]      = true,
+    }
+    local equipTypeValid = false
+    if equipType ~= nil then
+        equipTypeValid = equipTypesValid[equipType] or false
+    end
     local setItemIds = lib.GetSetItemIds(setId)
     if not setItemIds then return end
     for setItemId, isCorrect in pairs(setItemIds) do
-        if setItemId ~= nil and isCorrect == 1 then return setItemId end
+        if equipTypeValid == true then
+            --Create itemLink of the itemId
+            local itemLink = lib.buildItemLink(setItemId)
+            if itemLink then
+                local ilEquipType = GetItemLinkEquipType(itemLink)
+                if ilEquipType ~= nil and ilEquipType == equipType then return setItemId end
+            end
+            --Check the equipType against the itemLink's equipType
+        else
+            if setItemId ~= nil and isCorrect == true then return setItemId end
+        end
     end
     return
 end
