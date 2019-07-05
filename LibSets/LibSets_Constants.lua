@@ -27,8 +27,8 @@ lib.supportedLanguages = {
     ["de"]  = true,
     ["en"]  = true,
     ["fr"]  = true,
-    ["jp"]  = true,
-    ["ru"]  = true,
+    ["jp"]  = false,
+    ["ru"]  = false,
 }
 ------------------------------------------------------------------------------------------------------------------------
 --Number of currently available set bonus for a monster set piece (2: head, shoulder)
