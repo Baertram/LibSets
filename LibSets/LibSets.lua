@@ -174,7 +174,8 @@ end
 --Create an example itemlink of the setItem's itemId
 function lib.buildItemLink(itemId)
     if itemId == nil or itemId == 0 then return end
-    return '|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
+    --return '|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
+    return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, 364, ITEMSTYLE_NONE, 0, 10000)
 end
 
 ------------------------------------------------------------------------
