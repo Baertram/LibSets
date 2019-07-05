@@ -346,7 +346,7 @@ end
 
 
 --Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
---e.g. wayshrines={382,382,382,}. All entries can be the same, or even -1 which means: No weayshrine is known
+--e.g. wayshrines={382,382,382,}. All entries can be the same, or even a negative value which means: No weayshrine is known
 --Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact
 --> Parameters: setId number: The set's setId
 --> Returns:    wayshrineNodeIds table
@@ -527,7 +527,9 @@ function lib.GetSetName(setId, lang)
     return setNames[tonumber(setId)][lang]
 end
 
---Returns all names as String of the setId provided
+--Returns all names as String of the setId provided.
+--The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.
+--{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
 --> Parameters: setId number: The set's setId
 --> Returns:    table setNames
 ----> Contains a table with the different names of the set, for each scanned language (setNames = {["de"] = String nameDE, ["en"] = String nameEN})
@@ -542,22 +544,41 @@ end
 --Returns the set info as a table
 --> Parameters: setId number: The set's setId
 --> Returns:    table setInfo
-----> Contains the number setId,
+----> Contains:
+----> number setId
+----> number dlcId (the dlcId where the set was added, see file LibSets_Constants.lua, constants DLC_BASE_GAME to e.g. DLC_ELSWEYR)
 ----> tables itemIds (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's item),
-----> table names ([String lang] = String name),
+----> table names ([2 character String lang] = String name),
 ----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),
-----> isDungeon, isTrial, IsCraftable, ... boolean value
-----> isVeteran boolean value. true if this set can be only obtained in veteran mode
+----> isDungeon, isTrial, IsCraftable, ... boolean value. Only one of the values will be given, all other values will be nil
+----> isVeteran boolean value true if this set can be only obtained in veteran mode, or a table containing the key = equipType and value=boolean true/false if the equipType of the setId cen be only obtained in veteran mode (e.g. a monster set head is veteran, shoulders are normal)
 ----> isMultiTrial boolean, only if isTrial == true (setId can be obtained in multiple trials -> see zoneIds table)
 ----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).
------->The table will contain 1 entry if it's a NON-craftable setId (wayshrines = {[1] = WSNodeNoFaction})
------->and 3 entries (one for each faction) if it's a craftable setId (wayshrines = {[1] = WSNodeFactionAD, [2] = WSNodeFactionDC, [3] = WSNodeFactionEP})
-----> table zoneIds containing the zoneIds where this set drops or can be obtained
+------>The table can contain 1 to 3 entries (one for each faction e.g.) and contains the wayshrineNodeId nearest to the set's crafting table/in the drop zone
+----> table zoneIds containing the zoneIds (one to n) where this set drops, or can be obtained
+-------Example for setId 408
+--- ["setId"] = 408,
+--- ["dlcId"] = 12    --DLC_MURKMIRE
+--	["isCrafted"] = true
+--	["itemIds"] = table [#0,370]
+--	["names"] = table [#0,3]
+--		["de"] = "Grabpflocksammler"
+--		["en"] = "Grave-Stake Collector"
+--		["fr"] = "Collectionneur de marqueurs funéraires"
+--	["traitsNeeded"] = 7
+--	["veteran"] = false
+--	["wayshrines"] = table [#3,3]
+--		[1] = 375
+--		[2] = 375
+--		[3] = 375
+--	["zoneIds"] = table [#1,1]
+--		[1] = 726
 function lib.GetSetInfo(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     if setInfo[tonumber(setId)] == nil then return end
     local setInfoTable = setInfo[tonumber(setId)]
+    setInfoTable["setId"] = setId
     local itemIds = preloaded["setItemIds"][setId]
     if itemIds then setInfoTable["itemIds"] = itemIds end
     local setNames = preloaded["setNames"][setId]
@@ -573,22 +594,14 @@ end
 --> Parameters: setId number: The set's setId
 -->             OPTIONAL factionIndex: The index of the faction (1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact)
 function lib.JumpToSetId(setId, factionIndex)
-    if setId == nil then return false end
+    if setId == nil or setInfo[setId] == nil or setInfo[setId].wayshrines == nil then return false end
     if not lib.checkIfSetsAreLoadedProperly() then return end
+    --Then use the faction Id 1 (AD), 2 (DC) to 3 (EP)
+    factionIndex = factionIndex or 1
+    if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
     local jumpToNode = -1
-    --Is a crafted set?
-    if lib.craftedSets[setId] then
-        --Then use the faction Id 1 (AD), 2 (DC) to 3 (EP)
-        factionIndex = factionIndex or 1
-        if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
-        local craftedSetWSData = setInfo[setId].wayshrines
-        if craftedSetWSData ~= nil and craftedSetWSData[factionIndex] ~= nil then
-            jumpToNode = craftedSetWSData[factionIndex]
-        end
-        --Other sets wayshrines
-    else
-        jumpToNode = setInfo[setId].wayshrines[1]
-    end
+    local setWayshrines = setInfo[setId].wayshrines[1]
+    jumpToNode = setInfo[setId].wayshrines
     --Jump now?
     if jumpToNode and jumpToNode > 0 then
         FastTravelToNode(jumpToNode)
