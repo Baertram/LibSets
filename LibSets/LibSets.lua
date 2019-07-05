@@ -28,13 +28,6 @@ local MAJOR, MINOR = "LibSets", 0.06
 LibSets = LibSets or {}
 local lib = LibSets
 
-lib.name        = MAJOR
-lib.version     = MINOR
-lib.svName      = "LibSets_SV_Data"
-lib.svVersion   = 0.6
-lib.setsLoaded  = false
-lib.setsScanning = false
-
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------

@@ -11,11 +11,12 @@ local lib = LibSets
 --wayshrines:       table of wayshrine nodeIds to jump to. You'll be near the set's crafting station/at a wayshrine in the dropZone then. 1st table key=EP, 2nd table key=AD, 3rd table key= DC
 --> If a table entry is negative (e.g. -1 or -2, or any value below 0) the jump won't work as no wayshrine is knwon or it is a special one like the Mages's guild island Augvea
 --traitsNeeded:     the number of traits you need to research to be able to craft this set (if isCrafted = true)
---veteran:          boolean value telling you if you need to do the dungeon in veteran mode to get this set pieces (if the set type is a trial/arena/dungeon where there is normal and veteran mode possible)
--->                 or a table containing the different equipTypes as key, and a boolean value as value to show which of the equipTypes is a veteran dungeon reward (e.g. head and shoulders for monster sets)
---multiTrial:       boolean value (only if isTrial=true) telling you if this set can be achieved in multiple trials
 --dlcId:            the dlcId from table lib.DLCData (key). The set was added with this DLC. 0 if it's the ESO base game
 --zoneIds:          table containing the different drop zoneIds of the game where this set can drop
+--veteran:          boolean value telling you if you need to do the dungeon in veteran mode to get this set pieces (if the set type is a trial/arena/dungeon where there is normal and veteran mode possible)
+-->                 or a table containing the different equipTypes as key, and a boolean value as value to show which of the equipTypes is a veteran dungeon reward (e.g. head and shoulders for monster sets)
+--isArena, isBattleground, isCrafted, isCyrodiil, isDailyRandomDungeonAndImperialCityReward, isDungeon, isImperialCity, isMonster, isOverland, isTrial: Boolean value
+--multiTrial:       boolean value (only if isTrial=true) telling you if this set can be achieved in multiple trials
 --names:            table containing the different set names with the languages supported as subtable key, e.g. ["en"] (see LibSets_Constants.lua, variable lib.supportedLanguages)
 -------
 -------

@@ -1,6 +1,17 @@
+--Check if the library was loaded before already
+assert(LibSets == nil, "[LibSets]Library was loaded before already!")
+
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets
+
+--Library base values
+lib.name            = MAJOR
+lib.version         = MINOR
+lib.svName          = "LibSets_SV_Data"
+lib.svVersion       = 0.6
+lib.setsLoaded      = false
+lib.setsScanning    = false
 
 -- lookup this "max itemId scanned" for the current patch with the following script:
 -- /script local maxId=147664 for itemId=maxId,250000 do local itemType = GetItemLinkItemType('|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h') if itemType>0 then maxId=itemId end end d(maxId)
