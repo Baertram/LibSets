@@ -633,7 +633,6 @@ function lib.GetUndauntedChestName(undauntedChestId, lang)
     local undauntedChestNameLang = lib.undauntedChestIds[lang]
     --Fallback language "EN"
     if not undauntedChestNameLang then undauntedChestNameLang = lib.undauntedChestIds["en"] end
-    if not undauntedChestNameLang[undauntedChestId] then return "" end
     return undauntedChestNameLang[undauntedChestId]
 end
 
@@ -688,6 +687,7 @@ local function LoadSavedVariables()
         ["maps"]            = {},
         ["wayshrineNames"]  = {},
     }
+    --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$AllAccounts")
 end
 lib.LoadSavedVariables = LoadSavedVariables
