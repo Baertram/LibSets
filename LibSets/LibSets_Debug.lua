@@ -260,8 +260,12 @@ end
 --for x loops (where x is the multiplier number e.g. 40, so 40x5000 itemIds will be scanned for set data)
 --This takes some time and the chat will show information about found sets and item counts during the packages get scanned.
 local function scanAllSetData()
-    d(debugOutputStartLine .. "[" .. MAJOR .."]")
-    d("Start to load all set data. This could take some minutes to finish! Watch the chat output for further information.")
+    local numItemIdPackages = 40       -- Increase this to find new added set itemIds after and update
+    local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
+    local itemIdsToScanTotal = numItemIdPackages * numItemIdPackageSize
+    d(debugOutputStartLine)
+    d("[" .. MAJOR .."]Start to load all set data. This could take some minutes to finish!\nWatch the chat output for further information.")
+    d("Scanning " ..tostring(numItemIdPackages) .. " packages with each " .. tostring(numItemIdPackageSize) .. " itemIds (total: " .. tostring(itemIdsToScanTotal) ..") now...")
 
     --Clear all set data
     sets = {}
@@ -276,8 +280,6 @@ local function scanAllSetData()
     --> Change variable numItemIdPackages and increase it to support new added set itemIds
     --> Total itemIds collected: 0 to (numItemIdPackages * numItemIdPackageSize)
     local miliseconds = 0
-    local numItemIdPackages = 40       -- Increase this to find new added set itemIds after and update
-    local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
     local fromTo = {}
     local fromVal = 0
     for numItemIdPackage = 1, numItemIdPackages, 1 do
