@@ -450,8 +450,8 @@ function lib.GetSetItemIds(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setItemIds = preloaded["setItemIds"]
-    if setItemIds[tonumber(setId)] == nil then return end
-    return setItemIds[tonumber(setId)]
+    if setItemIds[setId] == nil then return end
+    return setItemIds[setId]
 end
 
 --If the setId only got 1 itemId this function returns this itemId of the setId provided.
@@ -515,9 +515,9 @@ function lib.GetSetName(setId, lang)
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setNames = preloaded["setNames"]
     if setId == nil or not lib.supportedLanguages[lang]
-        or setNames[tonumber(setId)] == nil
-        or setNames[tonumber(setId)][lang] == nil then return end
-    return setNames[tonumber(setId)][lang]
+        or setNames[setId] == nil
+        or setNames[setId][lang] == nil then return end
+    return setNames[setId][lang]
 end
 
 --Returns all names as String of the setId provided.
@@ -530,8 +530,8 @@ function lib.GetSetNames(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setNames = preloaded["setNames"]
-    if setNames[tonumber(setId)] == nil then return end
-    return setNames[tonumber(setId)]
+    if setNames[setId] == nil then return end
+    return setNames[setId]
 end
 
 --Returns the set info as a table
@@ -569,8 +569,8 @@ end
 function lib.GetSetInfo(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    if setInfo[tonumber(setId)] == nil then return end
-    local setInfoTable = setInfo[tonumber(setId)]
+    if setInfo[setId] == nil then return end
+    local setInfoTable = setInfo[setId]
     setInfoTable["setId"] = setId
     local itemIds = preloaded["setItemIds"][setId]
     if itemIds then setInfoTable["itemIds"] = itemIds end
