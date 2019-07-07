@@ -19,5 +19,5 @@ LibSets_Data.lua
 ##Functions and base library code
 LibSets.lua
 
-##Debug functions - Remove ## in front of LibSets_Debug.lua and /reloadui to enable them
+##Debug functions
 LibSets_Debug.lua
