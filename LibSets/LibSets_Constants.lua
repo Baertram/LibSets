@@ -31,6 +31,12 @@ lib.supportedLanguages = {
     ["ru"]  = false,
 }
 ------------------------------------------------------------------------------------------------------------------------
+--The itemTypes possible to be used for setItems
+lib.setItemTypes = {
+    [ITEMTYPE_ARMOR]    = true,
+    [ITEMTYPE_WEAPON]   = true,
+}
+------------------------------------------------------------------------------------------------------------------------
 --Number of currently available set bonus for a monster set piece (2: head, shoulder)
 lib.countMonsterSetBonus = 2
 ------------------------------------------------------------------------------------------------------------------------

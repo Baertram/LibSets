@@ -106,6 +106,9 @@ local function GetMapNames(lang)
     return mapNames
 end
 
+------------------------------------------------------------------------------------------------------------------------
+-- Scan for zone names -> Save them in the SavedVariables "zoneData"
+------------------------------------------------------------------------------------------------------------------------
 function lib.DebugGetAllZoneInfo()
     local zoneData = GetAllZoneInfo()
     if zoneData ~= nil then
@@ -117,6 +120,9 @@ function lib.DebugGetAllZoneInfo()
     end
 end
 
+------------------------------------------------------------------------------------------------------------------------
+-- Scan for map names -> Save them in the SavedVariables "maps"
+------------------------------------------------------------------------------------------------------------------------
 function lib.DebugGetAllMapNames()
     local maps = GetMapNames(lib.clientLang)
     if maps ~= nil then
@@ -128,6 +134,10 @@ function lib.DebugGetAllMapNames()
     end
 end
 
+------------------------------------------------------------------------------------------------------------------------
+-- Scan for wayshrines -> Save them in the SavedVariables "wayshrines"
+--> You need to open a map (zone map, no city or sub-zone maps!) in order to let the function work properly
+------------------------------------------------------------------------------------------------------------------------
 function lib.DebugGetAllWayshrineInfo()
     local ws = GetWayshrineInfo()
     if ws ~= nil then
@@ -151,6 +161,9 @@ function lib.DebugGetAllWayshrineNames()
     end
 end
 
+------------------------------------------------------------------------------------------------------------------------
+-- Scan for set names in client language -> Save them in the SavedVariables "setNames"
+---------------------------------------------------------------------------------------------------------------------------
 function lib.DebugGetAllSetNames()
     d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(lib.clientLang))
     --Use the SavedVariables to get the setNames of the current client language
@@ -186,3 +199,105 @@ function lib.DebugGetAllSetNames()
         end
     end
 end
+
+------------------------------------------------------------------------------------------------------------------------
+-- Scan for sets and their itemIds -> Save them in the SavedVariables "setItemIds"
+---------------------------------------------------------------------------------------------------------------------------
+--Variables needed for the functions below (Scan itemIds for sets and itemIds)
+local sets = {}
+local setCount = 0
+local itemCount = 0
+local itemIdsScanned = 0
+local function showSetCountsScanned(finished)
+    finished = finished or false
+    d(debugOutputStartLine .."[" .. MAJOR .."]Scanned itemIds: " .. tostring(itemIdsScanned))
+    d("-> Sets found: "..tostring(setCount))
+    d("-> Set items found: "..tostring(itemCount))
+    if finished then
+        d(">>> [" .. MAJOR .. "] Scanning of sets has finished! Please do a /reloadui to update the SavedVariables properly! <<<")
+        --Save the data to the SavedVariables now
+        if setCount > 0 then
+            LoadSavedVariables()
+            lib.svData.setItemIds = {}
+            lib.svData.setItemIds = sets
+        end
+    end
+    d("<<" .. debugOutputStartLine)
+end
+--Load a package of 5000 itemIds and scan it:
+--Build an itemlink from the itemId, check if the itemLink is not crafted, if the itemType is a possibel set itemType, check if the item is a set:
+--If yes: Update the table sets and setNames, and add the itemIds found for this set to the sets table
+--Format of the sets table is: sets[setId] = {[itemIdOfSetItem]=true, ...}
+local function loadSetsByIds(from,to)
+    for setItemId=from,to do
+        itemIdsScanned = itemIdsScanned + 1
+        --Generate link for item
+        local itemLink = lib.buildItemLink(setItemId)
+        if itemLink and itemLink ~= "" then
+            if not IsItemLinkCrafted(itemLink) then
+                local isSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+                if isSet then
+                    local itemType = GetItemLinkItemType(itemLink)
+                    --Some set items are only "containers" ...
+                    if lib.setItemTypes[itemType] then
+                        if sets[setId] == nil then
+                            sets[setId] = {}
+                            --Update the set counts value
+                            setCount = setCount + 1
+                        end
+                        sets[setId][setItemId] = true
+                        --Update the set's item count
+                        itemCount = itemCount + 1
+                    end
+                end
+            end
+        end
+    end
+    showSetCountsScanned(false)
+end
+
+--Scan all sets data by scanning all itemIds in the game via a 5000 itemId package size (5000 itemIds scanned at once),
+--for x loops (where x is the multiplier number e.g. 40, so 40x5000 itemIds will be scanned for set data)
+--This takes some time and the chat will show information about found sets and item counts during the packages get scanned.
+local function scanAllSetData()
+    d(debugOutputStartLine .. "[" .. MAJOR .."]")
+    d("Start to load all set data. This could take some minutes to finish! Watch the chat output for further information.")
+
+    --Clear all set data
+    sets = {}
+    --Clear counters
+    setCount = 0
+    itemCount = 0
+    itemIdsScanned = 0
+
+    --Loop through all item ids and save all sets to an array
+    --Split the itemId packages into 5000 itemIds each, so the client is not lagging that
+    --much and is not crashing!
+    --> Change variable numItemIdPackages and increase it to support new added set itemIds
+    --> Total itemIds collected: 0 to (numItemIdPackages * numItemIdPackageSize)
+    local miliseconds = 0
+    local numItemIdPackages = 40       -- Increase this to find new added set itemIds after and update
+    local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
+    local fromTo = {}
+    local fromVal = 0
+    for numItemIdPackage = 1, numItemIdPackages, 1 do
+        --Set the to value to loop counter muliplied with the package size (e.g. 1*500, 2*5000, 3*5000, ...)
+        local toVal = numItemIdPackage * numItemIdPackageSize
+        --Add the from and to values to the totla itemId check array
+        table.insert(fromTo, {from = fromVal, to = toVal})
+        --For the next loop: Set the from value to the to value + 1 (e.g. 5000+1, 10000+1, ...)
+        fromVal = toVal + 1
+    end
+    --Add itemIds and scan them for set parts!
+    for _, v in pairs(fromTo) do
+        zo_callLater(function()
+            loadSetsByIds(v.from,v.to)
+        end, miliseconds)
+        miliseconds = miliseconds + 2000 -- scan item ID packages every 2 seconds to get not kicked/crash the client!
+    end
+    --Were all item IDs scanned? Show the results list now
+    zo_callLater(function()
+        showSetCountsScanned(true)
+    end, miliseconds + 2000)
+end
+lib.DebugScanAllSetData = scanAllSetData
