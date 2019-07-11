@@ -37,6 +37,7 @@ LIBSETS_TABLEKEY_SETNAMES_NO_SETID              = "setNames" .. noSetIdString
 LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION          = "lastSetsCheckAPIVersion"
 LIBSETS_TABLEKEY_NUMBONUSES                     = "numBonuses"
 LIBSETS_TABLEKEY_MAXEQUIPPED                    = "maxEquipped"
+LIBSETS_TABLEKEY_SETTYPE                        = "setType"
 --Set types
 LIBSETS_SETTYPE_ARENA                           = "Arena"
 LIBSETS_SETTYPE_BATTLEGROUND                    = "Battleground"

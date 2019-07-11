@@ -201,7 +201,7 @@ local function LoadSets()
                     itemIds = preloadedNonESOsetIdItemIds[setId]
                 end
                 if itemIds ~= nil then
-                    refToSetIdTable["itemIds"] = itemIds
+                    refToSetIdTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds
                 end
                 --Get the names stored for the setId and add them to the set's ["names"] table
                 local setNames = preloadedSetNames[setId]
@@ -209,7 +209,7 @@ local function LoadSets()
                     setNames = preloadedNonESOsetIdSetNames[setId]
                 end
                 if setNames ~= nil then
-                    refToSetIdTable["names"] = setNames
+                    refToSetIdTable[LIBSETS_TABLEKEY_SETNAMES] = setNames
                 end
             end
         end
@@ -808,17 +808,23 @@ local function getSetTypeSetsData(setType)
     --Loop over that table now and get each setId and transfer the data to the outputTable
     --+ enrich it with the setType and other needed information
     local setsDataForSetTypeTable
+    local cnt = 0
     for setIdForSetType, setDataForSetType in pairs(setType2SetIdsTable) do
         setsDataForSetTypeTable = setsDataForSetTypeTable or {}
         setsDataForSetTypeTable[setIdForSetType] = setDataForSetType
-        setsDataForSetTypeTable[setIdForSetType]["setType"] = setType
+        setsDataForSetTypeTable[setIdForSetType][LIBSETS_TABLEKEY_SETTYPE] = setType
+        cnt = cnt +1
     end
-    return setsDataForSetTypeTable
+    if cnt > 0 then
+        return setsDataForSetTypeTable
+    else
+        return nil
+    end
 end
 
 --Returns the set data (setType String, setIds table, itemIds table, setNames table)
 --> Returns:    table with key = setId, value = table which contains:
----->             setType = LIBSETS_SETTYPE_CRAFTED ("Crafted")
+---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
 ------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
 ------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
 ---             Example:
