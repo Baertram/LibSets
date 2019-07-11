@@ -34,11 +34,11 @@ local MAJOR, MINOR = lib.name, lib.version
 
 ------------The sets--------------
 --The preloaded sets data
-local preloaded         = lib.setDataPreloaded      -- <-- this table contains all setData (itemIds, names) of the sets, preloaded
+local preloaded         = lib.setDataPreloaded      -- <-- this table contains all setData (setItemIds, setNames) of the sets, preloaded
 --The set data
 local setInfo           = lib.setInfo               -- <--this table contains all set information like setId, type, drop zoneIds, wayshrines, etc.
 --The special sets
-local noSetIdSets       = lib.noSetIdSets           -- <-- this table contains the set information for special sets like Maelstrom or Master
+local noSetIdSets       = lib.noSetIdSets           -- <-- this table contains the set information for special sets which got no ESO own unique setId, but a new generated setId starting with 9999xxx
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -73,7 +73,7 @@ end
 local function checkNoSetIdSet(itemId)
     if itemId == nil or itemId == "" then return false, "", 0, 0, 0, 0 end
     local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = false, "", 0, 0, 0, 0
-    local specialSetNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+    local noESOsetIdSetNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
     --Check the special sets data for the itemId
     for noESOSetId, specialSetData in pairs(noSetIdSets) do
         --Check if we got preloaded itemIds for the noSetIdSets
@@ -82,7 +82,7 @@ local function checkNoSetIdSet(itemId)
             --Found the itemId in the sepcial sets itemIds table?
             if specialSetsItemIds and specialSetsItemIds[itemId] then
                 isSet = true
-                setName = specialSetNames[noESOSetId][lib.clientLang] or ""
+                setName = noESOsetIdSetNames[noESOSetId][lib.clientLang] or ""
                 numBonuses = specialSetData[LIBSETS_TABLEKEY_NUMBONUSES] or 0
                 numEquipped = getNumEquippedItemsWithItemId(itemId)
                 maxEquipped = specialSetData[LIBSETS_TABLEKEY_MAXEQUIPPED] or 0
@@ -654,8 +654,8 @@ end
 ----> Contains:
 ----> number setId
 ----> number dlcId (the dlcId where the set was added, see file LibSets_Constants.lua, constants DLC_BASE_GAME to e.g. DLC_ELSWEYR)
-----> tables itemIds (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's item),
-----> table names ([2 character String lang] = String name),
+----> tables LIBSETS_TABLEKEY_SETITEMIDS (="setItemIds") (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's item),
+----> table names (="setNames") ([2 character String lang] = String name),
 ----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),
 ----> isDungeon, isTrial, IsCraftable, ... boolean value. Only one of the values will be given, all other values will be nil
 ----> isVeteran boolean value true if this set can be only obtained in veteran mode, or a table containing the key = equipType and value=boolean true/false if the equipType of the setId cen be only obtained in veteran mode (e.g. a monster set head is veteran, shoulders are normal)
@@ -667,8 +667,8 @@ end
 --- ["setId"] = 408,
 --- ["dlcId"] = 12    --DLC_MURKMIRE
 --	["isCrafted"] = true
---	["itemIds"] = table [#0,370]
---	["names"] = table [#0,3]
+--	[LIBSETS_TABLEKEY_SETITEMIDS] = table [#0,370]
+--	[LIBSETS_TABLEKEY_SETNAMES] = table [#0,3]
 --		["de"] = "Grabpflocksammler"
 --		["en"] = "Grave-Stake Collector"
 --		["fr"] = "Collectionneur de marqueurs funéraires"
@@ -698,8 +698,8 @@ function lib.GetSetInfo(setId)
     end
     if setInfoTable == nil then return end
     setInfoTable["setId"] = setId
-    if itemIds then setInfoTable["itemIds"] = itemIds end
-    if setNames then setInfoTable["names"] = setNames end
+    if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
+    if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
     return setInfoTable
 end
 
