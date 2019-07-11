@@ -67,11 +67,11 @@ end
 local function checkNoSetIdSet(itemId)
     if itemId == nil or itemId == "" then return false, "", 0, 0, 0, 0 end
     local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = false, "", 0, 0, 0, 0
-    local specialSetNames = preloaded["setNamesNoSetId"]
+    local specialSetNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
     --Check the special sets data for the itemId
     for noESOSetId, specialSetData in pairs(noSetIdSets) do
         --Check if we got preloaded itemIds for the noSetIdSets
-        if preloaded and preloaded["setItemIdsNoSetId"] and preloaded["setItemIdsNoSetId"][noESOSetId] then
+        if preloaded and preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] and preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][noESOSetId] then
             local specialSetsItemIds = lib.GetSetItemIds(noESOSetId, true)
             --Found the itemId in the sepcial sets itemIds table?
             if specialSetsItemIds and specialSetsItemIds[itemId] then
@@ -127,71 +127,91 @@ local function LoadSets()
     local preloadedItemIds = preloaded.setItemIds
     --The preloaded setNames
     local preloadedSetNames = preloaded.setNames
+    --The preloaded non ESO setId itemIds
+    local preloadedNonESOsetIdItemIds = preloaded.setItemIdsNoSetId
+    --The preloaded non ESO setId setNames
+    local preloadedNonESOsetIdSetNames = preloaded.setNamesNoSetId
 
-    --Check the setsData and move entries to appropriate table
-    for setId, setData in pairs(setInfo) do
-        --Add the setId to the setIds table
-        lib.setIds[setId] = true
-        --Get the type of set and create the entry for the setId in the appropriate table
-        local refToSetIdTable
-        if     setData.isArena then
-            lib.arenaSets[setId] = setData
-            lib.arenaSetsCount = lib.arenaSetsCount +1
-            refToSetIdTable = lib.arenaSets[setId]
-        elseif setData.isCrafted then
-            lib.craftedSets[setId] = setData
-            lib.craftedSetsCount = lib.craftedSetsCount +1
-            refToSetIdTable = lib.craftedSets[setId]
-        elseif setData.isDailyRandomDungeonAndImperialCityReward then
-            lib.dailyRandomDungeonAndImperialCityRewardSets[setId] = setData
-            lib.dailyRandomDungeonAndImperialCityRewardSetsCount = lib.dailyRandomDungeonAndImperialCityRewardSetsCount +1
-            refToSetIdTable = lib.dailyRandomDungeonAndImperialCityRewardSets[setId]
-        elseif setData.isDungeon then
-            lib.dungeonSets[setId] = setData
-            lib.dungeonSetsCount = lib.dungeonSetsCount +1
-            refToSetIdTable = lib.dungeonSets[setId]
-        elseif setData.isMonster then
-            lib.monsterSets[setId] = setData
-            lib.monsterSetsCount = lib.monsterSetsCount +1
-            refToSetIdTable = lib.monsterSets[setId]
-        elseif setData.isOverland then
-            lib.overlandSets[setId] = setData
-            lib.overlandSetsCount = lib.overlandSetsCount +1
-            refToSetIdTable = lib.overlandSets[setId]
-        elseif setData.isBattleground then
-            lib.battlegroundSets[setId] = setData
-            lib.battlegroundSetsCount = lib.battlegroundSetsCount +1
-            refToSetIdTable = lib.battlegroundSets[setId]
-        elseif setData.isCyrodiil then
-            lib.cyrodiilSets[setId] = setData
-            lib.cyrodiilSetsCount = lib.cyrodiilSetsCount +1
-            refToSetIdTable = lib.cyrodiilSets[setId]
-        elseif setData.isImperialCity then
-            lib.imperialCitySets[setId] = setData
-            lib.imperialCitySetsCount = lib.imperialCitySetsCount +1
-            refToSetIdTable = lib.imperialCitySets[setId]
-        elseif setData.isSpecial then
-            lib.specialSets[setId] = setData
-            lib.specialSetsCount = lib.specialSetsCount +1
-            refToSetIdTable = lib.specialSets[setId]
-        elseif setData.isTrial then
-            lib.trialSets[setId] = setData
-            lib.trialSetsCount = lib.trialSetsCount +1
-            refToSetIdTable = lib.trialSets[setId]
-        end
-        --Store all other data to the set's table
-        if refToSetIdTable ~= nil then
-            --Get the itemIds stored for the setId and add them to the set's ["itemIds"] table
-            local itemIds = preloadedItemIds[setId]
-            if itemIds ~= nil then
-                refToSetIdTable["itemIds"] = itemIds
+    --Helper function to check the set type and update the tables in the library
+    local function checkSetTypeAndUpdateLibTablesAndCounters(setDataTable)
+        --Check the setsData and move entries to appropriate table
+        for setId, setData in pairs(setDataTable) do
+            --Add the setId to the setIds table
+            lib.setIds[setId] = true
+            --Get the type of set and create the entry for the setId in the appropriate table
+            local refToSetIdTable
+            if     setData.isArena then
+                lib.arenaSets[setId] = setData
+                lib.arenaSetsCount = lib.arenaSetsCount +1
+                refToSetIdTable = lib.arenaSets[setId]
+            elseif setData.isCrafted then
+                lib.craftedSets[setId] = setData
+                lib.craftedSetsCount = lib.craftedSetsCount +1
+                refToSetIdTable = lib.craftedSets[setId]
+            elseif setData.isDailyRandomDungeonAndImperialCityReward then
+                lib.dailyRandomDungeonAndImperialCityRewardSets[setId] = setData
+                lib.dailyRandomDungeonAndImperialCityRewardSetsCount = lib.dailyRandomDungeonAndImperialCityRewardSetsCount +1
+                refToSetIdTable = lib.dailyRandomDungeonAndImperialCityRewardSets[setId]
+            elseif setData.isDungeon then
+                lib.dungeonSets[setId] = setData
+                lib.dungeonSetsCount = lib.dungeonSetsCount +1
+                refToSetIdTable = lib.dungeonSets[setId]
+            elseif setData.isMonster then
+                lib.monsterSets[setId] = setData
+                lib.monsterSetsCount = lib.monsterSetsCount +1
+                refToSetIdTable = lib.monsterSets[setId]
+            elseif setData.isOverland then
+                lib.overlandSets[setId] = setData
+                lib.overlandSetsCount = lib.overlandSetsCount +1
+                refToSetIdTable = lib.overlandSets[setId]
+            elseif setData.isBattleground then
+                lib.battlegroundSets[setId] = setData
+                lib.battlegroundSetsCount = lib.battlegroundSetsCount +1
+                refToSetIdTable = lib.battlegroundSets[setId]
+            elseif setData.isCyrodiil then
+                lib.cyrodiilSets[setId] = setData
+                lib.cyrodiilSetsCount = lib.cyrodiilSetsCount +1
+                refToSetIdTable = lib.cyrodiilSets[setId]
+            elseif setData.isImperialCity then
+                lib.imperialCitySets[setId] = setData
+                lib.imperialCitySetsCount = lib.imperialCitySetsCount +1
+                refToSetIdTable = lib.imperialCitySets[setId]
+            elseif setData.isSpecial then
+                lib.specialSets[setId] = setData
+                lib.specialSetsCount = lib.specialSetsCount +1
+                refToSetIdTable = lib.specialSets[setId]
+            elseif setData.isTrial then
+                lib.trialSets[setId] = setData
+                lib.trialSetsCount = lib.trialSetsCount +1
+                refToSetIdTable = lib.trialSets[setId]
             end
-            --Get the names stored for the setId and add them to the set's ["names"] table
-            local setNames = preloadedSetNames[setId]
-            if setNames ~= nil then
-                refToSetIdTable["names"] = setNames
+            --Store all other data to the set's table
+            if refToSetIdTable ~= nil then
+                --Get the itemIds stored for the setId and add them to the set's ["itemIds"] table
+                local itemIds = preloadedItemIds[setId]
+                if itemIds == nil then
+                    itemIds = preloadedNonESOsetIdItemIds[setId]
+                end
+                if itemIds ~= nil then
+                    refToSetIdTable["itemIds"] = itemIds
+                end
+                --Get the names stored for the setId and add them to the set's ["names"] table
+                local setNames = preloadedSetNames[setId]
+                if setNames == nil then
+                    setNames = preloadedNonESOsetIdSetNames[setId]
+                end
+                if setNames ~= nil then
+                    refToSetIdTable["names"] = setNames
+                end
             end
         end
+    end
+
+    --Get the setTypes for the normal ESO setIds
+    checkSetTypeAndUpdateLibTablesAndCounters(setInfo)
+   --And now get the settypes for the non ESO "self created" setIds
+    if noSetIdSets ~= nil then
+        checkSetTypeAndUpdateLibTablesAndCounters(noSetIdSets)
     end
     lib.setsScanning = false
 end
@@ -332,9 +352,9 @@ end
 function lib.IsNoESOSet(noESOSetId)
     if noESOSetId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return noSetIdSets[noESOSetId] or false
+    local isNoESOSetId = noSetIdSets[noESOSetId] ~= nil or false
+    return isNoESOSetId
 end
-
 
 --Returns information about the set if the itemId provides is a set item
 --> Parameters: itemId number: The item's itemId
@@ -375,6 +395,13 @@ function lib.IsVeteranSet(setId, itemLink)
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local isVeteranSet = false
     local setData = setInfo[setId]
+    if setData == nil then
+        if lib.IsNoESOSet(setId) then
+            setData = noSetIdSets[setId]
+        else
+            return
+        end
+    end
     if setData == nil then return end
     local veteranData = setData.veteran
     if veteranData == nil then return false end
@@ -464,6 +491,13 @@ function lib.GetSetType(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setData = setInfo[setId]
+    if setData == nil then
+        if lib.IsNoESOSet(setId) then
+            setData = noSetIdSets[setId]
+        else
+            return
+        end
+    end
     if setData == nil then return end
     local setType = ""
     if     setData.isArena then
@@ -504,19 +538,18 @@ end
 --> Parameters: setId number: The set's setId
 -->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
 --> Returns:    table setItemIds
-function lib.GetSetItemIds(setId, isSpecialSet)
+function lib.GetSetItemIds(setId, isNoESOSetId)
     if setId == nil then return end
-    isSpecialSet = isSpecialSet or false
+    isNoESOSetId = isNoESOSetId or false
+    if isNoESOSetId == false then
+        isNoESOSetId = lib.IsNoESOSet(setId)
+    end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setItemIds
-    if isSpecialSet then
-        setItemIds = preloaded["setItemIdsSpecial"]
+    if isNoESOSetId then
+        setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
     else
-        setItemIds = preloaded["setItemIds"]
-        if setItemIds[setId] == nil then
-            --Check if the setId is not in the normal sets but in the in the special sets table
-            setItemIds = preloaded["setItemIdsSpecial"]
-        end
+        setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
     end
     if setItemIds[setId] == nil then return end
     return setItemIds[setId]
@@ -581,7 +614,12 @@ end
 function lib.GetSetName(setId, lang)
     lang = lang or lib.clientLang
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    local setNames = preloaded["setNames"]
+    local setNames = {}
+    if lib.IsNoESOSet(setId) then
+        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+    else
+        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
+    end
     if setId == nil or not lib.supportedLanguages[lang]
         or setNames[setId] == nil
         or setNames[setId][lang] == nil then return end
@@ -597,7 +635,12 @@ end
 function lib.GetSetNames(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    local setNames = preloaded["setNames"]
+    local setNames = {}
+    if lib.IsNoESOSet(setId) then
+        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+    else
+        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
+    end
     if setNames[setId] == nil then return end
     return setNames[setId]
 end
@@ -640,9 +683,9 @@ function lib.GetSetInfo(setId)
     if setInfo[setId] == nil then return end
     local setInfoTable = setInfo[setId]
     setInfoTable["setId"] = setId
-    local itemIds = preloaded["setItemIds"][setId]
+    local itemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId]
     if itemIds then setInfoTable["itemIds"] = itemIds end
-    local setNames = preloaded["setNames"][setId]
+    local setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES][setId]
     if setNames then setInfoTable["names"] = setNames end
     return setInfoTable
 end
@@ -744,8 +787,8 @@ local function LoadSavedVariables()
     if lib.svData ~= nil then return end
     local defaults = {
         ["maps"]            = {},
-        ["setItemIds"]      = {},
-        ["setNames"]        = {},
+        [LIBSETS_TABLEKEY_SETITEMIDS]      = {},
+        [LIBSETS_TABLEKEY_SETNAMES]        = {},
         ["wayshrineNames"]  = {},
         ["zoneData"]        = {},
     }

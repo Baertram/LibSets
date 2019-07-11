@@ -28,6 +28,14 @@ lib.supportedLanguages = {
     ["ru"]  = false,
 }
 ------------------------------------------------------------------------------------------------------------------------
+--Constants for the table keys of setInfo, setNames etc.
+local noSetIdString = "NoSetId"
+LIBSETS_TABLEKEY_SETITEMIDS             = "setItemIds"
+LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID    = "setItemIds" .. noSetIdString
+LIBSETS_TABLEKEY_SETNAMES               = "setNames"
+LIBSETS_TABLEKEY_SETNAMES_NO_SETID      = "setNames" .. noSetIdString
+LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION  = "lastSetsCheckAPIVersion"
+------------------------------------------------------------------------------------------------------------------------
 --The itemTypes possible to be used for setItems
 lib.setItemTypes = {
     [ITEMTYPE_ARMOR]    = true,
