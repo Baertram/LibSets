@@ -667,12 +667,22 @@ end
 function lib.GetSetInfo(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    if setInfo[setId] == nil then return end
-    local setInfoTable = setInfo[setId]
+    local setInfoTable
+    local itemIds
+    local setNames
+    if lib.IsNoESOSet(setId) then
+        setInfoTable = noSetIdSets[setId]
+        itemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId]
+        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID][setId]
+    else
+        if setInfo[setId] == nil then return end
+        setInfoTable = setInfo[setId]
+        itemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId]
+        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES][setId]
+    end
+    if setInfoTable == nil then return end
     setInfoTable["setId"] = setId
-    local itemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId]
     if itemIds then setInfoTable["itemIds"] = itemIds end
-    local setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES][setId]
     if setNames then setInfoTable["names"] = setNames end
     return setInfoTable
 end
@@ -691,12 +701,18 @@ function lib.JumpToSetId(setId, factionIndex)
     factionIndex = factionIndex or 1
     if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
     local jumpToNode = -1
-    local setWayshrines = setInfo[setId].wayshrines
+    local setWayshrines
+    if lib.IsNoESOSet(setId) then
+        setWayshrines = setInfo[setId].wayshrines
+    else
+        setWayshrines = noSetIdSets[setId].wayshrines
+    end
+    if setWayshrines == nil then return false end
     jumpToNode = setWayshrines[factionIndex]
     --Jump now?
     if jumpToNode and jumpToNode > 0 then
-        FastTravelToNode(jumpToNode)
-        return true
+    FastTravelToNode(jumpToNode)
+    return true
     end
     return false
 end
