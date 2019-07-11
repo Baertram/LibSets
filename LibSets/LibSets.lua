@@ -326,6 +326,16 @@ function lib.IsDailyRandomDungeonAndImperialCityRewardSet(setId)
     return lib.dailyRandomDungeonAndImperialCityRewardSets[setId] or false
 end
 
+--Returns true if the setId provided is a non ESO, own defined setId
+--> Parameters: noESOSetId number: The set's setId
+--> Returns:    boolean isNonESOSet
+function lib.IsNoESOSet(noESOSetId)
+    if noESOSetId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    return noSetIdSets[noESOSetId] or false
+end
+
+
 --Returns information about the set if the itemId provides is a set item
 --> Parameters: itemId number: The item's itemId
 --> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number
