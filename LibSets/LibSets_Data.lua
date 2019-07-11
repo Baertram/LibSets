@@ -450,7 +450,7 @@ lib.setDataPreloaded = {
     },
 --......................................................................................................................
     --The list of setNamesNoSetId below is predefined and does not change unless the table LibSets.noSetIdSets does not change (see above)
-    [LIBSETS_TABLEKEY_SETNAMES_NON_SETID] = {
+    [LIBSETS_TABLEKEY_SETNAMES_NO_SETID] = {
         --[[
         [9999001] = {
             ["de"] = "Set Name 1",
