@@ -100,6 +100,8 @@ end
 local function LoadSets()
     if lib.setsScanning then return end
     lib.setsScanning = true
+    --Reset variables
+    lib.setTypeToSetIdsForSetTypeTable = {}
 
     --Counters
     lib.arenaSetsCount = 0
@@ -219,6 +221,20 @@ local function LoadSets()
     if noSetIdSets ~= nil then
         checkSetTypeAndUpdateLibTablesAndCounters(noSetIdSets)
     end
+    --Update the setType tables
+    lib.setTypeToSetIdsForSetTypeTable = {
+        [LIBSETS_SETTYPE_ARENA                        ] = lib.arenaSets,
+        [LIBSETS_SETTYPE_BATTLEGROUND                 ] = lib.battlegroundSets,
+        [LIBSETS_SETTYPE_CRAFTED                      ] = lib.craftedSets,
+        [LIBSETS_SETTYPE_CYRODIIL                     ] = lib.cyrodiilSets,
+        [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = lib.dailyRandomDungeonAndImperialCityRewardSets,
+        [LIBSETS_SETTYPE_DUNGEON                      ] = lib.dungeonSets,
+        [LIBSETS_SETTYPE_IMPERIALCITY                 ] = lib.imperialCitySets,
+        [LIBSETS_SETTYPE_MONSTER                      ] = lib.monsterSets,
+        [LIBSETS_SETTYPE_OVERLAND                     ] = lib.overlandSets,
+        [LIBSETS_SETTYPE_SPECIAL                      ] = lib.specialSets,
+        [LIBSETS_SETTYPE_TRIAL                        ] = lib.trialSets,
+    }
     lib.setsScanning = false
 end
 
@@ -507,27 +523,27 @@ function lib.GetSetType(setId)
     if setData == nil then return end
     local setType = ""
     if     setData.isArena then
-        setType = "Arena"
+        setType = LIBSETS_SETTYPE_ARENA
     elseif setData.isBattleground then
-        setType = "Battleground"
+        setType = LIBSETS_SETTYPE_BATTLEGROUND
     elseif setData.isCrafted then
-        setType = "Crafted"
+        setType = LIBSETS_SETTYPE_CRAFTED
     elseif setData.isCyrodiil then
-        setType = "Cyrodiil"
+        setType = LIBSETS_SETTYPE_CYRODIIL
     elseif setData.isDailyRandomDungeonAndImperialCityReward then
-        setType = "DailyRandomDungeonAndICReward"
+        setType = LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD
     elseif setData.isDungeon then
-        setType = "Dungeon"
+        setType = LIBSETS_SETTYPE_DUNGEON
     elseif setData.isImperialCity then
-        setType = "Imperial City"
+        setType = LIBSETS_SETTYPE_IMPERIALCITY
     elseif setData.isMonster then
-        setType = "Monster"
+        setType = LIBSETS_SETTYPE_MONSTER
     elseif setData.isOverland then
-        setType = "Overland"
+        setType = LIBSETS_SETTYPE_OVERLAND
     elseif setData.isSpecial then
-        setType = "Special"
+        setType = LIBSETS_SETTYPE_SPECIAL
     elseif setData.isTrial then
-        setType = "Trial"
+        setType = LIBSETS_SETTYPE_TRIAL
     end
     return setType
 end
@@ -763,6 +779,13 @@ end
 
 --Returns the setIds, itemIds and setNames for a given setType
 local function getSetTypeSetsData(setType)
+    if setType == nil then return end
+    --Check if the setType is allowed within LiBSets
+    local allowedSetTypes = lib.allowedSetTypes
+    local allowedSetType  = allowedSetTypes[setType] or false
+    if not allowedSetType then return end
+    --Get the setIds for the setType
+    local setType2SetIdsTable = lib.setTypeToSetIdsForSetTypeTable
 
 end
 

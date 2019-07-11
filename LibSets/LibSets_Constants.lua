@@ -47,6 +47,22 @@ LIBSETS_SETTYPE_MONSTER                         = "Monster"
 LIBSETS_SETTYPE_OVERLAND                        = "Overland"
 LIBSETS_SETTYPE_SPECIAL                         = "Special"
 LIBSETS_SETTYPE_TRIAL                           = "Trial"
+lib.allowedSetTypes = {
+    [LIBSETS_SETTYPE_ARENA                        ] = true,
+    [LIBSETS_SETTYPE_BATTLEGROUND                 ] = true,
+    [LIBSETS_SETTYPE_CRAFTED                      ] = true,
+    [LIBSETS_SETTYPE_CYRODIIL                     ] = true,
+    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = true,
+    [LIBSETS_SETTYPE_DUNGEON                      ] = true,
+    [LIBSETS_SETTYPE_IMPERIALCITY                 ] = true,
+    [LIBSETS_SETTYPE_MONSTER                      ] = true,
+    [LIBSETS_SETTYPE_OVERLAND                     ] = true,
+    [LIBSETS_SETTYPE_SPECIAL                      ] = true,
+    [LIBSETS_SETTYPE_TRIAL                        ] = true,
+}
+--Mapping table setType to setIds for this settype.
+-->Will be filled in file LibSets.lua, function LoadSets()
+lib.setTypeToSetIdsForSetTypeTable = {}
 ------------------------------------------------------------------------------------------------------------------------
 --The itemTypes possible to be used for setItems
 lib.setItemTypes = {
