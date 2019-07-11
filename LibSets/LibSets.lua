@@ -1,4 +1,4 @@
-<--[========================================================================[
+--[========================================================================[
     This is free and unencumbered software released into the public domain.
 
     Anyone is free to copy, modify, publish, use, compile, sell, or
@@ -38,7 +38,7 @@ local preloaded         = lib.setDataPreloaded      -- <-- this table contains a
 --The set data
 local setInfo           = lib.setInfo               -- <--this table contains all set information like setId, type, drop zoneIds, wayshrines, etc.
 --The special sets
-local specialSets       = lib.specialSets           -- <-- this table contains the set information for special sets like Maelstrom or Master
+local noSetIdSets       = lib.noSetIdSets           -- <-- this table contains the set information for special sets like Maelstrom or Master
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -64,23 +64,23 @@ local function checkSet(itemLink)
 end
 
 --Check if an itemId belongs to a special set and return the set's data from LibSets data tables
-local function checkSpecialSet(itemId)
+local function checkNoSetIdSet(itemId)
     if itemId == nil or itemId == "" then return false, "", 0, 0, 0, 0 end
     local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = false, "", 0, 0, 0, 0
-    local specialSetNames = preloaded["setNamesSpecial"]
+    local specialSetNames = preloaded["setNamesNoSetId"]
     --Check the special sets data for the itemId
-    for specialSetId, specialSetData in pairs(specialSets) do
-        --Check if we got preloaded itemIds for the specialSetId
-        if preloaded and preloaded["setItemIdsSpecial"] and preloaded["setItemIdsSpecial"][specialSetId] then
-            local specialSetsItemIds = lib.GetSetItemIds(specialSetId, true)
+    for noESOSetId, specialSetData in pairs(noSetIdSets) do
+        --Check if we got preloaded itemIds for the noSetIdSets
+        if preloaded and preloaded["setItemIdsNoSetId"] and preloaded["setItemIdsNoSetId"][noESOSetId] then
+            local specialSetsItemIds = lib.GetSetItemIds(noESOSetId, true)
             --Found the itemId in the sepcial sets itemIds table?
             if specialSetsItemIds and specialSetsItemIds[itemId] then
                 isSet = true
-                setName = specialSetNames[specialSetId][lib.clientLang] or ""
+                setName = specialSetNames[noESOSetId][lib.clientLang] or ""
                 numBonuses = specialSetData["numBonuses"] or 0
                 numEquipped = 0 --Todo: Check how many of the itemId items are currently equipped
                 maxEquipped = specialSetData["maxEquipped"] or 0
-                setId = specialSetId
+                setId = noESOSetId
                 return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
             end
         end
@@ -334,8 +334,8 @@ function lib.IsSetByItemId(itemId)
     local itemLink = lib.buildItemLink(itemId)
     local isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSet(itemLink)
     if not isSet then
-        --Maybe it is a special set
-        isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSpecialSet(itemId)
+        --Maybe it is a set with no ESO setId, but an own defined setId
+        isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkNoSetIdSet(itemId)
     end
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
@@ -346,8 +346,8 @@ end
 function lib.IsSetByItemLink(itemLink)
     local isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSet(itemLink)
     if not isSet then
-        --Maybe it is a special set
-        isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSpecialSet(itemId)
+        --Maybe it is a set with no ESO setId, but an own defined setId
+        isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkNoSetIdSet(itemId)
     end
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
