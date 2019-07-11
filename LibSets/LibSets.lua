@@ -83,9 +83,9 @@ local function checkNoSetIdSet(itemId)
             if specialSetsItemIds and specialSetsItemIds[itemId] then
                 isSet = true
                 setName = specialSetNames[noESOSetId][lib.clientLang] or ""
-                numBonuses = specialSetData["numBonuses"] or 0
+                numBonuses = specialSetData[LIBSETS_TABLEKEY_NUMBONUSES] or 0
                 numEquipped = getNumEquippedItemsWithItemId(itemId)
-                maxEquipped = specialSetData["maxEquipped"] or 0
+                maxEquipped = specialSetData[LIBSETS_TABLEKEY_MAXEQUIPPED] or 0
                 setId = noESOSetId
                 return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
             end
@@ -221,7 +221,7 @@ local function LoadSets()
     if noSetIdSets ~= nil then
         checkSetTypeAndUpdateLibTablesAndCounters(noSetIdSets)
     end
-    --Update the setType tables
+    --Update the setType mapping to setType's setId tables within LibSets
     lib.setTypeToSetIdsForSetTypeTable = {
         [LIBSETS_SETTYPE_ARENA                        ] = lib.arenaSets,
         [LIBSETS_SETTYPE_BATTLEGROUND                 ] = lib.battlegroundSets,
@@ -778,23 +778,62 @@ end
 
 
 --Returns the setIds, itemIds and setNames for a given setType
+--> Returns:    table with key = setId, value = table which contains:
+---->             setType = e.g. LIBSETS_SETTYPE_CRAFTED ("Crafted")
+------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
+------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
+---             Example:
+---             [setId] = {
+---                 setType = e.g. LIBSETS_SETTYPE_CRAFTED or any other LIBSETS_SETTYPE_* constants which is allowed (see file LibSets_Constants.lua),
+---                 [LIBSETS_TABLEKEY_SETITEMIDS] = {
+---                     [itemId1]=true,
+---                     [itemId2]=true
+---                 },
+---                 [LIBSETS_TABLEKEY_SETNAMES] = {
+---                     ["de"]="Set name German",
+---                     ["en"]="Set name English",
+---                     ["fr"]="Set name French",
+---                 },
+---             }
 local function getSetTypeSetsData(setType)
     if setType == nil then return end
     --Check if the setType is allowed within LiBSets
     local allowedSetTypes = lib.allowedSetTypes
     local allowedSetType  = allowedSetTypes[setType] or false
     if not allowedSetType then return end
-    --Get the setIds for the setType
-    local setType2SetIdsTable = lib.setTypeToSetIdsForSetTypeTable
-
+    --Get the setIds tablefor the setType
+    local setTypes2SetIdsTable = lib.setTypeToSetIdsForSetTypeTable
+    local setType2SetIdsTable = setTypes2SetIdsTable[setType]
+    if not setType2SetIdsTable then return false end
+    --Loop over that table now and get each setId and transfer the data to the outputTable
+    --+ enrich it with the setType and other needed information
+    local setsDataForSetTypeTable
+    for setIdForSetType, setDataForSetType in pairs(setType2SetIdsTable) do
+        setsDataForSetTypeTable = setsDataForSetTypeTable or {}
+        setsDataForSetTypeTable[setIdForSetType] = setDataForSetType
+        setsDataForSetTypeTable[setIdForSetType]["setType"] = setType
+    end
+    return setsDataForSetTypeTable
 end
 
 --Returns the set data (setType String, setIds table, itemIds table, setNames table)
 --> Returns:    table with key = setId, value = table which contains:
--->             setType = LIBSETS_SETTYPE_CRAFTED ("Crafted")
--->
--->             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
--->             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
+---->             setType = LIBSETS_SETTYPE_CRAFTED ("Crafted")
+------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
+------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
+---             Example:
+---             [setId] = {
+---                 setType = LIBSETS_SETTYPE_CRAFTED,
+---                 [LIBSETS_TABLEKEY_SETITEMIDS] = {
+---                     [itemId1]=true,
+---                     [itemId2]=true
+---                 },
+---                 [LIBSETS_TABLEKEY_SETNAMES] = {
+---                     ["de"]="Set name German",
+---                     ["en"]="Set name English",
+---                     ["fr"]="Set name French",
+---                 },
+---             }
 function lib.GetCraftedSetsData()
     local setsCraftedData = getSetTypeSetsData(LIBSETS_SETTYPE_CRAFTED)
     return setsCraftedData

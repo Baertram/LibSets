@@ -428,10 +428,12 @@ lib.setInfo = {
     [449] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=true	, isTrial=true},	 --Perfected False God's Devotion / Perfektionierte Ergebenheit zum falschen Gott   [Sunspire]
     [450] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=true	, isTrial=true},	 --Perfected Tooth of Lokkestiiz / Perfektionierter Zahn von Lokkestiiz   [Sunspire]
     [451] = {wayshrines={399,399,399,}, dlcId=14	, zoneIds={1121}, veteran=true	, isTrial=true},	 --Perfected Claw of Yolnakhriin / Perfektionierte Kralle von Yolnahkriin   [Sunspire]
-}
+}--lib.setInfo
 ---------------------------------------------------------------------------------------------------------------------------
---This table contains special set items, which got no unique setId (thanks ZOs :-(). A "fake" setId is created starting at 9999001.
---The "fake" setId will be only 1 for the whole set.
+--This table contains special set items, which got no unique ESO setId. A "fake" unique setId is needed to be manually created starting at 9999001!
+--The "fake" setId will be only 1 for the whole set. The data table should contain information about the set like wayshrines, zoneIds dlcId and setType value too, like the normal sets in table LibSets.setInfo(see above).
+--> This table LibSets.noSetIdSets is basically designed to make the addon compatible with set itemIds for items not having a setId (yet) but being related to a set.
+---> Be sure to provide the values which normaly the ESO API function "GetItemLinkSetInfo" returns (numBonuses, maxEquipped,) inside this table as well!
 --The itemIds possible to be used are stored in the table lib.setDataPreloaded.setItemIdsNoSetId below, using the setId as key, a table a value, with the contents = [itemId]=true.
 --The setNames for the specialSets are stored in the table lib.setDataPreloaded.setNamesNoSetId below using the names given from set information pages for ESO
 lib.noSetIdSets = {
@@ -445,11 +447,13 @@ lib.setDataPreloaded = {
     [LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION] = lib.lastSetsPreloadedCheckAPIVersion,
 --......................................................................................................................
     --The list of setItemIdsNoSetId below is predefined and does not change unless the table LibSets.noSetIdSets does not change (see above)
+    -->You need to manually add the entries in here matching the new defined nonESOsetId from table LiBSets.noSetIdSets as key and a table of [itemId]=true, lines as value
     [LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = {
         --[99990001]={[itemId1]=true,[itemId2]=true},
     },
 --......................................................................................................................
     --The list of setNamesNoSetId below is predefined and does not change unless the table LibSets.noSetIdSets does not change (see above)
+    -->You need to manually add the entries in here matching the new defined nonESOsetId from table LiBSets.noSetIdSets as key and a table of [language]="Set name in this language String", lines as value
     [LIBSETS_TABLEKEY_SETNAMES_NO_SETID] = {
         --[[
         [9999001] = {
