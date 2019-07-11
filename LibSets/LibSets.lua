@@ -571,26 +571,7 @@ end
 --> Returns:    number setItemId
 function lib.GetSetItemId(setId, equipType)
     if setId == nil then return end
-    local equipTypesValid = {
-        --Not allowed
-        [EQUIP_TYPE_INVALID]    = false,
-        [EQUIP_TYPE_COSTUME]    = false,
-        [EQUIP_TYPE_POISON]     = false,
-        --Allowed
-        [EQUIP_TYPE_CHEST]      = true,
-        [EQUIP_TYPE_FEET]       = true,
-        [EQUIP_TYPE_HAND]       = true,
-        [EQUIP_TYPE_HEAD]       = true,
-        [EQUIP_TYPE_LEGS]       = true,
-        [EQUIP_TYPE_MAIN_HAND]  = true,
-        [EQUIP_TYPE_NECK]       = true,
-        [EQUIP_TYPE_OFF_HAND]   = true,
-        [EQUIP_TYPE_ONE_HAND]   = true,
-        [EQUIP_TYPE_RING]       = true,
-        [EQUIP_TYPE_SHOULDERS]  = true,
-        [EQUIP_TYPE_TWO_HAND]   = true,
-        [EQUIP_TYPE_WAIST]      = true,
-    }
+    local equipTypesValid = lib.equipTypesValid
     local equipTypeValid = false
     if equipType ~= nil then
         equipTypeValid = equipTypesValid[equipType] or false
