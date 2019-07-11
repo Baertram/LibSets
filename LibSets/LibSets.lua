@@ -760,6 +760,23 @@ function lib.GetZoneName(zoneId, lang)
     return zoneName
 end
 
+
+--Returns the setIds, itemIds and setNames for a given setType
+local function getSetTypeSetsData(setType)
+
+end
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table)
+--> Returns:    table with key = setId, value = table which contains:
+-->             setType = LIBSETS_SETTYPE_CRAFTED ("Crafted")
+-->
+-->             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
+-->             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
+function lib.GetCraftedSetsData()
+    local setsCraftedData = getSetTypeSetsData(LIBSETS_SETTYPE_CRAFTED)
+    return setsCraftedData
+end
+
 ------------------------------------------------------------------------
 -- 	Global library check functions
 ------------------------------------------------------------------------

@@ -30,11 +30,23 @@ lib.supportedLanguages = {
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.
 local noSetIdString = "NoSetId"
-LIBSETS_TABLEKEY_SETITEMIDS             = "setItemIds"
-LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID    = "setItemIds" .. noSetIdString
-LIBSETS_TABLEKEY_SETNAMES               = "setNames"
-LIBSETS_TABLEKEY_SETNAMES_NO_SETID      = "setNames" .. noSetIdString
-LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION  = "lastSetsCheckAPIVersion"
+LIBSETS_TABLEKEY_SETITEMIDS                     = "setItemIds"
+LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID            = "setItemIds" .. noSetIdString
+LIBSETS_TABLEKEY_SETNAMES                       = "setNames"
+LIBSETS_TABLEKEY_SETNAMES_NO_SETID              = "setNames" .. noSetIdString
+LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION          = "lastSetsCheckAPIVersion"
+--Set types
+LIBSETS_SETTYPE_ARENA                           = "Arena"
+LIBSETS_SETTYPE_BATTLEGROUND                    = "Battleground"
+LIBSETS_SETTYPE_CRAFTED                         = "Crafted"
+LIBSETS_SETTYPE_CYRODIIL                        = "Cyrodiil"
+LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD   = "DailyRandomDungeonAndICReward"
+LIBSETS_SETTYPE_DUNGEON                         = "Dungeon"
+LIBSETS_SETTYPE_IMPERIALCITY                    = "Imperial City"
+LIBSETS_SETTYPE_MONSTER                         = "Monster"
+LIBSETS_SETTYPE_OVERLAND                        = "Overland"
+LIBSETS_SETTYPE_SPECIAL                         = "Special"
+LIBSETS_SETTYPE_TRIAL                           = "Trial"
 ------------------------------------------------------------------------------------------------------------------------
 --The itemTypes possible to be used for setItems
 lib.setItemTypes = {
