@@ -244,6 +244,67 @@ function LibSets.GetUndauntedChestName(undauntedChestId, lang)
 --> Returns:    name zoneName
 function LibSets.GetZoneName(zoneId, lang)
 
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for arena sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetArenaSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for battleground sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetBattlegroundSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for carfted sets
+--> Returns:    table with key = setId, value = table which contains:
+---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
+------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
+------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
+---             Example:
+---             [setId] = {
+---                 setType = LIBSETS_SETTYPE_CRAFTED,
+---                 [LIBSETS_TABLEKEY_SETITEMIDS] = {
+---                     [itemId1]=true,
+---                     [itemId2]=true
+---                 },
+---                 [LIBSETS_TABLEKEY_SETNAMES] = {
+---                     ["de"]="Set name German",
+---                     ["en"]="Set name English",
+---                     ["fr"]="Set name French",
+---                 },
+---             }
+function LibSets.GetCraftedSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for cyrodiil sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetCyrodiilSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for daily random dungeon and imperial city rewards sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetDailyRandomDungeonAndImperialCityRewardsSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for dungeon sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetDungeonSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for imperial city sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetImperialCitySetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for monster sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetMonsterSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for overland sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetOverlandSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for special sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetSpecialSetsData()
+
+--Returns the set data (setType String, setIds table, itemIds table, setNames table) for trial sets
+--> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
+function LibSets.GetTrialSetsData()
+
+
 ------------------------------------------------------------------------
 -- 	Global library check functions
 ------------------------------------------------------------------------
