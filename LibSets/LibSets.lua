@@ -1,4 +1,4 @@
---[========================================================================[
+<--[========================================================================[
     This is free and unencumbered software released into the public domain.
 
     Anyone is free to copy, modify, publish, use, compile, sell, or
@@ -37,6 +37,8 @@ local MAJOR, MINOR = lib.name, lib.version
 local preloaded         = lib.setDataPreloaded      -- <-- this table contains all setData (itemIds, names) of the sets, preloaded
 --The set data
 local setInfo           = lib.setInfo               -- <--this table contains all set information like setId, type, drop zoneIds, wayshrines, etc.
+--The special sets
+local specialSets       = lib.specialSets           -- <-- this table contains the set information for special sets like Maelstrom or Master
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -53,13 +55,39 @@ local function getNonIndexedTableCount(tableName)
 end
 ]]
 
---local helper function for set data
+--Check if an itemLink is a set and return the set's data from ESO API function GetItemLinkSetInfo
 local function checkSet(itemLink)
     if itemLink == nil or itemLink == "" then return false, "", 0, 0, 0, 0 end
     local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = GetItemLinkSetInfo(itemLink, false)
     if not isSet then isSet = false end
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
+
+--Check if an itemId belongs to a special set and return the set's data from LibSets data tables
+local function checkSpecialSet(itemId)
+    if itemId == nil or itemId == "" then return false, "", 0, 0, 0, 0 end
+    local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = false, "", 0, 0, 0, 0
+    local specialSetNames = preloaded["setNamesSpecial"]
+    --Check the special sets data for the itemId
+    for specialSetId, specialSetData in pairs(specialSets) do
+        --Check if we got preloaded itemIds for the specialSetId
+        if preloaded and preloaded["setItemIdsSpecial"] and preloaded["setItemIdsSpecial"][specialSetId] then
+            local specialSetsItemIds = lib.GetSetItemIds(specialSetId, true)
+            --Found the itemId in the sepcial sets itemIds table?
+            if specialSetsItemIds and specialSetsItemIds[itemId] then
+                isSet = true
+                setName = specialSetNames[specialSetId][lib.clientLang] or ""
+                numBonuses = specialSetData["numBonuses"] or 0
+                numEquipped = 0 --Todo: Check how many of the itemId items are currently equipped
+                maxEquipped = specialSetData["maxEquipped"] or 0
+                setId = specialSetId
+                return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
+            end
+        end
+    end
+    return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
+end
+
 
 --Check which setIds were found and get the set's info from the preloaded data table "setInfo",
 --sort them into their appropriate set table and increase the counter for each table
@@ -304,14 +332,24 @@ end
 function lib.IsSetByItemId(itemId)
     if itemId == nil then return end
     local itemLink = lib.buildItemLink(itemId)
-    return checkSet(itemLink)
+    local isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSet(itemLink)
+    if not isSet then
+        --Maybe it is a special set
+        isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSpecialSet(itemId)
+    end
+    return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
 --Returns information about the set if the itemlink provides is a set item
 --> Parameters: itemLink String/ESO ItemLink: The item's itemLink '|H1:item:itemId...|h|h'
 --> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number
 function lib.IsSetByItemLink(itemLink)
-    return checkSet(itemLink)
+    local isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSet(itemLink)
+    if not isSet then
+        --Maybe it is a special set
+        isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSpecialSet(itemId)
+    end
+    return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
 --Returns true/false if the set must be obtained in a veteran mode dungeon/trial/arena.
@@ -454,11 +492,22 @@ end
 --Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
 --The key is the itemId and the value is the boolean value true
 --> Parameters: setId number: The set's setId
+-->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
 --> Returns:    table setItemIds
-function lib.GetSetItemIds(setId)
+function lib.GetSetItemIds(setId, isSpecialSet)
     if setId == nil then return end
+    isSpecialSet = isSpecialSet or false
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    local setItemIds = preloaded["setItemIds"]
+    local setItemIds
+    if isSpecialSet then
+        setItemIds = preloaded["setItemIdsSpecial"]
+    else
+        setItemIds = preloaded["setItemIds"]
+        if setItemIds[setId] == nil then
+            --Check if the setId is not in the normal sets but in the in the special sets table
+            setItemIds = preloaded["setItemIdsSpecial"]
+        end
+    end
     if setItemIds[setId] == nil then return end
     return setItemIds[setId]
 end
