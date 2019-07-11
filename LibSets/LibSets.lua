@@ -63,6 +63,12 @@ local function checkSet(itemLink)
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
+--Todo: Check how many of the itemId items are currently equipped
+--Get the number of equipped items with the given itemId
+local function getNumEquippedItemsWithItemId(itemId)
+    return 0
+end
+
 --Check if an itemId belongs to a special set and return the set's data from LibSets data tables
 local function checkNoSetIdSet(itemId)
     if itemId == nil or itemId == "" then return false, "", 0, 0, 0, 0 end
@@ -78,7 +84,7 @@ local function checkNoSetIdSet(itemId)
                 isSet = true
                 setName = specialSetNames[noESOSetId][lib.clientLang] or ""
                 numBonuses = specialSetData["numBonuses"] or 0
-                numEquipped = 0 --Todo: Check how many of the itemId items are currently equipped
+                numEquipped = getNumEquippedItemsWithItemId(itemId)
                 maxEquipped = specialSetData["maxEquipped"] or 0
                 setId = noESOSetId
                 return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
