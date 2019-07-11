@@ -435,10 +435,8 @@ lib.setInfo = {
 --The itemIds possible to be used are stored in the table lib.setDataPreloaded.setItemIdsNoSetId below, using the setId as key, a table a value, with the contents = [itemId]=true.
 --The setNames for the specialSets are stored in the table lib.setDataPreloaded.setNamesNoSetId below using the names given from set information pages for ESO
 lib.noSetIdSets = {
-    --Master weapons
-    [9999001] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true, numBonuses=1, maxEquipped=1},	 --Master Weapons / Meister Waffen   [Dragonstar Arena]
-    --Maelstrom weapons
-    [9999002] = {wayshrines={-1,-1,-1,}, dlcId=2	, zoneIds={677}, veteran=true	, isArena=true, numBonuses=1, maxEquipped=1},	 --Maelstrom Weapons / Mahlstrom Waffen   [Maelstrom Arena]
+    --Example set 1
+    --[9999001] = {wayshrines={-1,-1,-1,}, dlcId=0	, zoneIds={635}, veteran=true	, isArena=true, numBonuses=1, maxEquipped=1},	 --Example set name 1 / Example Set Name 1   [Example set's drop location name]
 }
 ------------------------------------------------------------------------------------------------------------------------
 --One itemId to be used to build itemLink etc. for each setId in the game.
