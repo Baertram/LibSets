@@ -39,6 +39,9 @@ LIBSETS_TABLEKEY_NUMBONUSES                     = "numBonuses"
 LIBSETS_TABLEKEY_MAXEQUIPPED                    = "maxEquipped"
 LIBSETS_TABLEKEY_SETTYPE                        = "setType"
 --Set types
+--> If you change these be sure to check the following tables below and add/change/remove entries as well:
+--lib.setTypeToLibraryInternalVariableNames
+--lib.setTypesToName
 LIBSETS_SETTYPE_ITERATION_BEGIN                 = 1 -- Start of iteration over allowed SetTypes
 LIBSETS_SETTYPE_ARENA                           = 1 --"Arena"
 LIBSETS_SETTYPE_BATTLEGROUND                    = 2 --"Battleground"
@@ -56,7 +59,67 @@ lib.allowedSetTypes = { }
 for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
     lib.allowedSetTypes[i] = true
 end
+--Mapping between the LibSets setType and the used internal library table and counter variable
+--------------------------------------------------------------------------
+--!!! Attention: Change this table if you add/remove LibSets setTyps !!!
+--------------------------------------------------------------------------
+--[[
+lib.setTypeToSetIdsForSetTypeTable = {
+    [LIBSETS_SETTYPE_ARENA                        ] = lib.arenaSets,
+    [LIBSETS_SETTYPE_BATTLEGROUND                 ] = lib.battlegroundSets,
+    [LIBSETS_SETTYPE_CRAFTED                      ] = lib.craftedSets,
+    [LIBSETS_SETTYPE_CYRODIIL                     ] = lib.cyrodiilSets,
+    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = lib.dailyRandomDungeonAndImperialCityRewardSets,
+    [LIBSETS_SETTYPE_DUNGEON                      ] = lib.dungeonSets,
+    [LIBSETS_SETTYPE_IMPERIALCITY                 ] = lib.imperialCitySets,
+    [LIBSETS_SETTYPE_MONSTER                      ] = lib.monsterSets,
+    [LIBSETS_SETTYPE_OVERLAND                     ] = lib.overlandSets,
+    [LIBSETS_SETTYPE_SPECIAL                      ] = lib.specialSets,
+    [LIBSETS_SETTYPE_TRIAL                        ] = lib.trialSets,
+}
+]]
+lib.setTypeToLibraryInternalVariableNames = {
+    [LIBSETS_SETTYPE_ARENA                        ] = {
+        ["tableName"] = "arenaSets",
+    },
+    [LIBSETS_SETTYPE_BATTLEGROUND                 ] = {
+        ["tableName"] = "battlegroundSets",
+    },
+    [LIBSETS_SETTYPE_CRAFTED                      ] ={
+        ["tableName"] = "craftedSets",
+    },
+    [LIBSETS_SETTYPE_CYRODIIL                     ] ={
+        ["tableName"] = "cyrodiilSets",
+    },
+    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] ={
+        ["tableName"] = "dailyRandomDungeonAndImperialCityRewardSets",
+    },
+    [LIBSETS_SETTYPE_DUNGEON                      ] ={
+        ["tableName"] = "dungeonSets",
+    },
+    [LIBSETS_SETTYPE_IMPERIALCITY                 ] ={
+        ["tableName"] = "imperialCitySets",
+    },
+    [LIBSETS_SETTYPE_MONSTER                      ] ={
+        ["tableName"] = "monsterSets",
+    },
+    [LIBSETS_SETTYPE_OVERLAND                     ] ={
+        ["tableName"] = "overlandSets",
+    },
+    [LIBSETS_SETTYPE_SPECIAL                      ] ={
+        ["tableName"] = "specialSets",
+    },
+    [LIBSETS_SETTYPE_TRIAL                        ] ={
+        ["tableName"] = "trialSets",
+    },
+}
+--The suffix for the counter variables of the setType tables. e.g. setType LIBSETS_SETTYPE_OVERLAND table is called overlandSets.
+--The suffix is "Counter" so the variable for the counter is "overlandSetsCounter"
+lib.counterSuffix = "Counter"
 --The LibSets setType mapping table for names
+--------------------------------------------------------------------------
+--!!! Attention: Change this table if you add/remove LibSets setTyps !!!
+--------------------------------------------------------------------------
 lib.setTypesToName = {
     [LIBSETS_SETTYPE_ARENA                        ] = {
         ["de"] = "Arena",

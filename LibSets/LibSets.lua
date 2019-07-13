@@ -32,6 +32,10 @@ local MAJOR, MINOR = lib.name, lib.version
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
 
+------------Global variables--------------
+--Get counter suffix
+local counterSuffix = lib.counterSuffix or "Counter"
+
 ------------The sets--------------
 --The preloaded sets data
 local preloaded         = lib.setDataPreloaded      -- <-- this table contains all setData (setItemIds, setNames) of the sets, preloaded
@@ -102,35 +106,24 @@ local function LoadSets()
     lib.setsScanning = true
     --Reset variables
     lib.setTypeToSetIdsForSetTypeTable = {}
-
-    --Counters
-    lib.arenaSetsCount = 0
-    lib.craftedSetsCount = 0
-    lib.dailyRandomDungeonAndImperialCityRewardSetsCount = 0
-    lib.dungeonSetsCount  = 0
-    lib.monsterSetsCount  = 0
-    lib.overlandSetsCount = 0
-    lib.battlegroundSetsCount = 0
-    lib.cyrodiilSetsCount = 0
-    lib.imperialCitySetsCount = 0
-    lib.specialSetsCount = 0
-    lib.trialSetsCount = 0
-
-    --Set tables
-    lib.arenaSets = {}
-    lib.craftedSets = {}
-    lib.dailyRandomDungeonAndImperialCityRewardSets = {}
-    lib.dungeonSets = {}
-    lib.monsterSets = {}
-    lib.overlandSets = {}
-    lib.battlegroundSets = {}
-    lib.cyrodiilSets = {}
-    lib.imperialCitySets = {}
-    lib.specialSets = {}
-    lib.trialSets = {}
+    --The mapping table for the internal library set tables and counter variables
+    local setTypeToLibraryInternalVariableNames = lib.setTypeToLibraryInternalVariableNames
+    if not setTypeToLibraryInternalVariableNames then return end
+    --Set tables and counters (dynamic creation, depending on given LibSets SetTypes)
+    for _, libSetsSetTypeVariableData in pairs(setTypeToLibraryInternalVariableNames) do
+        if libSetsSetTypeVariableData then
+            local libSetsSetTypeTableVariable = libSetsSetTypeVariableData["tableName"]
+            local libSetsSetTypeCounterVariable = libSetsSetTypeTableVariable .. counterSuffix
+            if libSetsSetTypeTableVariable then
+                lib[libSetsSetTypeTableVariable] = {}
+            end
+            if libSetsSetTypeCounterVariable then
+                lib[libSetsSetTypeCounterVariable] = 0
+            end
+        end
+    end
     --The overall setIds table
     lib.setIds = {}
-
     --The preloaded itemIds
     local preloadedItemIds = preloaded.setItemIds
     --The preloaded setNames
@@ -139,7 +132,6 @@ local function LoadSets()
     local preloadedNonESOsetIdItemIds = preloaded.setItemIdsNoSetId
     --The preloaded non ESO setId setNames
     local preloadedNonESOsetIdSetNames = preloaded.setNamesNoSetId
-
     --Helper function to check the set type and update the tables in the library
     local function checkSetTypeAndUpdateLibTablesAndCounters(setDataTable)
         --Check the setsData and move entries to appropriate table
@@ -148,50 +140,19 @@ local function LoadSets()
             lib.setIds[setId] = true
             --Get the type of set and create the entry for the setId in the appropriate table
             local refToSetIdTable
-            if     setData.isArena then
-                lib.arenaSets[setId] = setData
-                lib.arenaSetsCount = lib.arenaSetsCount +1
-                refToSetIdTable = lib.arenaSets[setId]
-            elseif setData.isCrafted then
-                lib.craftedSets[setId] = setData
-                lib.craftedSetsCount = lib.craftedSetsCount +1
-                refToSetIdTable = lib.craftedSets[setId]
-            elseif setData.isDailyRandomDungeonAndImperialCityReward then
-                lib.dailyRandomDungeonAndImperialCityRewardSets[setId] = setData
-                lib.dailyRandomDungeonAndImperialCityRewardSetsCount = lib.dailyRandomDungeonAndImperialCityRewardSetsCount +1
-                refToSetIdTable = lib.dailyRandomDungeonAndImperialCityRewardSets[setId]
-            elseif setData.isDungeon then
-                lib.dungeonSets[setId] = setData
-                lib.dungeonSetsCount = lib.dungeonSetsCount +1
-                refToSetIdTable = lib.dungeonSets[setId]
-            elseif setData.isMonster then
-                lib.monsterSets[setId] = setData
-                lib.monsterSetsCount = lib.monsterSetsCount +1
-                refToSetIdTable = lib.monsterSets[setId]
-            elseif setData.isOverland then
-                lib.overlandSets[setId] = setData
-                lib.overlandSetsCount = lib.overlandSetsCount +1
-                refToSetIdTable = lib.overlandSets[setId]
-            elseif setData.isBattleground then
-                lib.battlegroundSets[setId] = setData
-                lib.battlegroundSetsCount = lib.battlegroundSetsCount +1
-                refToSetIdTable = lib.battlegroundSets[setId]
-            elseif setData.isCyrodiil then
-                lib.cyrodiilSets[setId] = setData
-                lib.cyrodiilSetsCount = lib.cyrodiilSetsCount +1
-                refToSetIdTable = lib.cyrodiilSets[setId]
-            elseif setData.isImperialCity then
-                lib.imperialCitySets[setId] = setData
-                lib.imperialCitySetsCount = lib.imperialCitySetsCount +1
-                refToSetIdTable = lib.imperialCitySets[setId]
-            elseif setData.isSpecial then
-                lib.specialSets[setId] = setData
-                lib.specialSetsCount = lib.specialSetsCount +1
-                refToSetIdTable = lib.specialSets[setId]
-            elseif setData.isTrial then
-                lib.trialSets[setId] = setData
-                lib.trialSetsCount = lib.trialSetsCount +1
-                refToSetIdTable = lib.trialSets[setId]
+            local setType = setData.setType
+            if setType then
+                local internalLibsSetVariableNames = setTypeToLibraryInternalVariableNames[setType]
+                if internalLibsSetVariableNames and internalLibsSetVariableNames["tableName"] then
+                    local internalLibsSetTableName = internalLibsSetVariableNames["tableName"]
+                    local internalLibsSetCounterName = internalLibsSetTableName .. counterSuffix
+                    if lib[internalLibsSetTableName] and lib[internalLibsSetCounterName] then
+                        lib[internalLibsSetTableName][setId] = setData
+                        local counterVarCurrent = lib[internalLibsSetCounterName]
+                        lib[internalLibsSetCounterName] = counterVarCurrent +1
+                        refToSetIdTable = lib[internalLibsSetTableName][setId]
+                    end
+                end
             end
             --Store all other data to the set's table
             if refToSetIdTable ~= nil then
@@ -214,27 +175,25 @@ local function LoadSets()
             end
         end
     end
-
     --Get the setTypes for the normal ESO setIds
     checkSetTypeAndUpdateLibTablesAndCounters(setInfo)
-   --And now get the settypes for the non ESO "self created" setIds
+    --And now get the settypes for the non ESO "self created" setIds
     if noSetIdSets ~= nil then
         checkSetTypeAndUpdateLibTablesAndCounters(noSetIdSets)
     end
-    --Update the setType mapping to setType's setId tables within LibSets
-    lib.setTypeToSetIdsForSetTypeTable = {
-        [LIBSETS_SETTYPE_ARENA                        ] = lib.arenaSets,
-        [LIBSETS_SETTYPE_BATTLEGROUND                 ] = lib.battlegroundSets,
-        [LIBSETS_SETTYPE_CRAFTED                      ] = lib.craftedSets,
-        [LIBSETS_SETTYPE_CYRODIIL                     ] = lib.cyrodiilSets,
-        [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = lib.dailyRandomDungeonAndImperialCityRewardSets,
-        [LIBSETS_SETTYPE_DUNGEON                      ] = lib.dungeonSets,
-        [LIBSETS_SETTYPE_IMPERIALCITY                 ] = lib.imperialCitySets,
-        [LIBSETS_SETTYPE_MONSTER                      ] = lib.monsterSets,
-        [LIBSETS_SETTYPE_OVERLAND                     ] = lib.overlandSets,
-        [LIBSETS_SETTYPE_SPECIAL                      ] = lib.specialSets,
-        [LIBSETS_SETTYPE_TRIAL                        ] = lib.trialSets,
-    }
+    --Update the setType mapping to setType's setId tables within LibSets in order to have the current values, after
+    -- they got updated, inside this mapping table. WIll be uised within the local function getSetTypeSetsData which
+    -- is used within the API functions to get the set data for the searched LibSets setType
+    --Loop over table lib.setTypeToLibraryInternalTableAndCounterNames and for each tableName add the output to
+    --lib.setTypeToSetIdsForSetTypeTable:
+    for libSetsSetType, libSetsSetTypeVariableData in pairs(setTypeToLibraryInternalVariableNames) do
+        if libSetsSetTypeVariableData then
+            local libSetsSetTypeTableVariable = libSetsSetTypeVariableData["tableName"]
+            if libSetsSetTypeTableVariable then
+                lib.setTypeToSetIdsForSetTypeTable[libSetsSetType] = lib[libSetsSetTypeTableVariable]
+            end
+        end
+    end
     lib.setsScanning = false
 end
 
@@ -841,21 +800,29 @@ local function getSetTypeSetsData(setType)
     end
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for arena sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
+--Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
+--> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
+function lib.GetSetTypeSetsData(setType)
+    local setsData = getSetTypeSetsData(setType)
+    return setsData
+end
+
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for arena sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetArenaSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_ARENA)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for battleground sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for battleground sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetBattlegroundSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_BATTLEGROUND)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for carfted sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for carfted sets
 --> Returns:    table with key = setId, value = table which contains:
 ---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
 ------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
@@ -878,56 +845,56 @@ function lib.GetCraftedSetsData()
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for cyrodiil sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for cyrodiil sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetCyrodiilSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_CYRODIIL)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for daily random dungeon and imperial city rewards sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for daily random dungeon and imperial city rewards sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetDailyRandomDungeonAndImperialCityRewardsSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for dungeon sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for dungeon sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetDungeonSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_DUNGEON)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for imperial city sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for imperial city sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetImperialCitySetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_IMPERIALCITY)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for monster sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for monster sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetMonsterSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_MONSTER)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for overland sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for overland sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetOverlandSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_OVERLAND)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for special sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for special sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetSpecialSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_SPECIAL)
     return setsData
 end
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for trial sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for trial sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetTrialSetsData()
     local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_TRIAL)
