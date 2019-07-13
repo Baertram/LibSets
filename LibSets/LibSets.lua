@@ -710,7 +710,7 @@ function lib.GetSetInfo(setId)
 end
 
 --Returns the setType name as String
---> Parameters: libSetsSetType String: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
+--> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 -->             lang String the language for the setType name. Can be left nil -> The client language will be used then
 --> Returns:    String setTypeName
 function lib.GetSetTypeName(libSetsSetType, lang)
@@ -795,14 +795,14 @@ function lib.GetZoneName(zoneId, lang)
     if lib.libZone ~= nil then
         zoneName = lib.libZone:GetZoneName(zoneId, lang)
     else
-        zoneName = GetZoneNameById(zoneId)
-        zoneName = ZO_CachedStrFormat("<<C:1>>", zoneName)
+        zoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameById(zoneId) )
     end
     return zoneName
 end
 
 
 --Returns the setIds, itemIds and setNames for a given setType
+--> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 --> Returns:    table with key = setId, value = table which contains:
 ---->             setType = e.g. LIBSETS_SETTYPE_CRAFTED ("Crafted")
 ------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
