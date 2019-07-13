@@ -469,31 +469,7 @@ function lib.GetSetType(setId)
         end
     end
     if setData == nil then return end
-    local setType = ""
-    if     setData.isArena then
-        setType = LIBSETS_SETTYPE_ARENA
-    elseif setData.isBattleground then
-        setType = LIBSETS_SETTYPE_BATTLEGROUND
-    elseif setData.isCrafted then
-        setType = LIBSETS_SETTYPE_CRAFTED
-    elseif setData.isCyrodiil then
-        setType = LIBSETS_SETTYPE_CYRODIIL
-    elseif setData.isDailyRandomDungeonAndImperialCityReward then
-        setType = LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD
-    elseif setData.isDungeon then
-        setType = LIBSETS_SETTYPE_DUNGEON
-    elseif setData.isImperialCity then
-        setType = LIBSETS_SETTYPE_IMPERIALCITY
-    elseif setData.isMonster then
-        setType = LIBSETS_SETTYPE_MONSTER
-    elseif setData.isOverland then
-        setType = LIBSETS_SETTYPE_OVERLAND
-    elseif setData.isSpecial then
-        setType = LIBSETS_SETTYPE_SPECIAL
-    elseif setData.isTrial then
-        setType = LIBSETS_SETTYPE_TRIAL
-    end
-    return setType
+    return setData.setType
 end
 
 --Returns the setType name as String
