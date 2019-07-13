@@ -447,9 +447,9 @@ end
 --> Returns:    traitsNeededToCraft number
 function lib.GetTraitsNeeded(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not lib.IsCraftedSet(setId) then return end
     local setData = setInfo[setId]
-    if setData == nil or not setData.isCrafted or setData.traitsNeeded == nil then return end
+    if setData == nil or setData.traitsNeeded == nil then return end
     return setData.traitsNeeded
 end
 
