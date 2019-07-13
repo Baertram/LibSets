@@ -1,6 +1,6 @@
 # LibSets
 LibSets is a library addon for the game Elder Scrolls Online.
-<br>This file can also be found included in the package, with the name: ReadMe_LibSets.md
+This file can also be found included in the package, with the name: ReadMe_LibSets.md
 
 It's based on the data mined and collected data of the item sets in the game.
 The item sets got a unique setId which was used to identify the sets in this library.
@@ -146,6 +146,12 @@ function LibSets.GetTraitsNeeded(setId)
 --   setType = "Special"
 --   setType = "Trial"
 function LibSets.GetSetType(setId)
+
+--Returns the setType name as String
+--> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
+-->             lang String the language for the setType name. Can be left nil -> The client language will be used then
+--> Returns:    String setTypeName
+function LibSets.GetSetTypeName(libSetsSetType, lang)
 
 --Returns a sorted array of all set ids. Key is the setId, value is the boolean value true
 --> Returns: setIds table
