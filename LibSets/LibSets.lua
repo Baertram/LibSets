@@ -800,30 +800,8 @@ local function getSetTypeSetsData(setType)
     end
 end
 
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
---Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetSetTypeSetsData(setType)
-    local setsData = getSetTypeSetsData(setType)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for arena sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetArenaSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_ARENA)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for battleground sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetBattlegroundSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_BATTLEGROUND)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for carfted sets
---> Returns:    table with key = setId, value = table which contains:
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType
+--> Returns:    table with key = setId, value = table which contains (as example for setType = LIBSETS_SETTYPE_CRAFTED)
 ---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
 ------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
 ------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
@@ -840,64 +818,12 @@ end
 ---                     ["fr"]="Set name French",
 ---                 },
 ---             }
-function lib.GetCraftedSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_CRAFTED)
-    return setsData
-end
 
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for cyrodiil sets
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
+--Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetCyrodiilSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_CYRODIIL)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for daily random dungeon and imperial city rewards sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetDailyRandomDungeonAndImperialCityRewardsSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for dungeon sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetDungeonSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_DUNGEON)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for imperial city sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetImperialCitySetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_IMPERIALCITY)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for monster sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetMonsterSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_MONSTER)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for overland sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetOverlandSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_OVERLAND)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for special sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetSpecialSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_SPECIAL)
-    return setsData
-end
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for trial sets
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
-function lib.GetTrialSetsData()
-    local setsData = getSetTypeSetsData(LIBSETS_SETTYPE_TRIAL)
+function lib.GetSetTypeSetsData(setType)
+    local setsData = getSetTypeSetsData(setType)
     return setsData
 end
 
