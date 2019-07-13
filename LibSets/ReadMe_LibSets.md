@@ -147,6 +147,12 @@ function LibSets.GetTraitsNeeded(setId)
 --   setType = "Trial"
 function LibSets.GetSetType(setId)
 
+--Returns the setType name as String
+--> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
+-->             lang String the language for the setType name. Can be left nil -> The client language will be used then
+--> Returns:    String setTypeName
+function LibSets.GetSetTypeName(libSetsSetType, lang)
+
 --Returns a sorted array of all set ids. Key is the setId, value is the boolean value true
 --> Returns: setIds table
 function LibSets.GetAllSetIds()

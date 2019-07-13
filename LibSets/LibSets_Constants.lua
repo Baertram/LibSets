@@ -61,9 +61,9 @@ lib.setTypesToName = {
     [LIBSETS_SETTYPE_ARENA                        ] = {
         ["de"] = "Arena",
         ["en"] = "Arena",
-        ["fr"] = "Arena",
-        ["jp"] = "Arena",
-        ["ru"] = "Arena",
+        ["fr"] = "Arène",
+        ["jp"] = "アリーナ",
+        ["ru"] = "Aрена",
     },
     [LIBSETS_SETTYPE_BATTLEGROUND                        ] = {
         ["de"] = GetString(SI_LEADERBOARDTYPE4),

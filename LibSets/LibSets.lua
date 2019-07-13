@@ -919,7 +919,6 @@ function lib.GetMonsterSetsData()
     return setsData
 end
 
-
 --Returns the set data (setType String, setIds table, itemIds table, setNames table) for overland sets
 --> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetOverlandSetsData()
