@@ -1,5 +1,6 @@
 # LibSets
 LibSets is a library addon for the game Elder Scrolls Online.
+This file can also be found included in the package, with the name: ReadMe_LibSets.md
 
 It's based on the data mined and collected data of the item sets in the game.
 The item sets got a unique setId which was used to identify the sets in this library.
