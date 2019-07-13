@@ -39,7 +39,7 @@ LIBSETS_TABLEKEY_NUMBONUSES                     = "numBonuses"
 LIBSETS_TABLEKEY_MAXEQUIPPED                    = "maxEquipped"
 LIBSETS_TABLEKEY_SETTYPE                        = "setType"
 --Set types
-LIBSETS_SETTYPE_ITERATION_START                 = 1
+LIBSETS_SETTYPE_ITERATION_BEGIN                 = 1 -- Start of iteration over allowed SetTypes
 LIBSETS_SETTYPE_ARENA                           = 1 --"Arena"
 LIBSETS_SETTYPE_BATTLEGROUND                    = 2 --"Battleground"
 LIBSETS_SETTYPE_CRAFTED                         = 3 --"Crafted"
@@ -51,7 +51,7 @@ LIBSETS_SETTYPE_MONSTER                         = 8 --"Monster"
 LIBSETS_SETTYPE_OVERLAND                        = 9 --"Overland"
 LIBSETS_SETTYPE_SPECIAL                         = 10 --"Special"
 LIBSETS_SETTYPE_TRIAL                           = 11 --"Trial"
-LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_TRIAL --Increase this variable to the maximum setType if new setTypes are added
+LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_TRIAL --End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
 lib.allowedSetTypes = { }
 for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
     lib.allowedSetTypes[i] = true
