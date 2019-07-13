@@ -63,6 +63,85 @@ lib.allowedSetTypes = {
     [LIBSETS_SETTYPE_SPECIAL                      ] = true,
     [LIBSETS_SETTYPE_TRIAL                        ] = true,
 }
+lib.setTypesToName = {
+    [LIBSETS_SETTYPE_ARENA                        ] = {
+        ["de"] = "Arena",
+        ["en"] = "Arena",
+        ["fr"] = "Arena",
+        ["jp"] = "Arena",
+        ["ru"] = "Arena",
+    },
+    [LIBSETS_SETTYPE_BATTLEGROUND                        ] = {
+        ["de"] = GetString(SI_LEADERBOARDTYPE4),
+        ["en"] = GetString(SI_LEADERBOARDTYPE4),
+        ["fr"] = GetString(SI_LEADERBOARDTYPE4),
+        ["jp"] = GetString(SI_LEADERBOARDTYPE4),
+        ["ru"] = GetString(SI_LEADERBOARDTYPE4),
+    },
+    [LIBSETS_SETTYPE_CRAFTED                        ] = {
+        ["de"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+        ["en"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+        ["fr"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+        ["jp"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+        ["ru"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+    },
+    [LIBSETS_SETTYPE_CYRODIIL                        ] = {
+        ["de"] = GetString(SI_CAMPAIGNRULESETTYPE1),
+        ["en"] = GetString(SI_CAMPAIGNRULESETTYPE1),
+        ["fr"] = GetString(SI_CAMPAIGNRULESETTYPE1),
+        ["jp"] = GetString(SI_CAMPAIGNRULESETTYPE1),
+        ["ru"] = GetString(SI_CAMPAIGNRULESETTYPE1),
+    },
+    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD  ] = {
+        ["de"] = GeString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
+        ["en"] = GeString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
+        ["fr"] = GeString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
+        ["jp"] = GeString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
+        ["ru"] = GeString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
+    },
+    [LIBSETS_SETTYPE_DUNGEON                        ] = {
+        ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
+        ["en"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
+        ["fr"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
+        ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
+        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
+    },
+    [LIBSETS_SETTYPE_IMPERIALCITY                        ] = {
+        ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
+        ["en"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
+        ["fr"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
+        ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
+        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
+    },
+    [LIBSETS_SETTYPE_MONSTER                        ] = {
+        ["de"] = GetString(SI_SPECIALIZEDITEMTYPE406),
+        ["en"] = GetString(SI_SPECIALIZEDITEMTYPE406),
+        ["fr"] = GetString(SI_SPECIALIZEDITEMTYPE406),
+        ["jp"] = GetString(SI_SPECIALIZEDITEMTYPE406),
+        ["ru"] = GetString(SI_SPECIALIZEDITEMTYPE406),
+    },
+    [LIBSETS_SETTYPE_OVERLAND                        ] = {
+        ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
+        ["en"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
+        ["fr"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
+        ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
+        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
+    },
+    [LIBSETS_SETTYPE_SPECIAL                        ] = {
+        ["de"] = GetString(SI_HOTBARCATEGORY9),
+        ["en"] = GetString(SI_HOTBARCATEGORY9),
+        ["fr"] = GetString(SI_HOTBARCATEGORY9),
+        ["jp"] = GetString(SI_HOTBARCATEGORY9),
+        ["ru"] = GetString(SI_HOTBARCATEGORY9),
+    },
+    [LIBSETS_SETTYPE_TRIAL                        ] = {
+        ["de"] = GetString(SI_LFGACTIVITY4),
+        ["en"] = GetString(SI_LFGACTIVITY4),
+        ["fr"] = GetString(SI_LFGACTIVITY4),
+        ["jp"] = GetString(SI_LFGACTIVITY4),
+        ["ru"] = GetString(SI_LFGACTIVITY4),
+    },
+}
 --Mapping table setType to setIds for this settype.
 -->Will be filled in file LibSets.lua, function LoadSets()
 lib.setTypeToSetIdsForSetTypeTable = {}

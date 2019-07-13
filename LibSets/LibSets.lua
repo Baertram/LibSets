@@ -657,29 +657,35 @@ end
 ----> tables LIBSETS_TABLEKEY_SETITEMIDS (="setItemIds") (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's item),
 ----> table names (="setNames") ([2 character String lang] = String name),
 ----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),
-----> isDungeon, isTrial, IsCraftable, ... boolean value. Only one of the values will be given, all other values will be nil
+----> String setType which shows the setType via the LibSets setType constant values like LIBSETS_SETTYPE_ARENA, LIBSETS_SETTYPE_DUNGEON etc. Only 1 setType is possible for each set
 ----> isVeteran boolean value true if this set can be only obtained in veteran mode, or a table containing the key = equipType and value=boolean true/false if the equipType of the setId cen be only obtained in veteran mode (e.g. a monster set head is veteran, shoulders are normal)
-----> isMultiTrial boolean, only if isTrial == true (setId can be obtained in multiple trials -> see zoneIds table)
+----> isMultiTrial boolean, only if setType == LIBSETS_SETTYPE_TRIAL (setId can be obtained in multiple trials -> see zoneIds table)
 ----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).
 ------>The table can contain 1 to 3 entries (one for each faction e.g.) and contains the wayshrineNodeId nearest to the set's crafting table/in the drop zone
 ----> table zoneIds containing the zoneIds (one to n) where this set drops, or can be obtained
 -------Example for setId 408
 --- ["setId"] = 408,
---- ["dlcId"] = 12    --DLC_MURKMIRE
---	["isCrafted"] = true
---	[LIBSETS_TABLEKEY_SETITEMIDS] = table [#0,370]
---	[LIBSETS_TABLEKEY_SETNAMES] = table [#0,3]
+--- ["dlcId"] = 12,    --DLC_MURKMIRE
+--	["setType"] = LIBSETS_SETTYPE_CRAFTED,
+--	[LIBSETS_TABLEKEY_SETITEMIDS] = {
+--      table [#0,370]
+--  },
+--	[LIBSETS_TABLEKEY_SETNAMES] = {
 --		["de"] = "Grabpflocksammler"
 --		["en"] = "Grave-Stake Collector"
 --		["fr"] = "Collectionneur de marqueurs funéraires"
---	["traitsNeeded"] = 7
---	["veteran"] = false
---	["wayshrines"] = table [#3,3]
+--  },
+--	["traitsNeeded"] = 7,
+--	["veteran"] = false,
+--	["wayshrines"] = {
 --		[1] = 375
 --		[2] = 375
 --		[3] = 375
---	["zoneIds"] = table [#1,1]
---		[1] = 726
+--  },
+--	["zoneIds"] = {
+--		[1] = 726,
+--  },
+--}
 function lib.GetSetInfo(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
@@ -701,6 +707,25 @@ function lib.GetSetInfo(setId)
     if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
     if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
     return setInfoTable
+end
+
+--Returns the setType name as String
+--> Parameters: libSetsSetType String: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
+-->             lang String the language for the setType name. Can be left nil -> The client language will be used then
+--> Returns:    String setTypeName
+function lib.GetSetTypeName(libSetsSetType, lang)
+    if libSetsSetType == nil then return end
+    lang = lang or lib.clientLang
+    local allowedLibSetsSetTypes = lib.allowedSetTypes
+    local allowedSetType = allowedLibSetsSetTypes[libSetsSetType] or false
+    if not allowedSetType then return end
+    local setTypeName
+    local libSetsSetTypeNames = lib.setTypesToName
+    local setTypeNameAllLang = libSetsSetTypeNames[libSetsSetType]
+    if setTypeNameAllLang and setTypeNameAllLang[lang] then
+        setTypeName = setTypeNameAllLang[lang]
+    end
+    return setTypeName
 end
 
 ------------------------------------------------------------------------
