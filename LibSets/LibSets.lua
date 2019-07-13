@@ -814,11 +814,12 @@ local function LoadSavedVariables()
     --SavedVars were loaded already before?
     if lib.svData ~= nil then return end
     local defaults = {
-        ["maps"]            = {},
-        [LIBSETS_TABLEKEY_SETITEMIDS]      = {},
-        [LIBSETS_TABLEKEY_SETNAMES]        = {},
-        ["wayshrineNames"]  = {},
-        ["zoneData"]        = {},
+        [LIBSETS_TABLEKEY_MAPS]                 = {},
+        [LIBSETS_TABLEKEY_SETITEMIDS]           = {},
+        [LIBSETS_TABLEKEY_SETNAMES]             = {},
+        [LIBSETS_TABLEKEY_WAYSHRINE_NAMES]      = {},
+        [LIBSETS_TABLEKEY_ZONE_DATA]            = {},
+        [LIBSETS_TABLEKEY_DUNGEONFINDER_DATA]   = {},
     }
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$AllAccounts")

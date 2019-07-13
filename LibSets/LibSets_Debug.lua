@@ -303,3 +303,70 @@ local function scanAllSetData()
     end, miliseconds + 2000)
 end
 lib.DebugScanAllSetData = scanAllSetData
+
+--Local helper function to get the dungeon finder data node entries of normal and/or veteran dungeons
+local retTableDungeons
+local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenTable)
+    local veteranIconString = "|t100%:100%:EsoUI/Art/UnitFrames/target_veteranRank_icon.dds|t "
+    local dungeonsAddedCounter = 0
+    if dungeonFinderRootNodeChildrenTable == nil or dungeonFinderRootNodeChildrenTable.children == nil then return 0 end
+    for _, childData in ipairs(dungeonFinderRootNodeChildrenTable.children) do
+        if childData and childData.data then
+            retTableDungeons = retTableDungeons or {}
+            local data = childData.data
+            local dungeonData = {
+                ["id"] = data.id,
+                ["zoneId"] = data.zoneId,
+            }
+            --Check the name for the veteran icon and remove if + update the isVeteran boolean in the table
+            local name = data.nameKeyboard
+            local nameClean = name
+            if zo_strfind(name, veteranIconString) then
+d(">found veteran icon in: " ..tostring(name))
+                nameClean = zo_strgsub(name, veteranIconString, "")
+                dungeonData["isVeteran"] = true
+            end
+            dungeonData["name"] = {
+                [lib.clientLang] = nameClean,
+            },
+            table.insert(retTableDungeons, dungeonData)
+            dungeonsAddedCounter = dungeonsAddedCounter +1
+        end
+    end
+    return dungeonsAddedCounter
+end
+
+--Read all dungeons from the dungeon finder and save them to the SavedVariables key "dungeonFinderData" (LIBSETS_TABLEKEY_DUNGEONFINDER_DATA).
+--->!!!Attention!!!You MUST open the dungeon finder->go to specific dungeon dropdown entry in order to build the dungeons list needed first!!!
+--Parameter: dungeonFinderIndex number. Possible values are 1=Normal or 2=Veteran or 3=Both dungeons. Leave empty to get both
+function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
+    d("[" .. MAJOR .."]Start to load all dungeon data from the keyboard dungeon finder...")
+    dungeonFinderIndex = dungeonFinderIndex or 3
+    local dungeonFinder = DUNGEON_FINDER_KEYBOARD
+    retTableDungeons = nil
+    local dungeonsAdded = 0
+    if dungeonFinder and dungeonFinder.navigationTree and dungeonFinder.navigationTree.rootNode then
+        local dfRootNode = dungeonFinder.navigationTree.rootNode
+        if dfRootNode.children then
+            if dungeonFinderIndex == 3 then
+                local dungeonsData = dfRootNode.children[1]
+                getDungeonFinderDataFromChildNodes(dungeonsData)
+                dungeonsData = dfRootNode.children[2]
+                dungeonsAdded = getDungeonFinderDataFromChildNodes(dungeonsData)
+            else
+                local dungeonsData = dfRootNode.children[dungeonFinderIndex]
+                dungeonsAdded = getDungeonFinderDataFromChildNodes(dungeonsData)
+            end
+        else
+            d("<Please open the dungeon finder and choose the \'Specifiy dungeon\' entry from the dropdown box at the top-right edge! Then try this function again.")
+        end
+    end
+    if retTableDungeons and #retTableDungeons>0 and dungeonsAdded >0 then
+        LoadSavedVariables()
+        lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = {}
+        lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
+        d("->Stored " .. tostring(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_DUNGEONFINDER_DATA .. "\', language: \'" ..tostring(lib.clientLang).."\'")
+    else
+        d("<No dungeon data was found!")
+    end
+end
