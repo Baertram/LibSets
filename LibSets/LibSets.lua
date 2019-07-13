@@ -730,25 +730,7 @@ function lib.GetZoneName(zoneId, lang)
 end
 
 
---Returns the setIds, itemIds and setNames for a given setType
---> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
---> Returns:    table with key = setId, value = table which contains:
----->             setType = e.g. LIBSETS_SETTYPE_CRAFTED ("Crafted")
------->             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
------->             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
----             Example:
----             [setId] = {
----                 setType = e.g. LIBSETS_SETTYPE_CRAFTED or any other LIBSETS_SETTYPE_* constants which is allowed (see file LibSets_Constants.lua),
----                 [LIBSETS_TABLEKEY_SETITEMIDS] = {
----                     [itemId1]=true,
----                     [itemId2]=true
----                 },
----                 [LIBSETS_TABLEKEY_SETNAMES] = {
----                     ["de"]="Set name German",
----                     ["en"]="Set name English",
----                     ["fr"]="Set name French",
----                 },
----             }
+--Helper function to return the setIds, itemIds and setNames for a given setType
 local function getSetTypeSetsData(setType)
     if setType == nil then return end
     --Check if the setType is allowed within LiBSets

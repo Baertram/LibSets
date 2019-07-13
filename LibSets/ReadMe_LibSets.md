@@ -133,18 +133,7 @@ function LibSets.GetTraitsNeeded(setId)
 --Returns the type of the setId!
 --> Parameters: setId number: The set's setId
 --> Returns:    setType String
----> Possible values are:
---   setType = "Arena"
---   setType = "Battleground"
---   setType = "Crafted"
---   setType = "Cyrodiil"
---   setType = "DailyRandomDungeonAndICReward"
---   setType = "Dungeon"
---   setType = "Imperial City"
---   setType = "Monster"
---   setType = "Overland"
---   setType = "Special"
---   setType = "Trial"
+---> Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 function LibSets.GetSetType(setId)
 
 --Returns the setType name as String
@@ -193,32 +182,38 @@ function LibSets.GetSetNames(setId)
 ----> Contains:
 ----> number setId
 ----> number dlcId (the dlcId where the set was added, see file LibSets_Constants.lua, constants DLC_BASE_GAME to e.g. DLC_ELSWEYR)
-----> tables itemIds (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's item),
-----> table names ([2 character String lang] = String name),
+----> tables LIBSETS_TABLEKEY_SETITEMIDS (="setItemIds") (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's item),
+----> table names (="setNames") ([2 character String lang] = String name),
 ----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),
-----> isDungeon, isTrial, IsCraftable, ... boolean value. Only one of the values will be given, all other values will be nil
+----> String setType which shows the setType via the LibSets setType constant values like LIBSETS_SETTYPE_ARENA, LIBSETS_SETTYPE_DUNGEON etc. Only 1 setType is possible for each set
 ----> isVeteran boolean value true if this set can be only obtained in veteran mode, or a table containing the key = equipType and value=boolean true/false if the equipType of the setId cen be only obtained in veteran mode (e.g. a monster set head is veteran, shoulders are normal)
-----> isMultiTrial boolean, only if isTrial == true (setId can be obtained in multiple trials -> see zoneIds table)
+----> isMultiTrial boolean, only if setType == LIBSETS_SETTYPE_TRIAL (setId can be obtained in multiple trials -> see zoneIds table)
 ----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).
 ------>The table can contain 1 to 3 entries (one for each faction e.g.) and contains the wayshrineNodeId nearest to the set's crafting table/in the drop zone
 ----> table zoneIds containing the zoneIds (one to n) where this set drops, or can be obtained
 -------Example for setId 408
 --- ["setId"] = 408,
---- ["dlcId"] = 12    --DLC_MURKMIRE
---	["isCrafted"] = true
---	["itemIds"] = table [#0,370]
---	["names"] = table [#0,3]
+--- ["dlcId"] = 12,    --DLC_MURKMIRE
+--	["setType"] = LIBSETS_SETTYPE_CRAFTED,
+--	[LIBSETS_TABLEKEY_SETITEMIDS] = {
+--      table [#0,370]
+--  },
+--	[LIBSETS_TABLEKEY_SETNAMES] = {
 --		["de"] = "Grabpflocksammler"
 --		["en"] = "Grave-Stake Collector"
 --		["fr"] = "Collectionneur de marqueurs funéraires"
---	["traitsNeeded"] = 7
---	["veteran"] = false
---	["wayshrines"] = table [#3,3]
+--  },
+--	["traitsNeeded"] = 7,
+--	["veteran"] = false,
+--	["wayshrines"] = {
 --		[1] = 375
 --		[2] = 375
 --		[3] = 375
---	["zoneIds"] = table [#1,1]
---		[1] = 726
+--  },
+--	["zoneIds"] = {
+--		[1] = 726,
+--  },
+--}
 function LibSets.GetSetInfo(setId)
 
 
@@ -251,16 +246,9 @@ function LibSets.GetUndauntedChestName(undauntedChestId, lang)
 --> Returns:    name zoneName
 function LibSets.GetZoneName(zoneId, lang)
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for arena sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetArenaSetsData()
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for battleground sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetBattlegroundSetsData()
-
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for carfted sets
---> Returns:    table with key = setId, value = table which contains:
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType
+--> Returns:    table with key = setId, value = table which contains (as example for setType = LIBSETS_SETTYPE_CRAFTED)
 ---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
 ------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
 ------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
@@ -277,39 +265,11 @@ function LibSets.GetBattlegroundSetsData()
 ---                     ["fr"]="Set name French",
 ---                 },
 ---             }
-function LibSets.GetCraftedSetsData()
 
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for cyrodiil sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetCyrodiilSetsData()
-
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for daily random dungeon and imperial city rewards sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetDailyRandomDungeonAndImperialCityRewardsSetsData()
-
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for dungeon sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetDungeonSetsData()
-
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for imperial city sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetImperialCitySetsData()
-
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for monster sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetMonsterSetsData()
-
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for overland sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetOverlandSetsData()
-
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for special sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetSpecialSetsData()
-
---Returns the set data (setType String, setIds table, itemIds table, setNames table) for trial sets
---> Returns:    table -> See LibSets.GetCraftedSetsData for details of the table contents
-function LibSets.GetTrialSetsData()
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
+--Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
+--> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
+function LibSets.GetSetTypeSetsData(setType)
 
 
 ------------------------------------------------------------------------
