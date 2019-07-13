@@ -497,18 +497,7 @@ end
 --Returns the type of the setId!
 --> Parameters: setId number: The set's setId
 --> Returns:    setType String
----> Possible values are:
---   setType = "Arena"
---   setType = "Battleground"
---   setType = "Crafted"
---   setType = "Cyrodiil"
---   setType = "DailyRandomDungeonAndICReward"
---   setType = "Dungeon"
---   setType = "Imperial City"
---   setType = "Monster"
---   setType = "Overland"
---   setType = "Special"
---   setType = "Trial"
+---> Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 function lib.GetSetType(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
@@ -546,6 +535,30 @@ function lib.GetSetType(setId)
         setType = LIBSETS_SETTYPE_TRIAL
     end
     return setType
+end
+
+--Returns the setType name as String
+--> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
+-->             lang String the language for the setType name. Can be left nil -> The client language will be used then
+--> Returns:    String setTypeName
+function lib.GetSetTypeName(libSetsSetType, lang)
+    if libSetsSetType == nil then return end
+    lang = lang or lib.clientLang
+    local allowedLibSetsSetTypes = lib.allowedSetTypes
+    local allowedSetType = allowedLibSetsSetTypes[libSetsSetType] or false
+    if not allowedSetType then return end
+    local setTypeName
+    local libSetsSetTypeNames = lib.setTypesToName
+    local setTypeNameAllLang = libSetsSetTypeNames[libSetsSetType]
+    if setTypeNameAllLang and setTypeNameAllLang[lang] then
+        setTypeName = setTypeNameAllLang[lang]
+    end
+    return setTypeName
+end
+
+--Returns the table of setTypes of LibSets (the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
+function lib.GetSetTypes()
+    return lib.allowedSetTypes
 end
 
 --Returns a sorted array of all set ids. Key is the setId, value is the boolean value true
@@ -707,25 +720,6 @@ function lib.GetSetInfo(setId)
     if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
     if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
     return setInfoTable
-end
-
---Returns the setType name as String
---> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
--->             lang String the language for the setType name. Can be left nil -> The client language will be used then
---> Returns:    String setTypeName
-function lib.GetSetTypeName(libSetsSetType, lang)
-    if libSetsSetType == nil then return end
-    lang = lang or lib.clientLang
-    local allowedLibSetsSetTypes = lib.allowedSetTypes
-    local allowedSetType = allowedLibSetsSetTypes[libSetsSetType] or false
-    if not allowedSetType then return end
-    local setTypeName
-    local libSetsSetTypeNames = lib.setTypesToName
-    local setTypeNameAllLang = libSetsSetTypeNames[libSetsSetType]
-    if setTypeNameAllLang and setTypeNameAllLang[lang] then
-        setTypeName = setTypeNameAllLang[lang]
-    end
-    return setTypeName
 end
 
 ------------------------------------------------------------------------
