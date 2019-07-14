@@ -109,6 +109,8 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for zone names -> Save them in the SavedVariables "zoneData"
 ------------------------------------------------------------------------------------------------------------------------
+--Returns a list of the zone data in the current client language and saves it to the SavedVars table "zoneData" in this format:
+--zoneData[lang][zoneId] = zoneId .. "|" .. zoneIndex .. "|" .. parentZoneId .. "|" ..zoneNameCleanLocalizedInClientLanguage
 function lib.DebugGetAllZoneInfo()
     local zoneData = GetAllZoneInfo()
     if zoneData ~= nil then
@@ -123,6 +125,8 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for map names -> Save them in the SavedVariables "maps"
 ------------------------------------------------------------------------------------------------------------------------
+--Returns a list of the maps data in the current client language and saves it to the SavedVars table "maps" in this format:
+--maps[mapIndex] = mapIndex .. "|" .. localizedCleanMapNameInClientLanguage .. "|" .. zoneId .. "|" .. zoneNameLocalizedInClientLanguage
 function lib.DebugGetAllMapNames()
     local maps = GetMapNames(lib.clientLang)
     if maps ~= nil then
@@ -138,6 +142,9 @@ end
 -- Scan for wayshrines -> Save them in the SavedVariables "wayshrines"
 --> You need to open a map (zone map, no city or sub-zone maps!) in order to let the function work properly
 ------------------------------------------------------------------------------------------------------------------------
+--Returns a list of the wayshrine data (nodes) in the current client language and saves it to the SavedVars table "wayshrines" in this format:
+--wayshrines[i] = wayshrineNodeId .."|"..currentMapIndex.."|"..currentMapId.."|"..currentMapNameLocalizedInClientLanguage.."|"
+--..currentMapsZoneIndex.."|"..currentZoneId.."|"..currentZoneNameLocalizedInClientLanguage.."|"..wayshrinesPOIType.."|".. wayshrineNameCleanLocalizedInClientLanguage
 function lib.DebugGetAllWayshrineInfo()
     local ws = GetWayshrineInfo()
     if ws ~= nil then
@@ -150,6 +157,8 @@ function lib.DebugGetAllWayshrineInfo()
     end
 end
 
+--Returns a list of the wayshrine names in the current client language and saves it to the SavedVars table "wayshrineNames" in this format:
+--wayshrineNames[clientLanguage][wayshrineNodeId] = wayshrineNodeId .. "|" .. wayshrineLocalizedNameCleanInClientLanguage
 function lib.DebugGetAllWayshrineNames()
     local wsNames = GetWayshrineNames()
     if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
@@ -308,27 +317,23 @@ lib.DebugScanAllSetData = scanAllSetData
 local retTableDungeons
 local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenTable)
     local veteranIconString = "|t100%:100%:EsoUI/Art/UnitFrames/target_veteranRank_icon.dds|t "
+    local veteranIconStringPattern = "|t.-:.-:EsoUI/Art/UnitFrames/target_veteranRank_icon.dds|t%s*"
     local dungeonsAddedCounter = 0
     if dungeonFinderRootNodeChildrenTable == nil or dungeonFinderRootNodeChildrenTable.children == nil then return 0 end
     for _, childData in ipairs(dungeonFinderRootNodeChildrenTable.children) do
         if childData and childData.data then
             retTableDungeons = retTableDungeons or {}
             local data = childData.data
-            local dungeonData = {
-                ["id"] = data.id,
-                ["zoneId"] = data.zoneId,
-            }
             --Check the name for the veteran icon and remove if + update the isVeteran boolean in the table
             local name = data.nameKeyboard
             local nameClean = name
-            if zo_strfind(name, veteranIconString) then
-d(">found veteran icon in: " ..tostring(name))
-                nameClean = zo_strgsub(name, veteranIconString, "")
-                dungeonData["isVeteran"] = true
+            local substMadeCount=0
+            local isVeteranDungeon = false
+            nameClean, substMadeCount = zo_strgsub(name, veteranIconStringPattern, "")
+            if substMadeCount > 0 then
+                isVeteranDungeon = true
             end
-            dungeonData["name"] = {
-                [lib.clientLang] = nameClean,
-            },
+            local dungeonData = data.id .. "|" .. nameClean .. "|" .. data.zoneId .. "|" .. tostring(isVeteranDungeon)
             table.insert(retTableDungeons, dungeonData)
             dungeonsAddedCounter = dungeonsAddedCounter +1
         end
@@ -337,6 +342,16 @@ d(">found veteran icon in: " ..tostring(name))
 end
 
 --Read all dungeons from the dungeon finder and save them to the SavedVariables key "dungeonFinderData" (LIBSETS_TABLEKEY_DUNGEONFINDER_DATA).
+--The format will be:
+--dungeonFinderData[integerIndexIncreasedBy1] = dungeonId .. "|" .. dungeonName .. "|" .. zoneId .. "|" .. isVeteranDungeon
+--This string can be easily copy&pasted to Excel and split at the | delimiter
+--Example:
+--["dungeonFinderData"] =
+--{
+--  [1] = "2|Pilzgrotte I|283|false",
+--  [2] = "18|Pilzgrotte II|934|false",
+--..
+--}
 --->!!!Attention!!!You MUST open the dungeon finder->go to specific dungeon dropdown entry in order to build the dungeons list needed first!!!
 --Parameter: dungeonFinderIndex number. Possible values are 1=Normal or 2=Veteran or 3=Both dungeons. Leave empty to get both
 function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
