@@ -115,10 +115,10 @@ function lib.DebugGetAllZoneInfo()
     local zoneData = GetAllZoneInfo()
     if zoneData ~= nil then
         LoadSavedVariables()
-        lib.svData.zoneData = lib.svData.zoneData or {}
-        lib.svData.zoneData[lib.clientLang] = {}
-        lib.svData.zoneData[lib.clientLang] = zoneData[lib.clientLang]
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'zoneData\', language: \'" ..tostring(lib.clientLang).."\'")
+        lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] or {}
+        lib.svData[LIBSETS_TABLEKEY_ZONE_DATA][lib.clientLang] = {}
+        lib.svData[LIBSETS_TABLEKEY_ZONE_DATA][lib.clientLang] = zoneData[lib.clientLang]
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'".. LIBSETS_TABLEKEY_ZONE_DATA .. "\', language: \'" ..tostring(lib.clientLang).."\'")
     end
 end
 
@@ -131,10 +131,10 @@ function lib.DebugGetAllMapNames()
     local maps = GetMapNames(lib.clientLang)
     if maps ~= nil then
         LoadSavedVariables()
-        lib.svData.maps = lib.svData.maps or {}
-        lib.svData.maps[lib.clientLang] = {}
-        lib.svData.maps[lib.clientLang] = maps
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'maps\', language: \'" ..tostring(lib.clientLang).."\'")
+        lib.svData[LIBSETS_TABLEKEY_MAPS] = lib.svData[LIBSETS_TABLEKEY_MAPS] or {}
+        lib.svData[LIBSETS_TABLEKEY_MAPS][lib.clientLang] = {}
+        lib.svData[LIBSETS_TABLEKEY_MAPS][lib.clientLang] = maps
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MAPS.."\', language: \'" ..tostring(lib.clientLang).."\'")
     end
 end
 
@@ -149,11 +149,11 @@ function lib.DebugGetAllWayshrineInfo()
     local ws = GetWayshrineInfo()
     if ws ~= nil then
         LoadSavedVariables()
-        lib.svData.wayshrines = lib.svData.wayshrines or {}
+        lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] or {}
         for wsNodeId, wsData in pairs(ws) do
-            lib.svData.wayshrines[wsNodeId] = wsData
+            lib.svData[LIBSETS_TABLEKEY_WAYSHRINES][wsNodeId] = wsData
         end
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'wayshrines\'")
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINES.."\'")
     end
 end
 
@@ -163,16 +163,19 @@ function lib.DebugGetAllWayshrineNames()
     local wsNames = GetWayshrineNames()
     if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
         LoadSavedVariables()
-        lib.svData.wayshrineNames = lib.svData.wayshrineNames or {}
-        lib.svData.wayshrineNames[lib.clientLang] = {}
-        lib.svData.wayshrineNames[lib.clientLang] = wsNames[lib.clientLang]
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'wayshrineNames\', language: \'" ..tostring(lib.clientLang).."\'")
+        lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] or {}
+        lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][lib.clientLang] = {}
+        lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][lib.clientLang] = wsNames[lib.clientLang]
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINE_NAMES.."\', language: \'" ..tostring(lib.clientLang).."\'")
     end
 end
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for set names in client language -> Save them in the SavedVariables "setNames"
 ---------------------------------------------------------------------------------------------------------------------------
+--Returns a list of the set names in the current client language and saves it to the SavedVars table "setNames" in this format:
+--setNames[setId][clientLanguage] = localizedAndCleanSetNameInClientLanguage
+-->The table LibSets.setItemIds in file LibSets_Data.lua must be updated with all setId and itemIds in order to make this debug function scan ALL actual setIds!
 function lib.DebugGetAllSetNames()
     d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(lib.clientLang))
     --Use the SavedVariables to get the setNames of the current client language
@@ -194,8 +197,8 @@ function lib.DebugGetAllSetNames()
                                     LoadSavedVariables()
                                     svLoadedAlready = true
                                 end
-                                lib.svData["setNames"][setId] = lib.svData["setNames"][setId] or {}
-                                lib.svData["setNames"][setId][lib.clientLang] = setName
+                                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
+                                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
                                 setNamesAdded = setNamesAdded +1
                             end
                         end
@@ -204,7 +207,7 @@ function lib.DebugGetAllSetNames()
             end
         end
         if setNamesAdded > 0 then
-            d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'setNames\', language: \'" ..tostring(lib.clientLang).."\'")
+            d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'")
         end
     end
 end
@@ -223,12 +226,12 @@ local function showSetCountsScanned(finished)
     d("-> Sets found: "..tostring(setCount))
     d("-> Set items found: "..tostring(itemCount))
     if finished then
-        d(">>> [" .. MAJOR .. "] Scanning of sets has finished! Please do a /reloadui to update the SavedVariables properly! <<<")
+        d(">>> [" .. MAJOR .. "] Scanning of sets has finished! Please do a /reloadui to update the SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS .. "\' properly! <<<")
         --Save the data to the SavedVariables now
         if setCount > 0 then
             LoadSavedVariables()
-            lib.svData.setItemIds = {}
-            lib.svData.setItemIds = sets
+            lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = {}
+            lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
         end
     end
     d("<<" .. debugOutputStartLine)
