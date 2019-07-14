@@ -390,6 +390,32 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
     end
 end
 
+--This function scans the collectibles for their names to provide a list for the new DLCs and chapters
+--Parameters: collectibleStartId number, the start ID of the collectibles to start the scan FROM
+--            collectibleEndId number, the end ID of the collectibles to start the scan TO
+function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
+    collectibleStartId = collectibleStartId or 1
+    collectibleEndId = collectibleEndId or 5000
+    if collectibleEndId < collectibleStartId then collectibleEndId = collectibleStartId end
+    d("[" .. MAJOR .."]Start to load all collectibles with start ID ".. collectibleStartId .. " to end ID " .. collectibleEndId .. "...")
+    local collectiblesAdded = 0
+    local collectibleDataScanned
+    for i=collectibleStartId, collectibleEndId, 1 do
+        local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(i)))
+        if collectibleName and collectibleName ~= "" then
+            collectibleDataScanned = collectibleDataScanned or {}
+            collectibleDataScanned[i] = tostring(i) .. "|" .. collectibleName
+            collectiblesAdded = collectiblesAdded +1
+        end
+    end
+    if collectiblesAdded >0 then
+        LoadSavedVariables()
+        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = {}
+        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = collectibleDataScanned
+        d("->Stored " .. tostring(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'")
+    end
+end
+
 --This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
 function lib.DebugResetSavedVariables()
     LoadSavedVariables()

@@ -4,7 +4,7 @@ assert(LibSets == nil, "[LibSets]Library was loaded before already!")
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets
-
+------------------------------------------------------------------------------------------------------------------------
 --Library base values
 local MAJOR, MINOR = "LibSets", 0.06
 lib.name            = MAJOR
@@ -13,11 +13,11 @@ lib.svName          = "LibSets_SV_Data"
 lib.svVersion       = 0.6
 lib.setsLoaded      = false
 lib.setsScanning    = false
-
+------------------------------------------------------------------------------------------------------------------------
 --The last checked API version for the setsData in file LibSets_Data.lua, see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion    = 100028 --Scalebraker
+lib.lastSetsPreloadedCheckAPIVersion    = 100027 --Elsweyr
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
 lib.supportedLanguages = {
@@ -43,6 +43,8 @@ LIBSETS_TABLEKEY_WAYSHRINES                     = "wayshrines"
 LIBSETS_TABLEKEY_WAYSHRINE_NAMES                = "wayshrineNames"
 LIBSETS_TABLEKEY_ZONE_DATA                      = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA             = "dungeonFinderData"
+LIBSETS_TABLEKEY_COLLECTIBLE_NAMES              = "collectibleNames"
+------------------------------------------------------------------------------------------------------------------------
 --Set types
 --> If you change these be sure to check the following tables below and add/change/remove entries as well:
 --lib.setTypeToLibraryInternalVariableNames
@@ -254,8 +256,6 @@ DLC_WOLFHUNTER              = 11
 DLC_MURKMIRE                = 12
 DLC_WRATHSTONE              = 13
 DLC_ELSWEYR                 = 14
-DLC_SCALEBRAKER             = 15
-DLC_DRAGONHOLD              = 16
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
 lib.dlcAndChapterAchievementIds = {
     --Imperial city
@@ -286,10 +286,6 @@ lib.dlcAndChapterAchievementIds = {
     [DLC_WRATHSTONE] = 2265,
     --Elsweyr
     [DLC_ELSWEYR] = 2463,
-    --Scalebraker
-    [DLC_SCALEBRAKER] = 0, --TODO
-    --Dragonhold
-    [DLC_DRAGONHOLD] = 0, --TODO
 }
 --Internal achievement example ids of the ESO DLCs and chapters
 local dlcAndChapterAchievementIds = lib.dlcAndChapterAchievementIds
