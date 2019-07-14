@@ -200,18 +200,20 @@ end
 ------------------------------------------------------------------------
 -- 	Global helper functions
 ------------------------------------------------------------------------
---Create an example itemlink of the setItem's itemId
+--Create an example itemlink of the setItem's itemId (level 50, CP160) using the itemQuality subtype.
+--Standard value for the qualitySubType is 366 which means "Normal" quality.
+--The following qualities are available:
+--357:  Trash
+--366:  Normal
+--367:  Magic
+--368:  Arcane
+--369:  Artifact
+--370:  Legendary
 function lib.buildItemLink(itemId, itemQualitySubType)
     if itemId == nil or itemId == 0 then return end
     --itemQualitySubType is used for the itemLinks quality, see UESP website for a description of the itemLink: https://en.uesp.net/wiki/Online:Item_Link
     itemQualitySubType = itemQualitySubType or 366 -- Normal
     --itemQualitySubType values for Level 50 items:
-    --357:  Trash
-    --366:  Normal
-    --367:  Magic
-    --368:  Arcane
-    --369:  Artifact
-    --370:  Legendary
     --return '|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
     return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, itemQualitySubType, ITEMSTYLE_NONE, 0, 10000)
 end
@@ -328,6 +330,7 @@ function lib.IsDailyRandomDungeonAndImperialCityRewardSet(setId)
 end
 
 --Returns true if the setId provided is a non ESO, own defined setId
+--See file LibSets_SetData_(APIVersion).lua, table LibSets.lib.noSetIdSets and description above it.
 --> Parameters: noESOSetId number: The set's setId
 --> Returns:    boolean isNonESOSet
 function lib.IsNoESOSet(noESOSetId)
@@ -810,7 +813,8 @@ function lib.IsSetsScanning()
 end
 
 --Returns a boolean value, true if the sets database is properly loaded yet and is not currently scanning
---or false if not
+--or false if not.
+--This functions combines the result values of the functions LibSets.AreSetsLoaded() and LibSets.IsSetsScanning()
 function lib.checkIfSetsAreLoadedProperly()
     if lib.IsSetsScanning() or not lib.AreSetsLoaded() then return false end
     return true
