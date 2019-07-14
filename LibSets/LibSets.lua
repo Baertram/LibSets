@@ -504,13 +504,12 @@ function lib.GetAllSetIds()
     return lib.setIds
 end
 
---Returns all sets itemIds as tabke. Key is the setId, value is a subtable with the key=itemId and value = boolean value true.
+--Returns all sets itemIds as table. Key is the setId, value is a subtable with the key=itemId and value = boolean value true.
 --> Returns: setItemIds table
 function lib.GetAllSetItemIds()
     if not lib.checkIfSetsAreLoadedProperly() then return end
     return preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
 end
-
 
 --Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
 --The key is the itemId and the value is the boolean value true
