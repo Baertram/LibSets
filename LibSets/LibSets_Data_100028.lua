@@ -32,7 +32,7 @@ local lib = LibSets
 --The data below is generated from the Excel document containing the set data. The excel map "Sets data" contains the code in the excel's columns
 --AR to AU (AV is not needed/used anymore and only in there for information!)
 --The Excel document can be found here: https://github.com/Baertram/LibSets
---> Last updated: API 100027, Elsweyr, 13.07.2019, Baertram
+--> Last updated: API 100028, Scalebraker, 14.07.2019, Baertram
 lib.setInfo = {
     --Removed sets (old ones)
     --209	Armor of the Code
