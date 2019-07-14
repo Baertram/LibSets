@@ -14,7 +14,7 @@
 LibSets_Constants.lua
 
 ##Data file (update each APIversion increase!)
-LibSets_Data.lua
+LibSets_Data_$(APIVersion).lua
 
 ##Functions and base library code
 LibSets.lua
