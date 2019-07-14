@@ -17,7 +17,7 @@ lib.setsScanning    = false
 --The last checked API version for the setsData in file LibSets_Data.lua, see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion    = 100027 --Elsweyr
+lib.lastSetsPreloadedCheckAPIVersion    = 100028 --Scalebraker
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
 lib.supportedLanguages = {

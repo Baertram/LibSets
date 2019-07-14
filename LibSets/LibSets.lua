@@ -496,12 +496,21 @@ function lib.GetSetTypes()
     return lib.allowedSetTypes
 end
 
---Returns a sorted array of all set ids. Key is the setId, value is the boolean value true
+--Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.
+--Attention: The table can have a gap in it's index as not all setIds are gap-less in ESO!
 --> Returns: setIds table
 function lib.GetAllSetIds()
     if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.setIds
 end
+
+--Returns all sets itemIds as tabke. Key is the setId, value is a subtable with the key=itemId and value = boolean value true.
+--> Returns: setItemIds table
+function lib.GetAllSetItemIds()
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+end
+
 
 --Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
 --The key is the itemId and the value is the boolean value true

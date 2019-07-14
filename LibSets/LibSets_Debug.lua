@@ -176,39 +176,40 @@ end
 --Returns a list of the set names in the current client language and saves it to the SavedVars table "setNames" in this format:
 --setNames[setId][clientLanguage] = localizedAndCleanSetNameInClientLanguage
 -->The table LibSets.setItemIds in file LibSets_Data.lua must be updated with all setId and itemIds in order to make this debug function scan ALL actual setIds!
+-->Read above the tble for instructions how to update it
 function lib.DebugGetAllSetNames()
     d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(lib.clientLang))
     --Use the SavedVariables to get the setNames of the current client language
     local svLoadedAlready = false
-    local setIdsToCheck = lib.GetAllSetIds()
-    if setIdsToCheck then
-        local setNamesAdded = 0
-        for setIdToCheck, _ in pairs(setIdsToCheck) do
-            local itemIdsToCheck = lib.GetSetItemIds(setIdToCheck)
-            if itemIdsToCheck then
-                for itemIdToCheck, _ in pairs(itemIdsToCheck) do
-                    if itemIdToCheck then
-                        local isSet, setName, setId = lib.IsSetByItemId(itemIdToCheck)
-                        if isSet and setId == setIdToCheck then
-                            setName = ZO_CachedStrFormat("<<C:1>>", setName)
-                            if setName ~= "" then
-                                --Load the SV once
-                                if not svLoadedAlready then
-                                    LoadSavedVariables()
-                                    svLoadedAlready = true
-                                end
-                                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
-                                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
-                                setNamesAdded = setNamesAdded +1
+    local setNamesAdded = 0
+    local allSetItemIds = lib.GetAllSetItemIds()
+    local setWasChecked = false
+    for setIdToCheck, setsItemIds in pairs(allSetItemIds) do
+        setWasChecked = false
+        if setsItemIds then
+            for itemIdToCheck, _ in pairs(setsItemIds) do
+                if not setWasChecked and itemIdToCheck then
+                    local isSet, setName, setId = lib.IsSetByItemId(itemIdToCheck)
+                    if isSet and setId == setIdToCheck then
+                        setWasChecked = true
+                        setName = ZO_CachedStrFormat("<<C:1>>", setName)
+                        if setName ~= "" then
+                            --Load the SV once
+                            if not svLoadedAlready then
+                                LoadSavedVariables()
+                                svLoadedAlready = true
                             end
+                            lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
+                            lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
+                            setNamesAdded = setNamesAdded +1
                         end
                     end
                 end
             end
         end
-        if setNamesAdded > 0 then
-            d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'")
-        end
+    end
+    if setNamesAdded > 0 then
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'")
     end
 end
 
@@ -291,7 +292,7 @@ local function scanAllSetData()
     --much and is not crashing!
     --> Change variable numItemIdPackages and increase it to support new added set itemIds
     --> Total itemIds collected: 0 to (numItemIdPackages * numItemIdPackageSize)
-    local miliseconds = 0
+    local milliseconds = 0
     local fromTo = {}
     local fromVal = 0
     for numItemIdPackage = 1, numItemIdPackages, 1 do
@@ -307,12 +308,12 @@ local function scanAllSetData()
         zo_callLater(function()
             loadSetsByIds(v.from,v.to)
         end, miliseconds)
-        miliseconds = miliseconds + 2000 -- scan item ID packages every 2 seconds to get not kicked/crash the client!
+        milliseconds = milliseconds + 2000 -- scan item ID packages every 2 seconds to get not kicked/crash the client!
     end
     --Were all item IDs scanned? Show the results list now
     zo_callLater(function()
         showSetCountsScanned(true)
-    end, miliseconds + 2000)
+    end, milliseconds + 2000)
 end
 lib.DebugScanAllSetData = scanAllSetData
 
@@ -387,4 +388,17 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
     else
         d("<No dungeon data was found!")
     end
+end
+
+--This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
+function lib.DebugResetSavedVariables()
+    LoadSavedVariables()
+    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+    lib.svData[LIBSETS_TABLEKEY_SETNAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_MAPS] = nil
+    lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
+    lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
+    lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
+    d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'. Please do a /reloadui or logout to update the SavedVariables data now!")
 end
