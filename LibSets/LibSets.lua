@@ -411,16 +411,40 @@ end
 -- 	Global set get data functions
 ------------------------------------------------------------------------
 --Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
---e.g. wayshrines={382,382,382,}. All entries can be the same, or even a negative value which means: No weayshrine is known
+--e.g. wayshrines={382,382,382}. All entries can be the same, or even a negative value which means: No weayshrine is known
 --Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact
 --> Parameters: setId number: The set's setId
+-->             withRelatedZoneIds boolean: Also provide a mappingTable as 2nd return value which contains the wayshrine's zoneId
+-->             in this format: wayshrineNodsId2ZoneId = { [wayshrineNodeId1]= zoneId1, [wayshrineNodeId2]= zoneId2,... }
 --> Returns:    wayshrineNodeIds table
-function lib.GetWayshrineIds(setId)
+function lib.GetWayshrineIds(setId, withRelatedZoneIds)
+    withRelatedZoneIds = withRelatedZoneIds or false
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setData = setInfo[setId]
     if setData == nil or setData.wayshrines == nil then return end
-    return setData.wayshrines
+    local wayshrineNodsId2ZoneId
+    if withRelatedZoneIds then
+        wayshrineNodsId2ZoneId = {}
+        --Get the zoneId for each wayshrineNodeId, read it from the preloaded setdata
+        local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
+        for _, wayshrineNodeId in ipairs(setData.wayshrines) do
+            wayshrineNodsId2ZoneId[wayshrineNodeId] = wayshrine2zone[wayshrineNodeId]
+        end
+    end
+    return setData.wayshrines, wayshrineNodsId2ZoneId
+end
+
+--Returns the wayshrineNodeIds's zoneId
+--> Parameters: wayshrineNodeId number
+--> Returns:    zoneId number
+function lib.GetWayshrinesZoneId(wayshrineNodeId)
+    if wayshrineNodeId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    --Get the zoneId for each wayshrineNodeId, read it from the preloaded setdata
+    local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
+    if not wayshrine2zone then return end
+    return wayshrine2zone[wayshrineNodeId]
 end
 
 --Returns the drop zoneIds as table for the setId

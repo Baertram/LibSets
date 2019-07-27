@@ -6,11 +6,11 @@ LibSets = LibSets or {}
 local lib = LibSets
 ------------------------------------------------------------------------------------------------------------------------
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.08
+local MAJOR, MINOR = "LibSets", 0.09
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.8
+lib.svVersion       = 0.9
 lib.setsLoaded      = false
 lib.setsScanning    = false
 ------------------------------------------------------------------------------------------------------------------------
@@ -39,6 +39,7 @@ LIBSETS_TABLEKEY_WAYSHRINE_NAMES                = "wayshrineNames"
 LIBSETS_TABLEKEY_ZONE_DATA                      = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA             = "dungeonFinderData"
 LIBSETS_TABLEKEY_COLLECTIBLE_NAMES              = "collectibleNames"
+LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID         = "wayshrineNodeId2zoneId"
 ------------------------------------------------------------------------------------------------------------------------
 --Set types
 --> If you change these be sure to check the following tables below and add/change/remove entries as well:
