@@ -17,315 +17,298 @@ into the LibSets_Data.lua file.
 Supported languages, some constants like the actual number of monster set chests and the names of the NPCs/chest to provide the set are
 included as well.
 
-[Here is a list of the API functions you are able to use]
+##[Here is a list of the API functions you are able to use]
 
 --Global variable of the library to access it:
-LibSets
+**LibSets**
 
-------------------------------------------------------------------------
--- 	Global helper functions
-------------------------------------------------------------------------
---Create an example itemlink of the setItem's itemId (level 50, CP160) using the itemQuality subtype.
---Standard value for the qualitySubType is 366 which means "Normal" quality.
---The following qualities are available:
---357:  Trash
---366:  Normal
---367:  Magic
---368:  Arcane
---369:  Artifact
---370:  Legendary
---> Parameters: itemId number: The item's itemId
--->             itemQualitySubType number: The itemquality number of ESO, described above (standard value: 366 -> Normal)
---> Returns:    itemLink String: The generated itemLink for the item with the given quality
-function lib.buildItemLink(itemId, itemQualitySubType)
+###Global helper functions
+--Create an example itemlink of the setItem's itemId (level 50, CP160) using the itemQuality subtype.<br>
+--Standard value for the qualitySubType is 366 which means "Normal" quality.<br>
+--The following qualities are available:<br>
+--357:  Trash<br>
+--366:  Normal<br>
+--367:  Magic<br>
+--368:  Arcane<br>
+--369:  Artifact<br>
+--370:  Legendary<br>
+--> Parameters: itemId number: The item's itemId<br>
+-->             itemQualitySubType number: The itemquality number of ESO, described above (standard value: 366 -> Normal)<br>
+--> Returns:    itemLink String: The generated itemLink for the item with the given quality<br>
+function lib.buildItemLink(itemId, itemQualitySubType)<br>
+<br>
+--Open the worldmap and show the map of the zoneId<br>
+--> Parameters: zoneId number: The zone's zoneId<br>
+function lib.openMapOfZoneId(zoneId)<br>
+<br>
+--Open the worldmap, get the zoneId of the wayshrine wayshrineNodeId and show the wayshrine wayshrineNodeId on the map<br>
+--> Parameters: wayshrineNodeId number: The wayshrine's nodeIndex<br>
+function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)<br>
 
---Open the worldmap and show the map of the zoneId
---> Parameters: zoneId number: The zone's zoneId
-function lib.openMapOfZoneId(zoneId)
-
---Open the worldmap, get the zoneId of the wayshrine wayshrineNodeId and show the wayshrine wayshrineNodeId on the map
---> Parameters: wayshrineNodeId number: The wayshrine's nodeIndex
-function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)
-
-
-------------------------------------------------------------------------
--- 	Global set check functions
-------------------------------------------------------------------------
---Returns true if the setId provided is a craftable set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isCraftedSet
-function lib.IsCraftedSet(setId)
-
---Returns true if the setId provided is a monster set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isMonsterSet
-function lib.IsMonsterSet(setId)
-
---Returns true if the setId provided is a dungeon set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isDungeonSet
-function lib.IsDungeonSet(setId)
-
---Returns true if the setId provided is a trial set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isTrialSet, boolean isMultiTrialSet
-function lib.IsTrialSet(setId)
-
---Returns true if the setId provided is an arena set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isArenaSet
-function lib.IsArenaSet(setId)
-
---Returns true if the setId provided is an overland set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isOverlandSet
-function lib.IsOverlandSet(setId)
-
---Returns true if the setId provided is an cyrodiil set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isCyrodiilSet
-function lib.IsCyrodiilSet(setId)
-
---Returns true if the setId provided is a battleground set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isBattlegroundSet
-function lib.IsBattlegroundSet(setId)
-
---Returns true if the setId provided is an Imperial City set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isImperialCitySet
-function lib.IsImperialCitySet(setId)
-
---Returns true if the setId provided is a special set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isSpecialSet
-function lib.IsSpecialSet(setId)
-
---Returns true if the setId provided is a DailyRandomDungeonAndImperialCityRewardSet set
---> Parameters: setId number: The set's setId
---> Returns:    boolean isDailyRandomDungeonAndImperialCityRewardSet
-function lib.IsDailyRandomDungeonAndImperialCityRewardSet(setId)
-
---Returns true if the setId provided is a non ESO, own defined setId
---See file LibSets_SetData_(APIVersion).lua, table LibSets.lib.noSetIdSets and description above it.
---> Parameters: noESOSetId number: The set's setId
---> Returns:    boolean isNonESOSet
-function lib.IsNoESOSet(noESOSetId)
-
---Returns information about the set if the itemId provides is a set item
---> Parameters: itemId number: The item's itemId
---> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number
-function lib.IsSetByItemId(itemId)
-
---Returns information about the set if the itemlink provides is a set item
---> Parameters: itemLink String/ESO ItemLink: The item's itemLink '|H1:item:itemId...|h|h'
---> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number
-function lib.IsSetByItemLink(itemLink)
-
---Returns true/false if the set must be obtained in a veteran mode dungeon/trial/arena.
---If the veteran state is not a boolean value, but a table, then this table contains the equipType as key
---and the boolean value for each of these equipTypes as value. e.g. the head is a veteran setItem but the shoulders aren't (monster set).
---->To check the equiptype you need to specify the 2nd parameter itemlink in this case! Or the return value will be nil
---> Parameters: setId number: The set's setId
--->             itemLink String: An itemlink of a setItem -> only needed if the veteran data contains equipTypes and should be checked
--->                              against these.
---> Returns:    isVeteranSet boolean
+###Global set check functions
+--Returns true if the setId provided is a craftable set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isCraftedSet<br>
+function lib.IsCraftedSet(setId)<br>
+<br>
+--Returns true if the setId provided is a monster set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isMonsterSet<br>
+function lib.IsMonsterSet(setId)<br>
+<br>
+--Returns true if the setId provided is a dungeon set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isDungeonSet<br>
+function lib.IsDungeonSet(setId)<br>
+<br>
+--Returns true if the setId provided is a trial set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isTrialSet, boolean isMultiTrialSet<br>
+function lib.IsTrialSet(setId)<br>
+<br>
+--Returns true if the setId provided is an arena set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isArenaSet<br>
+function lib.IsArenaSet(setId)<br>
+<br>
+--Returns true if the setId provided is an overland set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isOverlandSet<br>
+function lib.IsOverlandSet(setId)<br>
+<br>
+--Returns true if the setId provided is an cyrodiil set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isCyrodiilSet<br>
+function lib.IsCyrodiilSet(setId)<br>
+<br>
+--Returns true if the setId provided is a battleground set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isBattlegroundSet<br>
+function lib.IsBattlegroundSet(setId)<br>
+<br>
+--Returns true if the setId provided is an Imperial City set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isImperialCitySet<br>
+function lib.IsImperialCitySet(setId)<br>
+<br>
+--Returns true if the setId provided is a special set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isSpecialSet<br>
+function lib.IsSpecialSet(setId)<br>
+<br>
+--Returns true if the setId provided is a DailyRandomDungeonAndImperialCityRewardSet set<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    boolean isDailyRandomDungeonAndImperialCityRewardSet<br>
+function lib.IsDailyRandomDungeonAndImperialCityRewardSet(setId)<br>
+<br>
+--Returns true if the setId provided is a non ESO, own defined setId<br>
+--See file LibSets_SetData_(APIVersion).lua, table LibSets.lib.noSetIdSets and description above it.<br>
+--> Parameters: noESOSetId number: The set's setId<br>
+--> Returns:    boolean isNonESOSet<br>
+function lib.IsNoESOSet(noESOSetId)<br>
+<br>
+--Returns information about the set if the itemId provides is a set item<br>
+--> Parameters: itemId number: The item's itemId<br>
+--> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number<br>
+function lib.IsSetByItemId(itemId)<br>
+<br>
+--Returns information about the set if the itemlink provides is a set item<br>
+--> Parameters: itemLink String/ESO ItemLink: The item's itemLink '|H1:item:itemId...|h|h'<br>
+--> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number<br>
+function lib.IsSetByItemLink(itemLink)<br>
+<br>
+--Returns true/false if the set must be obtained in a veteran mode dungeon/trial/arena.<br>
+--If the veteran state is not a boolean value, but a table, then this table contains the equipType as key<br>
+--and the boolean value for each of these equipTypes as value. e.g. the head is a veteran setItem but the shoulders aren't (monster set).<br>
+--->To check the equiptype you need to specify the 2nd parameter itemlink in this case! Or the return value will be nil<br>
+--> Parameters: setId number: The set's setId<br>
+-->             itemLink String: An itemlink of a setItem -> only needed if the veteran data contains equipTypes and should be checked<br>
+-->                              against these.<br>
+--> Returns:    isVeteranSet boolean<br>
 function lib.IsVeteranSet(setId, itemLink)
 
-
-------------------------------------------------------------------------
--- 	Global set get data functions
-------------------------------------------------------------------------
---Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
---e.g. wayshrines={382,382,382}. All entries can be the same, or even a negative value which means: No weayshrine is known
---Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact
---> Parameters: setId number: The set's setId
--->             withRelatedZoneIds boolean: Also provide a mappingTable as 2nd return value which contains the wayshrine's zoneId
--->             in this format: wayshrineNodsId2ZoneId = { [wayshrineNodeId1]= zoneId1, [wayshrineNodeId2]= zoneId2,... }
---> Returns:    wayshrineNodeIds table
-function lib.GetWayshrineIds(setId, withRelatedZoneIds)
-
---Returns the wayshrineNodeIds's related zoneId, where this wayshrine is located
---> Parameters: wayshrineNodeId number
---> Returns:    zoneId number
-function lib.GetWayshrinesZoneId(wayshrineNodeId)
-
---Returns the drop zoneIds as table for the setId
---> Parameters: setId number: The set's setId
---> Returns:    zoneIds table
-function lib.GetZoneIds(setId)
-
---Returns the dlcId as number for the setId
---> Parameters: setId number: The set's setId
---> Returns:    dlcId number
-function lib.GetDLCId(setId)
-
---Returns the number of researched traits needed to craft this set. This will only check the craftable sets!
---> Parameters: setId number: The set's setId
---> Returns:    traitsNeededToCraft number
-function lib.GetTraitsNeeded(setId)
-
---Returns the type of the setId!
---> Parameters: setId number: The set's setId
---> Returns:    setType String
----> Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
-function lib.GetSetType(setId)
-
---Returns the setType name as String
---> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
--->             lang String the language for the setType name. Can be left nil -> The client language will be used then
---> Returns:    String setTypeName
-function lib.GetSetTypeName(libSetsSetType, lang)
-
---Returns the table of setTypes of LibSets (the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
-function lib.GetSetTypes()
-
---Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.
---Attention: The table can have a gap in it's index as not all setIds are gap-less in ESO!
---> Returns: setIds table
-function lib.GetAllSetIds()
-
---Returns all sets itemIds as table. Key is the setId, value is a subtable with the key=itemId and value = boolean value true.
---> Returns: setItemIds table
-function lib.GetAllSetItemIds()
-
---Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
---The key is the itemId and the value is the boolean value true
---> Parameters: setId number: The set's setId
--->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
---> Returns:    table setItemIds
-function lib.GetSetItemIds(setId, isNoESOSetId)
-
---If the setId only got 1 itemId this function returns this itemId of the setId provided.
---If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
---If the 2nd parameter equipType is not specified: The first random itemId found will be returned
---If the 2nd parameter equipType is specified:  Each itemId of the setId will be turned into an itemLink where the given equipType is checked against.
---Only the itemId where the equipType fits will be returned. Else the return value will be nil
---> Parameters: setId number: The set's setId
--->             equipType number: The equipType to check the itemId against
---> Returns:    number setItemId
-function lib.GetSetItemId(setId, equipType)
-
---Returns the name as String of the setId provided
---> Parameters: setId number: The set's setId
---> lang String: The language to return the setName in. Can be left empty and the client language will be used then
---> Returns:    String setName
-function lib.GetSetName(setId, lang)
-
---Returns all names as String of the setId provided.
---The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.
---{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
---> Parameters: setId number: The set's setId
---> Returns:    table setNames
-----> Contains a table with the different names of the set, for each scanned language (setNames = {["de"] = String nameDE, ["en"] = String nameEN})
-function lib.GetSetNames(setId)
-
---Returns the set info as a table
---> Parameters: setId number: The set's setId
---> Returns:    table setInfo
-----> Contains:
-----> number setId
-----> number dlcId (the dlcId where the set was added, see file LibSets_Constants.lua, constants DLC_BASE_GAME to e.g. DLC_ELSWEYR)
-----> tables LIBSETS_TABLEKEY_SETITEMIDS (="setItemIds") (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's item),
-----> table names (="setNames") ([2 character String lang] = String name),
-----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),
-----> String setType which shows the setType via the LibSets setType constant values like LIBSETS_SETTYPE_ARENA, LIBSETS_SETTYPE_DUNGEON etc. Only 1 setType is possible for each set
-----> isVeteran boolean value true if this set can be only obtained in veteran mode, or a table containing the key = equipType and value=boolean true/false if the equipType of the setId cen be only obtained in veteran mode (e.g. a monster set head is veteran, shoulders are normal)
-----> isMultiTrial boolean, only if setType == LIBSETS_SETTYPE_TRIAL (setId can be obtained in multiple trials -> see zoneIds table)
-----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).
------->The table can contain 1 to 3 entries (one for each faction e.g.) and contains the wayshrineNodeId nearest to the set's crafting table/in the drop zone
-----> table zoneIds containing the zoneIds (one to n) where this set drops, or can be obtained
--------Example for setId 408
---- ["setId"] = 408,
---- ["dlcId"] = 12,    --DLC_MURKMIRE
---	["setType"] = LIBSETS_SETTYPE_CRAFTED,
---	[LIBSETS_TABLEKEY_SETITEMIDS] = {
---      table [#0,370]
---  },
---	[LIBSETS_TABLEKEY_SETNAMES] = {
---		["de"] = "Grabpflocksammler"
---		["en"] = "Grave-Stake Collector"
---		["fr"] = "Collectionneur de marqueurs funéraires"
---  },
---	["traitsNeeded"] = 7,
---	["veteran"] = false,
---	["wayshrines"] = {
---		[1] = 375
---		[2] = 375
---		[3] = 375
---  },
---	["zoneIds"] = {
---		[1] = 726,
---  },
---}
+###Global set get data functions
+--Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,<br>
+--e.g. wayshrines={382,382,382}. All entries can be the same, or even a negative value which means: No weayshrine is known<br>
+--Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact<br>
+--> Parameters: setId number: The set's setId<br>
+-->             withRelatedZoneIds boolean: Also provide a mappingTable as 2nd return value which contains the wayshrine's zoneId<br>
+-->             in this format: wayshrineNodsId2ZoneId = { [wayshrineNodeId1]= zoneId1, [wayshrineNodeId2]= zoneId2,... }<br>
+--> Returns:    wayshrineNodeIds table<br>
+function lib.GetWayshrineIds(setId, withRelatedZoneIds)<br>
+<br>
+--Returns the wayshrineNodeIds's related zoneId, where this wayshrine is located<br>
+--> Parameters: wayshrineNodeId number<br>
+--> Returns:    zoneId number<br>
+function lib.GetWayshrinesZoneId(wayshrineNodeId)<br>
+<br>
+--Returns the drop zoneIds as table for the setId<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    zoneIds table<br>
+function lib.GetZoneIds(setId)<br>
+<br>
+--Returns the dlcId as number for the setId<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    dlcId number<br>
+function lib.GetDLCId(setId)<br>
+<br>
+--Returns the number of researched traits needed to craft this set. This will only check the craftable sets!<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    traitsNeededToCraft number<br>
+function lib.GetTraitsNeeded(setId)<br>
+<br>
+--Returns the type of the setId!<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    setType String<br>
+---> Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)<br>
+function lib.GetSetType(setId)<br>
+<br>
+--Returns the setType name as String<br>
+--> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)<br>
+-->             lang String the language for the setType name. Can be left nil -> The client language will be used then<br>
+--> Returns:    String setTypeName<br>
+function lib.GetSetTypeName(libSetsSetType, lang)<br>
+<br>
+--Returns the table of setTypes of LibSets (the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)<br>
+function lib.GetSetTypes()<br>
+<br>
+--Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.<br>
+--Attention: The table can have a gap in it's index as not all setIds are gap-less in ESO!<br>
+--> Returns: setIds table<br>
+function lib.GetAllSetIds()<br>
+<br>
+--Returns all sets itemIds as table. Key is the setId, value is a subtable with the key=itemId and value = boolean value true.<br>
+--> Returns: setItemIds table<br>
+function lib.GetAllSetItemIds()<br>
+<br>
+--Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.<br>
+--The key is the itemId and the value is the boolean value true<br>
+--> Parameters: setId number: The set's setId<br>
+-->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?<br>
+--> Returns:    table setItemIds<br>
+function lib.GetSetItemIds(setId, isNoESOSetId)<br>
+<br>
+--If the setId only got 1 itemId this function returns this itemId of the setId provided.<br>
+--If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)<br>
+--If the 2nd parameter equipType is not specified: The first random itemId found will be returned<br>
+--If the 2nd parameter equipType is specified:  Each itemId of the setId will be turned into an itemLink where the given equipType is checked against.<br>
+--Only the itemId where the equipType fits will be returned. Else the return value will be nil<br>
+--> Parameters: setId number: The set's setId<br>
+-->             equipType number: The equipType to check the itemId against<br>
+--> Returns:    number setItemId<br>
+function lib.GetSetItemId(setId, equipType)<br>
+<br>
+--Returns the name as String of the setId provided<br>
+--> Parameters: setId number: The set's setId<br>
+--> lang String: The language to return the setName in. Can be left empty and the client language will be used then<br>
+--> Returns:    String setName<br>
+function lib.GetSetName(setId, lang)<br>
+<br>
+--Returns all names as String of the setId provided.<br>
+--The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.<br>
+--{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    table setNames<br>
+----> Contains a table with the different names of the set, for each scanned language (setNames = {["de"] = String nameDE, ["en"] = String nameEN})<br>
+function lib.GetSetNames(setId)<br>
+<br>
+--Returns the set info as a table<br>
+--> Parameters: setId number: The set's setId<br>
+--> Returns:    table setInfo<br>
+----> Contains:<br>
+----> number setId<br>
+----> number dlcId (the dlcId where the set was added, see file LibSets_Constants.lua, constants DLC_BASE_GAME to e.g. DLC_ELSWEYR)<br>
+----> tables LIBSETS_TABLEKEY_SETITEMIDS (="setItemIds") (which can be used with LibSets.buildItemLink(itemId) to create an itemLink of this set's item),<br>
+----> table names (="setNames") ([2 character String lang] = String name),<br>
+----> number traitsNeeded for the trait count needed to craft this set if it's a craftable one (else the value will be nil),<br>
+----> String setType which shows the setType via the LibSets setType constant values like LIBSETS_SETTYPE_ARENA, LIBSETS_SETTYPE_DUNGEON etc. Only 1 setType is possible for each set<br>
+----> isVeteran boolean value true if this set can be only obtained in veteran mode, or a table containing the key = equipType and value=boolean true/false if the equipType of the setId cen be only obtained in veteran mode (e.g. a monster set head is veteran, shoulders are normal)<br>
+----> isMultiTrial boolean, only if setType == LIBSETS_SETTYPE_TRIAL (setId can be obtained in multiple trials -> see zoneIds table)<br>
+----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).<br>
+------>The table can contain 1 to 3 entries (one for each faction e.g.) and contains the wayshrineNodeId nearest to the set's crafting table/in the drop zone<br>
+----> table zoneIds containing the zoneIds (one to n) where this set drops, or can be obtained<br>
+-------Example for setId 408<br>
+--- ["setId"] = 408,<br>
+--- ["dlcId"] = 12,    --DLC_MURKMIRE<br>
+--	["setType"] = LIBSETS_SETTYPE_CRAFTED,<br>
+--	[LIBSETS_TABLEKEY_SETITEMIDS] = {<br>
+--      table [#0,370]<br>
+--  },<br>
+--	[LIBSETS_TABLEKEY_SETNAMES] = {<br>
+--		["de"] = "Grabpflocksammler"<br>
+--		["en"] = "Grave-Stake Collector"<br>
+--		["fr"] = "Collectionneur de marqueurs funéraires"<br>
+--  },<br>
+--	["traitsNeeded"] = 7,<br>
+--	["veteran"] = false,<br>
+--	["wayshrines"] = {<br>
+--		[1] = 375<br>
+--		[2] = 375<br>
+--		[3] = 375<br>
+--  },<br>
+--	["zoneIds"] = {<br>
+--		[1] = 726,<br>
+--  },<br>
+--}<br>
 function lib.GetSetInfo(setId)
 
+###Global set misc. functions
+--Jump to a wayshrine of a set.<br>
+--If it's a crafted set you can specify a faction ID in order to jump to the selected faction's zone<br>
+--> Parameters: setId number: The set's setId<br>
+-->             OPTIONAL factionIndex: The index of the faction (1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact)<br>
+function lib.JumpToSetId(setId, factionIndex)<br>
 
-------------------------------------------------------------------------
--- 	Global set misc. functions
-------------------------------------------------------------------------
---Jump to a wayshrine of a set.
---If it's a crafted set you can specify a faction ID in order to jump to the selected faction's zone
---> Parameters: setId number: The set's setId
--->             OPTIONAL factionIndex: The index of the faction (1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact)
-function lib.JumpToSetId(setId, factionIndex)
-
-
-------------------------------------------------------------------------
--- 	Global other get functions
-------------------------------------------------------------------------
---Returns the name of the DLC by help of the DLC id
---> Parameters: dlcId number: The DLC id given in a set's info
---> Returns:    name dlcName
-function lib.GetDLCName(dlcId)
-
---Returns the name of the DLC by help of the DLC id
---> Parameters: undauntedChestId number: The undaunted chest id given in a set's info
---> Returns:    name undauntedChestName
-function lib.GetUndauntedChestName(undauntedChestId, lang)
-
---Returns the name of the zone by help of the zoneId
---> Parameters: zoneId number: The zone id given in a set's info
--->             language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated
---> Returns:    name zoneName
-function lib.GetZoneName(zoneId, lang)
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType
---> Returns:    table with key = setId, value = table which contains (as example for setType = LIBSETS_SETTYPE_CRAFTED)
----->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
------->             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
------->             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
----             Example:
----             [setId] = {
----                 setType = LIBSETS_SETTYPE_CRAFTED,
----                 [LIBSETS_TABLEKEY_SETITEMIDS] = {
----                     [itemId1]=true,
----                     [itemId2]=true
----                 },
----                 [LIBSETS_TABLEKEY_SETNAMES] = {
----                     ["de"]="Set name German",
----                     ["en"]="Set name English",
----                     ["fr"]="Set name French",
----                 },
----             }
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
---Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
+###Global other get functions
+--Returns the name of the DLC by help of the DLC id<br>
+--> Parameters: dlcId number: The DLC id given in a set's info<br>
+--> Returns:    name dlcName<br>
+function lib.GetDLCName(dlcId)<br>
+<br>
+--Returns the name of the DLC by help of the DLC id<br>
+--> Parameters: undauntedChestId number: The undaunted chest id given in a set's info<br>
+--> Returns:    name undauntedChestName<br>
+function lib.GetUndauntedChestName(undauntedChestId, lang)<br>
+<br>
+--Returns the name of the zone by help of the zoneId<br>
+--> Parameters: zoneId number: The zone id given in a set's info<br>
+-->             language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated<br>
+--> Returns:    name zoneName<br>
+function lib.GetZoneName(zoneId, lang)<br>
+<br>
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType<br>
+--> Returns:    table with key = setId, value = table which contains (as example for setType = LIBSETS_SETTYPE_CRAFTED)<br>
+---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")<br>
+------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)<br>
+------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)<br>
+---             Example:<br>
+---             [setId] = {<br>
+---                 setType = LIBSETS_SETTYPE_CRAFTED,<br>
+---                 [LIBSETS_TABLEKEY_SETITEMIDS] = {<br>
+---                     [itemId1]=true,<br>
+---                     [itemId2]=true<br>
+---                 },<br>
+---                 [LIBSETS_TABLEKEY_SETNAMES] = {<br>
+---                     ["de"]="Set name German",<br>
+---                     ["en"]="Set name English",<br>
+---                     ["fr"]="Set name French",<br>
+---                 },<br>
+---             }<br>
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType<br>
+--Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)<br>
+--> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents<br>
 function lib.GetSetTypeSetsData(setType)
 
-
-------------------------------------------------------------------------
--- 	Global library check functions
-------------------------------------------------------------------------
---Returns a boolean value, true if the sets of the game were already loaded/ false if not
---> Returns:    boolean areSetsLoaded
-function lib.AreSetsLoaded()
-
---Returns a boolean value, true if the sets of the game are currently scanned and added/updated/ false if not
---> Returns:    boolean isCurrentlySetsScanning
-function lib.IsSetsScanning()
-
---Returns a boolean value, true if the sets database is properly loaded yet and is not currently scanning
---or false if not.
---This functions combines the result values of the functions LibSets.AreSetsLoaded() and LibSets.IsSetsScanning()
-function lib.checkIfSetsAreLoadedProperly()
+###Global library check functions
+--Returns a boolean value, true if the sets of the game were already loaded/ false if not<br>
+--> Returns:    boolean areSetsLoaded<br>
+function lib.AreSetsLoaded()<br>
+<br>
+--Returns a boolean value, true if the sets of the game are currently scanned and added/updated/ false if not<br>
+--> Returns:    boolean isCurrentlySetsScanning<br>
+function lib.IsSetsScanning()<br>
+<br>
+--Returns a boolean value, true if the sets database is properly loaded yet and is not currently scanning<br>
+--or false if not.<br>
+--This functions combines the result values of the functions LibSets.AreSetsLoaded() and LibSets.IsSetsScanning()<br>
+function lib.checkIfSetsAreLoadedProperly()<br>
