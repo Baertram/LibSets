@@ -6,11 +6,11 @@ LibSets = LibSets or {}
 local lib = LibSets
 ------------------------------------------------------------------------------------------------------------------------
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.09
+local MAJOR, MINOR = "LibSets", 0.10
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.9
+lib.svVersion       = 0.1
 lib.setsLoaded      = false
 lib.setsScanning    = false
 ------------------------------------------------------------------------------------------------------------------------
@@ -160,11 +160,11 @@ lib.setTypesToName = {
         ["ru"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
     },
     [LIBSETS_SETTYPE_DUNGEON                        ] = {
-        ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
-        ["en"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
-        ["fr"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
-        ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
-        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES10),
+        ["de"] = GetString(SI_INSTANCEDISPLAYTYPE2),
+        ["en"] = GetString(SI_INSTANCEDISPLAYTYPE2),
+        ["fr"] = GetString(SI_INSTANCEDISPLAYTYPE2),
+        ["jp"] = GetString(SI_INSTANCEDISPLAYTYPE2),
+        ["ru"] = GetString(SI_INSTANCEDISPLAYTYPE2),
     },
     [LIBSETS_SETTYPE_IMPERIALCITY                        ] = {
         ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
@@ -174,18 +174,18 @@ lib.setTypesToName = {
         ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
     },
     [LIBSETS_SETTYPE_MONSTER                        ] = {
-        ["de"] = GetString(SI_SPECIALIZEDITEMTYPE406),
-        ["en"] = GetString(SI_SPECIALIZEDITEMTYPE406),
-        ["fr"] = GetString(SI_SPECIALIZEDITEMTYPE406),
-        ["jp"] = GetString(SI_SPECIALIZEDITEMTYPE406),
-        ["ru"] = GetString(SI_SPECIALIZEDITEMTYPE406),
+        ["de"] = "Monster",
+        ["en"] = "Monster",
+        ["fr"] = "Monster",
+        ["jp"] = "Monster",
+        ["ru"] = "Monster",
     },
     [LIBSETS_SETTYPE_OVERLAND                        ] = {
-        ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
-        ["en"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
-        ["fr"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
-        ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
-        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503),
+        ["de"] = "Überland / Normale Beute",
+        ["en"] = "Overland",
+        ["fr"] = "Overland",
+        ["jp"] = "Overland",
+        ["ru"] = "Overland",
     },
     [LIBSETS_SETTYPE_SPECIAL                        ] = {
         ["de"] = GetString(SI_HOTBARCATEGORY9),
