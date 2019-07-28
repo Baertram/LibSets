@@ -50,18 +50,7 @@ local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 ------------------------------------------------------------------------
 -- 	Local helper functions
 ------------------------------------------------------------------------
---[[
---Get the count of a table with a non-index table key
-local function getNonIndexedTableCount(tableName)
-    if not tableName then return nil end
-    local count = 0
-    for _,_ in pairs(tableName) do
-        count = count +1
-    end
-    return count
-end
-]]
-
+--======= SETS =====================================================================================================
 --Check if an itemLink is a set and return the set's data from ESO API function GetItemLinkSetInfo
 local function checkSet(itemLink)
     if itemLink == nil or itemLink == "" then return false, "", 0, 0, 0, 0 end
@@ -200,6 +189,17 @@ local function LoadSets()
     lib.setsScanning = false
 end
 
+--======= WORLDMAP =====================================================================================================
+local function showWorldMap()
+    if not ZO_WorldMap_IsWorldMapShowing() then
+        if IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Push("gamepad_worldMap")
+        else
+            MAIN_MENU_KEYBOARD:ShowCategory(MENU_CATEGORY_MAP)
+        end
+    end
+end
+
 ------------------------------------------------------------------------
 -- 	Global helper functions
 ------------------------------------------------------------------------
@@ -212,6 +212,9 @@ end
 --368:  Arcane
 --369:  Artifact
 --370:  Legendary
+--> Parameters: itemId number: The item's itemId
+-->             itemQualitySubType number: The itemquality number of ESO, described above (standard value: 366 -> Normal)
+--> Returns:    itemLink String: The generated itemLink for the item with the given quality
 function lib.buildItemLink(itemId, itemQualitySubType)
     if itemId == nil or itemId == 0 then return end
     --itemQualitySubType is used for the itemLinks quality, see UESP website for a description of the itemLink: https://en.uesp.net/wiki/Online:Item_Link
@@ -220,6 +223,32 @@ function lib.buildItemLink(itemId, itemQualitySubType)
     --return '|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
     return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, itemQualitySubType, ITEMSTYLE_NONE, 0, 10000)
 end
+
+--Open the worldmap and show the map of the zoneId
+--> Parameters: zoneId number: The zone's zoneId
+function lib.openMapOfZoneId(zoneId)
+    if not zoneId then return false end
+    local mapIndex = GetMapIndexByZoneId(zoneId)
+    if mapIndex then
+        showWorldMap()
+        zo_callLater(function()
+            ZO_WorldMap_SetMapByIndex(mapIndex)
+        end, 50)
+    end
+end
+
+--Open the worldmap, get the zoneId of the wayshrine wayshrineNodeId and show the wayshrine wayshrineNodeId on the map
+--> Parameters: wayshrineNodeId number: The wayshrine's nodeIndex
+function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)
+    if not wayshrineNodeId then return false end
+    local zoneId = lib.GetWayshrinesZoneId(wayshrineNodeId)
+    if not zoneId then return end
+    lib.openMapOfZoneId(zoneId)
+    zo_callLater(function()
+        ZO_WorldMap_PanToWayshrine(wayshrineNodeId)
+    end, 100)
+end
+
 
 ------------------------------------------------------------------------
 -- 	Global set check functions

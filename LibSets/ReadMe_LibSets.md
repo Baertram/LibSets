@@ -34,7 +34,18 @@ LibSets
 --368:  Arcane
 --369:  Artifact
 --370:  Legendary
+--> Parameters: itemId number: The item's itemId
+-->             itemQualitySubType number: The itemquality number of ESO, described above (standard value: 366 -> Normal)
+--> Returns:    itemLink String: The generated itemLink for the item with the given quality
 function lib.buildItemLink(itemId, itemQualitySubType)
+
+--Open the worldmap and show the map of the zoneId
+--> Parameters: zoneId number: The zone's zoneId
+function lib.openMapOfZoneId(zoneId)
+
+--Open the worldmap, get the zoneId of the wayshrine wayshrineNodeId and show the wayshrine wayshrineNodeId on the map
+--> Parameters: wayshrineNodeId number: The wayshrine's nodeIndex
+function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)
 
 
 ------------------------------------------------------------------------
