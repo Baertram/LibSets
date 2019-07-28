@@ -44,6 +44,9 @@ local setInfo           = lib.setInfo               -- <--this table contains al
 --The special sets
 local noSetIdSets       = lib.noSetIdSets           -- <-- this table contains the set information for special sets which got no ESO own unique setId, but a new generated setId starting with 9999xxx
 
+--Wayshrine node index -> zoneId mapping
+local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
+
 ------------------------------------------------------------------------
 -- 	Local helper functions
 ------------------------------------------------------------------------
@@ -425,9 +428,9 @@ function lib.GetWayshrineIds(setId, withRelatedZoneIds)
     if setData == nil or setData.wayshrines == nil then return end
     local wayshrineNodsId2ZoneId
     if withRelatedZoneIds then
+        if not wayshrine2zone then return end
         wayshrineNodsId2ZoneId = {}
         --Get the zoneId for each wayshrineNodeId, read it from the preloaded setdata
-        local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
         for _, wayshrineNodeId in ipairs(setData.wayshrines) do
             wayshrineNodsId2ZoneId[wayshrineNodeId] = wayshrine2zone[wayshrineNodeId]
         end
@@ -435,14 +438,13 @@ function lib.GetWayshrineIds(setId, withRelatedZoneIds)
     return setData.wayshrines, wayshrineNodsId2ZoneId
 end
 
---Returns the wayshrineNodeIds's zoneId
+--Returns the wayshrineNodeIds's related zoneId, where this wayshrine is located
 --> Parameters: wayshrineNodeId number
 --> Returns:    zoneId number
 function lib.GetWayshrinesZoneId(wayshrineNodeId)
     if wayshrineNodeId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     --Get the zoneId for each wayshrineNodeId, read it from the preloaded setdata
-    local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
     if not wayshrine2zone then return end
     return wayshrine2zone[wayshrineNodeId]
 end

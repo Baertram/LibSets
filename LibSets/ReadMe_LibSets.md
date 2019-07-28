@@ -126,11 +126,18 @@ function lib.IsVeteranSet(setId, itemLink)
 -- 	Global set get data functions
 ------------------------------------------------------------------------
 --Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
---e.g. wayshrines={382,382,382,}. All entries can be the same, or even a negative value which means: No weayshrine is known
+--e.g. wayshrines={382,382,382}. All entries can be the same, or even a negative value which means: No weayshrine is known
 --Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact
 --> Parameters: setId number: The set's setId
+-->             withRelatedZoneIds boolean: Also provide a mappingTable as 2nd return value which contains the wayshrine's zoneId
+-->             in this format: wayshrineNodsId2ZoneId = { [wayshrineNodeId1]= zoneId1, [wayshrineNodeId2]= zoneId2,... }
 --> Returns:    wayshrineNodeIds table
-function lib.GetWayshrineIds(setId)
+function lib.GetWayshrineIds(setId, withRelatedZoneIds)
+
+--Returns the wayshrineNodeIds's related zoneId, where this wayshrine is located
+--> Parameters: wayshrineNodeId number
+--> Returns:    zoneId number
+function lib.GetWayshrinesZoneId(wayshrineNodeId)
 
 --Returns the drop zoneIds as table for the setId
 --> Parameters: setId number: The set's setId
