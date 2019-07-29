@@ -10,7 +10,7 @@ local MAJOR, MINOR = "LibSets", 0.10
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.1
+lib.svVersion       = 0.10
 lib.setsLoaded      = false
 lib.setsScanning    = false
 ------------------------------------------------------------------------------------------------------------------------
