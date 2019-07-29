@@ -736,10 +736,10 @@ function lib.GetSetInfo(setId)
 end
 
 --Returns the possible armor types's of a set
---> Parameters: armorType ESOArmorType: The ArmotType (https://wiki.esoui.com/Globals#ArmorType)
+--> Parameters: setId number: The set's id
 --> Returns:    table armorTypesOfSet: Contains all armor types possible as key and the Boolean value
 -->             true/false if this setId got items of this armorType
-function lib.GetSetArmorType(setId)
+function lib.GetSetArmorTypes(setId)
     local armorTypesOfSet = {}
     if not lib.armorTypeNames then return end
     for armorType,_ in pairs(lib.armorTypeNames) do
@@ -766,6 +766,26 @@ function lib.GetSetArmorType(setId)
     --If it's not already added to the armorTypesOfSet table add it
     --Return the armorTypesOfSet table
     return armorTypesOfSet
+end
+
+--Returns the armor types of a set's item
+--> Parameters: itemId number: The set item's itemId
+--> Returns:    number armorTypeOfSetItem: The armorType (https://wiki.esoui.com/Globals#ArmorType) of the setItem
+function lib.GetItemsArmorType(itemId)
+    --Build an itemLink from the itemId
+    local itemLink = lib.buildItemLink(itemId)
+    if itemLink then
+        --Scan each itemId and get the armor type.
+        --* GetItemLinkArmorType(*string* _itemLink_)
+        --** _Returns:_ *[ArmorType|#ArmorType]* _armorType_
+        local armorTypeOfSetItem = GetItemLinkArmorType(itemLink)
+        if armorTypeOfSetItem and armorTypeOfSetItem ~= ARMORTYPE_NONE then
+            return armorTypeOfSetItem
+        end
+    end
+    --If it's not already added to the armorTypesOfSet table add it
+    --Return the armorTypesOfSet table
+    return nil
 end
 
 ------------------------------------------------------------------------
