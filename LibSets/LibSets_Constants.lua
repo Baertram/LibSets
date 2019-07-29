@@ -10,7 +10,7 @@ local MAJOR, MINOR = "LibSets", 0.10
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.1
+lib.svVersion       = 0.10
 lib.setsLoaded      = false
 lib.setsScanning    = false
 ------------------------------------------------------------------------------------------------------------------------
@@ -135,43 +135,43 @@ lib.setTypesToName = {
         ["de"] = GetString(SI_LEADERBOARDTYPE4),
         ["en"] = GetString(SI_LEADERBOARDTYPE4),
         ["fr"] = GetString(SI_LEADERBOARDTYPE4),
-        ["jp"] = GetString(SI_LEADERBOARDTYPE4),
-        ["ru"] = GetString(SI_LEADERBOARDTYPE4),
+        ["jp"] = GetString(SI_LEADERBOARDTYPE4) or "Battleground",
+        ["ru"] = GetString(SI_LEADERBOARDTYPE4) or "Battleground",
     },
     [LIBSETS_SETTYPE_CRAFTED                        ] = {
         ["de"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         ["en"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         ["fr"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
-        ["jp"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
-        ["ru"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+        ["jp"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED) or "Crafted",
+        ["ru"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED) or "Crafted",
     },
     [LIBSETS_SETTYPE_CYRODIIL                        ] = {
         ["de"] = GetString(SI_CAMPAIGNRULESETTYPE1),
         ["en"] = GetString(SI_CAMPAIGNRULESETTYPE1),
         ["fr"] = GetString(SI_CAMPAIGNRULESETTYPE1),
-        ["jp"] = GetString(SI_CAMPAIGNRULESETTYPE1),
-        ["ru"] = GetString(SI_CAMPAIGNRULESETTYPE1),
+        ["jp"] = GetString(SI_CAMPAIGNRULESETTYPE1) or "Cyrodiil",
+        ["ru"] = GetString(SI_CAMPAIGNRULESETTYPE1) or "Cyrodiil",
     },
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD  ] = {
         ["de"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
         ["en"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
         ["fr"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
-        ["jp"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
-        ["ru"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
+        ["jp"] = (GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR))  or "Random daily dungeon & Imperial city reward",
+        ["ru"] = (GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR))  or "Random daily dungeon & Imperial city reward",
     },
     [LIBSETS_SETTYPE_DUNGEON                        ] = {
         ["de"] = GetString(SI_INSTANCEDISPLAYTYPE2),
         ["en"] = GetString(SI_INSTANCEDISPLAYTYPE2),
         ["fr"] = GetString(SI_INSTANCEDISPLAYTYPE2),
-        ["jp"] = GetString(SI_INSTANCEDISPLAYTYPE2),
-        ["ru"] = GetString(SI_INSTANCEDISPLAYTYPE2),
+        ["jp"] = GetString(SI_INSTANCEDISPLAYTYPE2) or "Dungeon",
+        ["ru"] = GetString(SI_INSTANCEDISPLAYTYPE2 or "Dungeon"),
     },
     [LIBSETS_SETTYPE_IMPERIALCITY                        ] = {
         ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
         ["en"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
         ["fr"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
-        ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
-        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
+        ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) or "Imperial city",
+        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) or "Imperial city",
     },
     [LIBSETS_SETTYPE_MONSTER                        ] = {
         ["de"] = "Monster",
@@ -191,15 +191,15 @@ lib.setTypesToName = {
         ["de"] = GetString(SI_HOTBARCATEGORY9),
         ["en"] = GetString(SI_HOTBARCATEGORY9),
         ["fr"] = GetString(SI_HOTBARCATEGORY9),
-        ["jp"] = GetString(SI_HOTBARCATEGORY9),
-        ["ru"] = GetString(SI_HOTBARCATEGORY9),
+        ["jp"] = GetString(SI_HOTBARCATEGORY9) or "Special",
+        ["ru"] = GetString(SI_HOTBARCATEGORY9) or "Special",
     },
     [LIBSETS_SETTYPE_TRIAL                        ] = {
         ["de"] = GetString(SI_LFGACTIVITY4),
         ["en"] = GetString(SI_LFGACTIVITY4),
         ["fr"] = GetString(SI_LFGACTIVITY4),
-        ["jp"] = GetString(SI_LFGACTIVITY4),
-        ["ru"] = GetString(SI_LFGACTIVITY4),
+        ["jp"] = GetString(SI_LFGACTIVITY4) or "Trial",
+        ["ru"] = GetString(SI_LFGACTIVITY4) or "Trial",
     },
 }
 --Mapping table setType to setIds for this settype.
@@ -273,3 +273,9 @@ local undauntedChestIds = {
 }
 lib.undauntedChestIds = undauntedChestIds
 ------------------------------------------------------------------------------------------------------------------------
+lib.armorTypeNames =  {
+    [ARMORTYPE_LIGHT]   = GetString(SI_ARMORTYPE1) or "Light",
+    [ARMORTYPE_MEDIUM]  = GetString(SI_ARMORTYPE2) or "Medium",
+    [ARMORTYPE_HEAVY]   = GetString(SI_ARMORTYPE3) or "Heavy",
+}
+

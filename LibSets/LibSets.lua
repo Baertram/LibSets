@@ -249,6 +249,16 @@ function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)
     end, 100)
 end
 
+--Returns the armor types's name
+--> Parameters: armorType ESOArmorType: The ArmotType (https://wiki.esoui.com/Globals#ArmorType)
+--> Returns:    String armorTypeName: The name fo the armor type in the current client's language
+function lib.GetArmorTypeName(armorType)
+    if armorType == ARMORTYPE_NONE then return end
+    local armorTypeNames = lib.armorTypeNames
+    if not armorType or not armorTypeNames then return end
+    local armorTypeName = armorTypeNames[armorType]
+    return armorTypeName
+end
 
 ------------------------------------------------------------------------
 -- 	Global set check functions
@@ -706,21 +716,56 @@ function lib.GetSetInfo(setId)
     local setInfoTable
     local itemIds
     local setNames
+    local preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS
+    local preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES
     if lib.IsNoESOSet(setId) then
         setInfoTable = noSetIdSets[setId]
-        itemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId]
-        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID][setId]
+        preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID
+        preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES_NO_SETID
     else
         if setInfo[setId] == nil then return end
         setInfoTable = setInfo[setId]
-        itemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId]
-        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES][setId]
     end
     if setInfoTable == nil then return end
     setInfoTable["setId"] = setId
+    itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
+    setNames = preloaded[preloadedSetNamesTableKey][setId]
     if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
     if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
     return setInfoTable
+end
+
+--Returns the possible armor types's of a set
+--> Parameters: armorType ESOArmorType: The ArmotType (https://wiki.esoui.com/Globals#ArmorType)
+--> Returns:    table armorTypesOfSet: Contains all armor types possible as key and the Boolean value
+-->             true/false if this setId got items of this armorType
+function lib.GetSetArmorType(setId)
+    local armorTypesOfSet = {}
+    if not lib.armorTypeNames then return end
+    for armorType,_ in pairs(lib.armorTypeNames) do
+        armorTypesOfSet[armorType] = false
+    end
+    --Get all itemIds of this set
+    local setItemIds = lib.GetSetItemIds(setId)
+    if not setItemIds then return false end
+    --Build an itemLink from the itemId
+    for itemId, _ in pairs(setItemIds) do
+        local itemLink = lib.buildItemLink(itemId)
+        if itemLink then
+            --Scan each itemId and get the armor type.
+            --* GetItemLinkArmorType(*string* _itemLink_)
+            --** _Returns:_ *[ArmorType|#ArmorType]* _armorType_
+            local armorTypeOfSetItem = GetItemLinkArmorType(itemLink)
+            if armorTypeOfSetItem and armorTypeOfSetItem ~= ARMORTYPE_NONE then
+                if not armorTypesOfSet[armorTypeOfSetItem] then
+                    armorTypesOfSet[armorTypeOfSetItem] = true
+                end
+            end
+        end
+    end
+    --If it's not already added to the armorTypesOfSet table add it
+    --Return the armorTypesOfSet table
+    return armorTypesOfSet
 end
 
 ------------------------------------------------------------------------
