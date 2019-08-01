@@ -44,7 +44,20 @@ function lib.openMapOfZoneId(zoneId)<br>
 --Open the worldmap, get the zoneId of the wayshrine wayshrineNodeId and show the wayshrine wayshrineNodeId on the map<br>
 --> Parameters: wayshrineNodeId number: The wayshrine's nodeIndex<br>
 function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)<br>
-
+<br>
+--Returns the armor types's name<br>
+--> Parameters: armorType ESOArmorType: The ArmorType (https://wiki.esoui.com/Globals#ArmorType)<br>
+--> Returns:    String armorTypeName: The name fo the armor type in the current client's language<br>
+function lib.GetArmorTypeName(armorType)<br>
+<br>
+--Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)<br>
+--> Parameters: dropMechanicId number: The LibSetsDropMechanidIc<br>
+-->             lang String: The 2char language String for the used translation. If left empty the current client's<br>
+-->             language will be used.<br>
+--> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc<br>
+function lib.GetDropMechanicName(libSetsDropMechanidIc, lang)<br>
+<br>
+<br>
 ###Global set check functions
 --Returns true if the setId provided is a craftable set<br>
 --> Parameters: setId number: The set's setId<br>

@@ -268,6 +268,7 @@ end
 function lib.GetDropMechanicName(libSetsDropMechanidIc, lang)
     if libSetsDropMechanidIc == nil or libSetsDropMechanidIc <= 0 then return end
     lang = lang or lib.clientLang
+    if not lib.supportedLanguages[lang] then return end
     local dropMechanicNames = lib.dropMechanicIdToName
     local dropMechanicName = dropMechanicNames[libSetsDropMechanidIc]
     if dropMechanicName then
@@ -563,6 +564,7 @@ end
 function lib.GetSetTypeName(libSetsSetType, lang)
     if libSetsSetType == nil then return end
     lang = lang or lib.clientLang
+    if not lib.supportedLanguages[lang] then return end
     local allowedLibSetsSetTypes = lib.allowedSetTypes
     local allowedSetType = allowedLibSetsSetTypes[libSetsSetType] or false
     if not allowedSetType then return end
@@ -656,6 +658,7 @@ end
 --> Returns:    String setName
 function lib.GetSetName(setId, lang)
     lang = lang or lib.clientLang
+    if not lib.supportedLanguages[lang] then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setNames = {}
     if lib.IsNoESOSet(setId) then
@@ -663,9 +666,7 @@ function lib.GetSetName(setId, lang)
     else
         setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
     end
-    if setId == nil or not lib.supportedLanguages[lang]
-        or setNames[setId] == nil
-        or setNames[setId][lang] == nil then return end
+    if setId == nil or setNames[setId] == nil or setNames[setId][lang] == nil then return end
     return setNames[setId][lang]
 end
 
@@ -851,8 +852,8 @@ end
 --> Returns:    name undauntedChestName
 function lib.GetUndauntedChestName(undauntedChestId, lang)
     if undauntedChestId < 1 or undauntedChestId > lib.countUndauntedChests then return end
-    if lang and not lib.supportedLanguages[lang] then return end
     lang = lang or lib.clientLang
+    if not lib.supportedLanguages[lang] then return end
     if not lib.undauntedChestIds or not lib.undauntedChestIds[lang] or not lib.undauntedChestIds[lang][undauntedChestId] then return end
     local undauntedChestNameLang = lib.undauntedChestIds[lang]
     --Fallback language "EN"
@@ -984,6 +985,9 @@ local function OnLibraryLoaded(event, name)
     lib.setsLoaded = falsez
     --The actual clients language
     lib.clientLang = GetCVar("language.2")
+    if not lib.supportedLanguages[lib.clientLang] then
+        lib.clientLang = "en" --Fallback language if client language is not supported: English
+    end
     --The actual API version
     lib.currentAPIVersion = GetAPIVersion()
     --Get the different setTypes from the "all sets table" setInfo in file LibSets_Data.lua and put them in their

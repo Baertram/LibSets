@@ -301,8 +301,8 @@ lib.dropMechanicIdToName = {
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " Эл. адрес)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "город: Bruma (квартирмейстер)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "город: Cropsford (квартирмейстер)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "город: Vlastarus (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "город: Брума (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "город: Кропсфорд (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "город: Властарус (квартирмейстер)",
     },
 }
