@@ -269,6 +269,8 @@ LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY   = 1	--Rewards for the wo
 LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA	            = 2	--City Bruma (quartermaster)
 LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT	        = 3	--City Erntefurt (quartermaster)
 LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS	        = 4	--City Vlastarus (quartermaster)
+LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST                 = 5 --Arena stage chest
+LIBSETS_DROP_MECHANIC_MONSTER_NAME                      = 99 --The name is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table)
 -------------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets drop mechanics !!!
 -------------------------------------------------------------------------------
@@ -280,29 +282,39 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Stadt: Bruma (Quartiermeister)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Stadt: Erntefurt (Quartiermeister)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Stadt: Vlastarus (Quartiermeister)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena-Phasen Schatztruhe",
+        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster Name",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "City: Bruma (quartermaster)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "City: Cropsford (quartermaster)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "City: Vlastarus (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena stage chest",
+        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster name",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Ville: Bruma (maître de manœuvre)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Ville: Gué-les-Champs (maître de manœuvre)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Ville: Vlastrus (maître de manœuvre)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Coffre d'étape Arena",
+        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Nom du monstre",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " Eメール)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "シティ: Bruma (需品)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "シティ: Cropsford (需品)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "シティ: Vlastarus (需品)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "アリーナステージチェスト",
+        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "モンスター名",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " Эл. адрес)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "город: Брума (квартирмейстер)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "город: Кропсфорд (квартирмейстер)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "город: Властарус (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Стадион арены",
+        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Имя монстра",
     },
 }
