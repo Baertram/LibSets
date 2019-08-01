@@ -25,21 +25,24 @@ lib.supportedLanguages = {
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.
 local noSetIdString = "NoSetId"
+LIBSETS_TABLEKEY_NAMES                          = "Names"
 LIBSETS_TABLEKEY_SETITEMIDS                     = "setItemIds"
 LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID            = "setItemIds" .. noSetIdString
-LIBSETS_TABLEKEY_SETNAMES                       = "setNames"
-LIBSETS_TABLEKEY_SETNAMES_NO_SETID              = "setNames" .. noSetIdString
+LIBSETS_TABLEKEY_SETNAMES                       = "set" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_SETNAMES_NO_SETID              = "set" .. LIBSETS_TABLEKEY_NAMES .. noSetIdString
 LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION          = "lastSetsCheckAPIVersion"
 LIBSETS_TABLEKEY_NUMBONUSES                     = "numBonuses"
 LIBSETS_TABLEKEY_MAXEQUIPPED                    = "maxEquipped"
 LIBSETS_TABLEKEY_SETTYPE                        = "setType"
 LIBSETS_TABLEKEY_MAPS                           = "maps"
 LIBSETS_TABLEKEY_WAYSHRINES                     = "wayshrines"
-LIBSETS_TABLEKEY_WAYSHRINE_NAMES                = "wayshrineNames"
+LIBSETS_TABLEKEY_WAYSHRINE_NAMES                = "wayshrine" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_ZONE_DATA                      = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA             = "dungeonFinderData"
-LIBSETS_TABLEKEY_COLLECTIBLE_NAMES              = "collectibleNames"
+LIBSETS_TABLEKEY_COLLECTIBLE_NAMES              = "collectible" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID         = "wayshrineNodeId2zoneId"
+LIBSETS_TABLEKEY_DROPMECHANIC                   = "dropMechanic"
+LIBSETS_TABLEKEY_DROPMECHANIC_NAMES             = LIBSETS_TABLEKEY_DROPMECHANIC .. LIBSETS_TABLEKEY_NAMES
 ------------------------------------------------------------------------------------------------------------------------
 --Set types
 --> If you change these be sure to check the following tables below and add/change/remove entries as well:

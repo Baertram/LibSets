@@ -540,7 +540,7 @@ end
 
 --Returns the type of the setId!
 --> Parameters: setId number: The set's setId
---> Returns:    setType String
+--> Returns:    LibSetsSetType number
 ---> Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 function lib.GetSetType(setId)
     if setId == nil then return end
@@ -581,6 +581,44 @@ end
 function lib.GetSetTypes()
     return lib.allowedSetTypes
 end
+
+--Returns the dropMechanic ID of the setId!
+--> Parameters: setId number:       The set's setId
+-->             withNames bolean:   Should the function return the dropMechanic names as well?
+--> Returns:    LibSetsDropMechanic number
+---> Possible values are the dropMechanics of LibSets one of the constants named LIBSETS_DROP_MECHANIC*, see file LibSets_Constants.lua)
+function lib.GetDropMechanic(setId, withNames)
+    if setId == nil then return nil, nil end
+    if not lib.checkIfSetsAreLoadedProperly() then return nil, nil end
+    withNames = withNames or false
+    local setData = setInfo[setId]
+    if setData == nil then
+        if lib.IsNoESOSet(setId) then
+            setData = noSetIdSets[setId]
+        else
+            return
+        end
+    end
+    if setData == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC] == nil then return nil, nil end
+    local dropMechanicNames
+    if withNames then
+        if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]["en"] ~= nil then
+            dropMechanicNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
+        else
+            dropMechanicNames = {}
+            local supportedLanguages = lib.supportedLanguages
+            if supportedLanguages then
+                for supportedLanguage, isSupported in pairs(supportedLanguages) do
+                    if isSupported then
+                        dropMechanicNames[supportedLanguage] = lib.GetDropMechanicName(setData[LIBSETS_TABLEKEY_DROPMECHANIC], supportedLanguage)
+                    end
+                end
+            end
+        end
+    end
+    return setData[LIBSETS_TABLEKEY_DROPMECHANIC], dropMechanicNames
+end
+
 
 --Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.
 --Attention: The table can have a gap in it's index as not all setIds are gap-less in ESO!
@@ -704,6 +742,8 @@ end
 ----> table wayshrines containing the wayshrines to port to this setId using function LibSets.JumpToSetId(setId, factionIndex).
 ------>The table can contain 1 to 3 entries (one for each faction e.g.) and contains the wayshrineNodeId nearest to the set's crafting table/in the drop zone
 ----> table zoneIds containing the zoneIds (one to n) where this set drops, or can be obtained
+----> number dropMechanic containing the LibFiltersDropMechanic of the set
+----> table dropMechanicNames containing the names of the dropMechanig in the supported languages. Tablekey is the language 2character (e.g. ["en"]) and the value is the name String in that language.
 -------Example for setId 408
 --- ["setId"] = 408,
 --- ["dlcId"] = 12,    --DLC_MURKMIRE
@@ -726,6 +766,12 @@ end
 --	["zoneIds"] = {
 --		[1] = 726,
 --  },
+--  ["dropMechanic"] = LIBSETS_DROP_MECHANIC_MONSTER_NAME,
+--  ["dropMechanicNames"] = {
+--      ["en"] = "DropMechanicNameEN",
+--      ["de"] = "DropMechanicNameDE",
+--      ["fr"] = "DropMechanicNameFR",
+--  },
 --}
 function lib.GetSetInfo(setId)
     if setId == nil then return end
@@ -745,6 +791,23 @@ function lib.GetSetInfo(setId)
     end
     if setInfoTable == nil then return end
     setInfoTable["setId"] = setId
+    if setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC] ~= nil then
+        local dropMechanic = setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC]
+        --The drop mechanic is no monster name, so get the names of the drop mechanic via LibSets API function
+        if dropMechanic ~= LIBSETS_DROP_MECHANIC_MONSTER_NAME then
+            if setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]["en"] == nil then
+                setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = {}
+                local supportedLanguages = lib.supportedLanguages
+                if supportedLanguages then
+                    for supportedLanguage, isSupported in pairs(supportedLanguages) do
+                        if isSupported then
+                            setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES][supportedLanguage] = lib.GetDropMechanicName(dropMechanic, supportedLanguage)
+                        end
+                    end
+                end
+            end
+        end
+    end
     itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
     setNames = preloaded[preloadedSetNamesTableKey][setId]
     if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end

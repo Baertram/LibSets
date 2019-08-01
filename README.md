@@ -172,7 +172,7 @@ function lib.GetTraitsNeeded(setId)<br>
 <br>
 --Returns the type of the setId!<br>
 --> Parameters: setId number: The set's setId<br>
---> Returns:    setType String<br>
+--> Returns:    LibSetsSetType number<br>
 ---> Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)<br>
 function lib.GetSetType(setId)<br>
 <br>
@@ -184,6 +184,13 @@ function lib.GetSetTypeName(libSetsSetType, lang)<br>
 <br>
 --Returns the table of setTypes of LibSets (the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)<br>
 function lib.GetSetTypes()<br>
+<br>
+--Returns the dropMechanic ID of the setId!<br>
+--> Parameters: setId number:       The set's setId<br>
+-->             withNames bolean:   Should the function return the dropMechanic names as well?<br>
+--> Returns:    LibSetsDropMechanic number<br>
+---> Possible values are the dropMechanics of LibSets one of the constants named LIBSETS_DROP_MECHANIC*, see file LibSets_Constants.lua)<br>
+function lib.GetDropMechanic(setId, withNames)<br>
 <br>
 --Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.<br>
 --Attention: The table can have a gap in it's index as not all setIds are gap-less in ESO!<br>
@@ -261,6 +268,12 @@ function lib.GetSetNames(setId)<br>
 --  },<br>
 --	["zoneIds"] = {<br>
 --		[1] = 726,<br>
+--  },<br>
+--  ["dropMechanic"] = LIBSETS_DROP_MECHANIC_MONSTER_NAME,<br>
+--  ["dropMechanicNames"] = {<br>
+--      ["en"] = "DropMechanicNameEN",<br>
+--      ["de"] = "DropMechanicNameDE",<br>
+--      ["fr"] = "DropMechanicNameFR",<br>
 --  },<br>
 --}<br>
 function lib.GetSetInfo(setId)
