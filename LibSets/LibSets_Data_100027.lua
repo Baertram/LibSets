@@ -460,14 +460,6 @@ lib.setInfo = {
     [449] = {wayshrines={399,399,399,}, dlcId=DLC_ELSWEYR	, zoneIds={1121}, veteran=true	, setType=LIBSETS_SETTYPE_TRIAL},	 --Perfected False God's Devotion / Perfektionierte Ergebenheit zum falschen Gott   [Sunspire]
     [450] = {wayshrines={399,399,399,}, dlcId=DLC_ELSWEYR	, zoneIds={1121}, veteran=true	, setType=LIBSETS_SETTYPE_TRIAL},	 --Perfected Tooth of Lokkestiiz / Perfektionierter Zahn von Lokkestiiz   [Sunspire]
     [451] = {wayshrines={399,399,399,}, dlcId=DLC_ELSWEYR	, zoneIds={1121}, veteran=true	, setType=LIBSETS_SETTYPE_TRIAL},	 --Perfected Claw of Yolnakhriin / Perfektionierte Kralle von Yolnahkriin   [Sunspire]
-    [452] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SCALEBREAKER	, zoneIds={1122}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON},	 --Hollowfang Thirst / Hohlzahndurst   [Moongrave Fane]
-    [453] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SCALEBREAKER	, zoneIds={1122}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON},	 --Dro'Zakar's Claws / Dro'Zakars Krallen   [Moongrave Fane]
-    [454] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SCALEBREAKER	, zoneIds={1122}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON},	 --Renald's Resolve / Renalds Entschlossenheit   [Moongrave Fane]
-    [455] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SCALEBREAKER	, zoneIds={1123}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON},	 --Z'en's Redress / Z'ens Wiedergutmachung   [Lair of Maarselok]
-    [456] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SCALEBREAKER	, zoneIds={1123}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON},	 --Azureblight Reaper / Azurfäuleschnitter   [Lair of Maarselok]
-    [457] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SCALEBREAKER	, zoneIds={1123}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON},	 --Dragon's Defilement / Drachenschändung   [Lair of Maarselok]
-    [458] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SCALEBREAKER	, zoneIds={1122}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER, dropMechanic=LIBSETS_DROP_MECHANIC_MONSTER_NAME, dropMechanicNames={}},	 --Grundwulf / Grundwulf   [Moongrave Fane]
-    [459] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SCALEBREAKER	, zoneIds={1123}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER, dropMechanic=LIBSETS_DROP_MECHANIC_MONSTER_NAME, dropMechanicNames={}},	 --Maarselok / Maarselok   [Lair of Maarselok]
 }--lib.setInfo
 ---------------------------------------------------------------------------------------------------------------------------
 --This table contains special set items, which got no unique ESO setId. A "fake" unique setId is needed to be manually created starting at 9999001!
