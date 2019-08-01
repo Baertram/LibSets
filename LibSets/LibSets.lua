@@ -250,7 +250,7 @@ function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)
 end
 
 --Returns the armor types's name
---> Parameters: armorType ESOArmorType: The ArmotType (https://wiki.esoui.com/Globals#ArmorType)
+--> Parameters: armorType ESOArmorType: The ArmorType (https://wiki.esoui.com/Globals#ArmorType)
 --> Returns:    String armorTypeName: The name fo the armor type in the current client's language
 function lib.GetArmorTypeName(armorType)
     if armorType == ARMORTYPE_NONE then return end
@@ -258,6 +258,22 @@ function lib.GetArmorTypeName(armorType)
     if not armorType or not armorTypeNames then return end
     local armorTypeName = armorTypeNames[armorType]
     return armorTypeName
+end
+
+--Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)
+--> Parameters: dropMechanicId number: The LibSetsDropMechanidIc
+-->             lang String: The 2char language String for the used translation. If left empty the current client's
+-->             language will be used.
+--> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc
+function lib.GetDropMechanicName(libSetsDropMechanidIc, lang)
+    if libSetsDropMechanidIc == nil or libSetsDropMechanidIc <= 0 then return end
+    lang = lang or lib.clientLang
+    local dropMechanicNames = lib.dropMechanicIdToName
+    local dropMechanicName = dropMechanicNames[libSetsDropMechanidIc]
+    if dropMechanicName then
+        if not dropMechanicName[lang] then return end
+    end
+    return dropMechanicName[lang]
 end
 
 ------------------------------------------------------------------------

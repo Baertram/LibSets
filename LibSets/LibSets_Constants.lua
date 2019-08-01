@@ -66,21 +66,6 @@ end
 --------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets setTyps !!!
 --------------------------------------------------------------------------
---[[
-lib.setTypeToSetIdsForSetTypeTable = {
-    [LIBSETS_SETTYPE_ARENA                        ] = lib.arenaSets,
-    [LIBSETS_SETTYPE_BATTLEGROUND                 ] = lib.battlegroundSets,
-    [LIBSETS_SETTYPE_CRAFTED                      ] = lib.craftedSets,
-    [LIBSETS_SETTYPE_CYRODIIL                     ] = lib.cyrodiilSets,
-    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = lib.dailyRandomDungeonAndImperialCityRewardSets,
-    [LIBSETS_SETTYPE_DUNGEON                      ] = lib.dungeonSets,
-    [LIBSETS_SETTYPE_IMPERIALCITY                 ] = lib.imperialCitySets,
-    [LIBSETS_SETTYPE_MONSTER                      ] = lib.monsterSets,
-    [LIBSETS_SETTYPE_OVERLAND                     ] = lib.overlandSets,
-    [LIBSETS_SETTYPE_SPECIAL                      ] = lib.specialSets,
-    [LIBSETS_SETTYPE_TRIAL                        ] = lib.trialSets,
-}
-]]
 lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_ARENA                        ] = {
         ["tableName"] = "arenaSets",
@@ -278,4 +263,46 @@ lib.armorTypeNames =  {
     [ARMORTYPE_MEDIUM]  = GetString(SI_ARMORTYPE2) or "Medium",
     [ARMORTYPE_HEAVY]   = GetString(SI_ARMORTYPE3) or "Heavy",
 }
-
+------------------------------------------------------------------------------------------------------------------------
+--Drop mechanics / cities / etc. for additional drop location information
+LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY   = 1	--Rewards for the worthy (Cyrodiil/Battleground mail)
+LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA	            = 2	--City Bruma (quartermaster)
+LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT	        = 3	--City Erntefurt (quartermaster)
+LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS	        = 4	--City Vlastarus (quartermaster)
+-------------------------------------------------------------------------------
+--!!! Attention: Change this table if you add/remove LibSets drop mechanics !!!
+-------------------------------------------------------------------------------
+---The names of the drop mechanics
+local cyrodiilAndBattlegroundText = " .. GetString(SI_LEADERBOARDTYPE4) .. "/" .. GetString(SI_LEADERBOARDTYPE4) .."
+lib.dropMechanicIdToName = {
+    ["de"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Gerechter Lohn (" .. cyrodiilAndBattlegroundText .. " mail)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Stadt: Bruma (Quartiermeister)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Stadt: Erntefurt (Quartiermeister)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Stadt: Vlastarus (Quartiermeister)",
+    },
+    ["en"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "City: Bruma (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "City: Cropsford (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "City: Vlastarus (quartermaster)",
+    },
+    ["fr"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Ville: Bruma (maître de manœuvre)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Ville: Gué-les-Champs (maître de manœuvre)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Ville: Vlastrus (maître de manœuvre)",
+    },
+    ["jp"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " Eメール)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "シティ: Bruma (需品)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "シティ: Cropsford (需品)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "シティ: Vlastarus (需品)",
+    },
+    ["ru"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " Эл. адрес)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "город: Bruma (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "город: Cropsford (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "город: Vlastarus (квартирмейстер)",
+    },
+}
