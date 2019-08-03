@@ -276,7 +276,7 @@ LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS	        = 4	--City Vlastarus (quar
 LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST                 = 5 --Arena stage chest
 LIBSETS_DROP_MECHANIC_MONSTER_NAME                      = 6 --The name is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table)
 LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_MONSTER_NAME
-lib.allowedSetTypes = { }
+lib.allowedDropMechanics = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
 end
