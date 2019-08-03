@@ -620,7 +620,8 @@ function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     if not allowedDropMechanics[libSetsDropMechanicId] then return end
     lang = lang or lib.clientLang
     if not lib.supportedLanguages[lang] then return end
-    local dropMechanicNames = lib.dropMechanicIdToName
+    local dropMechanicNames = lib.dropMechanicIdToName[lang]
+    if dropMechanicNames == nil then return false end
     local dropMechanicName = dropMechanicNames[libSetsDropMechanicId]
     if dropMechanicName then
         if not dropMechanicName[lang] then return end
