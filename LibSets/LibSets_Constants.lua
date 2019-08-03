@@ -292,7 +292,7 @@ end
 --!!! Attention: Change this table if you add/remove LibSets drop mechanics !!!
 -------------------------------------------------------------------------------
 ---The names of the drop mechanics
-local cyrodiilAndBattlegroundText = " .. GetString(SI_LEADERBOARDTYPE4) .. "/" .. GetString(SI_LEADERBOARDTYPE4) .."
+local cyrodiilAndBattlegroundText = GetString(SI_CAMPAIGNRULESETTYPE1) .. "/" .. GetString(SI_LEADERBOARDTYPE4)
 lib.dropMechanicIdToName = {
     ["de"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Gerechter Lohn (" .. cyrodiilAndBattlegroundText .. " mail)",
