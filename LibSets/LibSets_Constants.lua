@@ -37,6 +37,7 @@ LIBSETS_TABLEKEY_SETTYPE                        = "setType"
 LIBSETS_TABLEKEY_MAPS                           = "maps"
 LIBSETS_TABLEKEY_WAYSHRINES                     = "wayshrines"
 LIBSETS_TABLEKEY_WAYSHRINE_NAMES                = "wayshrine" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_ZONEIDS                        = "zoneIds"
 LIBSETS_TABLEKEY_ZONE_DATA                      = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA             = "dungeonFinderData"
 LIBSETS_TABLEKEY_COLLECTIBLE_NAMES              = "collectible" .. LIBSETS_TABLEKEY_NAMES
@@ -269,13 +270,20 @@ lib.armorTypeNames =  {
 ------------------------------------------------------------------------------------------------------------------------
 --Drop mechanics / cities / etc. for additional drop location information
 LIBSETS_DROP_MECHANIC_ITERATION_BEGIN                             = 1
-LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY   = 1	--Rewards for the worthy (Cyrodiil/Battleground mail)
-LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA	            = 2	--City Bruma (quartermaster)
-LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT	        = 3	--City Erntefurt (quartermaster)
-LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS	        = 4	--City Vlastarus (quartermaster)
-LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST                 = 5 --Arena stage chest
-LIBSETS_DROP_MECHANIC_MONSTER_NAME                      = 6 --The name is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table)
-LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_MONSTER_NAME
+LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY   = 1	    --Rewards for the worthy (Cyrodiil/Battleground mail)
+LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA	            = 2	    --City Bruma (quartermaster)
+LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT	        = 3	    --City Erntefurt (quartermaster)
+LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS	        = 4	    --City Vlastarus (quartermaster)
+LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST                 = 5     --Arena stage chest
+LIBSETS_DROP_MECHANIC_MONSTER_NAME                      = 6     --The name of a monster (e.g. a boss in a dungeon) is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table containing the monster name in different languages)
+LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE               = 7     --Overland delve bosses
+LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS                = 8     --Overland world group bosses
+LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON      = 9     --Overland public dungeon bosses
+LIBSETS_DROP_MECHANIC_OVERLAND_CHEST                    = 10    --Overland chests
+LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD               = 11    --Battleground rewards
+LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD  = 12    --Daily random dungeon mail rewards
+LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS              = 13    --Imperial city vaults
+LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS
 lib.allowedDropMechanics = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
@@ -293,7 +301,14 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Stadt: Vlastarus (Quartiermeister)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena-Phasen Schatztruhe",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster Name",
-    },
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Bosse in Gewölben haben die Chance, eine Taille oder Füße fallen zu lassen.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Überland Gruppenbosse haben eine Chance von 100%, Kopf, Brust, Beine oder Waffen fallen zu lassen.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Öffentliche Dungeon-Bosse haben die Möglichkeit, eine Schulter, Handschuhe oder eine Waffe fallen zu lassen.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Truhen, die durch das Besiegen eines Dunklen Ankers gewonnen wurden, haben eine Chance von 100%, einen Ring oder ein Amulett fallen zu lassen.\nSchatztruhen, welche man in der Zone findet, haben eine Chance irgendein Setteil zu gewähren, das in dieser Zone droppen kann:\n-Einfache Truhen haben eine geringe Chance\n-Mittlere Truhen haben eine gute Chance\n-Fortgeschrittene- und Meisterhafte-Truhen haben eine garantierte Chance\n-Schatztruhen, die durch eine Schatzkarte gefunden wurden, haben eine garantierte Chance",
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Belohnung in Schlachtfeldern",
+        [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Tägliches Zufallsverlies Belohnungsemail",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Kaiserstadt Bunker",
+},
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "City: Bruma (quartermaster)",
@@ -301,6 +316,13 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "City: Vlastarus (quartermaster)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena stage chest",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster name",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses have a chance to drop a waist or feet.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests gained from defeating a Dark Anchor have a 100% chance to drop a ring or amulet.\nTreasure chests found in the world have a chance to grant any set piece that can drop in that zone:\n-Simple chests have a slight chance\n-Intermediate chests have a good chance\n-Advanced and Master chests have a guaranteed chance\n-Treasure chests found from a Treasure Map have a guaranteed chance",
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Battlegounds reward",
+        [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
@@ -327,3 +349,10 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Имя монстра",
     },
 }
+--Set metatable to get EN entries for missing other languages
+local dropMechanicNames = lib.dropMechanicIdToName
+local dropMechanicNamesEn = dropMechanicNames["en"]
+setmetatable(dropMechanicNames["de"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicNames["fr"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicNames["jp"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicNames["ru"], {__index = dropMechanicNamesEn})
