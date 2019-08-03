@@ -50,13 +50,6 @@ function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)<br>
 --> Returns:    String armorTypeName: The name fo the armor type in the current client's language<br>
 function lib.GetArmorTypeName(armorType)<br>
 <br>
---Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)<br>
---> Parameters: dropMechanicId number: The LibSetsDropMechanidIc<br>
--->             lang String: The 2char language String for the used translation. If left empty the current client's<br>
--->             language will be used.<br>
---> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc<br>
-function lib.GetDropMechanicName(libSetsDropMechanidIc, lang)<br>
-<br>
 <br>
 ###Global set check functions
 --Returns true if the setId provided is a craftable set<br>
@@ -188,9 +181,19 @@ function lib.GetSetTypes()<br>
 --Returns the dropMechanic ID of the setId!<br>
 --> Parameters: setId number:       The set's setId<br>
 -->             withNames bolean:   Should the function return the dropMechanic names as well?<br>
---> Returns:    LibSetsDropMechanic number<br>
----> Possible values are the dropMechanics of LibSets one of the constants named LIBSETS_DROP_MECHANIC*, see file LibSets_Constants.lua)<br>
+--> Returns:    LibSetsDropMechanic number
+---> Possible values are the dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 function lib.GetDropMechanic(setId, withNames)<br>
+<br>
+--Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)<br>
+--> Parameters: dropMechanicId number: The LibSetsDropMechanidIc (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)<br>
+-->             lang String: The 2char language String for the used translation. If left empty the current client's<br>
+-->             language will be used.<br>
+--> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc<br>
+function lib.GetDropMechanicName(libSetsDropMechanidIc, lang)<br>
+<br>
+--Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)<br>
+function lib.GetDropMechanics()<br>
 <br>
 --Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.<br>
 --Attention: The table can have a gap in it's index as not all setIds are gap-less in ESO!<br>

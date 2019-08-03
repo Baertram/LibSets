@@ -260,23 +260,6 @@ function lib.GetArmorTypeName(armorType)
     return armorTypeName
 end
 
---Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)
---> Parameters: dropMechanicId number: The LibSetsDropMechanidIc
--->             lang String: The 2char language String for the used translation. If left empty the current client's
--->             language will be used.
---> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc
-function lib.GetDropMechanicName(libSetsDropMechanidIc, lang)
-    if libSetsDropMechanidIc == nil or libSetsDropMechanidIc <= 0 then return end
-    lang = lang or lib.clientLang
-    if not lib.supportedLanguages[lang] then return end
-    local dropMechanicNames = lib.dropMechanicIdToName
-    local dropMechanicName = dropMechanicNames[libSetsDropMechanidIc]
-    if dropMechanicName then
-        if not dropMechanicName[lang] then return end
-    end
-    return dropMechanicName[lang]
-end
-
 ------------------------------------------------------------------------
 -- 	Global set check functions
 ------------------------------------------------------------------------
@@ -583,10 +566,10 @@ function lib.GetSetTypes()
 end
 
 --Returns the dropMechanic ID of the setId!
---> Parameters: setId number:       The set's setId
--->             withNames bolean:   Should the function return the dropMechanic names as well?
---> Returns:    LibSetsDropMechanic number
----> Possible values are the dropMechanics of LibSets one of the constants named LIBSETS_DROP_MECHANIC*, see file LibSets_Constants.lua)
+--> Parameters: setId number:           The set's setId
+-->             withNames bolean:       Should the function return the dropMechanic names as well?
+--> Returns:    LibSetsDropMechanicId   number
+---> Possible values are the dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 function lib.GetDropMechanic(setId, withNames)
     if setId == nil then return nil, nil end
     if not lib.checkIfSetsAreLoadedProperly() then return nil, nil end
@@ -619,6 +602,29 @@ function lib.GetDropMechanic(setId, withNames)
     return setData[LIBSETS_TABLEKEY_DROPMECHANIC], dropMechanicNames
 end
 
+--Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)
+--> Parameters: dropMechanicId number: The LibSetsDropMechanidIc (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
+-->             lang String: The 2char language String for the used translation. If left empty the current client's
+-->             language will be used.
+--> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc
+function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
+    local allowedDropMechanics = lib.allowedDropMechanics
+    if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return end
+    if not allowedDropMechanics[libSetsDropMechanicId] then return end
+    lang = lang or lib.clientLang
+    if not lib.supportedLanguages[lang] then return end
+    local dropMechanicNames = lib.dropMechanicIdToName
+    local dropMechanicName = dropMechanicNames[libSetsDropMechanicId]
+    if dropMechanicName then
+        if not dropMechanicName[lang] then return end
+    end
+    return dropMechanicName[lang]
+end
+
+--Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
+function lib.GetDropMechanics()
+    return lib.allowedDropMechanics
+end
 
 --Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.
 --Attention: The table can have a gap in it's index as not all setIds are gap-less in ESO!

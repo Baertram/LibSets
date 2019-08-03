@@ -268,12 +268,18 @@ lib.armorTypeNames =  {
 }
 ------------------------------------------------------------------------------------------------------------------------
 --Drop mechanics / cities / etc. for additional drop location information
+LIBSETS_DROP_MECHANIC_ITERATION_BEGIN                             = 1
 LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY   = 1	--Rewards for the worthy (Cyrodiil/Battleground mail)
 LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA	            = 2	--City Bruma (quartermaster)
 LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT	        = 3	--City Erntefurt (quartermaster)
 LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS	        = 4	--City Vlastarus (quartermaster)
 LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST                 = 5 --Arena stage chest
-LIBSETS_DROP_MECHANIC_MONSTER_NAME                      = 99 --The name is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table)
+LIBSETS_DROP_MECHANIC_MONSTER_NAME                      = 6 --The name is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table)
+LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_MONSTER_NAME
+lib.allowedSetTypes = { }
+for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
+    lib.allowedDropMechanics[i] = true
+end
 -------------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets drop mechanics !!!
 -------------------------------------------------------------------------------
