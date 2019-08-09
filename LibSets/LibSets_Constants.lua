@@ -247,13 +247,13 @@ local undauntedChestIds = {
         [2] = "Maj al-Ragath",
         [3] = "Urgalarg l'Èmasculatrice",
     },
+    ["ru"] = {
+        [1] = "Глирион Краснобородый",
+        [2] = "Мадж аль-Рагат",
+        [3] = "Ургарлаг Бич Вождей",
+    },
     --English translations used at the moment! Todo: Translate
     --Asked for assistance: https://www.esoui.com/forums/showthread.php?p=38559#post38559
-    ["ru"] = {
-        [1] = "Glirion the Redbeard",
-        [2] = "Maj al-Ragath",
-        [3] = "Urgarlag Chief-bane",
-    },
     ["jp"] = {
         [1] = "Glirion the Redbeard",
         [2] = "Maj al-Ragath",
@@ -332,14 +332,6 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Coffre d'étape Arena",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Nom du monstre",
     },
-    ["jp"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " Eメール)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "シティ: Bruma (需品)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "シティ: Cropsford (需品)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "シティ: Vlastarus (需品)",
-        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "アリーナステージチェスト",
-        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "モンスター名",
-    },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " Эл. адрес)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "город: Брума (квартирмейстер)",
@@ -347,6 +339,21 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "город: Властарус (квартирмейстер)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Стадион арены",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Имя монстра",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Боссы вылазок дают шанс выпадания талии или голени.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Групповые боссы дают 100% шанс выпадания головы, груди, ног или оружия.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Боссы публичных подземелий дают шанс выпадания плечей, рук или оружия.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Сундуки, полученные от побед над Темным якорем, имеют 100% шанс выпадания кольца или амулета.\nСундуки сокровищ, найденные в мире, дают шанс получить любой сетовый кусок, выпадающий в этой зоне:\n- простые сундуки дают незначительный шанс\n- средние сундуки дают хороший шанс\n- продвинутые и мастерские сундуки дают гарантированный шанс\n- сундуки сокровищ, найденные по Карте сокровищ, дают гарантированный шанс",
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Награды полей сражений",
+        [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Письмо с наградой за ежедневное рандомное подземелье",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Убежище Имперского города",
+    },
+    ["jp"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " Eメール)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "シティ: Bruma (需品)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "シティ: Cropsford (需品)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "シティ: Vlastarus (需品)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "アリーナステージチェスト",
+        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "モンスター名",
     },
 }
 --Set metatable to get EN entries for missing other languages
