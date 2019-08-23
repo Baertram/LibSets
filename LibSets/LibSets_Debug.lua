@@ -88,20 +88,25 @@ local function GetMapNames(lang)
     d(debugOutputStartLine.."[".. MAJOR .. " v" .. tostring(MINOR).."]GetMapNames, language: " ..tostring(lang))
     local lz = lib.libZone
     if not lz then d("ERROR: Library LibZone must be loaded!") return end
-    local zoneIds = lz.givenZoneData
+    local zoneIds
+    if lz.GetAllZoneData then
+        zoneIds = lz:GetAllZoneData()
+    elseif lz.givenZoneData then
+        zoneIds = lz.givenZoneData
+    end
     if not zoneIds then d("ERROR: Library LibZone givenZoneData is missing!") return end
     local zoneIdsLocalized = zoneIds[lang]
     if not zoneIdsLocalized then d("ERROR: Language \"" .. tostring(lang) .."\" is not scanned yet in library LibZone") return end
     local mapNames = {}
     for zoneId, zoneNameLocalized in pairs(zoneIdsLocalized) do
-        local mapIndex = GetMapIndexByZoneId(zoneId)
-        --d(">zoneId: " ..tostring(zoneId) .. ", mapIndex: " ..tostring(mapIndex))
-        if mapIndex ~= nil then
-            local mapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(mapIndex))
-            if mapName ~= nil then
-                mapNames[mapIndex] = tostring(mapIndex) .. "|" .. mapName .. "|" .. tostring(zoneId) .. "|" .. zoneNameLocalized
-            end
-        end
+    local mapIndex = GetMapIndexByZoneId(zoneId)
+    --d(">zoneId: " ..tostring(zoneId) .. ", mapIndex: " ..tostring(mapIndex))
+    if mapIndex ~= nil then
+    local mapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(mapIndex))
+    if mapName ~= nil then
+    mapNames[mapIndex] = tostring(mapIndex) .. "|" .. mapName .. "|" .. tostring(zoneId) .. "|" .. zoneNameLocalized
+    end
+    end
     end
     return mapNames
 end

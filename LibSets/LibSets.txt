@@ -1,6 +1,6 @@
 ﻿## Title: LibSets
 ## Author: Baertram
-## APIVersion: 100027 100028
+## APIVersion: 100028 100029
 ## AddOnVersion: 010
 ## Version: 0.1.0
 ## IsLibrary: true
@@ -12,9 +12,11 @@
 
 ##Constant values
 LibSets_Constants.lua
+LibSets_Constants_All.lua
 LibSets_Constants_$(APIVersion).lua
 
 ##Data file (update each APIversion increase!)
+LibSets_Data_All.lua
 LibSets_Data_$(APIVersion).lua
 
 ##Functions and base library code
