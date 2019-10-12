@@ -89,6 +89,7 @@ local function GetMapNames(lang)
     local lz = lib.libZone
     if not lz then d("ERROR: Library LibZone must be loaded!") return end
     local zoneIds
+    --Get zone data from LibZone
     if lz.GetAllZoneData then
         zoneIds = lz:GetAllZoneData()
     elseif lz.givenZoneData then
@@ -97,16 +98,28 @@ local function GetMapNames(lang)
     if not zoneIds then d("ERROR: Library LibZone givenZoneData is missing!") return end
     local zoneIdsLocalized = zoneIds[lang]
     if not zoneIdsLocalized then d("ERROR: Language \"" .. tostring(lang) .."\" is not scanned yet in library LibZone") return end
+    --Update new/missing zoneIds
+    if GetNumZones then
+        --Get the number of zoneIndices and create the zoneIds to scan from
+        for zoneIndex=0, GetNumZones(), 1 do
+            local zoneId = GetZoneId(zoneIndex)
+            if zoneId and not zoneIdsLocalized[zoneId] then
+                local zoneName = GetZoneNameByIndex(zoneIndex)
+                if not zoneName or zoneName == "" then zoneName = "n/a" end
+                zoneIdsLocalized[zoneId] = ZO_CachedStrFormat("<<C:1>>", zoneName)
+            end
+        end
+    end
     local mapNames = {}
     for zoneId, zoneNameLocalized in pairs(zoneIdsLocalized) do
-    local mapIndex = GetMapIndexByZoneId(zoneId)
-    --d(">zoneId: " ..tostring(zoneId) .. ", mapIndex: " ..tostring(mapIndex))
-    if mapIndex ~= nil then
-    local mapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(mapIndex))
-    if mapName ~= nil then
-    mapNames[mapIndex] = tostring(mapIndex) .. "|" .. mapName .. "|" .. tostring(zoneId) .. "|" .. zoneNameLocalized
-    end
-    end
+        local mapIndex = GetMapIndexByZoneId(zoneId)
+        --d(">zoneId: " ..tostring(zoneId) .. ", mapIndex: " ..tostring(mapIndex))
+        if mapIndex ~= nil then
+            local mapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(mapIndex))
+            if mapName ~= nil then
+                mapNames[mapIndex] = tostring(mapIndex) .. "|" .. mapName .. "|" .. tostring(zoneId) .. "|" .. zoneNameLocalized
+            end
+        end
     end
     return mapNames
 end
@@ -181,13 +194,28 @@ end
 --Returns a list of the set names in the current client language and saves it to the SavedVars table "setNames" in this format:
 --setNames[setId][clientLanguage] = localizedAndCleanSetNameInClientLanguage
 -->The table LibSets.setItemIds in file LibSets_Data.lua must be updated with all setId and itemIds in order to make this debug function scan ALL actual setIds!
--->Read above the tble for instructions how to update it
+-->Read above the table for instructions how to update it
+--If new sets were scanned using function LibSets.DebugScanAllSetData() beforen using this function here (and there were found new sets which are not already
+--in the table LibSets_Data.lua->LibSets.setItemIds, then the new setIds will be added here and dumped to the SavedVariables as well!
 function lib.DebugGetAllSetNames()
     d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(lib.clientLang))
     --Use the SavedVariables to get the setNames of the current client language
     local svLoadedAlready = false
     local setNamesAdded = 0
     local allSetItemIds = lib.GetAllSetItemIds()
+    if allSetItemIds then
+        --Transfer new scanned setIds with their setItemIds temporarily to the table of the preloaded setItemIds
+        --so looping over this table further down in this function will also add the names of new found sets!
+        if lib.svData and lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] then
+            local scannedSVSetItemIds = lib.svData[LIBSETS_TABLEKEY_SETITEMIDS]
+            for setId, setItemIds in pairs(scannedSVSetItemIds) do
+                if not allSetItemIds[setId] then
+                    allSetItemIds[setId] = setItemIds
+                end
+            end
+        end
+    end
+    --Check the set names now
     local setWasChecked = false
     for setIdToCheck, setsItemIds in pairs(allSetItemIds) do
         setWasChecked = false
@@ -278,8 +306,9 @@ end
 --for x loops (where x is the multiplier number e.g. 40, so 40x5000 itemIds will be scanned for set data)
 --This takes some time and the chat will show information about found sets and item counts during the packages get scanned.
 local function scanAllSetData()
-    local numItemIdPackages = 40       -- Increase this to find new added set itemIds after and update
-    local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
+    local numItemIdPackages     = lib.debugNumItemIdPackages
+    local numItemIdPackageSize  = lib.debugNumItemIdPackageSize
+    if not numItemIdPackages or numItemIdPackages == 0 or not numItemIdPackageSize or numItemIdPackageSize == 0 then return end
     local itemIdsToScanTotal = numItemIdPackages * numItemIdPackageSize
     d(debugOutputStartLine)
     d("[" .. MAJOR .."]Start to load all set data. This could take some minutes to finish!\nWatch the chat output for further information.")
@@ -312,10 +341,10 @@ local function scanAllSetData()
     for _, v in pairs(fromTo) do
         zo_callLater(function()
             loadSetsByIds(v.from,v.to)
-        end, miliseconds)
-        milliseconds = milliseconds + 2000 -- scan item ID packages every 2 seconds to get not kicked/crash the client!
+        end, milliseconds)
+        milliseconds = milliseconds + 1000 -- scan item ID packages every 1 second to get not kicked/crash the client!
     end
-    --Were all item IDs scanned? Show the results list now
+    --Were all item IDs scanned? Show the results list now and update the SavedVariables
     zo_callLater(function()
         showSetCountsScanned(true)
     end, milliseconds + 2000)

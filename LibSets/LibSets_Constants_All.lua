@@ -1,11 +1,32 @@
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets
+
+local APIVersions = {}
+--The actual API version on the live server we are logged in
+APIVersions["live"] = GetAPIVersion()
+
+--The current PTS APIVersion
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+APIVersions["PTS"] = 100029 --Dragonhold
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+lib.APIVersions = APIVersions
+
+--Check if the PTS APIVersion is now live
+local function checkIfPTSAPIVersionIsLive()
+    local APIVersionLive = APIVersions["live"]
+    local APIVersionPTS  = APIVersions["PTS"]
+    return (APIVersionLive >= APIVersionPTS) or false
+end
+
 ------------------------------------------------------------------------------------------------------------------------
 --The last checked API version for the setsData in file LibSets_Data.lua, see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion    = 100028 --Scalebreaker
+lib.lastSetsPreloadedCheckAPIVersion    = 100029 --Scalebreaker
 ------------------------------------------------------------------------------------------------------------------------
 --DLC & Chapter ID constants (for LibSets)
 DLC_BASE_GAME               = 0
@@ -24,6 +45,10 @@ DLC_MURKMIRE                = 12
 DLC_WRATHSTONE              = 13
 DLC_ELSWEYR                 = 14
 DLC_SCALEBREAKER            = 15
+if checkIfPTSAPIVersionIsLive() then
+    DLC_DRAGONHOLD            = 16
+end
+
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
 lib.dlcAndChapterAchievementIds = {
     --Imperial city
@@ -57,6 +82,11 @@ lib.dlcAndChapterAchievementIds = {
     --Scalebreaker
     [DLC_SCALEBREAKER] = 2413,
 }
+if checkIfPTSAPIVersionIsLive() then
+    lib.dlcAndChapterAchievementIds[DLC_DRAGONHOLD] = 2534
+end
+
+
 --Internal achievement example ids of the ESO DLCs and chapters
 local dlcAndChapterAchievementIds = lib.dlcAndChapterAchievementIds
 --For each entry in the list of example achievements above get the name of it's parent category (DLC, chapter)

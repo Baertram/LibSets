@@ -1,4 +1,4 @@
---[========================================================================[
+--[[========================================================================
     This is free and unencumbered software released into the public domain.
 
     Anyone is free to copy, modify, publish, use, compile, sell, or
@@ -23,7 +23,190 @@
     OTHER DEALINGS IN THE SOFTWARE.
 
     For more information, please refer to <http://unlicense.org/>
---]========================================================================]
+========================================================================
+
+========================================================================================================================
+ !!! API VERSION UPDATE - What needs to be scanned and done in this library and the Excel file?                     !!!
+========================================================================================================================
+All the data of this library is handled inside the included excel document LibSets_SetData.xlsx!
+
+If the API version of the game client updates there will be most likely new zones and maps, wayshrines, dungeons and sets
+in the game which needs to be added to the excel and then to these library files.
+
+1) At first check this library's folder if there are any LibSets_Constants_<APIVersion integer>.lua files.
+   If so: Transfer the data of the now "old APIVersion" files to the file LibSets_Constants_All.lua so they will always be loaded in the future.
+   If needed: Create an new file with the current APIversion, e.g. LibSets_Constants_<NEW PTS APIVersion integer>.lua and include the needed
+   data which should only be available if playing on the PTS.
+2) Do the same like described at 1) with files LibSets_Data_<APIVersion integer>.lua files BUT move them to file
+   LibSets_Data_All.lua (and not LibSets_Constants_All.lua!)
+3) Update the txt manifest file LibSets.txt and increase the ## Version, ## AddOnVersion tags, and change the ## APIVersion tag to support the new APIVersion
+   e.g. change 100027 100028 to 100028 100029
+4) To scan the data of the new APIVersion ingame login to the PTS (or live if the new APIversion is already live!) and check teh file LibSets_Debug.lua for the
+   functions to scan the data (multilanguage scans are not automatically supported so you need to change the client language in between manually!).
+   The scanned data will be saved to the SavedVariables filename LibSets.lua in the SavedVariables folder.
+   -> You should use the function LibSets.DebugResetSavedVariables() once before scanning all the new data so the SavedVariables are empty.
+      Do a /reloadui in chat afterwards to write the empty SV file on the harddisk/ssd!
+
+   The table inside the SavedVariables filename LibSets.lua, where all data is saved, is:
+   LibSets_SV_Data =
+    {
+        ["Default"] =
+        {
+            ["$AllAccounts"] =
+            {
+                ["$AccountWide"] = {
+                    --The data is stored here below subtables describing what data is held inside!
+                    [subTableKeyForTheScannedData1] = {},
+                    [subTableKeyForTheScannedData2] = {},
+                    [subTableKeyForTheScannedData3] = {},
+                    [subTableKeyForTheScannedData4] = {},
+                    ...
+                },
+            },
+        },
+    }
+
+   The table keys of the "subTableKeyForTheScannedData1 ... n" tables inside the SavedVariables are constant values defined in the file
+   LibSets_ConstantsLibraryInternal.lua, below the following comment line "--Constants for the table keys of setInfo, setNames etc."
+   e.g. LIBSETS_TABLEKEY_NAMES = "Names"
+   Use the value of these constants to check the appropriate subTable data inside the SavedVariables!
+
+   The debug/scan functions possible are:
+   ---------------------------------------------------------------------------------------------------------------------------------------------
+    Function name (execute with /script in chat)|   Description
+   ---------------------------------------------------------------------------------------------------------------------------------------------
+    LibSets.DebugResetSavedVariables()          |   Reset ALL data in the SavedVariables. Should be run ONCE before new data is scanned!
+
+    LibSets.DebugGetAllZoneInfo()               |   Get all the zone info saved to the SavedVars key constant LIBSETS_TABLEKEY_ZONE_DATA
+
+    LibSets.DebugGetAllMapNames()               |   Get all the map names saved to the SavedVars key constant LIBSETS_TABLEKEY_MAPS
+                                                |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
+                                                |       and then scan the names again with the new client language!
+
+    LibSets.DebugGetAllWayshrineInfo()          |   Get all the wayshrine info saved to the SavedVars key constant LIBSETS_TABLEKEY_WAYSHRINES
+
+    LibSets.DebugGetAllWayshrineNames()         |   Get all the wayshrine names saved to the SavedVars key constant LIBSETS_TABLEKEY_WAYSHRINE_NAMES
+                                                    |-> Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
+                                                |       and then scan the names again with the new client language!
+
+    LibSets.DebugGetDungeonFinderData()         |   Get all the dungeon ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
+
+    LibSets.DebugGetAllCollectibleNames()       |   Get all the collectible ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
+                                                |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
+                                                |       and then scan the names again with the new client language!
+
+    LibSets.DebugScanAllSetData()               |   Get all the set IDs and their item's itemIds saved to the SavedVars key constant LIBSETS_TABLEKEY_SETITEMIDS
+    LibSets.DebugGetAllSetNames()               |   Get all the set names saved to the SavedVars key constant LIBSETS_TABLEKEY_SETNAMES
+                                                |   ->  You need to scan the setIds BEFORE (language independent!) to scan all setnames properly afterwards.
+                                                |       Use the script /script LibSets.DebugScanAllSetData() to do this.
+                                                |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
+                                                |       and then scan the names again with the new client language!
+5) After scanning the data from the game client and updating the SavedVariables file LibSets.lua you got all the data in the following tables now:
+
+LIBSETS_TABLEKEY_SETITEMIDS                     = "setItemIds"
+LIBSETS_TABLEKEY_SETNAMES                       = "set" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_MAPS                           = "maps"
+LIBSETS_TABLEKEY_WAYSHRINES                     = "wayshrines"
+LIBSETS_TABLEKEY_WAYSHRINE_NAMES                = "wayshrine" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_ZONE_DATA                      = "zoneData"
+LIBSETS_TABLEKEY_DUNGEONFINDER_DATA             = "dungeonFinderData"
+LIBSETS_TABLEKEY_COLLECTIBLE_NAMES              = "collectible" .. LIBSETS_TABLEKEY_NAMES
+-> This is only a "suffix" used for the tablekeys: LIBSETS_TABLEKEY_NAMES= "Names"
+
+
+-[ For All entries in the SavedVariables containing these kind of | delimited texts: "[1021] = 1021|625|1011|Soltenure," ]-
+
+Copy the values from the subtables to a text editor e.g. Notepad++ and use regular expressions e.g. to remove the [key] = ..., surroundings:
+Replace \[.*\] = \"(.*)\", with $1 ($1 is the captured value between the () -> (.*)
+This will give you a string like "1021|625|1011|Soltenure"
+
+
+-[ Working with the excel document ]-
+ATTENTION: If the excel map columns contains a forumlar KEEP THIS FORMULA and do NOT OVERWRITE IT!
+Drag&drop down formulas from the rows above to the new rows in order to update all data carefully and correct!
+
+Copy the whole strings to an empty Excel map inside the LibSets_SetData.xlsx file.
+Use the "Split text" function from Excel (menu "Data") to split at the delimiter | into columns.
+Depending on table key (e.g. LIBSETS_TABLEKEY_WAYSHRINES) open the appropriate Excel map (e.g. "ESO wayshrine node constants").
+-> Check the yellow top row of the excel's map to see if the function name used to dump this data matches the function name of the
+   SavedVariables table you are currently taking the data from!
+
+An example dataset unsplit would be:    422|37|1654|Das südliche Elsweyr|719|1133|Das südliche Elsweyr|7|Die Vier-Pfoten-Landung
+An example dataset split would be:      422 37  1654    Das südliche Elsweyr    719 1133    Das südliche Elsweyr    7   Die Vier-Pfoten-Landung
+What column of the split data goes to what column on the excel map?
+-Check the function in file LibSets_Debug.lua used to generate the SV data. For this example this was the function lib.DebugGetAllWayshrineInfo()
+Above this function is described what the values between the | delimiter are:
+--Returns a list of the wayshrine data (nodes) in the current client language and saves it to the SavedVars table "wayshrines" in this format:
+--wayshrines[i] = wayshrineNodeId .."|"..currentMapIndex.."|"..currentMapId.."|"..currentMapNameLocalizedInClientLanguage.."|"
+--..currentMapsZoneIndex.."|"..currentZoneId.."|"..currentZoneNameLocalizedInClientLanguage.."|"..wayshrinesPOIType.."|".. wayshrineNameCleanLocalizedInClientLanguage
+Check the excel map columns now to find the appropriate coilumn for the split data.
+e.g. wayshrineNodeId -> "Wayshrine ESO internal node ID", currentMapIndex -> "ESO internal mapIndex", currentMapId -> "ESO internal mapId", etc.
+
+Place the values from the split columns into the matching fields of this excel map AND ALWAYS CHECK FIRST IF THERE IS A FORUMLAR IN THE COLUMN YOU WANT TO PUT THE DATA IN!
+YOU NEED TO CHECK THIS IN THE ROWs ABOVE THE NEW ROW AS THE NEW ROW MIGHT NOT HAVE A FORMULAR ALREADY APPLIED. YOU NEED TO MANUALLY DRAG&DROP THE FORMULAS DOWN FROM TOPROWS
+TO THE NEW ONES!!! IF THERE IS A FORUMLA BEHIND THIS FIELD DO NOT OVERWRITE THIS FIELD. THE DATA WILL BE LOOED UP FROM ANOTHER EXCEL MAP THEN, AS YOU FILL IN THE DATA THERE.
+
+-[ For the setItemIds ]-
+The setItemIds is a table containing the setId as key and for each setId a subtable containing ALL itemIds of this set.
+There is a lot of entries so we should "minify" the table to strip unneeded spaces and linebreaks.
+Use a lua minifier tool only (e.g. https://mothereff.in/lua-minifier).
+Copy the whole table from the SavedVariables and change the ["setItemIds"] to setItemIds.
+Also remove the last , at the end of the copied text and you should be able to see the results in the "Minified result" box then.
+Copy the minified result box content to your clipboard, and then paste it into the file
+"LibSets_Data_all.lua", into table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]" but strip the "setItemIds=" so that the result will look like this:
+lib.setDataPreloaded = {
+...
+    [LIBSETS_TABLEKEY_SETITEMIDS] = {[19]={[109568]=true,[109569]=true,[109570]=true,[109571]=true,[109572]=true,
+        ...
+    }, --setItemIds
+}, --lib.setDataPreloaded
+
+
+-[ For the setNames ]-
+The setNames is a table containing the setId as key and for each setId a subtable containing ALL itemIds of this set.
+Do the same like described above at "For the setItemIds" but for the "setNames" here.
+
+Copy the minified result box content to your clipboard, and then paste it into the file
+"LibSets_Data_all.lua", into table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]" but strip the "setNames=" so that the result will look like this:
+lib.setDataPreloaded = {
+...
+    [LIBSETS_TABLEKEY_SETNAMES] = {[19]={["fr"]="Les Vêtements du sorcier",["de"]="Gewänder des Hexers",["en"]="Vestments of the Warlock"},
+        ...
+    }, --setNames
+}, --lib.setDataPreloaded
+
+
+-[ For the wayshrineInfo ]-
+After you have updated the "wayshrines" SavedVariables table to the excel document you need to use the created lua code,
+coming from Excel file "LibSets_SetData.xlsx", map "ESO wayshrine node constants" colum P, to the filename "LibSets_Data_All.lua".
+
+Do the same like described above at "For the setItemIds" but for the "wayshrine 2 zone data"
+here (Excel file "LibSets_SetData.xlsx", map "ESO wayshrine node constants", colum P) -> Minify all the column P code.
+Copy the minified result box content to your clipboard, and then paste it into the file
+"LibSets_Data_all.lua", into table "lib.setDataPreloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]" but strip the "setNames=" so that the result will look like this:
+lib.setDataPreloaded = {
+...
+    [LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID] = {[1]=3,[2]=3,[3]=3,[4]=3,[5]=3,[6]=3,[7]=3,
+        ...
+    }, --wayshrine2ZoneId
+}, --lib.setDataPreloaded
+
+
+6) After updating all the set relevant information to the excel file you can have a look at the excel map "Sets data".
+It contains all the data combined from the other excel maps. You need to add new rows for each new set and fill in the new setIds,
+and the data. Be sure to drag&drop down ALL excel formulas from the rows above to the new rows as well!
+
+The new setids are the ones that are, compared to the maximum setId from the existing rows, are higher (newer).
+So check the SavedVariables for their names, and information.
+-Non existing API information like "traits needed to craft" must be checked ingame at the crafting stations or on websites which provide this information already.
+-Wayshrines where the sets can be found/near their crafting station need to be checked on the map and need to be manually entered as well to the data row.
+After all info is updated you can look at the columns AX to BB which provide the generated LUA text for the table entries.
+--> Copy ALL lines of this excel map to the file "LibSets_Data_All.lua" into the table "lib.setInfo"!
+--> New sets which are not known on the live server will automatically be removed as the internal LibSets tables are build (using function "checkIfSetExists(setId)"
+    from file LibSets.lua). So just keep them also in this table "lib.SetInfo"!
+]]
+
+
 LibSets = LibSets or {}
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
@@ -57,6 +240,29 @@ local function checkSet(itemLink)
     local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = GetItemLinkSetInfo(itemLink, false)
     if not isSet then isSet = false end
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
+end
+
+--Function to check if a setId is given for the current APIVersion
+local function checkIfSetExists(setId)
+    if not setId or setId <= 0 then return false end
+    local setDoesExist = false
+    local preloadedSetInfo      = lib.setInfo
+    local preloadedSetItemIds   = preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+    --SetId is not known in preloaded data?
+    if not preloadedSetInfo or not preloadedSetInfo[setId] or not preloadedSetItemIds or not preloadedSetItemIds[setId] then return false end
+    --SetId is knwon in preloaded data: get the first itemId of this setId, build an itemLink, and check if the setId for this itemId exists
+    --by the help of the API function GetItemLinkSetInfo(itemLink)
+    for itemId, isActive in pairs(preloadedSetItemIds[setId]) do
+        if isActive and itemId and itemId > 0 then
+            local itemLink = lib.buildItemLink(itemId)
+            if itemLink and itemLink ~= "" then
+                local isSet, _, _, _, _, _ = checkSet(itemLink)
+                isSet = isSet or false
+                return isSet
+            end
+        end
+    end
+    return setDoesExist
 end
 
 --Todo: Check how many of the itemId items are currently equipped
@@ -128,42 +334,52 @@ local function LoadSets()
     local function checkSetTypeAndUpdateLibTablesAndCounters(setDataTable)
         --Check the setsData and move entries to appropriate table
         for setId, setData in pairs(setDataTable) do
-            --Add the setId to the setIds table
-            lib.setIds[setId] = true
-            --Get the type of set and create the entry for the setId in the appropriate table
-            local refToSetIdTable
-            local setType = setData[LIBSETS_TABLEKEY_SETTYPE]
-            if setType then
-                local internalLibsSetVariableNames = setTypeToLibraryInternalVariableNames[setType]
-                if internalLibsSetVariableNames and internalLibsSetVariableNames["tableName"] then
-                    local internalLibsSetTableName = internalLibsSetVariableNames["tableName"]
-                    local internalLibsSetCounterName = internalLibsSetTableName .. counterSuffix
-                    if lib[internalLibsSetTableName] and lib[internalLibsSetCounterName] then
-                        lib[internalLibsSetTableName][setId] = setData
-                        local counterVarCurrent = lib[internalLibsSetCounterName]
-                        lib[internalLibsSetCounterName] = counterVarCurrent +1
-                        refToSetIdTable = lib[internalLibsSetTableName][setId]
+            --Does this setId exist within the current APIVersion?
+            if checkIfSetExists(setId) then
+                --Add the setId to the setIds table
+                lib.setIds[setId] = true
+                --Get the type of set and create the entry for the setId in the appropriate table
+                local refToSetIdTable
+                local setType = setData[LIBSETS_TABLEKEY_SETTYPE]
+                if setType then
+                    local internalLibsSetVariableNames = setTypeToLibraryInternalVariableNames[setType]
+                    if internalLibsSetVariableNames and internalLibsSetVariableNames["tableName"] then
+                        local internalLibsSetTableName = internalLibsSetVariableNames["tableName"]
+                        local internalLibsSetCounterName = internalLibsSetTableName .. counterSuffix
+                        if lib[internalLibsSetTableName] and lib[internalLibsSetCounterName] then
+                            lib[internalLibsSetTableName][setId] = setData
+                            local counterVarCurrent = lib[internalLibsSetCounterName]
+                            lib[internalLibsSetCounterName] = counterVarCurrent +1
+                            refToSetIdTable = lib[internalLibsSetTableName][setId]
+                        end
                     end
                 end
-            end
-            --Store all other data to the set's table
-            if refToSetIdTable ~= nil then
-                --Get the itemIds stored for the setId and add them to the set's ["itemIds"] table
-                local itemIds = preloadedItemIds[setId]
-                if itemIds == nil then
-                    itemIds = preloadedNonESOsetIdItemIds[setId]
+                --Store all other data to the set's table
+                if refToSetIdTable ~= nil then
+                    --Get the itemIds stored for the setId and add them to the set's ["itemIds"] table
+                    local itemIds = preloadedItemIds[setId]
+                    if itemIds == nil then
+                        itemIds = preloadedNonESOsetIdItemIds[setId]
+                    end
+                    if itemIds ~= nil then
+                        refToSetIdTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds
+                    end
+                    --Get the names stored for the setId and add them to the set's ["names"] table
+                    local setNames = preloadedSetNames[setId]
+                    if setNames == nil then
+                        setNames = preloadedNonESOsetIdSetNames[setId]
+                    end
+                    if setNames ~= nil then
+                        refToSetIdTable[LIBSETS_TABLEKEY_SETNAMES] = setNames
+                    end
                 end
-                if itemIds ~= nil then
-                    refToSetIdTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds
-                end
-                --Get the names stored for the setId and add them to the set's ["names"] table
-                local setNames = preloadedSetNames[setId]
-                if setNames == nil then
-                    setNames = preloadedNonESOsetIdSetNames[setId]
-                end
-                if setNames ~= nil then
-                    refToSetIdTable[LIBSETS_TABLEKEY_SETNAMES] = setNames
-                end
+            else
+                --Set does not exist, so remove it from the setInfo table and all other "preloaded" tables as well
+                setInfo[setId] = nil
+                preloadedItemIds[setId] = nil
+                preloadedNonESOsetIdItemIds[setId] = nil
+                preloadedSetNames[setId] = nil
+                preloadedNonESOsetIdSetNames[setId] = nil
             end
         end
     end
@@ -1073,14 +1289,14 @@ local function OnLibraryLoaded(event, name)
     --Only load lib if ingame
     if name ~= MAJOR then return end
     EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
-    lib.setsLoaded = falsez
+    lib.setsLoaded = false
     --The actual clients language
     lib.clientLang = GetCVar("language.2")
     if not lib.supportedLanguages[lib.clientLang] then
         lib.clientLang = "en" --Fallback language if client language is not supported: English
     end
     --The actual API version
-    lib.currentAPIVersion = GetAPIVersion()
+    lib.currentAPIVersion = (lib.APIVersions and lib.APIVersions["live"]) or GetAPIVersion()
     --Get the different setTypes from the "all sets table" setInfo in file LibSets_Data.lua and put them in their
     --own tables
     LoadSets()
