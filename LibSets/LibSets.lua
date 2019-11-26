@@ -639,17 +639,19 @@ function lib.IsVeteranSet(setId, itemLink)
 		local setData = setInfo[setId] or noSetIdSets[setId]
 		if setData then
 			local veteranData = setData.veteran
-			if veteranData and type(veteranData) == "table" then
-				local equipType = GetItemLinkEquipType(itemLink)
-				if equipType then
-					for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
-						if equipTypeVeteranCheck == equipType then
-							isVeteranSet = isVeteran
+			if veteranData then
+				if type(veteranData) == "table" then
+					local equipType = GetItemLinkEquipType(itemLink)
+					if equipType then
+						for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
+							if equipTypeVeteranCheck == equipType then
+								isVeteranSet = isVeteran
+							end
 						end
 					end
+				else
+					isVeteranSet = veteranData
 				end
-			elseif veteranData then
-				isVeteranSet = veteranData
 			end
 		end
 	end
