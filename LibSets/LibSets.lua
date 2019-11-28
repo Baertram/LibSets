@@ -633,35 +633,29 @@ end
 -->                              against these.
 --> Returns:    isVeteranSet boolean
 function lib.IsVeteranSet(setId, itemLink)
-    if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
-    local isVeteranSet = false
-    local setData = setInfo[setId]
-    if setData == nil then
-        if lib.IsNoESOSet(setId) then
-            setData = noSetIdSets[setId]
-        else
-            return
-        end
-    end
-    if setData == nil then return end
-    local veteranData = setData.veteran
-    if veteranData == nil then return false end
-    if type(veteranData) == "table" then
-        if itemLink == nil then return nil end
-        local equipType = GetItemLinkEquipType(itemLink)
-        if equipType == nil then return nil end
-        --veteran={EQUIP_TYPE_HEAD=true, EQUIP_TYPE_SHOULDERS=false}
-        for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
-            if equipTypeVeteranCheck == equipType then
-                return isVeteran
-            end
-        end
-        return false
-    else
-        isVeteranSet = veteranData or false
-    end
-    return isVeteranSet
+	if not lib.checkIfSetsAreLoadedProperly() then return false end
+	local isVeteranSet = false
+	if setId and itemLink then
+		local setData = setInfo[setId] or noSetIdSets[setId]
+		if setData then
+			local veteranData = setData.veteran
+			if veteranData then
+				if type(veteranData) == "table" then
+					local equipType = GetItemLinkEquipType(itemLink)
+					if equipType then
+						for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
+							if equipTypeVeteranCheck == equipType then
+								isVeteranSet = isVeteran
+							end
+						end
+					end
+				else
+					isVeteranSet = veteranData
+				end
+			end
+		end
+	end
+	return isVeteranSet
 end
 
 
