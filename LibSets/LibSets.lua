@@ -645,7 +645,7 @@ function lib.IsVeteranSet(setId, itemLink)
 					if equipType then
 						for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
 							if equipTypeVeteranCheck == equipType then
-								isVeteranSet = isVeteran
+								return isVeteran
 							end
 						end
 					end

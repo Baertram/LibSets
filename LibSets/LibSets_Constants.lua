@@ -1,16 +1,17 @@
+--Library base values
+local MAJOR, MINOR = "LibSets", 0.12
+
 --Check if the library was loaded before already
-assert(LibSets == nil, "[LibSets]Library was loaded before already!")
+assert(LibSets == nil, "[" .. tostring(MAJOR) .. "]Library was loaded before already!")
 
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets
 ------------------------------------------------------------------------------------------------------------------------
---Library base values
-local MAJOR, MINOR = "LibSets", 0.10
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.10
+lib.svVersion       = 0.12
 lib.setsLoaded      = false
 lib.setsScanning    = false
 ------------------------------------------------------------------------------------------------------------------------
