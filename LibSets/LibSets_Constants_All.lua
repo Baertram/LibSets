@@ -10,7 +10,7 @@ APIVersions["live"] = GetAPIVersion()
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-APIVersions["PTS"] = 100029 --Dragonhold
+APIVersions["PTS"] = 100030 --Greymoor (Dark heart of Skyrim)
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 lib.APIVersions = APIVersions
@@ -45,8 +45,9 @@ DLC_MURKMIRE                = 12
 DLC_WRATHSTONE              = 13
 DLC_ELSWEYR                 = 14
 DLC_SCALEBREAKER            = 15
+DLC_DRAGONHOLD              = 16
 if checkIfPTSAPIVersionIsLive() then
-    DLC_DRAGONHOLD            = 16
+    DLC_GREYMOOR            = 17
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
@@ -81,9 +82,11 @@ lib.dlcAndChapterAchievementIds = {
     [DLC_ELSWEYR] = 2463,
     --Scalebreaker
     [DLC_SCALEBREAKER] = 2413,
+    --Dragonhold
+    [DLC_DRAGONHOLD] = 2534
 }
 if checkIfPTSAPIVersionIsLive() then
-    lib.dlcAndChapterAchievementIds[DLC_DRAGONHOLD] = 2534
+    lib.dlcAndChapterAchievementIds[DLC_GREYMOOR] = 0 -- TODO
 end
 
 

@@ -418,7 +418,7 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = {}
         lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
-        d("->Stored " .. tostring(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_DUNGEONFINDER_DATA .. "\', language: \'" ..tostring(lib.clientLang).."\'")
+        d("->Stored " .. tostring(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_DUNGEONFINDER_DATA .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     else
         d("<No dungeon data was found!")
     end
@@ -446,7 +446,7 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = {}
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = collectibleDataScanned
-        d("->Stored " .. tostring(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'")
+        d("->Stored " .. tostring(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     end
 end
 
@@ -460,5 +460,76 @@ function lib.DebugResetSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
     lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
     lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
+    lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
     d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'. Please do a /reloadui or logout to update the SavedVariables data now!")
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- MIXING NEW SET NAMES INTO THE PRELOADED DATA
+-- Put other language setNames here in the variable called "otherLangSetNames" below a table key representing the language
+-- you want to "mix" into the LibSets_Data_All.lua file's table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]" (e.g. ["jp"])
+------------------------------------------------------------------------------------------------------------------------
+local otherLangSetNames={
+    --Example
+    --["jp"] = {[19]={["jp"]="妖術師の法衣"},[20]={["jp"]="魔法使いの鎧"},[21]={["jp"]="アカヴィリのドラゴンガード"},}}
+}
+--Manual tasks before
+--1. Add a new subtable above to table "otherLangSetNames" where the key is the language you want to add e.g. ["jp"]
+--2. Add a new subtable to this new key containing the [setId] as key and the setName String as value
+-- Example:  ["jp"] = { [19]={["jp"]="妖術師の法衣"},[20]={["jp"]="魔法使いの鎧"},[21]={["jp"]="アカヴィリのドラゴンガード"}, ... },
+
+--Run the function LibSets.buildMixedSetNamesForDataAll() (see below) ingame to:
+--3. Get the existing data of table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] from file "LibSets_Data_All.lua"
+--4. Let it parse the table otherLangSetNames above
+--5. For each language detected update the table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] with the (new) entries of the language above
+--6. Dump the table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] to the SavedVariables of LibSets, with the key "MixedSetNamesForDataAll"
+
+--Manual tasks afterwards
+--7. You need to logout then and copy the SavedVariables table "MixedSetNamesForDataAll"
+--8. Use a lua minifier to shrink the code, e.g. https://mothereff.in/lua-minifier
+--9* Put the shrinked lua table contents in the preloaded data table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] in file "LibSets_Data_All.lua"
+--   Now all new/ changed entries should be in there, old ones + the ones from table "otherLangSetNames" above!
+--11. Delete the contents of table "otherLangSetNames" above in this file "LibSets_Debug.lua" again
+function lib.buildMixedSetNamesForDataAll()
+    d("[" .. MAJOR .."]Start to combine entries from table \'otherLangSetNames\' in file \'LibSets_Debug.lua\' into table \'LibSets.setDataPreloaded["..LIBSETS_TABLEKEY_SETNAMES.."]\'")
+    --SavedVariables table key: LIBSETS_TABLEKEY_MIXED_SETNAMES
+    if not otherLangSetNames then return end
+    if not lib.setDataPreloaded then return end
+    local preloadedSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
+    if not preloadedSetNames then return end
+    local copyOfPreloadedSetNames = ZO_DeepTableCopy(preloadedSetNames)
+    if not copyOfPreloadedSetNames then return end
+    local setIdsFound = 0
+    local setIdsChanged = 0
+    local languagesCombinedStr = ""
+    --Each language which needs to be combined from otherLangSetNames into lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
+    for lang, langDataToCombine in pairs(otherLangSetNames) do
+        if languagesCombinedStr == "" then languagesCombinedStr = lang
+        else languagesCombinedStr = languagesCombinedStr .. " ," .. lang end
+        --Each setId which needs to be combined from otherLangSetNames[lang] into lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
+        for setId, setDataToCombine  in pairs(langDataToCombine) do
+            setIdsFound = setIdsFound + 1
+            --Does a subtable entry in otherLangSetNames exist with the same language as key which should be updated?
+            local setDataToCombineForLangKey = setDataToCombine[lang]
+            if setDataToCombineForLangKey and setDataToCombineForLangKey ~= "" then
+                --Use exisitng or create setId in the new table for the SavedVariables
+                copyOfPreloadedSetNames[setId] = copyOfPreloadedSetNames[setId] or {}
+                --Use exisitng or create lang subtable in the new setId table entry for the SavedVariables
+                copyOfPreloadedSetNames[setId][lang] = copyOfPreloadedSetNames[setId][lang] or {}
+                copyOfPreloadedSetNames[setId][lang] = setDataToCombineForLangKey
+                setIdsChanged = setIdsChanged + 1
+            end
+        end
+    end
+    --Update the SavedVariables now
+    if setIdsChanged > 0 then
+        d("<Updated the setNames of " ..tostring(setIdsChanged).. "/" .. tostring(setIdsFound) .." with the following languages: " ..tostring(languagesCombinedStr))
+        LoadSavedVariables()
+        --Reset the combined setNames table in the SavedVariables
+        lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = {}
+        lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = copyOfPreloadedSetNames
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MIXED_SETNAMES.."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
+    else
+        d("<Update of setNames for the following languages "..tostring(languagesCombinedStr).." finished without needed changes!")
+    end
 end
