@@ -10,7 +10,7 @@ APIVersions["live"] = GetAPIVersion()
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-APIVersions["PTS"] = 100030 --Greymoor (Dark heart of Skyrim)
+APIVersions["PTS"] = 100030 --Harrowstorm (Dark heart of Skyrim)
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 lib.APIVersions = APIVersions
@@ -23,10 +23,10 @@ local function checkIfPTSAPIVersionIsLive()
 end
 
 ------------------------------------------------------------------------------------------------------------------------
---The last checked API version for the setsData in file LibSets_Data.lua, see table "lib.setDataPreloaded = { ..."
+--The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion    = 100029 --Scalebreaker
+lib.lastSetsPreloadedCheckAPIVersion = 100029 --Dragonhold
 ------------------------------------------------------------------------------------------------------------------------
 --DLC & Chapter ID constants (for LibSets)
 DLC_BASE_GAME               = 0
@@ -47,7 +47,8 @@ DLC_ELSWEYR                 = 14
 DLC_SCALEBREAKER            = 15
 DLC_DRAGONHOLD              = 16
 if checkIfPTSAPIVersionIsLive() then
-    DLC_GREYMOOR            = 17
+    DLC_HARROWSTORM         = 17
+    DLC_GREYMOOR            = 18
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
@@ -86,7 +87,8 @@ lib.dlcAndChapterAchievementIds = {
     [DLC_DRAGONHOLD] = 2534
 }
 if checkIfPTSAPIVersionIsLive() then
-    lib.dlcAndChapterAchievementIds[DLC_GREYMOOR] = 0 -- TODO
+    lib.dlcAndChapterAchievementIds[DLC_HARROWSTORM]    = 0 -- TODO
+    lib.dlcAndChapterAchievementIds[DLC_GREYMOOR]       = 0 -- TODO
 end
 
 
