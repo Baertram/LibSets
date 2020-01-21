@@ -397,15 +397,24 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
     dungeonFinderIndex = dungeonFinderIndex or 3
     local dungeonFinder = DUNGEON_FINDER_KEYBOARD
     retTableDungeons = nil
+    local dungeonsAddedNormal = 0
+    local dungeonsAddedVet = 0
     local dungeonsAdded = 0
     if dungeonFinder and dungeonFinder.navigationTree and dungeonFinder.navigationTree.rootNode then
         local dfRootNode = dungeonFinder.navigationTree.rootNode
         if dfRootNode.children then
             if dungeonFinderIndex == 3 then
+                --Normal
                 local dungeonsData = dfRootNode.children[1]
-                getDungeonFinderDataFromChildNodes(dungeonsData)
+                if dungeonsData ~= nil then
+                    dungeonsAddedNormal = getDungeonFinderDataFromChildNodes(dungeonsData)
+                end
+                --Veteran (if already given for the char)
                 dungeonsData = dfRootNode.children[2]
-                dungeonsAdded = getDungeonFinderDataFromChildNodes(dungeonsData)
+                if dungeonsData ~= nil then
+                    dungeonsAddedVet = getDungeonFinderDataFromChildNodes(dungeonsData)
+                end
+                dungeonsAdded = dungeonsAddedNormal + dungeonsAddedVet
             else
                 local dungeonsData = dfRootNode.children[dungeonFinderIndex]
                 dungeonsAdded = getDungeonFinderDataFromChildNodes(dungeonsData)
@@ -450,6 +459,15 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
     end
 end
 
+--Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
+function lib.DebugGetAllNames()
+    lib.DebugGetAllCollectibleNames()
+    lib.DebugGetAllMapNames()
+    lib.DebugGetAllSetNames()
+    lib.DebugGetAllWayshrineNames()
+    lib.DebugGetAllZoneInfo()
+end
+
 --This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
 function lib.DebugResetSavedVariables()
     LoadSavedVariables()
@@ -471,14 +489,17 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 local otherLangSetNames={
     --Example
-    --["jp"] = {[19]={["jp"]="妖術師の法衣"},[20]={["jp"]="魔法使いの鎧"},[21]={["jp"]="アカヴィリのドラゴンガード"},}}
+    --["jp"] = {[19]={["jp"]="妖術師の法衣"},[20]={["jp"]="魔法使いの鎧"},[21]={["jp"]="アカヴィリのドラゴンガード"},...}
+    --Last updated: API 100029 Scalebreaker -> Provided by esoui user Calamath 2020-01-18
+    --Uncomment the table below to activate it!
+    --["jp"] = {[19]={["jp"]="妖術師の法衣"},[20]={["jp"]="魔法使いの鎧"},[21]={["jp"]="アカヴィリのドラゴンガード"},[22]={["jp"]="夢見人のマント"},[23]={["jp"]="射手の精神"},[24]={["jp"]="歩兵の幸運"},[25]={["jp"]="砂漠バラ"},[26]={["jp"]="囚人のぼろ服"},[27]={["jp"]="フィヨルドの遺産"},[28]={["jp"]="バークスキン"},[29]={["jp"]="軍曹の鎧"},[30]={["jp"]="サンダーバグの甲殻"},[31]={["jp"]="太陽の絹服"},[32]={["jp"]="治癒師の衣服"},[33]={["jp"]="毒蛇の針"},[34]={["jp"]="夜母の抱擁"},[35]={["jp"]="ナイト・メア"},[36]={["jp"]="ベールの継承者の鎧"},[37]={["jp"]="死を招く風"},[38]={["jp"]="黄昏の抱擁"},[39]={["jp"]="アレッシア教団"},[40]={["jp"]="寂夜"},[41]={["jp"]="ホワイトストレークの報復"},[43]={["jp"]="誘惑者の武具"},[44]={["jp"]="吸血鬼の口づけ"},[46]={["jp"]="高貴なる決闘者の衣装"},[47]={["jp"]="ウィサード・ハンドのローブ"},[48]={["jp"]="マグナスの贈物"},[49]={["jp"]="レッドマウンテンの影"},[50]={["jp"]="モラグ・トング"},[51]={["jp"]="夜母の注視"},[52]={["jp"]="誘引の鋼"},[53]={["jp"]="氷炉"},[54]={["jp"]="青白い柄"},[55]={["jp"]="祈りのショール"},[56]={["jp"]="ステンダールの抱擁"},[57]={["jp"]="シラベインの捕縛"},[58]={["jp"]="ウェアウルフの皮"},[59]={["jp"]="カイネの口づけ"},[60]={["jp"]="闇歩み"},[61]={["jp"]="ドゥルー王殺し"},[62]={["jp"]="幼虫の殻"},[63]={["jp"]="ジャガーノート"},[64]={["jp"]="シャドウダンサーの衣服"},[65]={["jp"]="ブラッドソーンの接触"},[66]={["jp"]="ヒストのローブ"},[67]={["jp"]="影の歩き手"},[68]={["jp"]="ステュクス"},[69]={["jp"]="レンジャーの足どり"},[70]={["jp"]="第七軍団のブルート"},[71]={["jp"]="デュロクの破滅"},[72]={["jp"]="ニクラスの重装鎧"},[73]={["jp"]="反オブリビオン"},[74]={["jp"]="霊なる瞳"},[75]={["jp"]="トラグパクト"},[76]={["jp"]="変性術師の衣服"},[77]={["jp"]="聖戦士"},[78]={["jp"]="ヒスト樹皮"},[79]={["jp"]="ウィロー路"},[80]={["jp"]="怒れるフンディング"},[81]={["jp"]="ラマエ歌"},[82]={["jp"]="アレッシア守護"},[83]={["jp"]="エルフ殺し"},[84]={["jp"]="オルグヌム鱗"},[85]={["jp"]="アルマレクシアの慈愛"},[86]={["jp"]="女王の雅"},[87]={["jp"]="マーラの目"},[88]={["jp"]="熟練なる破壊術のローブ"},[89]={["jp"]="哨戒兵"},[90]={["jp"]="センチの牙"},[91]={["jp"]="オブリビオンの刃"},[92]={["jp"]="カグレナクの希望"},[93]={["jp"]="ストームナイトの防具"},[94]={["jp"]="メリディアの祝福の武具"},[95]={["jp"]="呪えしシャリドール"},[96]={["jp"]="真実の鎧"},[97]={["jp"]="アークメイジ"},[98]={["jp"]="ネクロポーテンス"},[99]={["jp"]="救済"},[100]={["jp"]="ホークアイ"},[101]={["jp"]="感染者"},[102]={["jp"]="デューンリッパーの鱗"},[103]={["jp"]="マジカ炉"},[104]={["jp"]="呪いを喰らう者"},[105]={["jp"]="双子姉妹"},[106]={["jp"]="さまよえる女王のアーチ"},[107]={["jp"]="ウィルドの樹の祝福"},[108]={["jp"]="破壊者"},[109]={["jp"]="シロディールの光"},[110]={["jp"]="聖域"},[111]={["jp"]="シロディールの結界"},[112]={["jp"]="夜の恐怖"},[113]={["jp"]="シロディールの頂飾"},[114]={["jp"]="魂の輝き"},[116]={["jp"]="破壊の一組"},[117]={["jp"]="医薬師アンスールの遺物"},[118]={["jp"]="アースフォージの宝物"},[119]={["jp"]="反乱の遺物"},[120]={["jp"]="インファーナンスの武具"},[121]={["jp"]="先人の武器"},[122]={["jp"]="黒檀の武具"},[123]={["jp"]="ハーシーンの虚飾"},[124]={["jp"]="虫の教団装備"},[125]={["jp"]="帝国の憤怒"},[126]={["jp"]="古代の恩寵"},[127]={["jp"]="致死の一撃"},[128]={["jp"]="最高顧問の加護"},[129]={["jp"]="復讐の吸血"},[130]={["jp"]="鷲の目"},[131]={["jp"]="防衛のハートランド"},[132]={["jp"]="守護のバリアント"},[133]={["jp"]="防護のスイフト"},[134]={["jp"]="リッチの覆い"},[135]={["jp"]="ドラウグルの遺産"},[136]={["jp"]="不死身の戦士"},[137]={["jp"]="凶暴な戦士"},[138]={["jp"]="守護の戦士"},[139]={["jp"]="博学の魔術師"},[140]={["jp"]="破壊の魔術師"},[141]={["jp"]="治癒の魔術師"},[142]={["jp"]="素早さの大蛇"},[143]={["jp"]="毒の大蛇"},[144]={["jp"]="双牙蛇"},[145]={["jp"]="炎の流儀"},[146]={["jp"]="大気の流儀"},[147]={["jp"]="武術知識の道"},[148]={["jp"]="アリーナの流儀"},[155]={["jp"]="アンドーンテッド砦"},[156]={["jp"]="アンドーンテッドの潜入者"},[157]={["jp"]="アンドーンテッドのほころびた装備"},[158]={["jp"]="エンバーシールド"},[159]={["jp"]="サンダーフレイム"},[160]={["jp"]="炎上するスペルウィーブ"},[161]={["jp"]="双子星"},[162]={["jp"]="メファーラの落とし子"},[163]={["jp"]="ブラッドスポーン"},[164]={["jp"]="看守長"},[165]={["jp"]="スカージの収穫者"},[166]={["jp"]="エンジンのガーディアン"},[167]={["jp"]="夜の炎"},[168]={["jp"]="ネリエンエス"},[169]={["jp"]="ヴァルキン・スコリア"},[170]={["jp"]="業火のモー"},[171]={["jp"]="不滅の戦士"},[172]={["jp"]="完全なる魔術師"},[173]={["jp"]="残忍な大蛇"},[176]={["jp"]="大親征"},[177]={["jp"]="再分配"},[178]={["jp"]="鎧匠"},[179]={["jp"]="ブラックローズ"},[180]={["jp"]="強襲者"},[181]={["jp"]="勲功"},[183]={["jp"]="モラグ・キーナ"},[184]={["jp"]="帝国の印"},[185]={["jp"]="呪文攻撃治癒"},[186]={["jp"]="大揺れの武具"},[187]={["jp"]="沼の襲撃者"},[188]={["jp"]="嵐マスター"},[190]={["jp"]="辛辣な魔術師"},[193]={["jp"]="圧倒するサージ"},[194]={["jp"]="戦闘医薬師"},[195]={["jp"]="純粋な毒"},[196]={["jp"]="吸血プレート"},[197]={["jp"]="拷問者"},[198]={["jp"]="エキス盗賊"},[199]={["jp"]="シールドブレイカー"},[200]={["jp"]="不死鳥"},[201]={["jp"]="反応型鎧"},[204]={["jp"]="持久力"},[205]={["jp"]="意志"},[206]={["jp"]="俊敏"},[207]={["jp"]="ジュリアノスの掟"},[208]={["jp"]="炎の試練"},[209]={["jp"]="掟の鎧"},[210]={["jp"]="追放者の印"},[211]={["jp"]="永久凍土層"},[212]={["jp"]="ブライア・ハート"},[213]={["jp"]="栄光の守り手"},[214]={["jp"]="パラベルム"},[215]={["jp"]="継承の属性"},[216]={["jp"]="狩猟の先導者"},[217]={["jp"]="ウィンターボーン"},[218]={["jp"]="トリニマクの武勇"},[219]={["jp"]="モークルディン"},[224]={["jp"]="ターヴァの寵"},[225]={["jp"]="賢明な錬金術師"},[226]={["jp"]="エターナルハント"},[227]={["jp"]="バーラハの呪い"},[228]={["jp"]="シヴァラの鱗"},[229]={["jp"]="黄昏なる救済"},[230]={["jp"]="ムーンダンサー"},[231]={["jp"]="月の砦"},[232]={["jp"]="アルコシュの咆哮"},[234]={["jp"]="射手の頂飾"},[235]={["jp"]="変化の武具"},[236]={["jp"]="残忍な死"},[237]={["jp"]="レキのフォーカス"},[238]={["jp"]="ファサラの策謀"},[239]={["jp"]="戦士の激昂"},[240]={["jp"]="クヴァッチ剣闘士"},[241]={["jp"]="ヴァレンレガシー"},[242]={["jp"]="ペリナルの適性"},[243]={["jp"]="モリハウスの皮"},[244]={["jp"]="奇襲攻撃の戦略家"},[245]={["jp"]="シシスの接触"},[246]={["jp"]="ガレリオンの復讐"},[247]={["jp"]="バイスカノンの毒"},[248]={["jp"]="導き手の力"},[253]={["jp"]="インペリアルフィジカル"},[256]={["jp"]="強きチュダン"},[257]={["jp"]="ヴェリドレス"},[258]={["jp"]="琥珀のプラズム"},[259]={["jp"]="ヘーム・ジャスの報復"},[260]={["jp"]="マザッタンの姿"},[261]={["jp"]="流れ糸"},[262]={["jp"]="ウィドウメーカー"},[263]={["jp"]="メファーラの手"},[264]={["jp"]="ジャイアントスパイダー"},[265]={["jp"]="シャドウレンド"},[266]={["jp"]="クラグ"},[267]={["jp"]="スワームマザー"},[268]={["jp"]="ルクガムズの守衛"},[269]={["jp"]="チョークソーン"},[270]={["jp"]="スライムクロー"},[271]={["jp"]="セリストリクス"},[272]={["jp"]="業火のガーディアン"},[273]={["jp"]="イランブリス"},[274]={["jp"]="アイスハート"},[275]={["jp"]="ストームフィスト"},[276]={["jp"]="トレモルスケール"},[277]={["jp"]="海賊スケルトン"},[278]={["jp"]="トロールキング"},[279]={["jp"]="セレーン"},[280]={["jp"]="グロスダール"},[281]={["jp"]="訓練生の鎧"},[282]={["jp"]="吸血鬼のクローク"},[283]={["jp"]="ソードシンガー"},[284]={["jp"]="ダイアグナ騎士団"},[285]={["jp"]="吸血鬼の王"},[286]={["jp"]="スプリガンのいばら"},[287]={["jp"]="グリーンパクト"},[288]={["jp"]="養蜂家の装備"},[289]={["jp"]="紡ぎ手の衣服"},[290]={["jp"]="スクゥーマ密売人"},[291]={["jp"]="ショークの外骨格"},[292]={["jp"]="母の悲しみ"},[293]={["jp"]="疫病医"},[294]={["jp"]="イスグラモルの生得権"},[295]={["jp"]="牢破り"},[296]={["jp"]="スペランカー"},[297]={["jp"]="クモの教団信者の頭巾"},[298]={["jp"]="光の代弁者"},[299]={["jp"]="トゥースロウ"},[300]={["jp"]="ネッチの接触"},[301]={["jp"]="オートマトンの力"},[302]={["jp"]="リヴァイアサン"},[303]={["jp"]="ラミアの歌"},[304]={["jp"]="メドゥーサ"},[305]={["jp"]="トレジャーハンター"},[307]={["jp"]="ドラウグル・ハルキング"},[308]={["jp"]="骨の海賊のボロ"},[309]={["jp"]="遍歴の騎士の鎧"},[310]={["jp"]="ソードダンサー"},[311]={["jp"]="ラトルケージ"},[313]={["jp"]="大切断"},[314]={["jp"]="穿刺回復"},[315]={["jp"]="ひりつく斬撃"},[316]={["jp"]="腐食の矢"},[317]={["jp"]="破壊の衝撃"},[318]={["jp"]="大いなる再生"},[320]={["jp"]="戦乙女"},[321]={["jp"]="冒涜者"},[322]={["jp"]="戦詩人"},[323]={["jp"]="アサシンの幻惑"},[324]={["jp"]="デイドラの策略"},[325]={["jp"]="シャックルブレイカー"},[326]={["jp"]="挑む先遣隊"},[327]={["jp"]="臆病な歯車"},[328]={["jp"]="騎士殺し"},[329]={["jp"]="魔術師カウンター"},[330]={["jp"]="自律防御"},[331]={["jp"]="ウォーマシン"},[332]={["jp"]="匠の技"},[333]={["jp"]="発明家の守り"},[334]={["jp"]="非貫通アーマー"},[335]={["jp"]="ドラウグルズレスト"},[336]={["jp"]="ニルンの柱"},[337]={["jp"]="アイアンブラッド"},[338]={["jp"]="炎の花"},[339]={["jp"]="ブラッドドリンカー"},[340]={["jp"]="ハグレイヴン庭園"},[341]={["jp"]="アースゴア"},[342]={["jp"]="ドミーハウス"},[343]={["jp"]="カルウリオンの遺産"},[344]={["jp"]="活力の証"},[345]={["jp"]="ウルフノールの加護"},[346]={["jp"]="ジョルバルドの導き"},[347]={["jp"]="疫病の運び手"},[348]={["jp"]="ドイルミッシュの呪い"},[349]={["jp"]="サーヴォクン"},[350]={["jp"]="ザーン"},[351]={["jp"]="内在公理"},[352]={["jp"]="強化真鍮"},[353]={["jp"]="機械的精度"},[354]={["jp"]="狂気の鋳掛屋"},[355]={["jp"]="深淵の暗黒"},[356]={["jp"]="ライブワイヤー"},[357]={["jp"]="熟練したスラッシュ(完全)"},[358]={["jp"]="防御姿勢(完全)"},[359]={["jp"]="混沌の旋風(完全)"},[360]={["jp"]="貫通散布(完全)"},[361]={["jp"]="集中フォース(完全)"},[362]={["jp"]="朽ちぬ祝福(完全)"},[363]={["jp"]="熟練したスラッシュ"},[364]={["jp"]="防御姿勢"},[365]={["jp"]="混沌の旋風"},[366]={["jp"]="貫通散布"},[367]={["jp"]="集中フォース"},[368]={["jp"]="朽ちぬ祝福"},[369]={["jp"]="無慈悲なチャージ"},[370]={["jp"]="ランペイジスラッシュ"},[371]={["jp"]="冷酷な猛攻"},[372]={["jp"]="斉射(雷)"},[373]={["jp"]="壁破壊"},[374]={["jp"]="精密再生"},[380]={["jp"]="預言者"},[381]={["jp"]="壊れた魂"},[382]={["jp"]="闇の気品"},[383]={["jp"]="グリフォンの獰猛"},[384]={["jp"]="ヴァヌスの叡智"},[385]={["jp"]="熟練騎手"},[386]={["jp"]="スロードの装い"},[387]={["jp"]="ノクターナルの寵愛"},[388]={["jp"]="ガレンウェの盾"},[389]={["jp"]="レレクエンの腕"},[390]={["jp"]="シロリアのマント"},[391]={["jp"]="オロライムのベスト"},[392]={["jp"]="ガレンウェの完璧な盾"},[393]={["jp"]="レレクエンの完璧な武器"},[394]={["jp"]="シロリアの完璧なマント"},[395]={["jp"]="オロライムの完璧なベスト"},[397]={["jp"]="バローグ"},[398]={["jp"]="ヴィコサ"},[399]={["jp"]="ハヌの慈悲"},[400]={["jp"]="血の月"},[401]={["jp"]="ウルサスの避難所"},[402]={["jp"]="月狩人"},[403]={["jp"]="獰猛なウェアウルフ"},[404]={["jp"]="看守の執念"},[405]={["jp"]="ブライトスロートの自慢"},[406]={["jp"]="デッドウォーターの奸智"},[407]={["jp"]="ヒストの勇者"},[408]={["jp"]="墓標コレクター"},[409]={["jp"]="ナガ呪術師"},[410]={["jp"]="失われた軍団の力"},[411]={["jp"]="勇士の突撃"},[412]={["jp"]="放射アッパーカット"},[413]={["jp"]="形なきクローク"},[414]={["jp"]="有毒ショット"},[415]={["jp"]="激しい衝撃"},[416]={["jp"]="癒し手の結界"},[417]={["jp"]="不屈の激昂"},[418]={["jp"]="魔法戦略家"},[419]={["jp"]="戦場アクロバット"},[420]={["jp"]="苦痛の戦士"},[421]={["jp"]="頑強な英雄"},[422]={["jp"]="大隊の守り手"},[423]={["jp"]="完全な勇士の突撃"},[424]={["jp"]="完全な放射アッパーカット"},[425]={["jp"]="完全な形なきクローク"},[426]={["jp"]="完全な有毒ショット"},[427]={["jp"]="完全な衝撃"},[428]={["jp"]="完全な癒し手の結界"},[429]={["jp"]="強き氷河"},[430]={["jp"]="ツォグヴィンの軍団"},[431]={["jp"]="氷の召喚士"},[432]={["jp"]="石の番人"},[433]={["jp"]="凍った監視人"},[434]={["jp"]="スカベンジングの殺到"},[435]={["jp"]="オーロランの雷"},[436]={["jp"]="シンフォニー・オブ・ブレイズ"},[437]={["jp"]="コールドハーバーの流行"},[438]={["jp"]="センチラートの底力"},[439]={["jp"]="ヴァスタリーの教え"},[440]={["jp"]="狡猾なるアルフィク"},[441]={["jp"]="ダルロック・ブレイの礼装"},[442]={["jp"]="墓堀の呼び声"},[443]={["jp"]="ナーヴィンタースの目"},[444]={["jp"]="偽りの神への献身"},[445]={["jp"]="ロクケスティーズの歯"},[446]={["jp"]="ヨルナークリンの爪"},[448]={["jp"]="完全なナーヴィンタースの目"},[449]={["jp"]="完全な偽りの神への献身"},[450]={["jp"]="完全なロクケスティーズの歯"},[451]={["jp"]="完全なヨルナークリンの爪"},[452]={["jp"]="ホロウファングの渇き"},[453]={["jp"]="ドロザカールの爪"},[454]={["jp"]="レナルドの決意"},[455]={["jp"]="ズェンの矯正"},[456]={["jp"]="アズールブライトの死神"},[457]={["jp"]="ドラゴンの冒涜"},[458]={["jp"]="グランドウルフ"},[459]={["jp"]="マーセロク"},[465]={["jp"]="センシャルの守り手"},[466]={["jp"]="略奪者の加速"},[467]={["jp"]="ドラゴンガードの精鋭"},[468]={["jp"]="大胆な海賊"},[469]={["jp"]="古代ドラゴンガード"},[470]={["jp"]="新たなる月の侍者"}},
 }
 --Manual tasks before
 --1. Add a new subtable above to table "otherLangSetNames" where the key is the language you want to add e.g. ["jp"]
 --2. Add a new subtable to this new key containing the [setId] as key and the setName String as value
 -- Example:  ["jp"] = { [19]={["jp"]="妖術師の法衣"},[20]={["jp"]="魔法使いの鎧"},[21]={["jp"]="アカヴィリのドラゴンガード"}, ... },
 
---Run the function LibSets.buildMixedSetNamesForDataAll() (see below) ingame to:
+--Run the function LibSets.debugBuildMixedSetNames() (see below) ingame to:
 --3. Get the existing data of table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] from file "LibSets_Data_All.lua"
 --4. Let it parse the table otherLangSetNames above
 --5. For each language detected update the table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] with the (new) entries of the language above
@@ -490,7 +511,7 @@ local otherLangSetNames={
 --9* Put the shrinked lua table contents in the preloaded data table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] in file "LibSets_Data_All.lua"
 --   Now all new/ changed entries should be in there, old ones + the ones from table "otherLangSetNames" above!
 --11. Delete the contents of table "otherLangSetNames" above in this file "LibSets_Debug.lua" again
-function lib.buildMixedSetNamesForDataAll()
+function lib.debugBuildMixedSetNames()
     d("[" .. MAJOR .."]Start to combine entries from table \'otherLangSetNames\' in file \'LibSets_Debug.lua\' into table \'LibSets.setDataPreloaded["..LIBSETS_TABLEKEY_SETNAMES.."]\'")
     --SavedVariables table key: LIBSETS_TABLEKEY_MIXED_SETNAMES
     if not otherLangSetNames then return end
@@ -499,37 +520,48 @@ function lib.buildMixedSetNamesForDataAll()
     if not preloadedSetNames then return end
     local copyOfPreloadedSetNames = ZO_DeepTableCopy(preloadedSetNames)
     if not copyOfPreloadedSetNames then return end
+    --[[
+        --Debug output of all given preloaded setIds, languages and names
+        for setId, setData in pairs(copyOfPreloadedSetNames) do
+            for lang, setName in pairs(setData) do
+                d(string.format(">setId: %s, lang: %s, name: %s", tostring(setId), tostring(lang), tostring(setName)))
+            end
+        end
+    ]]
     local setIdsFound = 0
     local setIdsChanged = 0
-    local languagesCombinedStr = ""
+    local setIdsChangedTotal = 0
     --Each language which needs to be combined from otherLangSetNames into lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
     for lang, langDataToCombine in pairs(otherLangSetNames) do
-        if languagesCombinedStr == "" then languagesCombinedStr = lang
-        else languagesCombinedStr = languagesCombinedStr .. " ," .. lang end
+        setIdsFound = 0
+        setIdsChanged = 0
         --Each setId which needs to be combined from otherLangSetNames[lang] into lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
         for setId, setDataToCombine  in pairs(langDataToCombine) do
             setIdsFound = setIdsFound + 1
             --Does a subtable entry in otherLangSetNames exist with the same language as key which should be updated?
             local setDataToCombineForLangKey = setDataToCombine[lang]
             if setDataToCombineForLangKey and setDataToCombineForLangKey ~= "" then
-                --Use exisitng or create setId in the new table for the SavedVariables
-                copyOfPreloadedSetNames[setId] = copyOfPreloadedSetNames[setId] or {}
-                --Use exisitng or create lang subtable in the new setId table entry for the SavedVariables
-                copyOfPreloadedSetNames[setId][lang] = copyOfPreloadedSetNames[setId][lang] or {}
-                copyOfPreloadedSetNames[setId][lang] = setDataToCombineForLangKey
+                --Use existing or create setId in the new table for the SavedVariables
+                copyOfPreloadedSetNames[tonumber(setId)] = copyOfPreloadedSetNames[tonumber(setId)] or {}
+                --Use existing or create lang subtable in the new setId table entry for the SavedVariables
+                copyOfPreloadedSetNames[tonumber(setId)][lang] = copyOfPreloadedSetNames[tonumber(setId)][lang] or {}
+                copyOfPreloadedSetNames[tonumber(setId)][lang] = setDataToCombineForLangKey
                 setIdsChanged = setIdsChanged + 1
+                setIdsChangedTotal = setIdsChangedTotal + setIdsChanged
             end
         end
+        --Update the SavedVariables now
+        if setIdsChanged > 0 then
+            d("<Updated " ..tostring(setIdsChanged).. "/" .. tostring(setIdsFound) .." setNames for language: " ..tostring(lang))
+        end
     end
-    --Update the SavedVariables now
-    if setIdsChanged > 0 then
-        d("<Updated the setNames of " ..tostring(setIdsChanged).. "/" .. tostring(setIdsFound) .." with the following languages: " ..tostring(languagesCombinedStr))
+    if setIdsChangedTotal > 0 then
         LoadSavedVariables()
         --Reset the combined setNames table in the SavedVariables
         lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = {}
         lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = copyOfPreloadedSetNames
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MIXED_SETNAMES.."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     else
-        d("<Update of setNames for the following languages "..tostring(languagesCombinedStr).." finished without needed changes!")
+        d("<No setIds were updated!")
     end
 end

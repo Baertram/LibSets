@@ -89,7 +89,7 @@ lib.dlcAndChapterAchievementIds = {
     [DLC_DRAGONHOLD] = 2534
 }
 if checkIfPTSAPIVersionIsLive() then
-    lib.dlcAndChapterAchievementIds[DLC_HARROWSTORM]    = 0 -- TODO: Find value of achievementId ingame on PTS, and exchange the 0 in this line with the value
+    lib.dlcAndChapterAchievementIds[DLC_HARROWSTORM]    = 2537
 
     --TODO: With APIVersion = 100031 -> Approx. June 2020
     --lib.dlcAndChapterAchievementIds[DLC_GREYMOOR]       = 0
