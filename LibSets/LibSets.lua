@@ -700,7 +700,7 @@ end
 
 --Returns the drop zoneIds as table for the setId
 --> Parameters: setId number: The set's setId
---> Returns:    zoneIds table
+--> Returns:    zoneIds table, or NIL if set's DLCid is unknown
 function lib.GetZoneIds(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
@@ -711,13 +711,26 @@ end
 
 --Returns the dlcId as number for the setId
 --> Parameters: setId number: The set's setId
---> Returns:    dlcId number
+--> Returns:    dlcId number, or NIL if set's DLCid is unknown
 function lib.GetDLCId(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setData = setInfo[setId]
     if setData == nil or setData.dlcId == nil then return end
     return setData.dlcId
+end
+
+--Returns Boolean true/false if the set's dlcId is the currently active DLC.
+--Means the set is "new added with this DLC".
+--> Parameters: setId number: The set's setId
+--> Returns:    wasAddedWithCurrentDLC Boolean, or NIL if set's DLCid is unknown
+function lib.IsCurrentDLC(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setData = setInfo[setId]
+    if setData == nil or setData.dlcId == nil then return end
+    local wasAddedWithCurrentDLC = (DLC_ITERATION_END and setData.dlcId >= DLC_ITERATION_END) or false
+    return wasAddedWithCurrentDLC
 end
 
 --Returns the number of researched traits needed to craft this set. This will only check the craftable sets!
@@ -1007,6 +1020,7 @@ function lib.GetSetInfo(setId)
     local setInfoTable
     local itemIds
     local setNames
+    local isSetNew
     local preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS
     local preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES
     if lib.IsNoESOSet(setId) then
@@ -1050,6 +1064,8 @@ function lib.GetSetInfo(setId)
     setNames = preloaded[preloadedSetNamesTableKey][setId]
     if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
     if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
+    local isCurrentDLC = (DLC_ITERATION_END and setInfoTable["dlcId"] and setInfoTable["dlcId"] >= DLC_ITERATION_END) or false
+    setInfoTable.isCurrentDLC = isCurrentDLC
     return setInfoTable
 end
 

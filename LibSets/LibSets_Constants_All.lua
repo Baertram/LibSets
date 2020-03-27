@@ -26,7 +26,7 @@ end
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100029 --Dragonhold
+lib.lastSetsPreloadedCheckAPIVersion = 100030 --Harrowstorm
 ------------------------------------------------------------------------------------------------------------------------
 --DLC & Chapter ID constants (for LibSets)
 DLC_BASE_GAME               = 0
@@ -46,12 +46,15 @@ DLC_WRATHSTONE              = 13
 DLC_ELSWEYR                 = 14
 DLC_SCALEBREAKER            = 15
 DLC_DRAGONHOLD              = 16
+DLC_HARROWSTORM             = 17
 if checkIfPTSAPIVersionIsLive() then
-    DLC_HARROWSTORM         = 17
-
     --TODO: With APIVersion = 100031 -> Approx. June 2020
     --DLC_GREYMOOR            = 18
 end
+--Iterators for the ESO dlc and chapter constants
+--You can use the function
+DLC_ITERATION_BEGIN = DLC_BASE_GAME
+DLC_ITERATION_END = DLC_GREYMOOR or DLC_HARROWSTORM
 
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
 lib.dlcAndChapterAchievementIds = {
@@ -86,11 +89,11 @@ lib.dlcAndChapterAchievementIds = {
     --Scalebreaker
     [DLC_SCALEBREAKER] = 2413,
     --Dragonhold
-    [DLC_DRAGONHOLD] = 2534
+    [DLC_DRAGONHOLD] = 2534,
+    --Harrowstorm
+    [DLC_HARROWSTORM] = 2537,
 }
 if checkIfPTSAPIVersionIsLive() then
-    lib.dlcAndChapterAchievementIds[DLC_HARROWSTORM]    = 2537
-
     --TODO: With APIVersion = 100031 -> Approx. June 2020
     --lib.dlcAndChapterAchievementIds[DLC_GREYMOOR]       = 0
 end

@@ -6,11 +6,11 @@ LibSets = LibSets or {}
 local lib = LibSets
 ------------------------------------------------------------------------------------------------------------------------
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.13
+local MAJOR, MINOR = "LibSets", 0.14
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.13
+lib.svVersion       = 0.14
 lib.setsLoaded      = false
 lib.setsScanning    = false
 
@@ -69,7 +69,7 @@ LIBSETS_SETTYPE_OVERLAND                        = 9 --"Overland"
 LIBSETS_SETTYPE_SPECIAL                         = 10 --"Special"
 LIBSETS_SETTYPE_TRIAL                           = 11 --"Trial"
 LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_TRIAL --End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
-lib.allowedSetTypes = { }
+lib.allowedSetTypes = {}
 for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
     lib.allowedSetTypes[i] = true
 end
