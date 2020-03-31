@@ -6,11 +6,11 @@ LibSets = LibSets or {}
 local lib = LibSets
 ------------------------------------------------------------------------------------------------------------------------
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.14
+local MAJOR, MINOR = "LibSets", 0.15
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.14
+lib.svVersion       = 0.15
 lib.setsLoaded      = false
 lib.setsScanning    = false
 
