@@ -10,7 +10,7 @@ APIVersions["live"] = GetAPIVersion()
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-APIVersions["PTS"] = 100030 --Harrowstorm (Dark heart of Skyrim)
+APIVersions["PTS"] = 100031 --Greymoor (Dark heart of Skyrim)
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 lib.APIVersions = APIVersions
@@ -48,8 +48,7 @@ DLC_SCALEBREAKER            = 15
 DLC_DRAGONHOLD              = 16
 DLC_HARROWSTORM             = 17
 if checkIfPTSAPIVersionIsLive() then
-    --TODO: With APIVersion = 100031 -> Approx. June 2020
-    --DLC_GREYMOOR            = 18
+    DLC_GREYMOOR            = 18
 end
 --Iterators for the ESO dlc and chapter constants
 --You can use the function
@@ -94,8 +93,8 @@ lib.dlcAndChapterAchievementIds = {
     [DLC_HARROWSTORM] = 2537,
 }
 if checkIfPTSAPIVersionIsLive() then
-    --TODO: With APIVersion = 100031 -> Approx. June 2020
-    --lib.dlcAndChapterAchievementIds[DLC_GREYMOOR]       = 0
+    --Greymoor
+    lib.dlcAndChapterAchievementIds[DLC_GREYMOOR] = 0 --TODO: Get achievemnt Id of Greymoor
 end
 
 

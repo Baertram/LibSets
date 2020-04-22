@@ -6,11 +6,11 @@ LibSets = LibSets or {}
 local lib = LibSets
 ------------------------------------------------------------------------------------------------------------------------
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.15
+local MAJOR, MINOR = "LibSets", 0.16
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.15
+lib.svVersion       = 0.16
 lib.setsLoaded      = false
 lib.setsScanning    = false
 
@@ -26,7 +26,7 @@ lib.supportedLanguages = {
     ["en"]  = true,
     ["fr"]  = true,
     ["jp"]  = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath
-    ["ru"]  = false,
+    ["ru"]  = true,
 }
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.
@@ -68,7 +68,8 @@ LIBSETS_SETTYPE_MONSTER                         = 8 --"Monster"
 LIBSETS_SETTYPE_OVERLAND                        = 9 --"Overland"
 LIBSETS_SETTYPE_SPECIAL                         = 10 --"Special"
 LIBSETS_SETTYPE_TRIAL                           = 11 --"Trial"
-LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_TRIAL --End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
+LIBSETS_SETTYPE_MYTHIC                          = 12 --"Mythic"
+LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_MYTHIC --End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
 lib.allowedSetTypes = {}
 for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
     lib.allowedSetTypes[i] = true
@@ -111,6 +112,9 @@ lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_TRIAL                        ] ={
         ["tableName"] = "trialSets",
     },
+    [LIBSETS_SETTYPE_MYTHIC                       ] ={
+        ["tableName"] = "mythicSets",
+    },
 }
 --The suffix for the counter variables of the setType tables. e.g. setType LIBSETS_SETTYPE_OVERLAND table is called overlandSets.
 --The suffix is "Counter" so the variable for the counter is "overlandSetsCounter"
@@ -132,71 +136,79 @@ lib.setTypesToName = {
         ["en"] = GetString(SI_LEADERBOARDTYPE4),
         ["fr"] = GetString(SI_LEADERBOARDTYPE4),
         ["jp"] = GetString(SI_LEADERBOARDTYPE4) or "バトルグラウンド",
-        ["ru"] = GetString(SI_LEADERBOARDTYPE4) or "Battleground",
+        ["ru"] = GetString(SI_LEADERBOARDTYPE4) or "Поле сражений",
     },
     [LIBSETS_SETTYPE_CRAFTED                        ] = {
         ["de"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         ["en"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         ["fr"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         ["jp"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED) or "クラフトセット",
-        ["ru"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED) or "Crafted",
+        ["ru"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED) or "Созданный",
     },
     [LIBSETS_SETTYPE_CYRODIIL                        ] = {
         ["de"] = GetString(SI_CAMPAIGNRULESETTYPE1),
         ["en"] = GetString(SI_CAMPAIGNRULESETTYPE1),
         ["fr"] = GetString(SI_CAMPAIGNRULESETTYPE1),
         ["jp"] = GetString(SI_CAMPAIGNRULESETTYPE1) or "シロディール",
-        ["ru"] = GetString(SI_CAMPAIGNRULESETTYPE1) or "Cyrodiil",
+        ["ru"] = GetString(SI_CAMPAIGNRULESETTYPE1) or "Сиродил",
     },
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD  ] = {
         ["de"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
         ["en"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
         ["fr"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
         ["jp"] = (GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR))  or "デイリー報酬",
-        ["ru"] = (GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR))  or "Random daily dungeon & Imperial city reward",
+        ["ru"] = (GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR))  or "Случайное ежедневное подземелье и награда Имперского города",
     },
     [LIBSETS_SETTYPE_DUNGEON                        ] = {
         ["de"] = GetString(SI_INSTANCEDISPLAYTYPE2),
         ["en"] = GetString(SI_INSTANCEDISPLAYTYPE2),
         ["fr"] = GetString(SI_INSTANCEDISPLAYTYPE2),
         ["jp"] = GetString(SI_INSTANCEDISPLAYTYPE2) or "ダンジョン",
-        ["ru"] = GetString(SI_INSTANCEDISPLAYTYPE2 or "Dungeon"),
+        ["ru"] = GetString(SI_INSTANCEDISPLAYTYPE2 or "Подземелье"),
     },
     [LIBSETS_SETTYPE_IMPERIALCITY                        ] = {
         ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
         ["en"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
         ["fr"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
         ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) or "帝都",
-        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) or "Imperial city",
+        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) or "Имперский город",
     },
     [LIBSETS_SETTYPE_MONSTER                        ] = {
         ["de"] = "Monster",
         ["en"] = "Monster",
         ["fr"] = "Monster",
         ["jp"] = "モンスター",
-        ["ru"] = "Monster",
+        ["ru"] = "Монстр",
     },
     [LIBSETS_SETTYPE_OVERLAND                        ] = {
-        ["de"] = "Überland / Normale Beute",
+        ["de"] = "Überland",
         ["en"] = "Overland",
         ["fr"] = "Overland",
         ["jp"] = "陸上",
-        ["ru"] = "Overland",
+        ["ru"] = "Cухопутный",
     },
     [LIBSETS_SETTYPE_SPECIAL                        ] = {
         ["de"] = GetString(SI_HOTBARCATEGORY9),
         ["en"] = GetString(SI_HOTBARCATEGORY9),
         ["fr"] = GetString(SI_HOTBARCATEGORY9),
         ["jp"] = GetString(SI_HOTBARCATEGORY9) or "スペシャル",
-        ["ru"] = GetString(SI_HOTBARCATEGORY9) or "Special",
+        ["ru"] = GetString(SI_HOTBARCATEGORY9) or "Специальный",
     },
     [LIBSETS_SETTYPE_TRIAL                        ] = {
         ["de"] = GetString(SI_LFGACTIVITY4),
         ["en"] = GetString(SI_LFGACTIVITY4),
         ["fr"] = GetString(SI_LFGACTIVITY4),
         ["jp"] = GetString(SI_LFGACTIVITY4) or "試練",
-        ["ru"] = GetString(SI_LFGACTIVITY4) or "Trial",
+        ["ru"] = GetString(SI_LFGACTIVITY4) or "Испытание",
     },
+    [LIBSETS_SETTYPE_MYTHIC                       ] = {
+        ["de"] = GetString(0),
+        ["en"] = GetString(0),
+        ["fr"] = GetString(0),
+        ["jp"] = GetString(0) or "試練",
+        ["ru"] = GetString(0) or "Mythic",
+    },
+
 }
 --Mapping table setType to setIds for this settype.
 -->Will be filled in file LibSets.lua, function LoadSets()
@@ -289,7 +301,8 @@ LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD               = 11    --Battleground r
 LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD  = 12    --Daily random dungeon mail rewards
 LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS              = 13    --Imperial city vaults
 LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD                   = 14    --Level up reward
-LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD
+LIBSETS_DROP_MECHANIC_ANTIQUITIES                       = 15    --Antiquities (Mythic set items)
+LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_ANTIQUITIES
 lib.allowedDropMechanics = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
@@ -315,6 +328,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Tägliches Zufallsverlies Belohnungsemail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Kaiserstadt Bunker",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
 },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
@@ -331,6 +345,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level Aufstieg Belohnung",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
@@ -347,6 +362,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Courrier de récompense de donjon journalière",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Cité impériale voûte",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Récompense de niveau supérieur",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " Эл. адрес)",
@@ -363,6 +379,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Письмо с наградой за ежедневное рандомное подземелье",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Убежище Имперского города",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Вознаграждение за повышение уровня",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール)",
@@ -379,6 +396,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "デイリーランダムダンジョン報酬メール",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "帝都の宝物庫",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "レベルアップ報酬",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
     },
 }
 --Set metatable to get EN entries for missing other languages
