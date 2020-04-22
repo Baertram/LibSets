@@ -25,8 +25,8 @@ lib.supportedLanguages = {
     ["de"]  = true,
     ["en"]  = true,
     ["fr"]  = true,
-    ["jp"]  = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath
     ["ru"]  = true,
+    ["jp"]  = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath
 }
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.

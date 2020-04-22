@@ -94,7 +94,7 @@ lib.dlcAndChapterAchievementIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --Greymoor
-    lib.dlcAndChapterAchievementIds[DLC_GREYMOOR] = 0 --TODO: Get achievemnt Id of Greymoor
+    lib.dlcAndChapterAchievementIds[DLC_GREYMOOR] = 2639
 end
 
 

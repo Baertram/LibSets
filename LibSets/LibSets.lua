@@ -428,6 +428,7 @@ end
 --368:  Arcane
 --369:  Artifact
 --370:  Legendary
+--Todo: ??? respect new mythic quality somehow?
 --> Parameters: itemId number: The item's itemId
 -->             itemQualitySubType number: The itemquality number of ESO, described above (standard value: 366 -> Normal)
 --> Returns:    itemLink String: The generated itemLink for the item with the given quality
@@ -586,6 +587,16 @@ function lib.IsDailyRandomDungeonAndImperialCityRewardSet(setId)
     if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.dailyRandomDungeonAndImperialCityRewardSets[setId] or false
 end
+
+--Returns true if the setId provided is a mythic set
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isMythicSet
+function lib.IsMythicSet(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    return lib.mythicSets[setId] or false
+end
+
 
 --Returns true if the setId provided is a non ESO, own defined setId
 --See file LibSets_SetData_(APIVersion).lua, table LibSets.lib.noSetIdSets and description above it.
