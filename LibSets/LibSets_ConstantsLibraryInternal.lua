@@ -202,11 +202,11 @@ lib.setTypesToName = {
         ["ru"] = GetString(SI_LFGACTIVITY4) or "Испытание",
     },
     [LIBSETS_SETTYPE_MYTHIC                       ] = {
-        ["de"] = GetString(0),
-        ["en"] = GetString(0),
-        ["fr"] = GetString(0),
-        ["jp"] = GetString(0) or "試練",
-        ["ru"] = GetString(0) or "Mythic",
+        ["de"] = GetString(SI_ITEMDISPLAYQUALITY6),
+        ["en"] = GetString(SI_ITEMDISPLAYQUALITY6),
+        ["fr"] = GetString(SI_ITEMDISPLAYQUALITY6),
+        ["jp"] = GetString(SI_ITEMDISPLAYQUALITY6) or "神話上の",
+        ["ru"] = GetString(SI_ITEMDISPLAYQUALITY6) or "мифический",
     },
 
 }

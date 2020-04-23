@@ -26,7 +26,7 @@ end
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100030 --Harrowstorm
+lib.lastSetsPreloadedCheckAPIVersion = 100031 --Harrowstorm
 ------------------------------------------------------------------------------------------------------------------------
 --DLC & Chapter ID constants (for LibSets)
 DLC_BASE_GAME               = 0
