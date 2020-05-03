@@ -30,8 +30,8 @@
 ========================================================================================================================
 All the data of this library is handled inside the included excel document LibSets_SetData.xlsx!
 
-If the API version of the game client updates there will be most likely new zones and maps, wayshrines, dungeons and sets
-in the game which needs to be added to the excel and then to these library files.
+If the API version of the game client updates there will be most likely new zones and maps, wayshrines, dungeons, sets and itemIds of the sets
+in the game which needs to be added to the excel (itemIds are only kept in the lua files!) and then to these library's lua files.
 
 1) At first check this library's folder if there are any LibSets_Constants_<APIVersion integer>.lua files.
    If so: Transfer the data of the now "old APIVersion" files to the file LibSets_Constants_All.lua so they will always be loaded in the future.
@@ -95,7 +95,13 @@ in the game which needs to be added to the excel and then to these library files
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
 
-    LibSets.DebugScanAllSetData()               |   Get all the set IDs and their item's itemIds saved to the SavedVars key constant LIBSETS_TABLEKEY_SETITEMIDS
+    LibSets.DebugScanAllSetData()               |   Get all the set IDs and their item's itemIds saved to the SavedVars key constant LIBSETS_TABLEKEY_SETITEMIDS,
+                                                |   and then compress the itemIds from 1 itemId each to the table LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED, where itemIds
+                                                |   which are "in a range" (e.g. 200020, 200021, 200022, 200023) will be saved as 1 String entry with the starting itemId (e.g. 200020)
+                                                |   and the number of following itemIds (e.g. 3): "200020, 3" -> This can be "decompressed" again via function LibSets.decompressSetIdItemIds(setId)
+                                                |   resulting in the real timeIds 200020, 200020+1=200021, 200020+2=200022 and 200020+3=200023.
+                                                |   The real itemIds are cached in the table LibSets.CachedSetItemIdsTable[setId], once the itemIds of a setId were asked for in a session.
+
     LibSets.DebugGetAllSetNames()               |   Get all the set names saved to the SavedVars key constant LIBSETS_TABLEKEY_SETNAMES
                                                 |   ->  You need to scan the setIds BEFORE (language independent!) to scan all setnames properly afterwards.
                                                 |       Use the script /script LibSets.DebugScanAllSetData() to do this.
@@ -104,6 +110,7 @@ in the game which needs to be added to the excel and then to these library files
 5) After scanning the data from the game client and updating the SavedVariables file LibSets.lua you got all the data in the following tables now:
 
 LIBSETS_TABLEKEY_SETITEMIDS                     = "setItemIds"
+LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED          = "setItemIds_Compressed"
 LIBSETS_TABLEKEY_SETNAMES                       = "set" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_MAPS                           = "maps"
 LIBSETS_TABLEKEY_WAYSHRINES                     = "wayshrines"
@@ -125,7 +132,7 @@ This will give you a string like "1021|625|1011|Soltenure"
 ATTENTION: If the excel map columns contains a forumlar KEEP THIS FORMULA and do NOT OVERWRITE IT!
 Drag&drop down formulas from the rows above to the new rows in order to update all data carefully and correct!
 
-Copy the whole strings to an empty Excel map inside the LibSets_SetData.xlsx file.
+Copy the whole strings to an empty Excel map (create a new one) inside the LibSets_SetData.xlsx file.
 Use the "Split text" function from Excel (menu "Data") to split at the delimiter | into columns.
 Depending on table key (e.g. LIBSETS_TABLEKEY_WAYSHRINES) open the appropriate Excel map (e.g. "ESO wayshrine node constants").
 -> Check the yellow top row of the excel's map to see if the function name used to dump this data matches the function name of the
@@ -143,8 +150,12 @@ Check the excel map columns now to find the appropriate coilumn for the split da
 e.g. wayshrineNodeId -> "Wayshrine ESO internal node ID", currentMapIndex -> "ESO internal mapIndex", currentMapId -> "ESO internal mapId", etc.
 
 Place the values from the split columns into the matching fields of this excel map AND ALWAYS CHECK FIRST IF THERE IS A FORUMLAR IN THE COLUMN YOU WANT TO PUT THE DATA IN!
-YOU NEED TO CHECK THIS IN THE ROWs ABOVE THE NEW ROW AS THE NEW ROW MIGHT NOT HAVE A FORMULAR ALREADY APPLIED. YOU NEED TO MANUALLY DRAG&DROP THE FORMULAS DOWN FROM TOPROWS
-TO THE NEW ONES!!! IF THERE IS A FORUMLA BEHIND THIS FIELD DO NOT OVERWRITE THIS FIELD. THE DATA WILL BE LOOED UP FROM ANOTHER EXCEL MAP THEN, AS YOU FILL IN THE DATA THERE.
+YOU NEED TO CHECK THIS IN THE ROWs ABOVE THE NEW ROW AS THE NEW ROW MIGHT NOT HAVE A FORMULAR ALREADY APPLIED.
+YOU NEED TO MANUALLY DRAG&DROP THE FORMULAS DOWN FROM TOPROWS TO THE NEW ONES!
+IF THERE IS A FORUMLA BEHIND THIS FIELD DO NOT OVERWRITE THIS FIELD. THE DATA WILL BE LOOKED UP FROM ANOTHER EXCEL MAP THEN, AS YOU FILL IN THE DATA THERE.
+If the formula is not able to find a proper value, after you have extracted the new dungeons, wayshrines, zones etc. into the excel maps:
+Check if there is a "Fixed" column in front of a column with a formula. Some columns in the "sets data" map e.g. will use this fixed column entry instead of trying to
+determine it via a formula (e.g. the DLC ID -> instead of trying to read the zoneId from the wayshrine it can also use the fixed dlc id you specify).
 
 -[ For the setItemIds ]-
 The setItemIds is a table containing the setId as key and for each setId a subtable containing ALL itemIds of this set.
@@ -195,6 +206,8 @@ lib.setDataPreloaded = {
 6) After updating all the set relevant information to the excel file you can have a look at the excel map "Sets data".
 It contains all the data combined from the other excel maps. You need to add new rows for each new set and fill in the new setIds,
 and the data. Be sure to drag&drop down ALL excel formulas from the rows above to the new rows as well!
+Be sure to update the columns here like washrines, settype, dlcId, traits needed, isVeteran, the drop zones and drop mechanic + dropmechanic names of the bosses etc.
+This info in all the columns from left to right will generate the lua data in the most right columns which your are able to copy to the file LibSets_Data_All.lua at the end!
 
 The new setids are the ones that are, compared to the maximum setId from the existing rows, are higher (newer).
 So check the SavedVariables for their names, and information.
@@ -233,6 +246,70 @@ local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 ------------------------------------------------------------------------
 -- 	Local helper functions
 ------------------------------------------------------------------------
+------------------------------------------------------------------------
+--======= SavedVariables ===============================================================================================
+--Load the SavedVariables
+local function LoadSavedVariables()
+    --SavedVars were loaded already before?
+    if lib.svData ~= nil then return end
+    local defaults =
+    {
+        [LIBSETS_TABLEKEY_MAPS]                     = {},
+        [LIBSETS_TABLEKEY_SETITEMIDS]               = {},
+        [LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]      = {},
+        [LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]    = {},
+        [LIBSETS_TABLEKEY_SETNAMES]                 = {},
+        [LIBSETS_TABLEKEY_WAYSHRINE_NAMES]          = {},
+        [LIBSETS_TABLEKEY_ZONE_DATA]                = {},
+        [LIBSETS_TABLEKEY_DUNGEONFINDER_DATA]       = {},
+        [LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]        = {},
+    }
+    --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
+    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$AllAccounts")
+end
+lib.LoadSavedVariables = LoadSavedVariables
+
+
+--======= SET ItemId decompression =====================================================================================
+--Thanks to Dolgubon for the base function code from his LibLazyCrafting!
+--entries in the SavedVariables table lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] are of the type
+--[setId] = {
+--
+--}
+local CachedSetItemIdsTable = {}
+lib.CachedSetItemIdsTable = CachedSetItemIdsTable
+local function decompressSetIdItemIds(setId)
+	if CachedSetItemIdsTable[setId] then
+		return CachedSetItemIdsTable[setId]
+	end
+	local preloadedSetItemIdsCompressed = preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+    local IdSource = preloadedSetItemIdsCompressed[setId]
+	if not IdSource then
+		return
+	end
+	local workingTable = {}
+	for j = 1, #IdSource do
+		--Is the itemId a number: Then use the itemId directly
+        local itemIdType = type(IdSource[j])
+        if itemIdType=="number" then
+            workingTable[IdSource[j]] = LIBSETS_SET_TEMID_TABLE_VALUE_OK
+        --The itemId is a String (e.g. "200020, 3" -> Means itemId 200020 and 200020+1 and 200020+2 and 200020+3).
+        --Split it at the , to get the starting itemId and the number of following itemIds
+        elseif itemIdType == "string" then
+            local commaSpot = string.find(IdSource[j],",")
+			local firstPart = tonumber(string.sub(IdSource[j], 1, commaSpot-1))
+			local lastPart = tonumber(string.sub(IdSource[j], commaSpot+1))
+			for i = 0, lastPart do
+				workingTable[firstPart + i] = LIBSETS_SET_TEMID_TABLE_VALUE_OK
+			end
+		end
+	end
+    table.sort(workingTable)
+	CachedSetItemIdsTable[setId] = workingTable
+	return workingTable
+end
+lib.DecompressSetIdItemIds = decompressSetIdItemIds
+
 --======= SETS =====================================================================================================
 --Check if an itemLink is a set and return the set's data from ESO API function GetItemLinkSetInfo
 local function checkSet(itemLink)
@@ -250,16 +327,34 @@ local function checkIfSetExists(setId)
     local preloadedSetItemIds   = preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
     --SetId is not known in preloaded data?
     if not preloadedSetInfo or not preloadedSetInfo[setId] or not preloadedSetItemIds or not preloadedSetItemIds[setId] then return false end
-    --SetId is knwon in preloaded data: get the first itemId of this setId, build an itemLink, and check if the setId for this itemId exists
-    --by the help of the API function GetItemLinkSetInfo(itemLink)
-    for itemId, isActive in pairs(preloadedSetItemIds[setId]) do
-        if isActive and itemId and itemId > 0 then
-            local itemLink = lib.buildItemLink(itemId)
-            if itemLink and itemLink ~= "" then
-                local isSet, _, _, _, _, _ = checkSet(itemLink)
-                isSet = isSet or false
-                return isSet
+    --SetId is known in preloaded data: get the first itemId of this setId, build an itemLink, and check if the setId for this itemId exists
+    --by the help of the API function GetItemLinkSetInfo(itemLink).
+    --Therefor we need to decompress the itemIds of the preloaded data first in order to get the real first itemId,
+    --if the first entry of the itemIs table is "not" a number
+    local compressedSetItemIdsOfSetId = preloadedSetItemIds[setId]
+    local firstItemIdFound
+    for itemId, _ in pairs(compressedSetItemIdsOfSetId) do
+        if itemId and type(itemId) == "number" and itemId > 0 then
+            firstItemIdFound = itemId
+            break -- exit the for loop
+        end
+    end
+    if firstItemIdFound == nil then
+        --No number itemId was found for the set, so decompress the whole setId
+        local decompressedSetItemIdsOfSetId = decompressSetIdItemIds(setId)
+        for itemId, _ in pairs(decompressedSetItemIdsOfSetId) do
+            if itemId and itemId > 0 then
+                firstItemIdFound = itemId
+                break -- exit the for loop
             end
+        end
+    end
+    if firstItemIdFound ~= nil then
+        local itemLink = lib.buildItemLink(firstItemIdFound)
+        if itemLink and itemLink ~= "" then
+            local isSet, _, _, _, _, _ = checkSet(itemLink)
+            isSet = isSet or false
+            return isSet
         end
     end
     return setDoesExist
@@ -360,6 +455,9 @@ local function LoadSets()
                     local itemIds = preloadedItemIds[setId]
                     if itemIds == nil then
                         itemIds = preloadedNonESOsetIdItemIds[setId]
+                    else
+                        --Decompress the real itemIds
+                        itemIds = decompressSetIdItemIds(setId)
                     end
                     if itemIds ~= nil then
                         refToSetIdTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds
@@ -377,6 +475,7 @@ local function LoadSets()
                 --Set does not exist, so remove it from the setInfo table and all other "preloaded" tables as well
                 setInfo[setId] = nil
                 preloadedItemIds[setId] = nil
+                CachedSetItemIdsTable[setId] = nil
                 preloadedNonESOsetIdItemIds[setId] = nil
                 preloadedSetNames[setId] = nil
                 preloadedNonESOsetIdSetNames[setId] = nil
@@ -880,14 +979,21 @@ end
 --> Returns: setItemIds table
 function lib.GetAllSetItemIds()
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+    --Decompress all the setId's itemIds (if not already done before)
+    --and create the whole cached table CachedSetItemIdsTable this way
+    for setId, isActive in pairs(lib.setIds) do
+        if isActive == true then
+            decompressSetIdItemIds(setId)
+        end
+    end
+    return CachedSetItemIdsTable
 end
 
 --Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
 --The key is the itemId and the value is the boolean value true
 --> Parameters: setId number: The set's setId
 -->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
---> Returns:    table setItemIds
+--> Returns:    table setItemIds = {[setItemId1]=1,[setItemId2]=1, ...}
 function lib.GetSetItemIds(setId, isNoESOSetId)
     if setId == nil then return end
     isNoESOSetId = isNoESOSetId or false
@@ -896,13 +1002,15 @@ function lib.GetSetItemIds(setId, isNoESOSetId)
     end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setItemIds
-    if isNoESOSetId then
-        setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
+    if isNoESOSetId == true then
+        if preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId] ~= nil then
+            setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId]
+        end
     else
-        setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+        setItemIds = decompressSetIdItemIds(setId)
     end
-    if setItemIds[setId] == nil then return end
-    return setItemIds[setId]
+    if setItemIds == nil then return end
+    return setItemIds
 end
 
 --If the setId only got 1 itemId this function returns this itemId of the setId provided.
@@ -1028,13 +1136,13 @@ end
 function lib.GetSetInfo(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
+    local isNonEsoSetId = lib.IsNoESOSet(setId)
     local setInfoTable
     local itemIds
     local setNames
-    local isSetNew
     local preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS
     local preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES
-    if lib.IsNoESOSet(setId) then
+    if isNonEsoSetId == true then
         setInfoTable = noSetIdSets[setId]
         preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID
         preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES_NO_SETID
@@ -1071,7 +1179,12 @@ function lib.GetSetInfo(setId)
         end
     end
     setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
-    itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
+    --itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
+    if isNonEsoSetId == true then
+        itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
+    else
+        itemIds = decompressSetIdItemIds(setId)
+    end
     setNames = preloaded[preloadedSetNamesTableKey][setId]
     if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
     if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
@@ -1237,7 +1350,7 @@ end
 --Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType
 --> Returns:    table with key = setId, value = table which contains (as example for setType = LIBSETS_SETTYPE_CRAFTED)
 ---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
------->             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= true (e.g. [12345]=true,)
+------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= 1 (e.g. [12345]=1,)
 ------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
 ---             Example:
 ---             [setId] = {
@@ -1284,26 +1397,6 @@ function lib.checkIfSetsAreLoadedProperly()
     if lib.IsSetsScanning() or not lib.AreSetsLoaded() then return false end
     return true
 end
-
-------------------------------------------------------------------------
---Load the SavedVariables
-local function LoadSavedVariables()
-    --SavedVars were loaded already before?
-    if lib.svData ~= nil then return end
-    local defaults =
-    {
-        [LIBSETS_TABLEKEY_MAPS]                 = {},
-        [LIBSETS_TABLEKEY_SETITEMIDS]           = {},
-        [LIBSETS_TABLEKEY_SETNAMES]             = {},
-        [LIBSETS_TABLEKEY_WAYSHRINE_NAMES]      = {},
-        [LIBSETS_TABLEKEY_ZONE_DATA]            = {},
-        [LIBSETS_TABLEKEY_DUNGEONFINDER_DATA]   = {},
-        [LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]    = {},
-    }
-    --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
-    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$AllAccounts")
-end
-lib.LoadSavedVariables = LoadSavedVariables
 
 --Addon loaded function
 local function OnLibraryLoaded(event, name)

@@ -190,7 +190,112 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for set names in client language -> Save them in the SavedVariables "setNames"
----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+
+--======= SET ItemId compression =====================================================================================
+--Thanks to Dolgubon for the base function code from his LibLazyCrafting!
+--[[
+local function compressSetItemIds()
+	local apiVersionDifference = GetAPIVersion() - 100029
+	local estimatedTime = math.floor((20000*apiVersionDifference+200000)/300*25/1000)+3
+	d("LibSets: Beginning scrape of set items. Estimated time: "..estimatedTime.."s")
+	local craftedItemIds = {}
+	for k, setTable in pairs(LibStub:GetLibrary("LibLazyCrafting").GetSetIndexes()) do
+		craftedItemIds[setTable[4] ] = {}
+	end
+	craftedItemIds[0]=nil
+	local excludedTraits={[9]=true,[19]=true,[20]=true,[10]=true,[24]=true,[27]=true,}
+	local function isExcludedTrait(a)
+		local trait=GetItemLinkTraitInfo(a)
+		return excludedTraits[trait]
+	end
+	local maxloop=1
+	local function loopSpacer(start, last, functionToRun, interval)
+		if start<last then
+			for i = start, start+interval do
+				functionToRun(i)
+			end
+			if maxloop>1000000 then
+				return
+			end
+			maxloop = maxloop+1
+			zo_callLater(
+				function()
+				loopSpacer(start+interval+1, last, functionToRun, interval)
+			end
+			,25)
+		else
+			LibLazyCraftingSavedVars.SetIds[0] = itemSetIds[0]
+			LibLazyCraftingSavedVars.lastScrapedAPIVersion = GetAPIVersion()
+			d("LibLazyCrafting: Item Scrape complete")
+		end
+	end
+
+	loopSpacer(1,200000+20000*apiVersionDifference,
+		function(id)
+			local link="|H1:item:"..id..":0:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+			local itemType,specializedType=GetItemLinkItemType(link)
+			if itemType<3 and itemType>0 then
+				if (specializedType==300 or specializedType==0 or specializedType==250)and not isExcludedTrait(link) and GetItemLinkFlavorText(link)==""  then
+					local isSet,_,_,_,_,setId=GetItemLinkSetInfo(link)
+					if craftedItemIds[setId] and isSet then
+						table.insert(craftedItemIds[setId],id)
+					end
+				end
+			end
+		end,300)
+
+end
+]]
+
+local function compressSetItemIdTable(toMinify)
+    local minifiedTable={}
+    local numConsecutive,lastPosition = 0,1
+    for i = 2, #toMinify do
+        if toMinify[lastPosition]+numConsecutive+1==toMinify[i] then
+            numConsecutive=numConsecutive+1
+        else
+            if numConsecutive>0 then
+                table.insert(minifiedTable,tostring(toMinify[lastPosition])..","..numConsecutive)
+            else
+                table.insert(minifiedTable,toMinify[lastPosition])
+            end
+            numConsecutive=0
+            lastPosition=i
+        end
+    end
+    if numConsecutive>0 then
+        table.insert(minifiedTable,tostring(toMinify[lastPosition])..","..numConsecutive)
+    else
+        table.insert(minifiedTable,toMinify[lastPosition])
+    end
+    return minifiedTable
+end
+
+local function compressSetItemIdsNow(setsDataTable)
+    d("==============================================================\n[".. MAJOR .. "]Compressing setItemIds now")
+    LoadSavedVariables()
+    if setsDataTable == nil then setsDataTable = lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] end
+    if not setsDataTable then
+        d("Aborting: setsDataTable is missing")
+        return
+    end
+
+    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = {}
+    for setId, setItemIdsOfSetId in pairs(setsDataTable) do
+        --Transfer the setItemIds to an integer key table without gaps
+        local helperTabNoGapIndex = {}
+        for k, _ in pairs(setItemIdsOfSetId) do
+            table.insert(helperTabNoGapIndex, k)
+        end
+        table.sort(setItemIdsOfSetId)
+        lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = {}
+        lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = compressSetItemIdTable(helperTabNoGapIndex)
+    end
+    d("[".. MAJOR .. "]Compression of setItemIds finished")
+end
+lib.DebugCompressSetItemIdsNow = compressSetItemIdsNow
+
 --Returns a list of the set names in the current client language and saves it to the SavedVars table "setNames" in this format:
 --setNames[setId][clientLanguage] = localizedAndCleanSetNameInClientLanguage
 -->The table LibSets.setItemIds in file LibSets_Data.lua must be updated with all setId and itemIds in order to make this debug function scan ALL actual setIds!
@@ -266,14 +371,16 @@ local function showSetCountsScanned(finished)
             LoadSavedVariables()
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = {}
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
+            --Compress the itemIds now to lower the fileSize of LibSets_Data_all.lua later (copied setItemIds from SavedVariables)
+            compressSetItemIdsNow(sets)
         end
     end
     d("<<" .. debugOutputStartLine)
 end
 --Load a package of 5000 itemIds and scan it:
---Build an itemlink from the itemId, check if the itemLink is not crafted, if the itemType is a possibel set itemType, check if the item is a set:
+--Build an itemlink from the itemId, check if the itemLink is not crafted, if the itemType is a possible set itemType, check if the item is a set:
 --If yes: Update the table sets and setNames, and add the itemIds found for this set to the sets table
---Format of the sets table is: sets[setId] = {[itemIdOfSetItem]=true, ...}
+--Format of the sets table is: sets[setId] = {[itemIdOfSetItem]=1, ...}
 local function loadSetsByIds(from,to)
     for setItemId=from,to do
         itemIdsScanned = itemIdsScanned + 1
@@ -291,7 +398,7 @@ local function loadSetsByIds(from,to)
                             --Update the set counts value
                             setCount = setCount + 1
                         end
-                        sets[setId][setItemId] = true
+                        sets[setId][setItemId] = LIBSETS_SET_TEMID_TABLE_VALUE_OK
                         --Update the set's item count
                         itemCount = itemCount + 1
                     end
@@ -308,6 +415,7 @@ end
 local function scanAllSetData()
     local numItemIdPackages     = lib.debugNumItemIdPackages
     local numItemIdPackageSize  = lib.debugNumItemIdPackageSize
+
     if not numItemIdPackages or numItemIdPackages == 0 or not numItemIdPackageSize or numItemIdPackageSize == 0 then return end
     local itemIdsToScanTotal = numItemIdPackages * numItemIdPackageSize
     d(debugOutputStartLine)
@@ -472,6 +580,8 @@ end
 function lib.DebugResetSavedVariables()
     LoadSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
+    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
     lib.svData[LIBSETS_TABLEKEY_SETNAMES] = nil
     lib.svData[LIBSETS_TABLEKEY_MAPS] = nil
     lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = nil

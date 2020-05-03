@@ -17,7 +17,7 @@ lib.setsScanning    = false
 ------------------------------------------------------------------------------------------------------------------------
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds
-lib.debugNumItemIdPackages     = 55        -- Increase this to find new added set itemIds after and update (last updated APIVersion 100029 Dragonhold)
+lib.debugNumItemIdPackages     = 50        -- Increase this to find new added set itemIds after and update
 lib.debugNumItemIdPackageSize  = 5000      -- do not increase this or the client may crash!
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
@@ -33,7 +33,8 @@ lib.supportedLanguages = {
 local noSetIdString = "NoSetId"
 LIBSETS_TABLEKEY_NAMES                          = "Names"
 LIBSETS_TABLEKEY_SETITEMIDS                     = "setItemIds"
-LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID            = "setItemIds" .. noSetIdString
+LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID            = LIBSETS_TABLEKEY_SETITEMIDS .. noSetIdString
+LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED          = LIBSETS_TABLEKEY_SETITEMIDS .."_Compressed"
 LIBSETS_TABLEKEY_SETNAMES                       = "set" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_SETNAMES_NO_SETID              = "set" .. LIBSETS_TABLEKEY_NAMES .. noSetIdString
 LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION          = "lastSetsCheckAPIVersion"
@@ -406,3 +407,7 @@ setmetatable(dropMechanicNames["de"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["fr"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["jp"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["ru"], {__index = dropMechanicNamesEn})
+
+--Set itemId table value (key is the itemId)
+LIBSETS_SET_TEMID_TABLE_VALUE_OK    = 1
+LIBSETS_SET_TEMID_TABLE_VALUE_NOTOK = 2
