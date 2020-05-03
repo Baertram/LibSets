@@ -1434,6 +1434,9 @@ local function OnLibraryLoaded(event, name)
     end
     --The actual API version
     lib.currentAPIVersion = (lib.APIVersions and lib.APIVersions["live"]) or GetAPIVersion()
+    --Remove future APIverison setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
+    lib.removeFutureSetData()
+    lib.removeFutureSetData = nil
     --Get the different setTypes from the "all sets table" setInfo in file LibSets_Data.lua and put them in their
     --own tables
     LoadSets()

@@ -43,8 +43,8 @@ local function checkIfPTSAPIVersionIsLive()
     local APIVersionPTS  = APIVersions["PTS"]
     return (APIVersionLive >= APIVersionPTS) or false
 end
-lib.APIVersions = APIVersions
 lib.checkIfPTSAPIVersionIsLive = checkIfPTSAPIVersionIsLive
+lib.APIVersions = APIVersions
 ------------------------------------------------------------------------------------------------------------------------
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds

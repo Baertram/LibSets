@@ -3,16 +3,11 @@
 LibSets = LibSets or {}
 local lib = LibSets
 
+--Current APIversion is live or PTS check
+local isPTSAPIVersionLive = lib.checkIfPTSAPIVersionIsLive()
+--Future APIversion sets
 local setsOfNewerAPIVersion = {}
 
-------------------------------------------------------------------------------------------------------------------------
---Helper functions
-------------------------------------------------------------------------------------------------------------------------
-local function transferToTable(targetTable, key, value)
-    if not targetTable or (targetTable and targetTable[key]) then return end
-    targetTable[key] = value
-end
-local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
 ------------------------------------------------------------------------------------------------------------------------
 --> Last updated: API 100031, Greymoor, 2020-05-03, Baertram
 ------------------------------------------------------------------------------------------------------------------------
@@ -502,7 +497,7 @@ lib.setInfo = {
 
 ---------------------------------------------------------------------------------------------------------------------------
 --APIversion check
-if checkIfPTSAPIVersionIsLive() then
+if not isPTSAPIVersionLive then
     setsOfNewerAPIVersion = {
         --Greymoor sets - START
         [483] = true,
@@ -650,7 +645,7 @@ lib.setDataPreloaded = {
 -- Remove set data from the preloaded tables which is not given at the current API version
 ------------------------------------------------------------------------------------------------------------------------
 local function removeFutureSetData()
-    if not checkIfPTSAPIVersionIsLive() then
+    if not isPTSAPIVersionLive then
         ------------------------------------------------------------------------------------------------------------------------
         --Check all setIds of the new APIversion
         local setInfo = lib.setInfo
@@ -678,9 +673,7 @@ local function removeFutureSetData()
             end
             --Remove names from the list where setIds are only available in newer APIversions
             for setId, setData  in pairs(setIdsToSetNames) do
-d(">Checking setId for names: " ..tostring(setId))
                 if setId == setIdOfNewAPIVersion then
-d(">>removing future setName: " ..tostring(setData["en"]))
                     lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
                 end
             end
@@ -715,5 +708,5 @@ d(">>removing future setName: " ..tostring(setData["en"]))
         ------------------------------------------------------------------------------------------------------------------------
     end
 end
-removeFutureSetData()
+lib.removeFutureSetData = removeFutureSetData
 ------------------------------------------------------------------------------------------------------------------------
