@@ -1440,10 +1440,6 @@ local function OnLibraryLoaded(event, name)
     lib.setsLoaded = true
     --Check for library LibZone
     lib.libZone = LibZone
-    if lib.libZone == nil and LibStub then
-        lib.libZone = LibStub:GetLibrary("LibZone", true)
-    end
-
 end
 
 --Load the addon now

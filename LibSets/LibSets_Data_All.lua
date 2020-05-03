@@ -562,13 +562,14 @@ lib.setDataPreloaded = {
          1* Uncomment the line ## LibSets_Debug.lua in the LibSets.txt file
          2* /reloadui with the latest version
          3* Use /script LibSets.DebugScanAllSetData() to scan all the itemIds for sets and set items.
-            This will create a SavedVariables table ["setItemIds"] containing the setIds and the set's itemIds entries.
-            Attention: This can take about 1-5 minutes and the client will be slightly laggy during this scan period!
-         4* Copy the entire ["setItemIds"] array from the LibSets.lua saved variables
+            This will create a SavedVariables table ["setItemIds"] containing the setIds and the set's itemIds entries (uncompressed)
+            and a SavedVariables table ["setItemIds_Compressed"] which is shown below. The table "setItemIds" will be deleted automatically if you do not
+            set the booean parameter keepUncompressedSetItemIds as you call the function LibSets.DebugScanAllSetData(keepUncompressedSetItemIds)!
+            Attention: This can take about 1-5 minutes and the client will be slightly laggy during this scan period! Watch the chat for the itemId packages scanned.
+         4* Copy the entire ["setItemIds_Compressed"] table from the LibSets.lua saved variables
          5* use a lua minifier (e.g. https://mothereff.in/lua-minifier) to remove spaces etc.
             IMPORTANT: Remove the , at the end of the copied table contents and remove the [" and "] around setItemids, in order to let the lua minfier recognize the variable setItemIds properly!
-         6* The result should be the compressed table below then -> Make sure to add the [" and "] around "setItemIds" again afterwards so it will be ["setItemIds"] again,
-            and the , at the end of the closing }} of this table!
+         6* The result should be the compressed table below then starting right of [LIBSETS_TABLEKEY_SETITEMIDS]= -> Remove the "setItemIds =" at the beginning and just copy the { [setId]={[1]=[itemId]=...},....} table containing all setIds and their compressed itemIds, until the closing }
 
            IMPORTANT:
            Make sure to update the variable "lib.lastSetsPreloadedCheckAPIVersion" in file LibSets_Constants_All.lua after updating the itemIds table, so one can see when the itemIds were updated last.
@@ -657,7 +658,7 @@ if not checkIfPTSAPIVersionIsLive() then
     }
     --Remove the wayshrines that are new!
     local wayshrines2ZoneIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
-    for _, zoneIdOfNewAPIVersion in pairs(checkIfPTSAPIVersionIsLive) do
+    for _, zoneIdOfNewAPIVersion in pairs(zoneIdsOfNewAPIVersionOnly) do
         for wayshrineNodeIndex, zoneId in pairs(wayshrines2ZoneIds) do
             if zoneId == zoneIdOfNewAPIVersion then
                 lib.setDataPreloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID][wayshrineNodeIndex] = nil
