@@ -6,7 +6,7 @@ local lib = LibSets
 --Current APIversion is live or PTS check
 local isPTSAPIVersionLive = lib.checkIfPTSAPIVersionIsLive()
 --Future APIversion sets
-local setsOfNewerAPIVersion = {}
+local setsOfNewerAPIVersion
 
 ------------------------------------------------------------------------------------------------------------------------
 --> Last updated: API 100031, Greymoor, 2020-05-03, Baertram
@@ -645,7 +645,7 @@ lib.setDataPreloaded = {
 -- Remove set data from the preloaded tables which is not given at the current API version
 ------------------------------------------------------------------------------------------------------------------------
 local function removeFutureSetData()
-    if not isPTSAPIVersionLive then
+    if not isPTSAPIVersionLive and setsOfNewerAPIVersion ~= nil then
         ------------------------------------------------------------------------------------------------------------------------
         --Check all setIds of the new APIversion
         local setInfo = lib.setInfo
