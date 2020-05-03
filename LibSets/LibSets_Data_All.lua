@@ -645,69 +645,75 @@ lib.setDataPreloaded = {
     [LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID] = {[1]=3,[2]=3,[3]=3,[4]=3,[5]=3,[6]=3,[7]=3,[8]=3,[9]=20,[10]=20,[11]=20,[12]=20,[13]=20,[14]=19,[15]=19,[16]=19,[17]=19,[18]=19,[19]=19,[20]=3,[21]=383,[22]=19,[23]=19,[24]=57,[25]=57,[26]=57,[27]=57,[28]=57,[29]=57,[30]=57,[31]=19,[32]=57,[33]=92,[34]=92,[35]=92,[36]=92,[37]=92,[38]=92,[39]=92,[40]=92,[41]=41,[42]=104,[43]=104,[44]=104,[45]=104,[46]=104,[47]=117,[48]=117,[49]=117,[50]=117,[51]=117,[52]=117,[53]=117,[55]=20,[56]=19,[57]=104,[58]=104,[59]=104,[60]=104,[61]=104,[62]=3,[63]=92,[64]=3,[65]=41,[66]=41,[67]=41,[68]=41,[69]=41,[71]=41,[72]=41,[73]=41,[74]=41,[75]=41,[76]=41,[77]=41,[78]=117,[79]=57,[80]=57,[81]=57,[82]=20,[83]=20,[84]=20,[85]=117,[86]=20,[87]=101,[88]=101,[89]=101,[90]=101,[91]=101,[92]=101,[93]=101,[94]=101,[95]=101,[96]=101,[97]=101,[98]=41,[99]=58,[100]=58,[101]=58,[102]=58,[103]=58,[104]=58,[105]=58,[106]=58,[107]=58,[108]=41,[109]=103,[110]=103,[111]=103,[112]=103,[113]=103,[114]=103,[115]=103,[116]=103,[117]=103,[118]=103,[119]=103,[120]=103,[121]=381,[122]=381,[123]=381,[124]=381,[125]=281,[126]=281,[127]=381,[128]=347,[129]=347,[130]=347,[131]=347,[132]=347,[133]=347,[134]=347,[135]=347,[136]=347,[137]=104,[138]=534,[139]=347,[140]=347,[141]=537,[142]=537,[143]=108,[144]=382,[145]=347,[146]=347,[147]=108,[148]=108,[149]=108,[150]=108,[151]=108,[152]=108,[153]=108,[154]=108,[155]=104,[156]=382,[157]=382,[158]=382,[159]=382,[160]=382,[161]=382,[162]=382,[163]=382,[164]=383,[165]=383,[166]=383,[167]=383,[168]=383,[169]=383,[171]=117,[172]=280,[173]=281,[174]=381,[175]=381,[176]=381,[177]=381,[178]=381,[179]=534,[180]=534,[184]=347,[185]=382,[186]=92,[187]=103,[188]=58,[189]=19,[190]=20,[191]=383,[192]=117,[193]=3,[194]=381,[195]=101,[196]=104,[197]=108,[198]=57,[199]=584,[201]=584,[203]=584,[204]=92,[205]=57,[206]=92,[207]=383,[208]=20,[210]=3,[211]=381,[212]=41,[213]=383,[214]=383,[216]=3,[217]=888,[218]=888,[219]=888,[220]=888,[225]=888,[226]=888,[227]=888,[229]=888,[230]=888,[231]=888,[232]=888,[233]=888,[234]=888,[235]=888,[237]=684,[238]=684,[239]=684,[240]=684,[241]=684,[242]=684,[243]=684,[244]=684,[245]=684,[246]=684,[249]=684,[250]=684,[251]=823,[252]=823,[253]=823,[254]=823,[255]=816,[256]=816,[257]=816,[258]=382,[260]=117,[261]=117,[262]=381,[263]=19,[264]=57,[265]=383,[266]=41,[267]=3,[268]=108,[269]=20,[270]=888,[272]=849,[273]=849,[274]=849,[275]=849,[276]=849,[277]=849,[278]=849,[279]=849,[280]=849,[281]=849,[282]=849,[284]=849,[285]=381,[286]=104,[287]=57,[288]=381,[289]=3,[290]=41,[291]=382,[292]=3,[293]=41,[294]=58,[295]=281,[296]=383,[297]=3,[298]=41,[299]=58,[300]=537,[301]=103,[302]=19,[303]=92,[304]=108,[305]=117,[306]=108,[307]=20,[308]=117,[309]=57,[310]=888,[311]=382,[312]=101,[313]=92,[314]=104,[315]=381,[316]=117,[317]=383,[318]=19,[319]=57,[320]=382,[321]=382,[322]=103,[323]=92,[324]=534,[325]=383,[326]=888,[327]=888,[328]=849,[329]=849,[330]=849,[331]=849,[332]=888,[333]=849,[334]=849,[335]=849,[336]=849,[337]=980,[338]=980,[339]=980,[340]=980,[341]=92,[342]=3,[343]=823,[344]=347,[345]=888,[346]=980,[347]=980,[348]=684,[349]=1011,[350]=1011,[351]=1011,[352]=1011,[353]=1011,[354]=1011,[355]=1011,[356]=1011,[357]=1011,[358]=1011,[359]=1011,[360]=1027,[361]=816,[362]=823,[363]=19,[364]=1011,[365]=1011,[366]=1011,[367]=1011,[368]=1011,[369]=1011,[370]=108,[371]=382,[372]=103,[373]=1027,[374]=726,[375]=726,[376]=726,[377]=726,[378]=726,[379]=726,[380]=101,[381]=1086,[382]=1086,[383]=1086,[384]=1086,[386]=1086,[387]=1086,[388]=726,[389]=101,[390]=823,[391]=1086,[392]=101,[395]=888,[396]=1086,[397]=1086,[399]=1086,[400]=1086,[401]=1086,[402]=1133,[403]=1133,[404]=1133,[405]=1133,[406]=1133,[407]=1133,[408]=1133,[409]=1133,[410]=1086,[411]=1161,[412]=1161,[413]=1161,[414]=1161,[415]=1160,[416]=1160,[417]=1160,[418]=1160,[419]=1160,[420]=1160,[421]=1160,[422]=1133,[423]=1133,[424]=684,[425]=92,[426]=1160,[427]=92,[428]=684,[429]=1160,[430]=1161,[431]=1161,[432]=1161,[433]=1161,[434]=1160},--wayshrine2ZoneId
 }--lib.setDataPreloaded
 ------------------------------------------------------------------------------------------------------------------------
--- Reove set data from the preloaded tables which is not given at the current API version
-------------------------------------------------------------------------------------------------------------------------
-if not checkIfPTSAPIVersionIsLive() then
-------------------------------------------------------------------------------------------------------------------------
-    --Check all setIds of the new APIversion
-    local setInfo = lib.setInfo
-    local setIdsToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
-    local setIdsNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
-    local setNamesNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
-    local nonSetIds = lib.noSetIdSets
 
-    local setIdsToSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
-    for _, setIdIdOfNewAPIVersion in pairs(setsOfNewerAPIVersion) do
-        --Remove setIds from the setInfo
-        for setId, _ in pairs(setInfo) do
-            lib.setInfo[setId] = nil
-        end
-        --Remove itemIds from the list where setIds are only available in newer APIversions
-        for setId, _  in pairs(setIdsToSetItemIds) do
-            if setId == setIdIdOfNewAPIVersion then
-                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId] = nil
-            end
-        end
-        --Remove itemIds of non-sets from the list where setIds are only available in newer APIversions
-        for setId, _  in pairs(setIdsNoSetToSetItemIds) do
-            if setId == setIdIdOfNewAPIVersion then
-                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId] = nil
-            end
-        end
-        --Remove names from the list where setIds are only available in newer APIversions
-        for setId, _  in pairs(setIdsToSetNames) do
-            if setId == setIdIdOfNewAPIVersion then
-                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
-            end
-        end
-        --Remove names of non-sets from the list where setIds are only available in newer APIversions
-        for setId, _  in pairs(setNamesNoSetToSetItemIds) do
-            if setId == setIdIdOfNewAPIVersion then
-                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID][setId] = nil
-            end
-        end
-        --Remove the setIds of non-sets from the table
-        for setId, _  in pairs(nonSetIds) do
-            if setId == setIdIdOfNewAPIVersion then
-                lib.noSetIdSets[setId] = nil
-            end
-        end
-    end
 ------------------------------------------------------------------------------------------------------------------------
-    --Remove wayshrines from the list where zoneIds are only available in newer APIversions
-    local zoneIdsOfNewAPIVersionOnly = {
-        1160, --Werstern Skyrim
-        1161, --Werstern Skyrim Caverns
-    }
-    --Remove the wayshrines that are new!
-    local wayshrines2ZoneIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
-    for _, zoneIdOfNewAPIVersion in pairs(zoneIdsOfNewAPIVersionOnly) do
-        for wayshrineNodeIndex, zoneId in pairs(wayshrines2ZoneIds) do
-            if zoneId == zoneIdOfNewAPIVersion then
-                lib.setDataPreloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID][wayshrineNodeIndex] = nil
+-- Remove set data from the preloaded tables which is not given at the current API version
+------------------------------------------------------------------------------------------------------------------------
+local function removeFutureSetData()
+    if not checkIfPTSAPIVersionIsLive() then
+        ------------------------------------------------------------------------------------------------------------------------
+        --Check all setIds of the new APIversion
+        local setInfo = lib.setInfo
+        local setIdsToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+        local setIdsNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
+        local setNamesNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+        local nonSetIds = lib.noSetIdSets
+        local setIdsToSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
+        for _, setIdOfNewAPIVersion in pairs(setsOfNewerAPIVersion) do
+            --Remove setIds from the setInfo
+            for setId, _ in pairs(setInfo) do
+                lib.setInfo[setId] = nil
+            end
+            --Remove itemIds from the list where setIds are only available in newer APIversions
+            for setId, _  in pairs(setIdsToSetItemIds) do
+                if setId == setIdOfNewAPIVersion then
+                    lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId] = nil
+                end
+            end
+            --Remove itemIds of non-sets from the list where setIds are only available in newer APIversions
+            for setId, _  in pairs(setIdsNoSetToSetItemIds) do
+                if setId == setIdOfNewAPIVersion then
+                    lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId] = nil
+                end
+            end
+            --Remove names from the list where setIds are only available in newer APIversions
+            for setId, setData  in pairs(setIdsToSetNames) do
+d(">Checking setId for names: " ..tostring(setId))
+                if setId == setIdOfNewAPIVersion then
+d(">>removing future setName: " ..tostring(setData["en"]))
+                    lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
+                end
+            end
+            --Remove names of non-sets from the list where setIds are only available in newer APIversions
+            for setId, _  in pairs(setNamesNoSetToSetItemIds) do
+                if setId == setIdOfNewAPIVersion then
+                    lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID][setId] = nil
+                end
+            end
+            --Remove the setIds of non-sets from the table
+            for setId, _  in pairs(nonSetIds) do
+                if setId == setIdOfNewAPIVersion then
+                    lib.noSetIdSets[setId] = nil
+                end
             end
         end
+        ------------------------------------------------------------------------------------------------------------------------
+        --Remove wayshrines from the list where zoneIds are only available in newer APIversions
+        local zoneIdsOfNewAPIVersionOnly = {
+            1160, --Werstern Skyrim
+            1161, --Werstern Skyrim Caverns
+        }
+        --Remove the wayshrines that are new!
+        local wayshrines2ZoneIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
+        for _, zoneIdOfNewAPIVersion in pairs(zoneIdsOfNewAPIVersionOnly) do
+            for wayshrineNodeIndex, zoneId in pairs(wayshrines2ZoneIds) do
+                if zoneId == zoneIdOfNewAPIVersion then
+                    lib.setDataPreloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID][wayshrineNodeIndex] = nil
+                end
+            end
+        end
+        ------------------------------------------------------------------------------------------------------------------------
     end
-------------------------------------------------------------------------------------------------------------------------
 end
+removeFutureSetData()
 ------------------------------------------------------------------------------------------------------------------------
