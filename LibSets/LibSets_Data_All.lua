@@ -654,7 +654,7 @@ local function removeFutureSetData()
         local setNamesNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
         local nonSetIds = lib.noSetIdSets
         local setIdsToSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
-        for _, setIdOfNewAPIVersion in pairs(setsOfNewerAPIVersion) do
+        for _, setIdOfNewAPIVersion in ipairs(setsOfNewerAPIVersion) do
             --Remove setIds from the setInfo
             for setId, _ in pairs(setInfo) do
                 lib.setInfo[setId] = nil
