@@ -564,6 +564,7 @@ function lib.DebugResetSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
     lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
     lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
     d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'. Please do a /reloadui or logout to update the SavedVariables data now!")
 end
 
