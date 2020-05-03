@@ -272,7 +272,6 @@ local undauntedChestIds = {
         [2] = "Мадж аль-Рагат",
         [3] = "Ургарлаг Бич Вождей",
     },
-    --Thanks to Calamath 2020-01-18
     ["jp"] = {
         [1] = "赤髭グリリオン",           -- "Glirion the Redbeard"
         [2] = "マジ・アルラガス",         -- "Maj al-Ragath"
@@ -409,5 +408,5 @@ setmetatable(dropMechanicNames["jp"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["ru"], {__index = dropMechanicNamesEn})
 
 --Set itemId table value (key is the itemId)
-LIBSETS_SET_TEMID_TABLE_VALUE_OK    = 1
-LIBSETS_SET_TEMID_TABLE_VALUE_NOTOK = 2
+LIBSETS_SET_ITEMID_TABLE_VALUE_OK    = 1
+LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK = 2

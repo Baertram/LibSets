@@ -292,7 +292,7 @@ local function decompressSetIdItemIds(setId)
 		--Is the itemId a number: Then use the itemId directly
         local itemIdType = type(IdSource[j])
         if itemIdType=="number" then
-            workingTable[IdSource[j]] = LIBSETS_SET_TEMID_TABLE_VALUE_OK
+            workingTable[IdSource[j]] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
         --The itemId is a String (e.g. "200020, 3" -> Means itemId 200020 and 200020+1 and 200020+2 and 200020+3).
         --Split it at the , to get the starting itemId and the number of following itemIds
         elseif itemIdType == "string" then
@@ -300,7 +300,7 @@ local function decompressSetIdItemIds(setId)
 			local firstPart = tonumber(string.sub(IdSource[j], 1, commaSpot-1))
 			local lastPart = tonumber(string.sub(IdSource[j], commaSpot+1))
 			for i = 0, lastPart do
-				workingTable[firstPart + i] = LIBSETS_SET_TEMID_TABLE_VALUE_OK
+				workingTable[firstPart + i] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
 			end
 		end
 	end
@@ -993,7 +993,7 @@ end
 --The key is the itemId and the value is the boolean value true
 --> Parameters: setId number: The set's setId
 -->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
---> Returns:    table setItemIds = {[setItemId1]=1,[setItemId2]=1, ...}
+--> Returns:    table setItemIds = {[setItemId1]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,[setItemId2]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK, ...}
 function lib.GetSetItemIds(setId, isNoESOSetId)
     if setId == nil then return end
     isNoESOSetId = isNoESOSetId or false
@@ -1350,7 +1350,7 @@ end
 --Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType
 --> Returns:    table with key = setId, value = table which contains (as example for setType = LIBSETS_SETTYPE_CRAFTED)
 ---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
------->             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= 1 (e.g. [12345]=1,)
+------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= 1 (e.g. [12345]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,)
 ------>             2nd subtable with key LIBSETS_TABLEKEY_SETNAMES ("setNames") containing a pair of [language] = "Set name String" (e.g. ["en"]= Crafted set name 1",)
 ---             Example:
 ---             [setId] = {

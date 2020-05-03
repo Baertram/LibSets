@@ -194,60 +194,9 @@ end
 
 --======= SET ItemId compression =====================================================================================
 --Thanks to Dolgubon for the base function code from his LibLazyCrafting!
---[[
-local function compressSetItemIds()
-	local apiVersionDifference = GetAPIVersion() - 100029
-	local estimatedTime = math.floor((20000*apiVersionDifference+200000)/300*25/1000)+3
-	d("LibSets: Beginning scrape of set items. Estimated time: "..estimatedTime.."s")
-	local craftedItemIds = {}
-	for k, setTable in pairs(LibStub:GetLibrary("LibLazyCrafting").GetSetIndexes()) do
-		craftedItemIds[setTable[4] ] = {}
-	end
-	craftedItemIds[0]=nil
-	local excludedTraits={[9]=true,[19]=true,[20]=true,[10]=true,[24]=true,[27]=true,}
-	local function isExcludedTrait(a)
-		local trait=GetItemLinkTraitInfo(a)
-		return excludedTraits[trait]
-	end
-	local maxloop=1
-	local function loopSpacer(start, last, functionToRun, interval)
-		if start<last then
-			for i = start, start+interval do
-				functionToRun(i)
-			end
-			if maxloop>1000000 then
-				return
-			end
-			maxloop = maxloop+1
-			zo_callLater(
-				function()
-				loopSpacer(start+interval+1, last, functionToRun, interval)
-			end
-			,25)
-		else
-			LibLazyCraftingSavedVars.SetIds[0] = itemSetIds[0]
-			LibLazyCraftingSavedVars.lastScrapedAPIVersion = GetAPIVersion()
-			d("LibLazyCrafting: Item Scrape complete")
-		end
-	end
-
-	loopSpacer(1,200000+20000*apiVersionDifference,
-		function(id)
-			local link="|H1:item:"..id..":0:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
-			local itemType,specializedType=GetItemLinkItemType(link)
-			if itemType<3 and itemType>0 then
-				if (specializedType==300 or specializedType==0 or specializedType==250)and not isExcludedTrait(link) and GetItemLinkFlavorText(link)==""  then
-					local isSet,_,_,_,_,setId=GetItemLinkSetInfo(link)
-					if craftedItemIds[setId] and isSet then
-						table.insert(craftedItemIds[setId],id)
-					end
-				end
-			end
-		end,300)
-
-end
-]]
-
+-- Will compress the itemIds which are next to each other (e.g. 20000, 20001, 20002, etc.) by transfering them to a string
+--value containing the starting itemId + a , and then the number of following itemIds, e.g.: 20000,3 -> means 20000, 20001, 20002, 20003
+--Decompressed in function LibSets.DecompressSetIdItemIds(setId) and held in cache table (if decompressed) LibSets.CachedSetItemIdsTable
 local function compressSetItemIdTable(toMinify)
     local minifiedTable={}
     local numConsecutive,lastPosition = 0,1
@@ -273,7 +222,7 @@ local function compressSetItemIdTable(toMinify)
 end
 
 local function compressSetItemIdsNow(setsDataTable)
-    d("==============================================================\n[".. MAJOR .. "]Compressing setItemIds now")
+    d("[".. MAJOR .. "] Compressing the set itemIds now...")
     LoadSavedVariables()
     if setsDataTable == nil then setsDataTable = lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] end
     if not setsDataTable then
@@ -292,7 +241,7 @@ local function compressSetItemIdsNow(setsDataTable)
         lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = {}
         lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = compressSetItemIdTable(helperTabNoGapIndex)
     end
-    d("[".. MAJOR .. "]Compression of setItemIds finished")
+    d(">>> [" .. MAJOR .. "] Compression of set itemIds has finished. Please do a /reloadui to update the SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED .. "\' properly! <<<")
 end
 lib.DebugCompressSetItemIdsNow = compressSetItemIdsNow
 
@@ -359,13 +308,18 @@ local sets = {}
 local setCount = 0
 local itemCount = 0
 local itemIdsScanned = 0
-local function showSetCountsScanned(finished)
+local function showSetCountsScanned(finished, keepUncompressedetItemIds)
+    keepUncompressedetItemIds = keepUncompressedetItemIds or false
     finished = finished or false
     d(debugOutputStartLine .."[" .. MAJOR .."]Scanned itemIds: " .. tostring(itemIdsScanned))
     d("-> Sets found: "..tostring(setCount))
     d("-> Set items found: "..tostring(itemCount))
-    if finished then
-        d(">>> [" .. MAJOR .. "] Scanning of sets has finished! Please do a /reloadui to update the SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS .. "\' properly! <<<")
+    if finished == true then
+        local temporarilyText = ""
+        if not keepUncompressedetItemIds then
+            temporarilyText = " temporarily"
+        end
+        d(">>> [" .. MAJOR .. "] Scanning of sets has finished! SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS .. "\' was"..temporarilyText.." written! <<<")
         --Save the data to the SavedVariables now
         if setCount > 0 then
             LoadSavedVariables()
@@ -373,6 +327,12 @@ local function showSetCountsScanned(finished)
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
             --Compress the itemIds now to lower the fileSize of LibSets_Data_all.lua later (copied setItemIds from SavedVariables)
             compressSetItemIdsNow(sets)
+            --Keep the uncompressed setItemIds, or delete them again?
+            if not keepUncompressedetItemIds then
+                --Free the SavedVariables of the uncompressed set itemIds
+                lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+                d(">>> SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS .. "\' was deleted again to free space and speed-up the loading screens! <<<")
+            end
         end
     end
     d("<<" .. debugOutputStartLine)
@@ -380,7 +340,7 @@ end
 --Load a package of 5000 itemIds and scan it:
 --Build an itemlink from the itemId, check if the itemLink is not crafted, if the itemType is a possible set itemType, check if the item is a set:
 --If yes: Update the table sets and setNames, and add the itemIds found for this set to the sets table
---Format of the sets table is: sets[setId] = {[itemIdOfSetItem]=1, ...}
+--Format of the sets table is: sets[setId] = {[itemIdOfSetItem]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK, ...}
 local function loadSetsByIds(from,to)
     for setItemId=from,to do
         itemIdsScanned = itemIdsScanned + 1
@@ -398,7 +358,7 @@ local function loadSetsByIds(from,to)
                             --Update the set counts value
                             setCount = setCount + 1
                         end
-                        sets[setId][setItemId] = LIBSETS_SET_TEMID_TABLE_VALUE_OK
+                        sets[setId][setItemId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
                         --Update the set's item count
                         itemCount = itemCount + 1
                     end
@@ -412,7 +372,11 @@ end
 --Scan all sets data by scanning all itemIds in the game via a 5000 itemId package size (5000 itemIds scanned at once),
 --for x loops (where x is the multiplier number e.g. 40, so 40x5000 itemIds will be scanned for set data)
 --This takes some time and the chat will show information about found sets and item counts during the packages get scanned.
-local function scanAllSetData()
+--The parameter doNotKeepUncompressedetItemIds boolean specifies if the table lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] will be
+--kept after the set itemIds were scanned. The SV file is pretty big because of this table so normally only the compressed
+--itemIds will be kept!
+local function scanAllSetData(keepUncompressedetItemIds)
+    keepUncompressedetItemIds = keepUncompressedetItemIds or false
     local numItemIdPackages     = lib.debugNumItemIdPackages
     local numItemIdPackageSize  = lib.debugNumItemIdPackageSize
 
@@ -454,7 +418,7 @@ local function scanAllSetData()
     end
     --Were all item IDs scanned? Show the results list now and update the SavedVariables
     zo_callLater(function()
-        showSetCountsScanned(true)
+        showSetCountsScanned(true, keepUncompressedetItemIds)
     end, milliseconds + 2000)
 end
 lib.DebugScanAllSetData = scanAllSetData
