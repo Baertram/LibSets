@@ -4,6 +4,7 @@ assert(LibSets == nil, "[LibSets]Library was loaded before already!")
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets
+
 ------------------------------------------------------------------------------------------------------------------------
 --Library base values
 local MAJOR, MINOR = "LibSets", 0.16
@@ -13,7 +14,37 @@ lib.svName          = "LibSets_SV_Data"
 lib.svVersion       = 0.16
 lib.setsLoaded      = false
 lib.setsScanning    = false
-
+------------------------------------------------------------------------------------------------------------------------
+--vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+--!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+--The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
+-->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
+-->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
+lib.lastSetsPreloadedCheckAPIVersion = 100031 --Harrowstorm
+--^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------------------------------------------------------------------------
+local APIVersions = {}
+--The actual API version on the live server we are logged in
+APIVersions["live"] = GetAPIVersion()
+--vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+--The current PTS APIVersion
+APIVersions["PTS"] = 100031 --Greymoor (Dark heart of Skyrim)
+--^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--Check if the PTS APIVersion is now live
+local function checkIfPTSAPIVersionIsLive()
+    local APIVersionLive = APIVersions["live"]
+    local APIVersionPTS  = APIVersions["PTS"]
+    return (APIVersionLive >= APIVersionPTS) or false
+end
+lib.APIVersions = APIVersions
+lib.checkIfPTSAPIVersionIsLive = checkIfPTSAPIVersionIsLive
 ------------------------------------------------------------------------------------------------------------------------
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds
@@ -69,12 +100,16 @@ LIBSETS_SETTYPE_MONSTER                         = 8 --"Monster"
 LIBSETS_SETTYPE_OVERLAND                        = 9 --"Overland"
 LIBSETS_SETTYPE_SPECIAL                         = 10 --"Special"
 LIBSETS_SETTYPE_TRIAL                           = 11 --"Trial"
-LIBSETS_SETTYPE_MYTHIC                          = 12 --"Mythic"
-LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_MYTHIC --End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
+if checkIfPTSAPIVersionIsLive() then
+    --Greymoor
+    LIBSETS_SETTYPE_MYTHIC                          = 12 --"Mythic"
+end
+LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_MYTHIC or LIBSETS_SETTYPE_TRIAL --End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
 lib.allowedSetTypes = {}
 for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
     lib.allowedSetTypes[i] = true
 end
+------------------------------------------------------------------------------------------------------------------------
 --Mapping between the LibSets setType and the used internal library table and counter variable
 --------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets setTyps !!!
@@ -113,10 +148,14 @@ lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_TRIAL                        ] ={
         ["tableName"] = "trialSets",
     },
-    [LIBSETS_SETTYPE_MYTHIC                       ] ={
-        ["tableName"] = "mythicSets",
-    },
 }
+if checkIfPTSAPIVersionIsLive() then
+    --Greymoor
+    lib.setTypeToLibraryInternalVariableNames[LIBSETS_SETTYPE_MYTHIC                       ] ={
+        ["tableName"] = "mythicSets",
+    }
+end
+------------------------------------------------------------------------------------------------------------------------
 --The suffix for the counter variables of the setType tables. e.g. setType LIBSETS_SETTYPE_OVERLAND table is called overlandSets.
 --The suffix is "Counter" so the variable for the counter is "overlandSetsCounter"
 lib.counterSuffix = "Counter"
@@ -202,15 +241,18 @@ lib.setTypesToName = {
         ["jp"] = GetString(SI_LFGACTIVITY4) or "試練",
         ["ru"] = GetString(SI_LFGACTIVITY4) or "Испытание",
     },
-    [LIBSETS_SETTYPE_MYTHIC                       ] = {
+}
+if checkIfPTSAPIVersionIsLive() then
+    --Greymoor
+    lib.setTypesToName[LIBSETS_SETTYPE_MYTHIC                       ] = {
         ["de"] = GetString(SI_ITEMDISPLAYQUALITY6),
         ["en"] = GetString(SI_ITEMDISPLAYQUALITY6),
         ["fr"] = GetString(SI_ITEMDISPLAYQUALITY6),
         ["jp"] = GetString(SI_ITEMDISPLAYQUALITY6) or "神話上の",
         ["ru"] = GetString(SI_ITEMDISPLAYQUALITY6) or "мифический",
-    },
-
-}
+    }
+end
+------------------------------------------------------------------------------------------------------------------------
 --Mapping table setType to setIds for this settype.
 -->Will be filled in file LibSets.lua, function LoadSets()
 lib.setTypeToSetIdsForSetTypeTable = {}
@@ -301,12 +343,15 @@ LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD               = 11    --Battleground r
 LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD  = 12    --Daily random dungeon mail rewards
 LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS              = 13    --Imperial city vaults
 LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD                   = 14    --Level up reward
-LIBSETS_DROP_MECHANIC_ANTIQUITIES                       = 15    --Antiquities (Mythic set items)
-LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_ANTIQUITIES
+if checkIfPTSAPIVersionIsLive() then
+    LIBSETS_DROP_MECHANIC_ANTIQUITIES                       = 15    --Antiquities (Mythic set items)
+end
+LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_ANTIQUITIES or LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD
 lib.allowedDropMechanics = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
 end
+------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets drop mechanics !!!
 -------------------------------------------------------------------------------
@@ -328,7 +373,6 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Tägliches Zufallsverlies Belohnungsemail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Kaiserstadt Bunker",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
-        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
 },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
@@ -345,7 +389,6 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level Aufstieg Belohnung",
-        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
@@ -362,7 +405,6 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Courrier de récompense de donjon journalière",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Cité impériale voûte",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Récompense de niveau supérieur",
-        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " Эл. адрес)",
@@ -379,7 +421,6 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Письмо с наградой за ежедневное рандомное подземелье",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Убежище Имперского города",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Вознаграждение за повышение уровня",
-        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール)",
@@ -396,9 +437,12 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "デイリーランダムダンジョン報酬メール",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "帝都の宝物庫",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "レベルアップ報酬",
-        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),
     },
 }
+if checkIfPTSAPIVersionIsLive() then
+    --Greymoor
+    lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_ANTIQUITIES] = GetString(SI_ANTIQUITY_TOOLTIP_TAG)
+end
 --Set metatable to get EN entries for missing other languages
 local dropMechanicNames = lib.dropMechanicIdToName
 local dropMechanicNamesEn = dropMechanicNames["en"]
@@ -406,7 +450,8 @@ setmetatable(dropMechanicNames["de"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["fr"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["jp"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["ru"], {__index = dropMechanicNamesEn})
-
+------------------------------------------------------------------------------------------------------------------------
 --Set itemId table value (key is the itemId)
 LIBSETS_SET_ITEMID_TABLE_VALUE_OK    = 1
 LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK = 2
+------------------------------------------------------------------------------------------------------------------------

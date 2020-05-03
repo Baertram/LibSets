@@ -218,6 +218,7 @@ local function compressSetItemIdTable(toMinify)
     else
         table.insert(minifiedTable,toMinify[lastPosition])
     end
+    table.sort(minifiedTable)
     return minifiedTable
 end
 

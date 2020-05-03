@@ -246,6 +246,8 @@ local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 ------------------------------------------------------------------------
 -- 	Local helper functions
 ------------------------------------------------------------------------
+local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
+
 ------------------------------------------------------------------------
 --======= SavedVariables ===============================================================================================
 --Load the SavedVariables
@@ -691,11 +693,12 @@ end
 --> Parameters: setId number: The set's setId
 --> Returns:    boolean isMythicSet
 function lib.IsMythicSet(setId)
+    --Todo: Remove after Greymoor update!
+    if not checkIfPTSAPIVersionIsLive() then return false end
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     return lib.mythicSets[setId] or false
 end
-
 
 --Returns true if the setId provided is a non ESO, own defined setId
 --See file LibSets_SetData_(APIVersion).lua, table LibSets.lib.noSetIdSets and description above it.
@@ -1081,6 +1084,26 @@ function lib.GetSetNames(setId)
     end
     if setNames[setId] == nil then return end
     return setNames[setId]
+end
+
+--Returns all sets names as table.
+--The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.
+--{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
+--> Returns: setNames table
+function lib.GetAllSetNames()
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setNames = {}
+    local setIds = lib.GetAllSetIds()
+    if not setIds then return end
+    for setId, isActive in pairs(setIds) do
+        if isActive == true then
+            local setNamesOfSetId = lib.GetSetNames(setId)
+            if setNamesOfSetId then
+                setNames[setId] = setNamesOfSetId
+            end
+        end
+    end
+    return setNames
 end
 
 --Returns the set info as a table

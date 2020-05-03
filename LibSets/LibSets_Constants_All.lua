@@ -2,32 +2,9 @@
 LibSets = LibSets or {}
 local lib = LibSets
 
-local APIVersions = {}
---The actual API version on the live server we are logged in
-APIVersions["live"] = GetAPIVersion()
+--Helper function for the API check
+local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
 
---The current PTS APIVersion
---!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-APIVersions["PTS"] = 100031 --Greymoor (Dark heart of Skyrim)
---!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-lib.APIVersions = APIVersions
-
---Check if the PTS APIVersion is now live
-local function checkIfPTSAPIVersionIsLive()
-    local APIVersionLive = APIVersions["live"]
-    local APIVersionPTS  = APIVersions["PTS"]
-    return (APIVersionLive >= APIVersionPTS) or false
-end
-
-------------------------------------------------------------------------------------------------------------------------
---The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
--->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
--->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100031 --Harrowstorm
-------------------------------------------------------------------------------------------------------------------------
 --DLC & Chapter ID constants (for LibSets)
 DLC_BASE_GAME               = 0
 DLC_IMPERIAL_CITY           = 1
