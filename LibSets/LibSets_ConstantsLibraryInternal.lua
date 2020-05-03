@@ -1,19 +1,33 @@
---Check if the library was loaded before already
-assert(LibSets == nil, "[LibSets]Library was loaded before already!")
+--Library base values
+local MAJOR, MINOR = "LibSets", 0.16
+
+--Check if the library was loaded before already + chat output
+function IsLibSetsAlreadyLoaded(outputMsg)
+    outputMsg = outputMsg or false
+    if LibSets ~= nil and LibSets.fullyLoaded == true then
+        --Was an older version loaded?
+        local loadedVersion = LibSets.version
+        if loadedVersion < MINOR then return false end
+        if outputMsg == true then d("["..MAJOR.."]Library was already loaded before, with version " ..tostring(loadedVersion) .."!") end
+        return true
+    end
+    return false
+end
+if IsLibSetsAlreadyLoaded(true) then return end
 
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets
-
 ------------------------------------------------------------------------------------------------------------------------
---Library base values
-local MAJOR, MINOR = "LibSets", 0.16
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
-lib.svVersion       = 0.16
+lib.svVersion       = MINOR -- changing this will reset the SavedVariables!
 lib.setsLoaded      = false
 lib.setsScanning    = false
+------------------------------------------------------------------------------------------------------------------------
+lib.fullyLoaded     = false
+lib.startedLoading  = true
 ------------------------------------------------------------------------------------------------------------------------
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

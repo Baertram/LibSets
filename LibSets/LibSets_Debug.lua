@@ -1,3 +1,6 @@
+--Check if the library was loaded before already w/o chat output
+if IsLibSetsAlreadyLoaded(false) then return end
+
 LibSets = LibSets or {}
 local lib = LibSets
 local MAJOR = lib.name

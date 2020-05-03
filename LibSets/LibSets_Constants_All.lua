@@ -1,3 +1,6 @@
+--Check if the library was loaded before already w/o chat output
+if IsLibSetsAlreadyLoaded(false) then return end
+
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets

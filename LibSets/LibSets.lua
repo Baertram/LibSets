@@ -219,6 +219,8 @@ After all info is updated you can look at the columns AX to BB which provide the
     from file LibSets.lua). So just keep them also in this table "lib.SetInfo"!
 ]]
 
+--Check if the library was loaded before already w/o chat output
+if IsLibSetsAlreadyLoaded(false) then return end
 
 LibSets = LibSets or {}
 local lib = LibSets
@@ -1426,6 +1428,7 @@ local function OnLibraryLoaded(event, name)
     --Only load lib if ingame
     if name ~= MAJOR then return end
     EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
+    lib.startedLoading = true
     lib.setsLoaded = false
     --The actual clients language
     lib.clientLang = GetCVar("language.2")
@@ -1443,6 +1446,7 @@ local function OnLibraryLoaded(event, name)
     lib.setsLoaded = true
     --Check for library LibZone
     lib.libZone = LibZone
+    lib.fullyLoaded = true
 end
 
 --Load the addon now
