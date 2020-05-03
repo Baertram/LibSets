@@ -657,7 +657,9 @@ local function removeFutureSetData()
         for _, setIdOfNewAPIVersion in ipairs(setsOfNewerAPIVersion) do
             --Remove setIds from the setInfo
             for setId, _ in pairs(setInfo) do
-                lib.setInfo[setId] = nil
+                if setId == setIdOfNewAPIVersion then
+                    lib.setInfo[setId] = nil
+                end
             end
             --Remove itemIds from the list where setIds are only available in newer APIversions
             for setId, _  in pairs(setIdsToSetItemIds) do
