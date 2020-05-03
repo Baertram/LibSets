@@ -323,6 +323,7 @@ end
 
 --Function to check if a setId is given for the current APIVersion
 local function checkIfSetExists(setId)
+d(">checkIfSetExists, setId: " ..tostring(setId))
     if not setId or setId <= 0 then return false end
     local setDoesExist = false
     local preloadedSetInfo      = lib.setInfo
@@ -335,7 +336,7 @@ local function checkIfSetExists(setId)
     --if the first entry of the itemIs table is "not" a number
     local compressedSetItemIdsOfSetId = preloadedSetItemIds[setId]
     local firstItemIdFound
-    for itemId, _ in pairs(compressedSetItemIdsOfSetId) do
+    for _, itemId in pairs(compressedSetItemIdsOfSetId) do
         if itemId and type(itemId) == "number" and itemId > 0 then
             firstItemIdFound = itemId
             break -- exit the for loop
@@ -397,6 +398,7 @@ end
 --Check which setIds were found and get the set's info from the preloaded data table "setInfo",
 --sort them into their appropriate set table and increase the counter for each table
 local function LoadSets()
+d("[LibSets]LoadSets")
     if lib.setsScanning then return end
     lib.setsScanning = true
     --Reset variables
@@ -417,6 +419,7 @@ local function LoadSets()
             end
         end
     end
+d(">1")
     --The overall setIds table
     lib.setIds = {}
     --The preloaded itemIds
@@ -431,6 +434,7 @@ local function LoadSets()
     local function checkSetTypeAndUpdateLibTablesAndCounters(setDataTable)
         --Check the setsData and move entries to appropriate table
         for setId, setData in pairs(setDataTable) do
+d(">>checking setId: " ..tostring(setId))
             --Does this setId exist within the current APIVersion?
             if checkIfSetExists(setId) then
                 --Add the setId to the setIds table
