@@ -297,6 +297,7 @@ function lib.DebugGetAllSetNames()
                             --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
                             --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
                             table.insert(setIdsTable, setId)
+d(">Added setId: " ..tostring(setId) .. ", name: " ..tostring(setName))
                             setNamesOfLangTable[setId] = setName
                             setNamesAdded = setNamesAdded +1
                         end
@@ -307,11 +308,15 @@ function lib.DebugGetAllSetNames()
     end
     if setNamesAdded > 0 then
         if svLoadedAlready == true then
+LibSets._setIdsTable = setIdsTable
+LibSets._setNamesOfLangTable = setNamesOfLangTable
             table.sort(setIdsTable)
             for _, setId in ipairs(setIdsTable) do
                 local setName = setNamesOfLangTable[setId]
-                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
-                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
+                if setName and setName ~= "" then
+                    lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
+                    lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
+                end
             end
         end
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'")
