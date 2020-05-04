@@ -297,7 +297,6 @@ function lib.DebugGetAllSetNames()
                             --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
                             --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
                             table.insert(setIdsTable, setId)
-d(">Added setId: " ..tostring(setId) .. ", name: " ..tostring(setName))
                             setNamesOfLangTable[setId] = setName
                             setNamesAdded = setNamesAdded +1
                         end
@@ -308,8 +307,6 @@ d(">Added setId: " ..tostring(setId) .. ", name: " ..tostring(setName))
     end
     if setNamesAdded > 0 then
         if svLoadedAlready == true then
-LibSets._setIdsTable = setIdsTable
-LibSets._setNamesOfLangTable = setNamesOfLangTable
             table.sort(setIdsTable)
             for _, setId in ipairs(setIdsTable) do
                 local setName = setNamesOfLangTable[setId]
