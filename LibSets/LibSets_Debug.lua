@@ -135,7 +135,6 @@ end
 function lib.DebugGetAllZoneInfo()
     local zoneData = GetAllZoneInfo()
     if zoneData ~= nil then
-        table.sort(zoneData)
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] or {}
         lib.svData[LIBSETS_TABLEKEY_ZONE_DATA][lib.clientLang] = {}
@@ -186,7 +185,6 @@ end
 function lib.DebugGetAllWayshrineNames()
     local wsNames = GetWayshrineNames()
     if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
-        table.sort(wsNames)
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] or {}
         lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][lib.clientLang] = {}
@@ -279,6 +277,8 @@ function lib.DebugGetAllSetNames()
     end
     --Check the set names now
     local setWasChecked = false
+    local setIdsTable = {}
+    local setNamesOfLangTable = {}
     for setIdToCheck, setsItemIds in pairs(allSetItemIds) do
         setWasChecked = false
         if setsItemIds then
@@ -294,8 +294,10 @@ function lib.DebugGetAllSetNames()
                                 LoadSavedVariables()
                                 svLoadedAlready = true
                             end
-                            lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
-                            lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
+                            --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
+                            --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
+                            table.insert(setIdsTable, setId)
+                            setNamesOfLangTable[setId] = setName
                             setNamesAdded = setNamesAdded +1
                         end
                     end
@@ -304,7 +306,14 @@ function lib.DebugGetAllSetNames()
         end
     end
     if setNamesAdded > 0 then
-        if svLoadedAlready == true then table.sort(lib.svData[LIBSETS_TABLEKEY_SETNAMES]) end
+        if svLoadedAlready == true then
+            table.sort(setIdsTable)
+            for _, setId in ipairs(setIdsTable) do
+                local setName = setNamesOfLangTable[setId]
+                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
+                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
+            end
+        end
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'")
     end
 end
@@ -457,6 +466,7 @@ local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenT
             dungeonsAddedCounter = dungeonsAddedCounter +1
         end
     end
+    table.sort(retTableDungeons)
     return dungeonsAddedCounter
 end
 
@@ -508,7 +518,6 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = {}
         lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
-        table.sort(lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA])
         d("->Stored " .. tostring(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_DUNGEONFINDER_DATA .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     else
         d("<No dungeon data was found!")
@@ -534,10 +543,10 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
         end
     end
     if collectiblesAdded >0 then
+        table.sort(collectibleDataScanned)
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = {}
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = collectibleDataScanned
-        table.sort(lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES])
         d("->Stored " .. tostring(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     end
 end
@@ -646,7 +655,6 @@ function lib.debugBuildMixedSetNames()
         --Reset the combined setNames table in the SavedVariables
         lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = {}
         lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = copyOfPreloadedSetNames
-        table.sort(lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES])
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MIXED_SETNAMES.."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     else
         d("<No setIds were updated!")
