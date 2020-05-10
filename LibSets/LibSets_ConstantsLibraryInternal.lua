@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.16
+local MAJOR, MINOR = "LibSets", 0.17
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -186,51 +186,51 @@ lib.setTypesToName = {
         ["ru"] = "Aрена",
     },
     [LIBSETS_SETTYPE_BATTLEGROUND                        ] = {
-        ["de"] = GetString(SI_LEADERBOARDTYPE4),
-        ["en"] = GetString(SI_LEADERBOARDTYPE4),
-        ["fr"] = GetString(SI_LEADERBOARDTYPE4),
-        ["jp"] = GetString(SI_LEADERBOARDTYPE4) or "バトルグラウンド",
-        ["ru"] = GetString(SI_LEADERBOARDTYPE4) or "Поле сражений",
+        ["de"] = "Schlachtfeld", --SI_LEADERBOARDTYPE4,
+        ["en"] = "Battleground",
+        ["fr"] = "Champ de bataille",
+        ["jp"] = "バトルグラウンド",
+        ["ru"] = "Поле сражений",
     },
     [LIBSETS_SETTYPE_CRAFTED                        ] = {
-        ["de"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
-        ["en"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
-        ["fr"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
-        ["jp"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED) or "クラフトセット",
-        ["ru"] = GetString(SI_ITEM_FORMAT_STR_CRAFTED) or "Созданный",
+        ["de"] = "Handwerklich hergestellt", --SI_ITEM_FORMAT_STR_CRAFTED
+        ["en"] = "Crafted",
+        ["fr"] = "Fabriqué",
+        ["jp"] = "クラフトセット",
+        ["ru"] = "Созданный",
     },
     [LIBSETS_SETTYPE_CYRODIIL                        ] = {
-        ["de"] = GetString(SI_CAMPAIGNRULESETTYPE1),
-        ["en"] = GetString(SI_CAMPAIGNRULESETTYPE1),
-        ["fr"] = GetString(SI_CAMPAIGNRULESETTYPE1),
-        ["jp"] = GetString(SI_CAMPAIGNRULESETTYPE1) or "シロディール",
-        ["ru"] = GetString(SI_CAMPAIGNRULESETTYPE1) or "Сиродил",
+        ["de"] = "Cyrodiil", --SI_CAMPAIGNRULESETTYPE1,
+        ["en"] = "Cyrodiil",
+        ["fr"] = "Cyrodiil",
+        ["jp"] = "シロディール",
+        ["ru"] = "Сиродил",
     },
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD  ] = {
-        ["de"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
-        ["en"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
-        ["fr"] = GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR),
-        ["jp"] = (GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR))  or "デイリー報酬",
-        ["ru"] = (GetString(SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT) .. " & " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) .. " " .. GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR))  or "Случайное ежедневное подземелье и награда Имперского города",
+        ["de"] = "Zufälliges Verlies & Kaiserstadt Belohnung", --SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT & SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR
+        ["en"] = "Random Dungeonds & Imperial city " .. ZO_CachedStrFormat("<<c:1>>", "Reward"),
+        ["fr"] = "Donjons aléatoires & Cité impßériale " .. ZO_CachedStrFormat("<<c:1>>", "Récompense"),
+        ["jp"] = "デイリー報酬",
+        ["ru"] = "Случайное ежедневное подземелье и награда Имперского города",
     },
     [LIBSETS_SETTYPE_DUNGEON                        ] = {
-        ["de"] = GetString(SI_INSTANCEDISPLAYTYPE2),
-        ["en"] = GetString(SI_INSTANCEDISPLAYTYPE2),
-        ["fr"] = GetString(SI_INSTANCEDISPLAYTYPE2),
-        ["jp"] = GetString(SI_INSTANCEDISPLAYTYPE2) or "ダンジョン",
-        ["ru"] = GetString(SI_INSTANCEDISPLAYTYPE2 or "Подземелье"),
+        ["de"] = "Verlies", --SI_INSTANCEDISPLAYTYPE2
+        ["en"] = "Dungeon",
+        ["fr"] = "Donjon",
+        ["jp"] = "ダンジョン",
+        ["ru"] = "Подземелье",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY                        ] = {
-        ["de"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
-        ["en"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
-        ["fr"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4),
-        ["jp"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) or "帝都",
-        ["ru"] = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4) or "Имперский город",
+        ["de"] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
+        ["en"] = "Imperial city",
+        ["fr"] = "Cité impßériale",
+        ["jp"] = "帝都",
+        ["ru"] = "Имперский город",
     },
     [LIBSETS_SETTYPE_MONSTER                        ] = {
         ["de"] = "Monster",
         ["en"] = "Monster",
-        ["fr"] = "Monster",
+        ["fr"] = "Monstre",
         ["jp"] = "モンスター",
         ["ru"] = "Монстр",
     },
@@ -242,28 +242,28 @@ lib.setTypesToName = {
         ["ru"] = "Cухопутный",
     },
     [LIBSETS_SETTYPE_SPECIAL                        ] = {
-        ["de"] = GetString(SI_HOTBARCATEGORY9),
-        ["en"] = GetString(SI_HOTBARCATEGORY9),
-        ["fr"] = GetString(SI_HOTBARCATEGORY9),
-        ["jp"] = GetString(SI_HOTBARCATEGORY9) or "スペシャル",
-        ["ru"] = GetString(SI_HOTBARCATEGORY9) or "Специальный",
+        ["de"] = "Besonders", --SI_HOTBARCATEGORY9
+        ["en"] = "Special",
+        ["fr"] = "Spécial",
+        ["jp"] = "スペシャル",
+        ["ru"] = "Специальный",
     },
     [LIBSETS_SETTYPE_TRIAL                        ] = {
-        ["de"] = GetString(SI_LFGACTIVITY4),
-        ["en"] = GetString(SI_LFGACTIVITY4),
-        ["fr"] = GetString(SI_LFGACTIVITY4),
-        ["jp"] = GetString(SI_LFGACTIVITY4) or "試練",
-        ["ru"] = GetString(SI_LFGACTIVITY4) or "Испытание",
+        ["de"] = "Prüfungen", --SI_LFGACTIVITY4
+        ["en"] = "Trial",
+        ["fr"] = "Épreuves",
+        ["jp"] = "試練",
+        ["ru"] = "Испытание",
     },
 }
 if checkIfPTSAPIVersionIsLive() then
     --Greymoor
     lib.setTypesToName[LIBSETS_SETTYPE_MYTHIC                       ] = {
-        ["de"] = GetString(SI_ITEMDISPLAYQUALITY6),
-        ["en"] = GetString(SI_ITEMDISPLAYQUALITY6),
-        ["fr"] = GetString(SI_ITEMDISPLAYQUALITY6),
-        ["jp"] = GetString(SI_ITEMDISPLAYQUALITY6) or "神話上の",
-        ["ru"] = GetString(SI_ITEMDISPLAYQUALITY6) or "мифический",
+        ["de"] = "Mythisch",
+        ["en"] = "Mythic",
+        ["fr"] = "Mythique",
+        ["jp"] = "神話上の",
+        ["ru"] = "мифический",
     }
 end
 ------------------------------------------------------------------------------------------------------------------------

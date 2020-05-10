@@ -848,6 +848,11 @@ function lib.IsCurrentDLC(setId)
     return wasAddedWithCurrentDLC
 end
 
+--Returns the table of DLCIDs of LibSets (the constants in LibSets.allowedDLCIds, see file LibSets_ConstantsLibraryInternal.lua)
+function lib.GetAllDLCIds()
+    return lib.allowedDLCIds
+end
+
 --Returns the number of researched traits needed to craft this set. This will only check the craftable sets!
 --> Parameters: setId number: The set's setId
 --> Returns:    traitsNeededToCraft number
@@ -885,6 +890,7 @@ end
 function lib.GetSetTypeName(libSetsSetType, lang)
     if libSetsSetType == nil then return end
     lang = lang or lib.clientLang
+    lang = string.lower(lang)
     if not lib.supportedLanguages[lang] then return end
     local allowedLibSetsSetTypes = lib.allowedSetTypes
     local allowedSetType = allowedLibSetsSetTypes[libSetsSetType] or false
@@ -899,7 +905,7 @@ function lib.GetSetTypeName(libSetsSetType, lang)
 end
 
 --Returns the table of setTypes of LibSets (the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
-function lib.GetSetTypes()
+function lib.GetAllSetTypes()
     return lib.allowedSetTypes
 end
 
@@ -957,6 +963,7 @@ function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return end
     if not allowedDropMechanics[libSetsDropMechanicId] then return end
     lang = lang or lib.clientLang
+    lang = string.lower(lang)
     if not lib.supportedLanguages[lang] then return end
     local dropMechanicNames = lib.dropMechanicIdToName[lang]
     if dropMechanicNames == nil then return false end
@@ -1057,6 +1064,7 @@ end
 --> Returns:    String setName
 function lib.GetSetName(setId, lang)
     lang = lang or lib.clientLang
+    lang = string.lower(lang)
     if not lib.supportedLanguages[lang] then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
     local setNames = {}
@@ -1319,6 +1327,7 @@ end
 function lib.GetUndauntedChestName(undauntedChestId, lang)
     if undauntedChestId < 1 or undauntedChestId > lib.countUndauntedChests then return end
     lang = lang or lib.clientLang
+    lang = string.lower(lang)
     if not lib.supportedLanguages[lang] then return end
     if not lib.undauntedChestIds or not lib.undauntedChestIds[lang] or not lib.undauntedChestIds[lang][undauntedChestId] then return end
     local undauntedChestNameLang = lib.undauntedChestIds[lang]
@@ -1334,6 +1343,7 @@ end
 function lib.GetZoneName(zoneId, lang)
     if not zoneId then return end
     lang = lang or lib.clientLang
+    lang = string.lower(lang)
     local zoneName = ""
     if lib.libZone ~= nil then
         zoneName = lib.libZone:GetZoneName(zoneId, lang)
@@ -1432,6 +1442,7 @@ local function OnLibraryLoaded(event, name)
     lib.setsLoaded = false
     --The actual clients language
     lib.clientLang = GetCVar("language.2")
+    lib.clientLang = string.lower(lib.clientLang)
     if not lib.supportedLanguages[lib.clientLang] then
         lib.clientLang = "en" --Fallback language if client language is not supported: English
     end

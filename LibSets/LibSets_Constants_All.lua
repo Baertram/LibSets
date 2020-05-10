@@ -34,6 +34,11 @@ end
 --You can use the function
 DLC_ITERATION_BEGIN = DLC_BASE_GAME
 DLC_ITERATION_END = DLC_GREYMOOR or DLC_HARROWSTORM
+lib.allowedDLCIds = {}
+for i = DLC_ITERATION_BEGIN, DLC_ITERATION_END do
+    lib.allowedDLCIds[i] = true
+end
+
 
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
 lib.dlcAndChapterAchievementIds = {
