@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.17
+local MAJOR, MINOR = "LibSets", 0.18
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -96,6 +96,7 @@ LIBSETS_TABLEKEY_COLLECTIBLE_NAMES              = "collectible" .. LIBSETS_TABLE
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID         = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_DROPMECHANIC                   = "dropMechanic"
 LIBSETS_TABLEKEY_DROPMECHANIC_NAMES             = LIBSETS_TABLEKEY_DROPMECHANIC .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES     = LIBSETS_TABLEKEY_DROPMECHANIC .. "Tooltip" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_MIXED_SETNAMES                 = "MixedSetNamesForDataAll"
 ------------------------------------------------------------------------------------------------------------------------
 --Set types
@@ -331,7 +332,7 @@ local undauntedChestIds = {
     ["jp"] = {
         [1] = "赤髭グリリオン",           -- "Glirion the Redbeard"
         [2] = "マジ・アルラガス",         -- "Maj al-Ragath"
-        [3] = "族長殺しのウルガルラグ",   -- "Urgarlag Chief-bane"
+        [3] = "族長殺しのウルガルラグ",    -- "Urgarlag Chief-bane"
     },}
 lib.undauntedChestIds = undauntedChestIds
 ------------------------------------------------------------------------------------------------------------------------
@@ -374,96 +375,140 @@ local cyrodiilAndBattlegroundText = GetString(SI_CAMPAIGNRULESETTYPE1) .. "/" ..
 lib.dropMechanicIdToName = {
     ["de"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Gerechter Lohn (" .. cyrodiilAndBattlegroundText .. " mail)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Stadt: Bruma (Quartiermeister)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Stadt: Erntefurt (Quartiermeister)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Stadt: Vlastarus (Quartiermeister)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil Stadt: Bruma (Quartiermeister)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil Stadt: Erntefurt (Quartiermeister)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil Stadt: Vlastarus (Quartiermeister)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena-Phasen Schatztruhe",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster Name",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Bosse in Gewölben haben die Chance, eine Taille oder Füße fallen zu lassen.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Überland Gruppenbosse haben eine Chance von 100%, Kopf, Brust, Beine oder Waffen fallen zu lassen.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Öffentliche Dungeon-Bosse haben die Möglichkeit, eine Schulter, Handschuhe oder eine Waffe fallen zu lassen.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Truhen, die durch das Besiegen eines Dunklen Ankers gewonnen wurden, haben eine Chance von 100%, einen Ring oder ein Amulett fallen zu lassen.\nSchatztruhen, welche man in der Zone findet, haben eine Chance irgendein Setteil zu gewähren, das in dieser Zone droppen kann:\n-Einfache Truhen haben eine geringe Chance\n-Mittlere Truhen haben eine gute Chance\n-Fortgeschrittene- und Meisterhafte-Truhen haben eine garantierte Chance\n-Schatztruhen, die durch eine Schatzkarte gefunden wurden, haben eine garantierte Chance",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Bosse in Gewölben",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Überland Gruppenbosse",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Öffentliche Dungeon-Bosse",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Truhen",
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Belohnung in Schlachtfeldern",
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Tägliches Zufallsverlies Belohnungsemail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Kaiserstadt Bunker",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level Aufstieg Belohnung",
 },
     ["en"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "City: Bruma (quartermaster)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "City: Cropsford (quartermaster)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "City: Vlastarus (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil City: Bruma (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil City: Cropsford (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil City: Vlastarus (quartermaster)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena stage chest",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster name",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses have a chance to drop a waist or feet.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests gained from defeating a Dark Anchor have a 100% chance to drop a ring or amulet.\nTreasure chests found in the world have a chance to grant any set piece that can drop in that zone:\n-Simple chests have a slight chance\n-Intermediate chests have a good chance\n-Advanced and Master chests have a guaranteed chance\n-Treasure chests found from a Treasure Map have a guaranteed chance",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests",
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Battlegounds reward",
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
     },
     ["fr"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Ville: Bruma (maître de manœuvre)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Ville: Gué-les-Champs (maître de manœuvre)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Ville: Vlastrus (maître de manœuvre)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil Ville: Bruma (maître de manœuvre)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil Ville: Gué-les-Champs (maître de manœuvre)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil Ville: Vlastrus (maître de manœuvre)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Coffre d'étape Arena",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Nom du monstre",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Les boss de petit donjon ont une chance de laisser tomber une taille ou des pieds.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Les boss de zone ouvertes ont 100% de chances de laisser tomber la tête, la poitrine, les jambes ou l'arme.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Les boss de donjon public ont une chance de laisser tomber une épaule, une main ou une arme.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Les coffres obtenus en battant une ancre noire ont 100% de chances de laisser tomber un anneau ou une amulette.\nLes coffres au trésor trouvés dans le monde ont une chance d'accorder n'importe quelle pièce fixe qui peut tomber dans cette zone:\n-les coffres simples ont une légère chance \n-Les coffres intermédiaires ont de bonnes chances\n-Les coffres avancés et les maîtres ont une chance garantie\n-Les coffres au trésor trouvés sur une carte au trésor ont une chance garantie",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Les boss de petit donjon",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Les boss de zone ouvertes",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Les boss de donjon public",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Les coffres",
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Récompense de Champ de bataille",
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Courrier de récompense de donjon journalière",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Cité impériale voûte",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Récompense de niveau supérieur",
     },
     ["ru"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " Эл. адрес)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "город: Брума (квартирмейстер)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "город: Кропсфорд (квартирмейстер)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "город: Властарус (квартирмейстер)",
-        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Стадион арены",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil город: Брума (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil город: Кропсфорд (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil город: Властарус (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Cyrodiil Стадион арены",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Имя монстра",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Боссы вылазок дают шанс выпадания талии или голени.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Групповые боссы дают 100% шанс выпадания головы, груди, ног или оружия.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Боссы публичных подземелий дают шанс выпадания плечей, рук или оружия.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Сундуки, полученные от побед над Темным якорем, имеют 100% шанс выпадания кольца или амулета.\nСундуки сокровищ, найденные в мире, дают шанс получить любой сетовый кусок, выпадающий в этой зоне:\n- простые сундуки дают незначительный шанс\n- средние сундуки дают хороший шанс\n- продвинутые и мастерские сундуки дают гарантированный шанс\n- сундуки сокровищ, найденные по Карте сокровищ, дают гарантированный шанс",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Боссы вылазок",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Групповые боссы",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Боссы публичных подземелий",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Сундуки",
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Награды полей сражений",
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Письмо с наградой за ежедневное рандомное подземелье",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Убежище Имперского города",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Вознаграждение за повышение уровня",
     },
     ["jp"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "シティ: ブルーマ (補給係)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "シティ: クロップスフォード (補給係)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "シティ: ヴラスタルス (補給係)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil シティ: ブルーマ (補給係)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil シティ: クロップスフォード (補給係)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil シティ: ヴラスタルス (補給係)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "アリーナステージチェスト",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "モンスター名",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "洞窟ボスは、胴体や足装備をドロップすることがあります。",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "ワールドボスは、頭、腰、脚の各防具、または武器のいずれかが必ずドロップします。",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "パブリックダンジョンのボスは、肩、手の各防具、または武器をドロップすることがあります。",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "洞窟ボス",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "ワールドボス",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "パブリックダンジョンのボス",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "宝箱",
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "バトルグラウンドの報酬",
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "デイリーランダムダンジョン報酬メール",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "帝都の宝物庫",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "レベルアップ報酬",
     },
 }
+lib.dropMechanicIdToNameTooltip = {
+    ["de"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = cyrodiilAndBattlegroundText .. " mail",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Bosse in Gewölben haben die Chance, eine Taille oder Füße fallen zu lassen.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Überland Gruppenbosse haben eine Chance von 100%, Kopf, Brust, Beine oder Waffen fallen zu lassen.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Öffentliche Dungeon-Bosse haben die Möglichkeit, eine Schulter, Handschuhe oder eine Waffe fallen zu lassen.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Truhen, die durch das Besiegen eines Dunklen Ankers gewonnen wurden, haben eine Chance von 100%, einen Ring oder ein Amulett fallen zu lassen.\nSchatztruhen, welche man in der Zone findet, haben eine Chance irgendein Setteil zu gewähren, das in dieser Zone droppen kann:\n-Einfache Truhen haben eine geringe Chance\n-Mittlere Truhen haben eine gute Chance\n-Fortgeschrittene- und Meisterhafte-Truhen haben eine garantierte Chance\n-Schatztruhen, die durch eine Schatzkarte gefunden wurden, haben eine garantierte Chance",
+},
+    ["en"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses have a chance to drop a waist or feet.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests gained from defeating a Dark Anchor have a 100% chance to drop a ring or amulet.\nTreasure chests found in the world have a chance to grant any set piece that can drop in that zone:\n-Simple chests have a slight chance\n-Intermediate chests have a good chance\n-Advanced and Master chests have a guaranteed chance\n-Treasure chests found from a Treasure Map have a guaranteed chance",
+    },
+    ["fr"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Les boss de petit donjon ont une chance de laisser tomber une taille ou des pieds.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Les boss de zone ouvertes ont 100% de chances de laisser tomber la tête, la poitrine, les jambes ou l'arme.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Les boss de donjon public ont une chance de laisser tomber une épaule, une main ou une arme.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Les coffres obtenus en battant une ancre noire ont 100% de chances de laisser tomber un anneau ou une amulette.\nLes coffres au trésor trouvés dans le monde ont une chance d'accorder n'importe quelle pièce fixe qui peut tomber dans cette zone:\n-les coffres simples ont une légère chance \n-Les coffres intermédiaires ont de bonnes chances\n-Les coffres avancés et les maîtres ont une chance garantie\n-Les coffres au trésor trouvés sur une carte au trésor ont une chance garantie",
+    },
+    ["ru"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " Эл. адрес)",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Боссы вылазок дают шанс выпадания талии или голени.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Групповые боссы дают 100% шанс выпадания головы, груди, ног или оружия.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Боссы публичных подземелий дают шанс выпадания плечей, рук или оружия.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Сундуки, полученные от побед над Темным якорем, имеют 100% шанс выпадания кольца или амулета.\nСундуки сокровищ, найденные в мире, дают шанс получить любой сетовый кусок, выпадающий в этой зоне:\n- простые сундуки дают незначительный шанс\n- средние сундуки дают хороший шанс\n- продвинутые и мастерские сундуки дают гарантированный шанс\n- сундуки сокровищ, найденные по Карте сокровищ, дают гарантированный шанс",
+    },
+    ["jp"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール)",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "洞窟ボスは、胴体や足装備をドロップすることがあります。",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "ワールドボスは、頭、腰、脚の各防具、または武器のいずれかが必ずドロップします。",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "パブリックダンジョンのボスは、肩、手の各防具、または武器をドロップすることがあります。",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
+    },
+}
 if checkIfPTSAPIVersionIsLive() then
     --Greymoor
     lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_ANTIQUITIES] = GetString(SI_ANTIQUITY_TOOLTIP_TAG)
+    lib.dropMechanicIdToNameTooltip["en"][LIBSETS_DROP_MECHANIC_ANTIQUITIES] = GetString(SI_ANTIQUITY_TOOLTIP_TAG)
 end
 --Set metatable to get EN entries for missing other languages
 local dropMechanicNames = lib.dropMechanicIdToName
+local dropMechanicTooltipNames = lib.dropMechanicIdToNameTooltip
 local dropMechanicNamesEn = dropMechanicNames["en"]
 setmetatable(dropMechanicNames["de"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["fr"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["jp"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["ru"], {__index = dropMechanicNamesEn})
+
+setmetatable(dropMechanicTooltipNames["de"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicTooltipNames["fr"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicTooltipNames["jp"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicTooltipNames["ru"], {__index = dropMechanicNamesEn})
 ------------------------------------------------------------------------------------------------------------------------
 --Set itemId table value (key is the itemId)
 LIBSETS_SET_ITEMID_TABLE_VALUE_OK    = 1

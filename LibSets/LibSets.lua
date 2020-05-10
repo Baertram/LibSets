@@ -912,10 +912,12 @@ end
 --Returns the dropMechanicIDs of the setId!
 --> Parameters: setId number:           The set's setId
 -->             withNames bolean:       Should the function return the dropMechanic names as well?
---> Returns:    LibSetsDropMechanicIds  table, LibSetsDropMechanicNamesForEachId table
+--> Returns:    LibSetsDropMechanicIds  table, LibSetsDropMechanicNamesForEachId table, LibSetsDropMechanicTooltipForEachId table
 ---> table LibSetsDropMechanicIds: The key is a number starting at 1 and increasing by 1, and the value is one of the dropMechanics
 ---> of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 ---> table LibSetsDropMechanicNamesForEachId: The key is the dropMechanicId (value of each line in table LibSetsDropMechanicIds)
+---> and the value is a subtable containing each language as key and the localized String as the value.
+---> table LibSetsDropMechanicTooltipForEachId: The key is the dropMechanicId (value of each line in table LibSetsDropMechanicIds)
 ---> and the value is a subtable containing each language as key and the localized String as the value.
 function lib.GetDropMechanic(setId, withNames)
     if setId == nil then return nil, nil end
@@ -932,46 +934,54 @@ function lib.GetDropMechanic(setId, withNames)
     if setData == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC] == nil then return nil, nil end
     local dropMechanicIds = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
     local dropMechanicNames
+    local dropMechanicTooltips
     if withNames then
         if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]["en"] ~= nil then
             dropMechanicNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
+            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES]["en"] ~= nil then
+                dropMechanicTooltips =  setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES]
+            end
         else
             dropMechanicNames = {}
+            dropMechanicTooltips = {}
             local supportedLanguages = lib.supportedLanguages
             if supportedLanguages then
                 for _, dropMechanicEntry in ipairs(dropMechanicIds) do
                     for supportedLanguage, isSupported in pairs(supportedLanguages) do
                         dropMechanicNames[dropMechanicEntry] = dropMechanicNames[dropMechanicEntry] or {}
+                        dropMechanicTooltips[dropMechanicEntry] = dropMechanicTooltips[dropMechanicEntry] or {}
                         if isSupported then
-                            dropMechanicNames[dropMechanicEntry][supportedLanguage] = lib.GetDropMechanicName(dropMechanicEntry, supportedLanguage)
+                            local dropMechanicName, dropMechanicTooltip = lib.GetDropMechanicName(dropMechanicEntry, supportedLanguage)
+                            dropMechanicNames[dropMechanicEntry][supportedLanguage] = dropMechanicName
+                            dropMechanicTooltips[dropMechanicEntry][supportedLanguage] = dropMechanicTooltip
                         end
                     end
                 end
             end
         end
     end
-    return dropMechanicIds, dropMechanicNames
+    return dropMechanicIds, dropMechanicNames, dropMechanicTooltips
 end
 
 --Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)
 --> Parameters: dropMechanicId number: The LibSetsDropMechanidIc (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 -->             lang String: The 2char language String for the used translation. If left empty the current client's
 -->             language will be used.
---> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc
+--> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc, String dropMechanicNameTooltipLocalized: The tooltip of the dropMechanic
 function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
-    local allowedDropMechanics = lib.allowedDropMechanics
     if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return end
+    local allowedDropMechanics = lib.allowedDropMechanics
     if not allowedDropMechanics[libSetsDropMechanicId] then return end
     lang = lang or lib.clientLang
     lang = string.lower(lang)
     if not lib.supportedLanguages[lang] then return end
     local dropMechanicNames = lib.dropMechanicIdToName[lang]
-    if dropMechanicNames == nil then return false end
+    local dropMechanicTooltipNames = lib.dropMechanicIdToNameTooltip[lang]
+    if dropMechanicNames == nil or dropMechanicTooltipNames == nil then return false end
     local dropMechanicName = dropMechanicNames[libSetsDropMechanicId]
-    if dropMechanicName then
-        if not dropMechanicName[lang] then return end
-    end
-    return dropMechanicName[lang]
+    local dropMechanicTooltip = dropMechanicTooltipNames[libSetsDropMechanicId]
+    if not dropMechanicName or dropMechanicName == "" then return end
+    return dropMechanicName, dropMechanicTooltip
 end
 
 --Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)

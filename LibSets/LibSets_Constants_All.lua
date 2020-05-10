@@ -42,6 +42,8 @@ end
 
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
 lib.dlcAndChapterAchievementIds = {
+    --Base game
+    [DLC_BASE_GAME] = -1,
     --Imperial city
     [DLC_IMPERIAL_CITY] = 1267,
     --Orsinium
@@ -88,6 +90,7 @@ local dlcAndChapterAchievementIds = lib.dlcAndChapterAchievementIds
 --For each entry in the list of example achievements above get the name of it's parent category (DLC, chapter)
 lib.DLCData = {}
 local DLCandCHAPTERdata = lib.DLCData
+lib.DLCData[DLC_BASE_GAME] = "Elder Scrolls Online"
 for dlcId, dlcAchievementId in ipairs(dlcAndChapterAchievementIds) do
     if dlcId and dlcAchievementId and dlcAchievementId > 0 then
         DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(dlcAchievementId)))
