@@ -506,6 +506,7 @@ local function LoadSets()
         end
     end
     lib.setsScanning = false
+    lib.setsLoaded = true
 end
 
 --======= WORLDMAP =====================================================================================================
@@ -531,7 +532,6 @@ end
 --368:  Arcane
 --369:  Artifact
 --370:  Legendary
---Todo: ??? respect new mythic quality somehow?
 --> Parameters: itemId number: The item's itemId
 -->             itemQualitySubType number: The itemquality number of ESO, described above (standard value: 366 -> Normal)
 --> Returns:    itemLink String: The generated itemLink for the item with the given quality
@@ -1062,7 +1062,7 @@ function lib.GetSetItemId(setId, equipType)
             end
             --Check the equipType against the itemLink's equipType
         else
-            if setItemId ~= nil and isCorrect == true then return setItemId end
+            if setItemId ~= nil and isCorrect == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then return setItemId end
         end
     end
     return
@@ -1450,23 +1450,33 @@ local function OnLibraryLoaded(event, name)
     EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
     lib.startedLoading = true
     lib.setsLoaded = false
+
+    --Check for libraries
+    -->LibZone
+    lib.libZone = LibZone
+
     --The actual clients language
     lib.clientLang = GetCVar("language.2")
     lib.clientLang = string.lower(lib.clientLang)
     if not lib.supportedLanguages[lib.clientLang] then
         lib.clientLang = "en" --Fallback language if client language is not supported: English
     end
+
     --The actual API version
-    lib.currentAPIVersion = (lib.APIVersions and lib.APIVersions["live"]) or GetAPIVersion()
+    lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
+    lib.currentAPIVersion = lib.APIVersions["live"]
+
     --Remove future APIverison setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
     lib.removeFutureSetData()
+    --...and then remove this function from the library
     lib.removeFutureSetData = nil
-    --Get the different setTypes from the "all sets table" setInfo in file LibSets_Data.lua and put them in their
-    --own tables
+
+    --Get the different setTypes from the preloaded "all sets table" setInfo in file LibSets_Data.lua and put them in their
+    --own tables of the library, to be used from the LibSets API functions
     LoadSets()
-    lib.setsLoaded = true
-    --Check for library LibZone
-    lib.libZone = LibZone
+
+    --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
+    --work properly now
     lib.fullyLoaded = true
 end
 

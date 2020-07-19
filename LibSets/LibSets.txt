@@ -9,9 +9,9 @@
 ## Title: LibSets
 ## Description: List of all ingame sets and functions to check what set type they are, set names, itemIds, drop locations, etc.
 ## Author: Baertram
-## APIVersion: 100030 100031
-## Version: 0.1.8
-## AddOnVersion: 000108
+## APIVersion: 100031 100032
+## Version: 0.2.1
+## AddOnVersion: 000201
 ## IsLibrary: true
 ## SavedVariables: LibSets_SV_Data
 ## OptionalDependsOn: LibZone
@@ -25,14 +25,14 @@ LibSets_ConstantsLibraryInternal.lua
 ##Constant values as base for ALL API versions
 LibSets_Constants_All.lua
 ##Constant values dependent only on the current API version(s): If the file exists, it will be loaded
-##Currently disabled!
+##-->Currently disabled!
 ##LibSets_Constants_$(APIVersion).lua
 
 ##Data file with the data for ALL Api versions
 ##!!!!!!!!!!!! Update the data from the API version dependent files to this file, if the API version increases, or the old APIversion data will not be loaded anymore !!!!!!!!!!
 LibSets_Data_All.lua
 ##Data file dependent on the current API version(s): If the file exists, it will be loaded
-##Currently disabled!
+##-->Currently disabled!
 ##LibSets_Data_$(APIVersion).lua
 
 ##Functions and base library code

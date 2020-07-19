@@ -13,6 +13,8 @@ local LoadSavedVariables = lib.LoadSavedVariables
 -- Uncomment to use them via the libraries global functions then
 -------------------------------------------------------------------------------------------------------------------------------
 local debugOutputStartLine = "==============================\n"
+local newSetIdsFound = {}
+
 local function GetAllZoneInfo()
     local lang = GetCVar("language.2")
     d(debugOutputStartLine.."[".. MAJOR .. " v" .. tostring(MINOR).."]GetAllZoneInfo, language: " ..tostring(lang))
@@ -132,6 +134,8 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 --Returns a list of the zone data in the current client language and saves it to the SavedVars table "zoneData" in this format:
 --zoneData[lang][zoneId] = zoneId .. "|" .. zoneIndex .. "|" .. parentZoneId .. "|" ..zoneNameCleanLocalizedInClientLanguage
+-->RegEx to transfer [1]= "1|2|1|Zone Name Clean", to 1|2|1|Zone Name Clean:   \[\d*\] = \"(.*)\",
+--->Afterwards put into excel and split at | into columns
 function lib.DebugGetAllZoneInfo()
     local zoneData = GetAllZoneInfo()
     if zoneData ~= nil then
@@ -148,6 +152,8 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 --Returns a list of the maps data in the current client language and saves it to the SavedVars table "maps" in this format:
 --maps[mapIndex] = mapIndex .. "|" .. localizedCleanMapNameInClientLanguage .. "|" .. zoneId .. "|" .. zoneNameLocalizedInClientLanguage
+-->RegEx to transfer [1]= "1|Map Name clean|1|Zone name clean", to 1|Map Name clean|1|Zone name clean:   \[\d*\] = \"(.*)\",
+--->Afterwards put into excel and split at | into columns
 function lib.DebugGetAllMapNames()
     local maps = GetMapNames(lib.clientLang)
     if maps ~= nil then
@@ -167,6 +173,8 @@ end
 --Returns a list of the wayshrine data (nodes) in the current client language and saves it to the SavedVars table "wayshrines" in this format:
 --wayshrines[i] = wayshrineNodeId .."|"..currentMapIndex.."|"..currentMapId.."|"..currentMapNameLocalizedInClientLanguage.."|"
 --..currentMapsZoneIndex.."|"..currentZoneId.."|"..currentZoneNameLocalizedInClientLanguage.."|"..wayshrinesPOIType.."|".. wayshrineNameCleanLocalizedInClientLanguage
+-->RegEx to transfer [1]= "1|1|Zone Name clean|1|Map name clean", to 1|1|Zone Name clean|1|Map name clean:   \[\d*\] = \"(.*)\",
+--->Afterwards put into excel and split at | into columns
 function lib.DebugGetAllWayshrineInfo()
     local ws = GetWayshrineInfo()
     if ws ~= nil then
@@ -182,6 +190,8 @@ end
 
 --Returns a list of the wayshrine names in the current client language and saves it to the SavedVars table "wayshrineNames" in this format:
 --wayshrineNames[clientLanguage][wayshrineNodeId] = wayshrineNodeId .. "|" .. wayshrineLocalizedNameCleanInClientLanguage
+-->RegEx to transfer [1]= "1|Wayshrine name", to 1|Wayshrine name:   \[\d*\] = \"(.*)\",
+--->Afterwards put into excel and split at | into columns
 function lib.DebugGetAllWayshrineNames()
     local wsNames = GetWayshrineNames()
     if wsNames ~= nil and wsNames[lib.clientLang] ~= nil then
@@ -251,18 +261,40 @@ local function compressSetItemIdsNow(setsDataTable)
 end
 lib.DebugCompressSetItemIdsNow = compressSetItemIdsNow
 
+--Return all the setId's itemIds as table, from file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+local function getAllSetItemIds()
+    newSetIdsFound = {}
+    for setId, setItemIds in pairs(lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]) do
+        if setItemIds ~= nil then
+            --Is this setId in table lib.setInfo already?
+            if lib.setInfo and lib.setInfo[setId] == nil then
+                table.insert(newSetIdsFound, setId)
+            end
+            lib.DecompressSetIdItemIds(setId)
+        end
+    end
+    return lib.CachedSetItemIdsTable
+end
+
 --Returns a list of the set names in the current client language and saves it to the SavedVars table "setNames" in this format:
 --setNames[setId][clientLanguage] = localizedAndCleanSetNameInClientLanguage
+--
+-->!!!!!!! ATTENTION ATTENTION ATTENTION ATTENTION ATTENTION ATTENTION ATTENTION ATTENTION ATTENTION ATTENTION !!!!!!!
 -->The table LibSets.setItemIds in file LibSets_Data.lua must be updated with all setId and itemIds in order to make this debug function scan ALL actual setIds!
--->Read above the table for instructions how to update it
---If new sets were scanned using function LibSets.DebugScanAllSetData() beforen using this function here (and there were found new sets which are not already
---in the table LibSets_Data.lua->LibSets.setItemIds, then the new setIds will be added here and dumped to the SavedVariables as well!
+-->Read above the table for instructions how to update it, e.g. using LibSets.DebugScanAllSetData() to scan for new itemIds
+--If new sets were scanned using function LibSets.DebugScanAllSetData() before using THIS function "DebugGetAllSetNames" here
+--(and there were found new sets which are not already in the table LibSets_Data.lua->LibSets.setItemIds), then the new setIds
+--will be added here and dumped to the SavedVariables as well!
 function lib.DebugGetAllSetNames()
     d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(lib.clientLang))
     --Use the SavedVariables to get the setNames of the current client language
     local svLoadedAlready = false
     local setNamesAdded = 0
-    local allSetItemIds = lib.GetAllSetItemIds()
+    --Does not work as new setIds are unknown to table lib.setInfo until we scan the data and add it to the excel, to generate the code for this table!
+    --So we FIRST need to call the function LibSets.DebugScanAllSetData(), update the table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS] with the scanned
+    --setIds and their compressed itemIds, and afterwards we can use this fucntion DebugGetAllSetNames to rad this table, to get the new setIds
+    --local allSetItemIds = lib.GetAllSetItemIds()
+    local allSetItemIds = getAllSetItemIds()
     if allSetItemIds then
         --Transfer new scanned setIds with their setItemIds temporarily to the table of the preloaded setItemIds
         --so looping over this table further down in this function will also add the names of new found sets!
@@ -279,6 +311,7 @@ function lib.DebugGetAllSetNames()
     local setWasChecked = false
     local setIdsTable = {}
     local setNamesOfLangTable = {}
+    local maxSetIdChecked = 0
     for setIdToCheck, setsItemIds in pairs(allSetItemIds) do
         setWasChecked = false
         if setsItemIds then
@@ -304,6 +337,9 @@ function lib.DebugGetAllSetNames()
                 end
             end
         end
+        if setIdToCheck > maxSetIdChecked then
+            maxSetIdChecked = setIdToCheck
+        end
     end
     if setNamesAdded > 0 then
         if svLoadedAlready == true then
@@ -315,6 +351,11 @@ function lib.DebugGetAllSetNames()
                     lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][lib.clientLang] = setName
                 end
             end
+        end
+        local foundNewSetsCount = (newSetIdsFound and #newSetIdsFound) or 0
+        d("-->Maximum setId found: " ..tostring(maxSetIdChecked) .. " / Added setNames: " ..tostring(setNamesAdded) .. "/ New setIds found: " .. tostring(foundNewSetsCount))
+        for _, setIdNewFound in ipairs(newSetIdsFound) do
+            d("--->new setId: " ..tostring(setIdNewFound) .. ": " .. tostring(lib.svData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound][lib.clientLang]))
         end
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'")
     end
@@ -335,6 +376,8 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds)
     d("-> Sets found: "..tostring(setCount))
     d("-> Set items found: "..tostring(itemCount))
     if finished == true then
+        newSetIdsFound = {}
+        local newSetsFound = 0
         local temporarilyText = ""
         if not keepUncompressedetItemIds then
             temporarilyText = " temporarily"
@@ -342,7 +385,39 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds)
         d(">>> [" .. MAJOR .. "] Scanning of sets has finished! SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS .. "\' was"..temporarilyText.." written! <<<")
         --Save the data to the SavedVariables now
         if setCount > 0 then
+            --Check how many new setId were found
+            if sets ~= nil then
+                for setId, _ in pairs(sets) do
+                    if lib.setInfo and lib.setInfo[setId] == nil then
+                        table.insert(newSetIdsFound, setId)
+                    end
+                end
+            end
+            newSetsFound = (newSetIdsFound and #newSetIdsFound) or 0
+            if newSetsFound > 0 then
+                d(">> !!! Found " .. tostring(newSetsFound) .. " new setIds !!!")
+                for idx, newSetId in ipairs(newSetIdsFound) do
+                    local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] and
+                            (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][lib.clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId]["en"])) or "n/a"
+                    newSetName = ZO_CachedStrFormat("<<C:1>>", newSetName)
+                    d(">>>New setId found: " ..tostring(newSetId) .. "|" .. tostring(newSetName))
+                    --Update the value of the table entry with the setId|setNameClean
+                    newSetIdsFound[idx] = tostring(newSetId) .. "|" .. tostring(newSetName)
+                end
+            end
+
             LoadSavedVariables()
+            --First save the new found setIds to the SavedVariables table ""
+            if newSetsFound > 0 then
+                --Add the dateTime and APIversion the new setIds were scanned
+                newSetIdsFound["UpdateType"]  = "LibSets.DebugScanAllSetData()"
+                newSetIdsFound["DateTime"]    = os.date("%c")
+                local worldName = GetWorldName()
+                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = {}
+                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = {}
+                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][GetAPIVersion()] = newSetIdsFound
+            end
+
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = {}
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
             --Compress the itemIds now to lower the fileSize of LibSets_Data_all.lua later (copied setItemIds from SavedVariables)
@@ -553,6 +628,62 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
     end
 end
 
+--Only show the setIds that were added with the latest "Set itemId scan" via function "LibSets.DebugScanAllSetData()".
+-->The function will compare the setIds of this table with the setIds in the file LibSets_Data_All.lua table lib.setInfo!
+--->If there are no new setIds you either did NOT use this function before, did a reloadui, copied the comtents from the
+--->SavedVariables table to the lua minifier AND have transfered the scanned itemIds to the file LibSets_Data_All.lua
+--->table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS].
+--->Or there are no new setIds since the last time you updated this table.
+function lib.DebugShowNewSetIds()
+    d("[" .. MAJOR .."]DebugShowNewSetIds - Checking for new setIds.")
+    newSetIdsFound = {}
+    for setId, _ in pairs(lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]) do
+        if lib.setInfo and lib.setInfo[setId] == nil then
+            table.insert(newSetIdsFound, setId)
+        end
+    end
+    local newSetsFound = (newSetIdsFound and #newSetIdsFound) or 0
+    if newSetsFound > 0 then
+        d(">Found " .. tostring(newSetsFound) .. " new setIds!")
+        for idx, newSetId in ipairs(newSetIdsFound) do
+            local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] and
+                    (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][lib.clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId]["en"])) or "n/a"
+            newSetName = ZO_CachedStrFormat("<<C:1>>", newSetName)
+            d(">>New setId found: " ..tostring(newSetId) .. "|" ..tostring(newSetName))
+            --Update the value of the table entry with the setId|setNameClean
+            newSetIdsFound[idx] = tostring(newSetId) .. "|" .. tostring(newSetName)
+        end
+    end
+    --Check if any setId was already added to LibSets.setInfo table but is also inside the "do not use for current live APIversion" table,
+    --and the current API version is not yet live
+    if not lib.checkIfPTSAPIVersionIsLive() and lib.setsOfNewerAPIVersion and #lib.setsOfNewerAPIVersion > 0 then
+        local setsOfNewerAPIVersion = lib.setsOfNewerAPIVersion
+        d(">Found " .. tostring(#setsOfNewerAPIVersion) .. " setIds ONLY available for APIVersion \'"..tostring(lib.APIVersions["PTS"]).."\'!")
+        for _, setIdForPTSAPI in ipairs(setsOfNewerAPIVersion) do
+            local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setIdForPTSAPI] and
+                    (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setIdForPTSAPI][lib.clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setIdForPTSAPI]["en"])) or "n/a"
+            newSetName = ZO_CachedStrFormat("<<C:1>>", newSetName)
+            d(">>SetId for PTS API: " ..tostring(setIdForPTSAPI) .. "|" ..tostring(newSetName))
+            table.insert(newSetIdsFound, tostring(setIdForPTSAPI) .. "|" .. tostring(newSetName))
+        end
+        newSetsFound = newSetsFound + #setsOfNewerAPIVersion
+    end
+    if newSetsFound == 0 then
+        d("<No new setIds were found!\nDid you run function \'LibSets.DebugScanAllSetData()\' before already?")
+        d("Please read the function's description text in file \'LibSets_Debug.lua\' to be able to update the internal needed tables \'LibSets.setDataPreloaded[\'setItemIds\'] properly, before you try to search for new setIds!")
+    else
+        LoadSavedVariables()
+        --First save the new found setIds to the SavedVariables table ""
+        --Add the dateTime and APIversion the new setIds were scanned
+        newSetIdsFound["UpdateType"]  = "LibSets.DebugShowNewSetIds()"
+        newSetIdsFound["DateTime"]    = os.date("%c")
+        local worldName = GetWorldName()
+        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = {}
+        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = {}
+        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][GetAPIVersion()] = newSetIdsFound
+    end
+end
+
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames()
     lib.DebugGetAllCollectibleNames()
@@ -565,6 +696,7 @@ end
 --This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
 function lib.DebugResetSavedVariables()
     LoadSavedVariables()
+    lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil

@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.18
+local MAJOR, MINOR = "LibSets", 0.20
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -35,7 +35,7 @@ lib.startedLoading  = true
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100031 --Harrowstorm
+lib.lastSetsPreloadedCheckAPIVersion = 100032 --Stonethorn (2020-07-18, PTS, API 100032)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -47,7 +47,11 @@ APIVersions["live"] = GetAPIVersion()
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The current PTS APIVersion
-APIVersions["PTS"] = 100031 --Greymoor (Dark heart of Skyrim)
+--Update this in order to let the API comparison function "checkIfPTSAPIVersionIsLive" work properly and recognize what version
+--of the game you are playing: live or PTS
+--> Several automatic routines like "scan the librray for new sets" is draised via this comparison function and LibSets' event
+--> EVENT_ADD_ON_LOADED -> function LoadSets()
+APIVersions["PTS"] = 100032 --Stonethorn
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -76,6 +80,7 @@ lib.supportedLanguages = {
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.
 local noSetIdString = "NoSetId"
+LIBSETS_TABLEKEY_NEWSETIDS                      = "NewSetIDs"
 LIBSETS_TABLEKEY_NAMES                          = "Names"
 LIBSETS_TABLEKEY_SETITEMIDS                     = "setItemIds"
 LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID            = LIBSETS_TABLEKEY_SETITEMIDS .. noSetIdString
@@ -115,11 +120,12 @@ LIBSETS_SETTYPE_MONSTER                         = 8 --"Monster"
 LIBSETS_SETTYPE_OVERLAND                        = 9 --"Overland"
 LIBSETS_SETTYPE_SPECIAL                         = 10 --"Special"
 LIBSETS_SETTYPE_TRIAL                           = 11 --"Trial"
+LIBSETS_SETTYPE_MYTHIC                          = 12 --"Mythic"
+--SetTypes only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
-    --Greymoor
-    LIBSETS_SETTYPE_MYTHIC                          = 12 --"Mythic"
 end
-LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_MYTHIC or LIBSETS_SETTYPE_TRIAL --End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
+--End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
+LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_MYTHIC
 lib.allowedSetTypes = {}
 for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
     lib.allowedSetTypes[i] = true
@@ -163,12 +169,17 @@ lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_TRIAL                        ] ={
         ["tableName"] = "trialSets",
     },
-}
-if checkIfPTSAPIVersionIsLive() then
-    --Greymoor
-    lib.setTypeToLibraryInternalVariableNames[LIBSETS_SETTYPE_MYTHIC                       ] ={
+    [LIBSETS_SETTYPE_MYTHIC                       ] = {
         ["tableName"] = "mythicSets",
+    },
+}
+--setTypeToLibraryInternalVariableNames only available on current PTS, or automatically available if PTS->live
+if checkIfPTSAPIVersionIsLive() then
+    --[[
+    lib.setTypeToLibraryInternalVariableNames[LIBSETS_SETTYPE_*                       ] ={
+        ["tableName"] = "",
     }
+    ]]
 end
 ------------------------------------------------------------------------------------------------------------------------
 --The suffix for the counter variables of the setType tables. e.g. setType LIBSETS_SETTYPE_OVERLAND table is called overlandSets.
@@ -256,16 +267,25 @@ lib.setTypesToName = {
         ["jp"] = "試練",
         ["ru"] = "Испытание",
     },
-}
-if checkIfPTSAPIVersionIsLive() then
-    --Greymoor
-    lib.setTypesToName[LIBSETS_SETTYPE_MYTHIC                       ] = {
+    [LIBSETS_SETTYPE_MYTHIC                       ] = {
         ["de"] = "Mythisch",
         ["en"] = "Mythic",
         ["fr"] = "Mythique",
         ["jp"] = "神話上の",
         ["ru"] = "мифический",
+    },
+}
+--Translations only available on current PTS, or automatically available if PTS->live
+if checkIfPTSAPIVersionIsLive() then
+    --[[
+    lib.setTypesToName[LIBSETS_SETTYPE_*                       ] = {
+        ["de"] = "",
+        ["en"] = "",
+        ["fr"] = "",
+        ["jp"] = "",
+        ["ru"] = "",
     }
+    ]]
 end
 ------------------------------------------------------------------------------------------------------------------------
 --Mapping table setType to setIds for this settype.
@@ -330,9 +350,9 @@ local undauntedChestIds = {
         [3] = "Ургарлаг Бич Вождей",
     },
     ["jp"] = {
-        [1] = "赤髭グリリオン",           -- "Glirion the Redbeard"
-        [2] = "マジ・アルラガス",         -- "Maj al-Ragath"
-        [3] = "族長殺しのウルガルラグ",    -- "Urgarlag Chief-bane"
+        [1] = "赤髭グリリオン",
+        [2] = "マジ・アルラガス",
+        [3] = "族長殺しのウルガルラグ",
     },}
 lib.undauntedChestIds = undauntedChestIds
 ------------------------------------------------------------------------------------------------------------------------
@@ -358,10 +378,13 @@ LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD               = 11    --Battleground r
 LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD  = 12    --Daily random dungeon mail rewards
 LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS              = 13    --Imperial city vaults
 LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD                   = 14    --Level up reward
+LIBSETS_DROP_MECHANIC_ANTIQUITIES                       = 15    --Antiquities (Mythic set items)
+--DropMechanic only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
-    LIBSETS_DROP_MECHANIC_ANTIQUITIES                       = 15    --Antiquities (Mythic set items)
+    --LIBSETS_DROP_MECHANIC_ = number
 end
-LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_ANTIQUITIES or LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD
+--Increase the maximum drop mechanic here after updating the drop mechanics !!!
+LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_ANTIQUITIES
 lib.allowedDropMechanics = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
@@ -468,6 +491,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests gained from defeating a Dark Anchor have a 100% chance to drop a ring or amulet.\nTreasure chests found in the world have a chance to grant any set piece that can drop in that zone:\n-Simple chests have a slight chance\n-Intermediate chests have a good chance\n-Advanced and Master chests have a guaranteed chance\n-Treasure chests found from a Treasure Map have a guaranteed chance",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
@@ -491,10 +515,12 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
     },
 }
+--DropMechanic translations only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
-    --Greymoor
-    lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_ANTIQUITIES] = GetString(SI_ANTIQUITY_TOOLTIP_TAG)
-    lib.dropMechanicIdToNameTooltip["en"][LIBSETS_DROP_MECHANIC_ANTIQUITIES] = GetString(SI_ANTIQUITY_TOOLTIP_TAG)
+    --[[
+    lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*)
+    lib.dropMechanicIdToNameTooltip["en"][LIBSETS_DROP_MECHANIC_*] = ""
+    ]]
 end
 --Set metatable to get EN entries for missing other languages
 local dropMechanicNames = lib.dropMechanicIdToName
