@@ -6,15 +6,53 @@ if IsLibSetsAlreadyLoaded(false) then return end
 LibSets = LibSets or {}
 local lib = LibSets
 
+------------------------------------------------------------------------------------------------------------------------
+--> Last updated: API 100032, Stonethorn, 2020-07-19, Baertram
+------------------------------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------------------------------------------------
 --Current APIversion is live or PTS check
 local isPTSAPIVersionLive = lib.checkIfPTSAPIVersionIsLive()
+---------------------------------------------------------------------------------------------------------------------------
 --Future APIversion sets
 local setsOfNewerAPIVersion
 local zoneIdsOfNewAPIVersionOnly
+--APIversion checks
+--The setIds of sets which are not on the live server yet, or wil lthere as the PTS APIversion chnages to the live server.
+--As long as they are not live yet they will be kept in the library internal tables (see above) BUT will be removed from
+--the used game's tables on the live server!
+setsOfNewerAPIVersion = {
+    --Stonethorn sets - START
+    513,
+    514,
+    515,
+    516,
+    517,
+    518,
+    534,
+    535,
+    --Stonethorn sets - END
+}
+lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
+---------------------------------------------------------------------------------------------------------------------------
+--Remove wayshrines from the list where zoneIds are only available in newer APIversions
+zoneIdsOfNewAPIVersionOnly = {
+    --Stonethorn zoneIds - START
+    808,
+    1197,
+    1198,
+    1201,
+    1204,
+    1205,
+    1206,
+    1233,
+    1234,
+    --Stonethorn zoneIds - END
+}
+lib.zoneIdsOfNewAPIVersionOnly = zoneIdsOfNewAPIVersionOnly
+---------------------------------------------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------
---> Last updated: API 100031, Greymoor, 2020-05-03, Baertram
-------------------------------------------------------------------------------------------------------------------------
 --The set info from the Excel file within LibSets folder:
 --> All information was collected ingame and from different websites by user @Baertram
 --The [setId] is the table's key
@@ -497,41 +535,17 @@ lib.setInfo = {
 [531] = {wayshrines={-1,-1,-1,}, dlcId=DLC_GREYMOOR	, zoneIds={635}, veteran=true	, setType=LIBSETS_SETTYPE_ARENA	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},
 [532] = {wayshrines={-1,-1,-1,}, dlcId=DLC_GREYMOOR	, zoneIds={635}, veteran=true	, setType=LIBSETS_SETTYPE_ARENA	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},
 [533] = {wayshrines={-1,-1,-1,}, dlcId=DLC_GREYMOOR	, zoneIds={635}, veteran=true	, setType=LIBSETS_SETTYPE_ARENA	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},
---Stonethorn
-[513] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1201}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Talfyg’s Treachery /    [Castle Thorn]
-[514] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1201}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Unleashed Terror /    [Castle Thorn]
-[515] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1201}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Crimson Twilight /    [Castle Thorn]
-[516] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1197}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Elemental Catalyst /    [Stone Garden]
-[517] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1197}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Kraglen’s Howl /    [Stone Garden]
-[518] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1197}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Arkasis’s Genius /    [Stone Garden]
-[534] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1197}, veteran=true	, setType=LIBSETS_SETTYPE_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Stone Husk /    [Stone Garden]
-[535] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1201}, veteran=true	, setType=LIBSETS_SETTYPE_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Lady Thorn /    [Castle Thorn]
+--Stonethorn - API 100032 - Updated 2020-07-19 by Baertram
+[513] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1201}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Talfyg’s Treachery / Talfygs Verrat   [Castle Thorn]
+[514] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1201}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Unleashed Terror / Entfesselter Schrecken   [Castle Thorn]
+[515] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1201}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Crimson Twilight / Scharlachrotes Zwielicht   [Castle Thorn]
+[535] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1201}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_MONSTER_NAME}, dropMechanicNames={['en']='Lady Thorn', ['de']='Fürstin Dorn'}},	 --Lady Thorn / Fürstin Dorn   [Castle Thorn]
+[516] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1197}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Elemental Catalyst / Elementarer Katalysator   [Stone Garden]
+[517] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1197}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Kraglen’s Howl / Kraglens Heulen   [Stone Garden]
+[518] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1197}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}},	 --Arkasis’s Genius / Arkasis' Genie   [Stone Garden]
+[534] = {wayshrines={-1,-1,-1,}, dlcId=DLC_STONETHORN	, zoneIds={1197}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_MONSTER_NAME}, dropMechanicNames={['en']='Arkasis the Mad Alchemist', ['de']='Arkasis der verrückte Alchemist'}},	 --Stone Husk / Steinhülle   [Stone Garden]
 }--lib.setInfo
 
----------------------------------------------------------------------------------------------------------------------------
---APIversion checks
---The setIds of sets which are not on the live server yet, or wil lthere as the PTS APIversion chnages to the live server.
---As long as they are not live yet they will be kept in the library internal tables (see above) BUT will be removed from
---the used game's tables on the live server!
-if not isPTSAPIVersionLive then
-    setsOfNewerAPIVersion = {
-        --Stonethorn sets - START
-        513,
-        514,
-        515,
-        516,
-        517,
-        518,
-        534,
-        535,
-        --Stonethorn sets - END
-    }
-    --Remove wayshrines from the list where zoneIds are only available in newer APIversions
-    zoneIdsOfNewAPIVersionOnly = {
-        --DLC name zoneIds - START
-        --DLC name zoneIds - END
-    }
-end
 ---------------------------------------------------------------------------------------------------------------------------
 --This table contains special set items, which got no unique ESO setId. A "fake" unique setId is needed to be manually created, starting at: 9999001!
 --The "fake" setId will be only 1 for the whole set. The data table should contain information about the set like wayshrines, zoneIds dlcId and setType value too, like the normal sets in table LibSets.setInfo (see above).
@@ -630,53 +644,55 @@ lib.setDataPreloaded = {
 -- Remove set data from the preloaded tables which is not given at the current API version (live server)
 ------------------------------------------------------------------------------------------------------------------------
 local function removeFutureSetData()
-    if not isPTSAPIVersionLive and setsOfNewerAPIVersion ~= nil then
-        ------------------------------------------------------------------------------------------------------------------------
-        --Check all setIds of the new APIversion
-        local setInfo = lib.setInfo
-        local setIdsToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
-        local setIdsNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
-        local setNamesNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
-        local nonSetIds = lib.noSetIdSets
-        local setIdsToSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
-        for _, setIdOfNewAPIVersion in ipairs(setsOfNewerAPIVersion) do
-            --Remove setIds from the setInfo
-            for setId, _ in pairs(setInfo) do
-                if setId == setIdOfNewAPIVersion then
-                    lib.setInfo[setId] = nil
+    if not isPTSAPIVersionLive then
+        if setsOfNewerAPIVersion ~= nil then
+            ------------------------------------------------------------------------------------------------------------------------
+            --Check all setIds of the new APIversion
+            local setInfo = lib.setInfo
+            local setIdsToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+            local setIdsNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
+            local setNamesNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+            local nonSetIds = lib.noSetIdSets
+            local setIdsToSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
+            for _, setIdOfNewAPIVersion in ipairs(setsOfNewerAPIVersion) do
+                --Remove setIds from the setInfo
+                for setId, _ in pairs(setInfo) do
+                    if setId == setIdOfNewAPIVersion then
+                        lib.setInfo[setId] = nil
+                    end
+                end
+                --Remove itemIds from the list where setIds are only available in newer APIversions
+                for setId, _  in pairs(setIdsToSetItemIds) do
+                    if setId == setIdOfNewAPIVersion then
+                        lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId] = nil
+                    end
+                end
+                --Remove itemIds of non-sets from the list where setIds are only available in newer APIversions
+                for setId, _  in pairs(setIdsNoSetToSetItemIds) do
+                    if setId == setIdOfNewAPIVersion then
+                        lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId] = nil
+                    end
+                end
+                --Remove names from the list where setIds are only available in newer APIversions
+                for setId, setData  in pairs(setIdsToSetNames) do
+                    if setId == setIdOfNewAPIVersion then
+                        lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
+                    end
+                end
+                --Remove names of non-sets from the list where setIds are only available in newer APIversions
+                for setId, _  in pairs(setNamesNoSetToSetItemIds) do
+                    if setId == setIdOfNewAPIVersion then
+                        lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID][setId] = nil
+                    end
+                end
+                --Remove the setIds of non-sets from the table
+                for setId, _  in pairs(nonSetIds) do
+                    if setId == setIdOfNewAPIVersion then
+                        lib.noSetIdSets[setId] = nil
+                    end
                 end
             end
-            --Remove itemIds from the list where setIds are only available in newer APIversions
-            for setId, _  in pairs(setIdsToSetItemIds) do
-                if setId == setIdOfNewAPIVersion then
-                    lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId] = nil
-                end
-            end
-            --Remove itemIds of non-sets from the list where setIds are only available in newer APIversions
-            for setId, _  in pairs(setIdsNoSetToSetItemIds) do
-                if setId == setIdOfNewAPIVersion then
-                    lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId] = nil
-                end
-            end
-            --Remove names from the list where setIds are only available in newer APIversions
-            for setId, setData  in pairs(setIdsToSetNames) do
-                if setId == setIdOfNewAPIVersion then
-                    lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
-                end
-            end
-            --Remove names of non-sets from the list where setIds are only available in newer APIversions
-            for setId, _  in pairs(setNamesNoSetToSetItemIds) do
-                if setId == setIdOfNewAPIVersion then
-                    lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID][setId] = nil
-                end
-            end
-            --Remove the setIds of non-sets from the table
-            for setId, _  in pairs(nonSetIds) do
-                if setId == setIdOfNewAPIVersion then
-                    lib.noSetIdSets[setId] = nil
-                end
-            end
-        end
+        end --if setsOfNewerAPIVersion ~= nil then
         ------------------------------------------------------------------------------------------------------------------------
         --Remove the wayshrines that are new!
         if not zoneIdsOfNewAPIVersionOnly == nil then
@@ -693,5 +709,4 @@ local function removeFutureSetData()
     end
 end
 lib.removeFutureSetData = removeFutureSetData
-lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
 ------------------------------------------------------------------------------------------------------------------------

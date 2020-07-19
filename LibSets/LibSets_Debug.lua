@@ -129,6 +129,45 @@ local function GetMapNames(lang)
     return mapNames
 end
 
+local function checkForNewSetIds(setIdTable, funcToCallForEachSetId)
+    if not setIdTable then return end
+    local runFuncForEachSetId = (funcToCallForEachSetId ~= nil and type(funcToCallForEachSetId) == "function") or false
+    newSetIdsFound = {}
+    local setsOfNewerAPIVersion = lib.setsOfNewerAPIVersion
+    for setId, setItemIds in pairs(setIdTable) do
+        local doAddAsNew = false
+        if setItemIds ~= nil then
+            if lib.setInfo then
+                if lib.setInfo[setId] == nil then
+                    doAddAsNew = true
+                else
+                    if setsOfNewerAPIVersion ~= nil then
+                        for _, setIdOfNewerAPIVersion in ipairs(setsOfNewerAPIVersion) do
+                            if setId == setIdOfNewerAPIVersion then
+                                doAddAsNew = true
+                                break -- exit the loop
+                            end
+                        end
+                    end
+                end
+                if doAddAsNew == true then
+                    table.insert(newSetIdsFound, setId)
+                end
+            end
+            if runFuncForEachSetId == true then
+                funcToCallForEachSetId(setId)
+            end
+        end
+    end
+    table.sort(newSetIdsFound)
+end
+
+--Return all the setId's itemIds as table, from file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+local function getAllSetItemIds()
+    checkForNewSetIds(lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS], lib.DecompressSetIdItemIds)
+    return lib.CachedSetItemIdsTable
+end
+
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for zone names -> Save them in the SavedVariables "zoneData"
 ------------------------------------------------------------------------------------------------------------------------
@@ -261,21 +300,6 @@ local function compressSetItemIdsNow(setsDataTable)
 end
 lib.DebugCompressSetItemIdsNow = compressSetItemIdsNow
 
---Return all the setId's itemIds as table, from file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
-local function getAllSetItemIds()
-    newSetIdsFound = {}
-    for setId, setItemIds in pairs(lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]) do
-        if setItemIds ~= nil then
-            --Is this setId in table lib.setInfo already?
-            if lib.setInfo and lib.setInfo[setId] == nil then
-                table.insert(newSetIdsFound, setId)
-            end
-            lib.DecompressSetIdItemIds(setId)
-        end
-    end
-    return lib.CachedSetItemIdsTable
-end
-
 --Returns a list of the set names in the current client language and saves it to the SavedVars table "setNames" in this format:
 --setNames[setId][clientLanguage] = localizedAndCleanSetNameInClientLanguage
 --
@@ -312,11 +336,12 @@ function lib.DebugGetAllSetNames()
     local setIdsTable = {}
     local setNamesOfLangTable = {}
     local maxSetIdChecked = 0
+
     for setIdToCheck, setsItemIds in pairs(allSetItemIds) do
         setWasChecked = false
         if setsItemIds then
             for itemIdToCheck, _ in pairs(setsItemIds) do
-                if not setWasChecked and itemIdToCheck then
+                if not setWasChecked and itemIdToCheck ~= nil then
                     local isSet, setName, setId = lib.IsSetByItemId(itemIdToCheck)
                     if isSet and setId == setIdToCheck then
                         setWasChecked = true
@@ -337,11 +362,17 @@ function lib.DebugGetAllSetNames()
                 end
             end
         end
+        --Remember the highest setId which was checked
         if setIdToCheck > maxSetIdChecked then
             maxSetIdChecked = setIdToCheck
         end
     end
+    --Did we add setNames?
     if setNamesAdded > 0 then
+        if not svLoadedAlready then
+            LoadSavedVariables()
+            svLoadedAlready = true
+        end
         if svLoadedAlready == true then
             table.sort(setIdsTable)
             for _, setId in ipairs(setIdsTable) do
@@ -353,7 +384,7 @@ function lib.DebugGetAllSetNames()
             end
         end
         local foundNewSetsCount = (newSetIdsFound and #newSetIdsFound) or 0
-        d("-->Maximum setId found: " ..tostring(maxSetIdChecked) .. " / Added setNames: " ..tostring(setNamesAdded) .. "/ New setIds found: " .. tostring(foundNewSetsCount))
+        d("-->Maximum setId found: " ..tostring(maxSetIdChecked) .. " / Added set names: " ..tostring(setNamesAdded) .. " / New setIds found: " .. tostring(foundNewSetsCount))
         for _, setIdNewFound in ipairs(newSetIdsFound) do
             d("--->new setId: " ..tostring(setIdNewFound) .. ": " .. tostring(lib.svData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound][lib.clientLang]))
         end
@@ -387,11 +418,7 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds)
         if setCount > 0 then
             --Check how many new setId were found
             if sets ~= nil then
-                for setId, _ in pairs(sets) do
-                    if lib.setInfo and lib.setInfo[setId] == nil then
-                        table.insert(newSetIdsFound, setId)
-                    end
-                end
+                checkForNewSetIds(sets)
             end
             newSetsFound = (newSetIdsFound and #newSetIdsFound) or 0
             if newSetsFound > 0 then
@@ -636,12 +663,7 @@ end
 --->Or there are no new setIds since the last time you updated this table.
 function lib.DebugShowNewSetIds()
     d("[" .. MAJOR .."]DebugShowNewSetIds - Checking for new setIds.")
-    newSetIdsFound = {}
-    for setId, _ in pairs(lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]) do
-        if lib.setInfo and lib.setInfo[setId] == nil then
-            table.insert(newSetIdsFound, setId)
-        end
-    end
+    checkForNewSetIds(lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS])
     local newSetsFound = (newSetIdsFound and #newSetIdsFound) or 0
     if newSetsFound > 0 then
         d(">Found " .. tostring(newSetsFound) .. " new setIds!")
@@ -654,6 +676,8 @@ function lib.DebugShowNewSetIds()
             newSetIdsFound[idx] = tostring(newSetId) .. "|" .. tostring(newSetName)
         end
     end
+    --[[
+    --> Already done within function "checkForNewSetIds" now!
     --Check if any setId was already added to LibSets.setInfo table but is also inside the "do not use for current live APIversion" table,
     --and the current API version is not yet live
     if not lib.checkIfPTSAPIVersionIsLive() and lib.setsOfNewerAPIVersion and #lib.setsOfNewerAPIVersion > 0 then
@@ -668,6 +692,7 @@ function lib.DebugShowNewSetIds()
         end
         newSetsFound = newSetsFound + #setsOfNewerAPIVersion
     end
+    ]]
     if newSetsFound == 0 then
         d("<No new setIds were found!\nDid you run function \'LibSets.DebugScanAllSetData()\' before already?")
         d("Please read the function's description text in file \'LibSets_Debug.lua\' to be able to update the internal needed tables \'LibSets.setDataPreloaded[\'setItemIds\'] properly, before you try to search for new setIds!")
