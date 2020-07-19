@@ -258,6 +258,7 @@ local function LoadSavedVariables()
     if lib.svData ~= nil then return end
     local defaults =
     {
+        [LIBSETS_TABLEKEY_NEWSETIDS]                = {},
         [LIBSETS_TABLEKEY_MAPS]                     = {},
         [LIBSETS_TABLEKEY_SETITEMIDS]               = {},
         [LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]      = {},
@@ -364,11 +365,40 @@ local function checkIfSetExists(setId)
     return setDoesExist
 end
 
---Todo: Check how many of the itemId items are currently equipped
---Get the number of equipped items with the given itemId
-local function getNumEquippedItemsWithItemId(itemId)
-    return 0
+--Check how many items of the non ESO setId, belonging to the given itemId, are currently equipped.
+--The table specialSetsItemIds contains all the itemIds of this non ESO set
+-->The tables key must be the itemId and the value a boolean value e.g.
+-->Example setsItemIds = { [123456]=true, [12678]=true, ... }
+local function getNumEquippedItemsByItemId(itemId, setsItemIds)
+    local equippedItemsOfThisNonESOSet = 0
+    --Get the equipped item's data
+    local equippedItemsIds = {}
+    --Get the itemIds of the equipped items in BAG_WORN
+    local bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
+    for _, data in pairs(bagWornItemCache) do
+        table.insert(equippedItemsIds, data)
+    end
+    if equippedItemsIds and #equippedItemsIds > 0 then
+        --Compare equipped item's itemIds with the given non ESO set itemIds
+        for _, equippedItemData in pairs(equippedItemsIds) do
+            local wornItemId = tonumber(GetItemId(BAG_WORN, equippedItemData.slotIndex))
+            if wornItemId ~= nil then
+                if wornItemId == tonumber(itemId) then
+                    equippedItemsOfThisNonESOSet = equippedItemsOfThisNonESOSet +1
+                elseif setsItemIds ~= nil then
+                    for nonESOSetItemId, _ in pairs(setsItemIds) do
+                        if wornItemId == tonumber(nonESOSetItemId) then
+                            equippedItemsOfThisNonESOSet = equippedItemsOfThisNonESOSet +1
+                        end
+                    end
+                end
+            end
+        end
+    end
+--d("[LibSets]getNumEquippedItemsByItemId - itemid: " ..tostring(itemId) .. ", equipped: " ..tostring(equippedItemsOfThisNonESOSet))
+    return equippedItemsOfThisNonESOSet
 end
+lib.GetNumEquippedItemsByItemId = getNumEquippedItemsByItemId
 
 --Check if an itemId belongs to a special set and return the set's data from LibSets data tables
 local function checkNoSetIdSet(itemId)
@@ -385,7 +415,7 @@ local function checkNoSetIdSet(itemId)
                 isSet = true
                 setName = noESOsetIdSetNames[noESOSetId][lib.clientLang] or ""
                 numBonuses = specialSetData[LIBSETS_TABLEKEY_NUMBONUSES] or 0
-                numEquipped = getNumEquippedItemsWithItemId(itemId)
+                numEquipped = getNumEquippedItemsByItemId(itemId, specialSetsItemIds)
                 maxEquipped = specialSetData[LIBSETS_TABLEKEY_MAXEQUIPPED] or 0
                 setId = noESOSetId
                 return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
@@ -713,7 +743,7 @@ function lib.IsNoESOSet(noESOSetId)
     return isNoESOSetId
 end
 
---Returns information about the set if the itemId provides is a set item
+--Returns information about the set if the itemId provides it is a set item
 --> Parameters: itemId number: The item's itemId
 --> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number
 function lib.IsSetByItemId(itemId)
