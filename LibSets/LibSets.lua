@@ -365,41 +365,6 @@ local function checkIfSetExists(setId)
     return setDoesExist
 end
 
---Check how many items of the non ESO setId, belonging to the given itemId, are currently equipped.
---The table specialSetsItemIds contains all the itemIds of this non ESO set
--->The tables key must be the itemId and the value a boolean value e.g.
--->Example setsItemIds = { [123456]=true, [12678]=true, ... }
-local function getNumEquippedItemsByItemId(itemId, setsItemIds)
-    local equippedItemsOfThisNonESOSet = 0
-    --Get the equipped item's data
-    local equippedItemsIds = {}
-    --Get the itemIds of the equipped items in BAG_WORN
-    local bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
-    for _, data in pairs(bagWornItemCache) do
-        table.insert(equippedItemsIds, data)
-    end
-    if equippedItemsIds and #equippedItemsIds > 0 then
-        --Compare equipped item's itemIds with the given non ESO set itemIds
-        for _, equippedItemData in pairs(equippedItemsIds) do
-            local wornItemId = tonumber(GetItemId(BAG_WORN, equippedItemData.slotIndex))
-            if wornItemId ~= nil then
-                if wornItemId == tonumber(itemId) then
-                    equippedItemsOfThisNonESOSet = equippedItemsOfThisNonESOSet +1
-                elseif setsItemIds ~= nil then
-                    for nonESOSetItemId, _ in pairs(setsItemIds) do
-                        if wornItemId == tonumber(nonESOSetItemId) then
-                            equippedItemsOfThisNonESOSet = equippedItemsOfThisNonESOSet +1
-                        end
-                    end
-                end
-            end
-        end
-    end
---d("[LibSets]getNumEquippedItemsByItemId - itemid: " ..tostring(itemId) .. ", equipped: " ..tostring(equippedItemsOfThisNonESOSet))
-    return equippedItemsOfThisNonESOSet
-end
-lib.GetNumEquippedItemsByItemId = getNumEquippedItemsByItemId
-
 --Check if an itemId belongs to a special set and return the set's data from LibSets data tables
 local function checkNoSetIdSet(itemId)
     if itemId == nil or itemId == "" then return false, "", 0, 0, 0, 0 end
@@ -415,7 +380,7 @@ local function checkNoSetIdSet(itemId)
                 isSet = true
                 setName = noESOsetIdSetNames[noESOSetId][lib.clientLang] or ""
                 numBonuses = specialSetData[LIBSETS_TABLEKEY_NUMBONUSES] or 0
-                numEquipped = getNumEquippedItemsByItemId(itemId, specialSetsItemIds)
+                numEquipped = lib.getNumEquippedItemsByItemIds(specialSetsItemIds)
                 maxEquipped = specialSetData[LIBSETS_TABLEKEY_MAXEQUIPPED] or 0
                 setId = noESOSetId
                 return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
@@ -547,6 +512,36 @@ local function showWorldMap()
         else
             MAIN_MENU_KEYBOARD:ShowCategory(MENU_CATEGORY_MAP)
         end
+    end
+end
+
+
+--======= Set type =====================================================================================================
+--Helper function to return the setIds, itemIds and setNames for a given setType
+local function getSetTypeSetsData(setType)
+    if setType == nil then return end
+    --Check if the setType is allowed within LiBSets
+    local allowedSetTypes = lib.allowedSetTypes
+    local allowedSetType  = allowedSetTypes[setType] or false
+    if not allowedSetType then return end
+    --Get the setIds tablefor the setType
+    local setTypes2SetIdsTable = lib.setTypeToSetIdsForSetTypeTable
+    local setType2SetIdsTable = setTypes2SetIdsTable[setType]
+    if not setType2SetIdsTable then return false end
+    --Loop over that table now and get each setId and transfer the data to the outputTable
+    --+ enrich it with the setType and other needed information
+    local setsDataForSetTypeTable
+    local cnt = 0
+    for setIdForSetType, setDataForSetType in pairs(setType2SetIdsTable) do
+        setsDataForSetTypeTable = setsDataForSetTypeTable or {}
+        setsDataForSetTypeTable[setIdForSetType] = setDataForSetType
+        setsDataForSetTypeTable[setIdForSetType][LIBSETS_TABLEKEY_SETTYPE] = setType
+        cnt = cnt +1
+    end
+    if cnt > 0 then
+        return setsDataForSetTypeTable
+    else
+        return nil
     end
 end
 
@@ -1319,6 +1314,33 @@ function lib.GetItemsArmorType(itemId)
     return nil
 end
 
+--Check if any item within the table "setsItemIds", are currently equipped, and count the number of them.
+--> Parameters: setsItemIds table: The itemIds that need to be chedked in addition to the itemId parameter
+-->The tables key must be the itemId and the value a boolean value e.g.
+-->Example setsItemIds = { [123456]=true, [12678]=true, ... }
+function lib.GetNumEquippedItemsByItemIds(setsItemIds)
+    if not setsItemIds then return 0 end
+    local equippedItems = 0
+    --Get the equipped item's data
+    local equippedItemsIds = {}
+    --Get the itemIds of the equipped items in BAG_WORN
+    local bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
+    for _, data in pairs(bagWornItemCache) do
+        table.insert(equippedItemsIds, data)
+    end
+    if equippedItemsIds and #equippedItemsIds > 0 then
+        --Compare equipped item's itemIds with the given non ESO set itemIds
+        for _, equippedItemData in pairs(equippedItemsIds) do
+            local wornItemId = tonumber(GetItemId(BAG_WORN, equippedItemData.slotIndex))
+            if wornItemId ~= nil and setsItemIds[wornItemId] ~= nil then
+                equippedItems = equippedItems +1
+            end
+        end
+    end
+    return equippedItems
+end
+
+
 ------------------------------------------------------------------------
 -- 	Global set misc. functions
 ------------------------------------------------------------------------
@@ -1391,35 +1413,6 @@ function lib.GetZoneName(zoneId, lang)
         zoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameById(zoneId) )
     end
     return zoneName
-end
-
-
---Helper function to return the setIds, itemIds and setNames for a given setType
-local function getSetTypeSetsData(setType)
-    if setType == nil then return end
-    --Check if the setType is allowed within LiBSets
-    local allowedSetTypes = lib.allowedSetTypes
-    local allowedSetType  = allowedSetTypes[setType] or false
-    if not allowedSetType then return end
-    --Get the setIds tablefor the setType
-    local setTypes2SetIdsTable = lib.setTypeToSetIdsForSetTypeTable
-    local setType2SetIdsTable = setTypes2SetIdsTable[setType]
-    if not setType2SetIdsTable then return false end
-    --Loop over that table now and get each setId and transfer the data to the outputTable
-    --+ enrich it with the setType and other needed information
-    local setsDataForSetTypeTable
-    local cnt = 0
-    for setIdForSetType, setDataForSetType in pairs(setType2SetIdsTable) do
-        setsDataForSetTypeTable = setsDataForSetTypeTable or {}
-        setsDataForSetTypeTable[setIdForSetType] = setDataForSetType
-        setsDataForSetTypeTable[setIdForSetType][LIBSETS_TABLEKEY_SETTYPE] = setType
-        cnt = cnt +1
-    end
-    if cnt > 0 then
-        return setsDataForSetTypeTable
-    else
-        return nil
-    end
 end
 
 --Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType
