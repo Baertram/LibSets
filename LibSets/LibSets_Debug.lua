@@ -413,8 +413,8 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds)
                 newSetIdsFound["UpdateType"]  = "LibSets.DebugScanAllSetData()"
                 newSetIdsFound["DateTime"]    = os.date("%c")
                 local worldName = GetWorldName()
-                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = {}
-                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = {}
+                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] or {}
+                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] or {}
                 lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][GetAPIVersion()] = newSetIdsFound
             end
 
@@ -678,8 +678,8 @@ function lib.DebugShowNewSetIds()
         newSetIdsFound["UpdateType"]  = "LibSets.DebugShowNewSetIds()"
         newSetIdsFound["DateTime"]    = os.date("%c")
         local worldName = GetWorldName()
-        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = {}
-        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = {}
+        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] or {}
+        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] or {}
         lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][GetAPIVersion()] = newSetIdsFound
     end
 end
@@ -696,7 +696,6 @@ end
 --This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
 function lib.DebugResetSavedVariables()
     LoadSavedVariables()
-    lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
