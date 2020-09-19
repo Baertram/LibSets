@@ -1489,7 +1489,7 @@ local function OnLibraryLoaded(event, name)
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
     lib.currentAPIVersion = lib.APIVersions["live"]
 
-    --Remove future APIverison setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
+    --Remove future APIversion setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
     lib.removeFutureSetData()
     --...and then remove this function from the library
     lib.removeFutureSetData = nil
@@ -1504,5 +1504,4 @@ local function OnLibraryLoaded(event, name)
 end
 
 --Load the addon now
-EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
 EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, OnLibraryLoaded)

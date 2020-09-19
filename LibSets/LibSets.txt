@@ -9,9 +9,9 @@
 ## Title: LibSets
 ## Description: List of all ingame sets and functions to check what set type they are, set names, itemIds, drop locations, etc.
 ## Author: Baertram
-## APIVersion: 100031 100032
-## Version: 0.2.1
-## AddOnVersion: 000201
+## APIVersion: 100032 100033
+## Version: 0.2.2
+## AddOnVersion: 000202
 ## IsLibrary: true
 ## SavedVariables: LibSets_SV_Data
 ## OptionalDependsOn: LibZone
