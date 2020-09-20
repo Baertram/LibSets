@@ -217,6 +217,28 @@ After all info is updated you can look at the columns AX to BB which provide the
 --> Copy ALL lines of this excel map to the file "LibSets_Data_All.lua" into the table "lib.setInfo"!
 --> New sets which are not known on the live server will automatically be removed as the internal LibSets tables are build (using function "checkIfSetExists(setId)"
     from file LibSets.lua). So just keep them also in this table "lib.SetInfo"!
+
+
+7) -[ For the set procs ]-
+You need to find out the set procs and abilityIds of the procs and add them to the excel's tab "SetProcs" at the relevant setId.
+Each setId should have 1 row and in column D you need to add the procData table in this format, 1 new row for each different
+LIBSETS_SETPROC_CHECKTYPE_* (see file LibSets_ConstantsLibraryInternal.lua for the possible SetprocCheckTypes), and 1 new
+index if the SetprocCheckType is the same and only a different kind of abilityId + cooldown needs to be added.
+If the cooldown etc. is the same just add the new abilityId to the "abilityIds" table.
+[number setId] = {
+        [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
+            [number index1toN] = {
+                ["abilityIds"] = {number abilityId1, number abilityId2, ...},
+                ["unitTag"] = String unitTag e.g. "player", "playerpet", "group", "boss", etc.,
+                ["cooldown"] = number cooldownInMilliseconds e.g. 12000,
+                ["icon"] = String iconPathOfTheBuffIconToUse e.g. "/esoui/art/icons/ability_buff_minor_vitality.dds"
+            },
+        },     --String comment name of the set -> description of the proc EN / description of the proc DE
+    },
+
+After updating the columns D you are able to specify comments etc. in the columns E anf F and copy the columns G to the file
+LibSets_Data.All, table lib.setDataPreloaded, key LIBSETS_TABLEKEY_SET_PROCS
+-> Be sure to read and follow the comments about the excel created duplicate "" and ", and how to remove them, there!
 ]]
 
 --Check if the library was loaded before already w/o chat output
@@ -1442,6 +1464,283 @@ function lib.GetSetTypeSetsData(setType)
     return setsData
 end
 
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- 	Currently worked on NEW library functions
+------------------------------------------------------------------------
+--Internal helper function to read the set's procData, if it exists
+local function getSetProcData(setId)
+    if setId == nil then return end
+    local setProcData = preloaded[LIBSETS_TABLEKEY_SET_PROCS] and preloaded[LIBSETS_TABLEKEY_SET_PROCS][setId]
+    return setProcData
+end
+
+--Internal helper function to loop over a table and add the "dataName" entries in the table "setProcDataOfSetProcCheckTypeTable"
+--to a table "dataReturnTable"
+local function getSetProcDataOfIndex(setProcDataOfSetProcCheckTypeTable, dataName, dataReturnTable)
+    for _, setProcDataOfIndex in ipairs(setProcDataOfSetProcCheckTypeTable) do
+        local setprocDataOfIndexData = setProcDataOfIndex[dataName]
+        if setprocDataOfIndexData then
+            for _, data in ipairs(setprocDataOfIndexData) do
+                table.insert(dataReturnTable, data)
+            end
+        end
+    end
+end
+
+
+--Returns true if the setId provided got a set proc
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isSetWithProc
+function lib.IsSetWithProc(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local isSetWithProc = ( preloaded[LIBSETS_TABLEKEY_SET_PROCS] and preloaded[LIBSETS_TABLEKEY_SET_PROCS][setId] ) or false
+    return isSetWithProc
+end
+
+--Returns the procData of the setId as table, containing the abilityIds, unitTag, cooldown, icon, etc.
+--> Parameters: setId number: The set's setId
+--> Returns:    nilable:LibSetsSetProcData table
+--[[
+    [number setId] = {
+        [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
+            [number index1toN] = {
+                ["abilityIds"] = {number abilityId1, number abilityId2, ...},
+                ["unitTag"] = String unitTag e.g. "player", "playerpet", "group", "boss", etc.,
+                ["cooldown"] = number cooldownInMilliseconds e.g. 12000,
+                ["icon"] = String iconPathOfTheBuffIconToUse e.g. "/esoui/art/icons/ability_buff_minor_vitality.dds"
+            },
+            [number index2toN] = {
+            },
+            ...
+        },     --String comment name of the set -> description of the proc EN / description of the proc DE
+        [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
+        ...
+        },
+        ...
+    },
+]]
+function lib.GetSetProcData(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    return getSetProcData(setId)
+end
+
+--Returns the abilityIds of the setId's procData
+--> Parameters: setId number: The set's setId
+-->             nilable:setProcCheckType number: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
+-->             the abilityIds in. If left entry all setprocCheckTypes will be read adn the abilityIds taken from their indices.
+-->             nilable:procIndex number: The procIndex to get the abilityIds from. If left entry all abilityIds of all indices
+-->             of the setProcCheckType will be read
+--> Returns:    nilable:LibSetsSetProcDataAbilityIds table {[index1] = abilityId1, [index2] = abilityId2}
+function lib.GetSetProcAbilityIds(setId, setProcCheckType, procIndex)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local setProcData = getSetProcData(setId)
+    local setProcDataAbilityIds
+    if not setProcData then return end
+    local dataTableKey = "abilityIds"
+    if setProcCheckType and procIndex then
+        setProcDataAbilityIds = setProcData and setProcData[setProcCheckType]
+                and setProcData[setProcCheckType][procIndex]
+                and setProcData[setProcCheckType][procIndex][dataTableKey]
+    else
+        if setProcCheckType then
+            --No index given, so collect all of the setProcCheckType
+            local setProcDataOfSetProcCheckType = setProcData[setProcCheckType]
+            if not setProcDataOfSetProcCheckType then return end
+            setProcDataAbilityIds = {}
+            getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataAbilityIds)
+        else
+            --No setProcCheckType and no index given, so collect all setProcChecktypes and all indices of them
+            setProcDataAbilityIds = {}
+            for _, setProcDataOfSetProcCheckType in ipairs(setProcData) do
+                getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataAbilityIds)
+            end
+        end
+
+    end
+    return setProcDataAbilityIds
+end
+
+------------
+-- EVENTS --
+------------
+lib.eventListSetProcs = {}
+
+local function GetRegisteredSetProcEventDatatOfAbilityId(eventListTable, eventId, setId, addOnEventNamespace, abilityId)
+    --Find the eventId
+    local eventIdTableData = eventListTable[eventId]
+    if eventIdTableData then
+        local eventIdSetIdTableData = eventIdTableData[setId]
+        if eventIdSetIdTableData then
+            local eventIdSetIdAddonNamespaceTableData = eventIdSetIdTableData[addOnEventNamespace]
+            if eventIdSetIdAddonNamespaceTableData then
+                if abilityId == nil then
+                    return true
+                else
+                    local eventIdSetIdAddonNamespaceAbilityIdTableData = eventIdSetIdAddonNamespaceTableData[abilityId]
+                    if eventIdSetIdAddonNamespaceAbilityIdTableData then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+	return false
+end
+
+local supportedSetprocEventIds = {
+    [EVENT_EFFECT_CHANGED]  = true,
+    [EVENT_COMBAT_EVENT]    = false,
+}
+
+local function buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityId)
+    local uniqueAddonNamespaceEventName = addOnEventNamespace
+    if abilityId ~= nil then
+        uniqueAddonNamespaceEventName = uniqueAddonNamespaceEventName .. "_" .. tostring(abilityId)
+    end
+    return uniqueAddonNamespaceEventName
+end
+
+-- Add a callback function to any of the possible events:
+--  EVENT_EFFECT_CHANGED
+--  EVENT_COMBAT_EVENT
+-- Specify the abilityIds of the set's proc which should be checked. Those abilityIds will be automatically filtered at
+-- the event to speed up the performance.
+-- You can define additional filterTypes at the ... parameters, where there are always 2 parameters for each additional
+-- filterTyp which you want to add. e.g. filterType1, filterParameter1, filterType2, filterParameter2, ...
+-- Possible additional filterTypes are:
+-- REGISTER_FILTER_UNIT_TAG, REGISTER_FILTER_UNIT_TAG_PREFIX or more https://wiki.esoui.com/AddFilterForEvent ,
+-- Attention: DO NOT USE the filterType REGISTER_FILTER_ABILITY_ID, because this is already handled by this function internally!
+-- Returns nilable:successfulRegister boolean
+function lib.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, eventId, setId, abilityIds, callbackFunc, ...)
+    if addOnEventNamespace == nil or addOnEventNamespace == "" or eventId == nil or abilityIds == nil or setId == nil
+            or callbackFunc == nil then return nil end
+    if not supportedSetprocEventIds[eventId] then return end
+
+    local typeNamespace = type(addOnEventNamespace) == "string"
+    local typeFunc = type(callbackFunc) == "function"
+    local typeAbilities = type(abilityIds) == "table"
+    if typeNamespace == true and typeFunc == true and typeAbilities == true then
+        --For each abilityId provided: Register the eventId and add a filter to the abilityId + add the additional filters
+        --provided
+        for _, abilityIdToRegister in ipairs(abilityIds) do
+            local alreadyRegistered = GetRegisteredSetProcEventDatatOfAbilityId(lib.eventListSetProcs, eventId, setId, addOnEventNamespace, abilityIdToRegister)
+            if not alreadyRegistered then
+                local uniqueEventFilterAddonNamespaceTag = buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityIdToRegister)
+                --Not registered for the eventId, setId and addOnEventNamespace yet? So register it now
+                EVENT_MANAGER:RegisterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, function(_, ...)
+                    --Get the abilityId from the event's normal callback function
+                    local abilityId
+                    -- EVENT_EFFECT_CHANGED:
+                    -- Returns 16:  changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType
+                    -- EVENT_COMBAT_EVENT:
+                    --Returns 17:   actionResultType, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                    if eventId == EVENT_EFFECT_CHANGED then
+                        abilityId = select(15, ...)
+                    elseif eventId == EVENT_COMBAT_EVENT then
+                        abilityId = select(16, ...)
+                    end
+                    callbackFunc(...)
+                end)
+                --Add the filter on the abilityId for the same uniqueEventName
+                EVENT_MANAGER:AddFilterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, REGISTER_FILTER_ABILITY_ID, abilityIdToRegister)
+
+                -- Add additonal filters, e.g. on a unitTag
+                -- Multiple filters are handled here:
+                -- ... is a table like { filterType1, filterParameter1, filterType2, filterParameter2, filterType3, filterParameter3, ... }
+                -- You can only have one filterParameter for each filterType.
+                local filterParams = { ... }
+                if next(filterParams) then
+                    for i = 1, select("#", filterParams), 2 do
+                        local filterType = select(i, filterParams)
+                        local filterParameter = select(i + 1, filterParams)
+                        EVENT_MANAGER:AddFilterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, filterType, filterParameter)
+                    end
+                end
+
+                --Keep track of the registered eventIds, setId, addonNameSpaces + abilityIds
+                lib.eventListSetProcs[eventId] = lib.eventListSetProcs[eventId] or {}
+                lib.eventListSetProcs[eventId][setId] = lib.eventListSetProcs[eventId][setId] or {}
+                lib.eventListSetProcs[eventId][setId][addOnEventNamespace] = lib.eventListSetProcs[eventId][setId][addOnEventNamespace] or {}
+                lib.eventListSetProcs[eventId][setId][addOnEventNamespace][abilityIdToRegister] = {
+                        eventId = eventId,
+                        setId = setId,
+                        addOnEventNamespace = addOnEventNamespace,
+                        abilityIds = abilityIds,
+                        abilityIdFiltered = abilityIdToRegister,
+                        callbackFunc = callbackFunc,
+                        filterParams = filterParams
+                }
+                return true
+            end
+        end
+    end
+    return nil
+end
+
+--Local helper fucntion to unregister an eventId (clear all filters on it) and clear up internal tables
+local function unregisterSetProcEventAndDeleteEventList(eventId, setId, addOnEventNamespace, abilityId)
+    local alreadyRegistered = GetRegisteredSetProcEventDatatOfAbilityId(lib.eventListSetProcs, eventId, setId, addOnEventNamespace, abilityId)
+    if alreadyRegistered == true then
+        local uniqueAddonNamespaceEventName = buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityId)
+        EVENT_MANAGER:UnregisterForEvent(uniqueAddonNamespaceEventName, eventId)
+        if abilityId ~= nil then
+            lib.eventListSetProcs[eventId][setId][addOnEventNamespace][abilityId] = nil
+        else
+            lib.eventListSetProcs[eventId][setId][addOnEventNamespace] = nil
+        end
+        return true
+    end
+    return false
+end
+
+-- Unregister the registered callback functions for the Set procs eventId at the addOnEventNamespace, setId and abilityId
+-- Returns nilable:succesfulUnregister boolean
+function lib.UnRegisterSetProcEventCallbackForAbilityId(addOnEventNamespace, eventId, setId, abilityId)
+    if not addOnEventNamespace or addOnEventNamespace == "" or not setId or not abilityId then return end
+    if eventId ~= nil then
+        return unregisterSetProcEventAndDeleteEventList(eventId, setId, addOnEventNamespace, abilityId)
+    else
+        local retVar
+        for eventIdInTable, _ in pairs(lib.eventListSetProcs) do
+            local wasUnregistered = unregisterSetProcEventAndDeleteEventList(eventIdInTable, setId, addOnEventNamespace, abilityId)
+            if wasUnregistered == true then
+                retVar = true
+            end
+        end
+        return retVar
+    end
+    return nil
+end
+
+-- Unregister the registered callback functions for the Set procs eventId at the addOnEventNamespace and setId
+-- Returns nilable:succesfulUnregister boolean
+function lib.UnRegisterSetProcEventCallbackForSetId(addOnEventNamespace, eventId, setId)
+    if not addOnEventNamespace or addOnEventNamespace == "" or not setId then return end
+    if eventId ~= nil then
+        return unregisterSetProcEventAndDeleteEventList(eventId, setId, addOnEventNamespace)
+    else
+        local retVar
+        for eventIdInTable, _ in pairs(lib.eventListSetProcs) do
+            local wasUnregistered = unregisterSetProcEventAndDeleteEventList(eventIdInTable, setId, addOnEventNamespace)
+            if wasUnregistered == true then
+                retVar = true
+            end
+        end
+        return retVar
+    end
+    return nil
+end
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
 ------------------------------------------------------------------------
 -- 	Global library check functions
 ------------------------------------------------------------------------

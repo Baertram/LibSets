@@ -28,15 +28,16 @@ DLC_SCALEBREAKER            = 15
 DLC_DRAGONHOLD              = 16
 DLC_HARROWSTORM             = 17
 DLC_GREYMOOR                = 18
+DLC_STONETHORN              = 19
 --End of iteration over DLC ids. !!!!! Increase this variable to the maximum DLC id if new DLC ids are added !!!!!
 if checkIfPTSAPIVersionIsLive() then
-    DLC_STONETHORN          = 19
+    DLC_MARKARTH                = 20
 end
 --Iterators for the ESO dlc and chapter constants
 --You can use the function
 DLC_ITERATION_BEGIN = DLC_BASE_GAME
 --Remember to increase the DLC id here to the newest DLC Id, for the maximum iteration
-DLC_ITERATION_END = DLC_STONETHORN or DLC_GREYMOOR
+DLC_ITERATION_END = DLC_STONETHORN or DLC_MARKARTH
 lib.allowedDLCIds = {}
 for i = DLC_ITERATION_BEGIN, DLC_ITERATION_END do
     lib.allowedDLCIds[i] = true
@@ -83,10 +84,12 @@ lib.dlcAndChapterAchievementIds = {
     [DLC_HARROWSTORM] = 2537,
     --Greymoor
     [DLC_GREYMOOR] = 2639,
+    --Stonethorn
+    DLC_STONETHORN = 2692
 }
 if checkIfPTSAPIVersionIsLive() then
     --Greymoor
-    lib.dlcAndChapterAchievementIds[DLC_STONETHORN] = 2692
+    lib.dlcAndChapterAchievementIds[DLC_MARKARTH] = -1 --TODO
 end
 
 
