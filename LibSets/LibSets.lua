@@ -1572,20 +1572,25 @@ end
 ------------
 lib.eventListSetProcs = {}
 
-local function GetRegisteredSetProcEventDatatOfAbilityId(eventListTable, eventId, setId, addOnEventNamespace, abilityId)
+local function GetRegisteredSetProcEventDatatOfAbilityId(eventListTable, eventId, addOnEventNamespace, setId, abilityId, unregisterCheck)
     --Find the eventId
+    unregisterCheck = unregisterCheck or false
     local eventIdTableData = eventListTable[eventId]
     if eventIdTableData then
-        local eventIdSetIdTableData = eventIdTableData[setId]
-        if eventIdSetIdTableData then
-            local eventIdSetIdAddonNamespaceTableData = eventIdSetIdTableData[addOnEventNamespace]
-            if eventIdSetIdAddonNamespaceTableData then
-                if abilityId == nil then
-                    return true
-                else
-                    local eventIdSetIdAddonNamespaceAbilityIdTableData = eventIdSetIdAddonNamespaceTableData[abilityId]
-                    if eventIdSetIdAddonNamespaceAbilityIdTableData then
+        if setId == nil and unregisterCheck == true then
+            return true
+        else
+            local eventIdAddonNamespaceTableData = eventIdTableData[addOnEventNamespace]
+            if eventIdAddonNamespaceTableData then
+                local eventIdAddonNamespaceSetIdTableData = eventIdAddonNamespaceTableData[setId]
+                if eventIdAddonNamespaceSetIdTableData then
+                    if abilityId == nil and unregisterCheck == true then
                         return true
+                    else
+                        local eventIdAddonNamespaceSetIdAbilityIdTableData = eventIdAddonNamespaceSetIdTableData[abilityId]
+                        if eventIdAddonNamespaceSetIdAbilityIdTableData then
+                            return true
+                        end
                     end
                 end
             end
@@ -1630,7 +1635,7 @@ function lib.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, even
         --For each abilityId provided: Register the eventId and add a filter to the abilityId + add the additional filters
         --provided
         for _, abilityIdToRegister in ipairs(abilityIds) do
-            local alreadyRegistered = GetRegisteredSetProcEventDatatOfAbilityId(lib.eventListSetProcs, eventId, setId, addOnEventNamespace, abilityIdToRegister)
+            local alreadyRegistered = GetRegisteredSetProcEventDatatOfAbilityId(lib.eventListSetProcs, eventId, addOnEventNamespace, setId, abilityIdToRegister, false)
             if not alreadyRegistered then
                 local uniqueEventFilterAddonNamespaceTag = buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityIdToRegister)
                 --Not registered for the eventId, setId and addOnEventNamespace yet? So register it now
@@ -1666,9 +1671,9 @@ function lib.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, even
 
                 --Keep track of the registered eventIds, setId, addonNameSpaces + abilityIds
                 lib.eventListSetProcs[eventId] = lib.eventListSetProcs[eventId] or {}
-                lib.eventListSetProcs[eventId][setId] = lib.eventListSetProcs[eventId][setId] or {}
-                lib.eventListSetProcs[eventId][setId][addOnEventNamespace] = lib.eventListSetProcs[eventId][setId][addOnEventNamespace] or {}
-                lib.eventListSetProcs[eventId][setId][addOnEventNamespace][abilityIdToRegister] = {
+                lib.eventListSetProcs[eventId][addOnEventNamespace] = lib.eventListSetProcs[eventId][addOnEventNamespace] or {}
+                lib.eventListSetProcs[eventId][addOnEventNamespace][setId] = lib.eventListSetProcs[eventId][addOnEventNamespace][setId] or {}
+                lib.eventListSetProcs[eventId][addOnEventNamespace][setId][abilityIdToRegister] = {
                         eventId = eventId,
                         setId = setId,
                         addOnEventNamespace = addOnEventNamespace,
@@ -1685,19 +1690,42 @@ function lib.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, even
 end
 
 --Local helper fucntion to unregister an eventId (clear all filters on it) and clear up internal tables
-local function unregisterSetProcEventAndDeleteEventList(eventId, setId, addOnEventNamespace, abilityId)
-    local alreadyRegistered = GetRegisteredSetProcEventDatatOfAbilityId(lib.eventListSetProcs, eventId, setId, addOnEventNamespace, abilityId)
+local function unregisterSetProcEventAndDeleteEventList(eventId, addOnEventNamespace, setId, abilityId)
+    local alreadyRegistered = GetRegisteredSetProcEventDatatOfAbilityId(lib.eventListSetProcs, eventId, addOnEventNamespace, setId, abilityId, true)
     if alreadyRegistered == true then
         local uniqueAddonNamespaceEventName = buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityId)
         EVENT_MANAGER:UnregisterForEvent(uniqueAddonNamespaceEventName, eventId)
-        if abilityId ~= nil then
-            lib.eventListSetProcs[eventId][setId][addOnEventNamespace][abilityId] = nil
+        if setId ~= nil then
+            if abilityId ~= nil then
+                lib.eventListSetProcs[eventId][addOnEventNamespace][setId][abilityId] = nil
+            else
+                lib.eventListSetProcs[eventId][addOnEventNamespace][setId] = nil
+            end
         else
-            lib.eventListSetProcs[eventId][setId][addOnEventNamespace] = nil
+            lib.eventListSetProcs[eventId][addOnEventNamespace] = nil
         end
         return true
     end
     return false
+end
+
+-- Unregister the registered callback functions for the Set procs eventId at the addOnEventNamespace
+-- Returns nilable:succesfulUnregister boolean
+function lib.UnRegisterSetProcEventCallbackForEventId(addOnEventNamespace, eventId)
+    if not addOnEventNamespace or addOnEventNamespace == "" then return end
+    if eventId ~= nil then
+        return unregisterSetProcEventAndDeleteEventList(eventId, addOnEventNamespace, nil, nil)
+    else
+        local retVar
+        for eventIdInTable, _ in pairs(lib.eventListSetProcs) do
+            local wasUnregistered = unregisterSetProcEventAndDeleteEventList(eventIdInTable, addOnEventNamespace, nil, nil)
+            if wasUnregistered == true then
+                retVar = true
+            end
+        end
+        return retVar
+    end
+    return nil
 end
 
 -- Unregister the registered callback functions for the Set procs eventId at the addOnEventNamespace, setId and abilityId
@@ -1705,11 +1733,11 @@ end
 function lib.UnRegisterSetProcEventCallbackForAbilityId(addOnEventNamespace, eventId, setId, abilityId)
     if not addOnEventNamespace or addOnEventNamespace == "" or not setId or not abilityId then return end
     if eventId ~= nil then
-        return unregisterSetProcEventAndDeleteEventList(eventId, setId, addOnEventNamespace, abilityId)
+        return unregisterSetProcEventAndDeleteEventList(eventId, addOnEventNamespace, setId, abilityId)
     else
         local retVar
         for eventIdInTable, _ in pairs(lib.eventListSetProcs) do
-            local wasUnregistered = unregisterSetProcEventAndDeleteEventList(eventIdInTable, setId, addOnEventNamespace, abilityId)
+            local wasUnregistered = unregisterSetProcEventAndDeleteEventList(eventIdInTable, addOnEventNamespace, setId, abilityId)
             if wasUnregistered == true then
                 retVar = true
             end
@@ -1724,11 +1752,11 @@ end
 function lib.UnRegisterSetProcEventCallbackForSetId(addOnEventNamespace, eventId, setId)
     if not addOnEventNamespace or addOnEventNamespace == "" or not setId then return end
     if eventId ~= nil then
-        return unregisterSetProcEventAndDeleteEventList(eventId, setId, addOnEventNamespace)
+        return unregisterSetProcEventAndDeleteEventList(eventId, addOnEventNamespace, setId, nil)
     else
         local retVar
         for eventIdInTable, _ in pairs(lib.eventListSetProcs) do
-            local wasUnregistered = unregisterSetProcEventAndDeleteEventList(eventIdInTable, setId, addOnEventNamespace)
+            local wasUnregistered = unregisterSetProcEventAndDeleteEventList(eventIdInTable, addOnEventNamespace, setId, nil)
             if wasUnregistered == true then
                 retVar = true
             end
