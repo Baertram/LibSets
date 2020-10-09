@@ -1502,6 +1502,16 @@ function lib.IsSetWithProc(setId)
     return isSetWithProc
 end
 
+
+--Returns the procData of all the setIds
+--> Parameters: none
+--> Returns:    nilable:LibSetsAllSetProcData table
+function lib.GetAllSetProcData()
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_SET_PROCS]
+end
+
+
 --Returns the procData of the setId as table, containing the abilityIds, unitTag, cooldown, icon, etc.
 --> Parameters: setId number: The set's setId
 --> Returns:    nilable:LibSetsSetProcData table
@@ -1601,7 +1611,7 @@ end
 
 local supportedSetprocEventIds = {
     [EVENT_EFFECT_CHANGED]  = true,
-    [EVENT_COMBAT_EVENT]    = false,
+    [EVENT_COMBAT_EVENT]    = true,
 }
 
 local function buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityId)
@@ -1623,6 +1633,11 @@ end
 -- REGISTER_FILTER_UNIT_TAG, REGISTER_FILTER_UNIT_TAG_PREFIX or more https://wiki.esoui.com/AddFilterForEvent ,
 -- Attention: DO NOT USE the filterType REGISTER_FILTER_ABILITY_ID, because this is already handled by this function internally!
 -- Returns nilable:successfulRegister boolean
+--
+--Example call, will register EVENT_COMBAT_EVENT for the abilityId 135659 of th setId 487 (Winter), and call the function myCombatEventFunc
+--which's parameters must be the ones of the EVENT_COMBAT_EVENT (w/o the first eventId)->result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow
+--plus it will register a unitTag filter on "player"
+--LibSets.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, EVENT_COMBAT_EVENT, 487, {135659}, myCombatEventFunc, REGISTER_FILTER_UNIT_TAG, "player")
 function lib.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, eventId, setId, abilityIds, callbackFunc, ...)
     if addOnEventNamespace == nil or addOnEventNamespace == "" or eventId == nil or abilityIds == nil or setId == nil
             or callbackFunc == nil then return nil end

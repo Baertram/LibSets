@@ -636,127 +636,258 @@ lib.setDataPreloaded = {
         [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
             [number index1toN] = {
                 ["abilityIds"] = {number abilityId1, number abilityId2, ...},
-                ["unitTag"] = String unitTag e.g. "player", "playerpet", "group", "boss", etc.,
-                ["cooldown"] = number cooldownInMilliseconds e.g. 12000,
+                    --Only for LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED
+                    ["unitTag"] = String unitTag e.g. "player", "playerpet", "group", "boss", etc.,
+
+                    --Only for LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT
+                    ["source"] = number combatUnitType e.g. COMBAT_UNIT_TYPE_PLAYER
+                    ["target"] = number combatUnitType e.g. COMBAT_UNIT_TYPE_PLAYER
+
+                    --Only for LIBSETS_SETPROC_CHECKTYPE_EVENT_POWER_UPDATE
+                    ["powerType"] = number powerType e.g. POWERTYPE_STAMINA
+
+                    --Only for LIBSETS_SETPROC_CHECKTYPE_EVENT_BOSSES_CHANGED
+                    ["unitTag"] = String unitTagOfBoss e.g. boss1, boss2, ...
+
+                    --Only for LIBSETS_SETPROC_CHECKTYPE_SPECIAL
+                    [number index1toN] = boolean specialFunctionIsGiven e.g. true/false (if true: the abilityId1's callback function should run a special                                             function as well, which will be registered for the
+
+                ["cooldown"] = {number cooldownForAbilityId1 e.g. 12000, number cooldownForAbilityId2, ...},
                 ["icon"] = String iconPathOfTheBuffIconToUse e.g. "/esoui/art/icons/ability_buff_minor_vitality.dds"
             },
-        },     --String comment name of the set -> description of the proc EN / description of the proc DE
+        },
+        [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
+        ...
+        },
+        ...
+        --String comment name of the set -> description of the proc EN / description of the proc DE
     },
     ]]
     [LIBSETS_TABLEKEY_SET_PROCS] = {
-[160] = {
-    [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-        [1] = {
-            ["abilityIds"] = {61459},
-            ["unitTag"] = "player",
-            ["cooldown"] = 12000,
-        },
-    },     --Burning Spellweave ->  /
-},
-[167] = {
-    [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-        [1] = {
-            ["abilityIds"] = {59590},
-            ["cooldown"] = 10000,
-        },
-    },     --Nightflame ->  /
-},
-[180] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {61771},
-      ["unitTag"] = "player",
-      ["cooldown"] = 10000,
-          },
-  },},     --Powerful Assault ->  /
-[181] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {65706},
-      ["unitTag"] = "player",
-      ["cooldown"] = 20000,
-          },
-  },},     --Meritorious Service ->  /
-[230] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {75801},
-      ["unitTag"] = "player",
-    },
-    [2] = {
-      ["abilityIds"] = {75804},
-      ["unitTag"] = "player",
-    },
-  },},     --Moondancer -> 1: Lunar blessing (magReg), 2: Shadow blessing (spellPower) /
-[268] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {81036},
-      ["unitTag"] = "playerpet",
-      ["cooldown"] = 15000,
-    },
-  },},     --Sentinel of Rkugamz ->  /
-[280] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-[1] = {
-      ["abilityIds"] = {84504},
-      ["cooldown"] = 10000,
-      ["unitTag"] = "player",
-    },
-}},     --Grothdarr -> Grothdarr proc 1 /
-[341] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {97855},
-      ["cooldown"] = 20000,
-          },
-  },},     --Earthgore ->  /
-[353] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {99204},
-      ["cooldown"] = 18000,
-      ["unitTag"] = "player",
-    },
-  },},     --Mechanical Acuity ->  /
-[391] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {107141},
-      ["cooldown"] = 10000,
-    },
-  },},     --Vestment of Olorime ->  /
-[395] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {109084},
-      ["cooldown"] = 10000,
-    },
-  },},     --Perfect Vestment of Olorime ->  /
-[452] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {126924},
-      ["icon"] = "/esoui/art/icons/ability_buff_minor_vitality.dds", --ability_mage_065.dds
-      ["cooldown"] = 9000
-          },
-  },},     --Hollowfang Thirst ->  /
-[471] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {133210},
-      ["unitTag"] = "player",
-      ["cooldown"] = 12000
-          },
-  },},     --Hiti\'s Hearth ->  /
-[487] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {135659},
-      ["cooldown"] = 10000,
-    },
-  },},     --Winter's Respite ->  /
-[492] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {136098},
-      ["cooldown"] = 10000,
-    },
-  },},     --Kyne's Wind ->  /
-[493] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED] = {
-    [1] = {
-      ["abilityIds"] = {137995},
-      ["cooldown"] = 10000,
-    },
-  },},     --Perfected Kyne's Wind ->  /
-    },
+------------------------------------------------------------------------------------------------------------------------
+        [147] = {
+            [LIBSETS_SETPROC_CHECKTYPE_EVENT_POWER_UPDATE]         = {
+                [1] = {
+                    ["unitTag"]   = "player",
+                    ["powerType"] = POWERTYPE_STAMINA,
+                },
+            },
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 127070 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                    ["cooldown"]   = { 8000 },
+                },
+            },
+            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]                    = {
+                [1] = true,
+            },
+        }, --Way of Martial Knowledge ->  /
+        [160] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 61459 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                    ["cooldown"]   = { 12000 },
+                },
+            },
+        }, --Burning Spellweave ->  /
+        [167] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 59590 },
+                    ["cooldown"]   = { 10000 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Nightflame ->  /
+        [180] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 61771 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Powerful Assault ->  /
+        [181] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 65706 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            }, }, --Meritorious Service ->  /
+        [185] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 66902 },
+                    ["cooldown"]   = { 5000 },
+                },
+            },
+        }, --Spell Power Cure ->  /
+        [230] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 75801, 75804 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Moondancer -> 1: Lunar blessing (magReg), 2: Shadow blessing (spellPower) /
+        [268] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 81036 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                    ["cooldown"]   = { 15000 },
+                },
+            }, }, --Sentinel of Rkugamz ->  /
+        [280] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 84504 },
+                    ["cooldown"]   = { 10000 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            }
+        }, --Grothdarr -> Grothdarr proc 1 /
+        [341] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 97855 },
+                    ["cooldown"]   = { 20000 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Earthgore ->  /
+        [353] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 99204 },
+                    ["cooldown"]   = { 18000 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Mechanical Acuity ->  /
+        [391] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 107141 },
+                    ["cooldown"]   = { 10000 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Vestment of Olorime ->  /
+        [395] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 109084 },
+                    ["cooldown"]   = { 10000 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Perfect Vestment of Olorime ->  /
+        [452] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 126924 },
+                    ["cooldown"]   = { 9000 }
+                },
+            },
+            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]                    = {
+                [1] = true,
+            },
+        }, --Hollowfang Thirst ->  /
+        [455] = {
+            [LIBSETS_SETPROC_CHECKTYPE_EVENT_BOSSES_CHANGED] = {
+                [1] = {
+                    ["abilityIds"] = { 126597 },
+                    ["cooldown"]   = { 22000 }
+                },
+            },
+            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]              = {
+                [1] = true,
+            },
+        }, --Z'en's Redress ->  /
+        [471] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 133210 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                    ["cooldown"]   = { 12000 }
+                },
+            },
+        }, --Hiti\'s Hearth ->  /
+        [487] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 135659 },
+                    ["cooldown"]   = { 10000 },
+                },
+            },
+        }, --Winter's Respite ->  /
+        [492] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 136098 },
+                    ["cooldown"]   = { 10000 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Kyne's Wind ->  /
+        [493] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 137995 },
+                    ["cooldown"]   = { 10000 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                },
+            },
+        }, --Perfected Kyne's Wind ->  /
+        [496] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 135923 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                    ["cooldown"]   = { 22000 },
+                },
+                [2] = {
+                    ["abilityIds"] = { 135924 },
+                    ["gained"]     = true,
+                },
+                [3] = {
+                    ["abilityIds"] = { 135924 },
+                    ["faded"]      = true,
+                },
+            },
+            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]                    = {
+                [1] = true,
+                [2] = false,
+                [3] = false,
+            },
+        }, --Roaring Opportunist ->  /
+        [497] = {
+            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+                [1] = {
+                    ["abilityIds"] = { 137986 },
+                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
+                    ["cooldown"]   = 22000
+                },
+                [2] = {
+                    ["abilityIds"] = { 135985 },
+                    ["gained"]     = true,
+                },
+                [3] = {
+                    ["abilityIds"] = { 135985 },
+                    ["faded"]      = true,
+                },
+            },
+            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]                    = {
+                [1] = true,
+                [2] = false,
+                [3] = false,
+            },
+        }, --Perfected Roaring Opportunist ->  /
+------------------------------------------------------------------------------------------------------------------------
+    } --LIBSETS_TABLEKEY_SET_PROCS
 ------------------------------------------------------------------------------------------------------------------------
 }--lib.setDataPreloaded
 ------------------------------------------------------------------------------------------------------------------------
@@ -800,7 +931,7 @@ local function removeFutureSetData()
                         end
                     end
                     --Remove names from the list where setIds are only available in newer APIversions
-                    for setId, setData  in pairs(setIdsToSetNames) do
+                    for setId, _  in pairs(setIdsToSetNames) do
                         if setId == setIdOfNewAPIVersion then
                             lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
                         end
