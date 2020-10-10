@@ -89,7 +89,7 @@ lib.dlcAndChapterAchievementIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --Greymoor
-    lib.dlcAndChapterAchievementIds[DLC_MARKARTH] = -1 --TODO
+    lib.dlcAndChapterAchievementIds[DLC_MARKARTH] = 2849
 end
 
 
