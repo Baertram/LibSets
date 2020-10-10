@@ -88,7 +88,7 @@ lib.dlcAndChapterAchievementIds = {
     DLC_STONETHORN = 2692
 }
 if checkIfPTSAPIVersionIsLive() then
-    --Greymoor
+    --Markarth
     lib.dlcAndChapterAchievementIds[DLC_MARKARTH] = 2849
 end
 
