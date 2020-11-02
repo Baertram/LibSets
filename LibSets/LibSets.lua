@@ -1506,7 +1506,7 @@ end
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
--- 	Currently worked on NEW library functions
+-- 	Set PROC functions
 ------------------------------------------------------------------------
 --Internal helper function to read the set's procData, if it exists
 local function getSetProcData(setId)
