@@ -89,20 +89,30 @@ local function GetWayshrineNames()
 end
 
 local function GetMapNames(lang)
-    lang = lang or GetCVar("language.2")
+    local clientLang = GetCVar("language.2")
+    lang = lang or clientLang
     d(debugOutputStartLine.."[".. MAJOR .. " v" .. tostring(MINOR).."]GetMapNames, language: " ..tostring(lang))
     local lz = lib.libZone
-    if not lz then d("ERROR: Library LibZone must be loaded!") return end
-    local zoneIds
-    --Get zone data from LibZone
-    if lz.GetAllZoneData then
-        zoneIds = lz:GetAllZoneData()
-    elseif lz.givenZoneData then
-        zoneIds = lz.givenZoneData
+    if not lz then
+        if lang ~= clientLang then
+            d("ERROR: Library LibZone must be loaded to get a zoneName in another language!") return
+        end
     end
-    if not zoneIds then d("ERROR: Library LibZone givenZoneData is missing!") return end
-    local zoneIdsLocalized = zoneIds[lang]
-    if not zoneIdsLocalized then d("ERROR: Language \"" .. tostring(lang) .."\" is not scanned yet in library LibZone") return end
+    local zoneIds
+    local zoneIdsLocalized
+    --Get zone data from LibZone
+    if lz then
+        if lz.GetAllZoneData then
+            zoneIds = lz:GetAllZoneData()
+        elseif lz.givenZoneData then
+            zoneIds = lz.givenZoneData
+        end
+        if not zoneIds then d("ERROR: Library LibZone givenZoneData is missing!") return end
+        zoneIdsLocalized = zoneIds[lang]
+        if not zoneIdsLocalized then d("ERROR: Language \"" .. tostring(lang) .."\" is not scanned yet in library LibZone") return end
+    else
+        zoneIdsLocalized = {}
+    end
     --Update new/missing zoneIds
     if GetNumZones then
         --Get the number of zoneIndices and create the zoneIds to scan from
@@ -581,8 +591,8 @@ end
 --Example:
 --["dungeonFinderData"] =
 --{
---  [1] = "2|Pilzgrotte I|283|false",
---  [2] = "18|Pilzgrotte II|934|false",
+--  [1] = "2|Pilzgrotte I|283|false",
+--  [2] = "18|Pilzgrotte II|934|false",
 --..
 --}
 --->!!!Attention!!!You MUST open the dungeon finder->go to specific dungeon dropdown entry in order to build the dungeons list needed first!!!
@@ -734,6 +744,7 @@ function lib.DebugResetSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
     d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'. Please do a /reloadui or logout to update the SavedVariables data now!")
 end
+
 
 ------------------------------------------------------------------------------------------------------------------------
 -- MIXING NEW SET NAMES INTO THE PRELOADED DATA
