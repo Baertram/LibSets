@@ -1575,6 +1575,19 @@ end
 ------------------------------------------------------------------------
 -- 	Item set collections functions
 ------------------------------------------------------------------------
+
+--Get the current map's zoneIndex and via the index get the zoneId, the parent zoneId, and return them
+--+ the current zone's index and parent zone index
+--> Returns: number currentZoneId, number currentZoneParentId, number currentZoneIndex, number currentZoneParentIndex
+function lib.GetCurrentZoneIds()
+    local currentZoneIndex = GetCurrentMapZoneIndex()
+    local currentZoneId = GetZoneId(currentZoneIndex)
+    local currentZoneParentId = GetParentZoneId(currentZoneId)
+    local currentZoneParentIndex = GetZoneIndex(currentZoneParentId)
+    return currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex
+end
+
+
 --Returns the zoneIds (table) which are linked to a item set collection's categoryId
 --Not all categories are connected to a zone though! The result will be nil in these cases.
 --Example return table: {148}
