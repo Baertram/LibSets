@@ -566,11 +566,10 @@ local function LoadSets()
     lib.setItemCollectionCategory2ZoneId = {}
     lib.setItemCollectionCategories = {}
     for _, category2ZoneData in ipairs(preloadedSetItemCollectionMappingToZone) do
-        local parentCategoryId = category2ZoneData.parentCategory
+        --local parentCategoryId = category2ZoneData.parentCategory
         local categoryId = category2ZoneData.category
-        --Categories to parents mapping table
-        lib.setItemCollectionCategories[parentCategoryId] = lib.setItemCollectionCategories[parentCategoryId] or {}
-        lib.setItemCollectionCategories[parentCategoryId][categoryId] = category2ZoneData
+        --Categories table
+        lib.setItemCollectionCategories[categoryId] = category2ZoneData
         --Zone to categories / category to zones mapping tables
         if category2ZoneData.zoneIds ~= nil then
             lib.setItemCollectionCategory2ZoneId[categoryId] = lib.setItemCollectionCategory2ZoneId[categoryId] or {}
@@ -1564,6 +1563,51 @@ function lib.GetSetTypeSetsData(setType)
     local setsData = getSetTypeSetsData(setType)
     return setsData
 end
+
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- 	Item set collections functions
+------------------------------------------------------------------------
+--Returns the zoneIds (table) which are linked to a item set collection's categoryId
+--Not all categories are connected to a zone though! The result will be nil in these cases.
+--Example return table: {148}
+function lib.GetItemSetCollectionZoneIds(categoryId)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if categoryId == nil then return end
+    if lib.setItemCollectionCategory2ZoneId[categoryId] then
+        return lib.setItemCollectionCategory2ZoneId[categoryId]
+    end
+    return
+end
+
+--Returns the categoryIds (table) which are linked to a item set collection's zoneId
+--Not all zoneIds are connected to a category though! The result will be nil in these cases.
+--Example return table: {39}
+function lib.GetItemSetCollectionCategoryIds(zoneId)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if zoneId == nil then return end
+    if lib.zoneId2SetItemCollectionCategory[zoneId] then
+        return lib.zoneId2SetItemCollectionCategory[zoneId]
+    end
+    return
+end
+
+--Returns the category data (table) containing the zoneIds, and possible boolean parameters
+--isDungeon, isArena, isTrial -> See file LibSets_data_alllua -> table lib.setDataPreloaded ->
+--table key LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
+--Example return table: { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
+function lib.GetItemSetCollectionCategoryData(categoryId)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if categoryId == nil then return end
+    if lib.setItemCollectionCategories[categoryId] then
+        return lib.setItemCollectionCategories[categoryId]
+    end
+    return
+end
+
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
