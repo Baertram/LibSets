@@ -559,6 +559,29 @@ local function LoadSets()
             end
         end
     end
+    --SetItemCollection data
+    --Generate the table with the zoneId as key, and a table with the categoryId as key
+    local preloadedSetItemCollectionMappingToZone = preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
+    lib.zoneId2SetItemCollectionCategory = {}
+    lib.setItemCollectionCategory2ZoneId = {}
+    lib.setItemCollectionCategories = {}
+    for _, category2ZoneData in ipairs(preloadedSetItemCollectionMappingToZone) do
+        local parentCategoryId = category2ZoneData.parentCategory
+        local categoryId = category2ZoneData.category
+        --Categories to parents mapping table
+        lib.setItemCollectionCategories[parentCategoryId] = lib.setItemCollectionCategories[parentCategoryId] or {}
+        lib.setItemCollectionCategories[parentCategoryId][categoryId] = category2ZoneData
+        --Zone to categories / category to zones mapping tables
+        if category2ZoneData.zoneIds ~= nil then
+            lib.setItemCollectionCategory2ZoneId[categoryId] = lib.setItemCollectionCategory2ZoneId[categoryId] or {}
+            for _, zoneId in ipairs(category2ZoneData.zoneIds) do
+                lib.zoneId2SetItemCollectionCategory[zoneId] =  lib.zoneId2SetItemCollectionCategory[zoneId] or {}
+                table.insert(lib.zoneId2SetItemCollectionCategory[zoneId], categoryId)
+                table.insert(lib.setItemCollectionCategory2ZoneId[categoryId], zoneId)
+            end
+        end
+    end
+
     lib.setsScanning = false
     lib.setsLoaded = true
 end
@@ -1338,8 +1361,6 @@ function lib.GetSetArmorTypes(setId)
         local itemLink = lib.buildItemLink(itemId)
         if itemLink then
             --Scan each itemId and get the armor type.
-            --* GetItemLinkArmorType(*string* _itemLink_)
-            --** _Returns:_ *[ArmorType|#ArmorType]* _armorType_
             local armorTypeOfSetItem = GetItemLinkArmorType(itemLink)
             if armorTypeOfSetItem and armorTypeOfSetItem ~= ARMORTYPE_NONE then
                 if not armorTypesOfSet[armorTypeOfSetItem] then
@@ -1361,15 +1382,58 @@ function lib.GetItemsArmorType(itemId)
     local itemLink = lib.buildItemLink(itemId)
     if itemLink then
         --Scan each itemId and get the armor type.
-        --* GetItemLinkArmorType(*string* _itemLink_)
-        --** _Returns:_ *[ArmorType|#ArmorType]* _armorType_
         local armorTypeOfSetItem = GetItemLinkArmorType(itemLink)
         if armorTypeOfSetItem and armorTypeOfSetItem ~= ARMORTYPE_NONE then
             return armorTypeOfSetItem
         end
     end
-    --If it's not already added to the armorTypesOfSet table add it
-    --Return the armorTypesOfSet table
+    return nil
+end
+
+--Returns the possible weapon types's of a set
+--> Parameters: setId number: The set's id
+--> Returns:    table weaponTypesOfSet: Contains all weapon types possible as key and the Boolean value
+-->             true/false if this setId got items of this weaponType
+function lib.GetSetWeaponTypes(setId)
+    local weaponTypesOfSet = {}
+    if not lib.weaponTypeNames then return end
+    for weaponType,_ in pairs(lib.weaponTypeNames) do
+        weaponTypesOfSet[weaponType] = false
+    end
+    --Get all itemIds of this set
+    local setItemIds = lib.GetSetItemIds(setId)
+    if not setItemIds then return false end
+    --Build an itemLink from the itemId
+    for itemId, _ in pairs(setItemIds) do
+        local itemLink = lib.buildItemLink(itemId)
+        if itemLink then
+            --Scan each itemId and get the weapon type.
+            local weaponTypeOfSetItem = GetItemLinkWeaponType(itemLink)
+            if weaponTypeOfSetItem and weaponTypeOfSetItem ~= WEAPONTYPE_NONE then
+                if not weaponTypesOfSet[weaponTypeOfSetItem] then
+                    weaponTypesOfSet[weaponTypeOfSetItem] = true
+                end
+            end
+        end
+    end
+    --If it's not already added to the weaponTypesOfSet table add it
+    --Return the weaponTypesOfSet table
+    return weaponTypesOfSet
+end
+
+--Returns the weapon types of a set's item
+--> Parameters: itemId number: The set item's itemId
+--> Returns:    number weaponTypeOfSetItem: The weaponType (https://wiki.esoui.com/Globals#WeaponType) of the setItem
+function lib.GetItemsWeaponType(itemId)
+    --Build an itemLink from the itemId
+    local itemLink = lib.buildItemLink(itemId)
+    if itemLink then
+        --Scan each itemId and get the weapon type.
+        local weaponTypeOfSetItem = GetItemLinkWeaponType(itemLink)
+        if weaponTypeOfSetItem and weaponTypeOfSetItem ~= WEAPONTYPE_NONE then
+            return weaponTypeOfSetItem
+        end
+    end
     return nil
 end
 
@@ -1528,6 +1592,33 @@ local function getSetProcDataOfIndex(setProcDataOfSetProcCheckTypeTable, dataNam
     end
 end
 
+--Internal helper function to read abilityIds, debuffIds (dataTableKey) from the setProc data tables
+local function getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKey)
+    local setProcData = getSetProcData(setId)
+    local setProcDataIds
+    if not setProcData then return end
+    if setProcCheckType and procIndex then
+        setProcDataIds = setProcData and setProcData[setProcCheckType]
+                and setProcData[setProcCheckType][procIndex]
+                and setProcData[setProcCheckType][procIndex][dataTableKey]
+    else
+        if setProcCheckType then
+            --No index given, so collect all of the setProcCheckType
+            local setProcDataOfSetProcCheckType = setProcData[setProcCheckType]
+            if not setProcDataOfSetProcCheckType then return end
+            setProcDataIds = {}
+            getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataIds)
+        else
+            --No setProcCheckType and no index given, so collect all setProcChecktypes and all indices of them
+            setProcDataIds = {}
+            for _, setProcDataOfSetProcCheckType in ipairs(setProcData) do
+                getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataIds)
+            end
+        end
+    end
+    return setProcDataIds
+end
+
 
 --Returns true if the setId provided got a set proc
 --> Parameters: setId number: The set's setId
@@ -1557,6 +1648,7 @@ end
         [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
             [number index1toN] = {
                 ["abilityIds"] = {number abilityId1, number abilityId2, ...},
+                ["debuffIds"] = {number debuffId1, number debuffId1, ...},
                     --Only for LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED
                     ["unitTag"] = String unitTag e.g. "player", "playerpet", "group", "boss", etc.,
 
@@ -1593,38 +1685,31 @@ end
 --Returns the abilityIds of the setId's procData
 --> Parameters: setId number: The set's setId
 -->             nilable:setProcCheckType number: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
--->             the abilityIds in. If left entry all setprocCheckTypes will be read adn the abilityIds taken from their indices.
+-->             the abilityIds in. If left entry all setprocCheckTypes will be read and the abilityIds taken from their indices.
 -->             nilable:procIndex number: The procIndex to get the abilityIds from. If left entry all abilityIds of all indices
 -->             of the setProcCheckType will be read
 --> Returns:    nilable:LibSetsSetProcDataAbilityIds table {[index1] = abilityId1, [index2] = abilityId2}
 function lib.GetSetProcAbilityIds(setId, setProcCheckType, procIndex)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    local setProcData = getSetProcData(setId)
-    local setProcDataAbilityIds
-    if not setProcData then return end
     local dataTableKey = "abilityIds"
-    if setProcCheckType and procIndex then
-        setProcDataAbilityIds = setProcData and setProcData[setProcCheckType]
-                and setProcData[setProcCheckType][procIndex]
-                and setProcData[setProcCheckType][procIndex][dataTableKey]
-    else
-        if setProcCheckType then
-            --No index given, so collect all of the setProcCheckType
-            local setProcDataOfSetProcCheckType = setProcData[setProcCheckType]
-            if not setProcDataOfSetProcCheckType then return end
-            setProcDataAbilityIds = {}
-            getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataAbilityIds)
-        else
-            --No setProcCheckType and no index given, so collect all setProcChecktypes and all indices of them
-            setProcDataAbilityIds = {}
-            for _, setProcDataOfSetProcCheckType in ipairs(setProcData) do
-                getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataAbilityIds)
-            end
-        end
-
-    end
+    local setProcDataAbilityIds = getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKey)
     return setProcDataAbilityIds
+end
+
+--Returns the debuffIds of the setId's procData
+--> Parameters: setId number: The set's setId
+-->             nilable:setProcCheckType number: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
+-->             the debuffIds in. If left entry all setprocCheckTypes will be read and the debuffIds taken from their indices.
+-->             nilable:procIndex number: The procIndex to get the debuffIds from. If left entry all debuffIds of all indices
+-->             of the setProcCheckType will be read
+--> Returns:    nilable:LibSetsSetProcDataDebuffIds table {[index1] = debuffId1, [index2] = debuffId2}
+function lib.GetSetProcDebuffIds(setId, setProcCheckType, procIndex)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local dataTableKey = "debuffIds"
+    local setProcDataDebuffIds = getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKey)
+    return setProcDataDebuffIds
 end
 
 ------------

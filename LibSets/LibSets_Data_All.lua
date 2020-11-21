@@ -781,229 +781,367 @@ lib.setDataPreloaded = {
     ]]
     [LIBSETS_TABLEKEY_SET_PROCS] = {
 ------------------------------------------------------------------------------------------------------------------------
-        [147] = {
-            [LIBSETS_SETPROC_CHECKTYPE_EVENT_POWER_UPDATE]         = {
-                [1] = {
-                    ["unitTag"]   = "player",
-                    ["powerType"] = POWERTYPE_STAMINA,
-                },
+        [147] = {[LIBSETS_SETPROC_CHECKTYPE_EVENT_POWER_UPDATE] = {
+            [1] = {
+              ["unitTag"] = "player",
+              ["powerType"] = POWERTYPE_STAMINA,
+                  },
+        },
+        [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {127070},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+              ["cooldown"] = {8000},
+                  },
+          },
+        [LIBSETS_SETPROC_CHECKTYPE_SPECIAL] = {
+            [1] = true,
+        },},     --Way of Martial Knowledge ->  / "
+        [160] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {61459},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+              ["cooldown"] = {12000},
+                  },
+          },},     --Burning Spellweave ->  / "
+        [167] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+        [1] = {
+              ["abilityIds"] = {59590},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 127070 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                    ["cooldown"]   = { 8000 },
-                },
+        },},     --Nightflame ->  / "
+        [180] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {61771},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+                  },
+          },},     --Powerful Assault ->  / "
+        [181] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {65706},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+                  },
+          },},     --Meritorious Service ->  / "
+        [185] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {66902},
+              ["cooldown"] = {5000},
+            --Attention: No source COMBAT_UNIT_TYPE_PLAYER here!
+                  },
+          },},     --Spell Power Cure ->  / "
+        [211] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {71107},
+              ["cooldown"] = {15000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]                    = {
-                [1] = true,
+          },},     --Permafrost ->  / "
+        [225] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {75746},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+                  },
+          },},     --Clever Alchemist ->  / "
+        [230] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {75801, 75804},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+                  },
+          },},     --Moondancer -> 1: Lunar blessing (magReg), 2: Shadow blessing (spellPower) / "
+        [268] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {81036},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+              ["cooldown"] = {15000},
             },
-        }, --Way of Martial Knowledge ->  /
-        [160] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 61459 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                    ["cooldown"]   = { 12000 },
-                },
+          },},     --Sentinel of Rkugamz ->  / "
+        [271] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+        [1] = {
+              ["abilityIds"] = {80545},
+              ["cooldown"] = {6000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Burning Spellweave ->  /
-        [167] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 59590 },
-                    ["cooldown"]   = { 10000 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+        }},     --Sellistrix ->  / "
+        [276] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+        [1] = {
+              ["abilityIds"] = {80865},
+              ["cooldown"] = {7000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Nightflame ->  /
-        [180] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 61771 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+        }},     --Tremorscale ->  / "
+        [280] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+        [1] = {
+              ["abilityIds"] = {84504},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Powerful Assault ->  /
-        [181] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 65706 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
-            }, }, --Meritorious Service ->  /
-        [185] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 66902 },
-                    ["cooldown"]   = { 5000 },
-                },
+        }},     --Grothdarr -> Grothdarr proc 1 / "
+        [341] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {97855},
+              ["cooldown"] = {20000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+                  },
+          },},     --Earthgore ->  / "
+        [353] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {99204},
+              ["cooldown"] = {18000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Spell Power Cure ->  /
-        [230] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 75801, 75804 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+          },},     --Mechanical Acuity ->  / "
+        [391] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {107141},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Moondancer -> 1: Lunar blessing (magReg), 2: Shadow blessing (spellPower) /
-        [268] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 81036 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                    ["cooldown"]   = { 15000 },
-                },
-            }, }, --Sentinel of Rkugamz ->  /
-        [280] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 84504 },
-                    ["cooldown"]   = { 10000 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
-            }
-        }, --Grothdarr -> Grothdarr proc 1 /
-        [341] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 97855 },
-                    ["cooldown"]   = { 20000 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+          },},     --Vestment of Olorime ->  / "
+        [395] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {109084},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Earthgore ->  /
-        [353] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 99204 },
-                    ["cooldown"]   = { 18000 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+          },},     --Perfect Vestment of Olorime ->  / "
+        [446] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+        [1] = {
+              ["abilityIds"] = {121878},
+              ["cooldown"] = {8000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Mechanical Acuity ->  /
-        [391] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 107141 },
-                    ["cooldown"]   = { 10000 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+        }},     --Claw of Yolnakhriin ->  / "
+        [451] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+        [1] = {
+              ["abilityIds"] = {121878},
+              ["cooldown"] = {8000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Vestment of Olorime ->  /
-        [395] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 109084 },
-                    ["cooldown"]   = { 10000 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+        }},     --Perfected Claw of Yolnakhriin ->  / "
+        [452] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {126924},
+              ["cooldown"] = {9000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+                  },
+          },},     --Hollowfang Thirst ->  / "
+        [455] = {[LIBSETS_SETPROC_CHECKTYPE_EVENT_BOSSES_CHANGED] = {
+            [1] = {
+              ["abilityIds"] = {126597},
+              ["cooldown"] = {22000}
+                  },
+          },
+        [LIBSETS_SETPROC_CHECKTYPE_SPECIAL] = {
+            [1] = true,
+        },},     --Z'en's Redress ->  / "
+        [471] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {133210},
+              ["cooldown"] = {12000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+        },
+          },},     --Hiti\'s Hearth ->  / "
+        [487] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {135659},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Perfect Vestment of Olorime ->  /
-        [452] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 126924 },
-                    ["cooldown"]   = { 9000 }
-                },
+          },},     --Winter's Respite ->  / "
+        [488] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {135690},
+              ["cooldown"] = {15000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]                    = {
-                [1] = true,
+          },},     --Venomous Smite ->  / "
+        [492] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {136098},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Hollowfang Thirst ->  /
-        [455] = {
-            [LIBSETS_SETPROC_CHECKTYPE_EVENT_BOSSES_CHANGED] = {
-                [1] = {
-                    ["abilityIds"] = { 126597 },
-                    ["cooldown"]   = { 22000 }
-                },
+          },},     --Kyne's Wind ->  / "
+        [493] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {137995},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]              = {
-                [1] = true,
+          },},     --Perfected Kyne's Wind ->  / "
+        [496] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {135923},
+              ["debuffIds"] = {135924},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+              ["cooldown"] = {22000},
+                  },
+        },
+        [LIBSETS_SETPROC_CHECKTYPE_SPECIAL] = {
+            [1] = true,
+        },},     --Roaring Opportunist ->  / "
+        [497] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {137986},
+              ["debuffIds"] = {137985},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
+              ["cooldown"] = 22000
+                  },
+        },
+        [LIBSETS_SETPROC_CHECKTYPE_SPECIAL] = {
+            [1] = true,
+           },},     --Perfected Roaring Opportunist ->  / "
+        [535] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+        [1] = {
+              ["abilityIds"] = {141905},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Z'en's Redress ->  /
-        [471] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 133210 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                    ["cooldown"]   = { 12000 }
-                },
+        }},     --Lady Thorn ->  / "
+        [558] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {147747},
+              ["cooldown"] = {13000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Hiti\'s Hearth ->  /
-        [487] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 135659 },
-                    ["cooldown"]   = { 10000 },
-                },
+          },},     --Void Bash ->  / "
+        [561] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {147858},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Winter's Respite ->  /
-        [492] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 136098 },
-                    ["cooldown"]   = { 10000 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+          },},     --Wrath of Elements ->  / "
+        [562] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {147875},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Kyne's Wind ->  /
-        [493] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 137995 },
-                    ["cooldown"]   = { 10000 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                },
+          },},     --Force Overflow ->  / "
+        [564] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {147747},
+              ["cooldown"] = {13000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Perfected Kyne's Wind ->  /
-        [496] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 135923 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                    ["cooldown"]   = { 22000 },
-                },
-                [2] = {
-                    ["abilityIds"] = { 135924 },
-                    ["gained"]     = true,
-                },
-                [3] = {
-                    ["abilityIds"] = { 135924 },
-                    ["faded"]      = true,
-                },
+          },},     --Perfected Void Bash ->  / "
+        [567] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {147858},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]                    = {
-                [1] = true,
-                [2] = false,
-                [3] = false,
+          },},     --Perfected Wrath of Elements ->  / "
+        [568] = {[LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
+            [1] = {
+              ["abilityIds"] = {147875},
+              ["cooldown"] = {10000},
+              ["source"] = COMBAT_UNIT_TYPE_PLAYER,
             },
-        }, --Roaring Opportunist ->  /
-        [497] = {
-            [LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT] = {
-                [1] = {
-                    ["abilityIds"] = { 137986 },
-                    ["source"]     = COMBAT_UNIT_TYPE_PLAYER,
-                    ["cooldown"]   = 22000
-                },
-                [2] = {
-                    ["abilityIds"] = { 135985 },
-                    ["gained"]     = true,
-                },
-                [3] = {
-                    ["abilityIds"] = { 135985 },
-                    ["faded"]      = true,
-                },
-            },
-            [LIBSETS_SETPROC_CHECKTYPE_SPECIAL]                    = {
-                [1] = true,
-                [2] = false,
-                [3] = false,
-            },
-        }, --Perfected Roaring Opportunist ->  /
+          },},     --Perfected Force Overflow ->  / "
 ------------------------------------------------------------------------------------------------------------------------
-    } --LIBSETS_TABLEKEY_SET_PROCS
+    }, --LIBSETS_TABLEKEY_SET_PROCS
+------------------------------------------------------------------------------------------------------------------------
+    --The preloaded mapping between the ESO ingame set item collection tree-view (parent zone, zone, sets in zone) and
+    --the zoneIds of the mappable zones
+    --The table contains the setItemCollection parentCategoryId -> their subCategories as table, flags if those are a
+    --dungeon, trial, arena
+    --If zoneIds can be mapped to them there will be a zoneId sub-table entry as well! Some of the entries cannot be
+    --mapped to zoneIds so they will miss that sub-table!
+    [LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING] =
+    {
+        --Aldmeri-Dominion
+        { parentCategory=1, category=11, zoneIds={381}},--Auridon
+        { parentCategory=1, category=12, zoneIds={383}},--Grahtwood
+        { parentCategory=1, category=13, zoneIds={108}},--Greenshade
+        { parentCategory=1, category=14, zoneIds={58}},--Malabal Tor
+        { parentCategory=1, category=15, zoneIds={382}},--Reaper's March
+        --Daggerfall-Convenion
+        { parentCategory=2, category=16, zoneIds={104}},--Alik'r Desert
+        { parentCategory=2, category=17, zoneIds={92}},--Bangkorai
+        { parentCategory=2, category=18, zoneIds={3}},--Glenumbra
+        { parentCategory=2, category=19, zoneIds={20}},--Rivenspire
+        { parentCategory=2, category=20, zoneIds={19}},--Stormhaven
+        --Ebonheart Pact
+        { parentCategory=3, category=21, zoneIds={57}},--Deshaan
+        { parentCategory=3, category=22, zoneIds={101}},--Eastmarch
+        { parentCategory=3, category=23, zoneIds={103}},--The Rift
+        { parentCategory=3, category=24, zoneIds={117}},--Shadowfen
+        { parentCategory=3, category=25, zoneIds={41}},--Stonefalls
+        --DLC-Regions
+        { parentCategory=4, category=29, zoneIds={684}},--Wrothgar
+        { parentCategory=4, category=30, zoneIds={816}},--Hew's Bane
+        { parentCategory=4, category=31, zoneIds={823}},--Gold Coast
+        { parentCategory=4, category=32, zoneIds={849}},--Vvardenfell
+        { parentCategory=4, category=33, zoneIds={980}},--Clockwork City
+        { parentCategory=4, category=34, zoneIds={1011}},--Summerset
+        { parentCategory=4, category=35, zoneIds={726}},--Murkmire
+        { parentCategory=4, category=36, zoneIds={1086}},--Northern Elsweyr
+        { parentCategory=4, category=37, zoneIds={1133}},--Southern Elsweyr
+        { parentCategory=4, category=38, zoneIds={1160}},--Western Skyrim
+        { parentCategory=4, category=89, zoneIds={1207}},--The Reach
+        --Dungeons
+        { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
+        { parentCategory=5, category=40, zoneIds={380}, isDungeon=true},--The Banished Cells I
+        { parentCategory=5, category=41, zoneIds={38}, isDungeon=true},--Blackheart Haven
+        { parentCategory=5, category=42, zoneIds={64}, isDungeon=true},--Blessed Crucible
+        { parentCategory=5, category=43, zoneIds={176}, isDungeon=true},--City of Ash I
+        { parentCategory=5, category=44, zoneIds={130}, isDungeon=true},--Crypt of Hearts I
+        { parentCategory=5, category=45, zoneIds={63}, isDungeon=true},--Darkshade Caverns I
+        { parentCategory=5, category=46, zoneIds={449}, isDungeon=true},--Direfrost Keep
+        { parentCategory=5, category=47, zoneIds={126}, isDungeon=true},--Elden Hollow I
+        { parentCategory=5, category=48, zoneIds={283}, isDungeon=true},--Fungal Grotto I
+        { parentCategory=5, category=49, zoneIds={31}, isDungeon=true},--Selene's Web
+        { parentCategory=5, category=50, zoneIds={144}, isDungeon=true},--Spindleclutch I
+        { parentCategory=5, category=51, zoneIds={131}, isDungeon=true},--Tempest Island
+        { parentCategory=5, category=52, zoneIds={11}, isDungeon=true},--Vaults of Madness
+        { parentCategory=5, category=53, zoneIds={22}, isDungeon=true},--Volenfell
+        { parentCategory=5, category=54, zoneIds={146}, isDungeon=true},--Wayrest Sewers I
+        --DLC-Dungeons
+        { parentCategory=6, category=55, zoneIds={678}, isDungeon=true},--Imperial City Prison
+        { parentCategory=6, category=56, zoneIds={688}, isDungeon=true},--White-Gold Tower
+        { parentCategory=6, category=57, zoneIds={848}, isDungeon=true},--Cradle of Shadows
+        { parentCategory=6, category=58, zoneIds={843}, isDungeon=true},--Ruins of Mazzatun
+        { parentCategory=6, category=59, zoneIds={973}, isDungeon=true},--Bloodroot Forge
+        { parentCategory=6, category=60, zoneIds={974}, isDungeon=true},--Falkreath Hold
+        { parentCategory=6, category=61, zoneIds={1009}, isDungeon=true},--Fang Lair
+        { parentCategory=6, category=62, zoneIds={1010}, isDungeon=true},--Scalecaller Peak
+        { parentCategory=6, category=63, zoneIds={1055}, isDungeon=true},--March of Sacrifices
+        { parentCategory=6, category=64, zoneIds={1052}, isDungeon=true},--Moon Hunter Keep
+        { parentCategory=6, category=65, zoneIds={1081}, isDungeon=true},--Depths of Malatar
+        { parentCategory=6, category=66, zoneIds={1080}, isDungeon=true},--Frostvault
+        { parentCategory=6, category=67, zoneIds={1123}, isDungeon=true},--Lair of Maarselok
+        { parentCategory=6, category=68, zoneIds={1122}, isDungeon=true},--Moongrave Fane
+        { parentCategory=6, category=69, zoneIds={1152}, isDungeon=true},--Icereach
+        { parentCategory=6, category=70, zoneIds={1153}, isDungeon=true},--Unhallowed Grave
+        { parentCategory=6, category=87, zoneIds={1201}, isDungeon=true},--Castle Thorn
+        { parentCategory=6, category=88, zoneIds={1197}, isDungeon=true},--Stone Garden
+        --Trials
+        { parentCategory=7, category=71, zoneIds={638}, isTrial=true},--Aetherian Archive
+        { parentCategory=7, category=72, zoneIds={636}, isTrial=true},--Hel Ra Citadel
+        { parentCategory=7, category=73, zoneIds={639}, isTrial=true},--Sanctum Ophidia
+        { parentCategory=7, category=74, zoneIds={725}, isTrial=true},--Maw of Lorkhaj
+        { parentCategory=7, category=75, zoneIds={975}, isTrial=true},--Halls of Fabrication
+        { parentCategory=7, category=76, zoneIds={1000}, isTrial=true},--Asylum Sanctorium
+        { parentCategory=7, category=77, zoneIds={1051}, isTrial=true},--Cloudrest
+        { parentCategory=7, category=78, zoneIds={1121}, isTrial=true},--Sunspire
+        { parentCategory=7, category=79, zoneIds={1196}, isTrial=true},--Kyne's Aegis
+        --Arenas
+        { parentCategory=8, category=80, zoneIds={635}, isArena=true},--Dragonstar Arena
+        { parentCategory=8, category=81, zoneIds={677}, isArena=true},--Maelstrom Arena
+        { parentCategory=8, category=82, zoneIds={1082}, isArena=true},--Blackrose Prison
+        { parentCategory=8, category=90, zoneIds={1227}, isArena=true},--Vateshran Hollows
+        --PVP
+        { parentCategory=9, category=83, zoneIds={181}},--Cyrodiil
+        { parentCategory=9, category=84, zoneIds={584}},--Imperial City
+        { parentCategory=9, category=85},--Battlegrounds
+        --Miscellaneous
+        { parentCategory=10, category=26},--Beginner zones
+        { parentCategory=10, category=27, zoneIds={347}},--Coldharbour
+        { parentCategory=10, category=28, zoneIds={888}},--Craglorn
+        { parentCategory=10, category=86},--Antiquities
+    }, --LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
 ------------------------------------------------------------------------------------------------------------------------
 }--lib.setDataPreloaded
 ------------------------------------------------------------------------------------------------------------------------
