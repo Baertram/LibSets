@@ -562,20 +562,24 @@ local function LoadSets()
     --SetItemCollection data
     --Generate the table with the zoneId as key, and a table with the categoryId as key
     local preloadedSetItemCollectionMappingToZone = preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
-    lib.zoneId2SetItemCollectionCategory = {}
+    lib.setItemCollectionZoneId2Category = {}
     lib.setItemCollectionCategory2ZoneId = {}
+    lib.setItemCollectionParentCategories = {}
     lib.setItemCollectionCategories = {}
     for _, category2ZoneData in ipairs(preloadedSetItemCollectionMappingToZone) do
-        --local parentCategoryId = category2ZoneData.parentCategory
+        local parentCategoryId = category2ZoneData.parentCategory
         local categoryId = category2ZoneData.category
+        --Parent categories table
+        lib.setItemCollectionParentCategories[parentCategoryId] = lib.setItemCollectionParentCategories[parentCategoryId] or {}
+        lib.setItemCollectionParentCategories[parentCategoryId][categoryId] = category2ZoneData
         --Categories table
         lib.setItemCollectionCategories[categoryId] = category2ZoneData
         --Zone to categories / category to zones mapping tables
         if category2ZoneData.zoneIds ~= nil then
             lib.setItemCollectionCategory2ZoneId[categoryId] = lib.setItemCollectionCategory2ZoneId[categoryId] or {}
             for _, zoneId in ipairs(category2ZoneData.zoneIds) do
-                lib.zoneId2SetItemCollectionCategory[zoneId] =  lib.zoneId2SetItemCollectionCategory[zoneId] or {}
-                table.insert(lib.zoneId2SetItemCollectionCategory[zoneId], categoryId)
+                lib.setItemCollectionZoneId2Category[zoneId] =  lib.setItemCollectionZoneId2Category[zoneId] or {}
+                table.insert(lib.setItemCollectionZoneId2Category[zoneId], categoryId)
                 table.insert(lib.setItemCollectionCategory2ZoneId[categoryId], zoneId)
             end
         end
@@ -1589,8 +1593,22 @@ end
 function lib.GetItemSetCollectionCategoryIds(zoneId)
     if not lib.checkIfSetsAreLoadedProperly() then return end
     if zoneId == nil then return end
-    if lib.zoneId2SetItemCollectionCategory[zoneId] then
-        return lib.zoneId2SetItemCollectionCategory[zoneId]
+    if lib.setItemCollectionZoneId2Category[zoneId] then
+        return lib.setItemCollectionZoneId2Category[zoneId]
+    end
+    return
+end
+
+--Returns the parent category data (table) containing the zoneIds, and possible boolean parameters
+--isDungeon, isArena, isTrial of ALL categoryIds below this parent -> See file LibSets_data_all.lua ->
+--table lib.setDataPreloaded -> table key LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
+--Example return table: { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
+function lib.GetItemSetCollectionParentCategoryData(parentCategoryId)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if parentCategoryId == nil then return end
+    local parentCategorySubCategories = lib.setItemCollectionParentCategories[parentCategoryId]
+    if parentCategorySubCategories then
+        return parentCategorySubCategories
     end
     return
 end
@@ -1608,6 +1626,64 @@ function lib.GetItemSetCollectionCategoryData(categoryId)
     return
 end
 
+--Open a node in the item set collections book for teh given category data table
+-->the table categoryData must be determined via lib.GetItemSetCollectionCategoryData before
+-->categoryData.parentId must be given and > 0! categoryData.category can be nil or <= 0, then the parentId will be shown
+function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not categoryData or type(categoryData) ~= "table"
+            or categoryData.parentCategory == nil or categoryData.parentCategory <= 0 then
+        return
+    end
+    if SCENE_MANAGER.currentScene.name ~= "itemSetsBook" then
+        MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "itemSetsBook")
+    end
+    local categoryTree = ITEM_SET_COLLECTIONS_BOOK_KEYBOARD.categoryTree
+    if not categoryTree then return end
+    --How to get the node control ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
+    --Scan all entries in ITEM_SET_COLLECTIONS_BOOK_KEYBOARD.categoryTree.nodes.dataEntry.data somehow?
+    --Or via categoryTree:GetTreeNodeByData or categoryTree:GetTreeNodeInTreeByData? Might not work as the equalityFunction
+    --which GetTreeNodeInTreeByData uses only checks via GetId() function
+    --
+    --From the categoryTree, by help of the parentCategory and the categoryId:
+    -->loop over categoryTree.rootNode.children
+    --->local parentCategoryData = categoryTree.rootNode.children[n].data.dataSource.categoryId == categoryData.parentCategory
+    --->select subCategory from the parentCategory: parentCategoryData.children.data.dataSource.categoryId == categoryData.category
+    ---->nodeToOpen = parentCategoryData.children.data.node
+    local nodeToOpen --= ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
+    local parentCategoryIdToFind = categoryData.parentCategory
+    local categoryIdToFind = categoryData.category
+    local parentCategories = categoryTree.rootNode.children
+    for _, parentCategoryData in ipairs(parentCategories) do
+        if nodeToOpen == nil then
+            if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
+                    and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
+                --No subCategory given?
+                if categoryIdToFind == nil or categoryIdToFind <= 0 then
+                    --return the node of the parentCategory
+                    nodeToOpen = parentCategoryData.data.node
+                    break
+                else
+                    --Search for the correct subCategory
+                    for _, subCategoryData in ipairs(parentCategoryData.children) do
+                        if nodeToOpen == nil then
+                            if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
+                                    and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
+                                nodeToOpen = subCategoryData.data.node
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            break
+        end
+    end
+    if nodeToOpen == nil then return end
+    if categoryTree.selectedNode == nodeToOpen then return true end
+    categoryTree:SelectNode(nodeToOpen)
+end
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
