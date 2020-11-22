@@ -1675,7 +1675,14 @@ function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
     local parentCategoryIdToFind = categoryData.parentCategory
     local categoryIdToFind = categoryData.category
     local parentCategories = categoryTree.rootNode.children
-    for _, parentCategoryData in ipairs(parentCategories) do
+    --Nothing found? Try again after 250ms
+    if not parentCategories then
+        zo_callLater(function()
+            return lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
+        end, 250)
+        return
+    end
+    for _, parentCategoryData in pairs(parentCategories) do
         if nodeToOpen == nil then
             if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
                     and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
@@ -1686,7 +1693,7 @@ function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
                     break
                 else
                     --Search for the correct subCategory
-                    for _, subCategoryData in ipairs(parentCategoryData.children) do
+                    for _, subCategoryData in pairs(parentCategoryData.children) do
                         if nodeToOpen == nil then
                             if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
                                     and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
