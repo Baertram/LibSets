@@ -1698,6 +1698,20 @@ function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
     categoryTree:SelectNode(nodeToOpen)
 end
 
+--Open the item set collections book of the current parentZoneId. If more than 1 categoryId was found for the zoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfCurrentParentZone()
+    local currentZone, currentParentZone, _, _ = lib.GetCurrentZoneIds()
+    if not currentParentZone or currentParentZone <= 0 then return end
+    local categoryIdsOfParentZone = lib.GetItemSetCollectionCategoryIds(currentParentZone)
+    if not categoryIdsOfParentZone then return end
+    --Use 1st categoryId of found for the zone
+    local itemSetCollectionCategoryDataOfParentZone = lib.GetItemSetCollectionCategoryData(categoryIdsOfParentZone[1])
+    if not itemSetCollectionCategoryDataOfParentZone then return end
+    lib.OpenItemSetCollectionBookOfCategoryData(itemSetCollectionCategoryDataOfParentZone)
+end
+
+
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
