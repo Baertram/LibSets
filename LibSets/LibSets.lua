@@ -1575,6 +1575,14 @@ end
 ------------------------------------------------------------------------
 -- 	Item set collections functions
 ------------------------------------------------------------------------
+--Local helper function to open the categoryData of a categoryId in the item set collections book UI
+local function openItemSetCollectionBookOfZoneCategoryData(categoryId)
+    local itemSetCollectionCategoryDataOfParentZone = lib.GetItemSetCollectionCategoryData(categoryId)
+    if not itemSetCollectionCategoryDataOfParentZone then return end
+    local retVar = lib.OpenItemSetCollectionBookOfCategoryData(itemSetCollectionCategoryDataOfParentZone)
+    return retVar
+end
+
 
 --Get the current map's zoneIndex and via the index get the zoneId, the parent zoneId, and return them
 --+ the current zone's index and parent zone index
@@ -1696,19 +1704,45 @@ function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
     if nodeToOpen == nil then return end
     if categoryTree.selectedNode == nodeToOpen then return true end
     categoryTree:SelectNode(nodeToOpen)
+    return (categoryTree.selectedNode == nodeToOpen) or false
 end
 
---Open the item set collections book of the current parentZoneId. If more than 1 categoryId was found for the zoneId,
+--Open the item set collections book of the current parentZoneId. If more than 1 categoryId was found for the parentZoneId,
 --the 1st will be opened!
 function lib.OpenItemSetCollectionBookOfCurrentParentZone()
-    local currentZone, currentParentZone, _, _ = lib.GetCurrentZoneIds()
+    local _, currentParentZone, _, _ = lib.GetCurrentZoneIds()
     if not currentParentZone or currentParentZone <= 0 then return end
     local categoryIdsOfParentZone = lib.GetItemSetCollectionCategoryIds(currentParentZone)
     if not categoryIdsOfParentZone then return end
-    --Use 1st categoryId of found for the zone
-    local itemSetCollectionCategoryDataOfParentZone = lib.GetItemSetCollectionCategoryData(categoryIdsOfParentZone[1])
-    if not itemSetCollectionCategoryDataOfParentZone then return end
-    lib.OpenItemSetCollectionBookOfCategoryData(itemSetCollectionCategoryDataOfParentZone)
+    if #categoryIdsOfParentZone == 1 then
+        return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfParentZone[1])
+    else
+        for _, categoryId in ipairs(categoryIdsOfParentZone) do
+            if openItemSetCollectionBookOfZoneCategoryData(categoryId) then
+                return true
+            end
+        end
+        return false
+    end
+end
+
+--Open the item set collections book of the current zoneId. If more than 1 categoryId was found for the zoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfCurrentZone()
+    local currentZone, _, _, _ = lib.GetCurrentZoneIds()
+    if not currentZone or currentZone <= 0 then return end
+    local categoryIdsOfZone = lib.GetItemSetCollectionCategoryIds(currentZone)
+    if not categoryIdsOfZone then return end
+    if #categoryIdsOfZone == 1 then
+        return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfZone[1])
+    else
+        for _, categoryId in ipairs(categoryIdsOfZone) do
+            if openItemSetCollectionBookOfZoneCategoryData(categoryId) then
+                return true
+            end
+        end
+        return false
+    end
 end
 
 

@@ -34,29 +34,6 @@ local zoneIdsOfNewAPIVersionOnly
 --}
 setsOfNewerAPIVersion = {
     --DLCid sets - START
-536,
-537,
-538,
-539,
-540,
-541,
-542,
-543,
-544,
-557,
-558,
-559,
-560,
-561,
-562,
-563,
-564,
-565,
-566,
-567,
-568,
-575,
-576,
     --DLCid sets - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
@@ -1067,21 +1044,21 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=89, zoneIds={1207}},--The Reach
         --Dungeons
         { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
-        { parentCategory=5, category=40, zoneIds={380}, isDungeon=true},--The Banished Cells I
+        { parentCategory=5, category=40, zoneIds={380,935}, isDungeon=true},--The Banished Cells I
         { parentCategory=5, category=41, zoneIds={38}, isDungeon=true},--Blackheart Haven
         { parentCategory=5, category=42, zoneIds={64}, isDungeon=true},--Blessed Crucible
-        { parentCategory=5, category=43, zoneIds={176}, isDungeon=true},--City of Ash I
-        { parentCategory=5, category=44, zoneIds={130}, isDungeon=true},--Crypt of Hearts I
-        { parentCategory=5, category=45, zoneIds={63}, isDungeon=true},--Darkshade Caverns I
+        { parentCategory=5, category=43, zoneIds={176,681}, isDungeon=true},--City of Ash I
+        { parentCategory=5, category=44, zoneIds={130,932}, isDungeon=true},--Crypt of Hearts I
+        { parentCategory=5, category=45, zoneIds={63,93}, isDungeon=true},--Darkshade Caverns I
         { parentCategory=5, category=46, zoneIds={449}, isDungeon=true},--Direfrost Keep
-        { parentCategory=5, category=47, zoneIds={126}, isDungeon=true},--Elden Hollow I
-        { parentCategory=5, category=48, zoneIds={283}, isDungeon=true},--Fungal Grotto I
+        { parentCategory=5, category=47, zoneIds={126,931}, isDungeon=true},--Elden Hollow I
+        { parentCategory=5, category=48, zoneIds={283,934}, isDungeon=true},--Fungal Grotto I
         { parentCategory=5, category=49, zoneIds={31}, isDungeon=true},--Selene's Web
-        { parentCategory=5, category=50, zoneIds={144}, isDungeon=true},--Spindleclutch I
+        { parentCategory=5, category=50, zoneIds={144,936}, isDungeon=true},--Spindleclutch I
         { parentCategory=5, category=51, zoneIds={131}, isDungeon=true},--Tempest Island
         { parentCategory=5, category=52, zoneIds={11}, isDungeon=true},--Vaults of Madness
         { parentCategory=5, category=53, zoneIds={22}, isDungeon=true},--Volenfell
-        { parentCategory=5, category=54, zoneIds={146}, isDungeon=true},--Wayrest Sewers I
+        { parentCategory=5, category=54, zoneIds={146,933}, isDungeon=true},--Wayrest Sewers I
         --DLC-Dungeons
         { parentCategory=6, category=55, zoneIds={678}, isDungeon=true},--Imperial City Prison
         { parentCategory=6, category=56, zoneIds={688}, isDungeon=true},--White-Gold Tower
