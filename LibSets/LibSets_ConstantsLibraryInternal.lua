@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.23
+local MAJOR, MINOR = "LibSets", 0.26
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -35,7 +35,7 @@ lib.startedLoading  = true
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100032 --Stonethorn (2020-07-18, PTS, API 100032)
+lib.lastSetsPreloadedCheckAPIVersion = 100034 --Flames of Ambition (2021-01-28, PTS, API 100034)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -104,6 +104,7 @@ LIBSETS_TABLEKEY_DROPMECHANIC_NAMES             = LIBSETS_TABLEKEY_DROPMECHANIC 
 LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES     = LIBSETS_TABLEKEY_DROPMECHANIC .. "Tooltip" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_MIXED_SETNAMES                 = "MixedSetNamesForDataAll"
 LIBSETS_TABLEKEY_SET_PROCS                      = "setProcs"
+LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING = "setItemCollectionsZoneMapping"
 ------------------------------------------------------------------------------------------------------------------------
 --Set types
 --> If you change these be sure to check the following tables below and add/change/remove entries as well:
@@ -358,9 +359,27 @@ local undauntedChestIds = {
 lib.undauntedChestIds = undauntedChestIds
 ------------------------------------------------------------------------------------------------------------------------
 lib.armorTypeNames =  {
-    [ARMORTYPE_LIGHT]   = GetString(SI_ARMORTYPE1) or "Light",
-    [ARMORTYPE_MEDIUM]  = GetString(SI_ARMORTYPE2) or "Medium",
-    [ARMORTYPE_HEAVY]   = GetString(SI_ARMORTYPE3) or "Heavy",
+    [ARMORTYPE_LIGHT]               = GetString(SI_ARMORTYPE1) or "Light",
+    [ARMORTYPE_MEDIUM]              = GetString(SI_ARMORTYPE2) or "Medium",
+    [ARMORTYPE_HEAVY]               = GetString(SI_ARMORTYPE3) or "Heavy",
+}
+------------------------------------------------------------------------------------------------------------------------
+lib.weaponTypeNames = {
+    [WEAPONTYPE_NONE]               = GetString(SI_WEAPONTYPE0),
+    [WEAPONTYPE_AXE]                = GetString(SI_WEAPONTYPE1),
+    [WEAPONTYPE_BOW]                = GetString(SI_WEAPONTYPE8),
+    [WEAPONTYPE_DAGGER]             = GetString(SI_WEAPONTYPE11),
+    [WEAPONTYPE_FIRE_STAFF]         = GetString(SI_WEAPONTYPE12),
+    [WEAPONTYPE_FROST_STAFF]        = GetString(SI_WEAPONTYPE13),
+    [WEAPONTYPE_HAMMER]             = GetString(SI_WEAPONTYPE2),
+    [WEAPONTYPE_HEALING_STAFF]      = GetString(SI_WEAPONTYPE9),
+    [WEAPONTYPE_LIGHTNING_STAFF]    = GetString(SI_WEAPONTYPE15),
+    [WEAPONTYPE_RUNE]               = GetString(SI_WEAPONTYPE10),
+    [WEAPONTYPE_SHIELD]             = GetString(SI_WEAPONTYPE14),
+    [WEAPONTYPE_SWORD]              = GetString(SI_WEAPONTYPE3),
+    [WEAPONTYPE_TWO_HANDED_AXE]     = GetString(SI_WEAPONTYPE5),
+    [WEAPONTYPE_TWO_HANDED_HAMMER]  = GetString(SI_WEAPONTYPE6),
+    [WEAPONTYPE_TWO_HANDED_SWORD]   = GetString(SI_WEAPONTYPE4),
 }
 ------------------------------------------------------------------------------------------------------------------------
 --Drop mechanics / cities / etc. for additional drop location information

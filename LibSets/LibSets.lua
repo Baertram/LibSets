@@ -559,6 +559,32 @@ local function LoadSets()
             end
         end
     end
+    --SetItemCollection data
+    --Generate the table with the zoneId as key, and a table with the categoryId as key
+    local preloadedSetItemCollectionMappingToZone = preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
+    lib.setItemCollectionZoneId2Category = {}
+    lib.setItemCollectionCategory2ZoneId = {}
+    lib.setItemCollectionParentCategories = {}
+    lib.setItemCollectionCategories = {}
+    for _, category2ZoneData in ipairs(preloadedSetItemCollectionMappingToZone) do
+        local parentCategoryId = category2ZoneData.parentCategory
+        local categoryId = category2ZoneData.category
+        --Parent categories table
+        lib.setItemCollectionParentCategories[parentCategoryId] = lib.setItemCollectionParentCategories[parentCategoryId] or {}
+        lib.setItemCollectionParentCategories[parentCategoryId][categoryId] = category2ZoneData
+        --Categories table
+        lib.setItemCollectionCategories[categoryId] = category2ZoneData
+        --Zone to categories / category to zones mapping tables
+        if category2ZoneData.zoneIds ~= nil then
+            lib.setItemCollectionCategory2ZoneId[categoryId] = lib.setItemCollectionCategory2ZoneId[categoryId] or {}
+            for _, zoneId in ipairs(category2ZoneData.zoneIds) do
+                lib.setItemCollectionZoneId2Category[zoneId] =  lib.setItemCollectionZoneId2Category[zoneId] or {}
+                table.insert(lib.setItemCollectionZoneId2Category[zoneId], categoryId)
+                table.insert(lib.setItemCollectionCategory2ZoneId[categoryId], zoneId)
+            end
+        end
+    end
+
     lib.setsScanning = false
     lib.setsLoaded = true
 end
@@ -1338,8 +1364,6 @@ function lib.GetSetArmorTypes(setId)
         local itemLink = lib.buildItemLink(itemId)
         if itemLink then
             --Scan each itemId and get the armor type.
-            --* GetItemLinkArmorType(*string* _itemLink_)
-            --** _Returns:_ *[ArmorType|#ArmorType]* _armorType_
             local armorTypeOfSetItem = GetItemLinkArmorType(itemLink)
             if armorTypeOfSetItem and armorTypeOfSetItem ~= ARMORTYPE_NONE then
                 if not armorTypesOfSet[armorTypeOfSetItem] then
@@ -1361,15 +1385,58 @@ function lib.GetItemsArmorType(itemId)
     local itemLink = lib.buildItemLink(itemId)
     if itemLink then
         --Scan each itemId and get the armor type.
-        --* GetItemLinkArmorType(*string* _itemLink_)
-        --** _Returns:_ *[ArmorType|#ArmorType]* _armorType_
         local armorTypeOfSetItem = GetItemLinkArmorType(itemLink)
         if armorTypeOfSetItem and armorTypeOfSetItem ~= ARMORTYPE_NONE then
             return armorTypeOfSetItem
         end
     end
-    --If it's not already added to the armorTypesOfSet table add it
-    --Return the armorTypesOfSet table
+    return nil
+end
+
+--Returns the possible weapon types's of a set
+--> Parameters: setId number: The set's id
+--> Returns:    table weaponTypesOfSet: Contains all weapon types possible as key and the Boolean value
+-->             true/false if this setId got items of this weaponType
+function lib.GetSetWeaponTypes(setId)
+    local weaponTypesOfSet = {}
+    if not lib.weaponTypeNames then return end
+    for weaponType,_ in pairs(lib.weaponTypeNames) do
+        weaponTypesOfSet[weaponType] = false
+    end
+    --Get all itemIds of this set
+    local setItemIds = lib.GetSetItemIds(setId)
+    if not setItemIds then return false end
+    --Build an itemLink from the itemId
+    for itemId, _ in pairs(setItemIds) do
+        local itemLink = lib.buildItemLink(itemId)
+        if itemLink then
+            --Scan each itemId and get the weapon type.
+            local weaponTypeOfSetItem = GetItemLinkWeaponType(itemLink)
+            if weaponTypeOfSetItem and weaponTypeOfSetItem ~= WEAPONTYPE_NONE then
+                if not weaponTypesOfSet[weaponTypeOfSetItem] then
+                    weaponTypesOfSet[weaponTypeOfSetItem] = true
+                end
+            end
+        end
+    end
+    --If it's not already added to the weaponTypesOfSet table add it
+    --Return the weaponTypesOfSet table
+    return weaponTypesOfSet
+end
+
+--Returns the weapon types of a set's item
+--> Parameters: itemId number: The set item's itemId
+--> Returns:    number weaponTypeOfSetItem: The weaponType (https://wiki.esoui.com/Globals#WeaponType) of the setItem
+function lib.GetItemsWeaponType(itemId)
+    --Build an itemLink from the itemId
+    local itemLink = lib.buildItemLink(itemId)
+    if itemLink then
+        --Scan each itemId and get the weapon type.
+        local weaponTypeOfSetItem = GetItemLinkWeaponType(itemLink)
+        if weaponTypeOfSetItem and weaponTypeOfSetItem ~= WEAPONTYPE_NONE then
+            return weaponTypeOfSetItem
+        end
+    end
     return nil
 end
 
@@ -1501,6 +1568,191 @@ function lib.GetSetTypeSetsData(setType)
     return setsData
 end
 
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- 	Item set collections functions
+------------------------------------------------------------------------
+--Local helper function to open the categoryData of a categoryId in the item set collections book UI
+local function openItemSetCollectionBookOfZoneCategoryData(categoryId)
+    local itemSetCollectionCategoryDataOfParentZone = lib.GetItemSetCollectionCategoryData(categoryId)
+    if not itemSetCollectionCategoryDataOfParentZone then return end
+    local retVar = lib.OpenItemSetCollectionBookOfCategoryData(itemSetCollectionCategoryDataOfParentZone)
+    return retVar
+end
+
+
+--Get the current map's zoneIndex and via the index get the zoneId, the parent zoneId, and return them
+--+ the current zone's index and parent zone index
+--> Returns: number currentZoneId, number currentZoneParentId, number currentZoneIndex, number currentZoneParentIndex
+function lib.GetCurrentZoneIds()
+    local currentZoneIndex = GetCurrentMapZoneIndex()
+    local currentZoneId = GetZoneId(currentZoneIndex)
+    local currentZoneParentId = GetParentZoneId(currentZoneId)
+    local currentZoneParentIndex = GetZoneIndex(currentZoneParentId)
+    return currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex
+end
+
+
+--Returns the zoneIds (table) which are linked to a item set collection's categoryId
+--Not all categories are connected to a zone though! The result will be nil in these cases.
+--Example return table: {148}
+function lib.GetItemSetCollectionZoneIds(categoryId)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if categoryId == nil then return end
+    if lib.setItemCollectionCategory2ZoneId[categoryId] then
+        return lib.setItemCollectionCategory2ZoneId[categoryId]
+    end
+    return
+end
+
+--Returns the categoryIds (table) which are linked to a item set collection's zoneId
+--Not all zoneIds are connected to a category though! The result will be nil in these cases.
+--Example return table: {39}
+function lib.GetItemSetCollectionCategoryIds(zoneId)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if zoneId == nil then return end
+    if lib.setItemCollectionZoneId2Category[zoneId] then
+        return lib.setItemCollectionZoneId2Category[zoneId]
+    end
+    return
+end
+
+--Returns the parent category data (table) containing the zoneIds, and possible boolean parameters
+--isDungeon, isArena, isTrial of ALL categoryIds below this parent -> See file LibSets_data_all.lua ->
+--table lib.setDataPreloaded -> table key LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
+--Example return table: { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
+function lib.GetItemSetCollectionParentCategoryData(parentCategoryId)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if parentCategoryId == nil then return end
+    local parentCategorySubCategories = lib.setItemCollectionParentCategories[parentCategoryId]
+    if parentCategorySubCategories then
+        return parentCategorySubCategories
+    end
+    return
+end
+
+--Returns the category data (table) containing the zoneIds, and possible boolean parameters
+--isDungeon, isArena, isTrial -> See file LibSets_data_alllua -> table lib.setDataPreloaded ->
+--table key LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
+--Example return table: { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
+function lib.GetItemSetCollectionCategoryData(categoryId)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if categoryId == nil then return end
+    if lib.setItemCollectionCategories[categoryId] then
+        return lib.setItemCollectionCategories[categoryId]
+    end
+    return
+end
+
+--Open a node in the item set collections book for teh given category data table
+-->the table categoryData must be determined via lib.GetItemSetCollectionCategoryData before
+-->categoryData.parentId must be given and > 0! categoryData.category can be nil or <= 0, then the parentId will be shown
+function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not categoryData or type(categoryData) ~= "table"
+            or categoryData.parentCategory == nil or categoryData.parentCategory <= 0 then
+        return
+    end
+    if SCENE_MANAGER.currentScene.name ~= "itemSetsBook" then
+        MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "itemSetsBook")
+    end
+    local categoryTree = ITEM_SET_COLLECTIONS_BOOK_KEYBOARD.categoryTree
+    if not categoryTree then return end
+    --How to get the node control ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
+    --Scan all entries in ITEM_SET_COLLECTIONS_BOOK_KEYBOARD.categoryTree.nodes.dataEntry.data somehow?
+    --Or via categoryTree:GetTreeNodeByData or categoryTree:GetTreeNodeInTreeByData? Might not work as the equalityFunction
+    --which GetTreeNodeInTreeByData uses only checks via GetId() function
+    --
+    --From the categoryTree, by help of the parentCategory and the categoryId:
+    -->loop over categoryTree.rootNode.children
+    --->local parentCategoryData = categoryTree.rootNode.children[n].data.dataSource.categoryId == categoryData.parentCategory
+    --->select subCategory from the parentCategory: parentCategoryData.children.data.dataSource.categoryId == categoryData.category
+    ---->nodeToOpen = parentCategoryData.children.data.node
+    local nodeToOpen --= ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
+    local parentCategoryIdToFind = categoryData.parentCategory
+    local categoryIdToFind = categoryData.category
+    local parentCategories = categoryTree.rootNode.children
+    --Nothing found? Try again after 250ms
+    if not parentCategories then
+        zo_callLater(function()
+            return lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
+        end, 250)
+        return
+    end
+    for _, parentCategoryData in pairs(parentCategories) do
+        if nodeToOpen == nil then
+            if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
+                    and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
+                --No subCategory given?
+                if categoryIdToFind == nil or categoryIdToFind <= 0 then
+                    --return the node of the parentCategory
+                    nodeToOpen = parentCategoryData.data.node
+                    break
+                else
+                    --Search for the correct subCategory
+                    for _, subCategoryData in pairs(parentCategoryData.children) do
+                        if nodeToOpen == nil then
+                            if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
+                                    and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
+                                nodeToOpen = subCategoryData.data.node
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            break
+        end
+    end
+    if nodeToOpen == nil then return end
+    if categoryTree.selectedNode == nodeToOpen then return true end
+    categoryTree:SelectNode(nodeToOpen)
+    return (categoryTree.selectedNode == nodeToOpen) or false
+end
+
+--Open the item set collections book of the current parentZoneId. If more than 1 categoryId was found for the parentZoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfCurrentParentZone()
+    local _, currentParentZone, _, _ = lib.GetCurrentZoneIds()
+    if not currentParentZone or currentParentZone <= 0 then return end
+    local categoryIdsOfParentZone = lib.GetItemSetCollectionCategoryIds(currentParentZone)
+    if not categoryIdsOfParentZone then return end
+    if #categoryIdsOfParentZone == 1 then
+        return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfParentZone[1])
+    else
+        for _, categoryId in ipairs(categoryIdsOfParentZone) do
+            if openItemSetCollectionBookOfZoneCategoryData(categoryId) then
+                return true
+            end
+        end
+        return false
+    end
+end
+
+--Open the item set collections book of the current zoneId. If more than 1 categoryId was found for the zoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfCurrentZone()
+    local currentZone, _, _, _ = lib.GetCurrentZoneIds()
+    if not currentZone or currentZone <= 0 then return end
+    local categoryIdsOfZone = lib.GetItemSetCollectionCategoryIds(currentZone)
+    if not categoryIdsOfZone then return end
+    if #categoryIdsOfZone == 1 then
+        return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfZone[1])
+    else
+        for _, categoryId in ipairs(categoryIdsOfZone) do
+            if openItemSetCollectionBookOfZoneCategoryData(categoryId) then
+                return true
+            end
+        end
+        return false
+    end
+end
+
+
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
@@ -1526,6 +1778,33 @@ local function getSetProcDataOfIndex(setProcDataOfSetProcCheckTypeTable, dataNam
             end
         end
     end
+end
+
+--Internal helper function to read abilityIds, debuffIds (dataTableKey) from the setProc data tables
+local function getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKey)
+    local setProcData = getSetProcData(setId)
+    local setProcDataIds
+    if not setProcData then return end
+    if setProcCheckType and procIndex then
+        setProcDataIds = setProcData and setProcData[setProcCheckType]
+                and setProcData[setProcCheckType][procIndex]
+                and setProcData[setProcCheckType][procIndex][dataTableKey]
+    else
+        if setProcCheckType then
+            --No index given, so collect all of the setProcCheckType
+            local setProcDataOfSetProcCheckType = setProcData[setProcCheckType]
+            if not setProcDataOfSetProcCheckType then return end
+            setProcDataIds = {}
+            getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataIds)
+        else
+            --No setProcCheckType and no index given, so collect all setProcChecktypes and all indices of them
+            setProcDataIds = {}
+            for _, setProcDataOfSetProcCheckType in ipairs(setProcData) do
+                getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataIds)
+            end
+        end
+    end
+    return setProcDataIds
 end
 
 
@@ -1557,6 +1836,7 @@ end
         [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
             [number index1toN] = {
                 ["abilityIds"] = {number abilityId1, number abilityId2, ...},
+                ["debuffIds"] = {number debuffId1, number debuffId1, ...},
                     --Only for LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED
                     ["unitTag"] = String unitTag e.g. "player", "playerpet", "group", "boss", etc.,
 
@@ -1593,38 +1873,31 @@ end
 --Returns the abilityIds of the setId's procData
 --> Parameters: setId number: The set's setId
 -->             nilable:setProcCheckType number: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
--->             the abilityIds in. If left entry all setprocCheckTypes will be read adn the abilityIds taken from their indices.
+-->             the abilityIds in. If left entry all setprocCheckTypes will be read and the abilityIds taken from their indices.
 -->             nilable:procIndex number: The procIndex to get the abilityIds from. If left entry all abilityIds of all indices
 -->             of the setProcCheckType will be read
 --> Returns:    nilable:LibSetsSetProcDataAbilityIds table {[index1] = abilityId1, [index2] = abilityId2}
 function lib.GetSetProcAbilityIds(setId, setProcCheckType, procIndex)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    local setProcData = getSetProcData(setId)
-    local setProcDataAbilityIds
-    if not setProcData then return end
     local dataTableKey = "abilityIds"
-    if setProcCheckType and procIndex then
-        setProcDataAbilityIds = setProcData and setProcData[setProcCheckType]
-                and setProcData[setProcCheckType][procIndex]
-                and setProcData[setProcCheckType][procIndex][dataTableKey]
-    else
-        if setProcCheckType then
-            --No index given, so collect all of the setProcCheckType
-            local setProcDataOfSetProcCheckType = setProcData[setProcCheckType]
-            if not setProcDataOfSetProcCheckType then return end
-            setProcDataAbilityIds = {}
-            getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataAbilityIds)
-        else
-            --No setProcCheckType and no index given, so collect all setProcChecktypes and all indices of them
-            setProcDataAbilityIds = {}
-            for _, setProcDataOfSetProcCheckType in ipairs(setProcData) do
-                getSetProcDataOfIndex(setProcDataOfSetProcCheckType, dataTableKey, setProcDataAbilityIds)
-            end
-        end
-
-    end
+    local setProcDataAbilityIds = getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKey)
     return setProcDataAbilityIds
+end
+
+--Returns the debuffIds of the setId's procData
+--> Parameters: setId number: The set's setId
+-->             nilable:setProcCheckType number: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
+-->             the debuffIds in. If left entry all setprocCheckTypes will be read and the debuffIds taken from their indices.
+-->             nilable:procIndex number: The procIndex to get the debuffIds from. If left entry all debuffIds of all indices
+-->             of the setProcCheckType will be read
+--> Returns:    nilable:LibSetsSetProcDataDebuffIds table {[index1] = debuffId1, [index2] = debuffId2}
+function lib.GetSetProcDebuffIds(setId, setProcCheckType, procIndex)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local dataTableKey = "debuffIds"
+    local setProcDataDebuffIds = getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKey)
+    return setProcDataDebuffIds
 end
 
 ------------
