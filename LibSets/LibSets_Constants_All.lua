@@ -33,12 +33,14 @@ DLC_MARKARTH                = 20
 --End of iteration over DLC ids. !!!!! Increase this variable to the maximum DLC id if new DLC ids are added !!!!!
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
+    DLC_FLAMES_OF_AMBITION = 21
+    --DLC_BLACKWOOD          = 22
 end
 --Iterators for the ESO dlc and chapter constants
 --You can use the function
 DLC_ITERATION_BEGIN = DLC_BASE_GAME
 --Remember to increase the DLC id here to the newest DLC Id, for the maximum iteration
-DLC_ITERATION_END = DLC_MARKARTH
+DLC_ITERATION_END = DLC_FLAMES_OF_AMBITION or DLC_MARKARTH
 lib.allowedDLCIds = {}
 for i = DLC_ITERATION_BEGIN, DLC_ITERATION_END do
     lib.allowedDLCIds[i] = true
@@ -91,7 +93,8 @@ lib.dlcAndChapterAchievementIds = {
     [DLC_MARKARTH] = 2849,
 }
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dlcAndChapterAchievementIds[DLC_+++] = 9999
+    lib.dlcAndChapterAchievementIds[DLC_FLAMES_OF_AMBITION] = 2829
+    --lib.dlcAndChapterAchievementIds[DLC_BLACKWOOD]          = 9999
 end
 
 
