@@ -51,7 +51,7 @@ APIVersions["live"] = GetAPIVersion()
 --of the game you are playing: live or PTS
 --> Several automatic routines like "scan the librray for new sets" is draised via this comparison function and LibSets' event
 --> EVENT_ADD_ON_LOADED -> function LoadSets()
-APIVersions["PTS"] = 100033 --Markarth 2020-09-21
+APIVersions["PTS"] = 100034 --Markarth 2020-09-21
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

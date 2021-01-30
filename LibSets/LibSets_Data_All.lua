@@ -49,7 +49,14 @@ local zoneIdsOfNewAPIVersionOnly
 setsOfNewerAPIVersion = {
     --DLCid sets - START
     --Flames ob Ambition
-
+    569, --	Wahrgeschworenen-Raserei	True-Sworn Fury
+    570, --	Kinra's Zorn	Kinras’s Wrath
+    571, --	Dracheneile	Drake’s Rush
+    572, --	Entfesselter Ritualist	Unleashed Ritualist
+    573, --	Dagons Herrschaft	Dagon’s Dominion
+    574, --	Schutz des Narrentöters	Foolkiller’s Ward
+    577, --	Encratis\' Behemoth	Encratis\’s Behemoth
+    578, --	Baron Zaudrus	Baron Zaudrus
     --DLCid sets - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
@@ -1143,6 +1150,18 @@ lib.setDataPreloaded = {
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
+
+--Entries to the setItemCollection mappings which are APIversion dependend
+local mappingForSetItemCollectionsNotYetLive = {
+     {parentCategory=6, category=91, zoneIds={823}, isDungeon=true},    --Schwarzdrachenvilla - Gold coast
+     {parentCategory=6, category=92, zoneIds={57}, isDungeon=true},     --Der Kessel - Deshaan
+}
+if isPTSAPIVersionLive == true then
+    for _, mappingData in ipairs(mappingForSetItemCollectionsNotYetLive) do
+        table.insert(lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING], mappingData)
+    end
+end
+
 
 
 
