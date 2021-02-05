@@ -453,6 +453,7 @@ end
 --Check which setIds were found and get the set's info from the preloaded data table "setInfo",
 --sort them into their appropriate set table and increase the counter for each table
 local function LoadSets()
+d("[LibSets]LoadSets")
     if lib.setsScanning then return end
     lib.setsScanning = true
     --Reset variables
@@ -559,6 +560,7 @@ local function LoadSets()
             end
         end
     end
+d(">got here: Equiptypes")
 
     --Get equipTypes, armorTypes, weaponTypes, isJewelry from preloaded data and transfer them to internal library
     --tables, used for the API functions
@@ -568,13 +570,15 @@ local function LoadSets()
     for equipType, setsDataOfEquipType in pairs(preloadedEquipTypeData) do
         lib.equipTypesSets[equipType] = lib.equipTypesSets[equipType] or {}
         for setId, isSetIdInEquipType in pairs(setsDataOfEquipType) do
-            if isSetIdInEquipType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+d(">equiptype: " .. tostring(equipType) .. ", setId: " ..tostring(setId))
+            if lib.setIds[setId] ~= nil and isSetIdInEquipType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
                 --Add the setId to the equipTypes table
                 lib.equipTypesSets[equipType][setId] = true
             end
         end
     end
 
+d(">got here: Armortypes")
     --Armor
     local preloadedArmorTypeData    = preloaded[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]
     lib.armorSets = {}
@@ -583,13 +587,15 @@ local function LoadSets()
         lib.armorTypesSets[armorType] = lib.armorTypesSets[armorType] or {}
         for setId, isSetIdInArmorType in pairs(setsDataOfArmorType) do
             lib.armorSets[setId] = true
-            if isSetIdInArmorType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+d(">armorType: " .. tostring(armorType) .. ", setId: " ..tostring(setId))
+            if lib.setIds[setId] ~= nil and isSetIdInArmorType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
                 --Add the setId to the equipTypes table
                 lib.armorTypesSets[armorType][setId] = true
             end
         end
     end
 
+d(">got here: Weapontypes")
     --Weapons
     local preloadedWeaponTypeData   = preloaded[LIBSETS_TABLEKEY_SETS_WEAPON_TYPES]
     lib.weaponSets = {}
@@ -598,19 +604,22 @@ local function LoadSets()
         lib.weaponTypesSets[weaponType] = lib.weaponTypesSets[weaponType] or {}
         for setId, isSetIdInWeaponType in pairs(setsDataOfWeaponType) do
             lib.weaponSets[setId] = true
-            if isSetIdInWeaponType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+d(">weaponType: " .. tostring(weaponType) .. ", setId: " ..tostring(setId))
+            if lib.setIds[setId] ~= nil and isSetIdInWeaponType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
                 --Add the setId to the equipTypes table
                 lib.weaponTypesSets[weaponType][setId] = true
             end
         end
     end
 
+d(">got here: IsJewelrySet")
     --Jewelry
     local preloadedIsJewelryData    = preloaded[LIBSETS_TABLEKEY_SETS_JEWELRY]
     lib.jewelrySets = {}
     for setId, isSetIdJewelry in pairs(preloadedIsJewelryData) do
         lib.weaponSets[setId] = true
-        if isSetIdJewelry == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+        if lib.setIds[setId] ~= nil and isSetIdJewelry == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+d(">isJewelry: true, setId: " ..tostring(setId))
             --Add the setId to the equipTypes table
             lib.jewelrySets[setId] = true
         end
