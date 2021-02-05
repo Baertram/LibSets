@@ -1206,7 +1206,7 @@ local function removeFutureSetData()
             local setNamesNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
             local preloadedEquipTypeData    = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]
             local preloadedArmorTypeData    = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]
-            local preloadedWeaponTypeData   = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_WEAPON_TYPES]
+            local preloadedWeaponTypeData   = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES]
             local preloadedIsJewelryData    = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_JEWELRY]
             local nonSetIds = lib.noSetIdSets
             local setIdsToSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
@@ -1268,7 +1268,7 @@ local function removeFutureSetData()
                     for _, weaponTypeData in pairs(preloadedWeaponTypeData) do
                         for setId, _ in pairs(weaponTypeData) do
                             if setId == setIdOfNewAPIVersion then
-                                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_WEAPON_TYPES][setId] = nil
+                                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES][setId] = nil
                             end
                         end
                     end
