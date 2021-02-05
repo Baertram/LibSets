@@ -1532,9 +1532,7 @@ end
 function lib.GetSetArmorTypes(setId)
     local armorTypesOfSet = {}
     if not lib.armorTypeNames then return end
-    for armorType,_ in pairs(lib.armorTypeNames) do
-        armorTypesOfSet[armorType] = false
-    end
+   --[[
     --Get all itemIds of this set
     local setItemIds = lib.GetSetItemIds(setId)
     if not setItemIds then return false end
@@ -1550,6 +1548,12 @@ function lib.GetSetArmorTypes(setId)
                 end
             end
         end
+    end
+    ]]
+    --Use preloaded data now
+    for armorType,_ in pairs(lib.armorTypeNames) do
+        local armorTypeData = lib.armorTypesSets[armorType]
+        armorTypesOfSet[armorType] = armorTypeData[setId] or false
     end
     --If it's not already added to the armorTypesOfSet table add it
     --Return the armorTypesOfSet table
@@ -1579,9 +1583,7 @@ end
 function lib.GetSetWeaponTypes(setId)
     local weaponTypesOfSet = {}
     if not lib.weaponTypeNames then return end
-    for weaponType,_ in pairs(lib.weaponTypeNames) do
-        weaponTypesOfSet[weaponType] = false
-    end
+    --[[
     --Get all itemIds of this set
     local setItemIds = lib.GetSetItemIds(setId)
     if not setItemIds then return false end
@@ -1597,6 +1599,12 @@ function lib.GetSetWeaponTypes(setId)
                 end
             end
         end
+    end
+    ]]
+    --Use preloaded data now
+    for weaponType,_ in pairs(lib.weaponTypeNames) do
+        local weaponTypeData = lib.weaponTypesSets[weaponType]
+        weaponTypesOfSet[weaponType] = weaponTypeData[setId] or false
     end
     --If it's not already added to the weaponTypesOfSet table add it
     --Return the weaponTypesOfSet table
@@ -1631,18 +1639,34 @@ function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     --Get the itemIds of the equipped items in BAG_WORN
     local bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
     for _, data in pairs(bagWornItemCache) do
-        table.insert(equippedItemsIds, data)
+        table.insert(equippedItemsIds, data.slotIndex)
     end
     if equippedItemsIds and #equippedItemsIds > 0 then
         --Compare equipped item's itemIds with the given non ESO set itemIds
-        for _, equippedItemData in pairs(equippedItemsIds) do
-            local wornItemId = tonumber(GetItemId(BAG_WORN, equippedItemData.slotIndex))
+        for _, equippedItemSlot in pairs(equippedItemsIds) do
+            local wornItemId = tonumber(GetItemId(BAG_WORN, equippedItemSlot))
             if wornItemId ~= nil and setsItemIds[wornItemId] ~= nil then
                 equippedItems = equippedItems +1
             end
         end
     end
     return equippedItems
+end
+
+--Returns the possible equip types's of a set
+--> Parameters: setId number: The set's id
+--> Returns:    table equipTypesOfSet: Contains all equip types possible as key and the Boolean value
+-->             true/false if this setId got items of this equipType
+function lib.GetSetEquipTypes(setId)
+    local equipTypesOfSet = {}
+    if not lib.equipTypesValid then return end
+    --Use preloaded data now
+    for equipType,_ in pairs(lib.equipTypesValid) do
+        local equipTypeData = lib.weaponTypesSets[equipType]
+        equipTypesOfSet[equipType] = equipTypeData[setId] or false
+    end
+    --Return the equipTypesOfSet table
+    return equipTypesOfSet
 end
 
 

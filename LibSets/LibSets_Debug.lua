@@ -608,7 +608,7 @@ end
 --If yes: Update the table sets and setNames, and add the itemIds found for this set to the sets table
 --Format of the sets table is: sets[setId] = {[itemIdOfSetItem]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK, ...}
 local function loadSetsByIds(from,to)
-    local isJewelryEquiptype = lib.isJewelryEquiptype
+    local isJewelryEquiptype = lib.isJewelryEquipType
     local isWeaponEquipType = lib.isWeaponEquipType
 
     for setItemId=from,to do

@@ -300,19 +300,6 @@ end
 -->Will be filled in file LibSets.lua, function LoadSets()
 lib.setTypeToSetIdsForSetTypeTable = {}
 ------------------------------------------------------------------------------------------------------------------------
---The equip type check tables
---Jewelry
-lib.isJewelryEquiptype = {
-    [EQUIP_TYPE_NECK] = true,
-    [EQUIP_TYPE_RING] = true,
-}
---Weapons
-lib.isWeaponEquipType = {
-    [EQUIP_TYPE_MAIN_HAND]  = true,
-    [EQUIP_TYPE_OFF_HAND]   = true,
-    [EQUIP_TYPE_ONE_HAND]   = true,
-    [EQUIP_TYPE_TWO_HAND]   = true,
-}
 --The itemTypes possible to be used for setItems
 lib.setItemTypes = {
     [ITEMTYPE_ARMOR]    = true,
@@ -338,6 +325,19 @@ lib.equipTypesValid = {
     [EQUIP_TYPE_SHOULDERS]  = true,
     [EQUIP_TYPE_TWO_HAND]   = true,
     [EQUIP_TYPE_WAIST]      = true,
+}
+--The equip type check tables
+--Jewelry
+lib.isJewelryEquipType = {
+    [EQUIP_TYPE_NECK] = true,
+    [EQUIP_TYPE_RING] = true,
+}
+--Weapons
+lib.isWeaponEquipType = {
+    [EQUIP_TYPE_MAIN_HAND]  = true,
+    [EQUIP_TYPE_OFF_HAND]   = true,
+    [EQUIP_TYPE_ONE_HAND]   = true,
+    [EQUIP_TYPE_TWO_HAND]   = true,
 }
 
 --The trait types valid for set items
