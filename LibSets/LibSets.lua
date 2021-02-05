@@ -940,6 +940,89 @@ function lib.IsVeteranSet(setId, itemLink)
 	return isVeteranSet
 end
 
+--Returns true/false if the set got items with a given armorType
+--> Parameters: setId number: The set's setId
+-->             armorType number: The armorType to check for
+--> Returns:    isArmorTypeSet boolean
+function lib.IsArmorTypeSet(setId, armorType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId or not armorType then return end
+    return lib.armorTypesSets[armorType][setId] or false
+end
+
+--Returns true/false if the set got items with light armor
+--> Parameters: setId number: The set's setId
+--> Returns:    isLightArmorSet boolean
+function lib.IsLightArmorSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.armorTypesSets[ARMORTYPE_LIGHT][setId] or false
+end
+
+--Returns true/false if the set got items with medium armor
+--> Parameters: setId number: The set's setId
+--> Returns:    isMediumArmorSet boolean
+function lib.IsMediumArmorSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.armorTypesSets[ARMORTYPE_MEDIUM][setId] or false
+end
+
+--Returns true/false if the set got items with heavy armor
+--> Parameters: setId number: The set's setId
+--> Returns:    isHeavyArmorSet boolean
+function lib.IsHeavyArmorSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.armorTypesSets[ARMORTYPE_HEAVY][setId] or false
+end
+
+--Returns true/false if the set got items with armor
+--> Parameters: setId number: The set's setId
+--> Returns:    isArmorSet boolean
+function lib.IsArmorSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.armorSets[setId] or false
+end
+
+--Returns true/false if the set got items with jewelry
+--> Parameters: setId number: The set's setId
+--> Returns:    isJewelrySet boolean
+function lib.IsJewelrySet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.jewelrySets[setId] or false
+end
+
+--Returns true/false if the set got items with weapons
+--> Parameters: setId number: The set's setId
+--> Returns:    isWeaponSet boolean
+function lib.IsWeaponSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.weaponSets[setId] or false
+end
+
+--Returns true/false if the set got items with a given weaponType
+--> Parameters: setId number: The set's setId
+-->             weaponType number: The weaponType to check for
+--> Returns:    isWeaponTypeSet boolean
+function lib.IsWeaponTypeSet(setId, weaponType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId or not weaponType then return end
+    return lib.weaponTypesSets[weaponType][setId] or false
+end
+
+--Returns true/false if the set got items with a given equipType
+--> Parameters: setId number: The set's setId
+-->             equipType number: The equipType to check for
+--> Returns:    isEquipTypeSet boolean
+function lib.IsEquipTypeSet(setId, equipType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId or not equipType then return end
+    return lib.equipTypesSets[equipType][setId] or false
+end
 
 ------------------------------------------------------------------------
 -- 	Global set get data functions
