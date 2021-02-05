@@ -426,7 +426,13 @@ lib.enchantSearchCategoryTypesValid = {
     [ENCHANTMENT_SEARCH_CATEGORY_STAMINA] = true,
     [ENCHANTMENT_SEARCH_CATEGORY_STAMINA_REGEN] = true,
 }
-
+--Variables for the generateddata tables, coming from the preloaded setitem data
+lib.equipTypesSets = {}
+lib.armorSets = {}
+lib.armorTypesSets = {}
+lib.jewelrySets = {}
+lib.weaponSets = {}
+lib.weaponTypesSets = {}
 
 ------------------------------------------------------------------------------------------------------------------------
 --Number of currently available set bonus for a monster set piece (2: head, shoulder)

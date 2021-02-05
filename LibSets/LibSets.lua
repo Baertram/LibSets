@@ -559,6 +559,63 @@ local function LoadSets()
             end
         end
     end
+
+    --Get equipTypes, armorTypes, weaponTypes, isJewelry from preloaded data and transfer them to internal library
+    --tables, used for the API functions
+    --Equip Types
+    local preloadedEquipTypeData    = preloaded[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]
+    lib.equipTypesSets = {}
+    for equipType, setsDataOfEquipType in pairs(preloadedEquipTypeData) do
+        lib.equipTypesSets[equipType] = lib.equipTypesSets[equipType] or {}
+        for setId, isSetIdInEquipType in pairs(setsDataOfEquipType) do
+            if isSetIdInEquipType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+                --Add the setId to the equipTypes table
+                lib.equipTypesSets[equipType][setId] = true
+            end
+        end
+    end
+
+    --Armor
+    local preloadedArmorTypeData    = preloaded[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]
+    lib.armorSets = {}
+    lib.armorTypesSets = {}
+    for armorType, setsDataOfArmorType in pairs(preloadedArmorTypeData) do
+        lib.armorTypesSets[armorType] = lib.armorTypesSets[armorType] or {}
+        for setId, isSetIdInArmorType in pairs(setsDataOfArmorType) do
+            lib.armorSets[setId] = true
+            if isSetIdInArmorType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+                --Add the setId to the equipTypes table
+                lib.armorTypesSets[armorType][setId] = true
+            end
+        end
+    end
+
+    --Weapons
+    local preloadedWeaponTypeData   = preloaded[LIBSETS_TABLEKEY_SETS_WEAPON_TYPES]
+    lib.weaponSets = {}
+    lib.weaponTypesSets = {}
+    for weaponType, setsDataOfWeaponType in pairs(preloadedWeaponTypeData) do
+        lib.weaponTypesSets[weaponType] = lib.weaponTypesSets[weaponType] or {}
+        for setId, isSetIdInWeaponType in pairs(setsDataOfWeaponType) do
+            lib.weaponSets[setId] = true
+            if isSetIdInWeaponType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+                --Add the setId to the equipTypes table
+                lib.weaponTypesSets[weaponType][setId] = true
+            end
+        end
+    end
+
+    --Jewelry
+    local preloadedIsJewelryData    = preloaded[LIBSETS_TABLEKEY_SETS_JEWELRY]
+    lib.jewelrySets = {}
+    for setId, isSetIdJewelry in pairs(preloadedIsJewelryData) do
+        lib.weaponSets[setId] = true
+        if isSetIdJewelry == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+            --Add the setId to the equipTypes table
+            lib.jewelrySets[setId] = true
+        end
+    end
+
     --SetItemCollection data
     --Generate the table with the zoneId as key, and a table with the categoryId as key
     local preloadedSetItemCollectionMappingToZone = preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
@@ -2171,7 +2228,7 @@ function lib.checkIfSetsAreLoadedProperly()
 end
 
 --Addon loaded function
-local function OnLibraryLoaded(event, name)
+local function onLibraryLoaded(event, name)
     --Only load lib if ingame
     if name ~= MAJOR then return end
     EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
@@ -2208,4 +2265,4 @@ local function OnLibraryLoaded(event, name)
 end
 
 --Load the addon now
-EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, OnLibraryLoaded)
+EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, onLibraryLoaded)
