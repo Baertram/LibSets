@@ -1631,6 +1631,7 @@ end
 --> Parameters: setsItemIds table: The itemIds that need to be chedked in addition to the itemId parameter
 -->The tables key must be the itemId and the value a boolean value e.g.
 -->Example setsItemIds = { [123456]=true, [12678]=true, ... }
+--> Returns: equippedItems number
 function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     if not setsItemIds then return 0 end
     local equippedItems = 0
@@ -1652,6 +1653,45 @@ function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     end
     return equippedItems
 end
+
+local function getSetEquippedInfo(itemId)
+    if not itemId then return nil, nil, nil end
+    local itemLink = lib.buildItemLink(itemId)
+    local _, setId, _, _, equippedItems, maxEquipped = checkSet(itemLink)
+    return setId, equippedItems, maxEquipped, itemLink
+end
+
+--Check if any item of the setId specified is currently equipped and return the number of the equipped, and the maximum
+--equipped number of items of this set.
+--> Parameters: setId number: The setId
+--> Returns:
+-->          equippedItems number Number of currently equipped items of this setId
+-->          maxEquipped number Number of maximum equipped items of this setId
+-->          itemId number The itemId of an example item of the setId
+function lib.GetNumEquippedItemsBySetId(setId)
+    if not setId then return nil, nil, nil end
+    --Get any itemId of the setId
+    local itemId = lib.GetSetItemId(setId)
+    local setIdRet, equippedItems, maxEquipped, itemLink = getSetEquippedInfo(itemId)
+    if not setIdRet then return nil, nil, nil end
+    return equippedItems, maxEquipped, itemId
+end
+
+--Check if any item of the itemId specified is currently equipped and return the setId, the number of the equipped, and
+--the maximum equipped number of items of this set.
+--> Parameters: itemId number: The itemId of any set's item
+--> Returns:
+-->          equippedItems number Number of currently equipped items of this setId
+-->          maxEquipped number Number of maximum equipped items of this setId
+-->          setId number The setId of the itemId specified
+function lib.GetNumEquippedItemsByItemId(itemId)
+    if not itemId then return nil, nil, nil end
+    --Get any itemId of the setId
+    local setIdRet, equippedItems, maxEquipped, itemLink = getSetEquippedInfo(itemId)
+    if not setIdRet then return nil, nil, nil end
+    return equippedItems, maxEquipped, setIdRet
+end
+
 
 --Returns the possible equip types's of a set
 --> Parameters: setId number: The set's id
