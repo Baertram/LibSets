@@ -1149,32 +1149,71 @@ end
 --If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
 --If the 2nd parameter equipType is not specified: The first random itemId found will be returned
 --If the 2nd parameter equipType is specified:  Each itemId of the setId will be turned into an itemLink where the given equipType is checked against.
---Only the itemId where the equipType fits will be returned. Else the return value will be nil
+--If the 3rd to ... parameter *Type is specified: Each itemId of the setId will be turned into an itemLink where the given *type is cheched against.
+--Only the itemId where the parameters fits will be returned. Else the return value will be nil
 --> Parameters: setId number: The set's setId
--->             equipType number: The equipType to check the itemId against
+-->             equipType optional number: The equipType to check the itemId against
+-->             traitType optional number: The traitType to check the itemId against
+-->             enchantSearchCategoryType optional EnchantmentSearchCategoryType: The enchanting search category to check the itemId against
 --> Returns:    number setItemId
-function lib.GetSetItemId(setId, equipType)
+function lib.GetSetItemId(setId, equipType, traitType, enchantSearchCategoryType)
     if setId == nil then return end
     local equipTypesValid = lib.equipTypesValid
+    local traitTypesValid = lib.traitTypesValid
+    local enchantSearchCategoryTypesValid = lib.enchantSearchCategoryTypesValid
     local equipTypeValid = false
+    local traitTypeValid = false
+    local enchantSearchCategoryTypeValid = false
+
     if equipType ~= nil then
         equipTypeValid = equipTypesValid[equipType] or false
     end
+    if traitType ~= nil then
+        traitTypeValid = traitTypesValid[traitType] or false
+    end
+    if enchantSearchCategoryType ~= nil then
+        enchantSearchCategoryTypeValid = enchantSearchCategoryTypesValid[enchantSearchCategoryType] or false
+    end
+
     local setItemIds = lib.GetSetItemIds(setId)
     if not setItemIds then return end
+
+    local needItemLinkOfItemId = (equipTypeValid == true or traitTypeValid == true or enchantSearchCategoryTypeValid == true) or false
+    local returnGenericItemId = true
+    if needItemLinkOfItemId == true then
+        returnGenericItemId = false
+    end
+
     for setItemId, isCorrect in pairs(setItemIds) do
-        if equipTypeValid == true then
+        --Anything we need an itemlink for?
+        if needItemLinkOfItemId == true then
             --Create itemLink of the itemId
             local itemLink = lib.buildItemLink(setItemId)
-            if itemLink then
-                local ilEquipType = GetItemLinkEquipType(itemLink)
-                if ilEquipType ~= nil and ilEquipType == equipType then return setItemId end
+            if itemLink ~= nil and itemLink ~= "" then
+                local isValidItemId = false
+
+                if equipTypeValid == true then
+                    local ilEquipType = GetItemLinkEquipType(itemLink)
+                    if ilEquipType ~= nil and ilEquipType == equipType then isValidItemId = true end
+                end
+                if isValidItemId == true and traitTypeValid == true then
+                    local ilTraitType = GetItemLinkTraitType(itemLink)
+                    if ilTraitType ~= nil and ilTraitType == traitType then isValidItemId = true end
+                end
+                if isValidItemId == true and enchantSearchCategoryTypeValid == true then
+                    local ilenchantId = GetItemLinkDefaultEnchantId(itemLink)
+                    local ilenchantSearchCategoryType = GetEnchantSearchCategoryType(ilenchantId)
+                    if ilenchantSearchCategoryType ~= nil and ilenchantSearchCategoryType == enchantSearchCategoryType then isValidItemId = true end
+                end
+                if isValidItemId == true then
+                    return setItemId
+                end
             end
-            --Check the equipType against the itemLink's equipType
-        else
+        end
+        if returnGenericItemId == true then
             if setItemId ~= nil and isCorrect == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then return setItemId end
         end
-    end
+    end --for
     return
 end
 

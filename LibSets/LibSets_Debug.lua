@@ -512,8 +512,18 @@ end
 ---------------------------------------------------------------------------------------------------------------------------
 --Variables needed for the functions below (Scan itemIds for sets and itemIds)
 local sets = {}
+local setsEquipTypes= {}
+local setsArmor = {}
+local setsArmorTypes = {}
+local setsJewelry = {}
+local setsWeapons = {}
+local setsWeaponTypes = {}
+
 local setCount = 0
 local itemCount = 0
+local itemArmorCount = 0
+local itemJewelryCount = 0
+local itemWeaponsCount = 0
 local itemIdsScanned = 0
 local function showSetCountsScanned(finished, keepUncompressedetItemIds)
     keepUncompressedetItemIds = keepUncompressedetItemIds or false
@@ -521,6 +531,7 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds)
     d(debugOutputStartLine .."[" .. MAJOR .."]Scanned itemIds: " .. tostring(itemIdsScanned))
     d("-> Sets found: "..tostring(setCount))
     d("-> Set items found: "..tostring(itemCount))
+    df("-->Armor: %s / Jewelry: %s / Weapons: %s", tostring(itemArmorCount), tostring(itemJewelryCount), tostring(itemWeaponsCount))
     if finished == true then
         newSetIdsFound = {}
         local newSetsFound = 0
@@ -569,8 +580,17 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds)
                 lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][GetAPIVersion()] = newSetIdsFound
             end
 
+            --Save the set data to the SV
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = {}
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
+            --Save the set's armorType, equipmentTypes, weaponTypes and jewelryTypes to the SV
+            lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = setsEquipTypes
+            lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = setsArmor
+            lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = setsArmorTypes
+            lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = setsJewelry
+            lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = setsWeapons
+            lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = setsWeaponTypes
+
             --Compress the itemIds now to lower the fileSize of LibSets_Data_all.lua later (copied setItemIds from SavedVariables)
             compressSetItemIdsNow(sets)
             --Keep the uncompressed setItemIds, or delete them again?
@@ -588,6 +608,9 @@ end
 --If yes: Update the table sets and setNames, and add the itemIds found for this set to the sets table
 --Format of the sets table is: sets[setId] = {[itemIdOfSetItem]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK, ...}
 local function loadSetsByIds(from,to)
+    local isJewelryEquiptype = lib.isJewelryEquiptype
+    local isWeaponEquipType = lib.isWeaponEquipType
+
     for setItemId=from,to do
         itemIdsScanned = itemIdsScanned + 1
         --Generate link for item
@@ -607,6 +630,55 @@ local function loadSetsByIds(from,to)
                         sets[setId][setItemId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
                         --Update the set's item count
                         itemCount = itemCount + 1
+
+                        --Add the table entries to the set's equiptypes, armor, jewelry and weapon types,
+                        --and the general armor, jewelry, weapon tables, and armor class (light, medium, heavy)
+                        --[[
+                            setsEquipTypes= {}
+                            setsArmor = {}
+                            setsArmorTypes = {}
+                            setsJewelry = {}
+                            setsJewelryTypes = {}
+                            setsWeapons = {}
+                            setsWeaponTypes = {}
+                        ]]
+                        --Check the item's equipment type
+                        local equipType = GetItemLinkEquipType(itemLink)
+                        if equipType > EQUIP_TYPE_INVALID then
+                            setsEquipTypes[equipType] = setsEquipTypes[equipType] or {}
+                            setsEquipTypes[equipType][setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+
+                            if isJewelryEquiptype[equipType] then
+                                if not setsJewelry[setId] then
+                                    itemJewelryCount = itemJewelryCount + 1
+                                end
+                                setsJewelry[setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+
+                            elseif isWeaponEquipType[equipType] then
+                                if not setsWeapons[setId] then
+                                    itemWeaponsCount = itemWeaponsCount + 1
+                                end
+                                setsWeapons[setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+
+                                local weaponType = GetItemLinkWeaponType(itemLink)
+                                if weaponType > WEAPONTYPE_NONE then
+                                    setsWeaponTypes[weaponType] = setsWeaponTypes[weaponType] or {}
+                                    setsWeaponTypes[weaponType][setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+                                end
+
+                            else
+                                if not setsArmor[setId] then
+                                    itemArmorCount = itemArmorCount + 1
+                                end
+                                setsArmor[setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+
+                                local armorType = GetItemLinkArmorType(itemLink)
+                                if armorType > ARMORTYPE_NONE then
+                                    setsArmorTypes[armorType] = setsArmorTypes[armorType] or {}
+                                    setsArmorTypes[armorType][setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+                                end
+                            end
+                        end
                     end
                 end
             end
@@ -634,9 +706,20 @@ local function scanAllSetData(keepUncompressedetItemIds)
 
     --Clear all set data
     sets = {}
+    setsEquipTypes= {}
+    setsArmor = {}
+    setsArmorTypes = {}
+    setsJewelry = {}
+    setsWeapons = {}
+    setsWeaponTypes = {}
+
     --Clear counters
     setCount = 0
     itemCount = 0
+    itemArmorCount = 0
+    itemJewelryCount = 0
+    itemWeaponsCount = 0
+
     itemIdsScanned = 0
 
     --Loop through all item ids and save all sets to an array
@@ -658,7 +741,7 @@ local function scanAllSetData(keepUncompressedetItemIds)
     --Add itemIds and scan them for set parts!
     for _, v in pairs(fromTo) do
         zo_callLater(function()
-            loadSetsByIds(v.from,v.to)
+            loadSetsByIds(v.from, v.to)
         end, milliseconds)
         milliseconds = milliseconds + 1000 -- scan item ID packages every 1 second to get not kicked/crash the client!
     end
@@ -842,6 +925,12 @@ function lib.DebugResetSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
     lib.svData[LIBSETS_TABLEKEY_SETNAMES] = nil
     lib.svData[LIBSETS_TABLEKEY_MAPS] = nil
     lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
