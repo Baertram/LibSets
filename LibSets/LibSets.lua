@@ -383,6 +383,14 @@ local function checkSet(itemLink)
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
+--Get equipped numbers of a set's itemId, returnin the setId and the item's link + equipped numbers
+local function getSetEquippedInfo(itemId)
+    if not itemId then return nil, nil, nil end
+    local itemLink = lib.buildItemLink(itemId)
+    local _, _, setId, _, equippedItems, maxEquipped = checkSet(itemLink)
+    return setId, equippedItems, maxEquipped, itemLink
+end
+
 --Function to check if a setId is given for the current APIVersion
 local function checkIfSetExists(setId)
     if not setId or setId <= 0 then return false end
@@ -1654,13 +1662,6 @@ function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     return equippedItems
 end
 
-local function getSetEquippedInfo(itemId)
-    if not itemId then return nil, nil, nil end
-    local itemLink = lib.buildItemLink(itemId)
-    local _, setId, _, _, equippedItems, maxEquipped = checkSet(itemLink)
-    return setId, equippedItems, maxEquipped, itemLink
-end
-
 --Check if any item of the setId specified is currently equipped and return the number of the equipped, and the maximum
 --equipped number of items of this set.
 --> Parameters: setId number: The setId
@@ -1672,7 +1673,7 @@ function lib.GetNumEquippedItemsBySetId(setId)
     if not setId then return nil, nil, nil end
     --Get any itemId of the setId
     local itemId = lib.GetSetItemId(setId)
-    local setIdRet, equippedItems, maxEquipped, itemLink = getSetEquippedInfo(itemId)
+    local setIdRet, equippedItems, maxEquipped, _ = getSetEquippedInfo(itemId)
     if not setIdRet then return nil, nil, nil end
     return equippedItems, maxEquipped, itemId
 end
@@ -1687,7 +1688,7 @@ end
 function lib.GetNumEquippedItemsByItemId(itemId)
     if not itemId then return nil, nil, nil end
     --Get any itemId of the setId
-    local setIdRet, equippedItems, maxEquipped, itemLink = getSetEquippedInfo(itemId)
+    local setIdRet, equippedItems, maxEquipped, _ = getSetEquippedInfo(itemId)
     if not setIdRet then return nil, nil, nil end
     return equippedItems, maxEquipped, setIdRet
 end
