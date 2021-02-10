@@ -502,7 +502,7 @@ local function LoadSets()
                 --Get the type of set and create the entry for the setId in the appropriate table
                 local refToSetIdTable
                 local setType = setData[LIBSETS_TABLEKEY_SETTYPE]
-                if setType then
+                if setType ~= nil then
                     local internalLibsSetVariableNames = setTypeToLibraryInternalVariableNames[setType]
                     if internalLibsSetVariableNames and internalLibsSetVariableNames["tableName"] then
                         local internalLibsSetTableName = internalLibsSetVariableNames["tableName"]
@@ -514,6 +514,7 @@ local function LoadSets()
                             refToSetIdTable = lib[internalLibsSetTableName][setId]
                         end
                     end
+
                 end
                 --Store all other data to the set's table
                 if refToSetIdTable ~= nil then
@@ -764,7 +765,7 @@ end
 function lib.IsCraftedSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.craftedSets[setId] or false
+    return lib.craftedSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a monster set
@@ -773,7 +774,7 @@ end
 function lib.IsMonsterSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.monsterSets[setId] or false
+    return lib.monsterSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a dungeon set
@@ -782,7 +783,7 @@ end
 function lib.IsDungeonSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.dungeonSets[setId] or false
+    return lib.dungeonSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a trial set
@@ -809,7 +810,7 @@ end
 function lib.IsArenaSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.arenaSets[setId] or false
+    return lib.arenaSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is an overland set
@@ -818,7 +819,7 @@ end
 function lib.IsOverlandSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.overlandSets[setId] or false
+    return lib.overlandSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is an cyrodiil set
@@ -827,7 +828,7 @@ end
 function lib.IsCyrodiilSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.cyrodiilSets[setId] or false
+    return lib.cyrodiilSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a battleground set
@@ -836,7 +837,7 @@ end
 function lib.IsBattlegroundSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.battlegroundSets[setId] or false
+    return lib.battlegroundSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is an Imperial City set
@@ -845,7 +846,7 @@ end
 function lib.IsImperialCitySet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.imperialCitySets[setId] or false
+    return lib.imperialCitySets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a special set
@@ -854,7 +855,7 @@ end
 function lib.IsSpecialSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.specialSets[setId] or false
+    return lib.specialSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a DailyRandomDungeonAndImperialCityRewardSet set
@@ -863,18 +864,17 @@ end
 function lib.IsDailyRandomDungeonAndImperialCityRewardSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.dailyRandomDungeonAndImperialCityRewardSets[setId] or false
+    return lib.dailyRandomDungeonAndImperialCityRewardSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a mythic set
 --> Parameters: setId number: The set's setId
 --> Returns:    boolean isMythicSet
 function lib.IsMythicSet(setId)
-    --Todo: Remove after Greymoor update!
     if not checkIfPTSAPIVersionIsLive() then return false end
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.mythicSets[setId] or false
+    return lib.mythicSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a non ESO, own defined setId
