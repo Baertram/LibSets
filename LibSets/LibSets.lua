@@ -1561,7 +1561,9 @@ function lib.GetSetArmorTypes(setId)
     --Use preloaded data now
     for armorType,_ in pairs(lib.armorTypeNames) do
         local armorTypeData = lib.armorTypesSets[armorType]
-        armorTypesOfSet[armorType] = armorTypeData[setId] or false
+        if armorTypeData ~= nil then
+            armorTypesOfSet[armorType] = armorTypeData[setId] or false
+        end
     end
     --If it's not already added to the armorTypesOfSet table add it
     --Return the armorTypesOfSet table
@@ -1612,7 +1614,9 @@ function lib.GetSetWeaponTypes(setId)
     --Use preloaded data now
     for weaponType,_ in pairs(lib.weaponTypeNames) do
         local weaponTypeData = lib.weaponTypesSets[weaponType]
-        weaponTypesOfSet[weaponType] = weaponTypeData[setId] or false
+        if weaponTypeData ~= nil then
+            weaponTypesOfSet[weaponType] = weaponTypeData[setId] or false
+        end
     end
     --If it's not already added to the weaponTypesOfSet table add it
     --Return the weaponTypesOfSet table
@@ -1704,7 +1708,9 @@ function lib.GetSetEquipTypes(setId)
     --Use preloaded data now
     for equipType,_ in pairs(lib.equipTypesValid) do
         local equipTypeData = lib.weaponTypesSets[equipType]
-        equipTypesOfSet[equipType] = equipTypeData[setId] or false
+        if equipTypeData ~= nil then
+            equipTypesOfSet[equipType] = equipTypeData[setId] or false
+        end
     end
     --Return the equipTypesOfSet table
     return equipTypesOfSet
