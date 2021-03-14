@@ -1032,9 +1032,59 @@ function lib.IsEquipTypeSet(setId, equipType)
     return lib.equipTypesSets[equipType][setId] or false
 end
 
+
 ------------------------------------------------------------------------
 -- 	Global set get data functions
 ------------------------------------------------------------------------
+--Returns a table of setIds where the set got items with a given armorType
+--> Parameters: armorType number: The armorType to check for
+--> Returns:    armorTypeSetIds table
+function lib.GetAllArmorTypeSets(armorType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not armorType then return end
+    return lib.armorTypesSets[armorType]
+end
+
+--Returns a table of setIds where the set got items with an armorType
+--> Returns:    armorSet table
+function lib.GetAllArmorSets()
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    return lib.armorSets
+end
+
+--Returns a table of setIds where the set got items with a jewelryType
+--> Returns:    jewelrySets table
+function lib.GetAllJewelrySets()
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    return lib.jewelrySets
+end
+
+
+--Returns a table of setIds where the set got items with a weaponType
+--> Returns:    weaponSets table
+function lib.GetAllWeaponSets()
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    return lib.weaponSets
+end
+
+--Returns a table of setIds where the set got items with a given weaponType
+--> Parameters: weaponType number: The weaponType to check for
+--> Returns:    weaponTypeSetIds table
+function lib.GetAllWeaponTypeSets(weaponType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not weaponType then return end
+    return lib.weaponTypesSets[weaponType]
+end
+
+--Returns a table of setIds where the set got items with a given equipType
+--> Parameters: equipType number: The equipType to check for
+--> Returns:    equipTypeSetIds table
+function lib.GetAllEquipTypeSets(equipType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not equipType then return end
+    return lib.equipTypesSets[equipType]
+end
+
 --Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
 --e.g. wayshrines={382,382,382}. All entries can be the same, or even a negative value which means: No weayshrine is known
 --Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact
@@ -1791,7 +1841,9 @@ function lib.GetZoneName(zoneId, lang)
     return zoneName
 end
 
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
+--Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_ConstantsLibraryInternal.lua,
+--            e.g. LIBSETS_SETTYPE_MONSTER
 --> Returns:    table with key = setId, value = table which contains (as example for setType = LIBSETS_SETTYPE_CRAFTED)
 ---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
 ------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= 1 (e.g. [12345]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,)
@@ -1809,10 +1861,6 @@ end
 ---                     ["fr"]="Set name French",
 ---                 },
 ---             }
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
---Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetSetTypeSetsData(setType)
     local setsData = getSetTypeSetsData(setType)
     return setsData
@@ -2353,6 +2401,7 @@ function lib.UnRegisterSetProcEventCallbackForSetId(addOnEventNamespace, eventId
     end
     return nil
 end
+
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
