@@ -383,6 +383,14 @@ local function checkSet(itemLink)
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
+--Get equipped numbers of a set's itemId, returnin the setId and the item's link + equipped numbers
+local function getSetEquippedInfo(itemId)
+    if not itemId then return nil, nil, nil end
+    local itemLink = lib.buildItemLink(itemId)
+    local _, _, setId, _, equippedItems, maxEquipped = checkSet(itemLink)
+    return setId, equippedItems, maxEquipped, itemLink
+end
+
 --Function to check if a setId is given for the current APIVersion
 local function checkIfSetExists(setId)
     if not setId or setId <= 0 then return false end
@@ -494,7 +502,7 @@ local function LoadSets()
                 --Get the type of set and create the entry for the setId in the appropriate table
                 local refToSetIdTable
                 local setType = setData[LIBSETS_TABLEKEY_SETTYPE]
-                if setType then
+                if setType ~= nil then
                     local internalLibsSetVariableNames = setTypeToLibraryInternalVariableNames[setType]
                     if internalLibsSetVariableNames and internalLibsSetVariableNames["tableName"] then
                         local internalLibsSetTableName = internalLibsSetVariableNames["tableName"]
@@ -506,6 +514,7 @@ local function LoadSets()
                             refToSetIdTable = lib[internalLibsSetTableName][setId]
                         end
                     end
+
                 end
                 --Store all other data to the set's table
                 if refToSetIdTable ~= nil then
@@ -559,6 +568,63 @@ local function LoadSets()
             end
         end
     end
+
+    --Get equipTypes, armorTypes, weaponTypes, isJewelry from preloaded data and transfer them to internal library
+    --tables, used for the API functions
+    --Equip Types
+    local preloadedEquipTypeData    = preloaded[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]
+    lib.equipTypesSets = {}
+    for equipType, setsDataOfEquipType in pairs(preloadedEquipTypeData) do
+        lib.equipTypesSets[equipType] = lib.equipTypesSets[equipType] or {}
+        for setId, isSetIdInEquipType in pairs(setsDataOfEquipType) do
+            if lib.setIds[setId] ~= nil and isSetIdInEquipType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+                --Add the setId to the equipTypes table
+                lib.equipTypesSets[equipType][setId] = true
+            end
+        end
+    end
+
+    --Armor
+    local preloadedArmorTypeData    = preloaded[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]
+    lib.armorSets = {}
+    lib.armorTypesSets = {}
+    for armorType, setsDataOfArmorType in pairs(preloadedArmorTypeData) do
+        lib.armorTypesSets[armorType] = lib.armorTypesSets[armorType] or {}
+        for setId, isSetIdInArmorType in pairs(setsDataOfArmorType) do
+            lib.armorSets[setId] = true
+            if lib.setIds[setId] ~= nil and isSetIdInArmorType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+                --Add the setId to the equipTypes table
+                lib.armorTypesSets[armorType][setId] = true
+            end
+        end
+    end
+
+    --Weapons
+    local preloadedWeaponTypeData   = preloaded[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES]
+    lib.weaponSets = {}
+    lib.weaponTypesSets = {}
+    for weaponType, setsDataOfWeaponType in pairs(preloadedWeaponTypeData) do
+        lib.weaponTypesSets[weaponType] = lib.weaponTypesSets[weaponType] or {}
+        for setId, isSetIdInWeaponType in pairs(setsDataOfWeaponType) do
+            lib.weaponSets[setId] = true
+            if lib.setIds[setId] ~= nil and isSetIdInWeaponType == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+                --Add the setId to the equipTypes table
+                lib.weaponTypesSets[weaponType][setId] = true
+            end
+        end
+    end
+
+    --Jewelry
+    local preloadedIsJewelryData    = preloaded[LIBSETS_TABLEKEY_SETS_JEWELRY]
+    lib.jewelrySets = {}
+    for setId, isSetIdJewelry in pairs(preloadedIsJewelryData) do
+        lib.weaponSets[setId] = true
+        if lib.setIds[setId] ~= nil and isSetIdJewelry == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+            --Add the setId to the equipTypes table
+            lib.jewelrySets[setId] = true
+        end
+    end
+
     --SetItemCollection data
     --Generate the table with the zoneId as key, and a table with the categoryId as key
     local preloadedSetItemCollectionMappingToZone = preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
@@ -699,7 +765,7 @@ end
 function lib.IsCraftedSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.craftedSets[setId] or false
+    return lib.craftedSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a monster set
@@ -708,7 +774,7 @@ end
 function lib.IsMonsterSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.monsterSets[setId] or false
+    return lib.monsterSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a dungeon set
@@ -717,7 +783,7 @@ end
 function lib.IsDungeonSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.dungeonSets[setId] or false
+    return lib.dungeonSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a trial set
@@ -744,7 +810,7 @@ end
 function lib.IsArenaSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.arenaSets[setId] or false
+    return lib.arenaSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is an overland set
@@ -753,7 +819,7 @@ end
 function lib.IsOverlandSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.overlandSets[setId] or false
+    return lib.overlandSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is an cyrodiil set
@@ -762,7 +828,7 @@ end
 function lib.IsCyrodiilSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.cyrodiilSets[setId] or false
+    return lib.cyrodiilSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a battleground set
@@ -771,7 +837,7 @@ end
 function lib.IsBattlegroundSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.battlegroundSets[setId] or false
+    return lib.battlegroundSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is an Imperial City set
@@ -780,7 +846,7 @@ end
 function lib.IsImperialCitySet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.imperialCitySets[setId] or false
+    return lib.imperialCitySets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a special set
@@ -789,7 +855,7 @@ end
 function lib.IsSpecialSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.specialSets[setId] or false
+    return lib.specialSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a DailyRandomDungeonAndImperialCityRewardSet set
@@ -798,18 +864,17 @@ end
 function lib.IsDailyRandomDungeonAndImperialCityRewardSet(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.dailyRandomDungeonAndImperialCityRewardSets[setId] or false
+    return lib.dailyRandomDungeonAndImperialCityRewardSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a mythic set
 --> Parameters: setId number: The set's setId
 --> Returns:    boolean isMythicSet
 function lib.IsMythicSet(setId)
-    --Todo: Remove after Greymoor update!
     if not checkIfPTSAPIVersionIsLive() then return false end
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    return lib.mythicSets[setId] or false
+    return lib.mythicSets[setId] ~= nil or false
 end
 
 --Returns true if the setId provided is a non ESO, own defined setId
@@ -883,10 +948,143 @@ function lib.IsVeteranSet(setId, itemLink)
 	return isVeteranSet
 end
 
+--Returns true/false if the set got items with a given armorType
+--> Parameters: setId number: The set's setId
+-->             armorType number: The armorType to check for
+--> Returns:    isArmorTypeSet boolean
+function lib.IsArmorTypeSet(setId, armorType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId or not armorType then return end
+    return lib.armorTypesSets[armorType][setId] or false
+end
+
+--Returns true/false if the set got items with light armor
+--> Parameters: setId number: The set's setId
+--> Returns:    isLightArmorSet boolean
+function lib.IsLightArmorSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.armorTypesSets[ARMORTYPE_LIGHT][setId] or false
+end
+
+--Returns true/false if the set got items with medium armor
+--> Parameters: setId number: The set's setId
+--> Returns:    isMediumArmorSet boolean
+function lib.IsMediumArmorSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.armorTypesSets[ARMORTYPE_MEDIUM][setId] or false
+end
+
+--Returns true/false if the set got items with heavy armor
+--> Parameters: setId number: The set's setId
+--> Returns:    isHeavyArmorSet boolean
+function lib.IsHeavyArmorSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.armorTypesSets[ARMORTYPE_HEAVY][setId] or false
+end
+
+--Returns true/false if the set got items with armor
+--> Parameters: setId number: The set's setId
+--> Returns:    isArmorSet boolean
+function lib.IsArmorSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.armorSets[setId] or false
+end
+
+--Returns true/false if the set got items with jewelry
+--> Parameters: setId number: The set's setId
+--> Returns:    isJewelrySet boolean
+function lib.IsJewelrySet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.jewelrySets[setId] or false
+end
+
+--Returns true/false if the set got items with weapons
+--> Parameters: setId number: The set's setId
+--> Returns:    isWeaponSet boolean
+function lib.IsWeaponSet(setId)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId then return end
+    return lib.weaponSets[setId] or false
+end
+
+--Returns true/false if the set got items with a given weaponType
+--> Parameters: setId number: The set's setId
+-->             weaponType number: The weaponType to check for
+--> Returns:    isWeaponTypeSet boolean
+function lib.IsWeaponTypeSet(setId, weaponType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId or not weaponType then return end
+    return lib.weaponTypesSets[weaponType][setId] or false
+end
+
+--Returns true/false if the set got items with a given equipType
+--> Parameters: setId number: The set's setId
+-->             equipType number: The equipType to check for
+--> Returns:    isEquipTypeSet boolean
+function lib.IsEquipTypeSet(setId, equipType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not setId or not equipType then return end
+    return lib.equipTypesSets[equipType][setId] or false
+end
+
 
 ------------------------------------------------------------------------
 -- 	Global set get data functions
 ------------------------------------------------------------------------
+--Returns a table of setIds where the set got items with a given armorType
+--> Parameters: armorType number: The armorType to check for
+--> Returns:    armorTypeSetIds table
+function lib.GetAllArmorTypeSets(armorType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not armorType then return end
+    return lib.armorTypesSets[armorType]
+end
+
+--Returns a table of setIds where the set got items with an armorType
+--> Returns:    armorSet table
+function lib.GetAllArmorSets()
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    return lib.armorSets
+end
+
+--Returns a table of setIds where the set got items with a jewelryType
+--> Returns:    jewelrySets table
+function lib.GetAllJewelrySets()
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    return lib.jewelrySets
+end
+
+
+--Returns a table of setIds where the set got items with a weaponType
+--> Returns:    weaponSets table
+function lib.GetAllWeaponSets()
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    return lib.weaponSets
+end
+
+--Returns a table of setIds where the set got items with a given weaponType
+--> Parameters: weaponType number: The weaponType to check for
+--> Returns:    weaponTypeSetIds table
+function lib.GetAllWeaponTypeSets(weaponType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not weaponType then return end
+    return lib.weaponTypesSets[weaponType]
+end
+
+--Returns a table of setIds where the set got items with a given equipType
+--> Parameters: equipType number: The equipType to check for
+--> Returns:    equipTypeSetIds table
+function lib.GetAllEquipTypeSets(equipType)
+    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not equipType then return end
+    return lib.equipTypesSets[equipType]
+end
+
 --Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
 --e.g. wayshrines={382,382,382}. All entries can be the same, or even a negative value which means: No weayshrine is known
 --Else the order of the entries is 1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact
@@ -1149,32 +1347,71 @@ end
 --If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
 --If the 2nd parameter equipType is not specified: The first random itemId found will be returned
 --If the 2nd parameter equipType is specified:  Each itemId of the setId will be turned into an itemLink where the given equipType is checked against.
---Only the itemId where the equipType fits will be returned. Else the return value will be nil
+--If the 3rd to ... parameter *Type is specified: Each itemId of the setId will be turned into an itemLink where the given *type is cheched against.
+--Only the itemId where the parameters fits will be returned. Else the return value will be nil
 --> Parameters: setId number: The set's setId
--->             equipType number: The equipType to check the itemId against
+-->             equipType optional number: The equipType to check the itemId against
+-->             traitType optional number: The traitType to check the itemId against
+-->             enchantSearchCategoryType optional EnchantmentSearchCategoryType: The enchanting search category to check the itemId against
 --> Returns:    number setItemId
-function lib.GetSetItemId(setId, equipType)
+function lib.GetSetItemId(setId, equipType, traitType, enchantSearchCategoryType)
     if setId == nil then return end
     local equipTypesValid = lib.equipTypesValid
+    local traitTypesValid = lib.traitTypesValid
+    local enchantSearchCategoryTypesValid = lib.enchantSearchCategoryTypesValid
     local equipTypeValid = false
+    local traitTypeValid = false
+    local enchantSearchCategoryTypeValid = false
+
     if equipType ~= nil then
         equipTypeValid = equipTypesValid[equipType] or false
     end
+    if traitType ~= nil then
+        traitTypeValid = traitTypesValid[traitType] or false
+    end
+    if enchantSearchCategoryType ~= nil then
+        enchantSearchCategoryTypeValid = enchantSearchCategoryTypesValid[enchantSearchCategoryType] or false
+    end
+
     local setItemIds = lib.GetSetItemIds(setId)
     if not setItemIds then return end
+
+    local needItemLinkOfItemId = (equipTypeValid == true or traitTypeValid == true or enchantSearchCategoryTypeValid == true) or false
+    local returnGenericItemId = true
+    if needItemLinkOfItemId == true then
+        returnGenericItemId = false
+    end
+
     for setItemId, isCorrect in pairs(setItemIds) do
-        if equipTypeValid == true then
+        --Anything we need an itemlink for?
+        if needItemLinkOfItemId == true then
             --Create itemLink of the itemId
             local itemLink = lib.buildItemLink(setItemId)
-            if itemLink then
-                local ilEquipType = GetItemLinkEquipType(itemLink)
-                if ilEquipType ~= nil and ilEquipType == equipType then return setItemId end
+            if itemLink ~= nil and itemLink ~= "" then
+                local isValidItemId = false
+
+                if equipTypeValid == true then
+                    local ilEquipType = GetItemLinkEquipType(itemLink)
+                    if ilEquipType ~= nil and ilEquipType == equipType then isValidItemId = true end
+                end
+                if isValidItemId == true and traitTypeValid == true then
+                    local ilTraitType = GetItemLinkTraitType(itemLink)
+                    if ilTraitType ~= nil and ilTraitType == traitType then isValidItemId = true end
+                end
+                if isValidItemId == true and enchantSearchCategoryTypeValid == true then
+                    local ilenchantId = GetItemLinkDefaultEnchantId(itemLink)
+                    local ilenchantSearchCategoryType = GetEnchantSearchCategoryType(ilenchantId)
+                    if ilenchantSearchCategoryType ~= nil and ilenchantSearchCategoryType == enchantSearchCategoryType then isValidItemId = true end
+                end
+                if isValidItemId == true then
+                    return setItemId
+                end
             end
-            --Check the equipType against the itemLink's equipType
-        else
+        end
+        if returnGenericItemId == true then
             if setItemId ~= nil and isCorrect == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then return setItemId end
         end
-    end
+    end --for
     return
 end
 
@@ -1353,9 +1590,7 @@ end
 function lib.GetSetArmorTypes(setId)
     local armorTypesOfSet = {}
     if not lib.armorTypeNames then return end
-    for armorType,_ in pairs(lib.armorTypeNames) do
-        armorTypesOfSet[armorType] = false
-    end
+   --[[
     --Get all itemIds of this set
     local setItemIds = lib.GetSetItemIds(setId)
     if not setItemIds then return false end
@@ -1370,6 +1605,14 @@ function lib.GetSetArmorTypes(setId)
                     armorTypesOfSet[armorTypeOfSetItem] = true
                 end
             end
+        end
+    end
+    ]]
+    --Use preloaded data now
+    for armorType,_ in pairs(lib.armorTypeNames) do
+        local armorTypeData = lib.armorTypesSets[armorType]
+        if armorTypeData ~= nil then
+            armorTypesOfSet[armorType] = armorTypeData[setId] or false
         end
     end
     --If it's not already added to the armorTypesOfSet table add it
@@ -1400,9 +1643,7 @@ end
 function lib.GetSetWeaponTypes(setId)
     local weaponTypesOfSet = {}
     if not lib.weaponTypeNames then return end
-    for weaponType,_ in pairs(lib.weaponTypeNames) do
-        weaponTypesOfSet[weaponType] = false
-    end
+    --[[
     --Get all itemIds of this set
     local setItemIds = lib.GetSetItemIds(setId)
     if not setItemIds then return false end
@@ -1417,6 +1658,14 @@ function lib.GetSetWeaponTypes(setId)
                     weaponTypesOfSet[weaponTypeOfSetItem] = true
                 end
             end
+        end
+    end
+    ]]
+    --Use preloaded data now
+    for weaponType,_ in pairs(lib.weaponTypeNames) do
+        local weaponTypeData = lib.weaponTypesSets[weaponType]
+        if weaponTypeData ~= nil then
+            weaponTypesOfSet[weaponType] = weaponTypeData[setId] or false
         end
     end
     --If it's not already added to the weaponTypesOfSet table add it
@@ -1444,6 +1693,7 @@ end
 --> Parameters: setsItemIds table: The itemIds that need to be chedked in addition to the itemId parameter
 -->The tables key must be the itemId and the value a boolean value e.g.
 -->Example setsItemIds = { [123456]=true, [12678]=true, ... }
+--> Returns: equippedItems number
 function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     if not setsItemIds then return 0 end
     local equippedItems = 0
@@ -1452,18 +1702,68 @@ function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     --Get the itemIds of the equipped items in BAG_WORN
     local bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
     for _, data in pairs(bagWornItemCache) do
-        table.insert(equippedItemsIds, data)
+        table.insert(equippedItemsIds, data.slotIndex)
     end
     if equippedItemsIds and #equippedItemsIds > 0 then
         --Compare equipped item's itemIds with the given non ESO set itemIds
-        for _, equippedItemData in pairs(equippedItemsIds) do
-            local wornItemId = tonumber(GetItemId(BAG_WORN, equippedItemData.slotIndex))
+        for _, equippedItemSlot in pairs(equippedItemsIds) do
+            local wornItemId = tonumber(GetItemId(BAG_WORN, equippedItemSlot))
             if wornItemId ~= nil and setsItemIds[wornItemId] ~= nil then
                 equippedItems = equippedItems +1
             end
         end
     end
     return equippedItems
+end
+
+--Check if any item of the setId specified is currently equipped and return the number of the equipped, and the maximum
+--equipped number of items of this set.
+--> Parameters: setId number: The setId
+--> Returns:
+-->          equippedItems number Number of currently equipped items of this setId
+-->          maxEquipped number Number of maximum equipped items of this setId
+-->          itemId number The itemId of an example item of the setId
+function lib.GetNumEquippedItemsBySetId(setId)
+    if not setId then return nil, nil, nil end
+    --Get any itemId of the setId
+    local itemId = lib.GetSetItemId(setId)
+    local setIdRet, equippedItems, maxEquipped, _ = getSetEquippedInfo(itemId)
+    if not setIdRet then return nil, nil, nil end
+    return equippedItems, maxEquipped, itemId
+end
+
+--Check if any item of the itemId specified is currently equipped and return the setId, the number of the equipped, and
+--the maximum equipped number of items of this set.
+--> Parameters: itemId number: The itemId of any set's item
+--> Returns:
+-->          equippedItems number Number of currently equipped items of this setId
+-->          maxEquipped number Number of maximum equipped items of this setId
+-->          setId number The setId of the itemId specified
+function lib.GetNumEquippedItemsByItemId(itemId)
+    if not itemId then return nil, nil, nil end
+    --Get any itemId of the setId
+    local setIdRet, equippedItems, maxEquipped, _ = getSetEquippedInfo(itemId)
+    if not setIdRet then return nil, nil, nil end
+    return equippedItems, maxEquipped, setIdRet
+end
+
+
+--Returns the possible equip types's of a set
+--> Parameters: setId number: The set's id
+--> Returns:    table equipTypesOfSet: Contains all equip types possible as key and the Boolean value
+-->             true/false if this setId got items of this equipType
+function lib.GetSetEquipTypes(setId)
+    local equipTypesOfSet = {}
+    if not lib.equipTypesValid then return end
+    --Use preloaded data now
+    for equipType,_ in pairs(lib.equipTypesValid) do
+        local equipTypeData = lib.weaponTypesSets[equipType]
+        if equipTypeData ~= nil then
+            equipTypesOfSet[equipType] = equipTypeData[setId] or false
+        end
+    end
+    --Return the equipTypesOfSet table
+    return equipTypesOfSet
 end
 
 
@@ -1541,7 +1841,9 @@ function lib.GetZoneName(zoneId, lang)
     return zoneName
 end
 
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for specified LibSets setType
+--Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
+--Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_ConstantsLibraryInternal.lua,
+--            e.g. LIBSETS_SETTYPE_MONSTER
 --> Returns:    table with key = setId, value = table which contains (as example for setType = LIBSETS_SETTYPE_CRAFTED)
 ---->             [LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED ("Crafted")
 ------>             1st subtable with key LIBSETS_TABLEKEY_SETITEMIDS ("setItemIds") containing a pair of [itemId]= 1 (e.g. [12345]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,)
@@ -1559,10 +1861,6 @@ end
 ---                     ["fr"]="Set name French",
 ---                 },
 ---             }
-
---Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
---Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
---> Returns:    table -> See lib.GetCraftedSetsData for details of the table contents
 function lib.GetSetTypeSetsData(setType)
     local setsData = getSetTypeSetsData(setType)
     return setsData
@@ -2103,6 +2401,7 @@ function lib.UnRegisterSetProcEventCallbackForSetId(addOnEventNamespace, eventId
     end
     return nil
 end
+
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
@@ -2132,7 +2431,7 @@ function lib.checkIfSetsAreLoadedProperly()
 end
 
 --Addon loaded function
-local function OnLibraryLoaded(event, name)
+local function onLibraryLoaded(event, name)
     --Only load lib if ingame
     if name ~= MAJOR then return end
     EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
@@ -2169,4 +2468,4 @@ local function OnLibraryLoaded(event, name)
 end
 
 --Load the addon now
-EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, OnLibraryLoaded)
+EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, onLibraryLoaded)

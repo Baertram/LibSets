@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.26
+local MAJOR, MINOR = "LibSets", 0.29
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -35,7 +35,7 @@ lib.startedLoading  = true
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100034 --Flames of Ambition (2021-01-28, PTS, API 100034)
+lib.lastSetsPreloadedCheckAPIVersion = 100034 --Flames of Ambition (2021-02-01, PTS, API 100034)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -51,7 +51,7 @@ APIVersions["live"] = GetAPIVersion()
 --of the game you are playing: live or PTS
 --> Several automatic routines like "scan the librray for new sets" is draised via this comparison function and LibSets' event
 --> EVENT_ADD_ON_LOADED -> function LoadSets()
-APIVersions["PTS"] = 100034 --Markarth 2020-09-21
+APIVersions["PTS"] = 100034 --Flames ob Ambition 2021-02-01
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -85,6 +85,12 @@ LIBSETS_TABLEKEY_NAMES                          = "Names"
 LIBSETS_TABLEKEY_SETITEMIDS                     = "setItemIds"
 LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID            = LIBSETS_TABLEKEY_SETITEMIDS .. noSetIdString
 LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED          = LIBSETS_TABLEKEY_SETITEMIDS .."_Compressed"
+LIBSETS_TABLEKEY_SETS_EQUIP_TYPES               = "setsEquipTypes"
+LIBSETS_TABLEKEY_SETS_ARMOR                     = "setsWithArmor"
+LIBSETS_TABLEKEY_SETS_ARMOR_TYPES               = "setsArmorTypes"
+LIBSETS_TABLEKEY_SETS_JEWELRY                   = "setsWithJewelry"
+LIBSETS_TABLEKEY_SETS_WEAPONS                   = "setsWithWeapons"
+LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES             = "setsWeaponTypes"
 LIBSETS_TABLEKEY_SETNAMES                       = "set" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_SETNAMES_NO_SETID              = "set" .. LIBSETS_TABLEKEY_NAMES .. noSetIdString
 LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION          = "lastSetsCheckAPIVersion"
@@ -320,6 +326,114 @@ lib.equipTypesValid = {
     [EQUIP_TYPE_TWO_HAND]   = true,
     [EQUIP_TYPE_WAIST]      = true,
 }
+--The equip type check tables
+--Jewelry
+lib.isJewelryEquipType = {
+    [EQUIP_TYPE_NECK] = true,
+    [EQUIP_TYPE_RING] = true,
+}
+--Weapons
+lib.isWeaponEquipType = {
+    [EQUIP_TYPE_MAIN_HAND]  = true,
+    [EQUIP_TYPE_OFF_HAND]   = true,
+    [EQUIP_TYPE_ONE_HAND]   = true,
+    [EQUIP_TYPE_TWO_HAND]   = true,
+}
+
+--The trait types valid for set items
+lib.traitTypesValid = {
+    --Not allowed
+    --Allowed
+    [ITEM_TRAIT_TYPE_NONE] = true,
+    --Armor
+    [ITEM_TRAIT_TYPE_ARMOR_DIVINES] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_INFUSED] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_INTRICATE] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_NIRNHONED] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_ORNATE] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_REINFORCED] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_STURDY] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_TRAINING] = true,
+    [ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED] = true,
+    --Jewelry
+    [ITEM_TRAIT_TYPE_JEWELRY_ARCANE] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_HARMONY] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_HEALTHY] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_INFUSED] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_INTRICATE] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_ORNATE] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_ROBUST] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_SWIFT] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_TRIUNE] = true,
+    --Weapons
+    [ITEM_TRAIT_TYPE_WEAPON_CHARGED] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_DECISIVE] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_DEFENDING] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_INFUSED] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_INTRICATE] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_NIRNHONED] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_ORNATE] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_POWERED] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_PRECISE] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_SHARPENED] = true,
+    [ITEM_TRAIT_TYPE_WEAPON_TRAINING] = true,
+}
+--The enchanting EnchantmentSearchCategoryType that are valid
+lib.enchantSearchCategoryTypesValid = {
+    --Not allowed
+    --Allowed
+    [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_HEALTH] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_MAGICKA] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_STAMINA] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_BEFOULED_WEAPON] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_BERSERKER] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_CHARGED_WEAPON] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_DAMAGE_HEALTH] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_DAMAGE_SHIELD] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_DECREASE_PHYSICAL_DAMAGE] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_DECREASE_SPELL_DAMAGE] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_DISEASE_RESISTANT] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_FIERY_WEAPON] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_FIRE_RESISTANT] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_FROST_RESISTANT] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_FROZEN_WEAPON] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_HEALTH] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_HEALTH_REGEN] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_BASH_DAMAGE] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_PHYSICAL_DAMAGE] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_POTION_EFFECTIVENESS] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_SPELL_DAMAGE] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_INVALID] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_MAGICKA] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_MAGICKA_REGEN] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_NONE] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_POISONED_WEAPON] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_POISON_RESISTANT] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_PRISMATIC_DEFENSE] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_PRISMATIC_ONSLAUGHT] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_PRISMATIC_REGEN] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_REDUCE_ARMOR] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_REDUCE_BLOCK_AND_BASH] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_REDUCE_FEAT_COST] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_REDUCE_POTION_COOLDOWN] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_REDUCE_POWER] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_REDUCE_SPELL_COST] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_SHOCK_RESISTANT] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_STAMINA] = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_STAMINA_REGEN] = true,
+}
+--Variables for the generateddata tables, coming from the preloaded setitem data
+lib.equipTypesSets = {}
+lib.armorSets = {}
+lib.armorTypesSets = {}
+lib.jewelrySets = {}
+lib.weaponSets = {}
+lib.weaponTypesSets = {}
+
 ------------------------------------------------------------------------------------------------------------------------
 --Number of currently available set bonus for a monster set piece (2: head, shoulder)
 lib.countMonsterSetBonus = 2
