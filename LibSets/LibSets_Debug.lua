@@ -585,10 +585,10 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds)
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
             --Save the set's armorType, equipmentTypes, weaponTypes and jewelryTypes to the SV
             lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = setsEquipTypes
-            lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = setsArmor
+            --lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = setsArmor
             lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = setsArmorTypes
             lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = setsJewelry
-            lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = setsWeapons
+            --lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = setsWeapons
             lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = setsWeaponTypes
 
             --Compress the itemIds now to lower the fileSize of LibSets_Data_all.lua later (copied setItemIds from SavedVariables)
@@ -853,7 +853,7 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
             collectiblesAdded = collectiblesAdded +1
         end
     end
-    if collectiblesAdded >0 then
+    if collectiblesAdded > 0 then
         table.sort(collectibleDataScanned)
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = {}
@@ -914,9 +914,12 @@ end
 function lib.DebugGetAllNames()
     lib.DebugGetAllCollectibleNames()
     lib.DebugGetAllMapNames()
-    lib.DebugGetAllSetNames()
     lib.DebugGetAllWayshrineNames()
     lib.DebugGetAllZoneInfo()
+    -->Attention, you need to run LibSets.DebugScanAllSetData() first to scan for all setIds and setItemids AND update
+    -->the file LibSets_Data.lua, table LibSets.setItemIds, with them first, in order to let this function work properly
+    -->and let it scann and get names of all current data!
+    lib.DebugGetAllSetNames()
 end
 
 --This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
@@ -926,10 +929,10 @@ function lib.DebugResetSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
     lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
+    --lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
     lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
     lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
+    --lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
     lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
     lib.svData[LIBSETS_TABLEKEY_SETNAMES] = nil
     lib.svData[LIBSETS_TABLEKEY_MAPS] = nil

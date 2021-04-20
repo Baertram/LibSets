@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.29
+local MAJOR, MINOR = "LibSets", 0.30
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -35,7 +35,7 @@ lib.startedLoading  = true
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100034 --Flames of Ambition (2021-02-01, PTS, API 100034)
+lib.lastSetsPreloadedCheckAPIVersion = 100035 --Blackwood (2021-04-20, PTS, API 100035)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -86,10 +86,10 @@ LIBSETS_TABLEKEY_SETITEMIDS                     = "setItemIds"
 LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID            = LIBSETS_TABLEKEY_SETITEMIDS .. noSetIdString
 LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED          = LIBSETS_TABLEKEY_SETITEMIDS .."_Compressed"
 LIBSETS_TABLEKEY_SETS_EQUIP_TYPES               = "setsEquipTypes"
-LIBSETS_TABLEKEY_SETS_ARMOR                     = "setsWithArmor"
+--LIBSETS_TABLEKEY_SETS_ARMOR                     = "setsWithArmor"
 LIBSETS_TABLEKEY_SETS_ARMOR_TYPES               = "setsArmorTypes"
 LIBSETS_TABLEKEY_SETS_JEWELRY                   = "setsWithJewelry"
-LIBSETS_TABLEKEY_SETS_WEAPONS                   = "setsWithWeapons"
+--LIBSETS_TABLEKEY_SETS_WEAPONS                   = "setsWithWeapons"
 LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES             = "setsWeaponTypes"
 LIBSETS_TABLEKEY_SETNAMES                       = "set" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_SETNAMES_NO_SETID              = "set" .. LIBSETS_TABLEKEY_NAMES .. noSetIdString
