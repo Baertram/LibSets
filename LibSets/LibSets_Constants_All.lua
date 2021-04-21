@@ -90,7 +90,7 @@ lib.dlcAndChapterAchievementIds = {
     --Stonethorn
     [DLC_STONETHORN] = 2692,
     --Markarth
-    [DLC_MARKARTH] = 2849,
+    [DLC_MARKARTH] = 2851,
     --Flames of Ambition
     [DLC_FLAMES_OF_AMBITION] = 2829
 }
