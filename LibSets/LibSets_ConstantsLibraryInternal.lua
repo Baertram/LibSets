@@ -29,32 +29,39 @@ lib.setsScanning    = false
 lib.fullyLoaded     = false
 lib.startedLoading  = true
 ------------------------------------------------------------------------------------------------------------------------
+local APIVersions = {}
+--The actual API version on the live server we are logged in
+APIVersions["live"] = GetAPIVersion()
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100035 --Blackwood (2021-04-20, PTS, API 100035)
+lib.lastSetsPreloadedCheckAPIVersion = 100035 --Blackwood (2021-04-21, PTS, API 100035)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ------------------------------------------------------------------------------------------------------------------------
-local APIVersions = {}
---The actual API version on the live server we are logged in
-APIVersions["live"] = GetAPIVersion()
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The current PTS APIVersion
 --Update this in order to let the API comparison function "checkIfPTSAPIVersionIsLive" work properly and recognize what version
 --of the game you are playing: live or PTS
---> Several automatic routines like "scan the librray for new sets" is draised via this comparison function and LibSets' event
+--> Several automatic routines like "scan the librray for new sets" is raised via this comparison function and LibSets' event
 --> EVENT_ADD_ON_LOADED -> function LoadSets()
-APIVersions["PTS"] = 100034 --Flames ob Ambition 2021-02-01
+-- as well as setIds and zoneIds in file LibSets_Data_All.lua, tables "setsOfNewerAPIVersion" and "zoneIdsOfNewAPIVersionOnly"
+-- will be excluded from the LibSets tables, if the PTS version differs from the live version (GetAPIVersion())!
+-- Normally this will be the same as the "last sets preloaded check API version" above, as long as the PTS is not updated to a
+-- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
+-- to test on PTS and live with the same files
+--APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
+APIVersions["PTS"] = 100035
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 --Check if the PTS APIVersion is now live
 local function checkIfPTSAPIVersionIsLive()
     local APIVersionLive = APIVersions["live"]
