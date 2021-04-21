@@ -9,38 +9,43 @@ local lib = LibSets
 local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
 
 --DLC & Chapter ID constants (for LibSets)
-DLC_BASE_GAME               = 0
-DLC_IMPERIAL_CITY           = 1
-DLC_ORSINIUM                = 2
-DLC_THIEVES_GUILD           = 3
-DLC_DARK_BROTHERHOOD        = 4
-DLC_SHADOWS_OF_THE_HIST     = 5
-DLC_MORROWIND               = 6
-DLC_HORNS_OF_THE_REACH      = 7
-DLC_CLOCKWORK_CITY          = 8
-DLC_DRAGON_BONES            = 9
-DLC_SUMMERSET               = 10
-DLC_WOLFHUNTER              = 11
-DLC_MURKMIRE                = 12
-DLC_WRATHSTONE              = 13
-DLC_ELSWEYR                 = 14
-DLC_SCALEBREAKER            = 15
-DLC_DRAGONHOLD              = 16
-DLC_HARROWSTORM             = 17
-DLC_GREYMOOR                = 18
-DLC_STONETHORN              = 19
-DLC_MARKARTH                = 20
-DLC_FLAMES_OF_AMBITION      = 21
---End of iteration over DLC ids. !!!!! Increase this variable to the maximum DLC id if new DLC ids are added !!!!!
+DLC_BASE_GAME = 0
+local possibleDlcIds = {
+    [1]  = "DLC_IMPERIAL_CITY",
+    [2]  = "DLC_ORSINIUM",
+    [3]  = "DLC_THIEVES_GUILD",
+    [4]  = "DLC_DARK_BROTHERHOOD",
+    [5]  = "DLC_SHADOWS_OF_THE_HIST",
+    [6]  = "DLC_MORROWIND",
+    [7]  = "DLC_HORNS_OF_THE_REACH",
+    [8]  = "DLC_CLOCKWORK_CITY",
+    [9]  = "DLC_DRAGON_BONES",
+    [10] = "DLC_SUMMERSET",
+    [11] = "DLC_WOLFHUNTER",
+    [12] = "DLC_MURKMIRE",
+    [13] = "DLC_WRATHSTONE",
+    [14] = "DLC_ELSWEYR",
+    [15] = "DLC_SCALEBREAKER",
+    [16] = "DLC_DRAGONHOLD",
+    [17] = "DLC_HARROWSTORM",
+    [18] = "DLC_GREYMOOR",
+    [19] = "DLC_STONETHORN",
+    [20] = "DLC_MARKARTH",
+    [21] = "DLC_FLAMES_OF_AMBITION",
+}
+--Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
-    DLC_BLACKWOOD          = 22
+    possibleDlcIds[22] = "DLC_BLACKWOOD"
 end
+--Loop over the possible DLC ids and create them in the global table _G
+for dlcId, dlcName in ipairs(possibleDlcIds) do
+    _G[dlcName] = dlcId
+end
+local maxDlcId = #possibleDlcIds
 --Iterators for the ESO dlc and chapter constants
---You can use the function
 DLC_ITERATION_BEGIN = DLC_BASE_GAME
---Remember to increase the DLC id here to the newest DLC Id, for the maximum iteration
-DLC_ITERATION_END = DLC_FLAMES_OF_AMBITION or DLC_MARKARTH
+DLC_ITERATION_END   = _G[possibleDlcIds[maxDlcId]]
 lib.allowedDLCIds = {}
 for i = DLC_ITERATION_BEGIN, DLC_ITERATION_END do
     lib.allowedDLCIds[i] = true

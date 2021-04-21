@@ -64,8 +64,8 @@ APIVersions["PTS"] = 100035
 
 --Check if the PTS APIVersion is now live
 local function checkIfPTSAPIVersionIsLive()
-    local APIVersionLive = APIVersions["live"]
-    local APIVersionPTS  = APIVersions["PTS"]
+    local APIVersionLive = tonumber(APIVersions["live"])
+    local APIVersionPTS  = tonumber(APIVersions["PTS"])
     return (APIVersionLive >= APIVersionPTS) or false
 end
 lib.checkIfPTSAPIVersionIsLive = checkIfPTSAPIVersionIsLive
@@ -123,24 +123,32 @@ LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING = "setItemCollectionsZoneMapp
 --> If you change these be sure to check the following tables below and add/change/remove entries as well:
 --lib.setTypeToLibraryInternalVariableNames
 --lib.setTypesToName
-LIBSETS_SETTYPE_ITERATION_BEGIN                 = 1 -- Start of iteration over allowed SetTypes
-LIBSETS_SETTYPE_ARENA                           = 1 --"Arena"
-LIBSETS_SETTYPE_BATTLEGROUND                    = 2 --"Battleground"
-LIBSETS_SETTYPE_CRAFTED                         = 3 --"Crafted"
-LIBSETS_SETTYPE_CYRODIIL                        = 4 --"Cyrodiil"
-LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD   = 5 --"DailyRandomDungeonAndICReward"
-LIBSETS_SETTYPE_DUNGEON                         = 6 --"Dungeon"
-LIBSETS_SETTYPE_IMPERIALCITY                    = 7 --"Imperial City"
-LIBSETS_SETTYPE_MONSTER                         = 8 --"Monster"
-LIBSETS_SETTYPE_OVERLAND                        = 9 --"Overland"
-LIBSETS_SETTYPE_SPECIAL                         = 10 --"Special"
-LIBSETS_SETTYPE_TRIAL                           = 11 --"Trial"
-LIBSETS_SETTYPE_MYTHIC                          = 12 --"Mythic"
+local possibleSetTypes = {
+    [1]  = "LIBSETS_SETTYPE_ARENA",                         --"Arena"
+    [2]  = "LIBSETS_SETTYPE_BATTLEGROUND",                  --"Battleground"
+    [3]  = "LIBSETS_SETTYPE_CRAFTED",                       --"Crafted"
+    [4]  = "LIBSETS_SETTYPE_CYRODIIL",                      --"Cyrodiil"
+    [5]  = "LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD", --"DailyRandomDungeonAndICReward"
+    [6]  = "LIBSETS_SETTYPE_DUNGEON",                       --"Dungeon"
+    [7]  = "LIBSETS_SETTYPE_IMPERIALCITY",                  --"Imperial City"
+    [8]  = "LIBSETS_SETTYPE_MONSTER",                       --"Monster"
+    [9]  = "LIBSETS_SETTYPE_OVERLAND",                      --"Overland"
+    [10] = "LIBSETS_SETTYPE_SPECIAL",                       --"Special"
+    [11] = "LIBSETS_SETTYPE_TRIAL",                         --"Trial"
+    [12] = "LIBSETS_SETTYPE_MYTHIC",                        --"Mythic"
+}
 --SetTypes only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
+    --possibleSetTypes[13] = "..." --New LibSets set type
 end
---End of iteration over SetTypes. !!!!! Increase this variable to the maximum setType if new setTypes are added !!!!!
-LIBSETS_SETTYPE_ITERATION_END                   = LIBSETS_SETTYPE_MYTHIC
+--Loop over the possible DLC ids and create them in the global table _G
+for setTypeId, setTypeName in ipairs(possibleSetTypes) do
+    _G[setTypeName] = setTypeId
+end
+local maxSetTypes = #possibleSetTypes
+LIBSETS_SETTYPE_ITERATION_BEGIN     = LIBSETS_SETTYPE_ARENA
+LIBSETS_SETTYPE_ITERATION_END       = _G[possibleSetTypes[maxSetTypes]]
+
 lib.allowedSetTypes = {}
 for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
     lib.allowedSetTypes[i] = true
@@ -504,28 +512,36 @@ lib.weaponTypeNames = {
 }
 ------------------------------------------------------------------------------------------------------------------------
 --Drop mechanics / cities / etc. for additional drop location information
-LIBSETS_DROP_MECHANIC_ITERATION_BEGIN                             = 1
-LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY   = 1	    --Rewards for the worthy (Cyrodiil/Battleground mail)
-LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA	            = 2	    --City Bruma (quartermaster)
-LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT	        = 3	    --City Erntefurt (quartermaster)
-LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS	        = 4	    --City Vlastarus (quartermaster)
-LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST                 = 5     --Arena stage chest
-LIBSETS_DROP_MECHANIC_MONSTER_NAME                      = 6     --The name of a monster (e.g. a boss in a dungeon) is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table containing the monster name in different languages)
-LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE               = 7     --Overland delve bosses
-LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS                = 8     --Overland world group bosses
-LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON      = 9     --Overland public dungeon bosses
-LIBSETS_DROP_MECHANIC_OVERLAND_CHEST                    = 10    --Overland chests
-LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD               = 11    --Battleground rewards
-LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD  = 12    --Daily random dungeon mail rewards
-LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS              = 13    --Imperial city vaults
-LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD                   = 14    --Level up reward
-LIBSETS_DROP_MECHANIC_ANTIQUITIES                       = 15    --Antiquities (Mythic set items)
---DropMechanic only available on current PTS, or automatically available if PTS->live
+local possibleDropMechanics = {
+    [1]  = "LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY",     --Rewards for the worthy (Cyrodiil/Battleground mail)
+    [2]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA",                 --City Bruma (quartermaster)
+    [3]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT",             --City Erntefurt (quartermaster)
+    [4]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS",             --City Vlastarus (quartermaster)
+    [5]  = "LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST",                   --Arena stage chest
+    [6]  = "LIBSETS_DROP_MECHANIC_MONSTER_NAME",                        --The name of a monster (e.g. a boss in a dungeon) is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table containing the monster name in different languages)
+    [7]  = "LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE",                 --Overland delve bosses
+    [8]  = "LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS",                  --Overland world group bosses
+    [9]  = "LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON",        --Overland public dungeon bosses
+    [10] = "LIBSETS_DROP_MECHANIC_OVERLAND_CHEST",                      --Overland chests
+    [11] = "LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD",                 --Battleground rewards
+    [12] = "LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD",    --Daily random dungeon mail rewards
+    [13] = "LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS",                --Imperial city vaults
+    [14] = "LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD",                     --Level up reward
+    [15] = "LIBSETS_DROP_MECHANIC_ANTIQUITIES",                         --Antiquities (Mythic set items)
+}
+--Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
-    --LIBSETS_DROP_MECHANIC_ = number
+     --LIBSETS_DROP_MECHANIC_ = number
+    --possibleDropMechanics[16] = "LIBSETS_DROP_MECHANIC_..." --new dropmechanic ...
 end
---Increase the maximum drop mechanic here after updating the drop mechanics !!!
-LIBSETS_DROP_MECHANIC_ITERATION_END                     = LIBSETS_DROP_MECHANIC_ANTIQUITIES
+--Loop over the possible DLC ids and create them in the global table _G
+for dropMechanicId, dropMechanicName in ipairs(possibleDropMechanics) do
+    _G[dropMechanicName] = dropMechanicId
+end
+local maxDropMechanicIds = #possibleDropMechanics
+LIBSETS_DROP_MECHANIC_ITERATION_BEGIN                             = 1
+LIBSETS_DROP_MECHANIC_ITERATION_END                     = _G[possibleDropMechanics[maxDropMechanicIds]]
+
 lib.allowedDropMechanics = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
