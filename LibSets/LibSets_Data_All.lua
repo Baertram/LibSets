@@ -1156,6 +1156,7 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=37, zoneIds={1133}},--Southern Elsweyr
         { parentCategory=4, category=38, zoneIds={1160}},--Western Skyrim
         { parentCategory=4, category=89, zoneIds={1207}},--The Reach
+        { parentCategory=4, category=93, zoneIds={1261}},--Blackwood
         --Dungeons
         { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
         { parentCategory=5, category=40, zoneIds={380,935}, isDungeon=true},--The Banished Cells I
@@ -1204,6 +1205,7 @@ lib.setDataPreloaded = {
         { parentCategory=7, category=77, zoneIds={1051}, isTrial=true},--Cloudrest
         { parentCategory=7, category=78, zoneIds={1121}, isTrial=true},--Sunspire
         { parentCategory=7, category=79, zoneIds={1196}, isTrial=true},--Kyne's Aegis
+        { parentCategory=7, category=94, zoneIds={1263}, isTrial=true},--Rockgrove
         --Arenas
         { parentCategory=8, category=80, zoneIds={635}, isArena=true},--Dragonstar Arena
         { parentCategory=8, category=81, zoneIds={677}, isArena=true},--Maelstrom Arena
