@@ -585,10 +585,10 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds)
             lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
             --Save the set's armorType, equipmentTypes, weaponTypes and jewelryTypes to the SV
             lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = setsEquipTypes
-            lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = setsArmor
+            --lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = setsArmor
             lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = setsArmorTypes
             lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = setsJewelry
-            lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = setsWeapons
+            --lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = setsWeapons
             lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = setsWeaponTypes
 
             --Compress the itemIds now to lower the fileSize of LibSets_Data_all.lua later (copied setItemIds from SavedVariables)
@@ -840,25 +840,70 @@ end
 --            collectibleEndId number, the end ID of the collectibles to start the scan TO
 function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
     collectibleStartId = collectibleStartId or 1
-    collectibleEndId = collectibleEndId or 5000
+    collectibleEndId = collectibleEndId or 10000
     if collectibleEndId < collectibleStartId then collectibleEndId = collectibleStartId end
     d("[" .. MAJOR .."]Start to load all collectibles with start ID ".. collectibleStartId .. " to end ID " .. collectibleEndId .. "...")
     local collectiblesAdded = 0
     local collectibleDataScanned
     for i=collectibleStartId, collectibleEndId, 1 do
-        local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(i)))
-        if collectibleName and collectibleName ~= "" then
-            collectibleDataScanned = collectibleDataScanned or {}
-            collectibleDataScanned[i] = tostring(i) .. "|" .. collectibleName
-            collectiblesAdded = collectiblesAdded +1
+        local topLevelIndex, categoryIndex = GetCategoryInfoFromAchievementId(i)
+        if categoryIndex ~= COLLECTIBLE_CATEGORY_TYPE_DLC then
+            local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
+            if collectibleName and collectibleName ~= "" then
+                collectibleDataScanned = collectibleDataScanned or {}
+                collectibleDataScanned[i] = tostring(i) .. "|" .. collectibleName
+                collectiblesAdded = collectiblesAdded +1
+            end
         end
     end
-    if collectiblesAdded >0 then
+    if collectiblesAdded > 0 then
         table.sort(collectibleDataScanned)
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = {}
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = collectibleDataScanned
         d("->Stored " .. tostring(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
+    end
+end
+
+--This function scans the collectibles for their DLC names to provide a list for the new DLCs and chapters
+--Saves a line with collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
+function lib.DebugGetAllCollectibleDLCNames()
+    local dlcNames = {}
+    local collectiblesAdded = 0
+    d("[" .. MAJOR .."]Start to load all DLC collectibles")
+    --DLCs
+    local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC)
+    for collectibleSubCategoryIndex=1, numSubCategories do
+        local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex)
+        for i=1, numCollectibles do
+            local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex, i)
+            --- @return name string, description string, icon textureName, deprecatedLockedIcon textureName, unlocked bool, purchasable bool, isActive bool, categoryType [CollectibleCategoryType|#CollectibleCategoryType], hint string
+            local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
+            collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+            dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
+            collectiblesAdded = collectiblesAdded +1
+        end
+    end
+    --[[
+    --Chapters
+    local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
+    for collectibleSubCategoryIndex=1, numSubCategories do
+        local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex)
+        for i=1, numCollectibles do
+            local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex, i)
+            --- @return name string, description string, icon textureName, deprecatedLockedIcon textureName, unlocked bool, purchasable bool, isActive bool, categoryType [CollectibleCategoryType|#CollectibleCategoryType], hint string
+            local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
+            collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+            dlcNames[collectibleId] = collectibleName
+            collectiblesAdded = collectiblesAdded +1
+        end
+    end
+    ]]
+    if collectiblesAdded > 0 then
+        LoadSavedVariables()
+        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES][lib.clientLang] = {}
+        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES][lib.clientLang] = dlcNames
+        d("->Stored " .. tostring(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     end
 end
 
@@ -913,10 +958,14 @@ end
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames()
     lib.DebugGetAllCollectibleNames()
+    lib.DebugGetAllCollectibleDLCNames()
     lib.DebugGetAllMapNames()
-    lib.DebugGetAllSetNames()
     lib.DebugGetAllWayshrineNames()
     lib.DebugGetAllZoneInfo()
+    -->Attention, you need to run LibSets.DebugScanAllSetData() first to scan for all setIds and setItemids AND update
+    -->the file LibSets_Data.lua, table LibSets.setItemIds, with them first, in order to let this function work properly
+    -->and let it scann and get names of all current data!
+    lib.DebugGetAllSetNames()
 end
 
 --This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
@@ -926,10 +975,10 @@ function lib.DebugResetSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
     lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
     lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
+    --lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
     lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
     lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
+    --lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
     lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
     lib.svData[LIBSETS_TABLEKEY_SETNAMES] = nil
     lib.svData[LIBSETS_TABLEKEY_MAPS] = nil
@@ -939,6 +988,7 @@ function lib.DebugResetSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
     lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
     lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
     d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'. Please do a /reloadui or logout to update the SavedVariables data now!")
 end
 
