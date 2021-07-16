@@ -327,6 +327,7 @@ local function LoadSavedVariables()
         [LIBSETS_TABLEKEY_ZONE_DATA]                = {},
         [LIBSETS_TABLEKEY_DUNGEONFINDER_DATA]       = {},
         [LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]        = {},
+        [LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]    = {},
     }
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$AllAccounts")

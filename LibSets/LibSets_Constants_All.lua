@@ -32,11 +32,14 @@ local possibleDlcIds = {
     [19] = "DLC_STONETHORN",
     [20] = "DLC_MARKARTH",
     [21] = "DLC_FLAMES_OF_AMBITION",
+    [22] = "DLC_BLACKWOOD",
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
-    possibleDlcIds[22] = "DLC_BLACKWOOD"
+    --possibleDlcIds[xx] = "DLC_xxx"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_WAKING_FLAMES"
+
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -51,58 +54,93 @@ for i = DLC_ITERATION_BEGIN, DLC_ITERATION_END do
     lib.allowedDLCIds[i] = true
 end
 
+--[[
+[5473] = "Frostgewölbe",
+[5474] = "Tiefen von Malatar",
+[5107] = "Summerset",
+[8388] = "Markarth",
+[5843] = "Elsweyr",
+[7430] = "Der Steingarten",
+[7431] = "Kastell Dorn",
+[6920] = "Dragonhold",
+[8216] = "Schwarzdrachenvilla",
+[7466] = "Greymoor",
+[1355] = "Falkenring",
+[1240] = "Clockwork City",
+[1165] = "Blutquellschmiede",
+[593] = "Morrowind",
+[491] = "Wiege der Schatten",
+[5008] = "Die Mondjägerfeste",
+[5009] = "Marsch der Aufopferung",
+[306] = "Dark Brotherhood",
+[8659] = "Blackwood",
+[215] = "Orsinium",
+[8217] = "Der Kessel",
+[6646] = "Eiskap",
+[375] = "Ruinen von Mazzatun",
+[6040] = "Mondgrab-Tempelstadt",
+[6041] = "Hort von Maarselok",
+[154] = "Imperial City",
+[5755] = "Murkmire",
+[1331] = "Krallenhort",
+[6647] = "Unheiliges Grab",
+[254] = "Thieves Guild",
+[4703] = "Gipfel der Schuppenruferin",
+]]
 
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
 lib.dlcAndChapterAchievementIds = {
     --Base game
     [DLC_BASE_GAME] = -1,
     --Imperial city
-    [DLC_IMPERIAL_CITY] = 1267,
+    [DLC_IMPERIAL_CITY] = 154,
     --Orsinium
-    [DLC_ORSINIUM] = 1393,
+    [DLC_ORSINIUM] = 215,
     --Thieves Guild
-    [DLC_THIEVES_GUILD] = 1413,
+    [DLC_THIEVES_GUILD] = 254,
     --Dark Brotherhood
-    [DLC_DARK_BROTHERHOOD] = 1421,
+    [DLC_DARK_BROTHERHOOD] = 306,
     --Shadows of the Hist
     [DLC_SHADOWS_OF_THE_HIST] = 1520,
     --Morrowind
-    [DLC_MORROWIND] = 1843,
+    [DLC_MORROWIND] = 593,
     --Horns of the Reach
     [DLC_HORNS_OF_THE_REACH] = 1940,
     --Clockwork City
-    [DLC_CLOCKWORK_CITY] = 2048,
+    [DLC_CLOCKWORK_CITY] = 1240,
     --Dragon Bones
     [DLC_DRAGON_BONES] = 2104,
     --Summerset
-    [DLC_SUMMERSET] = 1845,
+    [DLC_SUMMERSET] = 5107,
     --Wolfhunter
     [DLC_WOLFHUNTER] = 2157,
     --Murkmire
-    [DLC_MURKMIRE] = 2340,
+    [DLC_MURKMIRE] = 5755,
     --Wrathstone
     [DLC_WRATHSTONE] = 2265,
     --Elsweyr
-    [DLC_ELSWEYR] = 2463,
+    [DLC_ELSWEYR] = 5843,
     --Scalebreaker
     [DLC_SCALEBREAKER] = 2413,
     --Dragonhold
-    [DLC_DRAGONHOLD] = 2534,
+    [DLC_DRAGONHOLD] = 6920,
     --Harrowstorm
     [DLC_HARROWSTORM] = 2537,
     --Greymoor
-    [DLC_GREYMOOR] = 2639,
+    [DLC_GREYMOOR] = 7466,
     --Stonethorn
     [DLC_STONETHORN] = 2692,
     --Markarth
-    [DLC_MARKARTH] = 2851,
+    [DLC_MARKARTH] = 8388,
     --Flames of Ambition
-    [DLC_FLAMES_OF_AMBITION] = 2829
+    [DLC_FLAMES_OF_AMBITION] = 2829,
+    --Blackwood
+    [DLC_BLACKWOOD] = 8659,
 }
 if checkIfPTSAPIVersionIsLive() then
-    lib.dlcAndChapterAchievementIds[DLC_BLACKWOOD] = 2866
+    --lib.dlcAndChapterAchievementIds[DLC_XXXX] = xxxx
+    lib.dlcAndChapterAchievementIds[DLC_WAKING_FLAME] = 2439
 end
-
 
 --Internal achievement example ids of the ESO DLCs and chapters
 local dlcAndChapterAchievementIds = lib.dlcAndChapterAchievementIds

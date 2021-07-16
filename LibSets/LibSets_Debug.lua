@@ -265,7 +265,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 --Returns a list of the zone data in the current client language and saves it to the SavedVars table "zoneData" in this format:
 --zoneData[lang][zoneId] = zoneId .. "|" .. zoneIndex .. "|" .. parentZoneId .. "|" ..zoneNameCleanLocalizedInClientLanguage
--->RegEx to transfer [1]= "1|2|1|Zone Name Clean", to 1|2|1|Zone Name Clean:   \[\d*\] = \"(.*)\",
+-->RegEx to transfer [1]= "1|2|1|Zone Name Clean", to 1|2|1|Zone Name Clean:   \[\d*\] = \"(.*)\" -> replace with $1
 --->Afterwards put into excel and split at | into columns
 function lib.DebugGetAllZoneInfo()
     local zoneData = GetAllZoneInfo()
@@ -283,7 +283,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 --Returns a list of the maps data in the current client language and saves it to the SavedVars table "maps" in this format:
 --maps[mapIndex] = mapIndex .. "|" .. localizedCleanMapNameInClientLanguage .. "|" .. zoneId .. "|" .. zoneNameLocalizedInClientLanguage
--->RegEx to transfer [1]= "1|Map Name clean|1|Zone name clean", to 1|Map Name clean|1|Zone name clean:   \[\d*\] = \"(.*)\",
+-->RegEx to transfer [1]= "1|2|1|Zone Name Clean", to 1|2|1|Zone Name Clean:   \[\d*\] = \"(.*)\" -> replace with $1
 --->Afterwards put into excel and split at | into columns
 function lib.DebugGetAllMapNames()
     local maps = GetMapNames(lib.clientLang)
@@ -304,24 +304,39 @@ end
 --Returns a list of the wayshrine data (nodes) in the current client language and saves it to the SavedVars table "wayshrines" in this format:
 --wayshrines[i] = wayshrineNodeId .."|"..currentMapIndex.."|"..currentMapId.."|"..currentMapNameLocalizedInClientLanguage.."|"
 --..currentMapsZoneIndex.."|"..currentZoneId.."|"..currentZoneNameLocalizedInClientLanguage.."|"..wayshrinesPOIType.."|".. wayshrineNameCleanLocalizedInClientLanguage
--->RegEx to transfer [1]= "1|1|Zone Name clean|1|Map name clean", to 1|1|Zone Name clean|1|Map name clean:   \[\d*\] = \"(.*)\",
+-->RegEx to transfer [1]= "1|WayshrineNodeId|mapIndex|mapId|mapName|zoneIndex|zoneId|zoneName|POIType|wayshrineName", to 1|WayshrineNodeId|mapIndex|mapId|mapName|zoneIndex|zoneId|zoneName|POIType|wayshrineName:   \[\d*\] = \"(.*)\" -> replace with $1
 --->Afterwards put into excel and split at | into columns
 function lib.DebugGetAllWayshrineInfo()
-    local ws = GetWayshrineInfo()
-    if ws ~= nil then
-        table.sort(ws)
-        LoadSavedVariables()
-        lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] or {}
-        for wsNodeId, wsData in pairs(ws) do
-            lib.svData[LIBSETS_TABLEKEY_WAYSHRINES][wsNodeId] = wsData
+    local delay = 0
+    if not ZO_WorldMap_IsWorldMapShowing() then
+        --Show the map
+        ZO_WorldMap_ShowWorldMap()
+        --Detect if we are in a city or not on the parent map
+        --TODO
+        local wayshrinesAvailable = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_WAYSHRINES) and (GetCurrentMapIndex() ~= nil)
+        --Unzoom once to get to the zonemap
+        if not wayshrinesAvailable then
+            ZO_WorldMap_MouseUp(nil, MOUSE_BUTTON_INDEX_RIGHT, true)
         end
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINES.."\'")
+        delay = 250
     end
+    zo_callLater(function()
+        local ws = GetWayshrineInfo()
+        if ws ~= nil then
+            table.sort(ws)
+            LoadSavedVariables()
+            lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] or {}
+            for wsNodeId, wsData in pairs(ws) do
+                lib.svData[LIBSETS_TABLEKEY_WAYSHRINES][wsNodeId] = wsData
+            end
+            d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINES.."\'")
+        end
+ end, delay)
 end
 
 --Returns a list of the wayshrine names in the current client language and saves it to the SavedVars table "wayshrineNames" in this format:
 --wayshrineNames[clientLanguage][wayshrineNodeId] = wayshrineNodeId .. "|" .. wayshrineLocalizedNameCleanInClientLanguage
--->RegEx to transfer [1]= "1|Wayshrine name", to 1|Wayshrine name:   \[\d*\] = \"(.*)\",
+-->RegEx to transfer [1]= "1|Wayshrine name", to 1|Wayshrine name:   \[\d*\] = \"(.*)\" -> replace with $1
 --->Afterwards put into excel and split at | into columns
 function lib.DebugGetAllWayshrineNames()
     local wsNames = GetWayshrineNames()
@@ -793,7 +808,8 @@ end
 --..
 --}
 --->!!!Attention!!!You MUST open the dungeon finder->go to specific dungeon dropdown entry in order to build the dungeons list needed first!!!
---Parameter: dungeonFinderIndex number. Possible values are 1=Normal or 2=Veteran or 3=Both dungeons. Leave empty to get both
+--Parameter: dungeonFinderIndex number. Possible values are 1=Normal or 2=Veteran or 3=Both dungeons. Leave empty to use 3=Both dungeons
+local preventEndlessCallDungeonFinderData = false
 function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
     d("[" .. MAJOR .."]Start to load all dungeon data from the keyboard dungeon finder...")
     dungeonFinderIndex = dungeonFinderIndex or 3
@@ -822,7 +838,21 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
                 dungeonsAdded = getDungeonFinderDataFromChildNodes(dungeonsData)
             end
         else
-            d("<Please open the dungeon finder and choose the \'Specifiy dungeon\' entry from the dropdown box at the top-right edge! Then try this function again.")
+            if preventEndlessCallDungeonFinderData == true then
+                d("<Please open the dungeon finder and choose the \'Specifiy dungeon\' entry from the dropdown box at the top-right edge! Then try this function again.")
+                preventEndlessCallDungeonFinderData = false
+                return
+            else
+                preventEndlessCallDungeonFinderData = true
+                --Open the group menu
+                GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment())
+                --Select entry "Sepcific dungeon" from dungeon dropdown
+                zo_callLater(function()
+                    ZO_DungeonFinder_KeyboardFilter.m_comboBox:SelectItemByIndex(3)
+
+                    lib.DebugGetDungeonFinderData(dungeonFinderIndex)
+                end, 250)
+            end
         end
     end
     if retTableDungeons and #retTableDungeons>0 and dungeonsAdded >0 then
@@ -831,7 +861,11 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex)
         lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
         d("->Stored " .. tostring(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_DUNGEONFINDER_DATA .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     else
-        d("<No dungeon data was found!")
+        local noDataFoundText = "<No dungeon data was found!"
+        if preventEndlessCallDungeonFinderData == true then
+            noDataFoundText = noDataFoundText .. " Opening the group panel now, and selecting the \'Specific dungeon\' entry!"
+        end
+        d(noDataFoundText)
     end
 end
 
@@ -840,17 +874,20 @@ end
 --            collectibleEndId number, the end ID of the collectibles to start the scan TO
 function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
     collectibleStartId = collectibleStartId or 1
-    collectibleEndId = collectibleEndId or 5000
+    collectibleEndId = collectibleEndId or 10000
     if collectibleEndId < collectibleStartId then collectibleEndId = collectibleStartId end
     d("[" .. MAJOR .."]Start to load all collectibles with start ID ".. collectibleStartId .. " to end ID " .. collectibleEndId .. "...")
     local collectiblesAdded = 0
     local collectibleDataScanned
     for i=collectibleStartId, collectibleEndId, 1 do
-        local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(i)))
-        if collectibleName and collectibleName ~= "" then
-            collectibleDataScanned = collectibleDataScanned or {}
-            collectibleDataScanned[i] = tostring(i) .. "|" .. collectibleName
-            collectiblesAdded = collectiblesAdded +1
+        local topLevelIndex, categoryIndex = GetCategoryInfoFromAchievementId(i)
+        if categoryIndex ~= COLLECTIBLE_CATEGORY_TYPE_DLC then
+            local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
+            if collectibleName and collectibleName ~= "" then
+                collectibleDataScanned = collectibleDataScanned or {}
+                collectibleDataScanned[i] = tostring(i) .. "|" .. collectibleName
+                collectiblesAdded = collectiblesAdded +1
+            end
         end
     end
     if collectiblesAdded > 0 then
@@ -859,6 +896,48 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId)
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = {}
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][lib.clientLang] = collectibleDataScanned
         d("->Stored " .. tostring(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
+    end
+end
+
+--This function scans the collectibles for their DLC names to provide a list for the new DLCs and chapters
+--Saves a line with collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
+function lib.DebugGetAllCollectibleDLCNames()
+    local dlcNames = {}
+    local collectiblesAdded = 0
+    d("[" .. MAJOR .."]Start to load all DLC collectibles")
+    --DLCs
+    local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC)
+    for collectibleSubCategoryIndex=1, numSubCategories do
+        local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex)
+        for i=1, numCollectibles do
+            local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex, i)
+            --- @return name string, description string, icon textureName, deprecatedLockedIcon textureName, unlocked bool, purchasable bool, isActive bool, categoryType [CollectibleCategoryType|#CollectibleCategoryType], hint string
+            local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
+            collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+            dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
+            collectiblesAdded = collectiblesAdded +1
+        end
+    end
+    --[[
+    --Chapters
+    local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
+    for collectibleSubCategoryIndex=1, numSubCategories do
+        local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex)
+        for i=1, numCollectibles do
+            local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex, i)
+            --- @return name string, description string, icon textureName, deprecatedLockedIcon textureName, unlocked bool, purchasable bool, isActive bool, categoryType [CollectibleCategoryType|#CollectibleCategoryType], hint string
+            local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
+            collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+            dlcNames[collectibleId] = collectibleName
+            collectiblesAdded = collectiblesAdded +1
+        end
+    end
+    ]]
+    if collectiblesAdded > 0 then
+        LoadSavedVariables()
+        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES][lib.clientLang] = {}
+        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES][lib.clientLang] = dlcNames
+        d("->Stored " .. tostring(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES .. "\', language: \'" ..tostring(lib.clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     end
 end
 
@@ -913,6 +992,7 @@ end
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames()
     lib.DebugGetAllCollectibleNames()
+    lib.DebugGetAllCollectibleDLCNames()
     lib.DebugGetAllMapNames()
     lib.DebugGetAllWayshrineNames()
     lib.DebugGetAllZoneInfo()
@@ -942,9 +1022,22 @@ function lib.DebugResetSavedVariables()
     lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
     lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
     lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
     d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'. Please do a /reloadui or logout to update the SavedVariables data now!")
 end
 
+--Run this once after a new PTS was released to get all the new data scanned to the SV tables.
+--Attention: You need to open the groupfinder -> dungeon data tab afterwards and manually run
+--           lib.DebugGetDungeonFinderData(dungeonFinderIndex) afterwards
+function lib.DebugGetNewSetsData(noReload)
+    noReload = noReload or false
+    lib.DebugResetSavedVariables()
+    lib.DebugScanAllSetData()
+    lib.DebugGetAllNames()
+
+    if noReload == true then return end
+    ReloadUI("ingame")
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 -- MIXING NEW SET NAMES INTO THE PRELOADED DATA
