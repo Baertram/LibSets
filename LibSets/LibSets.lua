@@ -312,6 +312,7 @@ local apiVersion = GetAPIVersion()
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
+local EM = EVENT_MANAGER
 local strgmatch = string.gmatch
 local strlower = string.lower
 --local strlen = string.len
@@ -2534,6 +2535,16 @@ local function createSlashCommands()
 end
 
 
+local function onPlayerActivated(eventId, isFirst)
+    EM:UnregisterForEvent(MAJOR, EVENT_PLAYER_ACTIVATED)
+
+    if lib.debugGetAllDataIsRunning == true then
+        --Continue to get all data until it is finished
+        d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - language now: " ..tostring(lib.clientLang))
+        lib.DebugGetAllData(false)
+    end
+end
+
 --Addon loaded function
 local function onLibraryLoaded(event, name)
     --Only load lib if ingame
@@ -2560,12 +2571,14 @@ local function onLibraryLoaded(event, name)
     --Check if any tasks are active via the SavedVariables -> Debug reloadUIs e.g.
     local goOn = false
     LoadSavedVariables()
+
+    --Is the DebugGetAllData function running and reloadUI's are done? -> See EVENT_PLAYER_ACTIVATED then
+    lib.debugGetAllDataIsRunning = false
     if lib.svData and lib.svData.DebugGetAllData and lib.svData.DebugGetAllData[apiVersion] then
         if lib.svData.DebugGetAllData[apiVersion].running == true and lib.svData.DebugGetAllData[apiVersion].finished == false then
-            --Continue to get all data until it is finished
-d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - language now: " ..tostring(lib.clientLang))
-            lib.DebugGetAllData(false)
+            lib.debugGetAllDataIsRunning = true
             goOn = false
+            EM:RegisterForEvent(MAJOR, EVENT_PLAYER_ACTIVATED, onPlayerActivated)
         elseif not lib.svData.DebugGetAllData[apiVersion].running or lib.svData.DebugGetAllData[apiVersion].finished == true then
             goOn = true
         end
@@ -2575,25 +2588,24 @@ d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - lang
     if not goOn then
         lib.setsScanning = true
         lib.fullyLoaded = false
-        return
+    else
+        --Remove future APIversion setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
+        lib.removeFutureSetData()
+        --...and then remove this function from the library
+        lib.removeFutureSetData = nil
+
+        --Get the different setTypes from the preloaded "all sets table" setInfo in file LibSets_Data.lua and put them in their
+        --own tables of the library, to be used from the LibSets API functions
+        LoadSets()
+
+        --Slash commands
+        createSlashCommands()
+
+        --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
+        --work properly now
+        lib.fullyLoaded = true
     end
-
-    --Remove future APIversion setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
-    lib.removeFutureSetData()
-    --...and then remove this function from the library
-    lib.removeFutureSetData = nil
-
-    --Get the different setTypes from the preloaded "all sets table" setInfo in file LibSets_Data.lua and put them in their
-    --own tables of the library, to be used from the LibSets API functions
-    LoadSets()
-
-    --Slash commands
-    createSlashCommands()
-
-    --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
-    --work properly now
-    lib.fullyLoaded = true
 end
 
 --Load the addon now
-EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, onLibraryLoaded)
+EM:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, onLibraryLoaded)

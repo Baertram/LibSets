@@ -7,6 +7,8 @@ local MAJOR = lib.name
 local MINOR = lib.version
 local LoadSavedVariables = lib.LoadSavedVariables
 
+local EM = EVENT_MANAGER
+
 local worldName = GetWorldName()
 local apiVersion = GetAPIVersion()
 local isPTSAPIVersionLive = lib.checkIfPTSAPIVersionIsLive()
@@ -281,6 +283,34 @@ local function getAllSetItemIds()
     return lib.CachedSetItemIdsTable
 end
 
+--This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
+function lib.DebugResetSavedVariables(noReloadInfo)
+    noReloadInfo = noReloadInfo or false
+    LoadSavedVariables()
+    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
+    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
+    --lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
+    --lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
+    lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
+    lib.svData[LIBSETS_TABLEKEY_SETNAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_MAPS] = nil
+    lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
+    lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
+    lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
+    lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
+    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+    d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'.")
+    if noReloadInfo == true then return end
+    d(">Please do a /reloadui or logout to update the SavedVariables data now!")
+end
+local debugResetSavedVariables = lib.DebugResetSavedVariables
+
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for zone names -> Save them in the SavedVariables "zoneData"
 ------------------------------------------------------------------------------------------------------------------------
@@ -298,6 +328,7 @@ function lib.DebugGetAllZoneInfo()
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'".. LIBSETS_TABLEKEY_ZONE_DATA .. "\', language: \'" ..tostring(clientLang).."\'")
     end
 end
+local debugGetAllZoneInfo = lib.DebugGetAllZoneInfo
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for map names -> Save them in the SavedVariables "maps"
@@ -317,6 +348,7 @@ function lib.DebugGetAllMapNames()
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MAPS.."\', language: \'" ..tostring(clientLang).."\'")
     end
 end
+local debugGetAllMapNames = lib.DebugGetAllMapNames
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for wayshrines -> Save them in the SavedVariables "wayshrines"
@@ -366,6 +398,7 @@ function lib.DebugGetAllWayshrineInfo()
         end, delay)
     end
 end
+local debugGetAllWayshrineInfo = lib.DebugGetAllWayshrineInfo
 
 --Returns a list of the wayshrine names in the current client language and saves it to the SavedVars table "wayshrineNames" in this format:
 --wayshrineNames[clientLanguage][wayshrineNodeId] = wayshrineNodeId .. "|" .. wayshrineLocalizedNameCleanInClientLanguage
@@ -381,6 +414,7 @@ function lib.DebugGetAllWayshrineNames()
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINE_NAMES.."\', language: \'" ..tostring(clientLang).."\'")
     end
 end
+local debugGetAllWayshrineNames = lib.DebugGetAllWayshrineNames
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for set names in client language -> Save them in the SavedVariables "setNames"
@@ -505,7 +539,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                             setName = ZO_CachedStrFormat("<<C:1>>", setName)
 
                             if isNewSet == true then
-    d(">new SetId found: " ..tostring(setId) .. ", name: " ..tostring(setName))
+    --d(">new SetId found: " ..tostring(setId) .. ", name: " ..tostring(setName))
                             end
 
                             if setName ~= "" then
@@ -560,6 +594,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
         d(">Please do a /reloadui to update the file properly!")
     end
 end
+local debugGetAllSetNames = lib.DebugGetAllSetNames
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for sets and their itemIds -> Save them in the SavedVariables "setItemIds"
@@ -596,6 +631,7 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
     df("-->Armor: %s / Jewelry: %s / Weapons: %s", tostring(itemArmorCount), tostring(itemJewelryCount), tostring(itemWeaponsCount))
 
     if finished == true then
+        noFurtherItemsFound = true
         newSetIdsFound = {}
         local newSetsFound = 0
         local temporarilyText = ""
@@ -859,17 +895,14 @@ d(">lastLoop or noFurtherItemsFound!")
                 --missing call in the loop, so that results are shown "now" (+2 seconds)
                 local loopsLeft = numPackageLoops - packageNr
                 if loopsLeft < 0 then loopsLeft = 0 end
-                summaryAndPostprocessingDelay = summaryAndPostprocessingDelay - (loopsLeft * 1000)
 d(">>#fromTo: " ..tostring(#fromTo) ..", packageNr: " ..tostring(packageNr) .. ", loopsLeft: " ..tostring(loopsLeft) .. ", summaryAndPostprocessingDelay: " ..tostring(summaryAndPostprocessingDelay))
+                --Were all item IDs scanned? Show the results list and update the SavedVariables
                 showSetCountsScanned(true, keepUncompressedetItemIds, noReloadInfo, "Summary")
             end
         end, milliseconds)
 
         milliseconds = milliseconds + 1000 -- scan item ID packages every 1 second to get not kicked/crash the client!
     end
-    --Were all item IDs scanned? Show the results list and update the SavedVariables after 2 seconds ->
-    --Variable summaryAndPostprocessingDelay will be upated via zo_callLater in the loop above
-    summaryAndPostprocessingDelay = milliseconds + 2000
 end
 lib.DebugScanAllSetData = scanAllSetData
 
@@ -998,6 +1031,7 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
         d(noDataFoundText)
     end
 end
+local debugGetDungeonFinderData = lib.DebugGetDungeonFinderData
 
 --This function scans the collectibles for their names to provide a list for the new DLCs and chapters
 --Parameters: collectibleStartId number, the start ID of the collectibles to start the scan FROM
@@ -1032,6 +1066,7 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId, n
         d("Please do a /reloadui or logout to update the SavedVariables data now!")
     end
 end
+local debugGetAllCollectibleNames = lib.DebugGetAllCollectibleNames
 
 --This function scans the collectibles for their DLC names to provide a list for the new DLCs and chapters
 --Saves a line with collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
@@ -1077,6 +1112,7 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
         d("Please do a /reloadui or logout to update the SavedVariables data now!")
     end
 end
+local debugGetAllCollectibleDLCNames = lib.DebugGetAllCollectibleDLCNames
 
 --Only show the setIds that were added with the latest "Set itemId scan" via function "LibSets.DebugScanAllSetData()".
 -->The function will compare the setIds of this table with the setIds in the file LibSets_Data_All.lua table lib.setInfo!
@@ -1136,53 +1172,28 @@ function lib.DebugShowNewSetIds()
         end
     end
 end
+local debugShowNewSetIds = lib.DebugShowNewSetIds
 
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames(noReloadInfo)
     noReloadInfo = noReloadInfo or false
     --lib.DebugGetAllCollectibleNames(nil, nil, noReloadInfo)
     d(">>>--------------->>>")
-    lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
+    debugGetAllCollectibleDLCNames(noReloadInfo)
     d(">>>--------------->>>")
-    lib.DebugGetAllMapNames(noReloadInfo)
+    debugGetAllMapNames(noReloadInfo)
     d(">>>--------------->>>")
-    lib.DebugGetAllWayshrineNames(noReloadInfo)
+    debugGetAllWayshrineNames(noReloadInfo)
     d(">>>--------------->>>")
-    lib.DebugGetAllZoneInfo(noReloadInfo)
+    debugGetAllZoneInfo(noReloadInfo)
     d(">>>--------------->>>")
     -->Attention, you need to run LibSets.DebugScanAllSetData() first to scan for all setIds and setItemids AND update
     -->the file LibSets_Data.lua, table LibSets.setItemIds, with them first, in order to let this function work properly
     -->and let it scan and get names of all current data! We need at least 1 itemId of the new setIds to build an itemlink
     -->to get the set name!
-    lib.DebugGetAllSetNames(noReloadInfo)
+    debugGetAllSetNames(noReloadInfo)
 end
-
---This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
-function lib.DebugResetSavedVariables(noReloadInfo)
-    noReloadInfo = noReloadInfo or false
-    LoadSavedVariables()
-    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
-    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
-    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
-    --lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
-    --lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
-    lib.svData[LIBSETS_TABLEKEY_SETNAMES] = nil
-    lib.svData[LIBSETS_TABLEKEY_MAPS] = nil
-    lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
-    lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
-    lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
-    lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
-    lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
-    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
-    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
-    d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'.")
-    if noReloadInfo == true then return end
-    d(">Please do a /reloadui or logout to update the SavedVariables data now!")
-end
+local debugGetAllNames = lib.DebugGetAllNames
 
 --Run this once after a new PTS was released to get all the new data scanned to the SV tables.
 --The UI wil autoamtically change the language to the supported languages, once after another, and update the language
@@ -1216,32 +1227,38 @@ function lib.DebugGetAllData(resetApiData)
 
     d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     d("[" .. MAJOR .. "]>>>DebugGetAllData START for API \'" ..  tostring(apiVersion) .. "\' - newRun: " .. tostring(newRun) .. ", resetApiData: " ..tostring(resetApiData))
-    local delay = 0
     if not alreadyFinished then
         if newRun == true then
-            lib.DebugResetSavedVariables(true)
+            debugResetSavedVariables(true)
             d(">>>--------------->>>")
             --This will take some time! Will only be done once per reloadui as it will get the setIds and itemIds of the set
-            lib.DebugScanAllSetData(false, true)
-            delay = summaryAndPostprocessingDelay
+            scanAllSetData(false, true)
             d(">>>--------------->>>")
-            delay = delay + 1000
+        else
+            noFurtherItemsFound = true
         end
-        zo_callLater(function()
+        --Try every 2 seconds: If variable noFurtherItemsFound == true then run teh code below:
+        local noFurtherItemsFoundUpdateName = lib.name .. "_RunIfNoFurtherItemsFound"
+        EM:UnregisterForUpdate(noFurtherItemsFoundUpdateName)
+        local function runIfNoFurtherItemsFound()
+            if not noFurtherItemsFound then return end
+            noFurtherItemsFound = false
+            EM:UnregisterForUpdate(noFurtherItemsFoundUpdateName)
+
             --Update the SavedVariables with the current scanned language
             lib.svData.DebugGetAllData[apiVersion].langDone = lib.svData.DebugGetAllData[apiVersion].langDone or {}
             lib.svData.DebugGetAllData[apiVersion].langDone[clientLang] = os.date("%c")
 
             --Get all client language dependent data now
-            lib.DebugGetAllNames(true)
+            debugGetAllNames(true)
             d(">>>--------------->>>")
 
             if newRun == true then
                 --Will open the dungeonfinder!
-                lib.DebugGetDungeonFinderData(true)
+                debugGetDungeonFinderData(true)
                 d(">>>--------------->>>")
                 --Will open the map and right click until at the current zone map
-                lib.DebugGetAllWayshrineInfo(true)
+                debugGetAllWayshrineInfo(true)
             end
 
             d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tostring(clientLang))
@@ -1277,15 +1294,17 @@ function lib.DebugGetAllData(resetApiData)
                     lib.svData.DebugGetAllData[apiVersion].LastError = errorText
                 end
             else
+                local origClientLang = lib.svData.DebugGetAllData[apiVersion].clientLang
+                origClientLang = origClientLang or "en"
+                d("[" .. MAJOR .. "]DebugGetAllData was finished! Resetting to your original language again: " .. tostring(origClientLang))
                 --All languages were scanned already. Switch back to original client language, or "en" as fallback
                 lib.svData.DebugGetAllData[apiVersion].running = false
                 lib.svData.DebugGetAllData[apiVersion].finished = true
                 lib.svData.DebugGetAllData[apiVersion].DateTimeEnd = os.date("%c")
-                local origClientLang = lib.svData.DebugGetAllData[apiVersion].clientLang
-                origClientLang = origClientLang or "en"
                 SetCVar("language.2", origClientLang) --> Will do a reloadUI and change the client language
             end
-        end, delay)
+        end
+        EM:RegisterForUpdate(noFurtherItemsFoundUpdateName, 2000, runIfNoFurtherItemsFound)
     else
         local errorText = "> APIversion \'".. tostring(apiVersion) .. "\' was scanned and updated already on: " ..tostring(lib.svData.DebugGetAllData[apiVersion].DateTimeEnd)
         lib.svData.DebugGetAllData[apiVersion].LastErrorDateTime = os.date("%c")
