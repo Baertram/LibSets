@@ -75,54 +75,77 @@ in the game which needs to be added to the excel (itemIds are only kept in the l
    ---------------------------------------------------------------------------------------------------------------------------------------------
     Function name (execute with /script in chat)|   Description
    ---------------------------------------------------------------------------------------------------------------------------------------------
+    LibSets.DebugGetAllData(resetCurrentAPI)
+                                                |  Attention: This function will need some time to scan all + realoduis for each supported client language. But it should update all needed
+                                                |              SV tables with 1 function call!
+                                                |
+                                                |   Scans all set itemIds, get's the current client language setName, wayshrine names, wayshrines ids, etc.
+                                                |   It basically does all the debug funcitons below after another! It will reload the UI after the current client language data was
+                                                |   loaded and transfered to the SavedVariables table "DebugGetAllData". Then it will go on with the next supported language which was
+                                                |   not scanned for yet.
+                                                |   Parameter resetCurrentAPI boolean: If set to true it will reset already scanned data for the current APIVersion and rescans it new!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugResetSavedVariables()          |   Reset ALL data in the SavedVariables. Should be run ONCE before new data is scanned!
-
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugScanAllSetData()               |   Get all the set IDs and their item's itemIds saved to the SavedVars key constant LIBSETS_TABLEKEY_SETITEMIDS,
                                                 |   and then compress the itemIds from 1 itemId each to the table LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED, where itemIds
                                                 |   which are "in a range" (e.g. 200020, 200021, 200022, 200023) will be saved as 1 String entry with the starting itemId (e.g. 200020)
                                                 |   and the number of following itemIds (e.g. 3): "200020, 3" -> This can be "decompressed" again via function LibSets.decompressSetIdItemIds(setId)
                                                 |   resulting in the real timeIds 200020, 200020+1=200021, 200020+2=200022 and 200020+3=200023.
                                                 |   The real itemIds are cached in the table LibSets.CachedSetItemIdsTable[setId], once the itemIds of a setId were asked for in a session.
-
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllZoneInfo()               |   Get all the zone info saved to the SavedVars key constant LIBSETS_TABLEKEY_ZONE_DATA
-
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllMapNames()               |   Get all the map names saved to the SavedVars key constant LIBSETS_TABLEKEY_MAPS
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllWayshrineInfo()          |   Get all the wayshrine info saved to the SavedVars key constant LIBSETS_TABLEKEY_WAYSHRINES
                                                 |   --> You need to open a map (zone map, no city or sub-zone maps!) in order to let the function work properly
-
+                                                |   ---> The function will try to do this automatically for you at the current zone, if you have not opened the map for any zone
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllWayshrineNames()         |   Get all the wayshrine names saved to the SavedVars key constant LIBSETS_TABLEKEY_WAYSHRINE_NAMES
                                                     |-> Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetDungeonFinderData()         |   Get all the dungeon ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
                                                 |   --->!!!Attention!!!You MUST open the dungeon finder->go to specific dungeon dropdown entry in order to build the dungeons list needed first!!!
-
+                                                |   ---> The function will try to do this automatically for you
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllCollectibleNames()       |   Get all the collectible ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllSetNames()               |   Get all the set names saved to the SavedVars key constant LIBSETS_TABLEKEY_SETNAMES
                                                 |   ->  You need to scan the setIds BEFORE (language independent!) to scan all setnames properly afterwards.
                                                 |       Use the script /script LibSets.DebugScanAllSetData() to do this.
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllNames()                  |   Run the following functions described above:
                                                 |   LibSets.DebugGetAllCollectibleNames()
                                                 |   LibSets.DebugGetAllMapNames()
                                                 |   LibSets.DebugGetAllSetNames()
                                                 |   LibSets.DebugGetAllWayshrineNames()
                                                 |   LibSets.DebugGetAllZoneInfo()
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.debugBuildMixedSetNames()           |    MIXING NEW SET NAMES INTO THE PRELOADED DATA
                                                 |    Put other language setNames here in the variable called "otherLangSetNames" below a table key representing the language
                                                 |    you want to "mix" into the LibSets_Data_All.lua file's table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]" (e.g. ["jp"]).
                                                 |    For further details please read the function's description and comments in file LibSets_Debug.lua
-
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugShowNewSetIds()                |    Output the new found (scanned and not inside base LibSets data yet, but only the Savedvariables) setIds to the chat.
+-------------------------------------------------------------------------------------------------------------------------------------------------
 
 5) After scanning the data from the game client and updating the SavedVariables file LibSets.lua you got all the data in the following tables now:
 
@@ -284,6 +307,7 @@ if IsLibSetsAlreadyLoaded(false) then return end
 LibSets = LibSets or {}
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
+local apiVersion = GetAPIVersion()
 
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
@@ -2453,6 +2477,27 @@ local function onLibraryLoaded(event, name)
     --The actual API version
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
     lib.currentAPIVersion = lib.APIVersions["live"]
+
+    --Check if any tasks are active via the SavedVariables -> Debug reloadUIs e.g.
+    local goOn = false
+    LoadSavedVariables()
+    if lib.svData and lib.svData.DebugGetAllData and lib.svData.DebugGetAllData[apiVersion] then
+        if lib.svData.DebugGetAllData[apiVersion].running == true and lib.svData.DebugGetAllData[apiVersion].finished == false then
+            --Continue to get all data until it is finished
+d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - language now: " ..tostring(lib.clientLang))
+            lib.DebugGetAllData(false)
+            goOn = false
+        elseif not lib.svData.DebugGetAllData[apiVersion].running or lib.svData.DebugGetAllData[apiVersion].finished == true then
+            goOn = true
+        end
+    else
+        goOn = true
+    end
+    if not goOn then
+        lib.setsScanning = true
+        lib.fullyLoaded = false
+        return
+    end
 
     --Remove future APIversion setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
     lib.removeFutureSetData()

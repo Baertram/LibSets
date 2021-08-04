@@ -73,17 +73,25 @@ lib.APIVersions = APIVersions
 ------------------------------------------------------------------------------------------------------------------------
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds
-lib.debugNumItemIdPackages     = 50        -- Increase this to find new added set itemIds after and update
-lib.debugNumItemIdPackageSize  = 5000      -- do not increase this or the client may crash!
+lib.debugNumItemIdPackages     = 50         -- Increase this to find new added set itemIds after an update. It will be
+                                            --multiplied by lib.debugNumItemIdPackageSize to build the itemIds of the
+                                            --items to scan inagme for sets -> build an itemLink->uses GetItemLinkSetInfo()
+lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the client may crash!
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
-lib.supportedLanguages = {
+local supportedLanguages = {
     ["de"]  = true,
     ["en"]  = true,
     ["fr"]  = true,
     ["ru"]  = true,
     ["jp"]  = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath
 }
+lib.supportedLanguages = supportedLanguages
+local numSupportedLangs = 0
+for _, isSupported in pairs(supportedLanguages) do
+    if isSupported == true then numSupportedLangs = numSupportedLangs + 1 end
+end
+lib.numSupportedLangs = numSupportedLangs
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.
 local noSetIdString = "NoSetId"

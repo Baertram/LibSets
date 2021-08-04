@@ -38,8 +38,7 @@ local possibleDlcIds = {
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[xx] = "DLC_xxx"
-    possibleDlcIds[#possibleDlcIds + 1] = "DLC_WAKING_FLAMES"
-
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_WAKING_FLAME"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -55,6 +54,7 @@ for i = DLC_ITERATION_BEGIN, DLC_ITERATION_END do
 end
 
 --[[
+--Dungeon achievement IDs
 [5473] = "Frostgewölbe",
 [5474] = "Tiefen von Malatar",
 [5107] = "Summerset",
@@ -86,6 +86,7 @@ end
 [6647] = "Unheiliges Grab",
 [254] = "Thieves Guild",
 [4703] = "Gipfel der Schuppenruferin",
+
 ]]
 
 --Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
