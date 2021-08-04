@@ -312,6 +312,12 @@ local apiVersion = GetAPIVersion()
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
+local strgmatch = string.gmatch
+local strlower = string.lower
+--local strlen = string.len
+local tins = table.insert
+local trem = table.remove
+local unp = unpack
 
 ------------Global variables--------------
 --Get counter suffix
@@ -332,6 +338,19 @@ local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 -- 	Local helper functions
 ------------------------------------------------------------------------
 local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
+
+local function toboolean(value)
+    local booleanStrings = {
+        ["true"]    = { [1]=true, ["1"]=true, ["true"]=true },
+        ["false"]   = { [0]=true, ["0"]=true, ["false"]=true },
+    }
+    if booleanStrings["true"][value] then
+        return true
+    elseif booleanStrings["false"][value] then
+        return false
+    end
+    return value
+end
 
 ------------------------------------------------------------------------
 --======= SavedVariables ===============================================================================================
@@ -670,8 +689,8 @@ local function LoadSets()
             lib.setItemCollectionCategory2ZoneId[categoryId] = lib.setItemCollectionCategory2ZoneId[categoryId] or {}
             for _, zoneId in ipairs(category2ZoneData.zoneIds) do
                 lib.setItemCollectionZoneId2Category[zoneId] =  lib.setItemCollectionZoneId2Category[zoneId] or {}
-                table.insert(lib.setItemCollectionZoneId2Category[zoneId], categoryId)
-                table.insert(lib.setItemCollectionCategory2ZoneId[categoryId], zoneId)
+                tins(lib.setItemCollectionZoneId2Category[zoneId], categoryId)
+                tins(lib.setItemCollectionCategory2ZoneId[categoryId], zoneId)
             end
         end
     end
@@ -1727,7 +1746,7 @@ function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     --Get the itemIds of the equipped items in BAG_WORN
     local bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
     for _, data in pairs(bagWornItemCache) do
-        table.insert(equippedItemsIds, data.slotIndex)
+        tins(equippedItemsIds, data.slotIndex)
     end
     if equippedItemsIds and #equippedItemsIds > 0 then
         --Compare equipped item's itemIds with the given non ESO set itemIds
@@ -2097,7 +2116,7 @@ local function getSetProcDataOfIndex(setProcDataOfSetProcCheckTypeTable, dataNam
         local setprocDataOfIndexData = setProcDataOfIndex[dataName]
         if setprocDataOfIndexData then
             for _, data in ipairs(setprocDataOfIndexData) do
-                table.insert(dataReturnTable, data)
+                tins(dataReturnTable, data)
             end
         end
     end
@@ -2455,6 +2474,66 @@ function lib.checkIfSetsAreLoadedProperly()
     return true
 end
 
+
+--SLASH COMMANDS
+local function slash_help()
+    d(">>> [" .. lib.name .. "] |c0000FFSlash command help -|r BEGIN >>>")
+    d("|-> \'DebugGetAllData\'   Scan all set's and itemIds, update the language dependent variables and put them into the SavedVariables.\n|cFF0000Attention:|r |cFFFFFFThe UI will reload several times for the supported languages of the library!|r")
+    d("<<< [" .. lib.name .. "] |c0000FFSlash command help -|r END <<<")
+end
+
+local function command_handler(args)
+    --Parse the arguments string
+    local options = {}
+    --local searchResult = {} --old: searchResult = { string.match(args, "^(%S*)%s*(.-)$") }
+    for param in strgmatch(args, "([^%s]+)%s*") do
+        if (param ~= nil and param ~= "") then
+            local paramBoolOrOther = toboolean(strlower(param))
+
+            options[#options+1] = paramBoolOrOther
+        end
+    end
+
+    --Possible parameters
+    -->help
+    local callHelpParams = {
+        help    = true,
+        hilfe   = true,
+        list    = true,
+        aide    = true,
+    }
+    -->debug functions
+    local callDebugParams = {
+        debuggetalldata = "DebugGetAllData",
+    }
+
+
+    --Help / status
+    local firstParam = options and options[1]
+    if #options == 0 or firstParam == nil or firstParam == "" or callHelpParams[firstParam] == true then
+        slash_help()
+    elseif firstParam ~= nil and firstParam ~= "" then
+        local debugFunc = callDebugParams[firstParam]
+        if debugFunc ~= nil then
+            trem(options, 1)
+            if lib[debugFunc] ~= nil then
+                lib[debugFunc](unp(options))
+            end
+        end
+    end
+end
+
+local function createSlashCommands()
+    SLASH_COMMANDS["/libsets"] = command_handler
+    if SLASH_COMMANDS["/sets"] == nil then
+        SLASH_COMMANDS["/sets"] = command_handler
+    end
+    if SLASH_COMMANDS["/ls"] == nil then
+        SLASH_COMMANDS["/ls"] = command_handler
+    end
+end
+
+
 --Addon loaded function
 local function onLibraryLoaded(event, name)
     --Only load lib if ingame
@@ -2507,6 +2586,9 @@ d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - lang
     --Get the different setTypes from the preloaded "all sets table" setInfo in file LibSets_Data.lua and put them in their
     --own tables of the library, to be used from the LibSets API functions
     LoadSets()
+
+    --Slash commands
+    createSlashCommands()
 
     --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
     --work properly now

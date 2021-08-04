@@ -18,6 +18,9 @@ local decompressSetIdItemIds = lib.DecompressSetIdItemIds
 local buildItemLink = lib.buildItemLink
 
 local unknownName = "n/a"
+
+local tins = table.insert
+
 -------------------------------------------------------------------------------------------------------------------------------
 -- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
 -- e.g. to get the new wayshrines names and zoneNames
@@ -223,7 +226,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
                     end
                 end
                 if doAddAsNew == true then
-                    table.insert(newSetIdsFound, setId)
+                    tins(newSetIdsFound, setId)
                 end
                 if runFuncForEachSetId == true then
                     funcToCallForEachSetId(setId)
@@ -397,18 +400,18 @@ local function compressSetItemIdTable(toMinify)
             numConsecutive=numConsecutive+1
         else
             if numConsecutive>0 then
-                table.insert(minifiedTable,tostring(toMinify[lastPosition])..","..numConsecutive)
+                tins(minifiedTable,tostring(toMinify[lastPosition])..","..numConsecutive)
             else
-                table.insert(minifiedTable,toMinify[lastPosition])
+                tins(minifiedTable,toMinify[lastPosition])
             end
             numConsecutive=0
             lastPosition=i
         end
     end
     if numConsecutive>0 then
-        table.insert(minifiedTable,tostring(toMinify[lastPosition])..","..numConsecutive)
+        tins(minifiedTable,tostring(toMinify[lastPosition])..","..numConsecutive)
     else
-        table.insert(minifiedTable,toMinify[lastPosition])
+        tins(minifiedTable,toMinify[lastPosition])
     end
     table.sort(minifiedTable)
     return minifiedTable
@@ -430,7 +433,7 @@ local function compressSetItemIdsNow(setsDataTable, noReloadInfo)
         --Transfer the setItemIds to an integer key table without gaps
         local helperTabNoGapIndex = {}
         for k, _ in pairs(setItemIdsOfSetId) do
-            table.insert(helperTabNoGapIndex, k)
+            tins(helperTabNoGapIndex, k)
         end
         table.sort(setItemIdsOfSetId)
         lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = {}
@@ -513,7 +516,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                                 end
                                 --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
                                 --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] = setName
-                                table.insert(setIdsTable, setId)
+                                tins(setIdsTable, setId)
                                 setNamesOfLangTable[setId] = setName
                                 setNamesAdded = setNamesAdded +1
                             end
@@ -787,6 +790,7 @@ end
 --The parameter doNotKeepUncompressedetItemIds boolean specifies if the table lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] will be
 --kept after the set itemIds were scanned. The SV file is pretty big because of this table so normally only the compressed
 --itemIds will be kept!
+local summaryAndPostprocessingDelay = 0
 local function scanAllSetData(keepUncompressedetItemIds, noReloadInfo)
     noReloadInfo = noReloadInfo or false
     keepUncompressedetItemIds = keepUncompressedetItemIds or false
@@ -825,38 +829,47 @@ local function scanAllSetData(keepUncompressedetItemIds, noReloadInfo)
     local milliseconds = 0
     local fromTo = {}
     local fromVal = 0
+    local summaryMet = false
+
     noFurtherItemsFound = false
     for numItemIdPackage = 1, numItemIdPackages, 1 do
         --Set the to value to loop counter muliplied with the package size (e.g. 1*500, 2*5000, 3*5000, ...)
         local toVal = numItemIdPackage * numItemIdPackageSize
         --Add the from and to values to the totla itemId check array
-        table.insert(fromTo, {from = fromVal, to = toVal})
+        tins(fromTo, {from = fromVal, to = toVal})
         --For the next loop: Set the from value to the to value + 1 (e.g. 5000+1, 10000+1, ...)
         fromVal = toVal + 1
     end
     --Add itemIds and scan them for set parts!
+    local numPackageLoops = #fromTo
     for packageNr, packageData in pairs(fromTo) do
+        local isLastLoop = (packageNr == numPackageLoops) or false
+
         zo_callLater(function()
             --There were further sets found?
-            if not noFurtherItemsFound then
+            if not summaryMet and not noFurtherItemsFound then
+d(">loadSetsByIds, packageNr: " ..tostring(packageNr))
                 loadSetsByIds(packageNr, packageData.from, packageData.to, noReloadInfo)
-            else
+            end
+            --Last loop or no further setIds were found during the last 5 loops
+            if (noFurtherItemsFound == true or isLastLoop == true) and not summaryMet then
+d(">lastLoop or noFurtherItemsFound!")
+                summaryMet = true
                 --No further sets found. Abort here and show the results now. Decrease the delay again by 1000 for each
                 --missing call in the loop, so that results are shown "now" (+2 seconds)
-                local loopsLeft = #fromTo - packageNr
+                local loopsLeft = numPackageLoops - packageNr
                 if loopsLeft < 0 then loopsLeft = 0 end
-                milliseconds = milliseconds - (loopsLeft * 1000)
-                break --leave the loop
+                summaryAndPostprocessingDelay = summaryAndPostprocessingDelay - (loopsLeft * 1000)
+d(">>#fromTo: " ..tostring(#fromTo) ..", packageNr: " ..tostring(packageNr) .. ", loopsLeft: " ..tostring(loopsLeft) .. ", summaryAndPostprocessingDelay: " ..tostring(summaryAndPostprocessingDelay))
+                showSetCountsScanned(true, keepUncompressedetItemIds, noReloadInfo, "Summary")
             end
         end, milliseconds)
+
         milliseconds = milliseconds + 1000 -- scan item ID packages every 1 second to get not kicked/crash the client!
     end
-    --Were all item IDs scanned? Show the results list now and update the SavedVariables
-    local summaryAndPostprocessingDelay = milliseconds + 2000
-    zo_callLater(function()
-        showSetCountsScanned(true, keepUncompressedetItemIds, noReloadInfo, "Summary")
-    end, summaryAndPostprocessingDelay)
-    return summaryAndPostprocessingDelay
+    --Were all item IDs scanned? Show the results list and update the SavedVariables after 2 seconds ->
+    --Variable summaryAndPostprocessingDelay will be upated via zo_callLater in the loop above
+    summaryAndPostprocessingDelay = milliseconds + 2000
 end
 lib.DebugScanAllSetData = scanAllSetData
 
@@ -902,7 +915,7 @@ local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenT
                 isVeteranDungeon = true
             end
             local dungeonData = data.id .. "|" .. nameClean .. "|" .. data.zoneId .. "|" .. tostring(isVeteranDungeon)
-            table.insert(retTableDungeons, dungeonData)
+            tins(retTableDungeons, dungeonData)
             dungeonsAddedCounter = dungeonsAddedCounter +1
         end
     end
@@ -1188,15 +1201,17 @@ function lib.DebugGetAllData(resetApiData)
     --or is it executed after a reloadui e.g.?
     lib.svData.DebugGetAllData = lib.svData.DebugGetAllData or {}
 
-    if resetApiData == true or not lib.svData.DebugGetAllData[apiVersion] then
+    if resetApiData == true or lib.svData.DebugGetAllData[apiVersion] == nil then
         newRun = true
         lib.svData.DebugGetAllData[apiVersion] = {}
         --Save the original chosen client language
         lib.svData.DebugGetAllData[apiVersion].clientLang = clientLang
         lib.svData.DebugGetAllData[apiVersion].running = true
         lib.svData.DebugGetAllData[apiVersion].DateTimeStart = os.date("%c")
-    else
+    elseif lib.svData.DebugGetAllData[apiVersion] ~= nil and lib.svData.DebugGetAllData[apiVersion].running == true then
         alreadyFinished = (lib.svData.DebugGetAllData[apiVersion].finished == true) or false
+    else
+        return
     end
 
     d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -1207,11 +1222,16 @@ function lib.DebugGetAllData(resetApiData)
             lib.DebugResetSavedVariables(true)
             d(">>>--------------->>>")
             --This will take some time! Will only be done once per reloadui as it will get the setIds and itemIds of the set
-            delay = lib.DebugScanAllSetData(false, true)
+            lib.DebugScanAllSetData(false, true)
+            delay = summaryAndPostprocessingDelay
             d(">>>--------------->>>")
             delay = delay + 1000
         end
         zo_callLater(function()
+            --Update the SavedVariables with the current scanned language
+            lib.svData.DebugGetAllData[apiVersion].langDone = lib.svData.DebugGetAllData[apiVersion].langDone or {}
+            lib.svData.DebugGetAllData[apiVersion].langDone[clientLang] = os.date("%c")
+
             --Get all client language dependent data now
             lib.DebugGetAllNames(true)
             d(">>>--------------->>>")
@@ -1227,12 +1247,8 @@ function lib.DebugGetAllData(resetApiData)
             d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tostring(clientLang))
             d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
-            --Update the SavedVariables with the current scanned language
-            lib.svData.DebugGetAllData[apiVersion].langDone = lib.svData.DebugGetAllData[apiVersion].langDone or {}
-            lib.svData.DebugGetAllData[apiVersion].langDone[clientLang] = true
-            local runData = lib.svData.DebugGetAllData[apiVersion]
-
             --Get the language to scan as next one, if not all were scanned already
+            local runData = lib.svData.DebugGetAllData[apiVersion]
             local numLangsScanned = NonContiguousCount(runData.langDone)
             if numLangsScanned < numSupportedLangs then
                 for langStr, isSupported in pairs(supportedLanguages) do
@@ -1247,6 +1263,8 @@ function lib.DebugGetAllData(resetApiData)
                 if languageToScanNext ~= nil and languageToScanNext ~= "" and supportedLanguages[languageToScanNext] == true then
                     lib.svData.DebugGetAllData[apiVersion].finished = false
                     lib.svData.DebugGetAllData[apiVersion].running = true
+                    lib.svData.DebugGetAllData[apiVersion].LanguageChangeDateTime = os.date("%c")
+                    lib.svData.DebugGetAllData[apiVersion].LanguageChangeTo = languageToScanNext
                     SetCVar("language.2", languageToScanNext) --> Will do a reloadUI and change the client language
                 else
                     local errorText = "<<<[ERROR]Language to scan next \'".. tostring(languageToScanNext) .. "\' is not supported! Aborting now..."

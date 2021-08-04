@@ -6,6 +6,8 @@ if IsLibSetsAlreadyLoaded(false) then return end
 LibSets = LibSets or {}
 local lib = LibSets
 
+local tins = table.insert
+
 ------------------------------------------------------------------------------------------------------------------------
 --> Last updated: API 100034, Flames of Ambition, 2021-01-28, Baertram
 ------------------------------------------------------------------------------------------------------------------------
@@ -1208,7 +1210,7 @@ local mappingForSetItemCollectionsNotYetLive = {
 }
 if isPTSAPIVersionLive == true then
     for _, mappingData in ipairs(mappingForSetItemCollectionsNotYetLive) do
-        table.insert(lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING], mappingData)
+        tins(lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING], mappingData)
     end
 end
 

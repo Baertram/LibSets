@@ -18,6 +18,7 @@ if IsLibSetsAlreadyLoaded(true) then return end
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets
+
 ------------------------------------------------------------------------------------------------------------------------
 lib.name            = MAJOR
 lib.version         = MINOR
