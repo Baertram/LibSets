@@ -75,54 +75,77 @@ in the game which needs to be added to the excel (itemIds are only kept in the l
    ---------------------------------------------------------------------------------------------------------------------------------------------
     Function name (execute with /script in chat)|   Description
    ---------------------------------------------------------------------------------------------------------------------------------------------
+    LibSets.DebugGetAllData(resetCurrentAPI)
+                                                |  Attention: This function will need some time to scan all + realoduis for each supported client language. But it should update all needed
+                                                |              SV tables with 1 function call!
+                                                |
+                                                |   Scans all set itemIds, get's the current client language setName, wayshrine names, wayshrines ids, etc.
+                                                |   It basically does all the debug funcitons below after another! It will reload the UI after the current client language data was
+                                                |   loaded and transfered to the SavedVariables table "DebugGetAllData". Then it will go on with the next supported language which was
+                                                |   not scanned for yet.
+                                                |   Parameter resetCurrentAPI boolean: If set to true it will reset already scanned data for the current APIVersion and rescans it new!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugResetSavedVariables()          |   Reset ALL data in the SavedVariables. Should be run ONCE before new data is scanned!
-
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugScanAllSetData()               |   Get all the set IDs and their item's itemIds saved to the SavedVars key constant LIBSETS_TABLEKEY_SETITEMIDS,
                                                 |   and then compress the itemIds from 1 itemId each to the table LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED, where itemIds
                                                 |   which are "in a range" (e.g. 200020, 200021, 200022, 200023) will be saved as 1 String entry with the starting itemId (e.g. 200020)
                                                 |   and the number of following itemIds (e.g. 3): "200020, 3" -> This can be "decompressed" again via function LibSets.decompressSetIdItemIds(setId)
                                                 |   resulting in the real timeIds 200020, 200020+1=200021, 200020+2=200022 and 200020+3=200023.
                                                 |   The real itemIds are cached in the table LibSets.CachedSetItemIdsTable[setId], once the itemIds of a setId were asked for in a session.
-
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllZoneInfo()               |   Get all the zone info saved to the SavedVars key constant LIBSETS_TABLEKEY_ZONE_DATA
-
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllMapNames()               |   Get all the map names saved to the SavedVars key constant LIBSETS_TABLEKEY_MAPS
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllWayshrineInfo()          |   Get all the wayshrine info saved to the SavedVars key constant LIBSETS_TABLEKEY_WAYSHRINES
                                                 |   --> You need to open a map (zone map, no city or sub-zone maps!) in order to let the function work properly
-
+                                                |   ---> The function will try to do this automatically for you at the current zone, if you have not opened the map for any zone
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllWayshrineNames()         |   Get all the wayshrine names saved to the SavedVars key constant LIBSETS_TABLEKEY_WAYSHRINE_NAMES
                                                     |-> Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetDungeonFinderData()         |   Get all the dungeon ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
                                                 |   --->!!!Attention!!!You MUST open the dungeon finder->go to specific dungeon dropdown entry in order to build the dungeons list needed first!!!
-
+                                                |   ---> The function will try to do this automatically for you
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllCollectibleNames()       |   Get all the collectible ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllSetNames()               |   Get all the set names saved to the SavedVars key constant LIBSETS_TABLEKEY_SETNAMES
                                                 |   ->  You need to scan the setIds BEFORE (language independent!) to scan all setnames properly afterwards.
                                                 |       Use the script /script LibSets.DebugScanAllSetData() to do this.
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugGetAllNames()                  |   Run the following functions described above:
                                                 |   LibSets.DebugGetAllCollectibleNames()
                                                 |   LibSets.DebugGetAllMapNames()
                                                 |   LibSets.DebugGetAllSetNames()
                                                 |   LibSets.DebugGetAllWayshrineNames()
                                                 |   LibSets.DebugGetAllZoneInfo()
-
+                                                |-> This function IS client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.debugBuildMixedSetNames()           |    MIXING NEW SET NAMES INTO THE PRELOADED DATA
                                                 |    Put other language setNames here in the variable called "otherLangSetNames" below a table key representing the language
                                                 |    you want to "mix" into the LibSets_Data_All.lua file's table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]" (e.g. ["jp"]).
                                                 |    For further details please read the function's description and comments in file LibSets_Debug.lua
-
+                                                |-> This function is not client language dependent!
+-------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugShowNewSetIds()                |    Output the new found (scanned and not inside base LibSets data yet, but only the Savedvariables) setIds to the chat.
+-------------------------------------------------------------------------------------------------------------------------------------------------
 
 5) After scanning the data from the game client and updating the SavedVariables file LibSets.lua you got all the data in the following tables now:
 
@@ -284,10 +307,18 @@ if IsLibSetsAlreadyLoaded(false) then return end
 LibSets = LibSets or {}
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
+local apiVersion = GetAPIVersion()
 
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
+local EM = EVENT_MANAGER
+local strgmatch = string.gmatch
+local strlower = string.lower
+--local strlen = string.len
+local tins = table.insert
+local trem = table.remove
+local unp = unpack
 
 ------------Global variables--------------
 --Get counter suffix
@@ -308,6 +339,19 @@ local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 -- 	Local helper functions
 ------------------------------------------------------------------------
 local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
+
+local function toboolean(value)
+    local booleanStrings = {
+        ["true"]    = { [1]=true, ["1"]=true, ["true"]=true },
+        ["false"]   = { [0]=true, ["0"]=true, ["false"]=true },
+    }
+    if booleanStrings["true"][value] then
+        return true
+    elseif booleanStrings["false"][value] then
+        return false
+    end
+    return value
+end
 
 ------------------------------------------------------------------------
 --======= SavedVariables ===============================================================================================
@@ -646,8 +690,8 @@ local function LoadSets()
             lib.setItemCollectionCategory2ZoneId[categoryId] = lib.setItemCollectionCategory2ZoneId[categoryId] or {}
             for _, zoneId in ipairs(category2ZoneData.zoneIds) do
                 lib.setItemCollectionZoneId2Category[zoneId] =  lib.setItemCollectionZoneId2Category[zoneId] or {}
-                table.insert(lib.setItemCollectionZoneId2Category[zoneId], categoryId)
-                table.insert(lib.setItemCollectionCategory2ZoneId[categoryId], zoneId)
+                tins(lib.setItemCollectionZoneId2Category[zoneId], categoryId)
+                tins(lib.setItemCollectionCategory2ZoneId[categoryId], zoneId)
             end
         end
     end
@@ -1703,7 +1747,7 @@ function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     --Get the itemIds of the equipped items in BAG_WORN
     local bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
     for _, data in pairs(bagWornItemCache) do
-        table.insert(equippedItemsIds, data.slotIndex)
+        tins(equippedItemsIds, data.slotIndex)
     end
     if equippedItemsIds and #equippedItemsIds > 0 then
         --Compare equipped item's itemIds with the given non ESO set itemIds
@@ -2073,7 +2117,7 @@ local function getSetProcDataOfIndex(setProcDataOfSetProcCheckTypeTable, dataNam
         local setprocDataOfIndexData = setProcDataOfIndex[dataName]
         if setprocDataOfIndexData then
             for _, data in ipairs(setprocDataOfIndexData) do
-                table.insert(dataReturnTable, data)
+                tins(dataReturnTable, data)
             end
         end
     end
@@ -2431,6 +2475,105 @@ function lib.checkIfSetsAreLoadedProperly()
     return true
 end
 
+
+--SLASH COMMANDS
+local function slash_help()
+    d(">>> [" .. lib.name .. "] |c0000FFSlash command help -|r BEGIN >>>")
+    d("|-> \'resetsv\'              Resets the SavedVariables")
+    d("|-> \'getall\'               Scan all set's and itemIds, maps, zones, wayshrines, dungeons, update the language dependent variables and put them into the SavedVariables.\n|cFF0000Attention:|r |cFFFFFFThe UI will reload several times for the supported languages of the library!|r")
+    d("|-> \'scanitemids\'          Scan all itemIds of sets")
+    d("|-> \'getallnames\'          Get all names (sets, zones, maps, wayshrines, DLCs) of the current client language")
+    d("|-> \'getzones\'             Get all zone data")
+    d("|-> \'getmapnamess\'         Get all map names of the current client language")
+    d("|-> \'getwayshrines\'        Get all wayshrine data of the currently shown zone. If the map is not opened it will be opened")
+    d("|-> \'getwayshrinenames\'    Get all wayshrine names of the current client language")
+    d("|-> \'getsetnames\'          Get all set names of the current client language")
+    d("|-> \'shownewsets\'          Show the new setIds and names of sets which were scanned and found but not transfered to the preoaded data yet. Needs to run \'scanitemids\' first!")
+    d("|-> \'getdungeons\'          Get the dungeon data. If the dungeon's view at the group window is not yet opened it will be opened.")
+    d("|-> \'getcollectiblenames\'  Get the collectible names of all collectibles of the current client language.")
+    d("|-> \'getdlcnames\'          Get the DLC collectible names of the current client language.")
+    d("<<< [" .. lib.name .. "] |c0000FFSlash command help -|r END <<<")
+end
+
+local function command_handler(args)
+    --Parse the arguments string
+    local options = {}
+    --local searchResult = {} --old: searchResult = { string.match(args, "^(%S*)%s*(.-)$") }
+    for param in strgmatch(args, "([^%s]+)%s*") do
+        if (param ~= nil and param ~= "") then
+            local paramBoolOrOther = toboolean(strlower(param))
+
+            options[#options+1] = paramBoolOrOther
+        end
+    end
+
+    --Possible parameters
+    -->help
+    local callHelpParams = {
+        help    = true,
+        hilfe   = true,
+        list    = true,
+        aide    = true,
+    }
+    -->debug functions
+    local callDebugParams = {
+        resetsv             = "DebugResetSavedVariables",
+        scanitemids         = "DebugScanAllSetData",
+
+        getall              = "DebugGetAllData",
+        getallnames         = "DebugGetAllNames",
+
+        getzones            = "DebugGetAllZoneInfo",
+        getmapnamess        = "DebugGetAllMapNames",
+
+        getwayshrines       = "DebugGetAllWayshrineInfo",
+        getwayshrinenames   = "DebugGetAllWayshrineNames",
+
+        getsetnames         = "DebugGetAllSetNames",
+        shownewsets         = "DebugShowNewSetIds",
+
+        getdungeons         = "DebugGetDungeonFinderData",
+        getcollectiblenames = "DebugGetAllCollectibleNames",
+        getdlcnames         = "DebugGetAllCollectibleDLCNames",
+    }
+
+
+    --Help / status
+    local firstParam = options and options[1]
+    if #options == 0 or firstParam == nil or firstParam == "" or callHelpParams[firstParam] == true then
+        slash_help()
+    elseif firstParam ~= nil and firstParam ~= "" then
+        local debugFunc = callDebugParams[firstParam]
+        if debugFunc ~= nil then
+            trem(options, 1)
+            if lib[debugFunc] ~= nil then
+                lib[debugFunc](unp(options))
+            end
+        end
+    end
+end
+
+local function createSlashCommands()
+    SLASH_COMMANDS["/libsets"] = command_handler
+    if SLASH_COMMANDS["/sets"] == nil then
+        SLASH_COMMANDS["/sets"] = command_handler
+    end
+    if SLASH_COMMANDS["/ls"] == nil then
+        SLASH_COMMANDS["/ls"] = command_handler
+    end
+end
+
+
+local function onPlayerActivated(eventId, isFirst)
+    EM:UnregisterForEvent(MAJOR, EVENT_PLAYER_ACTIVATED)
+
+    if lib.debugGetAllDataIsRunning == true then
+        --Continue to get all data until it is finished
+        d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - language now: " ..tostring(lib.clientLang))
+        lib.DebugGetAllData(false)
+    end
+end
+
 --Addon loaded function
 local function onLibraryLoaded(event, name)
     --Only load lib if ingame
@@ -2454,19 +2597,44 @@ local function onLibraryLoaded(event, name)
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
     lib.currentAPIVersion = lib.APIVersions["live"]
 
-    --Remove future APIversion setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
-    lib.removeFutureSetData()
-    --...and then remove this function from the library
-    lib.removeFutureSetData = nil
+    --Check if any tasks are active via the SavedVariables -> Debug reloadUIs e.g.
+    local goOn = false
+    LoadSavedVariables()
 
-    --Get the different setTypes from the preloaded "all sets table" setInfo in file LibSets_Data.lua and put them in their
-    --own tables of the library, to be used from the LibSets API functions
-    LoadSets()
+    --Is the DebugGetAllData function running and reloadUI's are done? -> See EVENT_PLAYER_ACTIVATED then
+    lib.debugGetAllDataIsRunning = false
+    if lib.svData and lib.svData.DebugGetAllData and lib.svData.DebugGetAllData[apiVersion] then
+        if lib.svData.DebugGetAllData[apiVersion].running == true and lib.svData.DebugGetAllData[apiVersion].finished == false then
+            lib.debugGetAllDataIsRunning = true
+            goOn = false
+            EM:RegisterForEvent(MAJOR, EVENT_PLAYER_ACTIVATED, onPlayerActivated)
+        elseif not lib.svData.DebugGetAllData[apiVersion].running or lib.svData.DebugGetAllData[apiVersion].finished == true then
+            goOn = true
+        end
+    else
+        goOn = true
+    end
+    if not goOn then
+        lib.setsScanning = true
+        lib.fullyLoaded = false
+    else
+        --Remove future APIversion setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
+        lib.removeFutureSetData()
+        --...and then remove this function from the library
+        lib.removeFutureSetData = nil
 
-    --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
-    --work properly now
-    lib.fullyLoaded = true
+        --Get the different setTypes from the preloaded "all sets table" setInfo in file LibSets_Data.lua and put them in their
+        --own tables of the library, to be used from the LibSets API functions
+        LoadSets()
+
+        --Slash commands
+        createSlashCommands()
+
+        --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
+        --work properly now
+        lib.fullyLoaded = true
+    end
 end
 
 --Load the addon now
-EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, onLibraryLoaded)
+EM:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, onLibraryLoaded)

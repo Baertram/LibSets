@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.31
+local MAJOR, MINOR = "LibSets", 0.32
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -18,6 +18,7 @@ if IsLibSetsAlreadyLoaded(true) then return end
 --This file contains the constant values needed for the library to work
 LibSets = LibSets or {}
 local lib = LibSets
+
 ------------------------------------------------------------------------------------------------------------------------
 lib.name            = MAJOR
 lib.version         = MINOR
@@ -38,7 +39,7 @@ APIVersions["live"] = GetAPIVersion()
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 100035 --Blackwood (2021-04-21, PTS, API 100035)
+lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-08-04, PTS, API 101031)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -57,7 +58,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 100035 --Blackwood (2021-04-21, PTS, API 
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"] = 100035
+APIVersions["PTS"] = 101031
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -73,17 +74,25 @@ lib.APIVersions = APIVersions
 ------------------------------------------------------------------------------------------------------------------------
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds
-lib.debugNumItemIdPackages     = 50        -- Increase this to find new added set itemIds after and update
-lib.debugNumItemIdPackageSize  = 5000      -- do not increase this or the client may crash!
+lib.debugNumItemIdPackages     = 50         -- Increase this to find new added set itemIds after an update. It will be
+                                            --multiplied by lib.debugNumItemIdPackageSize to build the itemIds of the
+                                            --items to scan inagme for sets -> build an itemLink->uses GetItemLinkSetInfo()
+lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the client may crash!
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
-lib.supportedLanguages = {
+local supportedLanguages = {
     ["de"]  = true,
     ["en"]  = true,
     ["fr"]  = true,
     ["ru"]  = true,
     ["jp"]  = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath
 }
+lib.supportedLanguages = supportedLanguages
+local numSupportedLangs = 0
+for _, isSupported in pairs(supportedLanguages) do
+    if isSupported == true then numSupportedLangs = numSupportedLangs + 1 end
+end
+lib.numSupportedLangs = numSupportedLangs
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.
 local noSetIdString = "NoSetId"
@@ -529,11 +538,12 @@ local possibleDropMechanics = {
     [13] = "LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS",                --Imperial city vaults
     [14] = "LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD",                     --Level up reward
     [15] = "LIBSETS_DROP_MECHANIC_ANTIQUITIES",                         --Antiquities (Mythic set items)
+    [16] = "LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR",                 --Battleground vendor
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
      --LIBSETS_DROP_MECHANIC_ = number
-    --possibleDropMechanics[16] = "LIBSETS_DROP_MECHANIC_..." --new dropmechanic ...
+    --possibleDropMechanics[xx] = "LIBSETS_DROP_MECHANIC_..." --new dropmechanic ...
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dropMechanicId, dropMechanicName in ipairs(possibleDropMechanics) do
@@ -585,7 +595,9 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
-        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG),  --Will be used in other languages via setmetatable below!
+        --Will be used in other languages via setmetatable below!
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
