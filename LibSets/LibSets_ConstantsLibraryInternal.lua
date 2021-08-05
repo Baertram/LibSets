@@ -39,7 +39,7 @@ APIVersions["live"] = GetAPIVersion()
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-07-15, PTS, API 101031)
+lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-08-04, PTS, API 101031)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
