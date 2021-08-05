@@ -704,7 +704,7 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
         --Did the last sets count not increase since 5 scanned packages?
         --Then set the abort flag. itemId numbers seems to be too high then (-> future itemIds)
         if lastSetsCount > 0 and setCount > 0 then
-            if (lastFoundPackageNr > 0 and (packageNr - lastFoundPackageNr) >= 5) then
+            if (lastFoundPackageNr > 0 and (packageNr - lastFoundPackageNr) >= 10) then
                 if lastSetsCount == setCount then
                     noFurtherItemsFound = true
                 end
@@ -1046,7 +1046,7 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId, n
     local collectibleDataScanned
     for i=collectibleStartId, collectibleEndId, 1 do
         local topLevelIndex, categoryIndex = GetCategoryInfoFromAchievementId(i)
-        if categoryIndex ~= COLLECTIBLE_CATEGORY_TYPE_DLC then
+        if categoryIndex ~= COLLECTIBLE_CATEGORY_TYPE_DLC and categoryIndex ~= COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
             local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
             if collectibleName and collectibleName ~= "" then
                 collectibleDataScanned = collectibleDataScanned or {}
@@ -1087,21 +1087,18 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
             collectiblesAdded = collectiblesAdded +1
         end
     end
-    --[[
     --Chapters
     local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
     for collectibleSubCategoryIndex=1, numSubCategories do
         local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex)
         for i=1, numCollectibles do
             local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex, i)
-            --- @return name string, description string, icon textureName, deprecatedLockedIcon textureName, unlocked bool, purchasable bool, isActive bool, categoryType [CollectibleCategoryType|#CollectibleCategoryType], hint string
             local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
             collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
-            dlcNames[collectibleId] = collectibleName
+            dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
             collectiblesAdded = collectiblesAdded +1
         end
     end
-    ]]
     if collectiblesAdded > 0 then
         LoadSavedVariables()
         lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] or {}

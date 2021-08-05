@@ -2479,7 +2479,19 @@ end
 --SLASH COMMANDS
 local function slash_help()
     d(">>> [" .. lib.name .. "] |c0000FFSlash command help -|r BEGIN >>>")
-    d("|-> \'DebugGetAllData\'   Scan all set's and itemIds, update the language dependent variables and put them into the SavedVariables.\n|cFF0000Attention:|r |cFFFFFFThe UI will reload several times for the supported languages of the library!|r")
+    d("|-> \'resetsv\'              Resets the SavedVariables")
+    d("|-> \'getall\'               Scan all set's and itemIds, maps, zones, wayshrines, dungeons, update the language dependent variables and put them into the SavedVariables.\n|cFF0000Attention:|r |cFFFFFFThe UI will reload several times for the supported languages of the library!|r")
+    d("|-> \'scanitemids\'          Scan all itemIds of sets")
+    d("|-> \'getallnames\'          Get all names (sets, zones, maps, wayshrines, DLCs) of the current client language")
+    d("|-> \'getzones\'             Get all zone data")
+    d("|-> \'getmapnamess\'         Get all map names of the current client language")
+    d("|-> \'getwayshrines\'        Get all wayshrine data of the currently shown zone. If the map is not opened it will be opened")
+    d("|-> \'getwayshrinenames\'    Get all wayshrine names of the current client language")
+    d("|-> \'getsetnames\'          Get all set names of the current client language")
+    d("|-> \'shownewsets\'          Show the new setIds and names of sets which were scanned and found but not transfered to the preoaded data yet. Needs to run \'scanitemids\' first!")
+    d("|-> \'getdungeons\'          Get the dungeon data. If the dungeon's view at the group window is not yet opened it will be opened.")
+    d("|-> \'getcollectiblenames\'  Get the collectible names of all collectibles of the current client language.")
+    d("|-> \'getdlcnames\'          Get the DLC collectible names of the current client language.")
     d("<<< [" .. lib.name .. "] |c0000FFSlash command help -|r END <<<")
 end
 
@@ -2505,7 +2517,24 @@ local function command_handler(args)
     }
     -->debug functions
     local callDebugParams = {
-        debuggetalldata = "DebugGetAllData",
+        resetsv             = "DebugResetSavedVariables",
+        scanitemids         = "DebugScanAllSetData",
+
+        getall              = "DebugGetAllData",
+        getallnames         = "DebugGetAllNames",
+
+        getzones            = "DebugGetAllZoneInfo",
+        getmapnamess        = "DebugGetAllMapNames",
+
+        getwayshrines       = "DebugGetAllWayshrineInfo",
+        getwayshrinenames   = "DebugGetAllWayshrineNames",
+
+        getsetnames         = "DebugGetAllSetNames",
+        shownewsets         = "DebugShowNewSetIds",
+
+        getdungeons         = "DebugGetDungeonFinderData",
+        getcollectiblenames = "DebugGetAllCollectibleNames",
+        getdlcnames         = "DebugGetAllCollectibleDLCNames",
     }
 
 
