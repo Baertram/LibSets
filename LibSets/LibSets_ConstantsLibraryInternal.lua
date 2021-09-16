@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.32
+local MAJOR, MINOR = "LibSets", 0.34
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -127,7 +127,9 @@ LIBSETS_TABLEKEY_DROPMECHANIC_NAMES             = LIBSETS_TABLEKEY_DROPMECHANIC 
 LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES     = LIBSETS_TABLEKEY_DROPMECHANIC .. "Tooltip" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_MIXED_SETNAMES                 = "MixedSetNamesForDataAll"
 LIBSETS_TABLEKEY_SET_PROCS                      = "setProcs"
+LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP       = "setProcsAllowedInPvP"
 LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING = "setItemCollectionsZoneMapping"
+
 ------------------------------------------------------------------------------------------------------------------------
 --Set types
 --> If you change these be sure to check the following tables below and add/change/remove entries as well:
@@ -268,7 +270,7 @@ lib.setTypesToName = {
     [LIBSETS_SETTYPE_IMPERIALCITY                        ] = {
         ["de"] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
         ["en"] = "Imperial city",
-        ["fr"] = "Cité impßériale",
+        ["fr"] = "Cité impériale",
         ["jp"] = "帝都",
         ["ru"] = "Имперский город",
     },

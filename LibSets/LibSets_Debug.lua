@@ -1046,13 +1046,11 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId, n
     local collectibleDataScanned
     for i=collectibleStartId, collectibleEndId, 1 do
         local topLevelIndex, categoryIndex = GetCategoryInfoFromAchievementId(i)
-        if categoryIndex ~= COLLECTIBLE_CATEGORY_TYPE_DLC and categoryIndex ~= COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
-            if collectibleName and collectibleName ~= "" then
-                collectibleDataScanned = collectibleDataScanned or {}
-                collectibleDataScanned[i] = tostring(i) .. "|" .. collectibleName
-                collectiblesAdded = collectiblesAdded +1
-            end
+        local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
+        if collectibleName and collectibleName ~= "" then
+            collectibleDataScanned = collectibleDataScanned or {}
+            collectibleDataScanned[i] = tostring(i) .. "|" .. collectibleName
+            collectiblesAdded = collectiblesAdded +1
         end
     end
     if collectiblesAdded > 0 then
@@ -1076,6 +1074,8 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     local collectiblesAdded = 0
     d("[" .. MAJOR .."]Start to load all DLC collectibles")
     --DLCs
+    --[[
+    WRONG as of ZOs_DanBatson because GetCollectibleCategoryInfo needs a opLevelIndex and not a collectible category type id!)
     local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC)
     for collectibleSubCategoryIndex=1, numSubCategories do
         local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex)
@@ -1098,6 +1098,22 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
             dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
             collectiblesAdded = collectiblesAdded +1
         end
+    end
+    ]]
+
+    for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) do
+        local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleIndex)
+        local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
+        collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+        dlcNames[collectibleId] = collectibleId .. "|DLC|" .. collectibleName
+        collectiblesAdded = collectiblesAdded +1
+    end
+    for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) do
+        local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleIndex)
+        local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
+        collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+        dlcNames[collectibleId] = collectibleId .. "|CHAPTER|" .. collectibleName
+        collectiblesAdded = collectiblesAdded +1
     end
     if collectiblesAdded > 0 then
         LoadSavedVariables()

@@ -33,12 +33,12 @@ local possibleDlcIds = {
     [20] = "DLC_MARKARTH",
     [21] = "DLC_FLAMES_OF_AMBITION",
     [22] = "DLC_BLACKWOOD",
+    [23] = "DLC_WAKING_FLAME",
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
-    --possibleDlcIds[xx] = "DLC_xxx"
-    possibleDlcIds[#possibleDlcIds + 1] = "DLC_WAKING_FLAME"
+    --possibleDlcIds[#possibleDlcIds + 1] = "DLC_<name_here>"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -92,68 +92,74 @@ end
 [8659] = "8659|1|Blackwood",
 ]]
 
---Internal achievement example ids of the ESO DLCs and chapters (first achievementId found from each DLC category)
-lib.dlcAndChapterAchievementIds = {
+--Internal collectible example ids of the ESO DLCs and chapters (first collectible found from each DLC category)
+lib.dlcAndChapterCollectibleIds = {
     --Base game
-    [DLC_BASE_GAME] = -1,
+    [DLC_BASE_GAME] = -1,               --OK
     --Imperial city
-    [DLC_IMPERIAL_CITY] = 154,
+    [DLC_IMPERIAL_CITY] = 154,          --OK
     --Orsinium
-    [DLC_ORSINIUM] = 215,
+    [DLC_ORSINIUM] = 215,               --OK
     --Thieves Guild
-    [DLC_THIEVES_GUILD] = 254,
+    [DLC_THIEVES_GUILD] = 254,          --OK
     --Dark Brotherhood
-    [DLC_DARK_BROTHERHOOD] = 306,
+    [DLC_DARK_BROTHERHOOD] = 306,       --OK
     --Shadows of the Hist
-    [DLC_SHADOWS_OF_THE_HIST] = 1520,
+    [DLC_SHADOWS_OF_THE_HIST] = "1796",   --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Morrowind
-    [DLC_MORROWIND] = 593,
+    [DLC_MORROWIND] = 593,              --OK
     --Horns of the Reach
-    [DLC_HORNS_OF_THE_REACH] = 1940,
+    [DLC_HORNS_OF_THE_REACH] = "2098",    --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Clockwork City
-    [DLC_CLOCKWORK_CITY] = 1240,
+    [DLC_CLOCKWORK_CITY] = 1240,        --OK
     --Dragon Bones
-    [DLC_DRAGON_BONES] = 2104,
+    [DLC_DRAGON_BONES] = "2190",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Summerset
-    [DLC_SUMMERSET] = 5107,
+    [DLC_SUMMERSET] = 5107,             --OK
     --Wolfhunter
-    [DLC_WOLFHUNTER] = 2157,
+    [DLC_WOLFHUNTER] = "2311",            --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Murkmire
-    [DLC_MURKMIRE] = 5755,
+    [DLC_MURKMIRE] = 5755,              --OK
     --Wrathstone
-    [DLC_WRATHSTONE] = 2265,
+    [DLC_WRATHSTONE] = "2265",            --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Elsweyr
-    [DLC_ELSWEYR] = 5843,
+    [DLC_ELSWEYR] = 5843,               --OK
     --Scalebreaker
-    [DLC_SCALEBREAKER] = 2413,
+    [DLC_SCALEBREAKER] = "2584",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Dragonhold
-    [DLC_DRAGONHOLD] = 6920,
+    [DLC_DRAGONHOLD] = 6920,            --OK
     --Harrowstorm
-    [DLC_HARROWSTORM] = 2537,
+    [DLC_HARROWSTORM] = "2683",           --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Greymoor
-    [DLC_GREYMOOR] = 7466,
+    [DLC_GREYMOOR] = 7466,              --OK
     --Stonethorn
-    [DLC_STONETHORN] = 2692,
+    [DLC_STONETHORN] = "2827",            --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Markarth
-    [DLC_MARKARTH] = 8388,
+    [DLC_MARKARTH] = 8388,              --OK
     --Flames of Ambition
-    [DLC_FLAMES_OF_AMBITION] = 2829,
+    [DLC_FLAMES_OF_AMBITION] = "2984",    --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Blackwood
-    [DLC_BLACKWOOD] = 8659,
+    [DLC_BLACKWOOD] = 8659,             --OK
+    --Waking Flames
+    [DLC_WAKING_FLAME] = "3093",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
 }
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dlcAndChapterAchievementIds[DLC_XXXX] = xxxx
-    lib.dlcAndChapterAchievementIds[DLC_WAKING_FLAME] = 2439
+    --lib.dlcAndChapterAchievementIds[DLC_<name_here>] = <id of achievement>
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
-local dlcAndChapterAchievementIds = lib.dlcAndChapterAchievementIds
+local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds
 --For each entry in the list of example achievements above get the name of it's parent category (DLC, chapter)
 lib.DLCData = {}
 local DLCandCHAPTERdata = lib.DLCData
 lib.DLCData[DLC_BASE_GAME] = "Elder Scrolls Online"
-for dlcId, dlcAchievementId in ipairs(dlcAndChapterAchievementIds) do
-    if dlcId and dlcAchievementId and dlcAchievementId > 0 then
-        DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(dlcAchievementId)))
+for dlcId, dlcAndChapterCollectibleOrAchievementId in ipairs(dlcAndChapterCollectibleIds) do
+    if dlcId and dlcAndChapterCollectibleOrAchievementId then
+        if type(dlcAndChapterCollectibleOrAchievementId) == "number" then
+            DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetCollectibleInfo(dlcAndChapterCollectibleOrAchievementId))
+        else
+            DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(dlcAndChapterCollectibleOrAchievementId)))
+        end
     end
 end
+
