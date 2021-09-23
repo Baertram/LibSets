@@ -2649,6 +2649,8 @@ local function onLibraryLoaded(event, name)
         lib.fullyLoaded = false
     else
         --Remove future APIversion setsData (ids, itemIds, names, wayshrines, zones, ..) from the PreLoaded data
+        -->But do not do this if the automatic reloadUIs of the debug functions are taking place and data is still collected!
+        -->Else new scanned setItemIds will get the new itemIds removed, and the names of the new setIds cannot be build properly
         lib.removeFutureSetData()
         --...and then remove this function from the library
         lib.removeFutureSetData = nil
