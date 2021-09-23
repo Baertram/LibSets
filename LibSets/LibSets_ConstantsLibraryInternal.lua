@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.32
+local MAJOR, MINOR = "LibSets", 0.35
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -39,7 +39,7 @@ APIVersions["live"] = GetAPIVersion()
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-08-04, PTS, API 101031)
+lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-09-16, PTS, API 101031)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -58,7 +58,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-08-04, PTS, 
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"] = 101031
+APIVersions["PTS"] = 101032 -- The Deadlands, 2021-09-23
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -127,7 +127,9 @@ LIBSETS_TABLEKEY_DROPMECHANIC_NAMES             = LIBSETS_TABLEKEY_DROPMECHANIC 
 LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES     = LIBSETS_TABLEKEY_DROPMECHANIC .. "Tooltip" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_MIXED_SETNAMES                 = "MixedSetNamesForDataAll"
 LIBSETS_TABLEKEY_SET_PROCS                      = "setProcs"
+LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP       = "setProcsAllowedInPvP"
 LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING = "setItemCollectionsZoneMapping"
+
 ------------------------------------------------------------------------------------------------------------------------
 --Set types
 --> If you change these be sure to check the following tables below and add/change/remove entries as well:
@@ -268,7 +270,7 @@ lib.setTypesToName = {
     [LIBSETS_SETTYPE_IMPERIALCITY                        ] = {
         ["de"] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
         ["en"] = "Imperial city",
-        ["fr"] = "Cité impßériale",
+        ["fr"] = "Cité impériale",
         ["jp"] = "帝都",
         ["ru"] = "Имперский город",
     },

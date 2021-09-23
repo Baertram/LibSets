@@ -536,6 +536,9 @@ local function LoadSets()
     local preloadedNonESOsetIdItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
     --The preloaded non ESO setId setNames
     local preloadedNonESOsetIdSetNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+    --The preloaded ESO setId with procs, allowed in PvP/AvA
+    preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP] = {}
+    local preloadedSetsWithProcsAllowedInPvP = preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP]
     --Helper function to check the set type and update the tables in the library
     local function checkSetTypeAndUpdateLibTablesAndCounters(setDataTable)
         --Check the setsData and move entries to appropriate table
@@ -582,6 +585,11 @@ local function LoadSets()
                     if setNames ~= nil then
                         refToSetIdTable[LIBSETS_TABLEKEY_SETNAMES] = setNames
                     end
+                    --Is the setsData containing the entry for "allowed proc set in PvP"?
+                    if setInfo[setId] ~= nil and (setInfo[setId].isProcSetAllowedInPvP ~= nil and
+                        setInfo[setId].isProcSetAllowedInPvP == LIBSETS_SET_ITEMID_TABLE_VALUE_OK) then
+                        preloadedSetsWithProcsAllowedInPvP[setId] = refToSetIdTable
+                    end
                 end
             else
                 --Set does not exist, so remove it from the setInfo table and all other "preloaded" tables as well
@@ -591,6 +599,7 @@ local function LoadSets()
                 preloadedNonESOsetIdItemIds[setId] = nil
                 preloadedSetNames[setId] = nil
                 preloadedNonESOsetIdSetNames[setId] = nil
+                preloadedSetsWithProcsAllowedInPvP[setId] = nil
             end
         end
     end
@@ -2150,6 +2159,27 @@ local function getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKe
     return setProcDataIds
 end
 
+------------------------------------------------------------------------------------------------------------------------
+
+--Returns true if the setId provided got a set proc which is currently allowed within PvP/AvA campaigns
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isSetWithProcAllowedInPvP
+function lib.IsSetWithProcAllowedInPvP(setId)
+    if setId == nil then return end
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    local isSetWithProcAllowedInPvP = ( preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP] ~= nil and preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP][setId] ~= nil ) or false
+    return isSetWithProcAllowedInPvP
+end
+
+--Returns the setsData of all the setIds which are allowed proc sets in PvP/AvA campaigns
+--> Parameters: none
+--> Returns:    nilable:LibSetsAllSetProcDataAllowedInPvP table
+function lib.GetAllSetDataWihtProcAllowedInPvP()
+    if not lib.checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP]
+end
+
+------------------------------------------------------------------------------------------------------------------------
 
 --Returns true if the setId provided got a set proc
 --> Parameters: setId number: The set's setId
@@ -2157,7 +2187,7 @@ end
 function lib.IsSetWithProc(setId)
     if setId == nil then return end
     if not lib.checkIfSetsAreLoadedProperly() then return end
-    local isSetWithProc = ( preloaded[LIBSETS_TABLEKEY_SET_PROCS] and preloaded[LIBSETS_TABLEKEY_SET_PROCS][setId] ) or false
+    local isSetWithProc = ( preloaded[LIBSETS_TABLEKEY_SET_PROCS] ~= nil and preloaded[LIBSETS_TABLEKEY_SET_PROCS][setId] ~= nil ) or false
     return isSetWithProc
 end
 
