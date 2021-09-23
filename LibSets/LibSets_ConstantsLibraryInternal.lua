@@ -33,6 +33,7 @@ lib.startedLoading  = true
 local APIVersions = {}
 --The actual API version on the live server we are logged in
 APIVersions["live"] = GetAPIVersion()
+local APIVersionLive = tonumber(APIVersions["live"])
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -59,14 +60,14 @@ lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-09-16, PTS, 
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
 APIVersions["PTS"] = 101032 -- The Deadlands, 2021-09-23
+local APIVersionPTS  = tonumber(APIVersions["PTS"])
+
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 --Check if the PTS APIVersion is now live
 local function checkIfPTSAPIVersionIsLive()
-    local APIVersionLive = tonumber(APIVersions["live"])
-    local APIVersionPTS  = tonumber(APIVersions["PTS"])
     return (APIVersionLive >= APIVersionPTS) or false
 end
 lib.checkIfPTSAPIVersionIsLive = checkIfPTSAPIVersionIsLive
