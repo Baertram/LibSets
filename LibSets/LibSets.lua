@@ -1376,7 +1376,7 @@ end
 --Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
 --The key is the itemId and the value is the boolean value true
 --> Parameters: setId number: The set's setId
--->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
+-->             isNoESOSetId boolean: true = Read the set's itemIds from the special sets table, false = read the normal reloaded itemIds?
 --> Returns:    table setItemIds = {[setItemId1]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,[setItemId2]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK, ...}
 function lib.GetSetItemIds(setId, isNoESOSetId)
     if setId == nil then return end
