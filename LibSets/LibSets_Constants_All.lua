@@ -39,6 +39,7 @@ local possibleDlcIds = {
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_<name_here>"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_DEADLANDS"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -76,6 +77,7 @@ end
 [8217] = "8217|2|The Cauldron",
 [9375] = "9375|2|The Dread Cellar",
 [9374] = "9374|2|Red Petal Bastion",
+
 --DLCs (missing some)
 [154] = "154|3|Imperial City",
 [215] = "215|3|Orsinium",
@@ -90,6 +92,7 @@ end
 [7466] = "7466|3|Greymoor",
 [8388] = "8388|3|Markarth",
 [8659] = "8659|1|Blackwood",
+[9365] = "9365|DLC|The Deadlands",
 ]]
 
 --Internal collectible example ids of the ESO DLCs and chapters (first collectible found from each DLC category)
@@ -145,6 +148,7 @@ lib.dlcAndChapterCollectibleIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterAchievementIds[DLC_<name_here>] = <id of achievement>
+    lib.dlcAndChapterCollectibleIds[DLC_DEADLANDS] = 9365
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters

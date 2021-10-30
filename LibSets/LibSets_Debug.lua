@@ -87,18 +87,18 @@ local function GetWayshrineInfo()
     local errorMapNavigateText = " Please open the map and navigate to a zone map first before running this function!"
     local wayshrines = {}
     local currentMapIndex = GetCurrentMapIndex()
-    if currentMapIndex == nil then d("<-Error: map index missing." .. errorMapNavigateText) return end
+    if currentMapIndex == nil then d("<-Error: map index missing." .. errorMapNavigateText) end
     local currentMapId = GetCurrentMapId()
     if currentMapId == nil then d("<-Error: map id missing." .. errorMapNavigateText) return end
     local currentMapsZoneIndex = GetCurrentMapZoneIndex()
     if currentMapsZoneIndex == nil then d("<-Error: map zone index missing." .. errorMapNavigateText) return end
     local currentZoneId = GetZoneId(currentMapsZoneIndex)
     if currentZoneId == nil then d("<-Error: map zone id missing." .. errorMapNavigateText) return end
-    local currentMapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(currentMapIndex))
+    local currentMapName = ZO_CachedStrFormat("<<C:1>>", currentMapIndex and GetMapNameByIndex(currentMapIndex) or GetMapNameById(currentMapId))
     local currentZoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameByIndex(currentMapsZoneIndex))
-    --d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
-    --        ", mapName: " .. tostring(currentMapName) .. ", mapZoneIndex: " ..tostring(currentMapsZoneIndex) .. ", zoneId: " .. tostring(currentZoneId) ..
-    --        ", zoneName: " ..tostring(currentZoneName))
+    d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
+            ", mapName: " .. tostring(currentMapName) .. ", mapZoneIndex: " ..tostring(currentMapsZoneIndex) .. ", zoneId: " .. tostring(currentZoneId) ..
+            ", zoneName: " ..tostring(currentZoneName))
     for i=1, GetNumFastTravelNodes(), 1 do
         local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = GetFastTravelNodeInfo(i)
         if wsisShownInCurrentMap then
@@ -112,6 +112,7 @@ local function GetWayshrineInfo()
     end
     return wayshrines
 end
+LibSets.DebugGetWayshrineInfo = GetWayshrineInfo
 
 local function GetWayshrineNames()
     d(debugOutputStartLine.."[".. MAJOR .. " v" .. tostring(MINOR).."]GetWayshrineNames, language: " ..tostring(clientLang))
@@ -1129,12 +1130,13 @@ local debugGetAllCollectibleDLCNames = lib.DebugGetAllCollectibleDLCNames
 
 --Only show the setIds that were added with the latest "Set itemId scan" via function "LibSets.DebugScanAllSetData()".
 -->The function will compare the setIds of this table with the setIds in the file LibSets_Data_All.lua table lib.setInfo!
---->If there are no new setIds you either did NOT use this function before, did a reloadui, copied the comtents from the
+--->If there are no new setIds you either did NOT use this function before, did a reloadui, copied the contents from the
 --->SavedVariables table to the lua minifier AND have transfered the scanned itemIds to the file LibSets_Data_All.lua
 --->table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS].
 --->Or there are no new setIds since the last time you updated this table.
-function lib.DebugShowNewSetIds()
-    d("[" .. MAJOR .."]DebugShowNewSetIds - Checking for new setIds...")
+function lib.DebugShowNewSetIds(noChatOutput)
+    noChatOutput = noChatOutput or false
+    if not noChatOutput then d("[" .. MAJOR .."]DebugShowNewSetIds - Checking for new setIds...") end
 
     --Is the local table still filled? Else: Fill it up again, either from SavedVariables of the current server and API version,
     --or by comparing setItemIds etc.
@@ -1144,13 +1146,13 @@ function lib.DebugShowNewSetIds()
     --Output the new sets data (id and name)
     local newSetsFound = (newSetIdsFound and #newSetIdsFound) or 0
     if newSetsFound > 0 then
-        d(">Found " .. tostring(newSetsFound) .. " new setIds!")
+        if not noChatOutput then d(">Found " .. tostring(newSetsFound) .. " new setIds!") end
         for idx, newSetId in ipairs(newSetIdsFound) do
             local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] and
-                                (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId]["en"]))
+                    (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId]["en"]))
             newSetName = newSetName or getNewSetName(newSetId)
             newSetName = ZO_CachedStrFormat("<<C:1>>", newSetName)
-            d(string.format(">>New setId found: %s -> name: %s", tostring(newSetId), tostring(newSetName)))
+            if not noChatOutput then d(string.format(">>New setId found: %s -> name: %s", tostring(newSetId), tostring(newSetName))) end
             if newSetName and newSetName ~= unknownName then
                 tempSetNamesOfClientLang = tempSetNamesOfClientLang or {}
                 tempSetNamesOfClientLang[newSetId] = newSetName
@@ -1160,6 +1162,7 @@ function lib.DebugShowNewSetIds()
         end
     end
     if newSetsFound == 0 then
+        if not noChatOutput then return end
         d("<No new setIds were found!\nDid you run function \'LibSets.DebugScanAllSetData()\' already?")
         d("Please read the function's description text in file \'LibSets_Debug.lua\' to be able to update the internal needed tables \'LibSets.setDataPreloaded[\'setItemIds\'] properly, before you try to search for new setIds!")
     else
@@ -1244,7 +1247,7 @@ function lib.DebugGetAllData(resetApiData)
         if newRun == true then
             debugResetSavedVariables(true)
             d(">>>--------------->>>")
-            --This will take some time! Will only be done once per reloadui as it will get the setIds and itemIds of the set
+            --This will take some time! Will only be done once per first reloadui as it will get the setIds and itemIds of the sets
             scanAllSetData(false, true)
             d(">>>--------------->>>")
         else
@@ -1263,6 +1266,7 @@ function lib.DebugGetAllData(resetApiData)
             lib.svData.DebugGetAllData[apiVersion].langDone[clientLang] = os.date("%c")
 
             --Get all client language dependent data now
+            debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
             debugGetAllNames(true)
             d(">>>--------------->>>")
 
