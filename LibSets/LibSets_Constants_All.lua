@@ -148,7 +148,7 @@ lib.dlcAndChapterCollectibleIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterAchievementIds[DLC_<name_here>] = <id of achievement>
-    lib.dlcAndChapterAchievementIds[DLC_DEADLANDS] = 9365
+    lib.dlcAndChapterCollectibleIds[DLC_DEADLANDS] = 9365
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
