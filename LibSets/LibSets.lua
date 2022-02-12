@@ -1346,59 +1346,6 @@ function lib.GetAllSetTypes()
     return lib.allowedSetTypes
 end
 
---Returns the dropMechanicIDs of the setId!
---> Parameters: setId number:           The set's setId
--->             withNames bolean:       Should the function return the dropMechanic names as well?
---> Returns:    LibSetsDropMechanicIds  table, LibSetsDropMechanicNamesForEachId table, LibSetsDropMechanicTooltipForEachId table
----> table LibSetsDropMechanicIds: The key is a number starting at 1 and increasing by 1, and the value is one of the dropMechanics
----> of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
----> table LibSetsDropMechanicNamesForEachId: The key is the dropMechanicId (value of each line in table LibSetsDropMechanicIds)
----> and the value is a subtable containing each language as key and the localized String as the value.
----> table LibSetsDropMechanicTooltipForEachId: The key is the dropMechanicId (value of each line in table LibSetsDropMechanicIds)
----> and the value is a subtable containing each language as key and the localized String as the value.
-function lib.GetDropMechanic(setId, withNames)
-    if setId == nil then return nil, nil end
-    if not checkIfSetsAreLoadedProperly() then return nil, nil end
-    withNames = withNames or false
-    local setData = setInfo[setId]
-    if setData == nil then
-        if isNoESOSet(setId) then
-            setData = noSetIdSets[setId]
-        else
-            return
-        end
-    end
-    if setData == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC] == nil then return nil, nil end
-    local dropMechanicIds = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
-    local dropMechanicNames
-    local dropMechanicTooltips
-    if withNames then
-        if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES][fallbackLang] ~= nil then
-            dropMechanicNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
-            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES][fallbackLang] ~= nil then
-                dropMechanicTooltips =  setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES]
-            end
-        else
-            dropMechanicNames = {}
-            dropMechanicTooltips = {}
-            if supportedLanguages then
-                for _, dropMechanicEntry in ipairs(dropMechanicIds) do
-                    for supportedLanguage, isSupported in pairs(supportedLanguages) do
-                        dropMechanicNames[dropMechanicEntry] = dropMechanicNames[dropMechanicEntry] or {}
-                        dropMechanicTooltips[dropMechanicEntry] = dropMechanicTooltips[dropMechanicEntry] or {}
-                        if isSupported then
-                            local dropMechanicName, dropMechanicTooltip = lib.GetDropMechanicName(dropMechanicEntry, supportedLanguage)
-                            dropMechanicNames[dropMechanicEntry][supportedLanguage] = dropMechanicName
-                            dropMechanicTooltips[dropMechanicEntry][supportedLanguage] = dropMechanicTooltip
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return dropMechanicIds, dropMechanicNames, dropMechanicTooltips
-end
-
 --Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)
 --> Parameters: dropMechanicId number: The LibSetsDropMechanidIc (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 -->             lang String: The 2char language String for the used translation. If left empty the current client's
@@ -1419,6 +1366,60 @@ function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     return dropMechanicName, dropMechanicTooltip
 end
 local getDropMechanicName = lib.GetDropMechanicName
+
+--Returns the dropMechanicIDs of the setId!
+--> Parameters: setId number:           The set's setId
+-->             withNames bolean:       Should the function return the dropMechanic names as well?
+--> Returns:    LibSetsDropMechanicIds  table, LibSetsDropMechanicNamesForEachId table, LibSetsDropMechanicTooltipForEachId table
+---> table LibSetsDropMechanicIds: The key is a number starting at 1 and increasing by 1, and the value is one of the dropMechanics
+--->   of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
+---> table LibSetsDropMechanicNamesForEachId: The key is the dropMechanicId (value of each line in table LibSetsDropMechanicIds)
+--->   and the value is a subtable containing each language as key and the localized String as the value.
+--->   table LibSetsDropMechanicTooltipForEachId: The key is the dropMechanicId (value of each line in table LibSetsDropMechanicIds)
+--->   and the value is a subtable containing each language as key and the localized String as the value.
+function lib.GetDropMechanic(setId, withNames)
+    if setId == nil then return nil, nil end
+    if not checkIfSetsAreLoadedProperly() then return nil, nil end
+    withNames = withNames or false
+    local setData = setInfo[setId]
+    if setData == nil then
+        if isNoESOSet(setId) then
+            setData = noSetIdSets[setId]
+        else
+            return
+        end
+    end
+    if setData == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC] == nil then return nil, nil end
+    local dropMechanicIds = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
+    local dropMechanicNames
+    local dropMechanicTooltips
+    if withNames then
+        if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES][fallbackLang] ~= nil then
+            dropMechanicNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
+            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES][fallbackLang] ~= nil then
+                dropMechanicTooltips = setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES]
+            end
+        else
+            dropMechanicNames = {}
+            dropMechanicTooltips = {}
+            if supportedLanguages then
+                for _, dropMechanicEntry in ipairs(dropMechanicIds) do
+                    for supportedLanguage, isSupported in pairs(supportedLanguages) do
+                        dropMechanicNames[dropMechanicEntry] = dropMechanicNames[dropMechanicEntry] or {}
+                        dropMechanicTooltips[dropMechanicEntry] = dropMechanicTooltips[dropMechanicEntry] or {}
+                        if isSupported then
+                            local dropMechanicName, dropMechanicTooltip = getDropMechanicName(dropMechanicEntry, supportedLanguage)
+                            dropMechanicNames[dropMechanicEntry][supportedLanguage] = dropMechanicName
+                            dropMechanicTooltips[dropMechanicEntry][supportedLanguage] = dropMechanicTooltip
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return dropMechanicIds, dropMechanicNames, dropMechanicTooltips
+end
+
 
 --Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 function lib.GetAllDropMechanics()
@@ -1731,13 +1732,15 @@ function lib.GetSetInfo(setId, noItemIds, lang)
                             end
                             if dropMechanicMonsterNames[langToUse] ~= nil then
                                 dropMechanicNamesTable = dropMechanicNamesTable or {}
-                                dropMechanicNamesTable[langToUse] = dropMechanicMonsterNames[langToUse]
+                                dropMechanicNamesTable[dropMechanic] = dropMechanicNamesTable[dropMechanic] or {}
+                                dropMechanicNamesTable[dropMechanic][langToUse] = dropMechanicMonsterNames[langToUse]
                             end
                         end
                     else
                         --All languages
                         dropMechanicNamesTable = dropMechanicNamesTable or {}
-                        dropMechanicNamesTable = dropMechanicMonsterNames
+                        dropMechanicNamesTable[dropMechanic] = {}
+                        dropMechanicNamesTable[dropMechanic] = dropMechanicMonsterNames
                     end
                 end
             end

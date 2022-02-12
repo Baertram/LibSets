@@ -295,23 +295,17 @@ local function buildSetNeededTraitsInfo(setData)
     return neededTraitsStrWithPlaceholder .. traitsNeeded
 end
 
-local droppedByStrWithPlaceholder
-local function buildSetDropBossInfo(setData)
-    droppedByStr = droppedByStr or localization.droppedBy
-    droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
-
-    local droppedByName = " Example bossname"
-
-    return droppedByStrWithPlaceholder .. droppedByName
-end
-
 local dropMechanicStrWithPlaceholder
-local function buildSetDropMechanicInfo(setData)
+local droppedByStrWithPlaceholder
+local function buildSetDropMechanicAndBossInfo(setData)
     local dropMechanicTab = setData.dropMechanic
     if not dropMechanicTab then return end
 
     local dropMechanicNamesStr
+    local bossNamesStr
+    local dropMechanicAndBossStr
     local dropMechanicNames = {}
+    local bossNames = {}
     local dropMechanicNamesOfSet = setData.dropMechanicNames
     if not dropMechanicNamesOfSet then return end
 
@@ -320,16 +314,45 @@ local function buildSetDropMechanicInfo(setData)
         if dropMechanicId ~= -1 and not alreadyAddedDropMechanics[dropMechanicId] then
             local dropMechanicName = dropMechanicNamesData[clientLang]
             if dropMechanicName and dropMechanicName ~= "" then
-                tins(dropMechanicNames, dropMechanicName)
-                alreadyAddedDropMechanics[dropMechanicId] = true
+                if addBossName and dropMechanicId == LIBSETS_DROP_MECHANIC_MONSTER_NAME then
+                    tins(bossNames, dropMechanicName)
+                    alreadyAddedDropMechanics[dropMechanicId] = true
+                elseif addDropMechanic then
+                    tins(dropMechanicNames, dropMechanicName)
+                    alreadyAddedDropMechanics[dropMechanicId] = true
+                end
             end
         end
     end
 
     dropMechanicStr = dropMechanicStr or localization.dropMechanic
-    dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
-    dropMechanicNamesStr = buildTextLinesFromTable(dropMechanicNames, dropMechanicStrWithPlaceholder, false, true)
-    return dropMechanicNamesStr
+    droppedByStr = droppedByStr or localization.droppedBy
+
+    local prefixForDropMechanicAndBoss
+    if addDropMechanic and addBossName then
+        if addDropMechanic and #dropMechanicNames > 0 then
+            prefixForDropMechanicAndBoss = dropMechanicStr
+        end
+        if addBossName and #bossNames > 0 then
+            if prefixForDropMechanicAndBoss and prefixForDropMechanicAndBoss ~= "" then
+                prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..droppedByStr
+            else
+                prefixForDropMechanicAndBoss = droppedByStr
+            end
+        end
+        prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. placeHolder
+        dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, prefixForDropMechanicAndBoss, false, true)
+        dropMechanicAndBossStr = dropMechanicAndBossStr .. buildTextLinesFromTable(bossNames, nil, false, true)
+    else
+        if addDropMechanic then
+            dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
+            dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, dropMechanicStrWithPlaceholder, false, true)
+        elseif addBossName then
+            droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
+            dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, droppedByStrWithPlaceholder, false, true)
+        end
+    end
+    return dropMechanicAndBossStr
 end
 
 local dlcStrWithPlaceholder
@@ -416,8 +439,8 @@ local function addTooltipLine(tooltipControl, setData)
     --  ["dropMechanicNames"] = {
     --      [1] = {
     --        ["en"] = "DropMechanicMonsterNameEN",
-    --          ["de"] = "DropMechanicMonsterNameDE",
-    --          ["fr"] = "DropMechanicMonsterNameFR",
+    --        ["de"] = "DropMechanicMonsterNameDE",
+    --        ["fr"] = "DropMechanicMonsterNameFR",
     --      },
     --      [2] = {
     --        ["en"] = "DropMechanic...NameEN",
@@ -440,19 +463,14 @@ local function addTooltipLine(tooltipControl, setData)
         addSetInfoText(setDLCText)
     end
 
-    if addDropMechanic then
-        local setDropMechanicText = buildSetDropMechanicInfo(setData)
-        addSetInfoText(setDropMechanicText)
-    end
-
     if addDropLocation then
         local setDropLocationsText = buildSetDropLocationInfo(setData)
         addSetInfoText(setDropLocationsText)
     end
 
-    if addBossName then
-        local setDropBossNameText = buildSetDropBossInfo(setData)
-        addSetInfoText(setDropBossNameText)
+    if addDropMechanic or addBossName then
+        local setDropMechanicText = buildSetDropMechanicAndBossInfo(setData)
+        addSetInfoText(setDropMechanicText)
     end
 
     if addNeededTraits then
@@ -461,7 +479,6 @@ local function addTooltipLine(tooltipControl, setData)
             addSetInfoText(setNeededTraitsText)
         end
     end
-
 
     --Output of the tooltip line at the bottom
     if not setInfoText or setInfoText == "" then return end
