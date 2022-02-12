@@ -9,7 +9,7 @@ local lib = LibSets
 local tins = table.insert
 
 ------------------------------------------------------------------------------------------------------------------------
---> Last updated: API 100034, Flames of Ambition, 2021-01-28, Baertram
+--> Last updated: API 101032, Deadlands, 2021-10-29, Baertram
 ------------------------------------------------------------------------------------------------------------------------
 
 --SetIds which are blacklisted (old or non-used anymore)
@@ -46,8 +46,8 @@ local zoneIdsOfNewAPIVersionOnly
 --}
 setsOfNewerAPIVersion = {
     --setIds not yet on live server - BEGIN
-    --- Sets of ApiVersion 101032: The Deadlands
-    610, 611, 612, 613, 614, 615, 625, 626, 627,
+    --- Sets of ApiVersion 101033: Ascending Tides
+    --todo
     --setIds not yet on live server - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion

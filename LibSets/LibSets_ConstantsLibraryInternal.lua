@@ -1,5 +1,8 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.36
+local MAJOR, MINOR = "LibSets", 0.38
+
+--local ZOs variables
+local zocstrfor = ZO_CachedStrFormat
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -23,6 +26,7 @@ local lib = LibSets
 lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
+lib.svDebugName     = "LibSets_SV_DEBUG_Data"
 lib.svVersion       = MINOR -- changing this will reset the SavedVariables!
 lib.setsLoaded      = false
 lib.setsScanning    = false
@@ -40,7 +44,7 @@ local APIVersionLive = tonumber(APIVersions["live"])
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-09-16, PTS, API 101031)
+lib.lastSetsPreloadedCheckAPIVersion = 101032 --Deadlands (2021-10-23, PTS, API 101032)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -59,7 +63,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101031 --Waking Flames (2021-09-16, PTS, 
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"] = 101032 -- The Deadlands, 2021-09-23
+APIVersions["PTS"] = 101033 -- Ascending Tide, 2022-02-12
 local APIVersionPTS  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -256,8 +260,8 @@ lib.setTypesToName = {
     },
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD  ] = {
         ["de"] = "Zufälliges Verlies & Kaiserstadt Belohnung", --SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT & SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR
-        ["en"] = "Random Dungeonds & Imperial city " .. ZO_CachedStrFormat("<<c:1>>", "Reward"),
-        ["fr"] = "Donjons aléatoires & Cité impßériale " .. ZO_CachedStrFormat("<<c:1>>", "Récompense"),
+        ["en"] = "Random Dungeonds & Imperial city " .. zocstrfor("<<c:1>>", "Reward"),
+        ["fr"] = "Donjons aléatoires & Cité impßériale " .. zocstrfor("<<c:1>>", "Récompense"),
         ["jp"] = "デイリー報酬",
         ["ru"] = "Случайное ежедневное подземелье и награда Имперского города",
     },
