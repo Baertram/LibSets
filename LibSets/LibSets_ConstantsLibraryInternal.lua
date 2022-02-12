@@ -586,7 +586,7 @@ end
 local cyrodiilAndBattlegroundText = GetString(SI_CAMPAIGNRULESETTYPE1) .. "/" .. GetString(SI_LEADERBOARDTYPE4)
 lib.dropMechanicIdToName = {
     ["de"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Gerechter Lohn (" .. cyrodiilAndBattlegroundText .. " mail)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Gerechter Lohn (" .. cyrodiilAndBattlegroundText .. " eMail)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil Stadt: Bruma (Quartiermeister)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil Stadt: Erntefurt (Quartiermeister)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil Stadt: Vlastarus (Quartiermeister)",

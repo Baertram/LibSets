@@ -47,18 +47,29 @@ local libSets_GetZoneName =                 lib.GetZoneName
 local libSets_GetSetTypeName =              lib.GetSetTypeName
 local libSets_GetDLCName =                  lib.GetDLCName
 
+--The tooltip game data line after that the LibSets entries should be added
+local tooltipGameDataEntryToAddAfter = TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN
+
 --Add set information like the drop location to the tooltips
 
 --Possible tooltips controls
 --ZO_PopupToolTip
 --ZO_ItemToolTip
---local tooltipCtrls = {
---    PopupTooltip,
---    InformationTooltip,
---    ComparativeTooltip1,
---    ComparativeTooltip2,
---}
+local tooltipCtrls = {
+    ["popup"] =     PopupTooltip,
+    ["info"] =      InformationTooltip,
+    ["item"] =      ItemTooltip,
+    ["compa1"] =    ComparativeTooltip1,
+    ["compa2"] =    ComparativeTooltip2,
+}
+local popupTooltip =        tooltipCtrls["popup"]
+local infoTooltip =         tooltipCtrls["info"]
+local itemTooltip =         tooltipCtrls["item"]
+--local comparativeTooltip1 = tooltipCtrls["compa1"]
+--local comparativeTooltip2 = tooltipCtrls["compa2"]
 
+
+--Other addons
 local masterMerchantCtrlNames = {
     ['MasterMerchantWindowListContents'] = true,
     ['MasterMerchantWindowList'] = true,
@@ -191,7 +202,7 @@ local function getItemLinkFromControl(rowControl)
             end
 
         --Other addons
-        elseif MasterMerchant and rowControl.GetText and string.find(name, "MasterMerchant", 1, true) ~= nil then
+        elseif MasterMerchant and rowControl.GetText and strfind(name, "MasterMerchant", 1, true) ~= nil then
             parentCtrl = parentCtrl or (rowControl.GetParent and rowControl:GetParent())
             local mocGPGP = parentCtrl:GetParent()
             if mocGPGP then
@@ -216,9 +227,9 @@ end
 
 local function getLastItemLink(tooltipControl)
 	local itemLink
-    if tooltipControl == PopupTooltip then
+    if tooltipControl == popupTooltip then
         itemLink = lastTooltipItemLink		-- this gets set on the prehook of PopupTooltip:SetLink
-    elseif tooltipControl == ItemTooltip or tooltipControl == InformationTooltip then
+    elseif tooltipControl == itemTooltip or tooltipControl == infoTooltip then
         itemLink = getMouseoverLink()
         lastTooltipItemLink = itemLink
 	end
@@ -346,10 +357,10 @@ end
 
 local function addTooltipLine(tooltipControl, setData)
     if not setData then return end
-    --local isPopupTooltip = tooltipControl == PopupTooltip or false
-    --local isInformationTooltip = tooltipControl == InformationTooltip or false
-    --local isItemTooltip = tooltipControl == ItemTooltip or false
-    --local isComparativeTooltip = (tooltipControl == ComparativeTooltip1 or tooltipControl == ComparativeTooltip2) or false
+    --local isPopupTooltip = tooltipControl == popupTooltip or false
+    --local isInformationTooltip = tooltipControl == infoTooltip or false
+    --local isItemTooltip = tooltipControl == itemTooltip or false
+    --local isComparativeTooltip = (tooltipControl == comparativeTooltip1 or tooltipControl == comparativeTooltip2) or false
 
     local setInfoText
     local setInfoTextWasCreated = false
@@ -476,8 +487,8 @@ end
 ]]
 
 local function tooltipOnAddGameData(tooltipControl, tooltipData)
-    --Add line below the currently "last" line (mythic or stolen info)
-    if tooltipData == TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN then
+    --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
+    if tooltipData == tooltipGameDataEntryToAddAfter then
         if not tooltipSV then return end
         if not addDropLocation then addDropLocation = tooltipSV.addDropLocation end
         if not addDropMechanic then addDropMechanic = tooltipSV.addDropMechanic end
@@ -523,11 +534,11 @@ local function onPlayerActivatedTooltips()
 
     --hook into the tooltip types?
     if hookTooltips then
-        ZO_PreHookHandler(PopupTooltip, 'OnAddGameData', tooltipOnAddGameData)
-        --ZO_PreHookHandler(PopupTooltip, 'OnHide', tooltipOnHide)
+        ZO_PreHookHandler(popupTooltip, 'OnAddGameData', tooltipOnAddGameData)
+        --ZO_PreHookHandler(popupTooltip, 'OnHide', tooltipOnHide)
 
-        ZO_PreHookHandler(ItemTooltip, 'OnAddGameData', tooltipOnAddGameData)
-        --ZO_PreHookHandler(ItemTooltip, 'OnHide', tooltipOnHide)
+        ZO_PreHookHandler(itemTooltip, 'OnAddGameData', tooltipOnAddGameData)
+        --ZO_PreHookHandler(itemTooltip, 'OnHide', tooltipOnHide)
 
         ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink) lastTooltipItemLink = itemLink end)
     end
