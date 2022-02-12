@@ -7,7 +7,20 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.versio
 
 local libPrefix = "["..MAJOR.."]"
+local placeHolder = ": "
 
+local clientLang = lib.clientLang
+local localization         =    lib.localization[clientLang]
+local dropLocationZonesStr =    localization.dropZones
+local dlcStr =                  localization.dlc
+local droppedByStr =            localization.droppedBy
+local setTypeStr =              localization.setType
+local neededTraitsStr =         localization.neededTraits
+local dropMechanicStr =         localization.dropMechanic
+local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
+
+
+--local ZOs variables
 local EM = EVENT_MANAGER
 
 local tos = tostring
@@ -26,9 +39,13 @@ local zocstrfor = ZO_CachedStrFormat
 
 local gilsetinf = GetItemLinkSetInfo
 
-local libSets_GetSetInfo = lib.GetSetInfo
-local libSets_GetZoneName = lib.GetZoneName
-local libSets_GetDropMechanic = lib.GetDropMechanic
+
+--local library variables
+local libSets_GetSetInfo =                  lib.GetSetInfo
+local libSets_GetZoneName =                 lib.GetZoneName
+--local libSets_GetDropMechanicName =         lib.GetDropMechanicName
+local libSets_GetSetTypeName =              lib.GetSetTypeName
+local libSets_GetDLCName =                  lib.GetDLCName
 
 --Add set information like the drop location to the tooltips
 
@@ -55,10 +72,15 @@ local IIfACtrlNames = {
 --Variables
 local hookTooltips = false
 local tooltipSV
+local addDLC
 local addDropLocation
-local lastTooltipItemLink
+local addDropMechanic
+local addBossName
+local addSetType
+local addNeededTraits
 
-local addTypeDropLocation = "dropLocation"
+
+local lastTooltipItemLink
 
 --Functions
 local function getLibSetsTooltipSavedVariables()
@@ -204,7 +226,8 @@ local function getLastItemLink(tooltipControl)
 end
 
 
-local function buildTextLinesFromTable(tableVar, prefixStr, doSort)
+local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSort)
+    alwaysNewLine = alwaysNewLine or false
     doSort = doSort or false
     local retStrVar
     local numEntries = #tableVar
@@ -213,49 +236,132 @@ local function buildTextLinesFromTable(tableVar, prefixStr, doSort)
         for idx, tableEntryStr in ipairs(tableVar) do
             retStrVar = tableEntryStr
             if idx < numEntries then
-                retStrVar = retStrVar .. "\n"
+                if alwaysNewLine then
+                    retStrVar = retStrVar .. "\n"
+                else
+                    retStrVar = retStrVar .. ", "
+                end
             end
         end
     end
     return (prefixStr ~= nil and prefixStr ~= "" and prefixStr .. retStrVar) or retStrVar
 end
 
+local dropLocationZonesWithPlaceholder
 local function buildSetDropLocationInfo(setData)
     local dropZonesStr
     --Got drop zones of the item?
     local alreadyAddedZoneIds = {}
     local setZonsIds = setData.zoneIds
+    local setType = setData.setType
     local dropZoneNames = {}
     if setZonsIds then
         for _, zoneId in ipairs(setZonsIds) do
             if zoneId ~= -1 and not alreadyAddedZoneIds[zoneId] then
                 local zoneName = libSets_GetZoneName(zoneId)
                 if zoneName == nil then
-                    if setData.setType == LIBSETS_SETTYPE_BATTLEGROUND then
-                        zoneName = GetString(SI_LEADERBOARDTYPE4) --Battleground
+                    if setType == LIBSETS_SETTYPE_BATTLEGROUND then
+                        zoneName = battlegroundStr
                     end
                 end
                 tins(dropZoneNames, zoneName)
                 alreadyAddedZoneIds[zoneId] = true
             end
         end
-        dropZonesStr = buildTextLinesFromTable(dropZoneNames, libPrefix .. "Drop locations:\n", true)
+        dropLocationZonesStr = dropLocationZonesStr or localization.dropZones
+        dropLocationZonesWithPlaceholder = dropLocationZonesWithPlaceholder or dropLocationZonesStr .. placeHolder
+        dropZonesStr = buildTextLinesFromTable(dropZoneNames, dropLocationZonesWithPlaceholder, false, true)
     end
     return dropZonesStr
 end
 
-local function addTooltipLine(tooltipControl, setId, addType)
-    if not setId then return end
-    local isPopupTooltip = tooltipControl == PopupTooltip or false
-    local isInformationTooltip = tooltipControl == InformationTooltip or false
-    local isItemTooltip = tooltipControl == ItemTooltip or false
-    local isComparativeTooltip = (tooltipControl == ComparativeTooltip1 or tooltipControl == ComparativeTooltip2) or false
+local neededTraitsStrWithPlaceholder
+local function buildSetNeededTraitsInfo(setData)
+    local traitsNeeded = tos(setData.traitsNeeded)
+    if not traitsNeeded then return end
+    neededTraitsStr = neededTraitsStr or localization.neededTraits
+    neededTraitsStrWithPlaceholder = neededTraitsStrWithPlaceholder or neededTraitsStr .. placeHolder
+    return neededTraitsStrWithPlaceholder .. traitsNeeded
+end
+
+local droppedByStrWithPlaceholder
+local function buildSetDropBossInfo(setData)
+    droppedByStr = droppedByStr or localization.droppedBy
+    droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
+
+    local droppedByName = " Example bossname"
+
+    return droppedByStrWithPlaceholder .. droppedByName
+end
+
+local dropMechanicStrWithPlaceholder
+local function buildSetDropMechanicInfo(setData)
+    local dropMechanicTab = setData.dropMechanic
+    if not dropMechanicTab then return end
+
+    local dropMechanicNamesStr
+    local alreadyAddedDropMechanics = {}
+    local dropMechanicNames = setData.dropMechanicNames
+    if not dropMechanicNames then return end
+
+    --[[
+    for _, dropMechanicId in ipairs(dropMechanicTab) do
+        if dropMechanicId ~= -1 and not alreadyAddedDropMechanics[dropMechanicId] then
+            local dropMechanicName = libSets_GetDropMechanicName(dropMechanicId)
+            if dropMechanicName and dropMechanicName ~= "" then
+                tins(dropMechanicNames, dropMechanicName)
+                alreadyAddedDropMechanics[dropMechanicId] = true
+            end
+        end
+    end
+    ]]
+
+    dropMechanicStr = dropMechanicStr or localization.dropMechanic
+    dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
+    dropMechanicNamesStr = buildTextLinesFromTable(dropMechanicNames, dropMechanicStrWithPlaceholder, false, true)
+    return dropMechanicNamesStr
+end
+
+local dlcStrWithPlaceholder
+local function buildSetDLCInfo(setData)
+    local DLCid = setData.dlcId
+    if not DLCid then return end
+
+    dlcStr = dlcStr or localization.dlc
+    dlcStrWithPlaceholder = dlcStrWithPlaceholder or dlcStr .. placeHolder
+
+    return dlcStrWithPlaceholder .. libSets_GetDLCName(DLCid)
+end
+
+local setTypeStrWithPlaceholder
+local function buildSetTypeInfo(setData)
+    local setType = setData.setType
+    if not setType then return end
+
+    setTypeStr = setTypeStr or localization.setType
+    setTypeStrWithPlaceholder = setTypeStrWithPlaceholder or setTypeStr .. placeHolder
+
+    return setTypeStrWithPlaceholder .. libSets_GetSetTypeName(setType)
+end
+
+
+local function addTooltipLine(tooltipControl, setData)
+    if not setData then return end
+    --local isPopupTooltip = tooltipControl == PopupTooltip or false
+    --local isInformationTooltip = tooltipControl == InformationTooltip or false
+    --local isItemTooltip = tooltipControl == ItemTooltip or false
+    --local isComparativeTooltip = (tooltipControl == ComparativeTooltip1 or tooltipControl == ComparativeTooltip2) or false
 
     local setInfoText
     local setInfoTextWasCreated = false
+    local function addSetInfoText(textToAdd)
+        if textToAdd ~= nil and textToAdd ~= "" then
+            --Add setInfoText
+            setInfoText = (setInfoTextWasCreated and (setInfoText .. "\n" .. textToAdd)) or textToAdd
+            setInfoTextWasCreated = true
+        end
+    end
 
-    local setData = libSets_GetSetInfo(setId)
-    if not setData then return end
     --Returns the set info as a table
     --> Parameters: setId number: The set's setId
     --> Returns:    table setInfo
@@ -278,9 +384,6 @@ local function addTooltipLine(tooltipControl, setId, addType)
     --- ["setId"] = 408,
     --- ["dlcId"] = 12,    --DLC_MURKMIRE
     --	["setType"] = LIBSETS_SETTYPE_CRAFTED,
-    --	[LIBSETS_TABLEKEY_SETITEMIDS] = {
-    --      table [#0,370]
-    --  },
     --	[LIBSETS_TABLEKEY_SETNAMES] = {
     --		["de"] = "Grabpflocksammler"
     --		["en"] = "Grave-Stake Collector"
@@ -307,17 +410,48 @@ local function addTooltipLine(tooltipControl, setId, addType)
     --  },
     --}
 
-    --Add drop locaiton to tooltip?
-    if addType == addTypeDropLocation then
-        --Get the set's drop location name as string
+    local setType = setData.setType
+
+
+    if addSetType and setType then
+        local setTypeText = buildSetTypeInfo(setData)
+        addSetInfoText(setTypeText)
+    end
+
+    if addDLC then
+        local setDLCText = buildSetDLCInfo(setData)
+        addSetInfoText(setDLCText)
+    end
+
+    if addDropMechanic then
+        local setDropMechanicText = buildSetDropMechanicInfo(setData)
+        addSetInfoText(setDropMechanicText)
+    end
+
+    if addDropLocation then
         local setDropLocationsText = buildSetDropLocationInfo(setData)
-        if setDropLocationsText then
-            --Add setInfoText
-            setInfoText = (setInfoTextWasCreated and setInfoText .. setDropLocationsText) or setDropLocationsText
-            setInfoTextWasCreated = true
+        addSetInfoText(setDropLocationsText)
+    end
+
+    if addBossName then
+        local setDropBossNameText = buildSetDropBossInfo(setData)
+        addSetInfoText(setDropBossNameText)
+    end
+
+    if addNeededTraits then
+        if setType and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED then
+            local setNeededTraitsText = buildSetNeededTraitsInfo(setData)
+            addSetInfoText(setNeededTraitsText)
         end
     end
+
+
+    --Output of the tooltip line at the bottom
     if not setInfoText or setInfoText == "" then return end
+    if tooltipControl.AddVerticalPadding then
+        tooltipControl:AddVerticalPadding(15)
+    end
+    ZO_Tooltip_AddDivider(tooltipControl)
     tooltipControl:AddLine(setInfoText)
 end
 
@@ -336,30 +470,48 @@ end
 ]]
 
 local function tooltipOnAddGameData(tooltipControl, tooltipData)
-    if not tooltipSV then return end
-    if addDropLocation == nil then addDropLocation = tooltipSV.addDropLocation end
+    --Add line below the currently "last" line (mythic or stolen info)
+    if tooltipData == TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN then
+        if not tooltipSV then return end
+        if addDropLocation == nil then addDropLocation = tooltipSV.addDropLocation end
+        if addDropMechanic == nil then addDropMechanic = tooltipSV.addDropMechanic end
+        if addDLC == nil then addDLC = tooltipSV.addDLC end
+        if addBossName == nil then addBossName = tooltipSV.addBossName end
+        if addSetType == nil then addSetType = tooltipSV.addSetType end
+        if addNeededTraits == nil then addNeededTraits = tooltipSV.addNeededTraits end
 
-    if addDropLocation then
-        --Add line below the currently "last" line (mythic or stolen info)
-        if tooltipData == TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN then
-            local isSet, setId = tooltipItemCheck(tooltipControl, tooltipData)
-            if not isSet then return end
-            addTooltipLine(tooltipControl, setId, addTypeDropLocation)
-        end
+        local anyTooltipInfoToAdd = (addDropLocation == true or addDropMechanic == true or addDLC == true
+                                    or addBossName == true or addSetType == true or addNeededTraits == true) or false
+        if not anyTooltipInfoToAdd then return end
+
+        local isSet, setId = tooltipItemCheck(tooltipControl, tooltipData)
+        if not isSet then return end
+        local setData = libSets_GetSetInfo(setId, true) --without itemIds!
+
+        addTooltipLine(tooltipControl, setData)
     end
 end
 
 local function onPlayerActivatedTooltips()
     EM:UnregisterForEvent(MAJOR .. "_Tooltips", EVENT_PLAYER_ACTIVATED) --only load once
+
+    clientLang = clientLang or lib.clientLang
+    localization = localization or lib.localization[clientLang]
+
     --Get the settngs for the tooltips
     tooltipSV = getLibSetsTooltipSavedVariables()
     if not tooltipSV then return end
 
     --add line of set information like chosen in the LAM settings of LibSets
     -->Drop location
-    addDropLocation = tooltipSV.addDropLocation
-    if addDropLocation then
+    addDropLocation =   tooltipSV.addDropLocation
+    addDropMechanic =   tooltipSV.addDropMechanic
+    addDLC =            tooltipSV.addDLC
+    addBossName =       tooltipSV.addBossName
+    addSetType =        tooltipSV.addSetType
+    addNeededTraits =   tooltipSV.addNeededTraits
 
+    if addDropLocation or addDropMechanic or addDLC or addBossName or addSetType or addNeededTraits then
         hookTooltips = true
     end
 

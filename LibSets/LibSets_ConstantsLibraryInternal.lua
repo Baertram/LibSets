@@ -88,6 +88,7 @@ lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the clien
 local supportedLanguages = {
     ["de"]  = true,
     ["en"]  = true,
+    ["es"]  = false, --TODO not yet supported as only on PTS!
     ["fr"]  = true,
     ["ru"]  = true,
     ["jp"]  = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath
@@ -230,86 +231,98 @@ lib.counterSuffix = "Counter"
 --!!! Attention: Change this table if you add/remove LibSets setTyps !!!
 --------------------------------------------------------------------------
 lib.setTypesToName = {
-    [LIBSETS_SETTYPE_ARENA                        ] = {
+    [LIBSETS_SETTYPE_ARENA] = {
         ["de"] = "Arena",
         ["en"] = "Arena",
+        ["es"] = "Arena",
         ["fr"] = "Arène",
         ["jp"] = "アリーナ",
         ["ru"] = "Aрена",
     },
-    [LIBSETS_SETTYPE_BATTLEGROUND                        ] = {
+    [LIBSETS_SETTYPE_BATTLEGROUND] = {
         ["de"] = "Schlachtfeld", --SI_LEADERBOARDTYPE4,
         ["en"] = "Battleground",
+        ["es"] = "Campo de batalla",
         ["fr"] = "Champ de bataille",
         ["jp"] = "バトルグラウンド",
         ["ru"] = "Поле сражений",
     },
-    [LIBSETS_SETTYPE_CRAFTED                        ] = {
+    [LIBSETS_SETTYPE_CRAFTED] = {
         ["de"] = "Handwerklich hergestellt", --SI_ITEM_FORMAT_STR_CRAFTED
         ["en"] = "Crafted",
+        ["es"] = "Hecho a mano",
         ["fr"] = "Fabriqué",
         ["jp"] = "クラフトセット",
         ["ru"] = "Созданный",
     },
-    [LIBSETS_SETTYPE_CYRODIIL                        ] = {
+    [LIBSETS_SETTYPE_CYRODIIL] = {
         ["de"] = "Cyrodiil", --SI_CAMPAIGNRULESETTYPE1,
         ["en"] = "Cyrodiil",
+        ["es"] = "Cyrodiil",
         ["fr"] = "Cyrodiil",
         ["jp"] = "シロディール",
         ["ru"] = "Сиродил",
     },
-    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD  ] = {
+    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = {
         ["de"] = "Zufälliges Verlies & Kaiserstadt Belohnung", --SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT & SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR
-        ["en"] = "Random Dungeonds & Imperial city " .. zocstrfor("<<c:1>>", "Reward"),
+        ["en"] = "Random Dungeons & Imperial city " .. zocstrfor("<<c:1>>", "Reward"),
+        ["es"] = "Mazmorras aleatorias y ciudad imperial " .. zocstrfor("<<c:1>>", "Recompensa"),
         ["fr"] = "Donjons aléatoires & Cité impßériale " .. zocstrfor("<<c:1>>", "Récompense"),
         ["jp"] = "デイリー報酬",
         ["ru"] = "Случайное ежедневное подземелье и награда Имперского города",
     },
-    [LIBSETS_SETTYPE_DUNGEON                        ] = {
+    [LIBSETS_SETTYPE_DUNGEON] = {
         ["de"] = "Verlies", --SI_INSTANCEDISPLAYTYPE2
         ["en"] = "Dungeon",
+        ["es"] = "Calabozo",
         ["fr"] = "Donjon",
         ["jp"] = "ダンジョン",
         ["ru"] = "Подземелье",
     },
-    [LIBSETS_SETTYPE_IMPERIALCITY                        ] = {
+    [LIBSETS_SETTYPE_IMPERIALCITY] = {
         ["de"] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
         ["en"] = "Imperial city",
+        ["es"] = "Ciudad imperial",
         ["fr"] = "Cité impériale",
         ["jp"] = "帝都",
         ["ru"] = "Имперский город",
     },
-    [LIBSETS_SETTYPE_MONSTER                        ] = {
+    [LIBSETS_SETTYPE_MONSTER] = {
         ["de"] = "Monster",
         ["en"] = "Monster",
+        ["es"] = "Monstruo",
         ["fr"] = "Monstre",
         ["jp"] = "モンスター",
         ["ru"] = "Монстр",
     },
-    [LIBSETS_SETTYPE_OVERLAND                        ] = {
+    [LIBSETS_SETTYPE_OVERLAND] = {
         ["de"] = "Überland",
         ["en"] = "Overland",
+        ["es"] = "Por tierra",
         ["fr"] = "Overland",
         ["jp"] = "陸上",
         ["ru"] = "Поверхности",
     },
-    [LIBSETS_SETTYPE_SPECIAL                        ] = {
+    [LIBSETS_SETTYPE_SPECIAL] = {
         ["de"] = "Besonders", --SI_HOTBARCATEGORY9
         ["en"] = "Special",
+        ["es"] = "Especial",
         ["fr"] = "Spécial",
         ["jp"] = "スペシャル",
         ["ru"] = "Специальный",
     },
-    [LIBSETS_SETTYPE_TRIAL                        ] = {
+    [LIBSETS_SETTYPE_TRIAL] = {
         ["de"] = "Prüfungen", --SI_LFGACTIVITY4
-        ["en"] = "Trial",
+        ["en"] = "Ensayo",
+        ["es"] = "Arena",
         ["fr"] = "Épreuves",
         ["jp"] = "試練",
         ["ru"] = "Испытание",
     },
-    [LIBSETS_SETTYPE_MYTHIC                       ] = {
+    [LIBSETS_SETTYPE_MYTHIC] = {
         ["de"] = "Mythisch",
-        ["en"] = "Mythic",
+        ["en"] = "Mítico",
+        ["es"] = "Arena",
         ["fr"] = "Mythique",
         ["jp"] = "神話上の",
         ["ru"] = "мифический",
@@ -581,12 +594,12 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Bosse in Gewölben",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Überland Gruppenbosse",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Öffentliche Dungeon-Bosse",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Truhen",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Überland/Verlies Truhen",
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Belohnung in Schlachtfeldern",
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Tägliches Zufallsverlies Belohnungsemail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Kaiserstadt Bunker",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level Aufstieg Belohnung",
-},
+    },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil City: Bruma (quartermaster)",
@@ -597,7 +610,26 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Overland/Delve chests",
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Battlegounds reward",
+        [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
+        [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
+        --Will be used in other languages via setmetatable below!
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
+    },
+    ["es"] = { --todo
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil City: Bruma (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil City: Cropsford (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil City: Vlastarus (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena stage chest",
+        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster name",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Overland/Delve chests",
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Battlegounds reward",
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
@@ -616,7 +648,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Les boss de petit donjon",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Les boss de zone ouvertes",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Les boss de donjon public",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Les coffres",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Les coffres de zone/donjon ouvertes",
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]             = "Récompense de Champ de bataille",
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Courrier de récompense de donjon journalière",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Cité impériale voûte",
@@ -662,8 +694,16 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Überland Gruppenbosse haben eine Chance von 100%, Kopf, Brust, Beine oder Waffen fallen zu lassen.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Öffentliche Dungeon-Bosse haben die Möglichkeit, eine Schulter, Handschuhe oder eine Waffe fallen zu lassen.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Truhen, die durch das Besiegen eines Dunklen Ankers gewonnen wurden, haben eine Chance von 100%, einen Ring oder ein Amulett fallen zu lassen.\nSchatztruhen, welche man in der Zone findet, haben eine Chance irgendein Setteil zu gewähren, das in dieser Zone droppen kann:\n-Einfache Truhen haben eine geringe Chance\n-Mittlere Truhen haben eine gute Chance\n-Fortgeschrittene- und Meisterhafte-Truhen haben eine garantierte Chance\n-Schatztruhen, die durch eine Schatzkarte gefunden wurden, haben eine garantierte Chance",
-},
+    },
     ["en"] = {
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses have a chance to drop a waist or feet.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests gained from defeating a Dark Anchor have a 100% chance to drop a ring or amulet.\nTreasure chests found in the world have a chance to grant any set piece that can drop in that zone:\n-Simple chests have a slight chance\n-Intermediate chests have a good chance\n-Advanced and Master chests have a guaranteed chance\n-Treasure chests found from a Treasure Map have a guaranteed chance",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
+    },
+    ["es"] = { --todo
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses have a chance to drop a waist or feet.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
@@ -693,6 +733,55 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
     },
 }
+
+--Localized texts
+lib.localization = {
+    ["de"] = {
+        dlc             = "Kapitel/DLC",
+        dropZones       = "Drop Zonen",
+        droppedBy       = "Drop durch",
+        setType         = "Set Art",
+        neededTraits    = "Eigenschaften benötigt (Analyse)",
+        dropMechanic    = "Drop Mechanik",
+    },
+    ["en"] = {
+        dlc             = "Chapter/DLC",
+        dropZones       = "Drop zones",
+        droppedBy       = "Dropped by",
+        setType         = "Set type",
+        neededTraits    = "Traits needed (research)",
+        dropMechanic    = "Drop mechanics",
+    },
+    ["es"] = {
+        dlc             = "Capítulo/DLC",
+        dropZones       = "Zonas de caída",
+        droppedBy       = "Dejado por",
+        setType         = "Tipo de conjunto",
+        dropMechanic    = "Mecanica de caída",
+    },
+    ["fr"] = {
+        dlc             = "Chapitre/DLC",
+        dropZones       = "Zones de largage",
+        droppedBy       = "Dépouillé par",
+        setType         = "Type de set",
+        dropMechanic    = "Mécanique de largage",
+    },
+    ["ru"] = {
+        dlc             = "Глава/DLC",
+        dropZones       = "Зоны сброса",
+        droppedBy       = "Снизился на",
+        setType         = "Тип набора",
+        dropMechanic    = "Механика падения",
+    },
+    ["jp"] = {
+        dlc             = "チャプター/ DLC",
+        dropZones       = "ドロップゾーン",
+        droppedBy       = "によってドロップ",
+        setType         = "セットの種類",
+        dropMechanic    = "ドロップメカニック",
+    },
+}
+
 --DropMechanic translations only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
     --[[
@@ -704,15 +793,27 @@ end
 local dropMechanicNames = lib.dropMechanicIdToName
 local dropMechanicTooltipNames = lib.dropMechanicIdToNameTooltip
 local dropMechanicNamesEn = dropMechanicNames["en"]
+local localization = lib.localization
+local localizationEn = lib.localization["en"]
 setmetatable(dropMechanicNames["de"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicNames["es"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["fr"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["jp"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["ru"], {__index = dropMechanicNamesEn})
 
 setmetatable(dropMechanicTooltipNames["de"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicTooltipNames["es"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicTooltipNames["fr"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicTooltipNames["jp"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicTooltipNames["ru"], {__index = dropMechanicNamesEn})
+
+setmetatable(localization["de"], {__index = localizationEn})
+setmetatable(localization["es"], {__index = localizationEn})
+setmetatable(localization["fr"], {__index = localizationEn})
+setmetatable(localization["jp"], {__index = localizationEn})
+setmetatable(localization["ru"], {__index = localizationEn})
+
+
 ------------------------------------------------------------------------------------------------------------------------
 --Set itemId table value (key is the itemId)
 LIBSETS_SET_ITEMID_TABLE_VALUE_OK    = 1

@@ -43,6 +43,7 @@ local gilet = GetItemLinkEquipType
 local gilit = GetItemLinkItemType
 local isilc = IsItemLinkCrafted
 
+local unknownName = "n/a"
 
 local worldName = GetWorldName()
 local apiVersion = GetAPIVersion()
@@ -53,9 +54,7 @@ local numSupportedLangs = lib.numSupportedLangs
 
 local decompressSetIdItemIds = lib.DecompressSetIdItemIds
 local buildItemLink = lib.buildItemLink
-
-local unknownName = "n/a"
-
+local isSetByItemId = lib.IsSetByItemId
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
@@ -561,7 +560,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
             if setsItemIds then
                 for itemIdToCheck, _ in pairs(setsItemIds) do
                     if not setWasChecked and itemIdToCheck ~= nil then
-                        local isSet, setName, setId = lib.IsSetByItemId(itemIdToCheck)
+                        local isSet, setName, setId = isSetByItemId(itemIdToCheck)
                         if isSet and setId == setIdToCheck then
                             local isNewSet = false
                             for _, setIdNewFound in ipairs(newSetIdsFound) do
