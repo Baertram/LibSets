@@ -1719,7 +1719,12 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
     local isCurrentDLC = (DLC_ITERATION_END and setInfoTable["dlcId"] and setInfoTable["dlcId"] >= DLC_ITERATION_END) or false
     setInfoTable.isCurrentDLC = isCurrentDLC
-    return setInfoTable
+
+    local setInfoTableCopy = ZO_ShallowTableCopy(setInfoTable)
+    if noItemIds then
+        setInfoTableCopy[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+    end
+    return setInfoTableCopy
 end
 
 --Returns the possible armor types's of a set
