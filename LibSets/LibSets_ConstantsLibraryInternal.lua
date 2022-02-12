@@ -85,6 +85,7 @@ lib.debugNumItemIdPackages     = 50         -- Increase this to find new added s
 lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the client may crash!
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
+lib.fallbackLang = "en"
 local supportedLanguages = {
     ["de"]  = true,
     ["en"]  = true,

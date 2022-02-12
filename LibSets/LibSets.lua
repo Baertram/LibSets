@@ -337,6 +337,11 @@ local gznbid = GetZoneNameById
 
 local gilsetinf = GetItemLinkSetInfo
 
+local gilet = GetItemLinkEquipType
+local giltt = GetItemLinkTraitType
+local gildeid = GetItemLinkDefaultEnchantId
+local gesct = GetEnchantSearchCategoryType
+
 
 ------------Global variables--------------
 --Get counter suffix
@@ -355,21 +360,28 @@ local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 
 local libZone
 
+
 --local lib variables
-local supportedLanguages = lib.supportedLanguages
-local undauntedChestIds = lib.undauntedChestIds
+local supportedLanguages =              lib.supportedLanguages
+local undauntedChestIds =               lib.undauntedChestIds
+local allowedDropMechanics =            lib.allowedDropMechanics
+local dropMechanicIdToName =            lib.dropMechanicIdToName
+local dropMechanicIdToNameTooltip =     lib.dropMechanicIdToNameTooltip
+
 
 --local lib functions
 local buildItemLink
 
 
 --The actual clients language
+local fallbackLang = lib.fallbackLang
 local clientLang = GetCVar("language.2")
 clientLang = strlower(clientLang)
 if not supportedLanguages[clientLang] then
-    clientLang = "en" --Fallback language if client language is not supported: English
+    clientLang = fallbackLang --Fallback language if client language is not supported: English
 end
 lib.clientLang = clientLang
+
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -1048,7 +1060,7 @@ function lib.IsVeteranSet(setId, itemLink)
 			local veteranData = setData.veteran
 			if veteranData then
 				if type(veteranData) == "table" then
-					local equipType = GetItemLinkEquipType(itemLink)
+					local equipType = gilet(itemLink)
 					if equipType then
 						for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
 							if equipTypeVeteranCheck == equipType then
@@ -1361,9 +1373,9 @@ function lib.GetDropMechanic(setId, withNames)
     local dropMechanicNames
     local dropMechanicTooltips
     if withNames then
-        if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]["en"] ~= nil then
+        if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES][fallbackLang] ~= nil then
             dropMechanicNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
-            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES]["en"] ~= nil then
+            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES][fallbackLang] ~= nil then
                 dropMechanicTooltips =  setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES]
             end
         else
@@ -1394,13 +1406,12 @@ end
 --> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc, String dropMechanicNameTooltipLocalized: The tooltip of the dropMechanic
 function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return end
-    local allowedDropMechanics = lib.allowedDropMechanics
     if not allowedDropMechanics[libSetsDropMechanicId] then return end
     lang = lang or clientLang
     lang = strlower(lang)
     if not supportedLanguages[lang] then return end
-    local dropMechanicNames = lib.dropMechanicIdToName[lang]
-    local dropMechanicTooltipNames = lib.dropMechanicIdToNameTooltip[lang]
+    local dropMechanicNames = dropMechanicIdToName[lang]
+    local dropMechanicTooltipNames = dropMechanicIdToNameTooltip[lang]
     if dropMechanicNames == nil or dropMechanicTooltipNames == nil then return false end
     local dropMechanicName = dropMechanicNames[libSetsDropMechanicId]
     local dropMechanicTooltip = dropMechanicTooltipNames[libSetsDropMechanicId]
@@ -1411,7 +1422,7 @@ local getDropMechanicName = lib.GetDropMechanicName
 
 --Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 function lib.GetAllDropMechanics()
-    return lib.allowedDropMechanics
+    return allowedDropMechanics
 end
 
 --Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.
@@ -1450,9 +1461,7 @@ function lib.GetSetItemIds(setId, isNoESOSetId)
     if not checkIfSetsAreLoadedProperly() then return end
     local setItemIds
     if isNoESOSetId == true then
-        if preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId] ~= nil then
-            setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId]
-        end
+        setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId]
     else
         setItemIds = decompressSetIdItemIds(setId)
     end
@@ -1508,16 +1517,16 @@ function lib.GetSetItemId(setId, equipType, traitType, enchantSearchCategoryType
                 local isValidItemId = false
 
                 if equipTypeValid == true then
-                    local ilEquipType = GetItemLinkEquipType(itemLink)
+                    local ilEquipType = gilet(itemLink)
                     if ilEquipType ~= nil and ilEquipType == equipType then isValidItemId = true end
                 end
                 if isValidItemId == true and traitTypeValid == true then
-                    local ilTraitType = GetItemLinkTraitType(itemLink)
+                    local ilTraitType = giltt(itemLink)
                     if ilTraitType ~= nil and ilTraitType == traitType then isValidItemId = true end
                 end
                 if isValidItemId == true and enchantSearchCategoryTypeValid == true then
-                    local ilenchantId = GetItemLinkDefaultEnchantId(itemLink)
-                    local ilenchantSearchCategoryType = GetEnchantSearchCategoryType(ilenchantId)
+                    local ilenchantId = gildeid(itemLink)
+                    local ilenchantSearchCategoryType = gesct(ilenchantId)
                     if ilenchantSearchCategoryType ~= nil and ilenchantSearchCategoryType == enchantSearchCategoryType then isValidItemId = true end
                 end
                 if isValidItemId == true then
@@ -1593,7 +1602,7 @@ end
 --Returns the set info as a table
 --> Parameters: setId number: The set's setId,
 -->             noItemIds boolean optional: Set this to true if you do not need the itemIds subtable LIBSETS_TABLEKEY_SETITEMIDS in the return table. Dafault will be false
--->             lang String optional: Specify the language to get language dependent info with. If left nil all supported languages will be returned
+-->             lang String optional: The 2char language String to use for language dependent info. If left nil all supported languages will be returned.
 --> Returns:    table setInfo
 ----> Contains:
 ----> number setId
@@ -1637,9 +1646,16 @@ end
 --      [2] = LIBSETS_DROP_MECHANIC_...,
 --  },
 --  ["dropMechanicNames"] = {
---      ["en"] = "DropMechanicNameEN",
---      ["de"] = "DropMechanicNameDE",
---      ["fr"] = "DropMechanicNameFR",
+--      [1] = {
+--        ["en"] = "DropMechanicMonsterNameEN",
+--          ["de"] = "DropMechanicMonsterNameDE",
+--          ["fr"] = "DropMechanicMonsterNameFR",
+--      },
+--      [2] = {
+--        ["en"] = "DropMechanic...NameEN",
+--        ["de"] = "DropMechanic...NameDE",
+--        ["fr"] = "DropMechanic....NameFR",
+--      },
 --  },
 --}
 function lib.GetSetInfo(setId, noItemIds, lang)
@@ -1648,11 +1664,13 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     noItemIds = noItemIds or false
     local isNonEsoSetId = isNoESOSet(setId)
     local setInfoTable
+    local setInfoTableCopy
     local itemIds
     local setNames
     local onlyOneLanguage = (lang ~= nil and true) or false
     local preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS
     local preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES
+
     if isNonEsoSetId == true then
         setInfoTable = noSetIdSets[setId]
         preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID
@@ -1672,11 +1690,16 @@ function lib.GetSetInfo(setId, noItemIds, lang)
             if dropMechanic ~= LIBSETS_DROP_MECHANIC_MONSTER_NAME then
                 if supportedLanguages then
                     if onlyOneLanguage then
-                        local supportedLanguageData = supportedLanguages[lang]
+                        local langToUse = lang
+                        local supportedLanguageData = supportedLanguages[langToUse]
+                        if not supportedLanguageData and lang ~= fallbackLang then
+                            langToUse = fallbackLang
+                            supportedLanguageData = supportedLanguages[langToUse]
+                        end
                         if supportedLanguageData ~= nil and supportedLanguageData == true then
                             dropMechanicNamesTable = dropMechanicNamesTable or {}
                             dropMechanicNamesTable[dropMechanic] = dropMechanicNamesTable[dropMechanic] or {}
-                            dropMechanicNamesTable[dropMechanic][lang] = getDropMechanicName(dropMechanic, lang)
+                            dropMechanicNamesTable[dropMechanic][langToUse] = getDropMechanicName(dropMechanic, langToUse)
                         end
                     else
                         for supportedLanguage, isSupported in pairs(supportedLanguages) do
@@ -1690,24 +1713,60 @@ function lib.GetSetInfo(setId, noItemIds, lang)
                 end
             else
                 --DropMechanic is a monster's name: So use the specified names from the setInfo's table LIBSETS_TABLEKEY_DROPMECHANIC_NAMES
-                if setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]["en"] ~= nil then
-                    dropMechanicNamesTable = dropMechanicNamesTable or {}
-                    dropMechanicNamesTable[dropMechanic] = setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
+                local dropMechanicMonsterNames = setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
+                if dropMechanicMonsterNames ~= nil then
+                    --First client language or language to use from parameter
+                    if onlyOneLanguage then
+                        local langToUse = lang
+                        local supportedLanguageData = supportedLanguages[langToUse]
+                        if not supportedLanguageData and lang ~= fallbackLang then
+                            langToUse = fallbackLang
+                            supportedLanguageData = supportedLanguages[langToUse]
+                        end
+                        if supportedLanguageData ~= nil and supportedLanguageData == true then
+                            if dropMechanicMonsterNames[langToUse] == nil then
+                                if lang ~= fallbackLang and dropMechanicMonsterNames[fallbackLang] ~= nil then
+                                    langToUse = fallbackLang
+                                end
+                            end
+                            if dropMechanicMonsterNames[langToUse] ~= nil then
+                                dropMechanicNamesTable = dropMechanicNamesTable or {}
+                                dropMechanicNamesTable[langToUse] = dropMechanicMonsterNames[langToUse]
+                            end
+                        end
+                    else
+                        --All languages
+                        dropMechanicNamesTable = dropMechanicNamesTable or {}
+                        dropMechanicNamesTable = dropMechanicMonsterNames
+                    end
                 end
             end
         end
     end
-    setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
+
+    local returnTableRef
+    if onlyOneLanguage or noItemIds then
+        setInfoTableCopy = ZO_ShallowTableCopy(setInfoTable)
+        setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
+        returnTableRef = setInfoTableCopy
+    else
+        setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
+        returnTableRef = setInfoTable
+    end
+
+
     if not noItemIds then
         if isNonEsoSetId == true then
             itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
         else
             itemIds = decompressSetIdItemIds(setId)
         end
-        if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
+        if itemIds then returnTableRef[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
+    else
+        returnTableRef[LIBSETS_TABLEKEY_SETITEMIDS] = nil
     end
     if onlyOneLanguage then
-        local setNameInLang = preloaded[preloadedSetNamesTableKey][setId]
+        local setNameInLang = preloaded[preloadedSetNamesTableKey][setId][lang]
         if setNameInLang ~= nil then
             setNames = {
                 [lang] = setNameInLang
@@ -1716,16 +1775,11 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     else
         setNames = preloaded[preloadedSetNamesTableKey][setId]
     end
-    if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
-    local isCurrentDLC = (DLC_ITERATION_END and setInfoTable["dlcId"] and setInfoTable["dlcId"] >= DLC_ITERATION_END) or false
-    setInfoTable.isCurrentDLC = isCurrentDLC
+    if setNames then returnTableRef[LIBSETS_TABLEKEY_SETNAMES] = setNames end
+    local isCurrentDLC = (DLC_ITERATION_END and returnTableRef["dlcId"] and returnTableRef["dlcId"] >= DLC_ITERATION_END) or false
+    returnTableRef.isCurrentDLC = isCurrentDLC
 
-    if noItemIds then
-        local setInfoTableCopy = ZO_ShallowTableCopy(setInfoTable)
-        setInfoTableCopy[LIBSETS_TABLEKEY_SETITEMIDS] = nil
-        return setInfoTableCopy
-    end
-    return setInfoTable
+    return returnTableRef
 end
 
 --Returns the possible armor types's of a set

@@ -300,21 +300,20 @@ local function buildSetDropMechanicInfo(setData)
     if not dropMechanicTab then return end
 
     local dropMechanicNamesStr
-    local alreadyAddedDropMechanics = {}
-    local dropMechanicNames = setData.dropMechanicNames
-    if not dropMechanicNames then return end
+    local dropMechanicNames = {}
+    local dropMechanicNamesOfSet = setData.dropMechanicNames
+    if not dropMechanicNamesOfSet then return end
 
-    --[[
-    for _, dropMechanicId in ipairs(dropMechanicTab) do
+    local alreadyAddedDropMechanics = {}
+    for dropMechanicId, dropMechanicNamesData in pairs(dropMechanicNamesOfSet) do
         if dropMechanicId ~= -1 and not alreadyAddedDropMechanics[dropMechanicId] then
-            local dropMechanicName = libSets_GetDropMechanicName(dropMechanicId)
+            local dropMechanicName = dropMechanicNamesData[clientLang]
             if dropMechanicName and dropMechanicName ~= "" then
                 tins(dropMechanicNames, dropMechanicName)
                 alreadyAddedDropMechanics[dropMechanicId] = true
             end
         end
     end
-    ]]
 
     dropMechanicStr = dropMechanicStr or localization.dropMechanic
     dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
@@ -404,9 +403,16 @@ local function addTooltipLine(tooltipControl, setData)
     --      [2] = LIBSETS_DROP_MECHANIC_...,
     --  },
     --  ["dropMechanicNames"] = {
-    --      ["en"] = "DropMechanicNameEN",
-    --      ["de"] = "DropMechanicNameDE",
-    --      ["fr"] = "DropMechanicNameFR",
+    --      [1] = {
+    --        ["en"] = "DropMechanicMonsterNameEN",
+    --          ["de"] = "DropMechanicMonsterNameDE",
+    --          ["fr"] = "DropMechanicMonsterNameFR",
+    --      },
+    --      [2] = {
+    --        ["en"] = "DropMechanic...NameEN",
+    --        ["de"] = "DropMechanic...NameDE",
+    --        ["fr"] = "DropMechanic....NameFR",
+    --      },
     --  },
     --}
 
@@ -473,12 +479,12 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
     --Add line below the currently "last" line (mythic or stolen info)
     if tooltipData == TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN then
         if not tooltipSV then return end
-        if addDropLocation == nil then addDropLocation = tooltipSV.addDropLocation end
-        if addDropMechanic == nil then addDropMechanic = tooltipSV.addDropMechanic end
-        if addDLC == nil then addDLC = tooltipSV.addDLC end
-        if addBossName == nil then addBossName = tooltipSV.addBossName end
-        if addSetType == nil then addSetType = tooltipSV.addSetType end
-        if addNeededTraits == nil then addNeededTraits = tooltipSV.addNeededTraits end
+        if not addDropLocation then addDropLocation = tooltipSV.addDropLocation end
+        if not addDropMechanic then addDropMechanic = tooltipSV.addDropMechanic end
+        if not addDLC then addDLC = tooltipSV.addDLC end
+        if not addBossName then addBossName = tooltipSV.addBossName end
+        if not addSetType then addSetType = tooltipSV.addSetType end
+        if not addNeededTraits then addNeededTraits = tooltipSV.addNeededTraits end
 
         local anyTooltipInfoToAdd = (addDropLocation == true or addDropMechanic == true or addDLC == true
                                     or addBossName == true or addSetType == true or addNeededTraits == true) or false
@@ -486,7 +492,7 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
 
         local isSet, setId = tooltipItemCheck(tooltipControl, tooltipData)
         if not isSet then return end
-        local setData = libSets_GetSetInfo(setId, true) --without itemIds!
+        local setData = libSets_GetSetInfo(setId, true, clientLang) --without itemIds, and names only in client laguage
 
         addTooltipLine(tooltipControl, setData)
     end
