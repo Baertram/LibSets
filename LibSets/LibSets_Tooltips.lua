@@ -252,6 +252,7 @@ local function addTooltipLine(tooltipControl, setId, addType)
     local isComparativeTooltip = (tooltipControl == ComparativeTooltip1 or tooltipControl == ComparativeTooltip2) or false
 
     local setInfoText
+    local setInfoTextWasCreated = false
 
     local setData = libSets_GetSetInfo(setId)
     if not setData then return end
@@ -312,7 +313,8 @@ local function addTooltipLine(tooltipControl, setId, addType)
         local setDropLocationsText = buildSetDropLocationInfo(setData)
         if setDropLocationsText then
             --Add setInfoText
-            setInfoText = setInfoText .. setDropLocationsText
+            setInfoText = (setInfoTextWasCreated and setInfoText .. setDropLocationsText) or setDropLocationsText
+            setInfoTextWasCreated = true
         end
     end
     if not setInfoText or setInfoText == "" then return end
