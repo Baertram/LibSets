@@ -304,7 +304,6 @@ LibSets_Data.All, table lib.setDataPreloaded, key LIBSETS_TABLEKEY_SET_PROCS
 --Check if the library was loaded before already w/o chat output
 if IsLibSetsAlreadyLoaded(false) then return end
 
-LibSets = LibSets or {}
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local apiVersion = GetAPIVersion()
@@ -356,6 +355,14 @@ local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 
 local libZone
 
+--The actual clients language
+local clientLang = GetCVar("language.2")
+clientLang = strlower(clientLang)
+if not lib.supportedLanguages[clientLang] then
+    clientLang = "en" --Fallback language if client language is not supported: English
+end
+lib.clientLang = clientLang
+
 ------------------------------------------------------------------------
 -- 	Local helper functions
 ------------------------------------------------------------------------
@@ -386,6 +393,9 @@ local function LoadSavedVariables()
     --For the library settings like tooltips
     local defaults = {
         modifyTooltips = false,
+        tooltipModifications = {
+            addDropLocation = true,
+        },
     }
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, worldName, "$AllAccounts")
@@ -523,7 +533,7 @@ local function checkNoSetIdSet(itemId)
             --Found the itemId in the sepcial sets itemIds table?
             if specialSetsItemIds and specialSetsItemIds[itemId] then
                 isSet = true
-                setName = noESOsetIdSetNames[noESOSetId][lib.clientLang] or ""
+                setName = noESOsetIdSetNames[noESOSetId][clientLang] or ""
                 numBonuses = specialSetData[LIBSETS_TABLEKEY_NUMBONUSES] or 0
                 numEquipped = lib.getNumEquippedItemsByItemIds(specialSetsItemIds)
                 maxEquipped = specialSetData[LIBSETS_TABLEKEY_MAXEQUIPPED] or 0
@@ -1284,7 +1294,7 @@ end
 --> Returns:    String setTypeName
 function lib.GetSetTypeName(libSetsSetType, lang)
     if libSetsSetType == nil then return end
-    lang = lang or lib.clientLang
+    lang = lang or clientLang
     lang = strlower(lang)
     if not lib.supportedLanguages[lang] then return end
     local allowedLibSetsSetTypes = lib.allowedSetTypes
@@ -1367,7 +1377,7 @@ function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return end
     local allowedDropMechanics = lib.allowedDropMechanics
     if not allowedDropMechanics[libSetsDropMechanicId] then return end
-    lang = lang or lib.clientLang
+    lang = lang or clientLang
     lang = strlower(lang)
     if not lib.supportedLanguages[lang] then return end
     local dropMechanicNames = lib.dropMechanicIdToName[lang]
@@ -1507,7 +1517,7 @@ end
 --> lang String: The language to return the setName in. Can be left empty and the client language will be used then
 --> Returns:    String setName
 function lib.GetSetName(setId, lang)
-    lang = lang or lib.clientLang
+    lang = lang or clientLang
     lang = strlower(lang)
     if not lib.supportedLanguages[lang] then return end
     if not checkIfSetsAreLoadedProperly() then return end
@@ -1859,7 +1869,7 @@ end
 --> lang String: The language to check for. Can be left empty and the client language will be used then
 --> Returns:  NILABLE number setId, NILABLE table setNames
 function lib.GetSetByName(setName, lang)
-    lang = lang or lib.clientLang
+    lang = lang or clientLang
     lang = strlower(lang)
     if not lib.supportedLanguages[lang] then return end
     if not checkIfSetsAreLoadedProperly() then return end
@@ -1928,7 +1938,7 @@ end
 --> Returns:    name undauntedChestName
 function lib.GetUndauntedChestName(undauntedChestId, lang)
     if undauntedChestId < 1 or undauntedChestId > lib.countUndauntedChests then return end
-    lang = lang or lib.clientLang
+    lang = lang or clientLang
     lang = strlower(lang)
     if not lib.supportedLanguages[lang] then return end
     if not lib.undauntedChestIds or not lib.undauntedChestIds[lang] or not lib.undauntedChestIds[lang][undauntedChestId] then return end
@@ -1944,7 +1954,7 @@ end
 --> Returns:    name zoneName
 function lib.GetZoneName(zoneId, lang)
     if not zoneId then return end
-    lang = lang or lib.clientLang
+    lang = lang or clientLang
     lang = strlower(lang)
     local zoneName = ""
     if libZone ~= nil then
@@ -2673,7 +2683,7 @@ local function onPlayerActivated(eventId, isFirst)
 
     if lib.debugGetAllDataIsRunning == true then
         --Continue to get all data until it is finished
-        d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - language now: " ..tos(lib.clientLang))
+        d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - language now: " ..tos(clientLang))
         lib.DebugGetAllData(false)
     end
 end
@@ -2690,13 +2700,6 @@ local function onLibraryLoaded(event, name)
     -->LibZone
     libZone = LibZone
     lib.libZone = libZone
-
-    --The actual clients language
-    lib.clientLang = GetCVar("language.2")
-    lib.clientLang = strlower(lib.clientLang)
-    if not lib.supportedLanguages[lib.clientLang] then
-        lib.clientLang = "en" --Fallback language if client language is not supported: English
-    end
 
     --The actual API version
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()

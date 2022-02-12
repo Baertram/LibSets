@@ -2,7 +2,6 @@
 if IsLibSetsAlreadyLoaded(false) then return end
 
 --This file contains the constant values needed for the library to work
-LibSets = LibSets or {}
 local lib = LibSets
 
 --Helper function for the API check

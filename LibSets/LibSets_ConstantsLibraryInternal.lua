@@ -19,7 +19,7 @@ end
 if IsLibSetsAlreadyLoaded(true) then return end
 
 --This file contains the constant values needed for the library to work
-LibSets = LibSets or {}
+LibSets = {} --Creation of the global variable
 local lib = LibSets
 
 ------------------------------------------------------------------------------------------------------------------------
