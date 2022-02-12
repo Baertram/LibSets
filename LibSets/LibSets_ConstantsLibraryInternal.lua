@@ -27,7 +27,7 @@ lib.name            = MAJOR
 lib.version         = MINOR
 lib.svName          = "LibSets_SV_Data"
 lib.svDebugName     = "LibSets_SV_DEBUG_Data"
-lib.svVersion       = MINOR -- changing this will reset the SavedVariables!
+lib.svVersion       = 0.38 -- ATTENTION: changing this will reset the SavedVariables!
 lib.setsLoaded      = false
 lib.setsScanning    = false
 ------------------------------------------------------------------------------------------------------------------------

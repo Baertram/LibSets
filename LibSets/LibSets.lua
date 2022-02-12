@@ -308,6 +308,7 @@ LibSets = LibSets or {}
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local apiVersion = GetAPIVersion()
+local worldName = GetWorldName()
 
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
@@ -387,7 +388,7 @@ local function LoadSavedVariables()
         modifyTooltips = false,
     }
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
-    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, GetWorldName(), "$AllAccounts")
+    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, worldName, "$AllAccounts")
     --------------------------------------------------------------------------------------------------------------------
 
     --For debugging and preloaded data
@@ -406,7 +407,7 @@ local function LoadSavedVariables()
         [LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]    = {},
     }
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
-    lib.svDebugData = ZO_SavedVars:NewAccountWide(lib.svDebugName, lib.svVersion, nil, defaultsDebug, nil, "$AllAccounts")
+    lib.svDebugData = ZO_SavedVars:NewAccountWide(lib.svDebugName, 1, nil, defaultsDebug, nil, "$AllAccounts")
 end
 lib.LoadSavedVariables = LoadSavedVariables
 
@@ -2732,6 +2733,9 @@ local function onLibraryLoaded(event, name)
         --Get the different setTypes from the preloaded "all sets table" setInfo in file LibSets_Data.lua and put them in their
         --own tables of the library, to be used from the LibSets API functions
         LoadSets()
+
+        --Tooltips
+        lib.loadTooltipHooks()
 
         --Slash commands
         createSlashCommands()
