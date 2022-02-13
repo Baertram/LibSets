@@ -39,6 +39,7 @@ local tins = table.insert
 local tsort = table.sort
 --local unp = unpack
 --local zocstrfor = ZO_CachedStrFormat
+local zoitf = zo_iconTextFormat
 
 local gilsetinf = GetItemLinkSetInfo
 
@@ -322,7 +323,7 @@ local function buildSetDropMechanicAndBossInfo(setData)
                 elseif addDropMechanic then
                     local dropMechanicTexture = dropMechanicIdToTexture[dropMechanicId]
                     if dropMechanicTexture then
-                        local dropMechanicNameIconStr = zo_iconTextFormat(dropMechanicTexture, 24, 24, dropMechanicName, nil)
+                        local dropMechanicNameIconStr = zoitf(dropMechanicTexture, 24, 24, dropMechanicName, nil)
                         dropMechanicName = dropMechanicNameIconStr
                     end
                     tins(dropMechanicNames, dropMechanicName)
@@ -399,7 +400,7 @@ local function buildSetTypeInfo(setData)
     local setTypeName = libSets_GetSetTypeName(setType)
     local setTypeTexture = setTypeToTexture[setType]
     if setTypeTexture then
-        local setTypeNameIconStr = zo_iconTextFormat(setTypeTexture, 24, 24, setTypeName, nil)
+        local setTypeNameIconStr = zoitf(setTypeTexture, 24, 24, setTypeName, nil)
         setTypeName = setTypeNameIconStr
     end
     return setTypeStrWithPlaceholder .. setTypeName
