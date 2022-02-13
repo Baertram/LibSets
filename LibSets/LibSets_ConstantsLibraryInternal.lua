@@ -751,22 +751,22 @@ local textures = {
 }
 ]]
 local dropMechanicIdToTexture = {
-    [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] =   "/esoui/art/chatwindow/chat_mail_up.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA] =               "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT] =           "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS] =           "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST] =                 "/esoui/art/icons/undaunted_dungeoncoffer.dds",
-    [LIBSETS_DROP_MECHANIC_MONSTER_NAME] =                      "/esoui/art/icons/quest_head_monster_014.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE] =               "/esoui/art/zonestories/completiontypeicon_delve.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS] =                "/esoui/art/icons/mapkey/mapkey_groupboss.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON] =      "/esoui/art/journal/journal_quest_dungeon.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST] =                    "/esoui/art/icons/undaunted_smallcoffer.dds",
-    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD] =               "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",
-    [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD] =  "/esoui/art/lfg/lfg_normaldungeon_up.dds",
-    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS] =              "/esoui/art/icons/servicemappins/ic_monstrousteeth_complete.dds",
-    [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD] =                   "/esoui/art/menubar/menubar_levelup_up.dds",
-    [LIBSETS_DROP_MECHANIC_ANTIQUITIES] =                       "/esoui/art/mappins/antiquity_trackeddigsite.dds",
-    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR] =               "/esoui/art/icons/quest_container_001.dds",
+    [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]  = "/esoui/art/chatwindow/chat_mail_up.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]              = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]          = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]          = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                = "/esoui/art/icons/undaunted_dungeoncoffer.dds",
+    [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                     = "/esoui/art/icons/quest_head_monster_014.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]              = "/esoui/art/zonestories/completiontypeicon_delve.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]               = "/esoui/art/icons/mapkey/mapkey_groupboss.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]     = "/esoui/art/journal/journal_quest_dungeon.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                   = "/esoui/art/icons/undaunted_smallcoffer.dds",
+    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]              = "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",
+    [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD] = "/esoui/art/lfg/lfg_normaldungeon_up.dds",
+    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]             = "/esoui/art/icons/servicemappins/ic_monstrousteeth_complete.dds",
+    [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                  = "/esoui/art/menubar/menubar_levelup_up.dds",
+    [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                      = "/esoui/art/mappins/antiquity_trackeddigsite.dds",
+    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]              = "/esoui/art/icons/quest_container_001.dds",
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted chest"] =     "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
@@ -774,6 +774,22 @@ local dropMechanicIdToTexture = {
 }
 lib.dropMechanicIdToTexture = dropMechanicIdToTexture
 
+local setTypeToTexture = {
+    [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/icons/servicemappins/servicepin_smithy.dds", --"Crafted"
+    [LIBSETS_SETTYPE_ARENA] =                                   "",                         --"Arena"
+    [LIBSETS_SETTYPE_BATTLEGROUND] =                            "",                  --"Battleground"
+    [LIBSETS_SETTYPE_CRAFTED] =                                 "",                       --"Crafted"
+    [LIBSETS_SETTYPE_CYRODIIL] =                                "",                      --"Cyrodiil"
+    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] =           "", --"DailyRandomDungeonAndICReward"
+    [LIBSETS_SETTYPE_DUNGEON] =                                 "",                       --"Dungeon"
+    [LIBSETS_SETTYPE_IMPERIALCITY] =                            "",                  --"Imperial City"
+    [LIBSETS_SETTYPE_MONSTER] =                                 "",                       --"Monster"
+    [LIBSETS_SETTYPE_OVERLAND] =                                "",                      --"Overland"
+    [LIBSETS_SETTYPE_SPECIAL] =                                 "",                       --"Special"
+    [LIBSETS_SETTYPE_TRIAL] =                                   "",                         --"Trial"
+    [LIBSETS_SETTYPE_MYTHIC] =                                  "",                        --"Mythic"
+}
+lib.setTypeToTexture = setTypeToTexture
 
 --Localized texts
 lib.localization = {

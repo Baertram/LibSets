@@ -20,6 +20,8 @@ local dropMechanicStr =         localization.dropMechanic
 local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 
 local dropMechanicIdToTexture = lib.dropMechanicIdToTexture
+local setTypeToTexture =        lib.setTypeToTexture
+
 
 --local ZOs variables
 local EM = EVENT_MANAGER
@@ -318,6 +320,11 @@ local function buildSetDropMechanicAndBossInfo(setData)
                     tins(bossNames, dropMechanicName)
                     alreadyAddedDropMechanics[dropMechanicId] = true
                 elseif addDropMechanic then
+                    local dropMechanicTexture = dropMechanicIdToTexture[dropMechanicId]
+                    if dropMechanicTexture then
+                        local dropMechanicNameIconStr = zo_iconTextFormat(dropMechanicTexture, 24, 24, dropMechanicName, nil)
+                        dropMechanicName = dropMechanicNameIconStr
+                    end
                     tins(dropMechanicNames, dropMechanicName)
                     alreadyAddedDropMechanics[dropMechanicId] = true
                 end
@@ -389,7 +396,13 @@ local function buildSetTypeInfo(setData)
     setTypeStr = setTypeStr or localization.setType
     setTypeStrWithPlaceholder = setTypeStrWithPlaceholder or setTypeStr .. placeHolder
 
-    return setTypeStrWithPlaceholder .. libSets_GetSetTypeName(setType)
+    local setTypeName = libSets_GetSetTypeName(setType)
+    local setTypeTexture = setTypeToTexture[setType]
+    if setTypeTexture then
+        local setTypeNameIconStr = zo_iconTextFormat(setTypeTexture, 24, 24, setTypeName, nil)
+        setTypeName = setTypeNameIconStr
+    end
+    return setTypeStrWithPlaceholder .. setTypeName
 end
 
 
