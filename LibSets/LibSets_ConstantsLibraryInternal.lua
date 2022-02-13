@@ -775,10 +775,9 @@ local dropMechanicIdToTexture = {
 lib.dropMechanicIdToTexture = dropMechanicIdToTexture
 
 local setTypeToTexture = {
-    [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/zonestories/completiontypeicon_setstation.dds",                 --"Crafted"
     [LIBSETS_SETTYPE_ARENA] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_arenasolo.dds",     --"Arena"
     [LIBSETS_SETTYPE_BATTLEGROUND] =                            "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",      --"Battleground"
-    [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/icons/achievements_indexicon_crafting_up.dds",                  --"Crafted"
+    [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/zonestories/completiontypeicon_setstation.dds",                 --"Crafted"
     [LIBSETS_SETTYPE_CYRODIIL] =                                "/esoui/art/lfg/gamepad/lfg_activityicon_cyrodiil.dds",                     --"Cyrodiil"
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] =           "/esoui/art/lfg/gamepad/gp_lfg_menuicon_random.dds",                        --"DailyRandomDungeonAndICReward"
     [LIBSETS_SETTYPE_DUNGEON] =                                 "/esoui/art/lfg/gamepad/lfg_activityicon_normaldungeon.dds",                --"Dungeon"
