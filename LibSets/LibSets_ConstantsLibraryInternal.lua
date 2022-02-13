@@ -775,19 +775,20 @@ local dropMechanicIdToTexture = {
 lib.dropMechanicIdToTexture = dropMechanicIdToTexture
 
 local setTypeToTexture = {
-    [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/icons/achievements_indexicon_crafting_up.dds",                  --"Crafted"
+    [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/zonestories/completiontypeicon_setstation.dds",                 --"Crafted"
     [LIBSETS_SETTYPE_ARENA] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_arenasolo.dds",     --"Arena"
     [LIBSETS_SETTYPE_BATTLEGROUND] =                            "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",      --"Battleground"
     [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/icons/achievements_indexicon_crafting_up.dds",                  --"Crafted"
     [LIBSETS_SETTYPE_CYRODIIL] =                                "/esoui/art/lfg/gamepad/lfg_activityicon_cyrodiil.dds",                     --"Cyrodiil"
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] =           "/esoui/art/lfg/gamepad/gp_lfg_menuicon_random.dds",                        --"DailyRandomDungeonAndICReward"
-    [LIBSETS_SETTYPE_DUNGEON] =                                 "/esoui/art/tutorial/achievements_indexicon_dungeons_up.dds",               --"Dungeon"
+    [LIBSETS_SETTYPE_DUNGEON] =                                 "/esoui/art/lfg/gamepad/lfg_activityicon_normaldungeon.dds",                --"Dungeon"
     [LIBSETS_SETTYPE_IMPERIALCITY] =                            "/esoui/art/mappins/ava_imperialcity_neutral.dds",                          --"Imperial City"
     [LIBSETS_SETTYPE_MONSTER] =                                 "/esoui/art/icons/quest_head_monster_014.dds",                              --"Monster"
     [LIBSETS_SETTYPE_OVERLAND] =                                "/esoui/art/icons/undaunted_smallcoffer.dds",                               --"Overland"
     [LIBSETS_SETTYPE_SPECIAL] =                                 "/esoui/art/tutorial/campaignbrowser_indexicon_specialevents_up.dds",       --"Special"
     [LIBSETS_SETTYPE_TRIAL] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds",    --"Trial"
     [LIBSETS_SETTYPE_MYTHIC] =                                  "/esoui/art/icons/antiquities_u30_mythic_ring02.dds",                       --"Mythic"
+    ["vet_dung"] =                                              "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds",               --"Veteran Dungeon"
 }
 lib.setTypeToTexture = setTypeToTexture
 

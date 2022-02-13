@@ -398,7 +398,12 @@ local function buildSetTypeInfo(setData)
     setTypeStrWithPlaceholder = setTypeStrWithPlaceholder or setTypeStr .. placeHolder
 
     local setTypeName = libSets_GetSetTypeName(setType)
-    local setTypeTexture = setTypeToTexture[setType]
+    local setTypeTexture
+    if setData.isVeteran ~= nil then
+        setTypeTexture = setTypeToTexture["vet_dung"]
+    else
+        setTypeTexture = setTypeToTexture[setType]
+    end
     if setTypeTexture then
         local setTypeNameIconStr = zoitf(setTypeTexture, 24, 24, setTypeName, nil)
         setTypeName = setTypeNameIconStr
