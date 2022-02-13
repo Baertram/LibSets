@@ -19,23 +19,24 @@ local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
 local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 
+local dropMechanicIdToTexture = lib.dropMechanicIdToTexture
 
 --local ZOs variables
 local EM = EVENT_MANAGER
 
 local tos = tostring
-local strgmatch = string.gmatch
-local strlower = string.lower
+--local strgmatch = string.gmatch
+--local strlower = string.lower
 --local strlen = string.len
 local strfind = string.find
-local strsub = string.sub
-local strfor = string.format
+--local strsub = string.sub
+--local strfor = string.format
 
 local tins = table.insert
-local trem = table.remove
+--local trem = table.remove
 local tsort = table.sort
-local unp = unpack
-local zocstrfor = ZO_CachedStrFormat
+--local unp = unpack
+--local zocstrfor = ZO_CachedStrFormat
 
 local gilsetinf = GetItemLinkSetInfo
 
@@ -236,7 +237,6 @@ local function getLastItemLink(tooltipControl)
 	return itemLink
 end
 
-
 local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSort)
     alwaysNewLine = alwaysNewLine or false
     doSort = doSort or false
@@ -329,29 +329,44 @@ local function buildSetDropMechanicAndBossInfo(setData)
     droppedByStr = droppedByStr or localization.droppedBy
 
     local prefixForDropMechanicAndBoss
+    local addBoth = false
+    local addDm = false
+    local addBoss = false
     if addDropMechanic and addBossName then
         if addDropMechanic and #dropMechanicNames > 0 then
             prefixForDropMechanicAndBoss = dropMechanicStr
+            addDm = true
         end
         if addBossName and #bossNames > 0 then
             if prefixForDropMechanicAndBoss and prefixForDropMechanicAndBoss ~= "" then
                 prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..droppedByStr
+                addBoth = true
             else
                 prefixForDropMechanicAndBoss = droppedByStr
             end
+            addBoss = true
         end
-        prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. placeHolder
-        dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, prefixForDropMechanicAndBoss, false, true)
-        dropMechanicAndBossStr = dropMechanicAndBossStr .. buildTextLinesFromTable(bossNames, nil, false, true)
+        if addBoth then
+            addDm = false
+            addBoss = false
+            prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. placeHolder
+            dropMechanicNamesStr = buildTextLinesFromTable(dropMechanicNames, prefixForDropMechanicAndBoss, false, true)
+            bossNamesStr = buildTextLinesFromTable(bossNames, nil, false, true)
+            dropMechanicAndBossStr = dropMechanicNamesStr .. "/" .. bossNamesStr
+        end
     else
-        if addDropMechanic then
-            dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
-            dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, dropMechanicStrWithPlaceholder, false, true)
-        elseif addBossName then
-            droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
-            dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, droppedByStrWithPlaceholder, false, true)
-        end
+        addDm = #dropMechanicNames > 0
+        addBoss = #bossNames > 0
     end
+
+    if addDropMechanic and addDm then
+        dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
+        dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, dropMechanicStrWithPlaceholder, false, true)
+    elseif addBossName and addBoss then
+        droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
+        dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, droppedByStrWithPlaceholder, false, true)
+    end
+
     return dropMechanicAndBossStr
 end
 
