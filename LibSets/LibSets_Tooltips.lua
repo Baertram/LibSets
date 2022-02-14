@@ -662,6 +662,7 @@ local function loadLAMSettingsMenu()
             end,
             default =   defaultSettings.modifyTooltips,
             disabled =  function() return false end,
+            requiresReload = true,
             width =     "full",
         },
         {
