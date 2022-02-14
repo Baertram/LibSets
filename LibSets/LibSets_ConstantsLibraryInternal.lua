@@ -3,6 +3,7 @@ local MAJOR, MINOR = "LibSets", 0.38
 
 --local ZOs variables
 local zocstrfor = ZO_CachedStrFormat
+local strlower = string.lower
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -85,7 +86,8 @@ lib.debugNumItemIdPackages     = 50         -- Increase this to find new added s
 lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the client may crash!
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
-lib.fallbackLang = "en"
+local fallbackLang = "en"
+lib.fallbackLang = fallbackLang
 local supportedLanguages = {
     ["de"]  = true,
     ["en"]  = true,
@@ -100,6 +102,15 @@ for _, isSupported in pairs(supportedLanguages) do
     if isSupported == true then numSupportedLangs = numSupportedLangs + 1 end
 end
 lib.numSupportedLangs = numSupportedLangs
+
+--The actual clients language
+local clientLang = GetCVar("language.2")
+clientLang = strlower(clientLang)
+if not supportedLanguages[clientLang] then
+    clientLang = fallbackLang --Fallback language if client language is not supported: English
+end
+lib.clientLang = clientLang
+
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.
 local noSetIdString = "NoSetId"
@@ -231,7 +242,7 @@ lib.counterSuffix = "Counter"
 --------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets setTyps !!!
 --------------------------------------------------------------------------
-lib.setTypesToName = {
+local setTypesToName = {
     [LIBSETS_SETTYPE_ARENA] = {
         ["de"] = "Arena",
         ["en"] = "Arena",
@@ -299,8 +310,8 @@ lib.setTypesToName = {
     [LIBSETS_SETTYPE_OVERLAND] = {
         ["de"] = "Überland",
         ["en"] = "Overland",
-        ["es"] = "Por tierra",
-        ["fr"] = "Overland",
+        ["es"] = "Zone terrestre",
+        ["fr"] = "Zone ouverte",
         ["jp"] = "陸上",
         ["ru"] = "Поверхности",
     },
@@ -332,7 +343,7 @@ lib.setTypesToName = {
 --Translations only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
     --[[
-    lib.setTypesToName[LIBSETS_SETTYPE_*                       ] = {
+    setTypesToName[LIBSETS_SETTYPE_*                       ] = {
         ["de"] = "",
         ["en"] = "",
         ["fr"] = "",
@@ -341,6 +352,8 @@ if checkIfPTSAPIVersionIsLive() then
     }
     ]]
 end
+lib.setTypesToName = setTypesToName
+
 ------------------------------------------------------------------------------------------------------------------------
 --Mapping table setType to setIds for this settype.
 -->Will be filled in file LibSets.lua, function LoadSets()
@@ -734,22 +747,16 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
     },
 }
+--DropMechanic translations only available on current PTS, or automatically available if PTS->live
+if checkIfPTSAPIVersionIsLive() then
+    --[[
+    lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*)
+    lib.dropMechanicIdToNameTooltip["en"][LIBSETS_DROP_MECHANIC_*] = ""
+    ]]
+end
 
---[[
-local textures = {
-    ["delve"] =             "/esoui/art/zonestories/completiontypeicon_delve.dds",
-    ["worldboss"] =         "/esoui/art/icons/mapkey/mapkey_groupboss.dds",
-    ["normalDungeon"] =     "/esoui/art/lfg/lfg_normaldungeon_up.dds",  --"/esoui/art/leveluprewards/levelup_dungeon.dds",
-    ["veteranDungeon"] =    "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
-    ["publicDungeon"] =     "/esoui/art/journal/journal_quest_dungeon.dds",
-    ["undauntedChest"] =    "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
-    ["undaunted"] =         "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
-    ["dungeonChest"] =      "/esoui/art/icons/undaunted_dungeoncoffer.dds",
-    ["treasureChest"] =     "/esoui/art/icons/undaunted_smallcoffer.dds",
-    ["cyrodiil"] =          "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    ["mail"] =              "/esoui/art/chatwindow/chat_mail_up.dds",
-}
-]]
+
+--Textures for the drop mechanic tooltips
 local dropMechanicIdToTexture = {
     [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]  = "/esoui/art/chatwindow/chat_mail_up.dds",
     [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]              = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
@@ -774,6 +781,7 @@ local dropMechanicIdToTexture = {
 }
 lib.dropMechanicIdToTexture = dropMechanicIdToTexture
 
+--Textures for the set type tooltips
 local setTypeToTexture = {
     [LIBSETS_SETTYPE_ARENA] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_arenasolo.dds",     --"Arena"
     [LIBSETS_SETTYPE_BATTLEGROUND] =                            "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",      --"Battleground"
@@ -792,60 +800,81 @@ local setTypeToTexture = {
 lib.setTypeToTexture = setTypeToTexture
 
 --Localized texts
+local undauntedStr = GetString(SI_VISUALARMORTYPE4)
+local dungeonStr = GetString(SI_INSTANCEDISPLAYTYPE2)
 lib.localization = {
     ["de"] = {
         dlc             = "Kapitel/DLC",
         dropZones       = "Drop Zonen",
+        dropZoneArena =   setTypesToName[LIBSETS_SETTYPE_ARENA]["de"],
         droppedBy       = "Drop durch",
         setType         = "Set Art",
         neededTraits    = "Eigenschaften benötigt (Analyse)",
         dropMechanic    = "Drop Mechanik",
+        undauntedChest  = undauntedStr .. " Truhe"
     },
     ["en"] = {
         dlc             = "Chapter/DLC",
         dropZones       = "Drop zones",
+        dropZoneDelve =             GetString(SI_INSTANCEDISPLAYTYPE7),
+        dropZoneDungeon =           dungeonStr,
+        dropZoneVeteranDungeon =    GetString(SI_DUNGEONDIFFICULTY2) .. " " .. dungeonStr,
+        dropZonePublicDungeon =     GetString(SI_INSTANCEDISPLAYTYPE6),
+        dropZoneBattleground =      GetString(SI_INSTANCEDISPLAYTYPE9),
+        dropZoneTrial =             GetString(SI_LFGACTIVITY4),
+        dropZoneArena =             setTypesToName[LIBSETS_SETTYPE_ARENA]["en"],
+        dropZoneMail    =           GetString(SI_WINDOW_TITLE_MAIL),
+        dropZoneCrafted =           GetString(SI_SPECIALIZEDITEMTYPE213),
+        dropZoneCyrodiil =          GetString(SI_CAMPAIGNRULESETTYPE1),
+        dropZoneMonster =           dungeonStr,
+        --dropZoneOverland =          GetString(),
+        dropZoneSpecial =           GetString(SI_HOTBARCATEGORY9),
+        dropZoneMythic =            GetString(SI_ITEMDISPLAYQUALITY6),
         droppedBy       = "Dropped by",
         setType         = "Set type",
         neededTraits    = "Traits needed (research)",
         dropMechanic    = "Drop mechanics",
+        undauntedChest  = undauntedStr .. " chest",
+        boss            = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501),
     },
     ["es"] = {
         dlc             = "Capítulo/DLC",
         dropZones       = "Zonas de caída",
+        dropZoneArena =   setTypesToName[LIBSETS_SETTYPE_ARENA]["es"],
         droppedBy       = "Dejado por",
         setType         = "Tipo de conjunto",
         dropMechanic    = "Mecanica de caída",
+        undauntedChest  = undauntedStr .. " cofre"
     },
     ["fr"] = {
         dlc             = "Chapitre/DLC",
         dropZones       = "Zones de largage",
+        dropZoneArena =   setTypesToName[LIBSETS_SETTYPE_ARENA]["fr"],
         droppedBy       = "Dépouillé par",
         setType         = "Type de set",
         dropMechanic    = "Mécanique de largage",
+        undauntedChest  = "Poitrine de " .. undauntedStr
     },
     ["ru"] = {
         dlc             = "Глава/DLC",
         dropZones       = "Зоны сброса",
+        dropZoneArena =   setTypesToName[LIBSETS_SETTYPE_ARENA]["ru"],
         droppedBy       = "Снизился на",
         setType         = "Тип набора",
         dropMechanic    = "Механика падения",
+        undauntedChest  = undauntedStr .. " грудь"
     },
     ["jp"] = {
         dlc             = "チャプター/ DLC",
         dropZones       = "ドロップゾーン",
+        dropZoneArena =   setTypesToName[LIBSETS_SETTYPE_ARENA]["jp"],
         droppedBy       = "によってドロップ",
         setType         = "セットの種類",
         dropMechanic    = "ドロップメカニック",
+        undauntedChest  = undauntedStr .. " 胸"
     },
 }
 
---DropMechanic translations only available on current PTS, or automatically available if PTS->live
-if checkIfPTSAPIVersionIsLive() then
-    --[[
-    lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*)
-    lib.dropMechanicIdToNameTooltip["en"][LIBSETS_DROP_MECHANIC_*] = ""
-    ]]
-end
 --Set metatable to get EN entries for missing other languages
 local dropMechanicNames = lib.dropMechanicIdToName
 local dropMechanicTooltipNames = lib.dropMechanicIdToNameTooltip
@@ -869,6 +898,26 @@ setmetatable(localization["es"], {__index = localizationEn})
 setmetatable(localization["fr"], {__index = localizationEn})
 setmetatable(localization["jp"], {__index = localizationEn})
 setmetatable(localization["ru"], {__index = localizationEn})
+
+
+--Mapping for tooltips
+local clientLocalization = localization[clientLang]
+local setTypeToDropZoneLocalizationStr = {
+    [LIBSETS_SETTYPE_ARENA] =                           clientLocalization.dropZoneArena,
+    [LIBSETS_SETTYPE_BATTLEGROUND] =                    clientLocalization.dropZoneBattleground,
+    [LIBSETS_SETTYPE_CRAFTED] =                         clientLocalization.dropZoneCrafted,
+    [LIBSETS_SETTYPE_CYRODIIL] =                        clientLocalization.dropZoneCyrodiil,
+    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] =   clientLocalization.dropZoneMail,
+    [LIBSETS_SETTYPE_DUNGEON] =                         clientLocalization.dropZoneDungeon,
+    [LIBSETS_SETTYPE_IMPERIALCITY] =                    clientLocalization.dropZoneArena,
+    [LIBSETS_SETTYPE_MONSTER] =                         clientLocalization.dropZoneMonster,
+    [LIBSETS_SETTYPE_OVERLAND] =                        clientLocalization.dropZoneOverland,
+    [LIBSETS_SETTYPE_SPECIAL] =                         clientLocalization.dropZoneSpecial,
+    [LIBSETS_SETTYPE_TRIAL] =                           clientLocalization.dropZoneTrial,
+    [LIBSETS_SETTYPE_MYTHIC] =                          clientLocalization.dropZoneMythic,
+    ["vet_dung"] =                                      clientLocalization.dropZoneVeteranDungeon,
+}
+lib.setTypeToDropZoneLocalizationStr = setTypeToDropZoneLocalizationStr
 
 
 ------------------------------------------------------------------------------------------------------------------------

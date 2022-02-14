@@ -309,6 +309,10 @@ local MAJOR, MINOR = lib.name, lib.version
 local apiVersion = GetAPIVersion()
 local worldName = GetWorldName()
 
+--The actual clients language
+local fallbackLang = lib.fallbackLang
+local clientLang = lib.clientLang
+
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
@@ -371,16 +375,6 @@ local dropMechanicIdToNameTooltip =     lib.dropMechanicIdToNameTooltip
 
 --local lib functions
 local buildItemLink
-
-
---The actual clients language
-local fallbackLang = lib.fallbackLang
-local clientLang = GetCVar("language.2")
-clientLang = strlower(clientLang)
-if not supportedLanguages[clientLang] then
-    clientLang = fallbackLang --Fallback language if client language is not supported: English
-end
-lib.clientLang = clientLang
 
 
 ------------------------------------------------------------------------

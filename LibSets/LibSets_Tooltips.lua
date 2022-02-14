@@ -14,6 +14,8 @@ local localization         =    lib.localization[clientLang]
 local dropLocationZonesStr =    localization.dropZones
 local dlcStr =                  localization.dlc
 local droppedByStr =            localization.droppedBy
+local dungeonStr =              localization.dropZoneDungeon
+local bossStr =                 localization.boss
 local setTypeStr =              localization.setType
 local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
@@ -21,7 +23,7 @@ local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 
 local dropMechanicIdToTexture = lib.dropMechanicIdToTexture
 local setTypeToTexture =        lib.setTypeToTexture
-
+local setTypeToDropZoneLocalizationStr = lib.setTypeToDropZoneLocalizationStr
 
 --local ZOs variables
 local EM = EVENT_MANAGER
@@ -240,6 +242,22 @@ local function getLastItemLink(tooltipControl)
 	return itemLink
 end
 
+local function checkTraitsNeededGiven(setData)
+    local setType = setData.setType
+    return (setType and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED) or false
+end
+
+local neededTraitsStrWithPlaceholder
+local function buildSetNeededTraitsInfo(setData, withOutPrefix)
+    if not checkTraitsNeededGiven(setData) then return end
+    withOutPrefix = withOutPrefix or false
+    local traitsNeeded = tos(setData.traitsNeeded)
+    if not traitsNeeded then return end
+    neededTraitsStr = neededTraitsStr or localization.neededTraits
+    neededTraitsStrWithPlaceholder = neededTraitsStrWithPlaceholder or neededTraitsStr .. placeHolder
+    return (not withOutPrefix and (neededTraitsStrWithPlaceholder .. traitsNeeded)) or traitsNeeded
+end
+
 local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSort)
     alwaysNewLine = alwaysNewLine or false
     doSort = doSort or false
@@ -248,7 +266,11 @@ local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSor
     if numEntries >= 1 then
         if doSort then tsort(tableVar) end
         for idx, tableEntryStr in ipairs(tableVar) do
-            retStrVar = tableEntryStr
+            if idx == 1 then
+                retStrVar = tableEntryStr
+            else
+                retStrVar = retStrVar .. tableEntryStr
+            end
             if idx < numEntries then
                 if alwaysNewLine then
                     retStrVar = retStrVar .. "\n"
@@ -262,7 +284,8 @@ local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSor
 end
 
 local dropLocationZonesWithPlaceholder
-local function buildSetDropLocationInfo(setData)
+local function buildSetDropLocationInfo(setData, isMonsterDropMechanic)
+    isMonsterDropMechanic = isMonsterDropMechanic or false
     local dropZonesStr
     --Got drop zones of the item?
     local alreadyAddedZoneIds = {}
@@ -284,42 +307,46 @@ local function buildSetDropLocationInfo(setData)
         end
         dropLocationZonesStr = dropLocationZonesStr or localization.dropZones
         dropLocationZonesWithPlaceholder = dropLocationZonesWithPlaceholder or dropLocationZonesStr .. placeHolder
-        dropZonesStr = buildTextLinesFromTable(dropZoneNames, dropLocationZonesWithPlaceholder, false, true)
+        local zoneStr
+        if setType ~= nil then
+            zoneStr = setTypeToDropZoneLocalizationStr[setType]
+            if zoneStr ~= nil then
+                zoneStr = zoneStr .. placeHolder
+            else
+                zoneStr = dropLocationZonesWithPlaceholder
+            end
+        end
+        dropZonesStr = buildTextLinesFromTable(dropZoneNames, zoneStr, false, true)
     end
     return dropZonesStr
 end
 
-local neededTraitsStrWithPlaceholder
-local function buildSetNeededTraitsInfo(setData)
-    local traitsNeeded = tos(setData.traitsNeeded)
-    if not traitsNeeded then return end
-    neededTraitsStr = neededTraitsStr or localization.neededTraits
-    neededTraitsStrWithPlaceholder = neededTraitsStrWithPlaceholder or neededTraitsStr .. placeHolder
-    return neededTraitsStrWithPlaceholder .. traitsNeeded
-end
-
 local dropMechanicStrWithPlaceholder
 local droppedByStrWithPlaceholder
+local bossStrWithPlaceholder
 local function buildSetDropMechanicAndBossInfo(setData)
     local dropMechanicTab = setData.dropMechanic
     if not dropMechanicTab then return end
+    local dropMechanicNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
+    if not dropMechanicNamesOfSet then return end
 
     local dropMechanicNamesStr
     local bossNamesStr
     local dropMechanicAndBossStr
     local dropMechanicNames = {}
     local bossNames = {}
-    local dropMechanicNamesOfSet = setData.dropMechanicNames
-    if not dropMechanicNamesOfSet then return end
+    local isMonsterDropMechanic = false
 
     local alreadyAddedDropMechanics = {}
     for dropMechanicId, dropMechanicNamesData in pairs(dropMechanicNamesOfSet) do
         if dropMechanicId ~= -1 and not alreadyAddedDropMechanics[dropMechanicId] then
             local dropMechanicName = dropMechanicNamesData[clientLang]
             if dropMechanicName and dropMechanicName ~= "" then
+--d(">dropMechanicName: " ..tos(dropMechanicName))
                 if addBossName and dropMechanicId == LIBSETS_DROP_MECHANIC_MONSTER_NAME then
                     tins(bossNames, dropMechanicName)
                     alreadyAddedDropMechanics[dropMechanicId] = true
+                    isMonsterDropMechanic = true
                 elseif addDropMechanic then
                     local dropMechanicTexture = dropMechanicIdToTexture[dropMechanicId]
                     if dropMechanicTexture then
@@ -335,6 +362,7 @@ local function buildSetDropMechanicAndBossInfo(setData)
 
     dropMechanicStr = dropMechanicStr or localization.dropMechanic
     droppedByStr = droppedByStr or localization.droppedBy
+    dungeonStr = dungeonStr or localization.dropZoneDungeon
 
     local prefixForDropMechanicAndBoss
     local addBoth = false
@@ -347,14 +375,14 @@ local function buildSetDropMechanicAndBossInfo(setData)
         end
         if addBossName and #bossNames > 0 then
             if prefixForDropMechanicAndBoss and prefixForDropMechanicAndBoss ~= "" then
-                prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..droppedByStr
+                prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..dungeonStr
                 addBoth = true
             else
-                prefixForDropMechanicAndBoss = droppedByStr
+                prefixForDropMechanicAndBoss = dungeonStr
             end
             addBoss = true
         end
-        if addBoth then
+        if addBoth == true then
             addDm = false
             addBoss = false
             prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. placeHolder
@@ -363,19 +391,21 @@ local function buildSetDropMechanicAndBossInfo(setData)
             dropMechanicAndBossStr = dropMechanicNamesStr .. "/" .. bossNamesStr
         end
     else
-        addDm = #dropMechanicNames > 0
-        addBoss = #bossNames > 0
+        addDm = (#dropMechanicNames > 0) or false
+        addBoss = (#bossNames > 0) > false
     end
 
     if addDropMechanic and addDm then
-        dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
-        dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, dropMechanicStrWithPlaceholder, false, true)
-    elseif addBossName and addBoss then
+        --dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
         droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
-        dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, droppedByStrWithPlaceholder, false, true)
+        dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, droppedByStrWithPlaceholder, false, true)
+    elseif addBossName and addBoss then
+        --droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
+        bossStrWithPlaceholder = bossStrWithPlaceholder or bossStr .. placeHolder
+        dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, bossStrWithPlaceholder, false, true)
     end
 
-    return dropMechanicAndBossStr
+    return dropMechanicAndBossStr, isMonsterDropMechanic
 end
 
 local dlcStrWithPlaceholder
@@ -408,9 +438,14 @@ local function buildSetTypeInfo(setData)
         local setTypeNameIconStr = zoitf(setTypeTexture, 24, 24, setTypeName, nil)
         setTypeName = setTypeNameIconStr
     end
+    if addNeededTraits then
+        local setTraitsNeeded = buildSetNeededTraitsInfo(setData, true)
+        if setTraitsNeeded ~= nil and setTraitsNeeded ~= "" then
+            return setTypeStrWithPlaceholder .. setTypeName .. " (" .. setTraitsNeeded .. ")"
+        end
+    end
     return setTypeStrWithPlaceholder .. setTypeName
 end
-
 
 local function addTooltipLine(tooltipControl, setData)
     if not setData then return end
@@ -485,33 +520,35 @@ local function addTooltipLine(tooltipControl, setData)
     --}
 
     local setType = setData.setType
-
-
     if addSetType and setType then
         local setTypeText = buildSetTypeInfo(setData)
         addSetInfoText(setTypeText)
     end
 
-    if addDLC then
-        local setDLCText = buildSetDLCInfo(setData)
-        addSetInfoText(setDLCText)
+    if not addSetType and addNeededTraits then
+        local setNeededTraitsText = buildSetNeededTraitsInfo(setData, false)
+        addSetInfoText(setNeededTraitsText)
+    end
+
+    local setDropMechanicText
+    local isMonsterDropMechanic = false
+    local dropMechanicOrBossOutput = false
+    if addDropMechanic or addBossName then
+        dropMechanicOrBossOutput = true
+        setDropMechanicText, isMonsterDropMechanic = buildSetDropMechanicAndBossInfo(setData)
     end
 
     if addDropLocation then
-        local setDropLocationsText = buildSetDropLocationInfo(setData)
+        local setDropLocationsText = buildSetDropLocationInfo(setData, isMonsterDropMechanic)
         addSetInfoText(setDropLocationsText)
     end
-
-    if addDropMechanic or addBossName then
-        local setDropMechanicText = buildSetDropMechanicAndBossInfo(setData)
+    if dropMechanicOrBossOutput then
         addSetInfoText(setDropMechanicText)
     end
 
-    if addNeededTraits then
-        if setType and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED then
-            local setNeededTraitsText = buildSetNeededTraitsInfo(setData)
-            addSetInfoText(setNeededTraitsText)
-        end
+    if addDLC then
+        local setDLCText = buildSetDLCInfo(setData)
+        addSetInfoText(setDLCText)
     end
 
     --Output of the tooltip line at the bottom
