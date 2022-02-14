@@ -77,14 +77,17 @@ local function getFirstEntryOfTable(tabName, keyOrValue)
 end
 
 local function MyCombineNonContiguousTables(dest, ...)
+    if ... == nil then return dest end
     for sourceTableIndex = 1, select("#", ...) do
         local sourceTable = select(sourceTableIndex, ...)
-        for key, data in pairs(sourceTable) do
-            --assert(dest[key] == nil, "Cannot combine tables that share keys")
-            if dest[key] == nil then
-                dest[key] = data
-            --else
-                --d(strfor(">Couldn't combine key \'%s\' as it it duplicate", tos(key)))
+        if sourceTable ~= nil then
+            for key, data in pairs(sourceTable) do
+                --assert(dest[key] == nil, "Cannot combine tables that share keys")
+                if dest[key] == nil then
+                    dest[key] = data
+                    --else
+                    --d(strfor(">Couldn't combine key \'%s\' as it it duplicate", tos(key)))
+                end
             end
         end
     end
@@ -1245,12 +1248,19 @@ end
 local debugGetAllNames = lib.DebugGetAllNames
 
 --Run this once after a new PTS was released to get all the new data scanned to the SV tables.
---The UI wil autoamtically change the language to the supported languages, once after another, and update the language
+--The UI wil automatically change the language to the supported languages, once after another, and update the language
 --dependent variables each time!
 --If the parameter resetApiData is true the current scanned data of the apiversion will be reset and all will be
---scanned new again, includig the set itemIds
-function lib.DebugGetAllData(resetApiData)
+--scanned new again, includig the set itemIds.
+--If parameter noItemIds is true all data will be rescanned, excluding the itemIds
+
+--todo: Find bug within GetAllSetNames -> New setNames in languages AFTER the clientLanguage where the setItemIds were scanned,
+--todo: do not update and just find "n/a" -> Somehow the setItemIds or setIds are missing and not read properly from SavedVariables
+--todo: (where they have been scanned to before) after the reladoui to next language
+
+function lib.DebugGetAllData(resetApiData, noItemIds)
     resetApiData = resetApiData or false
+    noItemIds = noItemIds or false
 
     local newRun = false
     local languageToScanNext
@@ -1268,21 +1278,26 @@ function lib.DebugGetAllData(resetApiData)
         lib.svDebugData.DebugGetAllData[apiVersion].clientLang = clientLang
         lib.svDebugData.DebugGetAllData[apiVersion].running = true
         lib.svDebugData.DebugGetAllData[apiVersion].DateTimeStart = os.date("%c")
-    elseif lib.svDebugData.DebugGetAllData[apiVersion] ~= nil and lib.svDebugData.DebugGetAllData[apiVersion].running == true then
+    elseif lib.svDebugData.DebugGetAllData[apiVersion] ~= nil and lib.svDebugData.DebugGetAllData[apiVersion].running ~= nil then
         alreadyFinished = (lib.svDebugData.DebugGetAllData[apiVersion].finished == true) or false
     else
         return
     end
 
     d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    d("[" .. MAJOR .. "]>>>DebugGetAllData START for API \'" ..  tos(apiVersion) .. "\' - newRun: " .. tos(newRun) .. ", resetApiData: " ..tos(resetApiData))
+    d("[" .. MAJOR .. "]>>>DebugGetAllData START for API \'" ..  tos(apiVersion) .. "\' - newRun: " .. tos(newRun) .. ", resetApiData: " ..tos(resetApiData) .. ", noItemIds: " ..tos(noItemIds))
     if not alreadyFinished then
         if newRun == true then
             debugResetSavedVariables(true)
-            d(">>>--------------->>>")
-            --This will take some time! Will only be done once per first reloadui as it will get the setIds and itemIds of the sets
-            scanAllSetData(false, true)
-            d(">>>--------------->>>")
+            --If no itemIds are requested: Skip the scan
+            if not noItemIds then
+                d(">>>--------------->>>")
+                --This will take some time! Will only be done once per first reloadui as it will get the setIds and itemIds of the sets
+                scanAllSetData(false, true)
+                d(">>>--------------->>>")
+            else
+                noFurtherItemsFound = true
+            end
         else
             noFurtherItemsFound = true
         end
@@ -1299,7 +1314,9 @@ function lib.DebugGetAllData(resetApiData)
             lib.svDebugData.DebugGetAllData[apiVersion].langDone[clientLang] = os.date("%c")
 
             --Get all client language dependent data now
-            debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
+            --if not noItemIds then
+                debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
+            --end
             debugGetAllNames(true)
             d(">>>--------------->>>")
 
