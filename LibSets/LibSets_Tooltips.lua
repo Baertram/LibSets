@@ -92,7 +92,6 @@ local IIfACtrlNames = {
 
 
 --Variables
-local hookTooltips = false
 local tooltipSV
 local addDLC
 local addDropLocation
@@ -479,6 +478,7 @@ end
 
 local function addTooltipLine(tooltipControl, setData, itemLink)
     if not setData then return end
+d("addTooltipLine")
     --local isPopupTooltip = tooltipControl == popupTooltip or false
     --local isInformationTooltip = tooltipControl == infoTooltip or false
     --local isItemTooltip = tooltipControl == itemTooltip or false
@@ -609,15 +609,15 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
     --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
     if tooltipData == tooltipGameDataEntryToAddAfter then
         if not tooltipSV then return end
-        if not addDropLocation then addDropLocation = tooltipSV.addDropLocation end
-        if not addDropMechanic then addDropMechanic = tooltipSV.addDropMechanic end
-        if not addDLC then addDLC = tooltipSV.addDLC end
-        if not addBossName then addBossName = tooltipSV.addBossName end
-        if not addSetType then addSetType = tooltipSV.addSetType end
-        if not addNeededTraits then addNeededTraits = tooltipSV.addNeededTraits end
+        addDropLocation = tooltipSV.addDropLocation
+        addDropMechanic = tooltipSV.addDropMechanic
+        addDLC = tooltipSV.addDLC
+        addBossName = tooltipSV.addBossName
+        addSetType = tooltipSV.addSetType
+        addNeededTraits = tooltipSV.addNeededTraits
 
-        local anyTooltipInfoToAdd = (addDropLocation == true or addDropMechanic == true or addDLC == true
-                                    or addBossName == true or addSetType == true or addNeededTraits == true) or false
+        local anyTooltipInfoToAdd = ((addDropLocation == true or addDropMechanic == true or addDLC == true
+                                    or addBossName == true or addSetType == true or addNeededTraits == true) and true) or false
         if not anyTooltipInfoToAdd then return end
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
@@ -750,7 +750,7 @@ local function onPlayerActivatedTooltips()
 
     --Get the settngs for the tooltips
     tooltipSV = getLibSetsTooltipSavedVariables()
-    if not tooltipSV then return end
+    if not lib.svData or not tooltipSV then return end
 
     loadLAMSettingsMenu()
 
@@ -763,12 +763,8 @@ local function onPlayerActivatedTooltips()
     addSetType =        tooltipSV.addSetType
     addNeededTraits =   tooltipSV.addNeededTraits
 
-    if addDropLocation or addDropMechanic or addDLC or addBossName or addSetType or addNeededTraits then
-        hookTooltips = tooltipSV.modifyTooltip
-    end
-
     --hook into the tooltip types?
-    if hookTooltips then
+    if lib.svData.modifyTooltip then
         ZO_PreHookHandler(popupTooltip, 'OnAddGameData', tooltipOnAddGameData)
         --ZO_PreHookHandler(popupTooltip, 'OnHide', tooltipOnHide)
 
