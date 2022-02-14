@@ -49,6 +49,7 @@ local setTypeStr =              localization.setType
 local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
 local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
+local undauntedChestStr =       localization.undauntedChest
 
 
 --local library variables
@@ -261,28 +262,34 @@ local function buildSetNeededTraitsInfo(setData, withOutPrefix)
     return (not withOutPrefix and (neededTraitsStrWithPlaceholder .. traitsNeeded)) or traitsNeeded
 end
 
-local function getDungeonDifficultyStr(setData, itemLink)
+local function getMonsterSetDungeonDifficultyStr(setData, isVeteranMonsterSet, itemLink)
     local veteranData = setData.veteran
     local setType = setData.setType
     if veteranData ~= nil and setType == LIBSETS_SETTYPE_MONSTER then
-        if type(veteranData) == "table" then
-            local equipType = gilet(itemLink)
-            if equipType then
-                for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
-                    if equipTypeVeteranCheck == equipType then
-                        if isVeteran then
-                            return veteranDungeonStr
-                        end
-                    end
-                end
+        if isVeteranMonsterSet ~= nil then
+            if isVeteranMonsterSet == true then
+                return veteranDungeonStr, true
             end
         else
-            if veteranData == true then
-                return veteranDungeonStr
+            if type(veteranData) == "table" then
+                local equipType = gilet(itemLink)
+                if equipType then
+                    local isVeteran = veteranData[equipType]
+                    if isVeteran then
+                        return veteranDungeonStr, true
+                    else
+                        --EquipType is the monster set's shoulder
+                        return undauntedChestStr, false
+                    end
+                end
+            else
+                if veteranData == true then
+                    return veteranDungeonStr, true
+                end
             end
         end
     end
-    return setTypeToDropZoneLocalizationStr[setType]
+    return setTypeToDropZoneLocalizationStr[setType], false
 end
 
 local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSort)
@@ -311,7 +318,7 @@ local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSor
 end
 
 local dropLocationZonesWithPlaceholder
-local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, itemLink)
+local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVeteranMonsterSet, itemLink)
     isMonsterDropMechanic = isMonsterDropMechanic or false
     local dropZonesStr
     --Got drop zones of the item?
@@ -335,9 +342,9 @@ local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, itemLink
         dropLocationZonesStr = dropLocationZonesStr or localization.dropZones
         dropLocationZonesWithPlaceholder = dropLocationZonesWithPlaceholder or dropLocationZonesStr .. placeHolder
         local zoneStr
-        if setType ~= nil then
-            if setType == LIBSETS_SETTYPE_MONSTER then
-                zoneStr = getDungeonDifficultyStr(setData, itemLink)
+        if setType ~= nil or isMonsterDropMechanic then
+            if isMonsterDropMechanic or setType == LIBSETS_SETTYPE_MONSTER then
+                zoneStr, isVeteranMonsterSet = getMonsterSetDungeonDifficultyStr(setData, isVeteranMonsterSet, itemLink)
             else
                 zoneStr = setTypeToDropZoneLocalizationStr[setType]
             end
@@ -349,14 +356,14 @@ local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, itemLink
         end
         dropZonesStr = buildTextLinesFromTable(dropZoneNames, zoneStr, false, true)
     end
-    return dropZonesStr
+    return dropZonesStr, isVeteranMonsterSet
 end
 
 
 local dropMechanicStrWithPlaceholder
 local droppedByStrWithPlaceholder
 local bossStrWithPlaceholder
-local function buildSetDropMechanicAndBossInfo(setData)
+local function buildSetDropMechanicAndBossInfo(setData, itemLink)
     local dropMechanicTab = setData.dropMechanic
     if not dropMechanicTab then return end
     local dropMechanicNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
@@ -375,12 +382,22 @@ local function buildSetDropMechanicAndBossInfo(setData)
             local dropMechanicName = dropMechanicNamesData[clientLang]
             if dropMechanicName and dropMechanicName ~= "" then
 --d(">dropMechanicName: " ..tos(dropMechanicName))
-                if addBossName and dropMechanicId == LIBSETS_DROP_MECHANIC_MONSTER_NAME then
+                local isMonsterSet = (dropMechanicId == LIBSETS_DROP_MECHANIC_MONSTER_NAME) or false
+                if addBossName and isMonsterSet then
                     tins(bossNames, dropMechanicName)
                     alreadyAddedDropMechanics[dropMechanicId] = true
                     isMonsterDropMechanic = true
                 elseif addDropMechanic then
-                    local dropMechanicTexture = dropMechanicIdToTexture[dropMechanicId]
+                    local dropMechanicTexture
+                    --If addBossName disabled, but dropMechanic enabled, then dropMechanicName will be the monster name dropping the set
+                    --> do not add the monster texture then and only output the dungeon texture and dropname of dungeon!
+                    if not addBossName and isMonsterSet then
+                        dropMechanicTexture = setTypeToTexture[LIBSETS_SETTYPE_DUNGEON]
+                        dropMechanicName = dungeonStr
+                        isMonsterDropMechanic = true
+                    else
+                        dropMechanicTexture = dropMechanicIdToTexture[dropMechanicId]
+                    end
                     if dropMechanicTexture then
                         local dropMechanicNameIconStr = zoitf(dropMechanicTexture, 24, 24, dropMechanicName, nil)
                         dropMechanicName = dropMechanicNameIconStr
@@ -396,19 +413,30 @@ local function buildSetDropMechanicAndBossInfo(setData)
     local addBoth = false
     local addDm = false
     local addBoss = false
+    local numDropMechanicNames = #dropMechanicNames
+    local numBossNames = #bossNames
+    local isMonsterSet = (setData.setType == LIBSETS_SETTYPE_MONSTER) or false
+    local zoneStr
+    local isVeteranMonsterSetItem = false
+    if isMonsterSet then
+        zoneStr, isVeteranMonsterSetItem = getMonsterSetDungeonDifficultyStr(setData, nil, itemLink)
+    end
+
     if addDropMechanic and addBossName then
-        if addDropMechanic and #dropMechanicNames > 0 then
+        if addDropMechanic and numDropMechanicNames > 0 then
             prefixForDropMechanicAndBoss = dropMechanicStr
             addDm = true
         end
-        if addBossName and #bossNames > 0 then
-            if prefixForDropMechanicAndBoss and prefixForDropMechanicAndBoss ~= "" then
-                prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..dungeonStr
-                addBoth = true
-            else
-                prefixForDropMechanicAndBoss = dungeonStr
+        if addBossName and numBossNames > 0 then
+            if isMonsterSet and isVeteranMonsterSetItem then
+                if prefixForDropMechanicAndBoss and prefixForDropMechanicAndBoss ~= "" then
+                    prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..dungeonStr
+                    addBoth = true
+                else
+                    prefixForDropMechanicAndBoss = dungeonStr
+                end
+                addBoss = true
             end
-            addBoss = true
         end
         if addBoth == true then
             addDm = false
@@ -419,8 +447,8 @@ local function buildSetDropMechanicAndBossInfo(setData)
             dropMechanicAndBossStr = dropMechanicNamesStr .. "/" .. bossNamesStr
         end
     else
-        addDm = (#dropMechanicNames > 0) or false
-        addBoss = (#bossNames > 0) > false
+        addDm = (numDropMechanicNames > 0 and true) or false
+        addBoss = (numBossNames > 0 and true) or false
     end
 
     if addDropMechanic and addDm then
@@ -433,7 +461,7 @@ local function buildSetDropMechanicAndBossInfo(setData)
         dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, bossStrWithPlaceholder, false, true)
     end
 
-    return dropMechanicAndBossStr, isMonsterDropMechanic
+    return dropMechanicAndBossStr, isMonsterDropMechanic, isVeteranMonsterSetItem
 end
 
 local dlcStrWithPlaceholder
@@ -477,7 +505,7 @@ end
 
 local function addTooltipLine(tooltipControl, setData, itemLink)
     if not setData then return end
-d("addTooltipLine")
+--d("addTooltipLine")
     --local isPopupTooltip = tooltipControl == popupTooltip or false
     --local isInformationTooltip = tooltipControl == infoTooltip or false
     --local isItemTooltip = tooltipControl == itemTooltip or false
@@ -549,6 +577,7 @@ d("addTooltipLine")
     --}
 
     local setType = setData.setType
+    local isMonsterSet = (setType == LIBSETS_SETTYPE_MONSTER) or false
     if addSetType and setType then
         local setTypeText = buildSetTypeInfo(setData)
         addSetInfoText(setTypeText)
@@ -562,16 +591,17 @@ d("addTooltipLine")
     local setDropMechanicText
     local isMonsterDropMechanic = false
     local dropMechanicOrBossOutput = false
+    local isVeteranMonsterSet = false
     if addDropMechanic or addBossName then
         dropMechanicOrBossOutput = true
-        setDropMechanicText, isMonsterDropMechanic = buildSetDropMechanicAndBossInfo(setData)
+        setDropMechanicText, isMonsterDropMechanic, isVeteranMonsterSet = buildSetDropMechanicAndBossInfo(setData, itemLink)
     end
 
     if addDropLocation then
-        local setDropLocationsText = buildSetDropLocationInfo(setData, isMonsterDropMechanic, itemLink)
+        local setDropLocationsText, isVeteranMonsterSet = buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVeteranMonsterSet, itemLink)
         addSetInfoText(setDropLocationsText)
     end
-    if dropMechanicOrBossOutput then
+    if dropMechanicOrBossOutput and setDropMechanicText ~= nil then
         addSetInfoText(setDropMechanicText)
     end
 
