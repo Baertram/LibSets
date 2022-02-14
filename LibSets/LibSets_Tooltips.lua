@@ -105,9 +105,8 @@ local lastTooltipItemLink
 
 --Functions
 local function getLibSetsTooltipSavedVariables()
-    local sv = lib.svData
-    if not sv then return nil end
-    return sv.tooltipModifications
+    if not lib.svData then return end
+    return lib.svData.tooltipModifications
 end
 
 local function isTooltipOfSetItem(itemLink, tooltipData)
@@ -618,6 +617,7 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
 
         local anyTooltipInfoToAdd = ((addDropLocation == true or addDropMechanic == true or addDLC == true
                                     or addBossName == true or addSetType == true or addNeededTraits == true) and true) or false
+--d("anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd))
         if not anyTooltipInfoToAdd then return end
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
@@ -658,7 +658,7 @@ local function loadLAMSettingsMenu()
             tooltip =   localization.modifyTooltip,
             getFunc =   function() return settings.modifyTooltips end,
             setFunc =   function(value)
-                settings.modifyTooltips = value
+                lib.svData.modifyTooltips = value
             end,
             default =   defaultSettings.modifyTooltips,
             disabled =  function() return false end,
@@ -671,7 +671,7 @@ local function loadLAMSettingsMenu()
             tooltip =   localization.setType,
             getFunc =   function() return settings.tooltipModifications.addSetType end,
             setFunc =   function(value)
-                settings.tooltipModifications.addSetType = value
+                lib.svData.tooltipModifications.addSetType = value
             end,
             default =   defaultSettings.tooltipModifications.addSetType,
             disabled =  function() return not settings.modifyTooltips end,
@@ -683,7 +683,7 @@ local function loadLAMSettingsMenu()
             tooltip =   localization.dropMechanic,
             getFunc =   function() return settings.tooltipModifications.addDropMechanic end,
             setFunc =   function(value)
-                settings.tooltipModifications.addDropMechanic = value
+                lib.svData.tooltipModifications.addDropMechanic = value
             end,
             default =   defaultSettings.tooltipModifications.addDropMechanic,
             disabled =  function() return not settings.modifyTooltips end,
@@ -695,7 +695,7 @@ local function loadLAMSettingsMenu()
             tooltip =   localization.dropZones,
             getFunc =   function() return settings.tooltipModifications.addDropLocation end,
             setFunc =   function(value)
-                settings.tooltipModifications.addDropLocation = value
+                lib.svData.tooltipModifications.addDropLocation = value
             end,
             default =   defaultSettings.tooltipModifications.addDropLocation,
             disabled =  function() return not settings.modifyTooltips end,
@@ -707,7 +707,7 @@ local function loadLAMSettingsMenu()
             tooltip =   localization.boss,
             getFunc =   function() return settings.tooltipModifications.addBossName end,
             setFunc =   function(value)
-                settings.tooltipModifications.addBossName = value
+                lib.svData.tooltipModifications.addBossName = value
             end,
             default =   defaultSettings.tooltipModifications.addBossName,
             disabled =  function() return not settings.modifyTooltips end,
@@ -719,7 +719,7 @@ local function loadLAMSettingsMenu()
             tooltip =   localization.neededTraits,
             getFunc =   function() return settings.tooltipModifications.addNeededTraits end,
             setFunc =   function(value)
-                settings.tooltipModifications.addNeededTraits = value
+                lib.svData.tooltipModifications.addNeededTraits = value
             end,
             default =   defaultSettings.tooltipModifications.addNeededTraits,
             disabled =  function() return not settings.modifyTooltips end,
@@ -731,7 +731,7 @@ local function loadLAMSettingsMenu()
             tooltip =   localization.dlc,
             getFunc =   function() return settings.tooltipModifications.addDLC end,
             setFunc =   function(value)
-                settings.tooltipModifications.addDLC = value
+                lib.svData.tooltipModifications.addDLC = value
             end,
             default =   defaultSettings.tooltipModifications.addDLC,
             disabled =  function() return not settings.modifyTooltips end,
@@ -764,7 +764,8 @@ local function onPlayerActivatedTooltips()
     addNeededTraits =   tooltipSV.addNeededTraits
 
     --hook into the tooltip types?
-    if lib.svData.modifyTooltip then
+    if lib.svData.modifyTooltips == true then
+--d("Hooks loaded")
         ZO_PreHookHandler(popupTooltip, 'OnAddGameData', tooltipOnAddGameData)
         --ZO_PreHookHandler(popupTooltip, 'OnHide', tooltipOnHide)
 
