@@ -416,6 +416,7 @@ local function LoadSavedVariables()
             addNeededTraits = false,
         },
     }
+    lib.defaultSV = defaults
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, worldName, "$AllAccounts")
     --------------------------------------------------------------------------------------------------------------------

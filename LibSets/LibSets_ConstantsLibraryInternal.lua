@@ -769,7 +769,7 @@ local dropMechanicIdToTexture = {
     [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]     = "/esoui/art/journal/journal_quest_dungeon.dds",
     [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                   = "/esoui/art/icons/undaunted_smallcoffer.dds",
     [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]              = "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",
-    [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD] = "/esoui/art/lfg/lfg_normaldungeon_up.dds",
+    [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD] = "/esoui/art/chatwindow/chat_mail_up.dds",
     [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]             = "/esoui/art/icons/servicemappins/ic_monstrousteeth_complete.dds",
     [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                  = "/esoui/art/menubar/menubar_levelup_up.dds",
     [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                      = "/esoui/art/mappins/antiquity_trackeddigsite.dds",
@@ -811,7 +811,8 @@ lib.localization = {
         setType         = "Set Art",
         neededTraits    = "Eigenschaften benötigt (Analyse)",
         dropMechanic    = "Drop Mechanik",
-        undauntedChest  = undauntedStr .. " Truhe"
+        undauntedChest  = undauntedStr .. " Truhe",
+        modifyTooltip   = "Tooltip um Set Infos erweitern",
     },
     ["en"] = {
         dlc             = "Chapter/DLC",
@@ -836,6 +837,7 @@ lib.localization = {
         dropMechanic    = "Drop mechanics",
         undauntedChest  = undauntedStr .. " chest",
         boss            =           GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501),
+        modifyTooltip   = "Enhance tooltip by set info",
     },
     ["es"] = {
         dlc             = "Capítulo/DLC",
@@ -844,7 +846,8 @@ lib.localization = {
         droppedBy       = "Dejado por",
         setType         = "Tipo de conjunto",
         dropMechanic    = "Mecanica de caída",
-        undauntedChest  = undauntedStr .. " cofre"
+        undauntedChest  = undauntedStr .. " cofre",
+        modifyTooltip   = "Enhance tooltip by set info",
     },
     ["fr"] = {
         dlc             = "Chapitre/DLC",
@@ -853,7 +856,8 @@ lib.localization = {
         droppedBy       = "Dépouillé par",
         setType         = "Type de set",
         dropMechanic    = "Mécanique de largage",
-        undauntedChest  = "Poitrine de " .. undauntedStr
+        undauntedChest  = "Poitrine de " .. undauntedStr,
+        modifyTooltip   = "Enhance tooltip by set info",
     },
     ["ru"] = {
         dlc             = "Глава/DLC",
@@ -862,7 +866,8 @@ lib.localization = {
         droppedBy       = "Снизился на",
         setType         = "Тип набора",
         dropMechanic    = "Механика падения",
-        undauntedChest  = undauntedStr .. " грудь"
+        undauntedChest  = undauntedStr .. " грудь",
+        modifyTooltip   = "Enhance tooltip by set info",
     },
     ["jp"] = {
         dlc             = "チャプター/ DLC",
@@ -871,7 +876,8 @@ lib.localization = {
         droppedBy       = "によってドロップ",
         setType         = "セットの種類",
         dropMechanic    = "ドロップメカニック",
-        undauntedChest  = undauntedStr .. " 胸"
+        undauntedChest  = undauntedStr .. " 胸",
+        modifyTooltip   = "Enhance tooltip by set info",
     },
 }
 

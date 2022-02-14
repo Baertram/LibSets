@@ -4,7 +4,7 @@ if IsLibSetsAlreadyLoaded(false) then return end
 --This file the sets data and info (pre-loaded from the specified API version)
 --It should be updated each time the APIversion increases to contain the new/changed data
 local lib = LibSets
-local MAJOR, MINOR = lib.name, lib.versio
+local MAJOR, MINOR = lib.name, lib.version
 
 local libPrefix = "["..MAJOR.."]"
 local placeHolder = ": "
@@ -628,6 +628,119 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
     end
 end
 
+local function loadLAMSettingsMenu()
+    local panelData = {
+        type 				= 'panel',
+        name 				= MAJOR,
+        displayName 		= MAJOR,
+        author 				= "Baertram",
+        version 			= MINOR,
+        registerForRefresh 	= false,
+        registerForDefaults = true,
+        slashCommand 		= "/libsetss",
+        website             = "https://www.esoui.com/downloads/info2241-LibSets.html",
+        feedback            = "https://www.esoui.com/portal.php?id=136&a=bugreport",
+        donation            = "https://www.esoui.com/portal.php?id=136&a=faq&faqid=131",
+    }
+    local LAMPanelName = MAJOR .. "_LAM"
+    --The LibAddonMenu2.0 settings panel reference variable
+    local LAMsettingsPanel = LibAddonMenu2:RegisterAddonPanel(LAMPanelName, panelData)
+    lib.LAMsettingsPanel = LAMsettingsPanel
+
+    local settings = lib.svData
+    local defaultSettings = lib.defaultSV
+
+    local optionsTable =
+    {
+        {
+            type =      "checkbox",
+            name =      localization.modifyTooltip,
+            tooltip =   localization.modifyTooltip,
+            getFunc =   function() return settings.modifyTooltips end,
+            setFunc =   function(value)
+                settings.modifyTooltips = value
+            end,
+            default =   defaultSettings.modifyTooltips,
+            disabled =  function() return false end,
+            width =     "full",
+        },
+        {
+            type =      "checkbox",
+            name =      localization.setType,
+            tooltip =   localization.setType,
+            getFunc =   function() return settings.tooltipModifications.addSetType end,
+            setFunc =   function(value)
+                settings.tooltipModifications.addSetType = value
+            end,
+            default =   defaultSettings.tooltipModifications.addSetType,
+            disabled =  function() return not settings.modifyTooltips end,
+            width =     "full",
+        },
+        {
+            type =      "checkbox",
+            name =      localization.dropMechanic,
+            tooltip =   localization.dropMechanic,
+            getFunc =   function() return settings.tooltipModifications.addDropMechanic end,
+            setFunc =   function(value)
+                settings.tooltipModifications.addDropMechanic = value
+            end,
+            default =   defaultSettings.tooltipModifications.addDropMechanic,
+            disabled =  function() return not settings.modifyTooltips end,
+            width =     "full",
+        },
+        {
+            type =      "checkbox",
+            name =      localization.dropZones,
+            tooltip =   localization.dropZones,
+            getFunc =   function() return settings.tooltipModifications.addDropLocation end,
+            setFunc =   function(value)
+                settings.tooltipModifications.addDropLocation = value
+            end,
+            default =   defaultSettings.tooltipModifications.addDropLocation,
+            disabled =  function() return not settings.modifyTooltips end,
+            width =     "full",
+        },
+        {
+            type =      "checkbox",
+            name =      localization.boss,
+            tooltip =   localization.boss,
+            getFunc =   function() return settings.tooltipModifications.addBossName end,
+            setFunc =   function(value)
+                settings.tooltipModifications.addBossName = value
+            end,
+            default =   defaultSettings.tooltipModifications.addBossName,
+            disabled =  function() return not settings.modifyTooltips end,
+            width =     "full",
+        },
+        {
+            type =      "checkbox",
+            name =      localization.neededTraits,
+            tooltip =   localization.neededTraits,
+            getFunc =   function() return settings.tooltipModifications.addNeededTraits end,
+            setFunc =   function(value)
+                settings.tooltipModifications.addNeededTraits = value
+            end,
+            default =   defaultSettings.tooltipModifications.addNeededTraits,
+            disabled =  function() return not settings.modifyTooltips end,
+            width =     "full",
+        },
+        {
+            type =      "checkbox",
+            name =      localization.dlc,
+            tooltip =   localization.dlc,
+            getFunc =   function() return settings.tooltipModifications.addDLC end,
+            setFunc =   function(value)
+                settings.tooltipModifications.addDLC = value
+            end,
+            default =   defaultSettings.tooltipModifications.addDLC,
+            disabled =  function() return not settings.modifyTooltips end,
+            width =     "full",
+        },
+    }
+
+    LibAddonMenu2:RegisterOptionControls(LAMPanelName, optionsTable)
+end
+
 local function onPlayerActivatedTooltips()
     EM:UnregisterForEvent(MAJOR .. "_Tooltips", EVENT_PLAYER_ACTIVATED) --only load once
 
@@ -637,6 +750,8 @@ local function onPlayerActivatedTooltips()
     --Get the settngs for the tooltips
     tooltipSV = getLibSetsTooltipSavedVariables()
     if not tooltipSV then return end
+
+    loadLAMSettingsMenu()
 
     --add line of set information like chosen in the LAM settings of LibSets
     -->Drop location
