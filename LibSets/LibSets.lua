@@ -408,13 +408,14 @@ local function LoadSavedVariables()
     local defaults = {
         modifyTooltips = false,
         tooltipModifications = {
-            addDropLocation = false,
-            addDropMechanic = false,
-            addDLC          = false,
-            addBossName     = false,
-            addSetType      = false,
-            addNeededTraits = false,
+            addSetType      = true,
+            addDropLocation = true,
+            addBossName     = true,
+            addDropMechanic = true,
+            addNeededTraits = true,
+            addDLC          = true,
         },
+        useCustomTooltipPattern = "",
     }
     lib.defaultSV = defaults
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)

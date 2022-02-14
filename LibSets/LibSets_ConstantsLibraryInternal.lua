@@ -813,6 +813,8 @@ lib.localization = {
         dropMechanic    = "Drop Mechanik",
         undauntedChest  = undauntedStr .. " Truhe",
         modifyTooltip   = "Tooltip um Set Infos erweitern",
+        customTooltipPattern        = "Definiere Set Information Tooltip Text",
+        customTooltipPattern_TT     = "Definiere deinen eigenen Tooltip Text, inklusive vor-definierter Platzhalter. Beispiel: \'Art <<1>>/Drop <<2>> <<3>> <<4>>\'. Lasse dieses Textfeld leer, um den eigenen Tooltip Text zu deaktivieren!\nPlatzhalter müssen mit << beginnen, danach folt eine Nummer, und beendet werden diese mit >>, z.B. <<1>> oder <<5>>. Es gibt maximal 7 Platzhalter in einem Text.\n\nMögliche Platzhalter sind:\n<<1>>   Set Art\n<<2>>   Drop Mechaniken [können mehrere , getrennte sein]\n<<3>>   Drop Zonen [können mehrere , getrennte sein]\n<<4>>   Boss/Drop durch Namen\n<<5>>   Benötigte Anzahl analysierter Eigenschaten\n<<6>>   Kapitel/DLC Name mit dem das Set eingeführt wurde",
     },
     ["en"] = {
         dlc             = "Chapter/DLC",
@@ -838,6 +840,8 @@ lib.localization = {
         undauntedChest  = undauntedStr .. " chest",
         boss            =           GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501),
         modifyTooltip   = "Enhance tooltip by set info",
+        customTooltipPattern        = "Define custom tooltip set info",
+        customTooltipPattern_TT     = "Define your own custom tooltip text, including the possibility to use some pre-defined placeholders in your text. Example: \'Type <<1>>/Drops <<2>> <<3>> <<4>>\'. Leave the text field empty to disable this custom tooltip!\nPlaceholders need to start with << followed by a number and end on >>, e.g. <<1>> or <<5>>. There can be only a maximum of 7 placeholders in a text.\n\nBelow you'll find the possible placeholders:\n<<1>>   Set type\n<<2>>   Drop mechanics [could be several with , separator]\n<<3>>   Drop zones [could be several with , separator]\n<<4>>   Boss/Dropped by names\n<<5>>   Number of needed traits researched\n<<6>>   Chapter/DLC name set was introduced with",
     },
     ["es"] = {
         dlc             = "Capítulo/DLC",

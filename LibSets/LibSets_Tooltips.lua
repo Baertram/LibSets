@@ -13,7 +13,7 @@ local placeHolder = ": "
 local EM = EVENT_MANAGER
 
 local tos = tostring
---local strgmatch = string.gmatch
+local strgmatch = string.gmatch
 --local strlower = string.lower
 --local strlen = string.len
 local strfind = string.find
@@ -246,6 +246,45 @@ local function getLastItemLink(tooltipControl)
 	return itemLink
 end
 
+--[[
+--Custom tooltip placeholders
+    <<1>>   Set type
+    <<2>>   Drop mechanics
+    <<3>>   Drop zones
+    <<4>>   Boss/Dropped by names
+    <<5>>   Number of needed traits researched
+    <<6>>   Chapter/DLC name set was introduced with",
+]]
+local useCustomTooltip
+local customTooltipPlaceholdersNeeded = {}
+local setTypePlaceholder = false
+local dropMechanicPlaceholder = false
+local dropZonesPlaceholder = false
+local bossNamePlaceholder = false
+local neededTraitsPlaceholder = false
+local dlcNamePlaceHolder = false
+local function isCustomTooltipEnabled(value)
+    local useCustomTooltipPattern = value or lib.svData.useCustomTooltipPattern
+    if useCustomTooltipPattern and useCustomTooltipPattern ~= "" then
+        --Check if the custom tooltip pattern contains any placeholder, else it will not be relevant
+        if strfind(useCustomTooltipPattern, "<<%d>>", 1, false) ~= nil then
+            for placeholder in strgmatch(useCustomTooltipPattern, "<<%d>>+") do
+                tins(customTooltipPlaceholdersNeeded, placeholder)
+                setTypePlaceholder =        placeholder == "<<1>>" and true or false
+                dropMechanicPlaceholder =   placeholder == "<<2>>" and true or false
+                dropZonesPlaceholder =      placeholder == "<<3>>" and true or false
+                bossNamePlaceholder =       placeholder == "<<4>>" and true or false
+                neededTraitsPlaceholder =   placeholder == "<<5>>" and true or false
+                dlcNamePlaceHolder =        placeholder == "<<6>>" and true or false
+            end
+            if #customTooltipPlaceholdersNeeded > 1 then
+                return true
+            end
+        end
+        return false
+    end
+end
+
 local function checkTraitsNeededGiven(setData)
     local setType = setData.setType
     return (setType and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED) or false
@@ -318,8 +357,12 @@ local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSor
 end
 
 local dropLocationZonesWithPlaceholder
-local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVeteranMonsterSet, itemLink)
+local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVeteranMonsterSet, itemLink, noPrefix)
     isMonsterDropMechanic = isMonsterDropMechanic or false
+    noPrefix = noPrefix or false
+--todo: noPrefix abfragen und berücksichtigen bei allen Ausgaben!
+
+
     local dropZonesStr
     --Got drop zones of the item?
     local alreadyAddedZoneIds = {}
@@ -363,7 +406,8 @@ end
 local dropMechanicStrWithPlaceholder
 local droppedByStrWithPlaceholder
 local bossStrWithPlaceholder
-local function buildSetDropMechanicAndBossInfo(setData, itemLink)
+local function buildSetDropMechanicAndBossInfo(setData, itemLink, noPrefix)
+    noPrefix = noPrefix or false
     local dropMechanicTab = setData.dropMechanic
     if not dropMechanicTab then return end
     local dropMechanicNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
@@ -420,6 +464,10 @@ local function buildSetDropMechanicAndBossInfo(setData, itemLink)
     local isVeteranMonsterSetItem = false
     if isMonsterSet then
         zoneStr, isVeteranMonsterSetItem = getMonsterSetDungeonDifficultyStr(setData, nil, itemLink)
+        if not isVeteranMonsterSetItem then
+            --Replace the bossNames with undaunted chest
+            bossNames = { [1] = undauntedChestStr }
+        end
     end
 
     if addDropMechanic and addBossName then
@@ -428,20 +476,22 @@ local function buildSetDropMechanicAndBossInfo(setData, itemLink)
             addDm = true
         end
         if addBossName and numBossNames > 0 then
-            if isMonsterSet and isVeteranMonsterSetItem then
-                if prefixForDropMechanicAndBoss and prefixForDropMechanicAndBoss ~= "" then
-                    prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..dungeonStr
-                    addBoth = true
-                else
-                    prefixForDropMechanicAndBoss = dungeonStr
-                end
-                addBoss = true
+            if prefixForDropMechanicAndBoss and prefixForDropMechanicAndBoss ~= "" then
+                prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..dungeonStr
+                addBoth = true
+            else
+                prefixForDropMechanicAndBoss = dungeonStr
             end
+            addBoss = true
         end
         if addBoth == true then
             addDm = false
             addBoss = false
-            prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. placeHolder
+            if noPrefix then
+                prefixForDropMechanicAndBoss = ""
+            else
+                prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. placeHolder
+            end
             dropMechanicNamesStr = buildTextLinesFromTable(dropMechanicNames, prefixForDropMechanicAndBoss, false, true)
             bossNamesStr = buildTextLinesFromTable(bossNames, nil, false, true)
             dropMechanicAndBossStr = dropMechanicNamesStr .. "/" .. bossNamesStr
@@ -451,34 +501,49 @@ local function buildSetDropMechanicAndBossInfo(setData, itemLink)
         addBoss = (numBossNames > 0 and true) or false
     end
 
+    local prefixStr
     if addDropMechanic and addDm then
         --dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
-        droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
-        dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, droppedByStrWithPlaceholder, false, true)
+        if noPrefix then
+            prefixStr = ""
+        else
+            droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
+            prefixStr = droppedByStrWithPlaceholder
+        end
+        dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, prefixStr, false, true)
     elseif addBossName and addBoss then
         --droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
         bossStrWithPlaceholder = bossStrWithPlaceholder or bossStr .. placeHolder
-        dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, bossStrWithPlaceholder, false, true)
+        prefixStr = bossStrWithPlaceholder
+        if noPrefix or (isMonsterSet and not isVeteranMonsterSetItem) then
+            prefixStr = ""
+        elseif not noPrefix then
+            droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
+            prefixStr = droppedByStrWithPlaceholder
+        end
+        dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, prefixStr, false, true)
     end
 
     return dropMechanicAndBossStr, isMonsterDropMechanic, isVeteranMonsterSetItem
 end
 
 local dlcStrWithPlaceholder
-local function buildSetDLCInfo(setData)
+local function buildSetDLCInfo(setData, noPrefix)
     local DLCid = setData.dlcId
     if not DLCid then return end
+    noPrefix = noPrefix or false
 
     dlcStr = dlcStr or localization.dlc
     dlcStrWithPlaceholder = dlcStrWithPlaceholder or dlcStr .. placeHolder
-
-    return dlcStrWithPlaceholder .. libSets_GetDLCName(DLCid)
+    local dlcName = libSets_GetDLCName(DLCid)
+    return (not noPrefix and dlcStrWithPlaceholder .. dlcName) or  dlcName
 end
 
 local setTypeStrWithPlaceholder
-local function buildSetTypeInfo(setData)
+local function buildSetTypeInfo(setData, noPrefix)
     local setType = setData.setType
     if not setType then return end
+    noPrefix = noPrefix or false
 
     setTypeStr = setTypeStr or localization.setType
     setTypeStrWithPlaceholder = setTypeStrWithPlaceholder or setTypeStr .. placeHolder
@@ -497,10 +562,16 @@ local function buildSetTypeInfo(setData)
     if addNeededTraits then
         local setTraitsNeeded = buildSetNeededTraitsInfo(setData, true)
         if setTraitsNeeded ~= nil and setTraitsNeeded ~= "" then
-            return setTypeStrWithPlaceholder .. setTypeName .. " (" .. setTraitsNeeded .. ")"
+            local retStr
+            if noPrefix then
+                retStr = setTypeName .. " (" .. setTraitsNeeded .. ")"
+            else
+                retStr = setTypeStrWithPlaceholder .. setTypeName .. " (" .. setTraitsNeeded .. ")"
+            end
+            return retStr
         end
     end
-    return setTypeStrWithPlaceholder .. setTypeName
+    return (not noPrefix and (setTypeStrWithPlaceholder .. setTypeName)) or setTypeName
 end
 
 local function addTooltipLine(tooltipControl, setData, itemLink)
@@ -576,37 +647,52 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     --  },
     --}
 
-    local setType = setData.setType
-    local isMonsterSet = (setType == LIBSETS_SETTYPE_MONSTER) or false
-    if addSetType and setType then
-        local setTypeText = buildSetTypeInfo(setData)
+    local setTypeText
+    local setNeededTraitsText
+    local setDropMechanicText
+    local setDropLocationsText
+    local setDLCText
+
+    local isMonsterDropMechanic = false
+    local dropMechanicOrBossOutput = false
+    --local setType = setData.setType
+    --local isMonsterSet = (setType == LIBSETS_SETTYPE_MONSTER) or false
+    local isVeteranMonsterSet = false
+
+    --[[
+        setTypePlaceholder =        placeholder == "<<1>>"
+        dropMechanicPlaceholder =   placeholder == "<<2>>"
+        dropZonesPlaceholder =      placeholder == "<<3>>"
+        bossNamePlaceholder =       placeholder == "<<4>>"
+        neededTraitsPlaceholder =   placeholder == "<<5>>"
+        dlcNamePlaceHolder =        placeholder == "<<6>>"
+    ]]
+
+    if (useCustomTooltip and setTypePlaceholder) or addSetType then
+        setTypeText = buildSetTypeInfo(setData, useCustomTooltip)
         addSetInfoText(setTypeText)
     end
 
-    if not addSetType and addNeededTraits then
-        local setNeededTraitsText = buildSetNeededTraitsInfo(setData, false)
+    if (useCustomTooltip and neededTraitsPlaceholder)  or (not addSetType and addNeededTraits) then
+        setNeededTraitsText = buildSetNeededTraitsInfo(setData, useCustomTooltip)
         addSetInfoText(setNeededTraitsText)
     end
 
-    local setDropMechanicText
-    local isMonsterDropMechanic = false
-    local dropMechanicOrBossOutput = false
-    local isVeteranMonsterSet = false
-    if addDropMechanic or addBossName then
+    if (useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder))  or addDropMechanic or addBossName then
         dropMechanicOrBossOutput = true
-        setDropMechanicText, isMonsterDropMechanic, isVeteranMonsterSet = buildSetDropMechanicAndBossInfo(setData, itemLink)
+        setDropMechanicText, isMonsterDropMechanic, isVeteranMonsterSet = buildSetDropMechanicAndBossInfo(setData, itemLink, useCustomTooltip)
     end
 
-    if addDropLocation then
-        local setDropLocationsText, isVeteranMonsterSet = buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVeteranMonsterSet, itemLink)
+    if (useCustomTooltip and dropZonesPlaceholder)  or addDropLocation then
+        setDropLocationsText, isVeteranMonsterSet = buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVeteranMonsterSet, itemLink, useCustomTooltip)
         addSetInfoText(setDropLocationsText)
     end
     if dropMechanicOrBossOutput and setDropMechanicText ~= nil then
         addSetInfoText(setDropMechanicText)
     end
 
-    if addDLC then
-        local setDLCText = buildSetDLCInfo(setData)
+    if (useCustomTooltip and dlcNamePlaceHolder)  or addDLC then
+        setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
         addSetInfoText(setDLCText)
     end
 
@@ -628,6 +714,8 @@ local function tooltipItemCheck(tooltipControl, tooltipData)
     return isSet, setId, itemLink
 end
 
+
+
 --[[
 local function tooltipOnHide(tooltipControl, tooltipData)
     --todo
@@ -638,15 +726,17 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
     --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
     if tooltipData == tooltipGameDataEntryToAddAfter then
         if not tooltipSV then return end
-        addDropLocation = tooltipSV.addDropLocation
-        addDropMechanic = tooltipSV.addDropMechanic
-        addDLC = tooltipSV.addDLC
-        addBossName = tooltipSV.addBossName
-        addSetType = tooltipSV.addSetType
-        addNeededTraits = tooltipSV.addNeededTraits
+        addDropLocation =   tooltipSV.addDropLocation
+        addDropMechanic =   tooltipSV.addDropMechanic
+        addDLC =            tooltipSV.addDLC
+        addBossName =       tooltipSV.addBossName
+        addSetType =        tooltipSV.addSetType
+        addNeededTraits =   tooltipSV.addNeededTraits
 
-        local anyTooltipInfoToAdd = ((addDropLocation == true or addDropMechanic == true or addDLC == true
-                                    or addBossName == true or addSetType == true or addNeededTraits == true) and true) or false
+        local anyTooltipInfoToAdd = ((useCustomTooltip == true
+                                    or (not useCustomTooltip and (addDropLocation == true or addDropMechanic == true or addDLC == true
+                                                                or addBossName == true or addSetType == true or addNeededTraits == true))) and true)
+                                    or false
 --d("anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd))
         if not anyTooltipInfoToAdd then return end
 
@@ -678,9 +768,10 @@ local function loadLAMSettingsMenu()
     lib.LAMsettingsPanel = LAMsettingsPanel
 
     local settings = lib.svData
-    local defaultSettings = lib.defaultSV
+    local defaultSettings                         = lib.defaultSV
+    local preventLAMTooltipEditSetFuncEndlessLoop = false
 
-    local optionsTable =
+    local optionsTable                            =
     {
         {
             type =      "checkbox",
@@ -704,7 +795,7 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addSetType = value
             end,
             default =   defaultSettings.tooltipModifications.addSetType,
-            disabled =  function() return not settings.modifyTooltips end,
+            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
             width =     "full",
         },
         {
@@ -716,7 +807,7 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addDropMechanic = value
             end,
             default =   defaultSettings.tooltipModifications.addDropMechanic,
-            disabled =  function() return not settings.modifyTooltips end,
+            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
             width =     "full",
         },
         {
@@ -728,7 +819,7 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addDropLocation = value
             end,
             default =   defaultSettings.tooltipModifications.addDropLocation,
-            disabled =  function() return not settings.modifyTooltips end,
+            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= ""end,
             width =     "full",
         },
         {
@@ -740,7 +831,7 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addBossName = value
             end,
             default =   defaultSettings.tooltipModifications.addBossName,
-            disabled =  function() return not settings.modifyTooltips end,
+            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
             width =     "full",
         },
         {
@@ -752,7 +843,7 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addNeededTraits = value
             end,
             default =   defaultSettings.tooltipModifications.addNeededTraits,
-            disabled =  function() return not settings.modifyTooltips end,
+            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
             width =     "full",
         },
         {
@@ -764,9 +855,36 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addDLC = value
             end,
             default =   defaultSettings.tooltipModifications.addDLC,
-            disabled =  function() return not settings.modifyTooltips end,
+            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
             width =     "full",
         },
+
+        ----------------------------------------------------------------------------------------------------------------
+        {
+            type = "editbox",
+            name = localization.customTooltipPattern,
+            tooltip = localization.customTooltipPattern_TT,
+            getFunc = function() return settings.useCustomTooltipPattern end,
+            setFunc = function(value)
+                if not preventLAMTooltipEditSetFuncEndlessLoop then
+                    useCustomTooltip = isCustomTooltipEnabled(value)
+                    if not useCustomTooltip then
+                        value = ""
+                        settings.useCustomTooltipPattern = value
+                        if LibSets_LAM_EditBox_CustomTooltipPattern ~= nil then
+                            preventLAMTooltipEditSetFuncEndlessLoop = true
+                            LibSets_LAM_EditBox_CustomTooltipPattern.editbox:SetText(value)
+                            preventLAMTooltipEditSetFuncEndlessLoop = false
+                        end
+                    else
+                        settings.useCustomTooltipPattern = value
+                    end
+                end
+            end,
+            default = defaultSettings.useCustomTooltipPattern,
+            reference = "LibSets_LAM_EditBox_CustomTooltipPattern",
+            --requiresReload = true,
+        }
     }
 
     LibAddonMenu2:RegisterOptionControls(LAMPanelName, optionsTable)
@@ -792,6 +910,7 @@ local function onPlayerActivatedTooltips()
     addBossName =       tooltipSV.addBossName
     addSetType =        tooltipSV.addSetType
     addNeededTraits =   tooltipSV.addNeededTraits
+    useCustomTooltip =  isCustomTooltipEnabled()
 
     --hook into the tooltip types?
     if lib.svData.modifyTooltips == true then
