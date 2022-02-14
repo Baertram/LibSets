@@ -9,22 +9,6 @@ local MAJOR, MINOR = lib.name, lib.versio
 local libPrefix = "["..MAJOR.."]"
 local placeHolder = ": "
 
-local clientLang = lib.clientLang
-local localization         =    lib.localization[clientLang]
-local dropLocationZonesStr =    localization.dropZones
-local dlcStr =                  localization.dlc
-local droppedByStr =            localization.droppedBy
-local dungeonStr =              localization.dropZoneDungeon
-local bossStr =                 localization.boss
-local setTypeStr =              localization.setType
-local neededTraitsStr =         localization.neededTraits
-local dropMechanicStr =         localization.dropMechanic
-local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
-
-local dropMechanicIdToTexture = lib.dropMechanicIdToTexture
-local setTypeToTexture =        lib.setTypeToTexture
-local setTypeToDropZoneLocalizationStr = lib.setTypeToDropZoneLocalizationStr
-
 --local ZOs variables
 local EM = EVENT_MANAGER
 
@@ -44,6 +28,27 @@ local tsort = table.sort
 local zoitf = zo_iconTextFormat
 
 local gilsetinf = GetItemLinkSetInfo
+local gilet = GetItemLinkEquipType
+
+
+local dropMechanicIdToTexture = lib.dropMechanicIdToTexture
+local setTypeToTexture =        lib.setTypeToTexture
+local vetDungTexture = setTypeToTexture["vet_dung"]
+local setTypeToDropZoneLocalizationStr = lib.setTypeToDropZoneLocalizationStr
+
+
+local clientLang = lib.clientLang
+local localization         =    lib.localization[clientLang]
+local dropLocationZonesStr =    localization.dropZones
+local dlcStr =                  localization.dlc
+local droppedByStr =            localization.droppedBy
+local dungeonStr =              localization.dropZoneDungeon
+local veteranDungeonStr =       zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
+local bossStr =                 localization.boss
+local setTypeStr =              localization.setType
+local neededTraitsStr =         localization.neededTraits
+local dropMechanicStr =         localization.dropMechanic
+local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 
 
 --local library variables
@@ -258,6 +263,30 @@ local function buildSetNeededTraitsInfo(setData, withOutPrefix)
     return (not withOutPrefix and (neededTraitsStrWithPlaceholder .. traitsNeeded)) or traitsNeeded
 end
 
+local function getDungeonDifficultyStr(setData, itemLink)
+    local veteranData = setData.veteran
+    local setType = setData.setType
+    if veteranData ~= nil and setType == LIBSETS_SETTYPE_MONSTER then
+        if type(veteranData) == "table" then
+            local equipType = gilet(itemLink)
+            if equipType then
+                for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
+                    if equipTypeVeteranCheck == equipType then
+                        if isVeteran then
+                            return veteranDungeonStr
+                        end
+                    end
+                end
+            end
+        else
+            if veteranData == true then
+                return veteranDungeonStr
+            end
+        end
+    end
+    return setTypeToDropZoneLocalizationStr[setType]
+end
+
 local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSort)
     alwaysNewLine = alwaysNewLine or false
     doSort = doSort or false
@@ -284,7 +313,7 @@ local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSor
 end
 
 local dropLocationZonesWithPlaceholder
-local function buildSetDropLocationInfo(setData, isMonsterDropMechanic)
+local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, itemLink)
     isMonsterDropMechanic = isMonsterDropMechanic or false
     local dropZonesStr
     --Got drop zones of the item?
@@ -309,7 +338,11 @@ local function buildSetDropLocationInfo(setData, isMonsterDropMechanic)
         dropLocationZonesWithPlaceholder = dropLocationZonesWithPlaceholder or dropLocationZonesStr .. placeHolder
         local zoneStr
         if setType ~= nil then
-            zoneStr = setTypeToDropZoneLocalizationStr[setType]
+            if setType == LIBSETS_SETTYPE_MONSTER then
+                zoneStr = getDungeonDifficultyStr(setData, itemLink)
+            else
+                zoneStr = setTypeToDropZoneLocalizationStr[setType]
+            end
             if zoneStr ~= nil then
                 zoneStr = zoneStr .. placeHolder
             else
@@ -320,6 +353,7 @@ local function buildSetDropLocationInfo(setData, isMonsterDropMechanic)
     end
     return dropZonesStr
 end
+
 
 local dropMechanicStrWithPlaceholder
 local droppedByStrWithPlaceholder
@@ -359,10 +393,6 @@ local function buildSetDropMechanicAndBossInfo(setData)
             end
         end
     end
-
-    dropMechanicStr = dropMechanicStr or localization.dropMechanic
-    droppedByStr = droppedByStr or localization.droppedBy
-    dungeonStr = dungeonStr or localization.dropZoneDungeon
 
     local prefixForDropMechanicAndBoss
     local addBoth = false
@@ -430,7 +460,7 @@ local function buildSetTypeInfo(setData)
     local setTypeName = libSets_GetSetTypeName(setType)
     local setTypeTexture
     if setData.isVeteran ~= nil then
-        setTypeTexture = setTypeToTexture["vet_dung"]
+        setTypeTexture = vetDungTexture
     else
         setTypeTexture = setTypeToTexture[setType]
     end
@@ -447,7 +477,7 @@ local function buildSetTypeInfo(setData)
     return setTypeStrWithPlaceholder .. setTypeName
 end
 
-local function addTooltipLine(tooltipControl, setData)
+local function addTooltipLine(tooltipControl, setData, itemLink)
     if not setData then return end
     --local isPopupTooltip = tooltipControl == popupTooltip or false
     --local isInformationTooltip = tooltipControl == infoTooltip or false
@@ -539,7 +569,7 @@ local function addTooltipLine(tooltipControl, setData)
     end
 
     if addDropLocation then
-        local setDropLocationsText = buildSetDropLocationInfo(setData, isMonsterDropMechanic)
+        local setDropLocationsText = buildSetDropLocationInfo(setData, isMonsterDropMechanic, itemLink)
         addSetInfoText(setDropLocationsText)
     end
     if dropMechanicOrBossOutput then
@@ -565,7 +595,8 @@ local function tooltipItemCheck(tooltipControl, tooltipData)
     local itemLink = getLastItemLink(tooltipControl)
     if not itemLink or itemLink == "" then return false, nil end
     --Check if tooltip shows a set item
-    return isTooltipOfSetItem(itemLink, tooltipData)
+    local isSet, setId = isTooltipOfSetItem(itemLink, tooltipData)
+    return isSet, setId, itemLink
 end
 
 --[[
@@ -589,11 +620,11 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
                                     or addBossName == true or addSetType == true or addNeededTraits == true) or false
         if not anyTooltipInfoToAdd then return end
 
-        local isSet, setId = tooltipItemCheck(tooltipControl, tooltipData)
+        local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
         if not isSet then return end
         local setData = libSets_GetSetInfo(setId, true, clientLang) --without itemIds, and names only in client laguage
 
-        addTooltipLine(tooltipControl, setData)
+        addTooltipLine(tooltipControl, setData, itemLink)
     end
 end
 

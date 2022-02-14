@@ -835,7 +835,7 @@ lib.localization = {
         neededTraits    = "Traits needed (research)",
         dropMechanic    = "Drop mechanics",
         undauntedChest  = undauntedStr .. " chest",
-        boss            = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501),
+        boss            =           GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501),
     },
     ["es"] = {
         dlc             = "Capítulo/DLC",
