@@ -107,7 +107,7 @@ local lastTooltipItemLink
 --Functions
 local function getLibSetsTooltipSavedVariables()
     local sv = lib.svData
-    if not sv or not sv.modifyTooltips then return nil end
+    if not sv then return nil end
     return sv.tooltipModifications
 end
 
@@ -764,7 +764,7 @@ local function onPlayerActivatedTooltips()
     addNeededTraits =   tooltipSV.addNeededTraits
 
     if addDropLocation or addDropMechanic or addDLC or addBossName or addSetType or addNeededTraits then
-        hookTooltips = true
+        hookTooltips = tooltipSV.modifyTooltip
     end
 
     --hook into the tooltip types?
