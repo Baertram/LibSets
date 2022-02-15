@@ -148,7 +148,7 @@ local function GetWayshrineInfo()
     end
     return wayshrines
 end
-LibSets.DebugGetWayshrineInfo = GetWayshrineInfo
+lib.DebugGetWayshrineInfo = GetWayshrineInfo
 
 local function GetWayshrineNames()
     d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetWayshrineNames, language: " ..tos(clientLang))
