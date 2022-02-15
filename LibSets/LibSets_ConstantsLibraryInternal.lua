@@ -166,6 +166,7 @@ local possibleSetTypes = {
     [10] = "LIBSETS_SETTYPE_SPECIAL",                       --"Special"
     [11] = "LIBSETS_SETTYPE_TRIAL",                         --"Trial"
     [12] = "LIBSETS_SETTYPE_MYTHIC",                        --"Mythic"
+    [13] = "LIBSETS_SETTYPE_IMPERIALCITY_MONSTER",          --"Imperial City Monster"
 }
 --SetTypes only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -338,6 +339,14 @@ local setTypesToName = {
         ["fr"] = "Mythique",
         ["jp"] = "神話上の",
         ["ru"] = "мифический",
+    },
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] = {
+        ["de"] = "Kaiserstadt Monster",
+        ["en"] = "Imperial city monster",
+        ["es"] = "Ciudad imperial monstruo",
+        ["fr"] = "Cité impériale monstre",
+        ["jp"] = "帝都 モンスター",
+        ["ru"] = "Имперский город Монстр",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
@@ -559,7 +568,7 @@ lib.weaponTypeNames = {
 local possibleDropMechanics = {
     [1]  = "LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY",     --Rewards for the worthy (Cyrodiil/Battleground mail)
     [2]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA",                 --City Bruma (quartermaster)
-    [3]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT",             --City Erntefurt (quartermaster)
+    [3]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD",             --City Cropsford (quartermaster)
     [4]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS",             --City Vlastarus (quartermaster)
     [5]  = "LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST",                   --Arena stage chest
     [6]  = "LIBSETS_DROP_MECHANIC_MONSTER_NAME",                        --The name of a monster (e.g. a boss in a dungeon) is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table containing the monster name in different languages)
@@ -573,10 +582,11 @@ local possibleDropMechanics = {
     [14] = "LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD",                     --Level up reward
     [15] = "LIBSETS_DROP_MECHANIC_ANTIQUITIES",                         --Antiquities (Mythic set items)
     [16] = "LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR",                 --Battleground vendor
+    [17] = "LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT",   --Tel Var equipment lockbox merchant
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
-     --LIBSETS_DROP_MECHANIC_ = number
+     --LIBSETS_DROP_MECHANIC_... = number
     --possibleDropMechanics[xx] = "LIBSETS_DROP_MECHANIC_..." --new dropmechanic ...
 end
 --Loop over the possible DLC ids and create them in the global table _G
@@ -601,7 +611,7 @@ lib.dropMechanicIdToName = {
     ["de"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Gerechter Lohn (" .. cyrodiilAndBattlegroundText .. " eMail)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil Stadt: Bruma (Quartiermeister)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil Stadt: Erntefurt (Quartiermeister)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]         = "Cyrodiil Stadt: Erntefurt (Quartiermeister)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil Stadt: Vlastarus (Quartiermeister)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena-Phasen Schatztruhe",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster Name",
@@ -613,11 +623,13 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Tägliches Zufallsverlies Belohnungsemail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Kaiserstadt Bunker",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level Aufstieg Belohnung",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var Ausrüstungs Box Händler, IC Kanalisation Basis",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Allianzpunkte Elite Gear Box Händler, Cyrodiil",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil City: Bruma (quartermaster)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil City: Cropsford (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]         = "Cyrodiil City: Cropsford (quartermaster)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil City: Vlastarus (quartermaster)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena stage chest",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster name",
@@ -629,6 +641,8 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -636,7 +650,7 @@ lib.dropMechanicIdToName = {
     ["es"] = { --todo
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil City: Bruma (quartermaster)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil City: Cropsford (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]         = "Cyrodiil City: Cropsford (quartermaster)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil City: Vlastarus (quartermaster)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Arena stage chest",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Monster name",
@@ -648,14 +662,13 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Daily random dungeon reward mail",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
-        --Will be used in other languages via setmetatable below!
-        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
-        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil Ville: Bruma (maître de manœuvre)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil Ville: Gué-les-Champs (maître de manœuvre)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]         = "Cyrodiil Ville: Gué-les-Champs (maître de manœuvre)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil Ville: Vlastrus (maître de manœuvre)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Coffre d'étape Arena",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Nom du monstre",
@@ -667,11 +680,13 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Courrier de récompense de donjon journalière",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Cité impériale voûte",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Récompense de niveau supérieur",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Сиродил: город Брума (квартирмейстер)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Сиродил: город Кропсфорд (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]         = "Сиродил: город Кропсфорд (квартирмейстер)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Сиродил: город Властарус (квартирмейстер)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "Этап арены",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "Имя монстра",
@@ -683,11 +698,13 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "Письмо с наградой за ежедневное случайное подземелье",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Хранилища Имперского города",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Вознаграждение за повышение уровня",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]             = "Cyrodiil シティ: ブルーマ (補給係)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]         = "Cyrodiil シティ: クロップスフォード (補給係)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]         = "Cyrodiil シティ: クロップスフォード (補給係)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]         = "Cyrodiil シティ: ヴラスタルス (補給係)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]               = "アリーナステージチェスト",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                    = "モンスター名",
@@ -699,6 +716,8 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]= "デイリーランダムダンジョン報酬メール",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "帝都の宝物庫",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "レベルアップ報酬",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
     },
 }
 lib.dropMechanicIdToNameTooltip = {
@@ -708,6 +727,8 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Überland Gruppenbosse haben eine Chance von 100%, Kopf, Brust, Beine oder Waffen fallen zu lassen.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Öffentliche Dungeon-Bosse haben die Möglichkeit, eine Schulter, Handschuhe oder eine Waffe fallen zu lassen.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Truhen, die durch das Besiegen eines Dunklen Ankers gewonnen wurden, haben eine Chance von 100%, einen Ring oder ein Amulett fallen zu lassen.\nSchatztruhen, welche man in der Zone findet, haben eine Chance irgendein Setteil zu gewähren, das in dieser Zone droppen kann:\n-Einfache Truhen haben eine geringe Chance\n-Mittlere Truhen haben eine gute Chance\n-Fortgeschrittene- und Meisterhafte-Truhen haben eine garantierte Chance\n-Schatztruhen, die durch eine Schatzkarte gefunden wurden, haben eine garantierte Chance",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Truhe, welche man bei einem TelVar Ausrüstungs Händler in der eigenne Fraktionsbasis in der Kaiserstadt Kanalisation für TelVar Steine eintauschen kann.",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Truhe, welche man bei einem Elite Gear Händler in Cyrodiil (Östliches Elsweyr Tor, Südliches Hochfels Tor, Nördliches Morrowind Tor), oder in Vvardenfall für Schlachtfelder (Ald Carac, Foyada Quarry, Ularra), für Allianzpunkte kaufen kann.",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
@@ -716,6 +737,8 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests gained from defeating a Dark Anchor have a 100% chance to drop a ring or amulet.\nTreasure chests found in the world have a chance to grant any set piece that can drop in that zone:\n-Simple chests have a slight chance\n-Intermediate chests have a good chance\n-Advanced and Master chests have a guaranteed chance\n-Treasure chests found from a Treasure Map have a guaranteed chance",
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers.",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Chest that can be exchanged for Alliance Points at a elite gear lockbox merchant in Cyrodiil (Eastern Elsweyr Gate, Southern High Rock Gate, Northern Morrowind Gate), or a battleground merchant in Vvardenfell (Ald Carac, Foyada Quarry, Ularra)",
     },
     ["es"] = { --todo
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
@@ -724,6 +747,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests gained from defeating a Dark Anchor have a 100% chance to drop a ring or amulet.\nTreasure chests found in the world have a chance to grant any set piece that can drop in that zone:\n-Simple chests have a slight chance\n-Intermediate chests have a good chance\n-Advanced and Master chests have a guaranteed chance\n-Treasure chests found from a Treasure Map have a guaranteed chance",
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers."
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
@@ -731,6 +755,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Les boss de zone ouvertes ont 100% de chances de laisser tomber la tête, la poitrine, les jambes ou l'arme.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Les boss de donjon public ont une chance de laisser tomber une épaule, une main ou une arme.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Les coffres obtenus en battant une ancre noire ont 100% de chances de laisser tomber un anneau ou une amulette.\nLes coffres au trésor trouvés dans le monde ont une chance d'accorder n'importe quelle pièce fixe qui peut tomber dans cette zone:\n-les coffres simples ont une légère chance \n-Les coffres intermédiaires ont de bonnes chances\n-Les coffres avancés et les maîtres ont une chance garantie\n-Les coffres au trésor trouvés sur une carte au trésor ont une chance garantie",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Coffre qui peut être échangé contre des pierres TelVar auprès d'un vendeur d'équipement TelVar dans votre base de faction, dans les égouts de la cité impériale.",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " почта)",
@@ -738,6 +763,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Групповые боссы дают 100% шанс выпадания головы, груди, ног или оружия.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Боссы открытых подземелий дают шанс выпадания плечей, рук или оружия.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Сундуки, полученные после побед над Тёмными якорями, имеют 100% шанс выпадания кольца или амулета.\nСундуки сокровищ, найденные в мире, дают шанс получить любую часть комплекта, выпадающую в этой зоне:\n- простые сундуки дают незначительный шанс\n- средние сундуки дают хороший шанс\n- продвинутые и мастерские сундуки дают гарантированный шанс\n- сундуки сокровищ, найденные по Карте сокровищ, дают гарантированный шанс",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Сундук, который можно обменять на камни ТелВар у продавца оборудования ТелВар на базе вашей фракции в канализации Имперского города",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール)",
@@ -745,6 +771,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "ワールドボスは、頭、腰、脚の各防具、または武器のいずれかが必ずドロップします。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "パブリックダンジョンのボスは、肩、手の各防具、または武器をドロップすることがあります。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "「インペリアルシティ下水道の派閥基地にあるTelVar機器ベンダーでTelVarストーンと交換できるチェスト。」",
     },
 }
 --DropMechanic translations only available on current PTS, or automatically available if PTS->live
@@ -760,7 +787,7 @@ end
 local dropMechanicIdToTexture = {
     [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]  = "/esoui/art/chatwindow/chat_mail_up.dds",
     [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]              = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_ERNTEFURT]          = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]          = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
     [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]          = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
     [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                = "/esoui/art/icons/undaunted_dungeoncoffer.dds",
     [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                     = "/esoui/art/icons/quest_head_monster_014.dds",
@@ -774,6 +801,7 @@ local dropMechanicIdToTexture = {
     [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                  = "/esoui/art/menubar/menubar_levelup_up.dds",
     [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                      = "/esoui/art/mappins/antiquity_trackeddigsite.dds",
     [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]              = "/esoui/art/icons/quest_container_001.dds",
+    [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]= "/esoui/art/icons/quest_container_001.dds", --todo Undaunted dungeon coffer icon, and/or TelVar stones
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted chest"] =     "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
@@ -795,6 +823,7 @@ local setTypeToTexture = {
     [LIBSETS_SETTYPE_SPECIAL] =                                 "/esoui/art/tutorial/campaignbrowser_indexicon_specialevents_up.dds",       --"Special"
     [LIBSETS_SETTYPE_TRIAL] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds",    --"Trial"
     [LIBSETS_SETTYPE_MYTHIC] =                                  "/esoui/art/icons/antiquities_u30_mythic_ring02.dds",                       --"Mythic"
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =                    "/esoui/art/icons/quest_head_monster_012.dds",                              --"Imperial City monster" --todo change to other monster icon!
     ["vet_dung"] =                                              "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds",               --"Veteran Dungeon"
 }
 lib.setTypeToTexture = setTypeToTexture
@@ -830,6 +859,7 @@ lib.localization = {
         dropZoneCrafted =           GetString(SI_SPECIALIZEDITEMTYPE213),
         dropZoneCyrodiil =          GetString(SI_CAMPAIGNRULESETTYPE1),
         dropZoneMonster =           dungeonStr,
+        dropZoneImperialCityMonster = GetString(SI_CAMPAIGNRULESETTYPE4), --todo: Integrate for setType LIBSETS_SETTYPE_IMPERIAL_CITY_MONSTER and show as drop zone text
         --dropZoneOverland =          GetString(),
         dropZoneSpecial =           GetString(SI_HOTBARCATEGORY9),
         dropZoneMythic =            GetString(SI_ITEMDISPLAYQUALITY6),
