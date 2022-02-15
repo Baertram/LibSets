@@ -841,8 +841,7 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=37, zoneIds={1133}},--Southern Elsweyr
         { parentCategory=4, category=38, zoneIds={1160}},--Western Skyrim
         { parentCategory=4, category=89, zoneIds={1207}},--The Reach
-        { parentCategory=4, category=93, zoneIds={1261}},--Blackwood
-        { parentCategory=4, category=97, zoneIds={1286}},--The Deadlands (Bor)
+        { parentCategory=4, category=97, zoneIds={1286}},--The Deadlands
         --Dungeons
         { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
         { parentCategory=5, category=40, zoneIds={380,935}, isDungeon=true},--The Banished Cells I
@@ -861,12 +860,12 @@ lib.setDataPreloaded = {
         { parentCategory=5, category=53, zoneIds={22}, isDungeon=true},--Volenfell
         { parentCategory=5, category=54, zoneIds={146,933}, isDungeon=true},--Wayrest Sewers I
         --DLC-Dungeons
-        { parentCategory=6, category=55, zoneIds={678},  isDungeon=true},--Imperial City Prison
-        { parentCategory=6, category=56, zoneIds={688},  isDungeon=true},--White-Gold Tower
-        { parentCategory=6, category=57, zoneIds={848},  isDungeon=true},--Cradle of Shadows
-        { parentCategory=6, category=58, zoneIds={843},  isDungeon=true},--Ruins of Mazzatun
-        { parentCategory=6, category=59, zoneIds={973},  isDungeon=true},--Bloodroot Forge
-        { parentCategory=6, category=60, zoneIds={974},  isDungeon=true},--Falkreath Hold
+        { parentCategory=6, category=55, zoneIds={678}, isDungeon=true},--Imperial City Prison
+        { parentCategory=6, category=56, zoneIds={688}, isDungeon=true},--White-Gold Tower
+        { parentCategory=6, category=57, zoneIds={848}, isDungeon=true},--Cradle of Shadows
+        { parentCategory=6, category=58, zoneIds={843}, isDungeon=true},--Ruins of Mazzatun
+        { parentCategory=6, category=59, zoneIds={973}, isDungeon=true},--Bloodroot Forge
+        { parentCategory=6, category=60, zoneIds={974}, isDungeon=true},--Falkreath Hold
         { parentCategory=6, category=61, zoneIds={1009}, isDungeon=true},--Fang Lair
         { parentCategory=6, category=62, zoneIds={1010}, isDungeon=true},--Scalecaller Peak
         { parentCategory=6, category=63, zoneIds={1055}, isDungeon=true},--March of Sacrifices
@@ -881,8 +880,8 @@ lib.setDataPreloaded = {
         { parentCategory=6, category=88, zoneIds={1197}, isDungeon=true},--Stone Garden
         { parentCategory=6, category=91, zoneIds={1228}, isDungeon=true},--Black Drake Villa
         { parentCategory=6, category=92, zoneIds={1229}, isDungeon=true},--The Cauldron
-        { parentCategory=6, category=95, zoneIds={1268},  isDungeon=true},--Dread Cellar
-        { parentCategory=6, category=96, zoneIds={1267}, isDungeon=true},--Red Petal Bastion
+        { parentCategory=6, category=98, zoneIds={1301}, isDungeon=true},--Coral Aerie
+        { parentCategory=6, category=99, zoneIds={1302}, isDungeon=true},--Shipwright's Regret
         --Trials
         { parentCategory=7, category=71, zoneIds={638}, isTrial=true},--Aetherian Archive
         { parentCategory=7, category=72, zoneIds={636}, isTrial=true},--Hel Ra Citadel
@@ -893,7 +892,6 @@ lib.setDataPreloaded = {
         { parentCategory=7, category=77, zoneIds={1051}, isTrial=true},--Cloudrest
         { parentCategory=7, category=78, zoneIds={1121}, isTrial=true},--Sunspire
         { parentCategory=7, category=79, zoneIds={1196}, isTrial=true},--Kyne's Aegis
-        { parentCategory=7, category=94, zoneIds={1263}, isTrial=true},--Rockgrove
         --Arenas
         { parentCategory=8, category=80, zoneIds={635}, isArena=true},--Dragonstar Arena
         { parentCategory=8, category=81, zoneIds={677}, isArena=true},--Maelstrom Arena

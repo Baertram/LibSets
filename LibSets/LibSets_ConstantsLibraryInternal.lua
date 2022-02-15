@@ -588,6 +588,7 @@ local possibleDropMechanics = {
     [15] = "LIBSETS_DROP_MECHANIC_ANTIQUITIES",                         --Antiquities (Mythic set items)
     [16] = "LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR",                 --Battleground vendor
     [17] = "LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT",   --Tel Var equipment lockbox merchant
+    [18] = "LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT",      --Alliance points Elite gear merchant
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -647,7 +648,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -668,7 +669,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Imperial city vaults",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
@@ -686,7 +687,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Cité impériale voûte",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Récompense de niveau supérieur",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным",
@@ -704,7 +705,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "Хранилища Имперского города",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Вознаграждение за повышение уровня",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です",
@@ -722,7 +723,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]            = "帝都の宝物庫",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "レベルアップ報酬",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
     },
 }
 lib.dropMechanicIdToNameTooltip = {
