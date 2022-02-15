@@ -25,6 +25,27 @@
     For more information, please refer to <http://unlicense.org/>
 ========================================================================
 
+
+========================================================================================================================
+ !!! TODO / BUGs list !!!
+========================================================================================================================
+ Last updated: 2022-02-15, Baertram, PTS AP101033 Ascending Tide
+------------------------------------------------------------------------------------------------------------------------
+
+ --Known bugs--
+ --Custom tooltips of set items via LAM settings menu in LibSets_Tooltips.lua not working
+
+
+ --Todo list--
+--Wayshrine info dumo from ALL game zones to SV and update the data in the excel
+--Check wayshrines for crafting and dungeon sets and overland set and update the wayshrine nodeIds
+
+
+ --Currently working on--
+ --2022-02-15
+ ----Tooltips
+
+
 ========================================================================================================================
  !!! API VERSION UPDATE - What needs to be scanned and done in this library and the Excel file?                     !!!
 ========================================================================================================================
