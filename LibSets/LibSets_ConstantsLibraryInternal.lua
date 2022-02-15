@@ -523,6 +523,11 @@ local undauntedChestIds = {
         [2] = "Maj al-Ragath",
         [3] = "Urgarlag Chief-bane",
     },
+    ["es"] = {
+        [1] = "Glirion the Redbeard",   --todo
+        [2] = "Maj al-Ragath",          --todo
+        [3] = "Urgarlag Chief-bane",    --todo
+    },
     ["fr"] = {
         [1] = "Glirion Barbe-Rousse",
         [2] = "Maj al-Ragath",
