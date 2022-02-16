@@ -591,10 +591,11 @@ local possibleDropMechanics = {
     [18] = "LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT",      --Alliance points Elite gear merchant
     [19] = "LIBSETS_DROP_MECHANIC_REWARD_BY_NPC",                       --A named NPC rewards this item
     [20] = "LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST",--Oblivion portal final boss chest
-    [21] = "LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD",            --Magical anomalies reward
+    [21] = "LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES",--Dolmen, Harrowstorms, Magical anomalies reward
     [22] = "LIBSETS_DROP_MECHANIC_DUNGEON_CHEST",	                    --Chests in a dungeon	Truhen in einem Verlies
     [23] = "LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER",	        --Daily quest reward coffer	Tägliche Quest Belohnungs-Kisten
     [24] = "LIBSETS_DROP_MECHANIC_FISHING_HOLE",                        --Fishing hole
+    [25] = "LIBSETS_DROP_MECHANIC_OVERLAND_LOOT",                       --Loot from overland items
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -639,10 +640,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Allianzpunkte Elite Gear Box Händler, Cyrodiil",
         [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "Ein benannter NPC belohnt mit diesem Gegenstand",
         [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion Portal letzte Boss Kiste",
-        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magische Annomalien Belohnung",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Belohnungen von Dolmen, Gramstürmen, Magischen Anomalien",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Truhen in einem Verlies" ,            --Chests in a dungeon
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Tägliche Quest Belohnungs-Kisten",--Daily quest reward coffer
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fischloch",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Überland Loot Gegenstände",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
@@ -663,10 +665,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
         [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
         [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
-        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -690,10 +693,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
         [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
         [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
-        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
@@ -714,10 +718,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
         [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
         [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
-        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным",
@@ -738,10 +743,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
         [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
         [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
-        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です",
@@ -762,11 +768,12 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
         [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
         [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
-        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
-    },
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
+   },
 }
 lib.dropMechanicIdToNameTooltip = {
     ["de"] = {
