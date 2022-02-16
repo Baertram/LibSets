@@ -589,6 +589,11 @@ local possibleDropMechanics = {
     [16] = "LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR",                 --Battleground vendor
     [17] = "LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT",   --Tel Var equipment lockbox merchant
     [18] = "LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT",      --Alliance points Elite gear merchant
+    [19] = "LIBSETS_DROP_MECHANIC_REWARD_BY_NPC",                       --A named NPC rewards this item
+    [20] = "LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST",--Oblivion portal final boss chest
+    [21] = "LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD",            --Magical anomalies reward
+    [22] = "LIBSETS_DROP_MECHANIC_DUNGEON_CHEST",	                    --Chests in a dungeon	Truhen in einem Verlies
+    [23] = "LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER",	        --Daily quest reward coffer	Tägliche Quest Belohnungs-Kisten
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -631,6 +636,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level Aufstieg Belohnung",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var Ausrüstungs Box Händler, IC Kanalisation Basis",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Allianzpunkte Elite Gear Box Händler, Cyrodiil",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "Ein benannter NPC belohnt mit diesem Gegenstand",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion Portal letzte Boss Kiste",
+        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magische Annomalien Belohnung",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Truhen in einem Verlies" ,            --Chests in a dungeon
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Tägliche Quest Belohnungs-Kisten",--Daily quest reward coffer
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
@@ -649,6 +659,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
+        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -670,6 +685,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Level up reward",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
+        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
@@ -688,6 +708,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Récompense de niveau supérieur",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
+        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным",
@@ -706,6 +731,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "Вознаграждение за повышение уровня",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
+        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です",
@@ -724,6 +754,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                 = "レベルアップ報酬",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Tel Var equipment lockbox merchant, IC sewer base",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC] =                   "A named NPC rewards with this item",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
+        [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
     },
 }
 lib.dropMechanicIdToNameTooltip = {
