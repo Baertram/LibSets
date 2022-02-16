@@ -594,6 +594,7 @@ local possibleDropMechanics = {
     [21] = "LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD",            --Magical anomalies reward
     [22] = "LIBSETS_DROP_MECHANIC_DUNGEON_CHEST",	                    --Chests in a dungeon	Truhen in einem Verlies
     [23] = "LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER",	        --Daily quest reward coffer	Tägliche Quest Belohnungs-Kisten
+    [24] = "LIBSETS_DROP_MECHANIC_FISHING_HOLE",                        --Fishing hole
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -641,6 +642,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magische Annomalien Belohnung",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Truhen in einem Verlies" ,            --Chests in a dungeon
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Tägliche Quest Belohnungs-Kisten",--Daily quest reward coffer
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fischloch",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
@@ -664,6 +666,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -690,6 +693,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
@@ -713,6 +717,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным",
@@ -736,6 +741,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です",
@@ -759,6 +765,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_MAGICAL_ANOMALIES_REWARD]        = "Magical anomalies reward",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                   = "Chests in a dungeon" ,
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
     },
 }
 lib.dropMechanicIdToNameTooltip = {
