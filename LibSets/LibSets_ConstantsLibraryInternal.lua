@@ -796,11 +796,11 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Chest that can be exchanged for Alliance Points at a elite gear lockbox merchant in Cyrodiil (Eastern Elsweyr Gate, Southern High Rock Gate, Northern Morrowind Gate), or a battleground merchant in Vvardenfell (Ald Carac, Foyada Quarry, Ularra)",
     },
     ["es"] = { --todo
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Delve bosses have a chance to drop a waist or feet.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Chests gained from defeating a Dark Anchor have a 100% chance to drop a ring or amulet.\nTreasure chests found in the world have a chance to grant any set piece that can drop in that zone:\n-Simple chests have a slight chance\n-Intermediate chests have a good chance\n-Advanced and Master chests have a guaranteed chance\n-Treasure chests found from a Treasure Map have a guaranteed chance",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Recompensa por el mérito (<placeholderDoNotTranslate> mail)",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]             = "Los jefes de cuevas pueden soltar cinturones o calzado.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Los jefes del mundo sueltan siempre piezas de cabeza, pecho, piernas, o armas.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Los jefes de mazmorras públicas pueden soltar hombreras, guantes, o armas.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Los cofres de áncoras oscuras sueltan siempre anillos o amuletos.\nLos cofres encontrados por el mundo pueden soltar cualquier pieza de armadura de un conjunto propio de la zona:\n-Los cofres sencillos tienen una ligera probabilidad\n-Los cofres intermedios tienen una buena probabilidad\n-Los cofres avanzados o de maestro tienen 100% de probabilidad\n-Los cofres encontrados con un mapa del tesoro tienen 100% de probabilidad",
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers."
     },
