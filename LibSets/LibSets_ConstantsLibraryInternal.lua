@@ -576,7 +576,7 @@ local possibleDropMechanics = {
     [3]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD",             --City Cropsford (quartermaster)
     [4]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS",             --City Vlastarus (quartermaster)
     [5]  = "LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST",                   --Arena stage chest
-    [6]  = "LIBSETS_DROP_MECHANIC_MONSTER_NAME",                        --The name of a monster (e.g. a boss in a dungeon) is specified in the excel and transfered to the setInfo table entry with the attribute dropMechanicNames (a table containing the monster name in different languages)
+    [6]  = "LIBSETS_DROP_MECHANIC_MONSTER_NAME",                        --The name of a monster (e.g. a boss in a dungeon) is specified in the excel and transfered to the setInfo table entry with the attribute "dropMechanicNames" (a table containing the monster name in different languages)
     [7]  = "LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE",                 --Overland delve bosses
     [8]  = "LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS",                  --Overland world group bosses
     [9]  = "LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON",        --Overland public dungeon bosses
@@ -596,6 +596,8 @@ local possibleDropMechanics = {
     [23] = "LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER",	        --Daily quest reward coffer	Tägliche Quest Belohnungs-Kisten
     [24] = "LIBSETS_DROP_MECHANIC_FISHING_HOLE",                        --Fishing hole
     [25] = "LIBSETS_DROP_MECHANIC_OVERLAND_LOOT",                       --Loot from overland items
+    [26] = "LIBSETS_DROP_MECHANIC_TRIAL_BOSS",                          --Trial bosses
+    [27] = "LIBSETS_DROP_MECHANIC_MOB_TYPE",                            --A type of mob/critter
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -645,6 +647,8 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Tägliche Quest Belohnungs-Kisten",--Daily quest reward coffer
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fischloch",
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Überland Loot Gegenstände",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Gegner Typ",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
@@ -670,6 +674,8 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -698,6 +704,8 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
@@ -723,6 +731,8 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным",
@@ -748,6 +758,8 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です",
@@ -773,6 +785,8 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]       = "Daily quest reward coffer",
         [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                    = "Fishing hole",
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
    },
 }
 lib.dropMechanicIdToNameTooltip = {
@@ -784,6 +798,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Truhen, die durch das Besiegen eines Dunklen Ankers gewonnen wurden, haben eine Chance von 100%, einen Ring oder ein Amulett fallen zu lassen.\nSchatztruhen, welche man in der Zone findet, haben eine Chance irgendein Setteil zu gewähren, das in dieser Zone droppen kann:\n-Einfache Truhen haben eine geringe Chance\n-Mittlere Truhen haben eine gute Chance\n-Fortgeschrittene- und Meisterhafte-Truhen haben eine garantierte Chance\n-Schatztruhen, die durch eine Schatzkarte gefunden wurden, haben eine garantierte Chance",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Truhe, welche man bei einem TelVar Ausrüstungs Händler in der eigenne Fraktionsbasis in der Kaiserstadt Kanalisation für TelVar Steine eintauschen kann.",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Truhe, welche man bei einem Elite Gear Händler in Cyrodiil (Östliches Elsweyr Tor, Südliches Hochfels Tor, Nördliches Morrowind Tor), oder in Vvardenfall für Schlachtfelder (Ald Carac, Foyada Quarry, Ularra), für Allianzpunkte kaufen kann.",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Alle Bosse: Hände, Taille, Füße, Brust, Schultern, Kopf, Beine\nLetzte Bosse: Waffen, Schild\nQuest Belohnung: Schmuck, Waffe, Schild (Gebunden beim Aufheben)",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
@@ -794,6 +809,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers.",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]  = "Chest that can be exchanged for Alliance Points at a elite gear lockbox merchant in Cyrodiil (Eastern Elsweyr Gate, Southern High Rock Gate, Northern Morrowind Gate), or a battleground merchant in Vvardenfell (Ald Carac, Foyada Quarry, Ularra)",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
     ["es"] = { --todo
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Recompensa por el mérito (<placeholderDoNotTranslate> mail)",
@@ -802,7 +818,8 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Los jefes de mazmorras públicas pueden soltar hombreras, guantes, o armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Los cofres de áncoras oscuras sueltan siempre anillos o amuletos.\nLos cofres encontrados por el mundo pueden soltar cualquier pieza de armadura de un conjunto propio de la zona:\n-Los cofres sencillos tienen una ligera probabilidad\n-Los cofres intermedios tienen una buena probabilidad\n-Los cofres avanzados o de maestro tienen 100% de probabilidad\n-Los cofres encontrados con un mapa del tesoro tienen 100% de probabilidad",
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
-        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers."
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers.",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
@@ -811,6 +828,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Les boss de donjon public ont une chance de laisser tomber une épaule, une main ou une arme.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Les coffres obtenus en battant une ancre noire ont 100% de chances de laisser tomber un anneau ou une amulette.\nLes coffres au trésor trouvés dans le monde ont une chance d'accorder n'importe quelle pièce fixe qui peut tomber dans cette zone:\n-les coffres simples ont une légère chance \n-Les coffres intermédiaires ont de bonnes chances\n-Les coffres avancés et les maîtres ont une chance garantie\n-Les coffres au trésor trouvés sur une carte au trésor ont une chance garantie",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Coffre qui peut être échangé contre des pierres TelVar auprès d'un vendeur d'équipement TelVar dans votre base de faction, dans les égouts de la cité impériale.",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " почта)",
@@ -819,6 +837,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Боссы открытых подземелий дают шанс выпадания плечей, рук или оружия.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Сундуки, полученные после побед над Тёмными якорями, имеют 100% шанс выпадания кольца или амулета.\nСундуки сокровищ, найденные в мире, дают шанс получить любую часть комплекта, выпадающую в этой зоне:\n- простые сундуки дают незначительный шанс\n- средние сундуки дают хороший шанс\n- продвинутые и мастерские сундуки дают гарантированный шанс\n- сундуки сокровищ, найденные по Карте сокровищ, дают гарантированный шанс",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Сундук, который можно обменять на камни ТелВар у продавца оборудования ТелВар на базе вашей фракции в канализации Имперского города",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール)",
@@ -827,6 +846,7 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "パブリックダンジョンのボスは、肩、手の各防具、または武器をドロップすることがあります。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "「インペリアルシティ下水道の派閥基地にあるTelVar機器ベンダーでTelVarストーンと交換できるチェスト。」",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
 }
 --DropMechanic translations only available on current PTS, or automatically available if PTS->live
