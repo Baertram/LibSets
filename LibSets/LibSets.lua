@@ -38,6 +38,8 @@
 
  --Todo list--
  --Add the new dropMechanics
+ --Add the new dropMechanics tooltips + localization
+ --Add the new dropMechanics textures
  --Add the new dropLocation names table return values to each setType which uses it!
  --Review existing API functions which return dropMechanic and/or dropLocation tables if they are still compatible
  --Review existing API debug functions which return dropMechanic and/or dropLocation tables if they are still compatible

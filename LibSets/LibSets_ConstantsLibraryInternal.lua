@@ -601,6 +601,8 @@ local possibleDropMechanics = {
     [25] = "LIBSETS_DROP_MECHANIC_OVERLAND_LOOT",                       --Loot from overland items
     [26] = "LIBSETS_DROP_MECHANIC_TRIAL_BOSS",                          --Trial bosses
     [27] = "LIBSETS_DROP_MECHANIC_MOB_TYPE",                            --A type of mob/critter
+    [28] = "LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS",                  --Bosses in group dungeons
+    [29] = "LIBSETS_DROP_MECHANIC_CRAFTED",                             --Crafted
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -652,6 +654,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Überland Loot Gegenstände",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Gegner Typ",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]              = "Bosse in Gruppenverliesen",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
@@ -679,9 +682,11 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]              = "Bosses in group dungeons",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]             = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
+        [LIBSETS_DROP_MECHANIC_CRAFTED]                         = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
     },
     ["es"] = { --todo
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Rewards for the worthy",
@@ -709,6 +714,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]              = "Bosses in group dungeons",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "La récompense des braves",
@@ -736,6 +742,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]              = "Bosses in group dungeons",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "Награда достойным",
@@ -763,6 +770,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]              = "Bosses in group dungeons",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY] = "貢献に見合った報酬です",
@@ -790,6 +798,7 @@ lib.dropMechanicIdToName = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                   = "Loot from overland items",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                        = "Mob/Critter type",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]              = "Bosses in group dungeons",
    },
 }
 lib.dropMechanicIdToNameTooltip = {
@@ -863,23 +872,37 @@ end
 
 --Textures for the drop mechanic tooltips
 local dropMechanicIdToTexture = {
-    [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]  = "/esoui/art/chatwindow/chat_mail_up.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]              = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]          = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]          = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                = "/esoui/art/icons/undaunted_dungeoncoffer.dds",
-    [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                     = "/esoui/art/icons/quest_head_monster_014.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]              = "/esoui/art/zonestories/completiontypeicon_delve.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]               = "/esoui/art/icons/mapkey/mapkey_groupboss.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]     = "/esoui/art/journal/journal_quest_dungeon.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                   = "/esoui/art/icons/undaunted_smallcoffer.dds",
-    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]              = "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",
-    [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD] = "/esoui/art/chatwindow/chat_mail_up.dds",
-    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]             = "/esoui/art/icons/servicemappins/ic_monstrousteeth_complete.dds",
-    [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                  = "/esoui/art/menubar/menubar_levelup_up.dds",
-    [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                      = "/esoui/art/mappins/antiquity_trackeddigsite.dds",
-    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]              = "/esoui/art/icons/quest_container_001.dds",
-    [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]= "/esoui/art/icons/quest_container_001.dds", --todo Undaunted dungeon coffer icon, and/or TelVar stones
+    [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]         = "/esoui/art/chatwindow/chat_mail_up.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                     = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]                 = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]                 = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                       = "/esoui/art/icons/undaunted_dungeoncoffer.dds",
+    [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                            = "/esoui/art/icons/quest_head_monster_014.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                     = "/esoui/art/zonestories/completiontypeicon_delve.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                      = "/esoui/art/icons/mapkey/mapkey_groupboss.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]            = "/esoui/art/journal/journal_quest_dungeon.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                          = "/esoui/art/icons/undaunted_smallcoffer.dds",
+    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]                     = "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",
+    [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]        = "/esoui/art/chatwindow/chat_mail_up.dds",
+    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                    = "/esoui/art/icons/servicemappins/ic_monstrousteeth_complete.dds",
+    [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                         = "/esoui/art/menubar/menubar_levelup_up.dds",
+    [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                             = "/esoui/art/mappins/antiquity_trackeddigsite.dds",
+    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                     = "/esoui/art/icons/quest_container_001.dds",
+    [LIBSETS_DROP_MECHANIC_CRAFTED]                                 = "/esoui/art/zonestories/completiontypeicon_setstation.dds"
+
+    --todo
+    [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]       = "/esoui/art/icons/quest_container_001.dds", --todo Undaunted dungeon coffer icon, and/or TelVar stones
+    [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]          = "todo",
+    [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                           = "todo",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST]    = "todo",
+    [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES]    = "todo",
+    [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                           = "todo",
+    [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]               = "todo",
+    [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                            = "todo",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                           = "todo",
+    [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                              = "todo",
+    [LIBSETS_DROP_MECHANIC_MOB_TYPE]                                = "todo",
+    [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                      = "todo",
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted chest"] =     "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
