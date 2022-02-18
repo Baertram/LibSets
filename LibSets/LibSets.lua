@@ -29,7 +29,7 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2022-02-15, Baertram, PTS AP101033 Ascending Tide
+ Last updated: 2022-02-18, Baertram, PTS AP101033 Ascending Tide
 ------------------------------------------------------------------------------------------------------------------------
 
  --Known bugs--
@@ -37,12 +37,14 @@
 
 
  --Todo list--
---Wayshrine info dumo from ALL game zones to SV and update the data in the excel
---Check wayshrines for crafting and dungeon sets and overland set and update the wayshrine nodeIds
+ --Add the new dropMechanics
+ --Add the new dropLocation names table return values to each setType which uses it!
+ --Review existing API functions which return dropMechanic and/or dropLocation tables if they are still compatible
+ --Review existing API debug functions which return dropMechanic and/or dropLocation tables if they are still compatible
 
 
  --Currently working on--
- --2022-02-15
+ --2022-02-18
  ----Tooltips
 
 
@@ -639,8 +641,8 @@ local function LoadSets()
                 local setType = setData[LIBSETS_TABLEKEY_SETTYPE]
                 if setType ~= nil then
                     local internalLibsSetVariableNames = setTypeToLibraryInternalVariableNames[setType]
-                    if internalLibsSetVariableNames and internalLibsSetVariableNames["tableName"] then
-                        local internalLibsSetTableName = internalLibsSetVariableNames["tableName"]
+                    local internalLibsSetTableName = internalLibsSetVariableNames ~= nil and internalLibsSetVariableNames["tableName"]
+                    if internalLibsSetTableName then
                         local internalLibsSetCounterName = internalLibsSetTableName .. counterSuffix
                         if lib[internalLibsSetTableName] and lib[internalLibsSetCounterName] then
                             lib[internalLibsSetTableName][setId] = setData
@@ -862,6 +864,7 @@ function lib.buildItemLink(itemId, itemQualitySubType)
     return strfor("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, itemQualitySubType, ITEMSTYLE_NONE, 0, 10000)
 end
 buildItemLink = lib.buildItemLink
+
 
 --Open the worldmap and show the map of the zoneId
 --> Parameters: zoneId number: The zone's zoneId

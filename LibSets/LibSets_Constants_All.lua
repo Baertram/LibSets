@@ -4,6 +4,11 @@ if IsLibSetsAlreadyLoaded(false) then return end
 --This file contains the constant values needed for the library to work
 local lib = LibSets
 
+local gaci =        GetAchievementCategoryInfo
+local gcifa =       GetCategoryInfoFromAchievementId
+local gci =         GetCollectibleInfo
+local zocstrfor =   ZO_CachedStrFormat
+
 --Helper function for the API check
 local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
 
@@ -161,12 +166,13 @@ local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds
 lib.DLCData = {}
 local DLCandCHAPTERdata = lib.DLCData
 lib.DLCData[DLC_BASE_GAME] = "Elder Scrolls Online"
+local dlcStrFormatPattern = "<<C:1>>"
 for dlcId, dlcAndChapterCollectibleOrAchievementId in ipairs(dlcAndChapterCollectibleIds) do
     if dlcId and dlcAndChapterCollectibleOrAchievementId then
         if type(dlcAndChapterCollectibleOrAchievementId) == "number" then
-            DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetCollectibleInfo(dlcAndChapterCollectibleOrAchievementId))
+            DLCandCHAPTERdata[dlcId] = zocstrfor(dlcStrFormatPattern, gci(dlcAndChapterCollectibleOrAchievementId))
         else
-            DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(dlcAndChapterCollectibleOrAchievementId)))
+            DLCandCHAPTERdata[dlcId] = zocstrfor(dlcStrFormatPattern, gaci(gcifa(dlcAndChapterCollectibleOrAchievementId)))
         end
     end
 end

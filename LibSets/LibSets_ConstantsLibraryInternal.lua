@@ -226,6 +226,9 @@ lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_MYTHIC                       ] = {
         ["tableName"] = "mythicSets",
     },
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER         ] = {
+        ["tableName"] = "monsterSets",
+    },
 }
 --setTypeToLibraryInternalVariableNames only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -1030,7 +1033,8 @@ local setTypeToDropZoneLocalizationStr = {
     [LIBSETS_SETTYPE_SPECIAL] =                         clientLocalization.dropZoneSpecial,
     [LIBSETS_SETTYPE_TRIAL] =                           clientLocalization.dropZoneTrial,
     [LIBSETS_SETTYPE_MYTHIC] =                          clientLocalization.dropZoneMythic,
-    ["vet_dung"] =                                      clientLocalization.dropZoneVeteranDungeon,
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =            clientLocalization.dropZoneMythic,
+    ["vet_dung"] =                                      clientLocalization.dropZoneImperialCityMonster,
 }
 lib.setTypeToDropZoneLocalizationStr = setTypeToDropZoneLocalizationStr
 

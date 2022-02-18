@@ -27,8 +27,16 @@ local tsort = table.sort
 --local zocstrfor = ZO_CachedStrFormat
 local zoitf = zo_iconTextFormat
 
-local gilsetinf = GetItemLinkSetInfo
-local gilet = GetItemLinkEquipType
+local gilsetinf =   GetItemLinkSetInfo
+local gilet =       GetItemLinkEquipType
+local gthlil =      GetTradingHouseListingItemLink
+local gmqal =       GetMailQueuedAttachmentLink
+local gail =        GetAttachedItemLink
+local gbil =        GetBuybackItemLink
+local gsil =        GetStoreItemLink
+local gqril =       GetQuestRewardItemLink
+local glil =        GetLootItemLink
+local gil =         GetItemLink
 
 
 local dropMechanicIdToTexture = lib.dropMechanicIdToTexture
@@ -138,7 +146,7 @@ local function getItemLinkFromControl(rowControl)
         if FCOIS then
             local IIfAclicked = FCOIS.IIfAclicked
             if IIfAclicked ~= nil then
-                return GetItemLink(IIfAclicked.bagId, IIfAclicked.slotIndex)
+                return gil(IIfAclicked.bagId, IIfAclicked.slotIndex)
             end
         else
             --Plain IIfA
@@ -161,9 +169,9 @@ local function getItemLinkFromControl(rowControl)
     else
         if dataEntryData then
             if dataEntryData.lootId then
-                return GetLootItemLink(dataEntryData.lootId, LINK_STYLE_BRACKETS)
+                return glil(dataEntryData.lootId, LINK_STYLE_BRACKETS)
             elseif rowControl.index and name == "ZO_InteractWindowRewardArea" then
-                return GetQuestRewardItemLink(rowControl.index, LINK_STYLE_BRACKETS)
+                return gqril(rowControl.index, LINK_STYLE_BRACKETS)
             elseif dataEntryData.itemLink then
                 return dataEntryData.itemLink
             elseif dataEntryData.itemlink then
@@ -185,30 +193,30 @@ local function getItemLinkFromControl(rowControl)
             bagId, slotIndex = BAG_BACKPACK, parentDataEntry.slotIndex
         elseif rowControl.index and rowControl.slotType then
             if rowControl.slotType == SLOT_TYPE_STORE_BUY or rowControl.slotType == SLOT_TYPE_BUY_MULTIPLE then
-                return GetStoreItemLink(rowControl.index, LINK_STYLE_BRACKETS)
+                return gsil(rowControl.index, LINK_STYLE_BRACKETS)
 
             elseif rowControl.slotType == SLOT_TYPE_STORE_BUYBACK then
-                return GetBuybackItemLink(rowControl.index, LINK_STYLE_BRACKETS)
+                return gbil(rowControl.index, LINK_STYLE_BRACKETS)
             end
         end
     end
 
     if bagId ~= nil and slotIndex ~= nil then
-        itemLink = GetItemLink(bagId, slotIndex)
+        itemLink = gil(bagId, slotIndex)
     end
 
     if itemLink == nil then
         if name == 'ZO_MailInboxMessageAttachments' then
-            return GetAttachedItemLink(MAIL_INBOX:GetOpenMailId(), rowControl.id, LINK_STYLE_DEFAULT)
+            return gail(MAIL_INBOX:GetOpenMailId(), rowControl.id, LINK_STYLE_DEFAULT)
         elseif name == 'ZO_MailSendAttachments' then
-            return GetMailQueuedAttachmentLink(rowControl.id, LINK_STYLE_DEFAULT)
+            return gmqal(rowControl.id, LINK_STYLE_DEFAULT)
         elseif name == "ZO_MailInboxMessageAttachments" then
             return nil
         elseif name == "ZO_TradingHousePostedItemsListContents" then
-            return GetTradingHouseListingItemLink(dataEntryData.slotIndex)
+            return gthlil(dataEntryData.slotIndex)
         elseif name == 'ZO_TradingHouseLeftPanePostItemFormInfo' then
             if rowControl.bagId and rowControl.slotIndex then
-                return GetItemLink(rowControl.bagId, rowControl.slotIndex)
+                return gil(rowControl.bagId, rowControl.slotIndex)
             end
 
         --Other addons

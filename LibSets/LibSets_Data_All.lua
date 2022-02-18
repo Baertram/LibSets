@@ -91,8 +91,10 @@ lib.zoneIdsOfNewAPIVersionOnly = zoneIdsOfNewAPIVersionOnly
 -->                 or a table containing the different equipTypes as key, and a boolean value as value to show which of the equipTypes is a veteran dungeon reward (e.g. head and shoulders for monster sets)
 --setType:          one of the number constants for the setTypes, see file LibSets_Constants.lua, table LibSets.allowedSetTypes
 --multiTrial:       boolean value (only if isTrial=true) telling you if this set can be achieved in multiple trials
---dropMechanic:     a table containing the possible dropMechanics of this set, see file "LibSets_ConstantsLibraryInternal.lua", section "--Drop mechanics / cities / etc. for additional drop location information"
---dropMechanicNames:    table containing the different dropMechanic names (of bosses e.g.), if the set's dropMechanic is LIBSETS_DROP_MECHANIC_MONSTER_NAME. The names are stored in different languages. The table's format is: {key = [language] = "String", ...}
+--dropMechanic:     a table containing the possible dropMechanics of this set, see file "LibSets_ConstantsLibraryInternal.lua", section "Drop mechanics / cities / etc. for additional drop location
+--                  information"
+--dropMechanicNames:    table containing the different dropMechanic names (of bosses e.g.). The index of the table reflects the same index in the table "dropMechanic"
+--                  The names are stored in different languages. The table's format is: {key = [language] = "String", ...}
 -------
 
 --The data below is generated from the Excel document LibSets_SetData.xlsx containing all the set data. The excel map "Sets data" contains the code in the excel's columns
