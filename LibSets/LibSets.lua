@@ -1771,9 +1771,11 @@ end
 ------>The table can contain 1 to 3 entries (one for each faction e.g.) and contains the wayshrineNodeId nearest to the set's crafting table/in the drop zone
 ----> table zoneIds containing the zoneIds (one to n) where this set drops, or can be obtained
 ----> table dropMechanic containing a number non-gap key and the LibSetsDropMechanic of the set as value
---->  table dropMechanicNames: The key is the same index as used within table "dropMechanic". And the value is a subtable containing each (or the specified lang parameter) language as key.
------> dropMechanicNames in the past could only be monsterNames, now it can be every type of dropMechanic which needs to add a name of a boss/mob/loot etc.
------> and the localized String as the value.
+--->  table dropMechanicNames: The key is the same index as used within table "dropMechanic". And the value is a subtable containing each (or the specified lang parameter) language as key,
+--->  and the localized String as the value. dropMechanicNames returns the names of the dropMechanic, e.g. "worldboss", "delve boss", ...
+--->  table dropMechanicLocationNames: The key is the same index as used within table "dropMechanic". And the value is a subtable containing each (or the specified lang parameter) language as key.
+-----> dropMechanicLocationNames returns the names of the mob/boss/... that drops the setItem, e.g. "Velidreth", "Mob type Daedra", ...
+-----> !!!Attention: dropMechanicLocationNames can now apply to all setTypes, not only anymore to monster sets!!!
 -------Example for setId 408
 --- ["setId"] = 408,
 --- ["dlcId"] = 12,    --DLC_MURKMIRE
@@ -1821,7 +1823,7 @@ end
 --          ["fr"] = "DropMechanicMonsterNameFR",
 --          [...] = "...",
 --      },
---      [2] = nil, --as it got not monsetr or other dropLocation name,
+--      [2] = nil, --as it got no monster or other dropMechanicLocation name,
 --  },
 --}
 function lib.GetSetInfo(setId, noItemIds, lang)
