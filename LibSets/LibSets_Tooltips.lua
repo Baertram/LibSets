@@ -42,6 +42,7 @@ local gil =         GetItemLink
 local dropMechanicIdToTexture = lib.dropMechanicIdToTexture
 local setTypeToTexture =        lib.setTypeToTexture
 local vetDungTexture = setTypeToTexture["vet_dung"]
+local imperialCityTexture = setTypeToTexture[LIBSETS_SETTYPE_IMPERIALCITY]
 local setTypeToDropZoneLocalizationStr = lib.setTypeToDropZoneLocalizationStr
 
 
@@ -51,6 +52,8 @@ local dropLocationZonesStr =    localization.dropZones
 local dlcStr =                  localization.dlc
 local droppedByStr =            localization.droppedBy
 local dungeonStr =              localization.dropZoneDungeon
+local imperialCityStr =         localization.dropZoneImperialCity
+local imperialSewersStr =       localization.dropZoneImperialSewers
 local veteranDungeonStr =       zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
 local bossStr =                 localization.boss
 local setTypeStr =              localization.setType
@@ -58,6 +61,19 @@ local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
 local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 local undauntedChestStr =       localization.undauntedChest
+
+local monsterSetTypes = {
+    [LIBSETS_SETTYPE_MONSTER] =                 true,
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    true,
+}
+local monsterSetTypeToVeteranStr = {
+    [LIBSETS_SETTYPE_MONSTER] =                 dungeonStr,
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialCityStr,
+}
+local monsterSetTypeToNoVeteranStr = {
+    [LIBSETS_SETTYPE_MONSTER] =                 undauntedChestStr,
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialSewersStr,
+}
 
 
 --local library variables
@@ -85,8 +101,8 @@ local tooltipCtrls = {
 local popupTooltip =        tooltipCtrls["popup"]
 local infoTooltip =         tooltipCtrls["info"]
 local itemTooltip =         tooltipCtrls["item"]
---local comparativeTooltip1 = tooltipCtrls["compa1"]
---local comparativeTooltip2 = tooltipCtrls["compa2"]
+--local comparativeTooltip1 = tooltipCtrls["compa1"] --not used so far
+--local comparativeTooltip2 = tooltipCtrls["compa2"] --not used so far
 
 
 --Other addons
@@ -312,10 +328,11 @@ end
 local function getMonsterSetDungeonDifficultyStr(setData, isVeteranMonsterSet, itemLink)
     local veteranData = setData.veteran
     local setType = setData.setType
-    if veteranData ~= nil and setType == LIBSETS_SETTYPE_MONSTER then
+    if veteranData ~= nil then
         if isVeteranMonsterSet ~= nil then
             if isVeteranMonsterSet == true then
-                return veteranDungeonStr, true
+                local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                return veteranStr, true
             end
         else
             if type(veteranData) == "table" then
@@ -323,15 +340,20 @@ local function getMonsterSetDungeonDifficultyStr(setData, isVeteranMonsterSet, i
                 if equipType then
                     local isVeteran = veteranData[equipType]
                     if isVeteran then
-                        return veteranDungeonStr, true
+                        local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                        return veteranStr, true
                     else
-                        --EquipType is the monster set's shoulder
-                        return undauntedChestStr, false
+                        local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                        return nonVeteranStr, false
                     end
                 end
             else
-                if veteranData == true then
-                    return veteranDungeonStr, true
+                if not veteranData then
+                    local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                    return nonVeteranStr, false
+                else
+                    local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                    return veteranStr, true
                 end
             end
         end
@@ -394,11 +416,7 @@ local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVetera
         dropLocationZonesWithPlaceholder = dropLocationZonesWithPlaceholder or dropLocationZonesStr .. placeHolder
         local zoneStr
         if setType ~= nil or isMonsterDropMechanic then
-            if isMonsterDropMechanic or setType == LIBSETS_SETTYPE_MONSTER then
-                zoneStr, isVeteranMonsterSet = getMonsterSetDungeonDifficultyStr(setData, isVeteranMonsterSet, itemLink)
-            else
-                zoneStr = setTypeToDropZoneLocalizationStr[setType]
-            end
+            zoneStr, isVeteranMonsterSet = getMonsterSetDungeonDifficultyStr(setData, isVeteranMonsterSet, itemLink)
             if zoneStr ~= nil then
                 zoneStr = zoneStr .. placeHolder
             else
@@ -411,7 +429,6 @@ local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVetera
 end
 
 
-local dropMechanicStrWithPlaceholder
 local droppedByStrWithPlaceholder
 local bossStrWithPlaceholder
 local function buildSetDropMechanicAndBossInfo(setData, itemLink, noPrefix)
@@ -467,14 +484,15 @@ local function buildSetDropMechanicAndBossInfo(setData, itemLink, noPrefix)
     local addBoss = false
     local numDropMechanicNames = #dropMechanicNames
     local numBossNames = #bossNames
-    local isMonsterSet = (setData.setType == LIBSETS_SETTYPE_MONSTER) or false
+    local setType = setData.setType
+    local isMonsterSet = monsterSetTypes[setType] or false
     local zoneStr
     local isVeteranMonsterSetItem = false
     if isMonsterSet then
         zoneStr, isVeteranMonsterSetItem = getMonsterSetDungeonDifficultyStr(setData, nil, itemLink)
         if not isVeteranMonsterSetItem then
             --Replace the bossNames with undaunted chest
-            bossNames = { [1] = undauntedChestStr }
+            bossNames = { [1] = monsterSetTypeToNoVeteranStr[setType]}
         end
     end
 
@@ -511,7 +529,6 @@ local function buildSetDropMechanicAndBossInfo(setData, itemLink, noPrefix)
 
     local prefixStr
     if addDropMechanic and addDm then
-        --dropMechanicStrWithPlaceholder = dropMechanicStrWithPlaceholder or dropMechanicStr .. placeHolder
         if noPrefix then
             prefixStr = ""
         else
