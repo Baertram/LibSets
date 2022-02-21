@@ -1565,7 +1565,7 @@ function lib.GetDropMechanic(setId, withNames, lang)
             buildNames = true
         end
         if buildNames then
-            dropMechanicNames, dropMechanicLocationNames, dropMechanicTooltips, nil = getDropMechanicAndDropLocationNames(setId, lang, setData)
+            dropMechanicNames, dropMechanicLocationNames, dropMechanicTooltips = getDropMechanicAndDropLocationNames(setId, lang, setData)
         end
         dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
     end
