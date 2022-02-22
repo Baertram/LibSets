@@ -860,6 +860,7 @@ end
 --======= Drop mechanic ================================================================================================
 --Helper function to return the custom dropMechnicLocationNames (if a setId is specified)
 local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
+--d("getDropMechanicAndDropLocationNames-setId: " ..tos(setId) .. ", langToUse: " ..tos(langToUse))
     local dropMechanicNamesTable, dropMechanicDropLocationNamesTable, dropMechanicTooltipsTable
     if setId == nil and setData == nil then return nil, nil, nil, setData end
     if setData == nil then
@@ -877,26 +878,29 @@ local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
         if setData == nil then return nil, nil, nil, nil end
         setData["setId"] = setId
     end
-
+--lib._setData = setData
     local dropMechanicTable = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
     if dropMechanicTable ~= nil then
         if supportedLanguages then
             local supportedLanguageData
             local onlyOneLanguage = (langToUse ~= nil and true) or false
+--d(">onlyOneLanguage: " ..tos(onlyOneLanguage))
             if onlyOneLanguage then
                 supportedLanguageData = supportedLanguages[langToUse]
                 if not supportedLanguageData and langToUse ~= fallbackLang then
                     langToUse = fallbackLang
                     supportedLanguageData = supportedLanguages[langToUse]
                 end
+                if not supportedLanguageData then return nil, nil, nil, setData end
             end
-            if not supportedLanguageData then return nil, nil, nil, setData end
+--d(">onlyOneLanguage: " ..tos(onlyOneLanguage) .. ", langTouse: " ..tos(langToUse))
 
             local dropMechanicProvidedDropLocationNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES]
-            if dropMechanicProvidedDropLocationNames == nil then return nil, nil, nil, setInfo end
+--d(">2")
 
             --For each entry in the drop mechanic table: Check if a custom name is given, else determine the standard dropMechanic name via API function
             for idx, dropMechanic in ipairs(dropMechanicTable) do
+--d(">idx: " ..tos(idx) .. ", dropMechanic: " ..tos(dropMechanic))
                 --The drop mechanic is no monster name, so get the names of the drop mechanic via LibSets API function
                 if onlyOneLanguage then
                     dropMechanicNamesTable                 = dropMechanicNamesTable or {}
@@ -904,23 +908,23 @@ local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
                     dropMechanicTooltipsTable              = dropMechanicTooltipsTable or {}
                     dropMechanicTooltipsTable[idx]         = dropMechanicTooltipsTable[idx] or {}
                     dropMechanicNamesTable[idx][langToUse], dropMechanicTooltipsTable[idx][langToUse] = getDropMechanicName(idx, langToUse)
-
+--d(">>3")
                     --Are custom names added (monster name, mob type, etc.)
                     if dropMechanicProvidedDropLocationNames ~= nil then
                         --First client language or language to use from parameter
-                        if onlyOneLanguage then
-                            --Is the language of the dropLocation not given in the desired language: Use EN fallback then
-                            local langTouseForProvidedNames = langToUse
-                            if dropMechanicProvidedDropLocationNames[langTouseForProvidedNames] == nil then
-                                if langToUse ~= fallbackLang and dropMechanicProvidedDropLocationNames[fallbackLang] ~= nil then
-                                    langTouseForProvidedNames = fallbackLang
-                                end
+                        --Is the language of the dropLocation not given in the desired language: Use EN fallback then
+                        local langTouseForProvidedNames = langToUse
+                        if dropMechanicProvidedDropLocationNames[langTouseForProvidedNames] == nil then
+                            if langToUse ~= fallbackLang and dropMechanicProvidedDropLocationNames[fallbackLang] ~= nil then
+                                langTouseForProvidedNames = fallbackLang
                             end
-                            if dropMechanicProvidedDropLocationNames[langTouseForProvidedNames] ~= nil then
-                                dropMechanicDropLocationNamesTable                                 = dropMechanicDropLocationNamesTable or {}
-                                dropMechanicDropLocationNamesTable[idx]                            = dropMechanicDropLocationNamesTable[idx] or {}
-                                dropMechanicDropLocationNamesTable[idx][langTouseForProvidedNames] = dropMechanicProvidedDropLocationNames[langTouseForProvidedNames]
-                            end
+                        end
+--d(">>>dropMechanicProvidedDropLocationNames-langTouseForProvidedNames: " ..tos(langTouseForProvidedNames))
+                        if dropMechanicProvidedDropLocationNames[langTouseForProvidedNames] ~= nil and dropMechanicProvidedDropLocationNames[langTouseForProvidedNames][idx]
+                            and dropMechanicProvidedDropLocationNames[langTouseForProvidedNames][idx] ~= "" then
+                            dropMechanicDropLocationNamesTable                                 = dropMechanicDropLocationNamesTable or {}
+                            dropMechanicDropLocationNamesTable[idx]                            = dropMechanicDropLocationNamesTable[idx] or {}
+                            dropMechanicDropLocationNamesTable[idx][langTouseForProvidedNames] = dropMechanicProvidedDropLocationNames[langTouseForProvidedNames]
                         end
                     end
                 else
@@ -935,9 +939,18 @@ local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
                     end
                     --Are custom names added (monster name, mob type, etc.)
                     if dropMechanicProvidedDropLocationNames ~= nil then
+--d(">>4")
                         --All languages - Take same index of dropMechanics for the dropLocationName
-                        dropMechanicDropLocationNamesTable      = dropMechanicDropLocationNamesTable or {}
-                        dropMechanicDropLocationNamesTable[idx] = dropMechanicProvidedDropLocationNames[idx]
+                        for supportedLanguage, isSupported in pairs(supportedLanguages) do
+                            if isSupported == true then
+                                if dropMechanicProvidedDropLocationNames[supportedLanguage] and dropMechanicProvidedDropLocationNames[supportedLanguage][idx]
+                                    and dropMechanicProvidedDropLocationNames[supportedLanguage][idx] ~= "" then
+                                    dropMechanicDropLocationNamesTable      = dropMechanicDropLocationNamesTable or {}
+                                    dropMechanicDropLocationNamesTable[idx] = dropMechanicDropLocationNamesTable[idx] or {}
+                                    dropMechanicDropLocationNamesTable[idx][supportedLanguage] = dropMechanicProvidedDropLocationNames[supportedLanguage][idx]
+                                end
+                            end
+                        end
                     end
                 end
             end
@@ -1510,8 +1523,8 @@ getDropMechanicName = lib.GetDropMechanicName
 --->   table LibSetsZoneIdsOfDrop: The key is an index, same as the index in table LibSetsDropMechanicIds,
 --->   and the value is the zoneId where the setItem drops
 function lib.GetDropMechanic(setId, withNames, lang)
-    if setId == nil then return nil, nil end
-    if not checkIfSetsAreLoadedProperly() then return nil, nil end
+    if setId == nil then return nil, nil, nil, nil, nil end
+    if not checkIfSetsAreLoadedProperly() then return nil, nil, nil, nil, nil end
     withNames = withNames or false
     local supportedLanguageData
     local onlyOneLanguage = (lang ~= nil and true) or false
@@ -1521,6 +1534,7 @@ function lib.GetDropMechanic(setId, withNames, lang)
             lang = fallbackLang
             supportedLanguageData = supportedLanguages[lang]
         end
+--d(">lang: " ..tos(lang))
         if not supportedLanguageData then return nil, nil, nil, nil, nil end
     end
 
@@ -1528,17 +1542,16 @@ function lib.GetDropMechanic(setId, withNames, lang)
     if setData == nil then
         if isNoESOSet(setId) then
             setData = noSetIdSets[setId]
-        else
-            return
         end
     end
-    if setData == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC] == nil then return nil, nil end
+    if setData == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC] == nil then return nil, nil, nil, nil, nil end
+--d(">setData found")
     local dropMechanicIds = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
+    local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
     local dropMechanicNames
     local dropMechanicLocationNames
     local dropMechanicTooltips
-    local dropZoneIds
-    if withNames then
+    if withNames == true then
         local buildNames = false
         if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil then
             dropMechanicNames = ZO_ShallowTableCopy(setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES])
@@ -1565,13 +1578,12 @@ function lib.GetDropMechanic(setId, withNames, lang)
             buildNames = true
         end
         if buildNames then
+--d(">>buildNames")
             dropMechanicNames, dropMechanicLocationNames, dropMechanicTooltips = getDropMechanicAndDropLocationNames(setId, lang, setData)
         end
-        dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
     end
     return dropMechanicIds, dropMechanicNames, dropMechanicTooltips, dropMechanicLocationNames, dropZoneIds
 end
-
 
 --Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 function lib.GetAllDropMechanics()
@@ -2967,6 +2979,20 @@ local function onLibraryLoaded(event, name)
         --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
         --work properly now
         lib.fullyLoaded = true
+
+
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --todo for debugging only!
+        if GetDisplayName() == "@Baertram" then
+            function lib.testDropMechanic(setId, lang)
+                lib._dropMechanicIds, lib._dropMechanicNames, lib._dropMechanicTooltips, lib._dropMechanicLocationNames, lib._dropZoneIds = lib.GetDropMechanic(setId, true, lang)
+            end
+        end
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     end
 end
 

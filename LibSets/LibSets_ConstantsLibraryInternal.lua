@@ -143,11 +143,29 @@ LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID         = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_DROPMECHANIC                   = "dropMechanic"
 LIBSETS_TABLEKEY_DROPMECHANIC_NAMES             = LIBSETS_TABLEKEY_DROPMECHANIC .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES     = LIBSETS_TABLEKEY_DROPMECHANIC .. "Tooltip" .. LIBSETS_TABLEKEY_NAMES
-LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES    = LIBSETS_TABLEKEY_DROPMECHANIC .. "Location" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES    = LIBSETS_TABLEKEY_DROPMECHANIC .. "DropLocation" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_MIXED_SETNAMES                 = "MixedSetNamesForDataAll"
 LIBSETS_TABLEKEY_SET_PROCS                      = "setProcs"
 LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP       = "setProcsAllowedInPvP"
 LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING = "setItemCollectionsZoneMapping"
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+--Set itemId table value (key is the itemId)
+LIBSETS_SET_ITEMID_TABLE_VALUE_OK    = 1
+LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK = 2
+
+
+------------------------------------------------------------------------------------------------------------------------
+--Set proc check types (e.g. event_effect_changed, event_combat_event)
+--SetprocCheckTypes
+LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED  = 1     --Check abilityId via EVENT_EFFECT_CHANGED callback function
+LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT    = 2     --Check abilityId via EVENT_COMBAT_EVENT callback function
+LIBSETS_SETPROC_CHECKTYPE_EVENT_POWER_UPDATE	        = 4     --Check if a power updated at EVENT_POWER_UPDATE
+LIBSETS_SETPROC_CHECKTYPE_EVENT_BOSSES_CHANGED	        = 5     --Check if a boss changed with EVENT_BOSSES_CHANGED
+LIBSETS_SETPROC_CHECKTYPE_SPECIAL                       = 99    --Check with an own defined special callback function
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --Set types
@@ -830,8 +848,6 @@ lib.dropMechanicIdToNameTooltip = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]              = "Los jefes del mundo sueltan siempre piezas de cabeza, pecho, piernas, o armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]    = "Los jefes de mazmorras públicas pueden soltar hombreras, guantes, o armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                  = "Los cofres de áncoras oscuras sueltan siempre anillos o amuletos.\nLos cofres encontrados por el mundo pueden soltar cualquier pieza de armadura de un conjunto propio de la zona:\n-Los cofres sencillos tienen una ligera probabilidad\n-Los cofres intermedios tienen una buena probabilidad\n-Los cofres avanzados o de maestro tienen 100% de probabilidad\n-Los cofres encontrados con un mapa del tesoro tienen 100% de probabilidad",
-        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                     = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
-
         --todo
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers.",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                      = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
@@ -871,66 +887,6 @@ if checkIfPTSAPIVersionIsLive() then
     lib.dropMechanicIdToNameTooltip["en"][LIBSETS_DROP_MECHANIC_*] = ""
     ]]
 end
-
-
---Textures for the drop mechanic tooltips
-local dropMechanicIdToTexture = {
-    [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]         = "/esoui/art/chatwindow/chat_mail_up.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                     = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]                 = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]                 = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
-    [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                       = "/esoui/art/icons/undaunted_dungeoncoffer.dds",
-    [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                            = "/esoui/art/icons/quest_head_monster_014.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                     = "/esoui/art/zonestories/completiontypeicon_delve.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                      = "/esoui/art/icons/mapkey/mapkey_groupboss.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]            = "/esoui/art/journal/journal_quest_dungeon.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                          = "/esoui/art/icons/undaunted_smallcoffer.dds",
-    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]                     = "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",
-    [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]        = "/esoui/art/chatwindow/chat_mail_up.dds",
-    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                    = "/esoui/art/icons/servicemappins/ic_monstrousteeth_complete.dds",
-    [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                         = "/esoui/art/menubar/menubar_levelup_up.dds",
-    [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                             = "/esoui/art/mappins/antiquity_trackeddigsite.dds",
-    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                     = "/esoui/art/icons/quest_container_001.dds",
-    [LIBSETS_DROP_MECHANIC_CRAFTED]                                 = "/esoui/art/zonestories/completiontypeicon_setstation.dds",
-
-    --todo
-    [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]       = "/esoui/art/icons/quest_container_001.dds", --todo Undaunted dungeon coffer icon, and/or TelVar stones
-    [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]          = "todo",
-    [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                           = "todo",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST]    = "todo",
-    [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES]    = "todo",
-    [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                           = "todo",
-    [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]               = "todo",
-    [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                            = "todo",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                           = "todo",
-    [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                              = "todo",
-    [LIBSETS_DROP_MECHANIC_MOB_TYPE]                                = "todo",
-    [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                      = "todo",
-    --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
-    --["undaunted chest"] =     "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
-    --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
-    --["golden chest"] =        "/esoui/art/icons/undaunted_dungeoncoffer.dds",
-}
-lib.dropMechanicIdToTexture = dropMechanicIdToTexture
-
---Textures for the set type tooltips
-local setTypeToTexture = {
-    [LIBSETS_SETTYPE_ARENA] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_arenasolo.dds",     --"Arena"
-    [LIBSETS_SETTYPE_BATTLEGROUND] =                            "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",      --"Battleground"
-    [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/zonestories/completiontypeicon_setstation.dds",                 --"Crafted"
-    [LIBSETS_SETTYPE_CYRODIIL] =                                "/esoui/art/lfg/gamepad/lfg_activityicon_cyrodiil.dds",                     --"Cyrodiil"
-    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] =           "/esoui/art/lfg/gamepad/gp_lfg_menuicon_random.dds",                        --"DailyRandomDungeonAndICReward"
-    [LIBSETS_SETTYPE_DUNGEON] =                                 "/esoui/art/lfg/gamepad/lfg_activityicon_normaldungeon.dds",                --"Dungeon"
-    [LIBSETS_SETTYPE_IMPERIALCITY] =                            "/esoui/art/mappins/ava_imperialcity_neutral.dds",                          --"Imperial City"
-    [LIBSETS_SETTYPE_MONSTER] =                                 "/esoui/art/icons/quest_head_monster_014.dds",                              --"Monster"
-    [LIBSETS_SETTYPE_OVERLAND] =                                "/esoui/art/icons/undaunted_smallcoffer.dds",                               --"Overland"
-    [LIBSETS_SETTYPE_SPECIAL] =                                 "/esoui/art/tutorial/campaignbrowser_indexicon_specialevents_up.dds",       --"Special"
-    [LIBSETS_SETTYPE_TRIAL] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds",    --"Trial"
-    [LIBSETS_SETTYPE_MYTHIC] =                                  "/esoui/art/icons/antiquities_u30_mythic_ring02.dds",                       --"Mythic"
-    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =                    "/esoui/art/icons/quest_head_monster_012.dds",                              --"Imperial City monster" --todo change to other monster icon!
-    ["vet_dung"] =                                              "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds",               --"Veteran Dungeon"
-}
-lib.setTypeToTexture = setTypeToTexture
 
 --Localized texts
 local undauntedStr = GetString(SI_VISUALARMORTYPE4)
@@ -1027,31 +983,94 @@ lib.localization = {
 
 --Set metatable to get EN entries for missing other languages
 local dropMechanicNames = lib.dropMechanicIdToName
-local dropMechanicTooltipNames = lib.dropMechanicIdToNameTooltip
 local dropMechanicNamesEn = dropMechanicNames["en"]
+
+local dropMechanicTooltipNames   = lib.dropMechanicIdToNameTooltip
+local dropMechanicTooltipNamesEn = dropMechanicTooltipNames["en"]
+
 local localization = lib.localization
 local localizationEn = lib.localization["en"]
+
 setmetatable(dropMechanicNames["de"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["es"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["fr"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["jp"], {__index = dropMechanicNamesEn})
 setmetatable(dropMechanicNames["ru"], {__index = dropMechanicNamesEn})
 
-setmetatable(dropMechanicTooltipNames["de"], {__index = dropMechanicNamesEn})
-setmetatable(dropMechanicTooltipNames["es"], {__index = dropMechanicNamesEn})
-setmetatable(dropMechanicTooltipNames["fr"], {__index = dropMechanicNamesEn})
-setmetatable(dropMechanicTooltipNames["jp"], {__index = dropMechanicNamesEn})
-setmetatable(dropMechanicTooltipNames["ru"], {__index = dropMechanicNamesEn})
+setmetatable(dropMechanicTooltipNames["de"], {__index = dropMechanicTooltipNamesEn })
+setmetatable(dropMechanicTooltipNames["es"], {__index = dropMechanicTooltipNamesEn })
+setmetatable(dropMechanicTooltipNames["fr"], {__index = dropMechanicTooltipNamesEn })
+setmetatable(dropMechanicTooltipNames["jp"], {__index = dropMechanicTooltipNamesEn })
+setmetatable(dropMechanicTooltipNames["ru"], {__index = dropMechanicTooltipNamesEn })
 
 setmetatable(localization["de"], {__index = localizationEn})
 setmetatable(localization["es"], {__index = localizationEn})
 setmetatable(localization["fr"], {__index = localizationEn})
 setmetatable(localization["jp"], {__index = localizationEn})
 setmetatable(localization["ru"], {__index = localizationEn})
+local clientLocalization = localization[clientLang]
 
 
 --Mapping for tooltips
-local clientLocalization = localization[clientLang]
+--Textures for the drop mechanic tooltips
+local dropMechanicIdToTexture = {
+    [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]         = "/esoui/art/chatwindow/chat_mail_up.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                     = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]                 = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]                 = "/esoui/art/icons/mapkey/mapkey_avatown.dds",
+    [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                       = "/esoui/art/icons/undaunted_dungeoncoffer.dds",
+    [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                            = "/esoui/art/icons/quest_head_monster_014.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                     = "/esoui/art/zonestories/completiontypeicon_delve.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                      = "/esoui/art/icons/mapkey/mapkey_groupboss.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]            = "/esoui/art/journal/journal_quest_dungeon.dds",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                          = "/esoui/art/icons/undaunted_smallcoffer.dds",
+    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]                     = "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",
+    [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]        = "/esoui/art/chatwindow/chat_mail_up.dds",
+    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                    = "/esoui/art/icons/servicemappins/ic_monstrousteeth_complete.dds",
+    [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                         = "/esoui/art/menubar/menubar_levelup_up.dds",
+    [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                             = "/esoui/art/mappins/antiquity_trackeddigsite.dds",
+    [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                     = "/esoui/art/icons/quest_container_001.dds",
+    [LIBSETS_DROP_MECHANIC_CRAFTED]                                 = "/esoui/art/zonestories/completiontypeicon_setstation.dds",
+
+    --todo
+    [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]       = "/esoui/art/icons/quest_container_001.dds", --todo Undaunted dungeon coffer icon, and/or TelVar stones
+    [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]          = "todo",
+    [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                           = "todo",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST]    = "todo",
+    [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES]    = "todo",
+    [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                           = "todo",
+    [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]               = "todo",
+    [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                            = "todo",
+    [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                           = "todo",
+    [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                              = "todo",
+    [LIBSETS_DROP_MECHANIC_MOB_TYPE]                                = "todo",
+    [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                      = "todo",
+    --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
+    --["undaunted chest"] =     "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
+    --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
+    --["golden chest"] =        "/esoui/art/icons/undaunted_dungeoncoffer.dds",
+}
+lib.dropMechanicIdToTexture = dropMechanicIdToTexture
+
+--Textures for the set type tooltips
+local setTypeToTexture = {
+    [LIBSETS_SETTYPE_ARENA] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_arenasolo.dds",     --"Arena"
+    [LIBSETS_SETTYPE_BATTLEGROUND] =                            "/esoui/art/battlegrounds/battlegrounds_tabicon_battlegrounds_up.dds",      --"Battleground"
+    [LIBSETS_SETTYPE_CRAFTED] =                                 "/esoui/art/zonestories/completiontypeicon_setstation.dds",                 --"Crafted"
+    [LIBSETS_SETTYPE_CYRODIIL] =                                "/esoui/art/lfg/gamepad/lfg_activityicon_cyrodiil.dds",                     --"Cyrodiil"
+    [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] =           "/esoui/art/lfg/gamepad/gp_lfg_menuicon_random.dds",                        --"DailyRandomDungeonAndICReward"
+    [LIBSETS_SETTYPE_DUNGEON] =                                 "/esoui/art/lfg/gamepad/lfg_activityicon_normaldungeon.dds",                --"Dungeon"
+    [LIBSETS_SETTYPE_IMPERIALCITY] =                            "/esoui/art/mappins/ava_imperialcity_neutral.dds",                          --"Imperial City"
+    [LIBSETS_SETTYPE_MONSTER] =                                 "/esoui/art/icons/quest_head_monster_014.dds",                              --"Monster"
+    [LIBSETS_SETTYPE_OVERLAND] =                                "/esoui/art/icons/undaunted_smallcoffer.dds",                               --"Overland"
+    [LIBSETS_SETTYPE_SPECIAL] =                                 "/esoui/art/tutorial/campaignbrowser_indexicon_specialevents_up.dds",       --"Special"
+    [LIBSETS_SETTYPE_TRIAL] =                                   "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds",    --"Trial"
+    [LIBSETS_SETTYPE_MYTHIC] =                                  "/esoui/art/icons/antiquities_u30_mythic_ring02.dds",                       --"Mythic"
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =                    "/esoui/art/icons/quest_head_monster_012.dds",                              --"Imperial City monster" --todo change to other monster icon!
+    ["vet_dung"] =                                              "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds",               --"Veteran Dungeon"
+}
+lib.setTypeToTexture = setTypeToTexture
+
 local setTypeToDropZoneLocalizationStr = {
     [LIBSETS_SETTYPE_ARENA] =                           clientLocalization.dropZoneArena,
     [LIBSETS_SETTYPE_BATTLEGROUND] =                    clientLocalization.dropZoneBattleground,
@@ -1069,17 +1088,3 @@ local setTypeToDropZoneLocalizationStr = {
     ["vet_dung"] =                                      clientLocalization.dropZoneDungeon,
 }
 lib.setTypeToDropZoneLocalizationStr = setTypeToDropZoneLocalizationStr
-
-
-------------------------------------------------------------------------------------------------------------------------
---Set itemId table value (key is the itemId)
-LIBSETS_SET_ITEMID_TABLE_VALUE_OK    = 1
-LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK = 2
-------------------------------------------------------------------------------------------------------------------------
---Set proc check types (e.g. event_effect_changed, event_combat_event)
---SetprocCheckTypes
-LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_EFFECT_CHANGED  = 1     --Check abilityId via EVENT_EFFECT_CHANGED callback function
-LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT    = 2     --Check abilityId via EVENT_COMBAT_EVENT callback function
-LIBSETS_SETPROC_CHECKTYPE_EVENT_POWER_UPDATE	        = 4     --Check if a power updated at EVENT_POWER_UPDATE
-LIBSETS_SETPROC_CHECKTYPE_EVENT_BOSSES_CHANGED	        = 5     --Check if a boss changed with EVENT_BOSSES_CHANGED
-LIBSETS_SETPROC_CHECKTYPE_SPECIAL                       = 99    --Check with an own defined special callback function
