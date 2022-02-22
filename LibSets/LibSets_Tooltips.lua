@@ -307,6 +307,7 @@ local function isCustomTooltipEnabled(value)
         end
         return false
     end
+    return false
 end
 
 local function checkTraitsNeededGiven(setData)
@@ -601,7 +602,7 @@ end
 
 local function addTooltipLine(tooltipControl, setData, itemLink)
     if not setData then return end
---d("addTooltipLine")
+d("addTooltipLine")
     --local isPopupTooltip = tooltipControl == popupTooltip or false
     --local isInformationTooltip = tooltipControl == infoTooltip or false
     --local isItemTooltip = tooltipControl == itemTooltip or false
@@ -660,18 +661,28 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     --  },
     --  ["dropMechanicNames"] = {
     --      [1] = {
-    --        ["en"] = "DropMechanicMonsterNameEN",
-    --        ["de"] = "DropMechanicMonsterNameDE",
-    --        ["fr"] = "DropMechanicMonsterNameFR",
+    --        ["en"] = "DropMechanicNameEN",
+    --          ["de"] = "DropMechanicNameDE",
+    --          ["fr"] = "DropMechanicNameFR",
+    --          [...] = "...",
     --      },
     --      [2] = {
     --        ["en"] = "DropMechanic...NameEN",
     --        ["de"] = "DropMechanic...NameDE",
     --        ["fr"] = "DropMechanic....NameFR",
+    --        [...] = "...",
     --      },
     --  },
+    --  ["dropMechanicLocationNames"] = {
+    --      [1] = {
+    --        ["en"] = "DropMechanicMonsterNameEN",
+    --          ["de"] = "DropMechanicMonsterNameDE",
+    --          ["fr"] = "DropMechanicMonsterNameFR",
+    --          [...] = "...",
+    --      },
+    --      [2] = nil, --as it got no monster or other dropMechanicLocation name,
+    --  },
     --}
-
     local setTypeText
     local setNeededTraitsText
     local setDropMechanicText

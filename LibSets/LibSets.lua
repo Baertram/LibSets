@@ -29,7 +29,7 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2022-02-18, Baertram, PTS AP101033 Ascending Tide
+ Last updated: 2022-02-22, Baertram, PTS AP101033 Ascending Tide
 ------------------------------------------------------------------------------------------------------------------------
 
  --Known bugs--
@@ -37,14 +37,12 @@
 
 
  --Todo list--
+ --Add localized translations
  --Add the new dropMechanics textures
- --Add the new dropLocation names table return values to each setType which uses it!
- --Review existing API functions which return dropMechanic and/or dropLocation tables if they are still compatible
- --Review existing API debug functions which return dropMechanic and/or dropLocation tables if they are still compatible
 
 
  --Currently working on--
- --2022-02-18
+ --2022-02-22
  ----Tooltips
 
 
@@ -2984,12 +2982,14 @@ local function onLibraryLoaded(event, name)
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-        --todo for debugging only!
+        --For debugging only!
+        --[[
         if GetDisplayName() == "@Baertram" then
             function lib.testDropMechanic(setId, lang)
                 lib._dropMechanicIds, lib._dropMechanicNames, lib._dropMechanicTooltips, lib._dropMechanicLocationNames, lib._dropZoneIds = lib.GetDropMechanic(setId, true, lang)
             end
         end
+        ]]
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
