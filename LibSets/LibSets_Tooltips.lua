@@ -18,7 +18,7 @@ local strgmatch = string.gmatch
 --local strlen = string.len
 local strfind = string.find
 --local strsub = string.sub
---local strfor = string.format
+local strfor = string.format
 
 local tins = table.insert
 --local trem = table.remove
@@ -39,14 +39,21 @@ local glil =        GetLootItemLink
 local gil =         GetItemLink
 
 
-local dropMechanicIdToTexture = lib.dropMechanicIdToTexture
-local setTypeToTexture =        lib.setTypeToTexture
-local vetDungTexture = setTypeToTexture["vet_dung"]
-local imperialCityTexture = setTypeToTexture[LIBSETS_SETTYPE_IMPERIALCITY]
-local setTypeToDropZoneLocalizationStr = lib.setTypeToDropZoneLocalizationStr
+local dropZoneNames = {}
+local dropMechanicNames = {}
+local dropLocationNames = {}
 
 
-local clientLang = lib.clientLang
+local dropMechanicIdToTexture =             lib.dropMechanicIdToTexture
+local setTypeToTexture =                    lib.setTypeToTexture
+local vetDungTexture =                      setTypeToTexture["vet_dung"]
+local imperialCityTexture =                 setTypeToTexture[LIBSETS_SETTYPE_IMPERIALCITY]
+local setTypeToDropZoneLocalizationStr =    lib.setTypeToDropZoneLocalizationStr
+local getDropMechanicName =                 lib.GetDropMechanicName
+
+
+local clientLang =      lib.clientLang
+local fallbackLang =    lib.fallbackLang
 local localization         =    lib.localization[clientLang]
 local dropLocationZonesStr =    localization.dropZones
 local dlcStr =                  localization.dlc
@@ -86,7 +93,6 @@ local libSets_GetDLCName =                  lib.GetDLCName
 --The tooltip game data line after that the LibSets entries should be added
 local tooltipGameDataEntryToAddAfter = TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN
 
---Add set information like the drop location to the tooltips
 
 --Possible tooltips controls
 --ZO_PopupToolTip
@@ -316,46 +322,36 @@ local function checkTraitsNeededGiven(setData)
 end
 
 local neededTraitsStrWithPlaceholder
-local function buildSetNeededTraitsInfo(setData, withOutPrefix)
+local function buildSetNeededTraitsInfo(setData)
     if not checkTraitsNeededGiven(setData) then return end
-    withOutPrefix = withOutPrefix or false
     local traitsNeeded = tos(setData.traitsNeeded)
     if not traitsNeeded then return end
-    neededTraitsStr = neededTraitsStr or localization.neededTraits
-    neededTraitsStrWithPlaceholder = neededTraitsStrWithPlaceholder or neededTraitsStr .. placeHolder
-    return (not withOutPrefix and (neededTraitsStrWithPlaceholder .. traitsNeeded)) or traitsNeeded
+    return tos(traitsNeeded)
 end
 
-local function getMonsterSetDungeonDifficultyStr(setData, isVeteranMonsterSet, itemLink)
+local function getDungeonDifficultyStr(setData, itemLink)
     local veteranData = setData.veteran
     local setType = setData.setType
     if veteranData ~= nil then
-        if isVeteranMonsterSet ~= nil then
-            if isVeteranMonsterSet == true then
-                local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
-                return veteranStr, true
-            end
-        else
-            if type(veteranData) == "table" then
-                local equipType = gilet(itemLink)
-                if equipType then
-                    local isVeteran = veteranData[equipType]
-                    if isVeteran then
-                        local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
-                        return veteranStr, true
-                    else
-                        local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
-                        return nonVeteranStr, false
-                    end
-                end
-            else
-                if not veteranData then
-                    local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
-                    return nonVeteranStr, false
-                else
+        if type(veteranData) == "table" then
+            local equipType = gilet(itemLink)
+            if equipType then
+                local isVeteran = veteranData[equipType]
+                if isVeteran then
                     local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
                     return veteranStr, true
+                else
+                    local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                    return nonVeteranStr, false
                 end
+            end
+        else
+            if not veteranData then
+                local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                return nonVeteranStr, false
+            else
+                local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                return veteranStr, true
             end
         end
     end
@@ -387,193 +383,97 @@ local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSor
     return (prefixStr ~= nil and prefixStr ~= "" and prefixStr .. retStrVar) or retStrVar
 end
 
-local dropLocationZonesWithPlaceholder
-local function buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVeteranMonsterSet, itemLink, noPrefix)
-    isMonsterDropMechanic = isMonsterDropMechanic or false
-    noPrefix = noPrefix or false
---todo: noPrefix abfragen und berücksichtigen bei allen Ausgaben!
 
-
-    local dropZonesStr
-    --Got drop zones of the item?
-    local alreadyAddedZoneIds = {}
-    local setZonsIds = setData.zoneIds
-    local setType = setData.setType
-    local dropZoneNames = {}
-    if setZonsIds then
-        for _, zoneId in ipairs(setZonsIds) do
-            if zoneId ~= -1 and not alreadyAddedZoneIds[zoneId] then
-                local zoneName = libSets_GetZoneName(zoneId)
-                if zoneName == nil then
-                    if setType == LIBSETS_SETTYPE_BATTLEGROUND then
-                        zoneName = battlegroundStr
-                    end
-                end
-                tins(dropZoneNames, zoneName)
-                alreadyAddedZoneIds[zoneId] = true
-            end
-        end
-        dropLocationZonesStr = dropLocationZonesStr or localization.dropZones
-        dropLocationZonesWithPlaceholder = dropLocationZonesWithPlaceholder or dropLocationZonesStr .. placeHolder
-        local zoneStr
-        if setType ~= nil or isMonsterDropMechanic then
-            zoneStr, isVeteranMonsterSet = getMonsterSetDungeonDifficultyStr(setData, isVeteranMonsterSet, itemLink)
-            if zoneStr ~= nil then
-                zoneStr = zoneStr .. placeHolder
-            else
-                zoneStr = dropLocationZonesWithPlaceholder
-            end
-        end
-        dropZonesStr = buildTextLinesFromTable(dropZoneNames, zoneStr, false, true)
-    end
-    return dropZonesStr, isVeteranMonsterSet
-end
-
-
-local droppedByStrWithPlaceholder
-local bossStrWithPlaceholder
-local function buildSetDropMechanicAndBossInfo(setData, itemLink, noPrefix)
-    noPrefix = noPrefix or false
+local function getSetDropMechanicInfo(setData)
     local dropMechanicTab = setData.dropMechanic
     if not dropMechanicTab then return end
+    local setType = setData.setType
+    local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
     local dropMechanicNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
-    if not dropMechanicNamesOfSet then return end
+    local dropMechanicDropLocationNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES]
 
-    local dropMechanicNamesStr
-    local bossNamesStr
-    local dropMechanicAndBossStr
-    local dropMechanicNames = {}
-    local bossNames = {}
-    local isMonsterDropMechanic = false
+    dropZoneNames = {}
+    dropMechanicNames = {}
+    dropLocationNames = {}
 
-    local alreadyAddedDropMechanics = {}
-    for dropMechanicId, dropMechanicNamesData in pairs(dropMechanicNamesOfSet) do
-        if dropMechanicId ~= -1 and not alreadyAddedDropMechanics[dropMechanicId] then
-            local dropMechanicName = dropMechanicNamesData[clientLang]
-            if dropMechanicName and dropMechanicName ~= "" then
---d(">dropMechanicName: " ..tos(dropMechanicName))
-                local isMonsterSet = (dropMechanicId == LIBSETS_DROP_MECHANIC_MONSTER_NAME) or false
-                if addBossName and isMonsterSet then
-                    tins(bossNames, dropMechanicName)
-                    alreadyAddedDropMechanics[dropMechanicId] = true
-                    isMonsterDropMechanic = true
-                elseif addDropMechanic then
-                    local dropMechanicTexture
-                    --If addBossName disabled, but dropMechanic enabled, then dropMechanicName will be the monster name dropping the set
-                    --> do not add the monster texture then and only output the dungeon texture and dropname of dungeon!
-                    if not addBossName and isMonsterSet then
-                        dropMechanicTexture = setTypeToTexture[LIBSETS_SETTYPE_DUNGEON]
-                        dropMechanicName = dungeonStr
-                        isMonsterDropMechanic = true
-                    else
-                        dropMechanicTexture = dropMechanicIdToTexture[dropMechanicId]
-                    end
-                    if dropMechanicTexture then
-                        local dropMechanicNameIconStr = zoitf(dropMechanicTexture, 24, 24, dropMechanicName, nil)
-                        dropMechanicName = dropMechanicNameIconStr
-                    end
-                    tins(dropMechanicNames, dropMechanicName)
-                    alreadyAddedDropMechanics[dropMechanicId] = true
+    --Loop the drop zones
+    for idx, zoneId in ipairs(dropZoneIds) do
+        --Get the zone names
+        local zoneName
+        if zoneId >= 0 then
+            zoneName = libSets_GetZoneName(zoneId)
+            if zoneName == nil then
+                if setType == LIBSETS_SETTYPE_BATTLEGROUND then
+                    zoneName = battlegroundStr
                 end
             end
+            dropZoneNames[idx] = zoneName
         end
-    end
 
-    local prefixForDropMechanicAndBoss
-    local addBoth = false
-    local addDm = false
-    local addBoss = false
-    local numDropMechanicNames = #dropMechanicNames
-    local numBossNames = #bossNames
-    local setType = setData.setType
-    local isMonsterSet = monsterSetTypes[setType] or false
-    local zoneStr
-    local isVeteranMonsterSetItem = false
-    if isMonsterSet then
-        zoneStr, isVeteranMonsterSetItem = getMonsterSetDungeonDifficultyStr(setData, nil, itemLink)
-        if not isVeteranMonsterSetItem then
-            --Replace the bossNames with undaunted chest
-            bossNames = { [1] = monsterSetTypeToNoVeteranStr[setType]}
-        end
-    end
+        --Get the drop mechanic at the zoneId
+        local dropMechanicIdOfZone = dropMechanicTab[idx]
+        if dropMechanicIdOfZone then
 
-    if addDropMechanic and addBossName then
-        if addDropMechanic and numDropMechanicNames > 0 then
-            prefixForDropMechanicAndBoss = dropMechanicStr
-            addDm = true
-        end
-        if addBossName and numBossNames > 0 then
-            if prefixForDropMechanicAndBoss and prefixForDropMechanicAndBoss ~= "" then
-                prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. "/" ..dungeonStr
-                addBoth = true
+            --Add the drop mechanic name
+            local dropMechanicNameOfZone
+            if dropMechanicNamesOfSet == nil or dropMechanicNamesOfSet[idx] == nil or dropMechanicNamesOfSet[idx][clientLang] == nil then
+                dropMechanicNameOfZone = getDropMechanicName(dropMechanicIdOfZone, clientLang)
             else
-                prefixForDropMechanicAndBoss = dungeonStr
+                dropMechanicNameOfZone = dropMechanicNamesOfSet[idx][clientLang]
             end
-            addBoss = true
-        end
-        if addBoth == true then
-            addDm = false
-            addBoss = false
-            if noPrefix then
-                prefixForDropMechanicAndBoss = ""
-            else
-                prefixForDropMechanicAndBoss = prefixForDropMechanicAndBoss .. placeHolder
+            if dropMechanicNameOfZone ~= nil then
+                local dropMechanicTexture = dropMechanicIdToTexture[dropMechanicIdOfZone]
+                if dropMechanicTexture then
+                    local dropMechanicNameIconStr = zoitf(dropMechanicTexture, 24, 24, dropMechanicNameOfZone, nil)
+                    dropMechanicNameOfZone = dropMechanicNameIconStr
+                end
+                dropMechanicNames[idx] = dropMechanicNameOfZone
             end
-            dropMechanicNamesStr = buildTextLinesFromTable(dropMechanicNames, prefixForDropMechanicAndBoss, false, true)
-            bossNamesStr = buildTextLinesFromTable(bossNames, nil, false, true)
-            dropMechanicAndBossStr = dropMechanicNamesStr .. "/" .. bossNamesStr
-        end
-    else
-        addDm = (numDropMechanicNames > 0 and true) or false
-        addBoss = (numBossNames > 0 and true) or false
-    end
 
-    local prefixStr
-    if addDropMechanic and addDm then
-        if noPrefix then
-            prefixStr = ""
-        else
-            droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
-            prefixStr = droppedByStrWithPlaceholder
+            --Add the drop mechanic drop location text (if given)
+            local dropMechanicDropLocationOfZone
+            if dropMechanicDropLocationOfZone ~= nil and dropMechanicDropLocationNamesOfSet[idx] ~= nil and dropMechanicDropLocationNamesOfSet[idx] ~= "" then
+                if dropMechanicDropLocationNamesOfSet[idx][clientLang] == nil then
+                    dropMechanicDropLocationOfZone = dropMechanicDropLocationNamesOfSet[idx][fallbackLang]
+                else
+                    dropMechanicDropLocationOfZone = dropMechanicDropLocationNamesOfSet[idx][clientLang]
+                end
+            end
+            if dropMechanicDropLocationOfZone ~= nil then
+                dropLocationNames[idx] = dropMechanicDropLocationOfZone
+            end
         end
-        dropMechanicAndBossStr = buildTextLinesFromTable(dropMechanicNames, prefixStr, false, true)
-    elseif addBossName and addBoss then
-        --droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
-        bossStrWithPlaceholder = bossStrWithPlaceholder or bossStr .. placeHolder
-        prefixStr = bossStrWithPlaceholder
-        if noPrefix or (isMonsterSet and not isVeteranMonsterSetItem) then
-            prefixStr = ""
-        elseif not noPrefix then
-            droppedByStrWithPlaceholder = droppedByStrWithPlaceholder or droppedByStr .. placeHolder
-            prefixStr = droppedByStrWithPlaceholder
-        end
-        dropMechanicAndBossStr = buildTextLinesFromTable(bossNames, prefixStr, false, true)
     end
-
-    return dropMechanicAndBossStr, isMonsterDropMechanic, isVeteranMonsterSetItem
 end
 
-local dlcStrWithPlaceholder
-local function buildSetDLCInfo(setData, noPrefix)
+local function buildSetDropMechanicInfo(setData, itemLink)
+    if not dropZoneNames or not dropMechanicNames then return end
+    local setDropMechanicsText
+    local setDropLocationsText, isVeteranMonsterSet = getDungeonDifficultyStr(setData, itemLink)
+d(">setDropLocationsText: " ..tos(setDropLocationsText) ..", isVeteranMonsterSet: " ..tos(isVeteranMonsterSet))
+    --todo check tables dropZoneNames, dropMechanicNames, dropLocationNames.
+    --todo Loop over dropZoneNames, get the drop mechanic name and the dropLocation and build a multi-line string (1 line for each zone) for the output
+    for idx, dropZoneName in ipairs(dropZoneNames) do
+        local dropMechanicName = dropMechanicNames[idx]
+        local dropMechanicDropLocationName = dropLocationNames[idx]
+d(">Zone: " ..tos(dropZoneName) .. ", dropMechanicName: " ..tos(dropMechanicName) .. ", dropMechanicDropLocationName: " ..tos(dropMechanicDropLocationName))
+
+
+    end
+
+    return setDropMechanicsText, setDropLocationsText
+end
+
+local function buildSetDLCInfo(setData)
     local DLCid = setData.dlcId
     if not DLCid then return end
-    noPrefix = noPrefix or false
-
-    dlcStr = dlcStr or localization.dlc
-    dlcStrWithPlaceholder = dlcStrWithPlaceholder or dlcStr .. placeHolder
     local dlcName = libSets_GetDLCName(DLCid)
-    return (not noPrefix and dlcStrWithPlaceholder .. dlcName) or  dlcName
+    return dlcName
 end
 
-local setTypeStrWithPlaceholder
-local function buildSetTypeInfo(setData, noPrefix)
+local function buildSetTypeInfo(setData)
     local setType = setData.setType
     if not setType then return end
-    noPrefix = noPrefix or false
-
-    setTypeStr = setTypeStr or localization.setType
-    setTypeStrWithPlaceholder = setTypeStrWithPlaceholder or setTypeStr .. placeHolder
-
     local setTypeName = libSets_GetSetTypeName(setType)
     local setTypeTexture
     if setData.isVeteran ~= nil then
@@ -581,23 +481,7 @@ local function buildSetTypeInfo(setData, noPrefix)
     else
         setTypeTexture = setTypeToTexture[setType]
     end
-    if setTypeTexture then
-        local setTypeNameIconStr = zoitf(setTypeTexture, 24, 24, setTypeName, nil)
-        setTypeName = setTypeNameIconStr
-    end
-    if addNeededTraits then
-        local setTraitsNeeded = buildSetNeededTraitsInfo(setData, true)
-        if setTraitsNeeded ~= nil and setTraitsNeeded ~= "" then
-            local retStr
-            if noPrefix then
-                retStr = setTypeName .. " (" .. setTraitsNeeded .. ")"
-            else
-                retStr = setTypeStrWithPlaceholder .. setTypeName .. " (" .. setTraitsNeeded .. ")"
-            end
-            return retStr
-        end
-    end
-    return (not noPrefix and (setTypeStrWithPlaceholder .. setTypeName)) or setTypeName
+    return setTypeName, setTypeTexture
 end
 
 local function addTooltipLine(tooltipControl, setData, itemLink)
@@ -683,16 +567,13 @@ d("addTooltipLine")
     --      [2] = nil, --as it got no monster or other dropMechanicLocation name,
     --  },
     --}
-    local setTypeText
+    local setTypeText, setTypeTexture
     local setNeededTraitsText
+    local setDropZoneStr
     local setDropMechanicText
     local setDropLocationsText
     local setDLCText
-
-    local isMonsterDropMechanic = false
-    local dropMechanicOrBossOutput = false
-    --local setType = setData.setType
-    --local isMonsterSet = (setType == LIBSETS_SETTYPE_MONSTER) or false
+    --dropZoneNames, dropMechanicNames, dropLocationNames
     local isVeteranMonsterSet = false
 
     --[[
@@ -705,31 +586,96 @@ d("addTooltipLine")
     ]]
 
     if (useCustomTooltip and setTypePlaceholder) or addSetType then
-        setTypeText = buildSetTypeInfo(setData, useCustomTooltip)
-        addSetInfoText(setTypeText)
+        setTypeText, setTypeTexture = buildSetTypeInfo(setData)
     end
-
     if (useCustomTooltip and neededTraitsPlaceholder)  or (not addSetType and addNeededTraits) then
-        setNeededTraitsText = buildSetNeededTraitsInfo(setData, useCustomTooltip)
-        addSetInfoText(setNeededTraitsText)
+        setNeededTraitsText = buildSetNeededTraitsInfo(setData)
     end
-
-    if (useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder))  or addDropMechanic or addBossName then
-        dropMechanicOrBossOutput = true
-        setDropMechanicText, isMonsterDropMechanic, isVeteranMonsterSet = buildSetDropMechanicAndBossInfo(setData, itemLink, useCustomTooltip)
-    end
-
-    if (useCustomTooltip and dropZonesPlaceholder)  or addDropLocation then
-        setDropLocationsText, isVeteranMonsterSet = buildSetDropLocationInfo(setData, isMonsterDropMechanic, isVeteranMonsterSet, itemLink, useCustomTooltip)
-        addSetInfoText(setDropLocationsText)
-    end
-    if dropMechanicOrBossOutput and setDropMechanicText ~= nil then
-        addSetInfoText(setDropMechanicText)
-    end
-
-    if (useCustomTooltip and dlcNamePlaceHolder)  or addDLC then
+    if (useCustomTooltip and dlcNamePlaceHolder) or addDLC then
         setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
-        addSetInfoText(setDLCText)
+    end
+
+    local runDropMechanic = (useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
+                            or (not useCustomTooltip and (addDropMechanic or addBossName or addDropLocation))
+    if runDropMechanic then
+        --dropZoneNames, dropMechanicNames, dropLocationNames
+        getSetDropMechanicInfo(setData)
+
+        if useCustomTooltip then
+            --Build , separated texts of dropZones, dropMechanics, dropLocationNames
+            setDropZoneStr = buildTextLinesFromTable(dropZoneNames, nil, false, false)
+            setDropMechanicText = buildTextLinesFromTable(dropMechanicNames, nil, false, false)
+            setDropLocationsText = buildTextLinesFromTable(dropLocationNames, nil, false, false)
+        else
+            setDropZoneStr, setDropMechanicText, setDropLocationsText = buildSetDropMechanicInfo(setData, itemLink)
+        end
+    end
+
+lib._tooltipData = {
+    setTypeText = setTypeText,
+    setTypeTexture = setTypeTexture,
+    setNeededTraitsText = setNeededTraitsText,
+    setDropZoneStr = setDropZoneStr,
+    setDropMechanicText = setDropMechanicText,
+    setDropLocationsText = setDropLocationsText,
+    setDLCText = setDLCText,
+    dropZoneNames = dropZoneNames,
+    dropMechanicNames = dropMechanicNames,
+    dropLocationNames = dropLocationNames,
+}
+
+    --Todo add textures to some of the texts, e.g. setType, setDropMechanicDropLocation
+
+    --Use custom defined string? -> Build output string for the tooltip, based on chosen LAM settings
+    if useCustomTooltip then
+        --Check which placeholder is used and pass in the texts
+        if not setTypePlaceholder then
+            setTypeText = ""
+            setTypeTexture = ""
+        end
+        if not neededTraitsPlaceholder then
+            setNeededTraitsText = ""
+        end
+        if not dlcNamePlaceHolder then
+            setDLCText = ""
+        end
+        if not dropZonesPlaceholder then
+            setDropZoneStr = ""
+        end
+        if not dropMechanicPlaceholder then
+            setDropMechanicText = ""
+        end
+        if not bossNamePlaceholder then
+            setDropLocationsText = ""
+        end
+        --[[
+        --Custom tooltip placeholders
+            <<1>>   Set type
+            <<2>>   Drop mechanics
+            <<3>>   Drop zones
+            <<4>>   Boss/Dropped by names
+            <<5>>   Number of needed traits researched
+            <<6>>   Chapter/DLC name set was introduced with",
+        ]]
+        setInfoText = zo_strformat(lib.svData.useCustomTooltipPattern,
+                setTypeTexture .. setTypeText,
+                setDropMechanicText,
+                setDropZoneStr,
+                setDropLocationsText,
+                setNeededTraitsText,
+                setDLCText
+        )
+    else
+        --Use default output tooltip:
+        --if addSetType == true: "Set type:" <setTypeTexture> <setTypeText> (if setType is craftable and addNeededTraits == true: "("<traitsNeededText>")" will be added)
+        --If not addSetType and addNeededTraits == true: "Traits needed: " <traitsNeededText>
+        --if addDropLocation == true: "Drop zones:" <setDropMechanicText>
+        ---> contains the <dropZone> "("if addDropMechanic == true: <dropMechanigTexture> <dropMechanicName>
+        --> if addBossName == true: "/" <droppedByTexture> <droppedByName>")"
+        --if addDLC == true: "DLC: " <setDLCText>
+
+        --todo
+
     end
 
     --Output of the tooltip line at the bottom
@@ -773,7 +719,7 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
                                     or (not useCustomTooltip and (addDropLocation == true or addDropMechanic == true or addDLC == true
                                                                 or addBossName == true or addSetType == true or addNeededTraits == true))) and true)
                                     or false
---d("anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd))
+d("anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
         if not anyTooltipInfoToAdd then return end
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
@@ -791,7 +737,7 @@ local function loadLAMSettingsMenu()
         displayName 		= MAJOR,
         author 				= "Baertram",
         version 			= MINOR,
-        registerForRefresh 	= false,
+        registerForRefresh 	= true,
         registerForDefaults = true,
         slashCommand 		= "/libsetss",
         website             = "https://www.esoui.com/downloads/info2241-LibSets.html",
@@ -831,19 +777,7 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addSetType = value
             end,
             default =   defaultSettings.tooltipModifications.addSetType,
-            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
-            width =     "full",
-        },
-        {
-            type =      "checkbox",
-            name =      localization.dropMechanic,
-            tooltip =   localization.dropMechanic,
-            getFunc =   function() return settings.tooltipModifications.addDropMechanic end,
-            setFunc =   function(value)
-                lib.svData.tooltipModifications.addDropMechanic = value
-            end,
-            default =   defaultSettings.tooltipModifications.addDropMechanic,
-            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
+            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
             width =     "full",
         },
         {
@@ -855,19 +789,31 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addDropLocation = value
             end,
             default =   defaultSettings.tooltipModifications.addDropLocation,
-            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= ""end,
+            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
             width =     "full",
         },
         {
             type =      "checkbox",
-            name =      localization.boss,
-            tooltip =   localization.boss,
+            name =      localization.dropMechanic,
+            tooltip =   localization.dropMechanic,
+            getFunc =   function() return settings.tooltipModifications.addDropMechanic end,
+            setFunc =   function(value)
+                lib.svData.tooltipModifications.addDropMechanic = value
+            end,
+            default =   defaultSettings.tooltipModifications.addDropMechanic,
+            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
+            width =     "full",
+        },
+        {
+            type =      "checkbox",
+            name =      localization.droppedBy,
+            tooltip =   localization.droppedBy .. "/" .. localization.boss .. "/" .. GetString(SI_CHARACTER_SELECT_LOCATION_LABEL),
             getFunc =   function() return settings.tooltipModifications.addBossName end,
             setFunc =   function(value)
                 lib.svData.tooltipModifications.addBossName = value
             end,
             default =   defaultSettings.tooltipModifications.addBossName,
-            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
+            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
             width =     "full",
         },
         {
@@ -879,7 +825,7 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addNeededTraits = value
             end,
             default =   defaultSettings.tooltipModifications.addNeededTraits,
-            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
+            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
             width =     "full",
         },
         {
@@ -891,7 +837,7 @@ local function loadLAMSettingsMenu()
                 lib.svData.tooltipModifications.addDLC = value
             end,
             default =   defaultSettings.tooltipModifications.addDLC,
-            disabled =  function() return not settings.modifyTooltips or settings.useCustomTooltipPattern ~= "" end,
+            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
             width =     "full",
         },
 
