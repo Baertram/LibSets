@@ -905,9 +905,9 @@ local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
                     dropMechanicNamesTable[idx]            = dropMechanicNamesTable[idx] or {}
                     dropMechanicTooltipsTable              = dropMechanicTooltipsTable or {}
                     dropMechanicTooltipsTable[idx]         = dropMechanicTooltipsTable[idx] or {}
-                    dropMechanicNamesTable[idx][langToUse], dropMechanicTooltipsTable[idx][langToUse] = getDropMechanicName(idx, langToUse)
+                    dropMechanicNamesTable[idx][langToUse], dropMechanicTooltipsTable[idx][langToUse] = getDropMechanicName(dropMechanic, langToUse)
 --d(">>3")
-                    --Are custom names added (monster name, mob type, etc.)
+                    --Are custom drop names added (monster name, mob type, etc.)
                     if dropMechanicProvidedDropLocationNames ~= nil then
                         --First client language or language to use from parameter
                         --Is the language of the dropLocation not given in the desired language: Use EN fallback then
@@ -922,7 +922,7 @@ local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
                             and dropMechanicProvidedDropLocationNames[langTouseForProvidedNames][idx] ~= "" then
                             dropMechanicDropLocationNamesTable                                 = dropMechanicDropLocationNamesTable or {}
                             dropMechanicDropLocationNamesTable[idx]                            = dropMechanicDropLocationNamesTable[idx] or {}
-                            dropMechanicDropLocationNamesTable[idx][langTouseForProvidedNames] = dropMechanicProvidedDropLocationNames[langTouseForProvidedNames]
+                            dropMechanicDropLocationNamesTable[idx][langTouseForProvidedNames] = dropMechanicProvidedDropLocationNames[langTouseForProvidedNames][idx]
                         end
                     end
                 else
@@ -1873,6 +1873,7 @@ function lib.GetSetInfo(setId, noItemIds, lang)
 
     local returnTableRef
     local dropMechanicNamesTable, dropMechanicDropLocationNamesTable = getDropMechanicAndDropLocationNames(setId, langToUse, setInfoTable)
+
     if onlyOneLanguage or noItemIds then
         setInfoTableCopy = ZO_ShallowTableCopy(setInfoTable)
         setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
@@ -1908,6 +1909,15 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     local isCurrentDLC = (DLC_ITERATION_END and returnTableRef["dlcId"] and returnTableRef["dlcId"] >= DLC_ITERATION_END) or false
     returnTableRef.isCurrentDLC = isCurrentDLC
 
+--[[
+lib._setInfo = {
+    setId = setId,
+    setInfoTable = setInfoTable,
+    dropMechanicNamesTable = dropMechanicNamesTable,
+    dropMechanicDropLocationNamesTable = dropMechanicDropLocationNamesTable,
+    returnTableRef = returnTableRef,
+}
+]]
     return returnTableRef
 end
 
@@ -2931,6 +2941,7 @@ local function onLibraryLoaded(event, name)
     -->LibZone
     libZone = LibZone
     lib.libZone = libZone
+    lib.libAddonMenu = LibAddonMenu2
 
     --The actual API version
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
