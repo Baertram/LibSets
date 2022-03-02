@@ -77,7 +77,7 @@ local monsterSetTypes = {
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    true,
 }
 local monsterSetTypeToVeteranStr = {
-    [LIBSETS_SETTYPE_MONSTER] =                 dungeonStr,
+    [LIBSETS_SETTYPE_MONSTER] =                 veteranDungeonStr,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialCityStr,
 }
 local monsterSetTypeToNoVeteranStr = {
@@ -641,7 +641,6 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     local setDropOverallTextsPerZone
     local setDLCText
     --dropZoneNames, dropMechanicNames, dropLocationNames
-    local isVeteranMonsterSet = false
 
     --[[
         setTypePlaceholder =        placeholder == "<<1>>"
@@ -724,6 +723,13 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         --Use default output tooltip:
         if addSetType then
             setInfoText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
+        end
+        if setDropLocationsText and setDropLocationsText ~= "" then
+            if setInfoText ~= nil then
+                setInfoText = setInfoText .. " " .. setDropLocationsText
+            else
+                setInfoText = setDropLocationsText
+            end
         end
         if addNeededTraits and setData.setType and setData.setType == LIBSETS_SETTYPE_CRAFTED then
             if addSetType then
