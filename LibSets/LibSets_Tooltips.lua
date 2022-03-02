@@ -341,10 +341,9 @@ end
 
 local function checkTraitsNeededGiven(setData)
     local setType = setData.setType
-    return (setType and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED) or false
+    return (setType ~= nil and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED and true) or false
 end
 
-local neededTraitsStrWithPlaceholder
 local function buildSetNeededTraitsInfo(setData)
     if not checkTraitsNeededGiven(setData) then return end
     local traitsNeeded = tos(setData.traitsNeeded)
@@ -510,7 +509,7 @@ local function buildSetDropMechanicInfo(setData, itemLink)
                     setDropOverallTextPerZone = "\'" .. dropMechanicDropLocationName .. "\'"
                 else
                     if addDropMechanic then
-                        setDropOverallTextPerZone = setDropOverallTextPerZone .. " \'" .. dropMechanicDropLocationName .. "\'"
+                        setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
                     else
                         setDropOverallTextPerZone = setDropOverallTextPerZone .. " (\'" .. dropMechanicDropLocationName .. "\'"
                         bracketOpened = true
@@ -561,6 +560,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     local setInfoText
     local setInfoTextWasCreated = false
     local function addSetInfoText(textToAdd)
+        setInfoTextWasCreated = (setInfoText ~= nil and setInfoText ~= "") or false
         if textToAdd ~= nil and textToAdd ~= "" then
             --Add setInfoText
             setInfoText = (setInfoTextWasCreated and (setInfoText .. "\n" .. textToAdd)) or textToAdd
@@ -655,7 +655,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     if (useCustomTooltip and setTypePlaceholder) or addSetType then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
     end
-    if (useCustomTooltip and neededTraitsPlaceholder) or (not addSetType and addNeededTraits) then
+    if (useCustomTooltip and neededTraitsPlaceholder) or addNeededTraits then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
     end
     if (useCustomTooltip and dlcNamePlaceHolder) or addDLC then
@@ -723,9 +723,9 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     else
         --Use default output tooltip:
         if addSetType then
-            setInfoText = setTypeTexture .. setTypeText
+            setInfoText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
         end
-        if addNeededTraits and setData.setType == LIBSETS_SETTYPE_CRAFTED then
+        if addNeededTraits and setData.setType and setData.setType == LIBSETS_SETTYPE_CRAFTED then
             if addSetType then
                 if setInfoText ~= nil then
                     setInfoText = setInfoText .. " (" .. setNeededTraitsText .. ")"
@@ -740,13 +740,24 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         end
         if runDropMechanic then
             local setDropMechanicDropLocationsText = buildTextLinesFromTable(setDropOverallTextsPerZone, nil, true, false)
-            addSetInfoText(setDropMechanicDropLocationsText)
+            if setDropMechanicDropLocationsText and setDropMechanicDropLocationsText ~= "" then
+                local prefix = ""
+                if addBossName and not addDropLocation and not addDropMechanic then
+                    prefix = droppedByStr .. ": "
+                elseif not addBossName and not addDropLocation and addDropMechanic then
+                    prefix = dropMechanicStr .. ": "
+                elseif not addBossName and addDropLocation and not addDropMechanic then
+                    prefix = dropLocationZonesStr .. ": "
+                end
+                addSetInfoText(prefix .. setDropMechanicDropLocationsText)
+            end
         end
         if addDLC then
             addSetInfoText(setDLCText)
         end
     end
 
+   --[[
     lib._tooltipData = {
         setTypeText = setTypeText,
         setTypeTexture = setTypeTexture,
@@ -763,6 +774,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         --
         setInfoText = setInfoText,
     }
+    ]]
 
     --Output of the tooltip line at the bottom
     if setInfoText == nil or setInfoText == "" then return end
