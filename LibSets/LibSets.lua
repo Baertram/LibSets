@@ -2252,6 +2252,14 @@ end
 local getCurrentZoneIds = lib.GetCurrentZoneIds
 
 
+--Returns the complete mapping table between set item collecitons parentCategory, category and zoneIds
+--> See file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
+local preloadedSetItemCollectionMappingToZoneCopy
+function lib.GetItemSetCollectionToZoneIds()
+    preloadedSetItemCollectionMappingToZoneCopy = preloadedSetItemCollectionMappingToZoneCopy or ZO_ShallowTableCopy(preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING])
+    return preloadedSetItemCollectionMappingToZoneCopy
+end
+
 --Returns the zoneIds (table) which are linked to a item set collection's categoryId
 --Not all categories are connected to a zone though! The result will be nil in these cases.
 --Example return table: {148}
