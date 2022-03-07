@@ -19,7 +19,7 @@ local strgmatch = string.gmatch
 --local strlower = string.lower
 --local strlen = string.len
 local strfind = string.find
-local strsub = string.sub
+local strgsub = string.gsub
 --local strfor = string.format
 
 local tins = table.insert
@@ -893,7 +893,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
             <<6>>   Chapter/DLC name set was introduced with",
         ]]
         --replace special characters like <br> with \n
-        local patternNew = strsub(lib.svData.useCustomTooltipPattern, "<br>", "\n")
+        local patternNew = strgsub(lib.svData.useCustomTooltipPattern, "<br>", "\n")
         setInfoText = zostrfor(patternNew,
                 setTypeText,
                 setDropMechanicText,
