@@ -385,9 +385,11 @@ local function buildSetNeededTraitsInfo(setData)
 end
 
 local function addNonVeteranUndauntedChestName(setType, undauntedChestId)
-    if not setType or not undauntedChestId then return "" end
-    if setType == LIBSETS_SETTYPE_MONSTER and undauntedChestId ~= nil then
-        return " (" .. zoitfns(undauntedChestTexture, 24, 24, undauntedChestIdNames[undauntedChestId], nil)  .. ")"
+    if not setType or not undauntedChestId or undauntedChestId == "" or undauntedChestId <= 0 then return "" end
+    if setType == LIBSETS_SETTYPE_MONSTER then
+        local undauntedChestTextureAndName = zoitfns(undauntedChestTexture, 24, 24, undauntedChestIdNames[undauntedChestId], nil)
+        if not undauntedChestTextureAndName or undauntedChestTextureAndName == "" then return "" end
+        return " (" .. undauntedChestTextureAndName .. ")"
     end
     return ""
 end
@@ -405,14 +407,18 @@ local function getDungeonDifficultyStr(setData, itemLink)
                     return veteranStr, true
                 else
                     local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
-                    nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
+                    if setData.undauntedChestId then
+                        nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
+                    end
                     return nonVeteranStr, false
                 end
             end
         else
             if not veteranData then
                 local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
-                nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
+                if setData.undauntedChestId then
+                    nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
+                end
                 return nonVeteranStr, false
             else
                 local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
