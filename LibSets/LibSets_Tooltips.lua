@@ -382,6 +382,28 @@ local function checkTraitsNeededGiven(setData)
     return (setType ~= nil and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED and true) or false
 end
 
+local function tableContentsAreAllTheSame(tabToCheck)
+    local entriesChecked = {}
+    for _, entry in pairs(tabToCheck) do
+        entriesChecked[entry] = true
+    end
+    if NonContiguousCount(entriesChecked) == 1 then
+        --All the same
+        return true
+    end
+    return false
+end
+
+local function condenseTable(tabToCondense)
+    if tableContentsAreAllTheSame(tabToCondense) then
+        local retTab
+        for k, v in pairs(tabToCondense) do
+            retTab = { [k]=v }
+            return retTab
+        end
+    end
+    return tabToCondense
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 local function buildSetNeededTraitsInfo(setData)
@@ -545,17 +567,7 @@ local function buildSetDropMechanicInfo(setData, itemLink)
 
     --Check if all zoneNames are the same
     -->Output string of the zones will be 1 zone and all drop mechanics and dropLocationNames afterwards then
-    local allZonesTheSame = false
-    if not useCustomTooltip then
-        local dropZoneNamesBefore = {}
-        for idx, dropZoneName in ipairs(dropZoneNames) do
-            dropZoneNamesBefore[dropZoneName] = true
-        end
-        if NonContiguousCount(dropZoneNamesBefore) == 1 then
-            --All zoneNames are the same
-            allZonesTheSame = true
-        end
-    end
+    local allZonesTheSame = (not useCustomTooltip and tableContentsAreAllTheSame(dropZoneNames)) or false
 
 --d(">>setDropLocationsText: " ..tos(setDropLocationsText) ..", isVeteranMonsterSet: " ..tos(isVeteranMonsterSet))
     --Default format <Zone Name> <Drop Mechanic texture><Drop Mechanic Name> (<Drop Mechanic Drop Location texture> '<Drop Mechanic Drop Location name>')
@@ -832,6 +844,9 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         getSetDropMechanicInfo(setData)
 
         if useCustomTooltip then
+            --All zoneNames are the same = Condense them to 1, else keep them as same dropZones could have diffeferent dropMechanics and dropLocations and the order needs to be kept!
+            local dropZoneNamesNew = condenseTable(dropZoneNames)
+            dropZoneNames = dropZoneNamesNew
             --Build , separated texts of dropZones, dropMechanics, dropLocationNames
             setDropZoneStr =        buildTextLinesFromTable(dropZoneNames,      nil, false, false)
             setDropMechanicText =   buildTextLinesFromTable(dropMechanicNames,  nil, false, false)
