@@ -29,6 +29,7 @@ local tsort = table.sort
 local zostrfor = zo_strformat
 --local zocstrfor = ZO_CachedStrFormat
 local zoitf = zo_iconTextFormat
+local zoitfns = zo_iconTextFormatNoSpace
 
 local gilsetinf =   GetItemLinkSetInfo
 local gilet =       GetItemLinkEquipType
@@ -50,6 +51,7 @@ local dropLocationNames = {}
 local dropMechanicIdToTexture =             lib.dropMechanicIdToTexture
 local setTypeToTexture =                    lib.setTypeToTexture
 local vetDungTexture =                      setTypeToTexture["vet_dung"]
+local undauntedChestTexture =               setTypeToTexture["undaunted chest"]
 local imperialCityTexture =                 setTypeToTexture[LIBSETS_SETTYPE_IMPERIALCITY]
 local setTypeToDropZoneLocalizationStr =    lib.setTypeToDropZoneLocalizationStr
 local getDropMechanicName =                 lib.GetDropMechanicName
@@ -385,7 +387,7 @@ end
 local function addNonVeteranUndauntedChestName(setType, undauntedChestId)
     if not setType or not undauntedChestId then return "" end
     if setType == LIBSETS_SETTYPE_MONSTER and undauntedChestId ~= nil then
-        return " (" .. undauntedChestIdNames[undauntedChestId] .. ")"
+        return " (" .. zoitfns(undauntedChestTexture, 24, 24, undauntedChestIdNames[undauntedChestId], nil)  .. ")"
     end
     return ""
 end
@@ -491,7 +493,7 @@ local function getSetDropMechanicInfo(setData)
 --d(">dropMechanicNameOfZone: " ..tos(dropMechanicNameOfZone))
                 local dropMechanicTexture = dropMechanicIdToTexture[dropMechanicIdOfZone]
                 if dropMechanicTexture then
-                    local dropMechanicNameIconStr = zoitf(dropMechanicTexture, 24, 24, dropMechanicNameOfZone, nil)
+                    local dropMechanicNameIconStr = zoitfns(dropMechanicTexture, 24, 24, dropMechanicNameOfZone, nil)
                     dropMechanicNameOfZone = dropMechanicNameIconStr
                 end
                 dropMechanicNames[idx] = dropMechanicNameOfZone
