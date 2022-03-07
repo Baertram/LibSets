@@ -338,6 +338,7 @@ local clientLang = lib.clientLang
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
 local EM = EVENT_MANAGER
+local ISCDM = ITEM_SET_COLLECTIONS_DATA_MANAGER
 
 local tos = tostring
 local strgmatch = string.gmatch
@@ -2271,6 +2272,7 @@ function lib.GetItemSetCollectionZoneIds(categoryId)
     end
     return
 end
+local getItemSetCollectionZoneIds = lib.GetItemSetCollectionZoneIds
 
 --Returns the categoryIds (table) which are linked to a item set collection's zoneId
 --Not all zoneIds are connected to a category though! The result will be nil in these cases.
@@ -2312,6 +2314,44 @@ function lib.GetItemSetCollectionCategoryData(categoryId)
     return
 end
 local getItemSetCollectionCategoryData = lib.GetItemSetCollectionCategoryData
+
+
+local function getItemSetCollectionUnlockedAndTotal(zoneId)
+    local sumNumUnlocked = 0
+    local sumNumTotal = 0
+    local categoryIds = getItemSetCollectionCategoryIds(zoneId)
+    for _, categoryId in ipairs(categoryIds) do
+        local categoryData = ISCDM:GetItemSetCollectionCategoryData(categoryId)
+        local numUnlocked, numTotal = categoryData:GetNumUnlockedAndTotalPieces()
+        sumNumUnlocked = sumNumUnlocked + numUnlocked
+        sumNumTotal = sumNumTotal + numTotal
+    end
+    return sumNumUnlocked, sumNumTotal
+end
+
+
+--Get the number of unlocked and total itemSetCollection pieces in a categoryId (categoryId needs to be the categoryId of
+--the Item Set Collections UI, see mapping table at file LibSets_Data_All.lua ->
+--number categoryId The zone's categoryId
+--returns number sumNumUnlocked, number sumNumTotal
+function lib.GetNumItemSetCollectionCategoryUnlockedPieces(categoryId)
+    local zoneIdsOfCategory = getItemSetCollectionZoneIds(categoryId)
+    local sumNumUnlocked, sumNumTotal
+    for _, zoneId in ipairs(zoneIdsOfCategory) do
+        local numUnlockedOfZone, numTotalOfZone = getItemSetCollectionUnlockedAndTotal(zoneId)
+        sumNumUnlocked = sumNumUnlocked + numUnlockedOfZone
+        sumNumTotal = sumNumTotal + numTotalOfZone
+    end
+    return sumNumUnlocked, sumNumTotal
+end
+
+
+--Get the number of unlocked and total itemSetCollection pieces in a zoneId
+--number zoneId The zone's ID
+--returns number sumNumUnlocked, number sumNumTotal
+function lib.GetNumItemSetCollectionZoneUnlockedPieces(zoneId)
+    return getItemSetCollectionUnlockedAndTotal(zoneId)
+end
 
 
 --Open a node in the item set collections book for teh given category data table
@@ -2393,33 +2433,9 @@ local function openItemSetCollectionBookOfZoneCategoryData(categoryId)
     return retVar
 end
 
-
---Open the item set collections book of the current parentZoneId. If more than 1 categoryId was found for the parentZoneId,
---the 1st will be opened!
-function lib.OpenItemSetCollectionBookOfCurrentParentZone()
-    local _, currentParentZone, _, _ = getCurrentZoneIds()
-    if not currentParentZone or currentParentZone <= 0 then return end
-    local categoryIdsOfParentZone = getItemSetCollectionCategoryIds(currentParentZone)
-    if not categoryIdsOfParentZone then return end
-    if #categoryIdsOfParentZone == 1 then
-        return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfParentZone[1])
-    else
-        for _, categoryId in ipairs(categoryIdsOfParentZone) do
-            if openItemSetCollectionBookOfZoneCategoryData(categoryId) then
-                return true
-            end
-        end
-        return false
-    end
-end
-
---Open the item set collections book of the current zoneId. If more than 1 categoryId was found for the zoneId,
---the 1st will be opened!
-function lib.OpenItemSetCollectionBookOfCurrentZone()
-    local currentZone, _, _, _ = getCurrentZoneIds()
-    if not currentZone or currentZone <= 0 then return end
-    local categoryIdsOfZone = getItemSetCollectionCategoryIds(currentZone)
-    if not categoryIdsOfZone then return end
+local function openItemSetCollectionsBookOfZoneId(zoneId)
+    local categoryIdsOfZone = getItemSetCollectionCategoryIds(zoneId)
+    if not categoryIdsOfZone then return false end
     if #categoryIdsOfZone == 1 then
         return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfZone[1])
     else
@@ -2430,6 +2446,30 @@ function lib.OpenItemSetCollectionBookOfCurrentZone()
         end
         return false
     end
+end
+
+--Open the item set collections book of the current parentZoneId. If more than 1 categoryId was found for the parentZoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfCurrentParentZone()
+    local _, currentParentZone, _, _ = getCurrentZoneIds()
+    if not currentParentZone or currentParentZone <= 0 then return end
+    return openItemSetCollectionsBookOfZoneId(currentParentZone)
+end
+
+--Open the item set collections book of the current zoneId. If more than 1 categoryId was found for the zoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfCurrentZone()
+    local currentZone, _, _, _ = getCurrentZoneIds()
+    if not currentZone or currentZone <= 0 then return end
+    return openItemSetCollectionsBookOfZoneId(currentParentZone)
+end
+
+
+--Open the item set collections book of the zoneId. If more than 1 categoryId was found for the zoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfZone(zoneId)
+    if not zoneId or zoneId <= 0 then return end
+    return openItemSetCollectionsBookOfZoneId(zoneId)
 end
 
 
