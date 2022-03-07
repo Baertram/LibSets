@@ -172,28 +172,38 @@ local function isCustomTooltipEnabled(value)
 
     local useCustomTooltipPattern = value
     if useCustomTooltipPattern == nil then useCustomTooltipPattern = lib.svData.useCustomTooltipPattern end
+--d(">useCustomTooltipPattern: " ..tos(useCustomTooltipPattern))
     if useCustomTooltipPattern and useCustomTooltipPattern ~= "" then
         --Check if the custom tooltip pattern contains any placeholder, else it will not be relevant
         if strfind(useCustomTooltipPattern, "<<%d>>", 1, false) ~= nil then
+--d(">>drin")
+            local doAdd = false
             for placeholder in strgmatch(useCustomTooltipPattern, "<<%d>>+") do
-                tins(customTooltipPlaceholdersNeeded, placeholder)
                 if placeholder == "<<1>>" then
                     setTypePlaceholder = true
+                    doAdd = true
                 elseif placeholder == "<<1>>" then
                     setTypePlaceholder = true
+                    doAdd = true
                 elseif placeholder == "<<2>>" then
                     dropMechanicPlaceholder = true
+                    doAdd = true
                 elseif placeholder == "<<3>>" then
                     dropZonesPlaceholder = true
+                    doAdd = true
                 elseif placeholder == "<<4>>" then
                     bossNamePlaceholder = true
+                    doAdd = true
                 elseif placeholder == "<<5>>" then
                     neededTraitsPlaceholder = true
+                    doAdd = true
                 elseif placeholder == "<<6>>" then
                     dlcNamePlaceHolder = true
+                    doAdd = true
                 end
             end
-            if #customTooltipPlaceholdersNeeded > 1 then
+--d(">>doAdd: " ..tos(doAdd))
+            if doAdd == true then
                 return true
             end
         end
@@ -673,12 +683,15 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
 
     if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
+d(">setTypeText: " ..tos(setTypeText))
     end
     if (useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
+d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
     end
     if (useCustomTooltip and dlcNamePlaceHolder) or (not useCustomTooltip and addDLC) then
         setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
+d(">setDLCText: " ..tos(setDLCText))
     end
 
     local runDropMechanic = (useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
@@ -695,31 +708,44 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         else
             setDropZoneStr, setDropMechanicText, setDropLocationsText, setDropOverallTextsPerZone = buildSetDropMechanicInfo(setData, itemLink)
         end
+d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
     end
 
     --Todo add textures to some of the texts, e.g. setType, setDropMechanicDropLocation
+d(">useCustomTooltip: " ..tos(useCustomTooltip))
+
 
     --Use custom defined string? -> Build output string for the tooltip, based on chosen LAM settings
-    if useCustomTooltip then
+    if useCustomTooltip == true then
         --Check which placeholder is used and pass in the texts
         if not setTypePlaceholder then
             setTypeText = ""
             setTypeTexture = ""
+            --d(">1")
+        else
+            if setTypeTexture ~= nil and setTypeTexture ~= "" then
+                setTypeText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
+            end
         end
         if not neededTraitsPlaceholder then
             setNeededTraitsText = ""
+--d(">2")
         end
         if not dlcNamePlaceHolder then
             setDLCText = ""
+--d(">3")
         end
         if not dropZonesPlaceholder then
             setDropZoneStr = ""
+--d(">4")
         end
         if not dropMechanicPlaceholder then
             setDropMechanicText = ""
+--d(">5")
         end
         if not bossNamePlaceholder then
             setDropLocationsText = ""
+--d(">6")
         end
         --[[
         --Custom tooltip placeholders
@@ -731,7 +757,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
             <<6>>   Chapter/DLC name set was introduced with",
         ]]
         setInfoText = zostrfor(lib.svData.useCustomTooltipPattern,
-                setTypeTexture .. setTypeText,
+                setTypeText,
                 setDropMechanicText,
                 setDropZoneStr,
                 setDropLocationsText,
@@ -782,6 +808,8 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
             addSetInfoText(setDLCText)
         end
     end
+
+d(">>setInfoText: " ..tos(setInfoText))
 
    --[[
     lib._tooltipData = {
@@ -1031,7 +1059,7 @@ local function onPlayerActivatedTooltips()
 
     --Get current enabled state of the tooltip settings
     useCustomTooltip =  isCustomTooltipEnabled()
-d(">useCustomTooltip: " ..tos(useCustomTooltip))
+--d(">useCustomTooltip: " ..tos(useCustomTooltip))
     isLibSetsTooltipEnabled()
 
     --Build the settings menu for the tooltip
