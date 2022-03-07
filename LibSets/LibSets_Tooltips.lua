@@ -163,28 +163,51 @@ end
     <<6>>   Chapter/DLC name set was introduced with",
 ]]
 local function isCustomTooltipEnabled(value)
-    local useCustomTooltipPattern = value or lib.svData.useCustomTooltipPattern
+    setTypePlaceholder = false
+    dropMechanicPlaceholder = false
+    dropZonesPlaceholder = false
+    bossNamePlaceholder = false
+    neededTraitsPlaceholder = false
+    dlcNamePlaceHolder = false
+
+    local useCustomTooltipPattern = value
+    if useCustomTooltipPattern == nil then useCustomTooltipPattern = lib.svData.useCustomTooltipPattern end
     if useCustomTooltipPattern and useCustomTooltipPattern ~= "" then
         --Check if the custom tooltip pattern contains any placeholder, else it will not be relevant
         if strfind(useCustomTooltipPattern, "<<%d>>", 1, false) ~= nil then
             for placeholder in strgmatch(useCustomTooltipPattern, "<<%d>>+") do
                 tins(customTooltipPlaceholdersNeeded, placeholder)
-                setTypePlaceholder =        placeholder == "<<1>>" and true or false
-                dropMechanicPlaceholder =   placeholder == "<<2>>" and true or false
-                dropZonesPlaceholder =      placeholder == "<<3>>" and true or false
-                bossNamePlaceholder =       placeholder == "<<4>>" and true or false
-                neededTraitsPlaceholder =   placeholder == "<<5>>" and true or false
-                dlcNamePlaceHolder =        placeholder == "<<6>>" and true or false
+                if placeholder == "<<1>>" then
+                    setTypePlaceholder = true
+                end
+                if placeholder == "<<1>>" then
+                    setTypePlaceholder = true
+                end
+                if placeholder == "<<2>>" then
+                    dropMechanicPlaceholder = true
+                end
+                if placeholder == "<<3>>" then
+                    dropZonesPlaceholder = true
+                end
+                if placeholder == "<<4>>" then
+                    bossNamePlaceholder = true
+                end
+                if placeholder == "<<5>>" then
+                    neededTraitsPlaceholder = true
+                end
+                if placeholder == "<<6>>" then
+                    dlcNamePlaceHolder = true
+                end
             end
             if #customTooltipPlaceholdersNeeded > 1 then
                 return true
             end
         end
-        return false
     end
     return false
 end
 lib.IsLibSetsCustomTooltipEnabled = isCustomTooltipEnabled
+
 
 local function isLibSetsTooltipEnabled()
     if not tooltipSV then return end
@@ -838,7 +861,7 @@ local function loadLAMSettingsMenu()
             getFunc =   function() return settings.modifyTooltips end,
             setFunc =   function(value)
                 lib.svData.modifyTooltips = value
-                useCustomTooltip =  isCustomTooltipEnabled()
+                useCustomTooltip = isCustomTooltipEnabled()
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.modifyTooltips,
