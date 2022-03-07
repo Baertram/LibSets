@@ -38,7 +38,11 @@
 
  --Todo list--
  --Add localized translations
- --Add the new dropMechanics textures
+
+    --Unique item detection, sirinsidiator 2022-03-07 e.g. "Pulsing Dremora Ring" and "Leviathan Rings", different itemIds
+    so basically convert itemId to setId+slotId back to itemId and then compare input itemId to output itemId and if it's the same you got the non-unique version, otherwise it's the unique one
+    you could actually do that in LibSets while scanning sets and then mark your data accordingly
+
 
 
  --Currently working on--
@@ -367,6 +371,9 @@ local gilet = GetItemLinkEquipType
 local giltt = GetItemLinkTraitType
 local gildeid = GetItemLinkDefaultEnchantId
 local gesct = GetEnchantSearchCategoryType
+local gilsi = GetItemLinkSetInfo
+local giliscs = GetItemLinkItemSetCollectionSlot
+local id64tos = Id64ToString
 
 
 ------------Global variables--------------
@@ -2241,6 +2248,21 @@ end
 -- 	Item set collections functions
 ------------------------------------------------------------------------
 
+--Returns string itemSetCollectionKey "setId:itemSetCollectionSlotId" of the itemLink
+--identifying a set item by setId and the equipment slot (e.g. hands, chest, ...) which potentially could have different
+--itemIds
+function lib.GetItemSetCollectionsSlotKey(itemLink)
+    if not itemLink then return nil end
+    local setId = select(6, gilsi(itemLink))
+    if not setId or setId <= 0 then
+        return
+    end
+    local itemSetCollectionSlot = giliscs(itemLink)
+    if not itemSetCollectionSlot or itemSetCollectionSlot == "" then return end
+    return strfor("%d:%s", setId, id64tos(itemSetCollectionSlot))
+end
+
+
 --Get the current map's zoneIndex and via the index get the zoneId, the parent zoneId, and return them
 --+ the current zone's index and parent zone index
 --> Returns: number currentZoneId, number currentZoneParentId, number currentZoneIndex, number currentZoneParentIndex
@@ -2848,6 +2870,7 @@ function lib.UnRegisterSetProcEventCallbackForSetId(addOnEventNamespace, eventId
     end
     return nil
 end
+
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------

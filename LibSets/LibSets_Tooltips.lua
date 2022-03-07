@@ -864,7 +864,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         end
     end
 
---d(">useCustomTooltip: " ..tos(useCustomTooltip))
+    --d(">useCustomTooltip: " ..tos(useCustomTooltip))
 
     --Use custom defined string? -> Build output string for the tooltip, based on chosen LAM settings
     if useCustomTooltip == true then
