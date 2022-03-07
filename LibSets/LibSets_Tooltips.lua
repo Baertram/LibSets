@@ -71,6 +71,7 @@ local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
 local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 local undauntedChestStr =       localization.undauntedChest
+local undauntedChestIdNames =   lib.undauntedChestIds[clientLang]
 
 local monsterSetTypes = {
     [LIBSETS_SETTYPE_MONSTER] =                 true,
@@ -138,7 +139,7 @@ local anyTooltipInfoToAdd = false
 local lastTooltipItemLink
 
 local useCustomTooltip = false
-local customTooltipPlaceholdersNeeded = {}
+--local customTooltipPlaceholdersNeeded = {}
 local setTypePlaceholder = false
 local dropMechanicPlaceholder = false
 local dropZonesPlaceholder = false
@@ -230,6 +231,7 @@ end
 lib.IsLibSetsTooltipEnabled = isLibSetsTooltipEnabled
 
 
+------------------------------------------------------------------------------------------------------------------------
 local function isTooltipOfSetItem(itemLink, tooltipData)
 -- @return hasSet bool, setName string, numBonuses integer, numNormalEquipped integer, maxEquipped integer, setId integer, numPerfectedEquipped integer
     local isSet, _, _, _, _, setId, _ = gilsetinf(itemLink, false)
@@ -371,11 +373,21 @@ local function checkTraitsNeededGiven(setData)
     return (setType ~= nil and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED and true) or false
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
 local function buildSetNeededTraitsInfo(setData)
     if not checkTraitsNeededGiven(setData) then return end
     local traitsNeeded = tos(setData.traitsNeeded)
     if not traitsNeeded then return end
     return tos(traitsNeeded)
+end
+
+local function addNonVeteranUndauntedChestName(setType, undauntedChestId)
+    if not setType or not undauntedChestId then return "" end
+    if setType == LIBSETS_SETTYPE_MONSTER and undauntedChestId ~= nil then
+        return " (" .. undauntedChestIdNames[undauntedChestId] .. ")"
+    end
+    return ""
 end
 
 local function getDungeonDifficultyStr(setData, itemLink)
@@ -391,12 +403,14 @@ local function getDungeonDifficultyStr(setData, itemLink)
                     return veteranStr, true
                 else
                     local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                    nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
                     return nonVeteranStr, false
                 end
             end
         else
             if not veteranData then
                 local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
+                nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
                 return nonVeteranStr, false
             else
                 local veteranStr = monsterSetTypeToVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
@@ -548,11 +562,12 @@ local function buildSetDropMechanicInfo(setData, itemLink)
             setDropOverallTextPerZone = setDropOverallTextPerZone .. ")"
         end
         --Do not add the same line again
-        if ZO_IsElementInNumericallyIndexedTable(setDropOverallTextsPerZone, setDropOverallTextPerZone) then
-            setDropOverallTextPerZone = ""
+        if not ZO_IsElementInNumericallyIndexedTable(setDropOverallTextsPerZone, setDropOverallTextPerZone) then
+            --setDropOverallTextPerZone = ""
+            table.insert(setDropOverallTextsPerZone, setDropOverallTextPerZone)
         end
-        table.insert(setDropOverallTextsPerZone, setDropOverallTextPerZone)
     end
+--lib._setDropOverallTextsPerZone = setDropOverallTextsPerZone
     return setDropZoneStr, setDropMechanicText, setDropLocationsText, setDropOverallTextsPerZone
 end
 
@@ -811,7 +826,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         end
     end
 
-d(">>setInfoText: " ..tos(setInfoText))
+--d(">>setInfoText: " ..tos(setInfoText))
 
    --[[
     lib._tooltipData = {
