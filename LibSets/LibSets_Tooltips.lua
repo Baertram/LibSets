@@ -64,9 +64,10 @@ local dropLocationZonesStr =    localization.dropZones
 local dlcStr =                  localization.dlc
 local droppedByStr =            localization.droppedBy
 local dungeonStr =              localization.dropZoneDungeon
+local vetDungeonStr =           localization.dropZoneVeteranDungeon
 local imperialCityStr =         localization.dropZoneImperialCity
 local imperialSewersStr =       localization.dropZoneImperialSewers
-local veteranDungeonStr =       zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
+local veteranDungeonIconStr =   zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
 local bossStr =                 localization.boss
 local setTypeStr =              localization.setType
 local neededTraitsStr =         localization.neededTraits
@@ -80,7 +81,7 @@ local monsterSetTypes = {
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    true,
 }
 local monsterSetTypeToVeteranStr = {
-    [LIBSETS_SETTYPE_MONSTER] =                 veteranDungeonStr,
+    [LIBSETS_SETTYPE_MONSTER] =                 veteranDungeonIconStr,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialCityStr,
 }
 local monsterSetTypeToNoVeteranStr = {
@@ -136,6 +137,7 @@ local addDropMechanic
 local addBossName
 local addSetType
 local addNeededTraits
+local tooltipTextures
 local anyTooltipInfoToAdd = false
 
 local lastTooltipItemLink
@@ -218,12 +220,17 @@ lib.IsLibSetsCustomTooltipEnabled = isCustomTooltipEnabled
 
 local function isLibSetsTooltipEnabled()
     if not tooltipSV then return end
-    addDropLocation =   tooltipSV.addDropLocation
-    addDropMechanic =   tooltipSV.addDropMechanic
-    addDLC =            tooltipSV.addDLC
-    addBossName =       tooltipSV.addBossName
-    addSetType =        tooltipSV.addSetType
-    addNeededTraits =   tooltipSV.addNeededTraits
+    tooltipTextures       =     tooltipSV.tooltipTextures
+    veteranDungeonIconStr =     (tooltipTextures == true and zoitf(vetDungTexture, 24, 24, dungeonStr, nil)) or vetDungeonStr
+    monsterSetTypeToVeteranStr[LIBSETS_SETTYPE_MONSTER] = veteranDungeonIconStr
+
+
+    addDropLocation =           tooltipSV.addDropLocation
+    addDropMechanic =           tooltipSV.addDropMechanic
+    addDLC =                    tooltipSV.addDLC
+    addBossName =               tooltipSV.addBossName
+    addSetType =                tooltipSV.addSetType
+    addNeededTraits =           tooltipSV.addNeededTraits
 
     anyTooltipInfoToAdd = ((useCustomTooltip == true
                                 or (not useCustomTooltip and (addDropLocation == true or addDropMechanic == true or addDLC == true
@@ -387,7 +394,13 @@ end
 local function addNonVeteranUndauntedChestName(setType, undauntedChestId)
     if not setType or not undauntedChestId or undauntedChestId == "" or undauntedChestId <= 0 then return "" end
     if setType == LIBSETS_SETTYPE_MONSTER then
-        local undauntedChestTextureAndName = zoitfns(undauntedChestTexture, 24, 24, undauntedChestIdNames[undauntedChestId], nil)
+        local undauntedChestName = undauntedChestIdNames[undauntedChestId]
+        local undauntedChestTextureAndName
+        if tooltipTextures == true then
+            undauntedChestTextureAndName = zoitfns(undauntedChestTexture, 24, 24, undauntedChestName, nil)
+        else
+            undauntedChestTextureAndName = undauntedChestName
+        end
         if not undauntedChestTextureAndName or undauntedChestTextureAndName == "" then return "" end
         return " (" .. undauntedChestTextureAndName .. ")"
     end
@@ -497,10 +510,12 @@ local function getSetDropMechanicInfo(setData)
             end
             if dropMechanicNameOfZone ~= nil then
 --d(">dropMechanicNameOfZone: " ..tos(dropMechanicNameOfZone))
+                if tooltipTextures == true then
                 local dropMechanicTexture = dropMechanicIdToTexture[dropMechanicIdOfZone]
-                if dropMechanicTexture then
-                    local dropMechanicNameIconStr = zoitfns(dropMechanicTexture, 24, 24, dropMechanicNameOfZone, nil)
-                    dropMechanicNameOfZone = dropMechanicNameIconStr
+                    if dropMechanicTexture then
+                        local dropMechanicNameIconStr = zoitfns(dropMechanicTexture, 24, 24, dropMechanicNameOfZone, nil)
+                        dropMechanicNameOfZone = dropMechanicNameIconStr
+                    end
                 end
                 dropMechanicNames[idx] = dropMechanicNameOfZone
             end
@@ -682,10 +697,12 @@ local function buildSetTypeInfo(setData)
     if not setType then return end
     local setTypeName = libSets_GetSetTypeName(setType)
     local setTypeTexture
-    if setData.isVeteran ~= nil then
-        setTypeTexture = vetDungTexture
-    else
-        setTypeTexture = setTypeToTexture[setType]
+    if tooltipTextures == true then
+        if setData.isVeteran ~= nil then
+            setTypeTexture = vetDungTexture
+        else
+            setTypeTexture = setTypeToTexture[setType]
+        end
     end
     return setTypeName, setTypeTexture
 end
@@ -842,7 +859,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
             setTypeTexture = ""
             --d(">1")
         else
-            if setTypeTexture ~= nil and setTypeTexture ~= "" then
+            if tooltipTextures == true and setTypeTexture ~= nil and setTypeTexture ~= "" then
                 setTypeText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
             end
         end
@@ -889,7 +906,11 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     else
         --Use default output tooltip:
         if addSetType then
-            setInfoText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
+            if tooltipTextures == true then
+                setInfoText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
+            else
+                setInfoText = setTypeText
+            end
         end
         if setDropLocationsText and setDropLocationsText ~= "" then
             if setInfoText ~= nil then
@@ -1013,6 +1034,21 @@ local function loadLAMSettingsMenu()
             default =   defaultSettings.modifyTooltips,
             disabled =  function() return false end,
             requiresReload = true,
+            width =     "full",
+        },
+
+        ----------------------------------------------------------------------------------------------------------------
+        {
+            type =      "checkbox",
+            name =      localization.tooltipTextures,
+            tooltip =   localization.tooltipTextures_TT,
+            getFunc =   function() return settings.tooltipModifications.tooltipTextures end,
+            setFunc =   function(value)
+                lib.svData.tooltipModifications.tooltipTextures = value
+                isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.tooltipTextures,
+            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
             width =     "full",
         },
 
@@ -1179,7 +1215,7 @@ local function onPlayerActivatedTooltips()
     if not lib.svData or not tooltipSV then return end
 
     --Get current enabled state of the tooltip settings
-    useCustomTooltip =  isCustomTooltipEnabled()
+    useCustomTooltip = isCustomTooltipEnabled()
 --d(">useCustomTooltip: " ..tos(useCustomTooltip))
     isLibSetsTooltipEnabled()
 

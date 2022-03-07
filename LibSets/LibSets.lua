@@ -448,6 +448,7 @@ local function LoadSavedVariables()
     local defaults = {
         modifyTooltips = false,
         tooltipModifications = {
+            tooltipTextures = true,
             addSetType      = true,
             addDropLocation = true,
             addBossName     = true,
