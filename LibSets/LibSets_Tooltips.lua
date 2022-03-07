@@ -137,7 +137,7 @@ local anyTooltipInfoToAdd = false
 
 local lastTooltipItemLink
 
-local useCustomTooltip
+local useCustomTooltip = false
 local customTooltipPlaceholdersNeeded = {}
 local setTypePlaceholder = false
 local dropMechanicPlaceholder = false
@@ -179,23 +179,17 @@ local function isCustomTooltipEnabled(value)
                 tins(customTooltipPlaceholdersNeeded, placeholder)
                 if placeholder == "<<1>>" then
                     setTypePlaceholder = true
-                end
-                if placeholder == "<<1>>" then
+                elseif placeholder == "<<1>>" then
                     setTypePlaceholder = true
-                end
-                if placeholder == "<<2>>" then
+                elseif placeholder == "<<2>>" then
                     dropMechanicPlaceholder = true
-                end
-                if placeholder == "<<3>>" then
+                elseif placeholder == "<<3>>" then
                     dropZonesPlaceholder = true
-                end
-                if placeholder == "<<4>>" then
+                elseif placeholder == "<<4>>" then
                     bossNamePlaceholder = true
-                end
-                if placeholder == "<<5>>" then
+                elseif placeholder == "<<5>>" then
                     neededTraitsPlaceholder = true
-                end
-                if placeholder == "<<6>>" then
+                elseif placeholder == "<<6>>" then
                     dlcNamePlaceHolder = true
                 end
             end
@@ -674,13 +668,16 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         dlcNamePlaceHolder =        placeholder == "<<6>>"
     ]]
 
-    if (useCustomTooltip and setTypePlaceholder) or addSetType then
+--d(string.format("<<1>> %s, <<2>> %s, <<3>> %s, <<4>> %s, <<5>> %s, <<6>> %s",
+--        tos(setTypePlaceholder), tos(dropMechanicPlaceholder), tos(dropZonesPlaceholder), tos(bossNamePlaceholder), tos(neededTraitsPlaceholder), tos(dlcNamePlaceHolder)))
+
+    if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
     end
-    if (useCustomTooltip and neededTraitsPlaceholder) or addNeededTraits then
+    if (useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
     end
-    if (useCustomTooltip and dlcNamePlaceHolder) or addDLC then
+    if (useCustomTooltip and dlcNamePlaceHolder) or (not useCustomTooltip and addDLC) then
         setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
     end
 
@@ -1034,6 +1031,7 @@ local function onPlayerActivatedTooltips()
 
     --Get current enabled state of the tooltip settings
     useCustomTooltip =  isCustomTooltipEnabled()
+d(">useCustomTooltip: " ..tos(useCustomTooltip))
     isLibSetsTooltipEnabled()
 
     --Build the settings menu for the tooltip
