@@ -2335,6 +2335,7 @@ end
 --number categoryId The zone's categoryId
 --returns number sumNumUnlocked, number sumNumTotal
 function lib.GetNumItemSetCollectionCategoryUnlockedPieces(categoryId)
+    if not categoryId then return nil, nil end
     local zoneIdsOfCategory = getItemSetCollectionZoneIds(categoryId)
     local sumNumUnlocked, sumNumTotal
     for _, zoneId in ipairs(zoneIdsOfCategory) do
@@ -2350,6 +2351,7 @@ end
 --number zoneId The zone's ID
 --returns number sumNumUnlocked, number sumNumTotal
 function lib.GetNumItemSetCollectionZoneUnlockedPieces(zoneId)
+    if not zoneId or zoneId == 0 then return nil, nil end
     return getItemSetCollectionUnlockedAndTotal(zoneId)
 end
 
