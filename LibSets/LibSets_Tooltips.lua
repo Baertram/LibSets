@@ -19,7 +19,7 @@ local strgmatch = string.gmatch
 --local strlower = string.lower
 --local strlen = string.len
 local strfind = string.find
---local strsub = string.sub
+local strsub = string.sub
 --local strfor = string.format
 
 local tins = table.insert
@@ -683,15 +683,15 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
 
     if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
-d(">setTypeText: " ..tos(setTypeText))
+--d(">setTypeText: " ..tos(setTypeText))
     end
     if (useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
-d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
+--d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
     end
     if (useCustomTooltip and dlcNamePlaceHolder) or (not useCustomTooltip and addDLC) then
         setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
-d(">setDLCText: " ..tos(setDLCText))
+--d(">setDLCText: " ..tos(setDLCText))
     end
 
     local runDropMechanic = (useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
@@ -708,11 +708,11 @@ d(">setDLCText: " ..tos(setDLCText))
         else
             setDropZoneStr, setDropMechanicText, setDropLocationsText, setDropOverallTextsPerZone = buildSetDropMechanicInfo(setData, itemLink)
         end
-d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
+--d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
     end
 
     --Todo add textures to some of the texts, e.g. setType, setDropMechanicDropLocation
-d(">useCustomTooltip: " ..tos(useCustomTooltip))
+--d(">useCustomTooltip: " ..tos(useCustomTooltip))
 
 
     --Use custom defined string? -> Build output string for the tooltip, based on chosen LAM settings
@@ -756,7 +756,9 @@ d(">useCustomTooltip: " ..tos(useCustomTooltip))
             <<5>>   Number of needed traits researched
             <<6>>   Chapter/DLC name set was introduced with",
         ]]
-        setInfoText = zostrfor(lib.svData.useCustomTooltipPattern,
+        --replace special characters like <br> with \n
+        local patternNew = strsub(lib.svData.useCustomTooltipPattern, "<br>", "\n")
+        setInfoText = zostrfor(patternNew,
                 setTypeText,
                 setDropMechanicText,
                 setDropZoneStr,
