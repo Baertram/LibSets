@@ -1049,7 +1049,6 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "/esoui/art/icons/pet_slateskinneddaedrat.dds",
     [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "/esoui/art/journal/journal_quest_group_instance.dds",
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
-    ["undaunted chest"] =     "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
     --["golden chest"] =        "/esoui/art/icons/undaunted_dungeoncoffer.dds",
 }
@@ -1071,6 +1070,7 @@ local setTypeToTexture                 = {
     [LIBSETS_SETTYPE_MYTHIC]                        = "/esoui/art/icons/antiquities_u30_mythic_ring02.dds", --"Mythic"
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster" --todo change to other monster icon!
     ["vet_dung"]                                    = "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds", --"Veteran Dungeon"
+    ["undaunted chest"]                             = "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
 }
 lib.setTypeToTexture                   = setTypeToTexture
 
