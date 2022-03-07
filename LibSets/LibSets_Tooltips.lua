@@ -582,7 +582,7 @@ local function buildSetDropMechanicInfo(setData, itemLink)
                                 setDropOverallTextPerZone = setDropOverallTextPerZone .. " (" .. dropMechanicName
                                 bracketOpened = true
                             else
-                                setDropOverallTextPerZone = setDropOverallTextPerZone .. ", " .. dropMechanicName
+                                setDropOverallTextPerZone = setDropOverallTextPerZone .. "; " .. dropMechanicName
                             end
                         end
                     end
@@ -618,7 +618,7 @@ local function buildSetDropMechanicInfo(setData, itemLink)
                                     setDropOverallTextPerZone = setDropOverallTextPerZone .. "(\'" .. dropMechanicDropLocationName .. "\'"
                                     bracketOpened = true
                                 else
-                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ", \'" .. dropMechanicDropLocationName .. "\'"
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. "; \'" .. dropMechanicDropLocationName .. "\'"
                                 end
                             end
                         end
