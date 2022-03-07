@@ -528,51 +528,142 @@ local function buildSetDropMechanicInfo(setData, itemLink)
 
 --d(">addDropLocation: " ..tos(addDropLocation) ..", addDropMechanic: " ..tos(addDropMechanic) ..", addBossName: " ..tos(addBossName))
 
+    --Check if all zoneNames are the same
+    -->Output string of the zones will be 1 zone and all drop mechanics and dropLocationNames afterwards then
+    local allZonesTheSame = false
+    if not useCustomTooltip then
+        local dropZoneNamesBefore = {}
+        for idx, dropZoneName in ipairs(dropZoneNames) do
+            dropZoneNamesBefore[dropZoneName] = true
+        end
+        if NonContiguousCount(dropZoneNamesBefore) == 1 then
+            --All zoneNames are the same
+            allZonesTheSame = true
+        end
+    end
 
 --d(">>setDropLocationsText: " ..tos(setDropLocationsText) ..", isVeteranMonsterSet: " ..tos(isVeteranMonsterSet))
-    --Default format <Zone Name>: <Drop Mechanic texture><Drop Mechanic Name> (<Drop Mechanic Drop Location texture> \'<Drop Mechanic Drop Location name>\')
+    --Default format <Zone Name> <Drop Mechanic texture><Drop Mechanic Name> (<Drop Mechanic Drop Location texture> '<Drop Mechanic Drop Location name>')
     --Check tables dropZoneNames, dropMechanicNames, dropLocationNames.
     ---Loop over dropZoneNames, get the drop mechanic name and the dropLocation and build a multi-line string (1 line for each zone) for the output
+    local numDropZoneNames = #dropZoneNames
+    local setDropOverallTextPerZone
+    local bracketOpened = false
+    local dropMechanicNamesAdded = {}
+    local dropMechanicDropLocationNamesAdded = {}
     for idx, dropZoneName in ipairs(dropZoneNames) do
-        local setDropOverallTextPerZone
+        if not allZonesTheSame then
+            setDropOverallTextPerZone = nil
+            bracketOpened = false
+        end
         local dropMechanicName = dropMechanicNames[idx]
         local dropMechanicDropLocationName = dropLocationNames[idx]
 --d(">>>Zone: " ..tos(dropZoneName) .. ", dropMechanicName: " ..tos(dropMechanicName) .. ", dropMechanicDropLocationName: " ..tos(dropMechanicDropLocationName))
-        local bracketOpened = false
         if addDropLocation then
-            setDropOverallTextPerZone  = dropZoneName
+            if allZonesTheSame == true then
+                --Only add the zoneName once if all zones are the same
+                if idx == 1 then
+                    setDropOverallTextPerZone  = dropZoneName
+                end
+            else
+                setDropOverallTextPerZone  = dropZoneName
+            end
         end
         if addDropMechanic then
             if dropMechanicName and dropMechanicName ~= "" then
-                if setDropOverallTextPerZone == nil then
-                    setDropOverallTextPerZone = dropMechanicName
+                if allZonesTheSame == true then
+                    if not dropMechanicNamesAdded[dropMechanicName] then
+                        dropMechanicNamesAdded[dropMechanicName] = true
+                        if setDropOverallTextPerZone == nil then
+                            setDropOverallTextPerZone = "(" .. dropMechanicName
+                            bracketOpened = true
+                        else
+                            if idx == 1 then
+                                setDropOverallTextPerZone = setDropOverallTextPerZone .. " (" .. dropMechanicName
+                                bracketOpened = true
+                            else
+                                setDropOverallTextPerZone = setDropOverallTextPerZone .. ", " .. dropMechanicName
+                            end
+                        end
+                    end
                 else
-                    setDropOverallTextPerZone = setDropOverallTextPerZone .. " (" .. dropMechanicName
-                    bracketOpened = true
-                end
-            end
-        end
-        if addBossName then
-            if dropMechanicDropLocationName ~= nil and dropMechanicDropLocationName ~= "" then
-                if setDropOverallTextPerZone == nil then
-                    setDropOverallTextPerZone = "\'" .. dropMechanicDropLocationName .. "\'"
-                else
-                    if addDropMechanic then
-                        setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                    if setDropOverallTextPerZone == nil then
+                        setDropOverallTextPerZone = dropMechanicName
                     else
-                        setDropOverallTextPerZone = setDropOverallTextPerZone .. " (\'" .. dropMechanicDropLocationName .. "\'"
+                        setDropOverallTextPerZone = setDropOverallTextPerZone .. " (" .. dropMechanicName
                         bracketOpened = true
                     end
                 end
             end
         end
-        if bracketOpened and setDropOverallTextPerZone ~= nil then
-            setDropOverallTextPerZone = setDropOverallTextPerZone .. ")"
+        if addBossName then
+            if allZonesTheSame == true then
+                if dropMechanicDropLocationName ~= nil and dropMechanicDropLocationName ~= "" then
+                    if not dropMechanicDropLocationNamesAdded[dropMechanicDropLocationName] then
+                        dropMechanicDropLocationNamesAdded[dropMechanicDropLocationName] = true
+                        if setDropOverallTextPerZone == nil then
+                            setDropOverallTextPerZone = "\'" .. dropMechanicDropLocationName .. "\'"
+                        else
+                            if addDropMechanic then
+                                if not dropMechanicNamesAdded[dropMechanicName] then
+                                    dropMechanicNamesAdded[dropMechanicName] = true
+                                end
+                                if idx == 1 then
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                                else
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                                end
+                            else
+                                if idx == 1 then
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. "(\'" .. dropMechanicDropLocationName .. "\'"
+                                    bracketOpened = true
+                                else
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ", \'" .. dropMechanicDropLocationName .. "\'"
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                if dropMechanicDropLocationName ~= nil and dropMechanicDropLocationName ~= "" then
+                    if setDropOverallTextPerZone == nil then
+                        setDropOverallTextPerZone = "\'" .. dropMechanicDropLocationName .. "\'"
+                    else
+                        if addDropMechanic then
+                            setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                        else
+                            setDropOverallTextPerZone = setDropOverallTextPerZone .. " (\'" .. dropMechanicDropLocationName .. "\'"
+                            bracketOpened = true
+                        end
+                    end
+                end
+            end
         end
-        --Do not add the same line again
-        if not ZO_IsElementInNumericallyIndexedTable(setDropOverallTextsPerZone, setDropOverallTextPerZone) then
-            --setDropOverallTextPerZone = ""
-            table.insert(setDropOverallTextsPerZone, setDropOverallTextPerZone)
+--d(">idx: " ..tos(idx) ..", bracketOpened: " ..tos(bracketOpened) .. ", setDropOverallTextPerZone: " ..tos(setDropOverallTextPerZone))
+        if bracketOpened and setDropOverallTextPerZone ~= nil then
+            if allZonesTheSame == true then
+                if idx == numDropZoneNames then
+                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ")"
+                --else
+                    --setDropOverallTextPerZone = setDropOverallTextPerZone .. ", "
+                end
+            else
+                setDropOverallTextPerZone = setDropOverallTextPerZone .. ")"
+            end
+        end
+
+        if not allZonesTheSame then
+            --Do not add the same line again
+            if not ZO_IsElementInNumericallyIndexedTable(setDropOverallTextsPerZone, setDropOverallTextPerZone) then
+                --setDropOverallTextPerZone = ""
+                table.insert(setDropOverallTextsPerZone, setDropOverallTextPerZone)
+            end
+        else
+            --Only add 1 line
+            if idx == numDropZoneNames then
+--d(">>>adding 1 output line")
+                table.insert(setDropOverallTextsPerZone, setDropOverallTextPerZone)
+            end
         end
     end
 --lib._setDropOverallTextsPerZone = setDropOverallTextsPerZone
@@ -734,9 +825,14 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
 --d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
     end
 
-    --Todo add textures to some of the texts, e.g. setType, setDropMechanicDropLocation
---d(">useCustomTooltip: " ..tos(useCustomTooltip))
+    --Remove duplicate SetType and SetDropLocation texts (e.g. "Dungeon")
+    if setDropLocationsText ~= nil and setDropLocationsText ~= "" then
+        if setTypeText ~= nil and setTypeText ~= "" then
+            if setTypeText == setDropLocationsText then setDropLocationsText = "" end
+        end
+    end
 
+--d(">useCustomTooltip: " ..tos(useCustomTooltip))
 
     --Use custom defined string? -> Build output string for the tooltip, based on chosen LAM settings
     if useCustomTooltip == true then
