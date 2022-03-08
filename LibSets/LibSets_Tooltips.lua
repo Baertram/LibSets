@@ -851,6 +851,11 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
             --All zoneNames are the same = Condense them to 1, else keep them as same dropZones could have diffeferent dropMechanics and dropLocations and the order needs to be kept!
             local dropZoneNamesNew = condenseTable(dropZoneNames)
             dropZoneNames = dropZoneNamesNew
+            local dropMechanicNamesNew = condenseTable(dropMechanicNames)
+            dropMechanicNames = dropMechanicNamesNew
+            local dropLocationNamesNew = condenseTable(dropLocationNames)
+            dropLocationNames = dropLocationNamesNew
+
             --Build , separated texts of dropZones, dropMechanics, dropLocationNames
             setDropZoneStr =        buildTextLinesFromTable(dropZoneNames,      nil, false, false)
             setDropMechanicText =   buildTextLinesFromTable(dropMechanicNames,  nil, false, false)
