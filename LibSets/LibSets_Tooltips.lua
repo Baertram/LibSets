@@ -497,6 +497,10 @@ local function getSetDropMechanicInfo(setData)
     if not dropMechanicTab then return end
     local setType = setData.setType
     local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
+    if not dropZoneIds then
+        d("[LibSets]ERROR getSetDropMechanicInfo - dropZoneIds MISSING! setId: " ..tos(setData.setId))
+        return
+    end
     local dropMechanicNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
     local dropMechanicDropLocationNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES]
     dropZoneNames = {}
