@@ -1890,7 +1890,7 @@ function lib.GetSetInfo(setId, noItemIds, lang)
         returnTableRef = setInfoTableCopy
     else
         setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
-        setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
+        setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
         returnTableRef = setInfoTable
     end
 
@@ -2276,7 +2276,7 @@ end
 local getCurrentZoneIds = lib.GetCurrentZoneIds
 
 
---Returns the complete mapping table between set item collecitons parentCategory, category and zoneIds
+--Returns the complete mapping table between set item collections parentCategory, category and zoneIds
 --> See file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
 local preloadedSetItemCollectionMappingToZoneCopy
 function lib.GetItemSetCollectionToZoneIds()
