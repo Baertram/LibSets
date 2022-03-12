@@ -1,13 +1,49 @@
 --Check if the library was loaded before already w/o chat output
 if IsLibSetsAlreadyLoaded(false) then return end
 
-LibSets = LibSets or {}
 local lib = LibSets
 local MAJOR = lib.name
 local MINOR = lib.version
 local LoadSavedVariables = lib.LoadSavedVariables
 
 local EM = EVENT_MANAGER
+
+local tos = tostring
+local ton = tonumber
+---local strgmatch = string.gmatch
+--local strlower = string.lower
+--local strlen = string.len
+--local strfind = string.find
+--local strsub = string.sub
+local strfor = string.format
+
+local tins = table.insert
+--local trem = table.remove
+local tsort = table.sort
+--local unp = unpack
+local zostrfor = zo_strformat
+local zocstrfor = ZO_CachedStrFormat
+
+local gzidx = GetZoneIndex
+local gzid = GetZoneId
+local gpzid = GetParentZoneId
+local gcmzidx = GetCurrentMapZoneIndex
+local gmidbzid = GetMapIndexByZoneId
+local gmnbid = GetMapNameById
+--local gznbid = GetZoneNameById
+local gznbidx = GetZoneNameByIndex
+local gnz = GetNumZones
+local gftninf = GetFastTravelNodeInfo
+local gnftn = GetNumFastTravelNodes
+
+local gilsetinf = GetItemLinkSetInfo
+local gilat = GetItemLinkArmorType
+local gilwt = GetItemLinkWeaponType
+local gilet = GetItemLinkEquipType
+local gilit = GetItemLinkItemType
+local isilc = IsItemLinkCrafted
+
+local unknownName = "n/a"
 
 local worldName = GetWorldName()
 local apiVersion = GetAPIVersion()
@@ -18,10 +54,7 @@ local numSupportedLangs = lib.numSupportedLangs
 
 local decompressSetIdItemIds = lib.DecompressSetIdItemIds
 local buildItemLink = lib.buildItemLink
-
-local unknownName = "n/a"
-
-local tins = table.insert
+local isSetByItemId = lib.IsSetByItemId
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
@@ -44,34 +77,37 @@ local function getFirstEntryOfTable(tabName, keyOrValue)
 end
 
 local function MyCombineNonContiguousTables(dest, ...)
+    if ... == nil then return dest end
     for sourceTableIndex = 1, select("#", ...) do
         local sourceTable = select(sourceTableIndex, ...)
-        for key, data in pairs(sourceTable) do
-            --assert(dest[key] == nil, "Cannot combine tables that share keys")
-            if dest[key] == nil then
-                dest[key] = data
-            --else
-                --d(string.format(">Couldn't combine key \'%s\' as it it duplicate", tostring(key)))
+        if sourceTable ~= nil then
+            for key, data in pairs(sourceTable) do
+                --assert(dest[key] == nil, "Cannot combine tables that share keys")
+                if dest[key] == nil then
+                    dest[key] = data
+                    --else
+                    --d(strfor(">Couldn't combine key \'%s\' as it it duplicate", tos(key)))
+                end
             end
         end
     end
 end
 
 local function GetAllZoneInfo()
-    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tostring(MINOR).."]GetAllZoneInfo, language: " ..tostring(clientLang))
+    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetAllZoneInfo, language: " ..tos(clientLang))
     local maxZoneId = 2000
     local zoneData = {}
     zoneData[clientLang] = {}
     --zoneIndex1 "Clean Test"'s zoneId
-    local zoneIndex1ZoneId = GetZoneId(1) -- should be: 2
+    local zoneIndex1ZoneId = gzid(1) -- should be: 2
     for zoneId = 1, maxZoneId, 1 do
-        local zi = GetZoneIndex(zoneId)
+        local zi = gzidx(zoneId)
         if zi ~= nil then
-            local pzid = GetParentZoneId(zoneId)
+            local pzid = gpzid(zoneId)
             --With API100027 Elsywer every non-used zoneIndex will be 1 instead 0 :-(
             --So we need to check if the zoneIndex is 1 and the zoneId <> the zoneId for index 1
             if (zi == 1 and zoneId == zoneIndex1ZoneId) or zi ~= 1 then
-                local zoneNameClean = zo_strformat("<<C:1>>", GetZoneNameByIndex(zi))
+                local zoneNameClean = zostrfor("<<C:1>>", gznbidx(zi))
                 if zoneNameClean ~= nil then
                     zoneData[clientLang][zoneId] = zoneId .. "|" .. zi .. "|" .. pzid .. "|" ..zoneNameClean
                 end
@@ -83,47 +119,47 @@ end
 
 --Execute in each map to get wayshrine data
 local function GetWayshrineInfo()
-    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tostring(MINOR).."]GetWayshrineInfo")
+    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetWayshrineInfo")
     local errorMapNavigateText = " Please open the map and navigate to a zone map first before running this function!"
     local wayshrines = {}
     local currentMapIndex = GetCurrentMapIndex()
     if currentMapIndex == nil then d("<-Error: map index missing." .. errorMapNavigateText) end
     local currentMapId = GetCurrentMapId()
     if currentMapId == nil then d("<-Error: map id missing." .. errorMapNavigateText) return end
-    local currentMapsZoneIndex = GetCurrentMapZoneIndex()
+    local currentMapsZoneIndex = gcmzidx()
     if currentMapsZoneIndex == nil then d("<-Error: map zone index missing." .. errorMapNavigateText) return end
-    local currentZoneId = GetZoneId(currentMapsZoneIndex)
+    local currentZoneId = gzid(currentMapsZoneIndex)
     if currentZoneId == nil then d("<-Error: map zone id missing." .. errorMapNavigateText) return end
-    local currentMapName = ZO_CachedStrFormat("<<C:1>>", currentMapIndex and GetMapNameByIndex(currentMapIndex) or GetMapNameById(currentMapId))
-    local currentZoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameByIndex(currentMapsZoneIndex))
-    d("->mapIndex: " .. tostring(currentMapIndex) .. ", mapId: " .. tostring(currentMapId) ..
-            ", mapName: " .. tostring(currentMapName) .. ", mapZoneIndex: " ..tostring(currentMapsZoneIndex) .. ", zoneId: " .. tostring(currentZoneId) ..
-            ", zoneName: " ..tostring(currentZoneName))
-    for i=1, GetNumFastTravelNodes(), 1 do
-        local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = GetFastTravelNodeInfo(i)
+    local currentMapName = zocstrfor("<<C:1>>", currentMapIndex and GetMapNameByIndex(currentMapIndex) or gmnbid(currentMapId))
+    local currentZoneName = zocstrfor("<<C:1>>", gznbidx(currentMapsZoneIndex))
+    d("->mapIndex: " .. tos(currentMapIndex) .. ", mapId: " .. tos(currentMapId) ..
+            ", mapName: " .. tos(currentMapName) .. ", mapZoneIndex: " ..tos(currentMapsZoneIndex) .. ", zoneId: " .. tos(currentZoneId) ..
+            ", zoneName: " ..tos(currentZoneName))
+    for i=1, gnftn(), 1 do
+        local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = gftninf(i)
         if wsisShownInCurrentMap then
-            local wsNameStripped = ZO_CachedStrFormat("<<C:1>>",wsname)
-            d("->[" .. tostring(i) .. "] " ..tostring(wsNameStripped))
+            local wsNameStripped = zocstrfor("<<C:1>>",wsname)
+            d("->[" .. tos(i) .. "] " ..tos(wsNameStripped))
             --Export for excel split at | char
             --WayshrineNodeId, mapIndex, mapId, mapName, zoneIndex, zoneId, zoneName, POIType, wayshrineName
-            wayshrines[i] = tostring(i).."|"..tostring(currentMapIndex).."|"..tostring(currentMapId).."|"..tostring(currentMapName).."|"..
-                    tostring(currentMapsZoneIndex).."|"..tostring(currentZoneId).."|"..tostring(currentZoneName).."|"..tostring(wspoiType).."|".. tostring(wsNameStripped)
+            wayshrines[i] = tos(i).."|"..tos(currentMapIndex).."|"..tos(currentMapId).."|"..tos(currentMapName).."|"..
+                    tos(currentMapsZoneIndex).."|"..tos(currentZoneId).."|"..tos(currentZoneName).."|"..tos(wspoiType).."|".. tos(wsNameStripped)
         end
     end
     return wayshrines
 end
-LibSets.DebugGetWayshrineInfo = GetWayshrineInfo
+lib.DebugGetWayshrineInfo = GetWayshrineInfo
 
 local function GetWayshrineNames()
-    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tostring(MINOR).."]GetWayshrineNames, language: " ..tostring(clientLang))
+    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetWayshrineNames, language: " ..tos(clientLang))
     local wsNames = {}
     wsNames[clientLang] = {}
-    for wsNodeId=1, GetNumFastTravelNodes(), 1 do
+    for wsNodeId=1, gnftn(), 1 do
         --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
-        local _, wsLocalizedName = GetFastTravelNodeInfo(wsNodeId)
+        local _, wsLocalizedName = gftninf(wsNodeId)
         if wsLocalizedName ~= nil then
-            local wsLocalizedNameClean = ZO_CachedStrFormat("<<C:1>>", wsLocalizedName)
-            wsNames[clientLang][wsNodeId] = tostring(wsNodeId) .. "|" .. wsLocalizedNameClean
+            local wsLocalizedNameClean = zocstrfor("<<C:1>>", wsLocalizedName)
+            wsNames[clientLang][wsNodeId] = tos(wsNodeId) .. "|" .. wsLocalizedNameClean
         end
     end
     return wsNames
@@ -131,7 +167,7 @@ end
 
 local function GetMapNames(lang)
     lang = lang or clientLang
-    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tostring(MINOR).."]GetMapNames, language: " ..tostring(lang))
+    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetMapNames, language: " ..tos(lang))
     local lz = lib.libZone
     if not lz then
         if lang ~= clientLang then
@@ -149,31 +185,31 @@ local function GetMapNames(lang)
         end
         if not zoneIds then d("ERROR: Library LibZone givenZoneData is missing!") return end
         zoneIdsLocalized = zoneIds[lang]
-        if not zoneIdsLocalized then d("ERROR: Language \"" .. tostring(lang) .."\" is not scanned yet in library LibZone") return end
+        if not zoneIdsLocalized then d("ERROR: Language \"" .. tos(lang) .."\" is not scanned yet in library LibZone") return end
     else
         zoneIdsLocalized = {}
     end
     --Update new/missing zoneIds
-    if GetNumZones then
+    if gnz then
         --Get the number of zoneIndices and create the zoneIds to scan from
-        for zoneIndex=0, GetNumZones(), 1 do
-            local zoneId = GetZoneId(zoneIndex)
+        for zoneIndex=0, gnz(), 1 do
+            local zoneId = gzid(zoneIndex)
             if zoneId and not zoneIdsLocalized[zoneId] then
-                local zoneName = GetZoneNameByIndex(zoneIndex)
+                local zoneName = gznbidx(zoneIndex)
                 if not zoneName or zoneName == "" then zoneName = unknownName end
-                zoneIdsLocalized[zoneId] = ZO_CachedStrFormat("<<C:1>>", zoneName)
+                zoneIdsLocalized[zoneId] = zocstrfor("<<C:1>>", zoneName)
             end
         end
     end
     local mapNames = {}
     for zoneId, zoneNameLocalized in pairs(zoneIdsLocalized) do
-        local mapIndex = GetMapIndexByZoneId(zoneId)
+        local mapIndex = gmidbzid(zoneId)
         local mapId = GetMapIdByIndex(mapIndex)
-        --d(">zoneId: " ..tostring(zoneId) .. ", mapIndex: " ..tostring(mapIndex))
+        --d(">zoneId: " ..tos(zoneId) .. ", mapIndex: " ..tos(mapIndex))
         if mapIndex ~= nil then
-            local mapName = ZO_CachedStrFormat("<<C:1>>", GetMapNameByIndex(mapIndex))
+            local mapName = zocstrfor("<<C:1>>", GetMapNameByIndex(mapIndex))
             if mapName ~= nil then
-                mapNames[mapIndex] = tostring(mapId) .. "|" .. tostring(mapIndex) .. "|" .. mapName .. "|" .. tostring(zoneId) .. "|" .. zoneNameLocalized
+                mapNames[mapIndex] = tos(mapId) .. "|" .. tos(mapIndex) .. "|" .. mapName .. "|" .. tos(zoneId) .. "|" .. zoneNameLocalized
             end
         end
     end
@@ -185,7 +221,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
     combineFromSV = combineFromSV or false
     forceShowOtherApiVersionSets = forceShowOtherApiVersionSets or false
     local runFuncForEachSetId = (funcToCallForEachSetId ~= nil and type(funcToCallForEachSetId) == "function") or false
---d(string.format(">checkForNewSetIds - funcToCallForEachSetId given: %s, combineFromSavedVariables: %s", tostring(runFuncForEachSetId), tostring(combineFromSV)))
+--d(strfor(">checkForNewSetIds - funcToCallForEachSetId given: %s, combineFromSavedVariables: %s", tos(runFuncForEachSetId), tos(combineFromSV)))
     newSetIdsFound = {}
     local setsOfNewerAPIVersion = lib.setsOfNewerAPIVersion
     local blacklistedSetIds = lib.blacklistedSetIds
@@ -196,10 +232,10 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
     local tableToProcess = {}
     if combineFromSV == true then
         --setIdTable -> lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
-        --SV table of all new itemIds scanned: lib.svData[LIBSETS_TABLEKEY_SETITEMIDS]
+        --SV table of all new itemIds scanned: lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS]
         LoadSavedVariables()
         svLoadedAlready = true
-        local loadedCompressedSetItemIdsFromSV = lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
+        local loadedCompressedSetItemIdsFromSV = lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
 --lib._loadedCompressedSetItemIdsFromSV = loadedCompressedSetItemIdsFromSV
         MyCombineNonContiguousTables(tableToProcess, setIdTable, loadedCompressedSetItemIdsFromSV)
     else
@@ -236,7 +272,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
                 end
             end
         --else
-            --d(">Skipped blacklisted setId: " ..tostring(setId))
+            --d(">Skipped blacklisted setId: " ..tos(setId))
         end
     end
 
@@ -244,20 +280,20 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
         if not svLoadedAlready then
             LoadSavedVariables()
         end
-        local newSetIdsFromSV = lib.svData and lib.svData[LIBSETS_TABLEKEY_NEWSETIDS]
-                                    and lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] and lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersion]
+        local newSetIdsFromSV = lib.svDebugData and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS]
+                                    and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersion]
         if newSetIdsFromSV ~= nil and #newSetIdsFromSV > 0 then
-            d(string.format(">>found newSetData in the SavedVariables - WorldName: %s, APIVersion: %s", tostring(worldName), tostring(apiVersion)))
+            d(strfor(">>found newSetData in the SavedVariables - WorldName: %s, APIVersion: %s", tos(worldName), tos(apiVersion)))
             for idx, newSetIdToCheck in ipairs(newSetIdsFromSV) do
                 local addNow = true
                 --local newSetIdToCheck
                 --A line [idx] = newSetData looks like this: [1] = "209|Rüstung des Kodex|N/a",
-                --local newSetIdToCheckStr = string.sub(newSetData, 1, string.find(newSetData, "|"))
+                --local newSetIdToCheckStr = strsub(newSetData, 1, strfind(newSetData, "|"))
                 --if newSetIdToCheckStr ~= nil and newSetIdToCheckStr ~= "" then
-                --    newSetIdToCheck = tonumber(newSetIdToCheckStr)
+                --    newSetIdToCheck = ton(newSetIdToCheckStr)
                 if newSetIdToCheck ~= nil then
                     for _, newSetIdLoadedBefore in ipairs(newSetIdsFound) do
---d(">>>newSetIdToCheck: " ..tostring(newSetIdToCheck) .. ", newSetIdLoadedBefore: " ..tostring(newSetIdLoadedBefore))
+--d(">>>newSetIdToCheck: " ..tos(newSetIdToCheck) .. ", newSetIdLoadedBefore: " ..tos(newSetIdLoadedBefore))
                         if newSetIdToCheck == newSetIdLoadedBefore then
                             addNow = false
                             break
@@ -266,7 +302,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
                 end
                 --end
                 if addNow == true and newSetIdToCheck ~= nil then
---d(">>added new setId now: " ..tostring(newSetIdToCheck))
+--d(">>added new setId now: " ..tos(newSetIdToCheck))
                     newSetIdsFound[idx] = newSetIdToCheck
                     if runFuncForEachSetId == true then
                         funcToCallForEachSetId(newSetIdToCheck)
@@ -275,7 +311,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
             end
         end
     end
-    table.sort(newSetIdsFound)
+    tsort(newSetIdsFound)
 end
 
 --Return all the setId's itemIds as table, from file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
@@ -288,24 +324,24 @@ end
 function lib.DebugResetSavedVariables(noReloadInfo)
     noReloadInfo = noReloadInfo or false
     LoadSavedVariables()
-    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
-    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
-    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
-    --lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
-    --lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
-    lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
-    lib.svData[LIBSETS_TABLEKEY_SETNAMES] = nil
-    lib.svData[LIBSETS_TABLEKEY_MAPS] = nil
-    lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
-    lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
-    lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
-    lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
-    lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
-    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
-    lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
+    --lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
+    --lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
+    lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
     d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'.")
     if noReloadInfo == true then return end
     d(">Please do a /reloadui or logout to update the SavedVariables data now!")
@@ -323,10 +359,10 @@ function lib.DebugGetAllZoneInfo()
     local zoneData = GetAllZoneInfo()
     if zoneData ~= nil then
         LoadSavedVariables()
-        lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] = lib.svData[LIBSETS_TABLEKEY_ZONE_DATA] or {}
-        lib.svData[LIBSETS_TABLEKEY_ZONE_DATA][clientLang] = {}
-        lib.svData[LIBSETS_TABLEKEY_ZONE_DATA][clientLang] = zoneData[clientLang]
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'".. LIBSETS_TABLEKEY_ZONE_DATA .. "\', language: \'" ..tostring(clientLang).."\'")
+        lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA][clientLang] = zoneData[clientLang]
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'".. LIBSETS_TABLEKEY_ZONE_DATA .. "\', language: \'" ..tos(clientLang).."\'")
     end
 end
 local debugGetAllZoneInfo = lib.DebugGetAllZoneInfo
@@ -341,12 +377,12 @@ local debugGetAllZoneInfo = lib.DebugGetAllZoneInfo
 function lib.DebugGetAllMapNames()
     local maps = GetMapNames(clientLang)
     if maps ~= nil then
-        table.sort(maps)
+        tsort(maps)
         LoadSavedVariables()
-        lib.svData[LIBSETS_TABLEKEY_MAPS] = lib.svData[LIBSETS_TABLEKEY_MAPS] or {}
-        lib.svData[LIBSETS_TABLEKEY_MAPS][clientLang] = {}
-        lib.svData[LIBSETS_TABLEKEY_MAPS][clientLang] = maps
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MAPS.."\', language: \'" ..tostring(clientLang).."\'")
+        lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = lib.svDebugData[LIBSETS_TABLEKEY_MAPS] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_MAPS][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_MAPS][clientLang] = maps
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MAPS.."\', language: \'" ..tos(clientLang).."\'")
     end
 end
 local debugGetAllMapNames = lib.DebugGetAllMapNames
@@ -388,11 +424,11 @@ function lib.DebugGetAllWayshrineInfo()
         zo_callLater(function()
             local ws = GetWayshrineInfo()
             if ws ~= nil then
-                table.sort(ws)
+                tsort(ws)
                 LoadSavedVariables()
-                lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] = lib.svData[LIBSETS_TABLEKEY_WAYSHRINES] or {}
+                lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES] = lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES] or {}
                 for wsNodeId, wsData in pairs(ws) do
-                    lib.svData[LIBSETS_TABLEKEY_WAYSHRINES][wsNodeId] = wsData
+                    lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES][wsNodeId] = wsData
                 end
                 d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINES.."\'")
             end
@@ -409,10 +445,10 @@ function lib.DebugGetAllWayshrineNames()
     local wsNames = GetWayshrineNames()
     if wsNames ~= nil and wsNames[clientLang] ~= nil then
         LoadSavedVariables()
-        lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] or {}
-        lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][clientLang] = {}
-        lib.svData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][clientLang] = wsNames[clientLang]
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINE_NAMES.."\', language: \'" ..tostring(clientLang).."\'")
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][clientLang] = wsNames[clientLang]
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINE_NAMES.."\', language: \'" ..tos(clientLang).."\'")
     end
 end
 local debugGetAllWayshrineNames = lib.DebugGetAllWayshrineNames
@@ -435,7 +471,7 @@ local function compressSetItemIdTable(toMinify)
             numConsecutive=numConsecutive+1
         else
             if numConsecutive>0 then
-                tins(minifiedTable,tostring(toMinify[lastPosition])..","..numConsecutive)
+                tins(minifiedTable,tos(toMinify[lastPosition])..","..numConsecutive)
             else
                 tins(minifiedTable,toMinify[lastPosition])
             end
@@ -444,11 +480,11 @@ local function compressSetItemIdTable(toMinify)
         end
     end
     if numConsecutive>0 then
-        tins(minifiedTable,tostring(toMinify[lastPosition])..","..numConsecutive)
+        tins(minifiedTable,tos(toMinify[lastPosition])..","..numConsecutive)
     else
         tins(minifiedTable,toMinify[lastPosition])
     end
-    table.sort(minifiedTable)
+    tsort(minifiedTable)
     return minifiedTable
 end
 
@@ -457,22 +493,22 @@ local function compressSetItemIdsNow(setsDataTable, noReloadInfo)
     noReloadInfo = noReloadInfo or false
     d("[".. MAJOR .. "] Compressing the set itemIds now...")
     LoadSavedVariables()
-    if setsDataTable == nil then setsDataTable = lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] end
+    if setsDataTable == nil then setsDataTable = lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] end
     if not setsDataTable then
         d("<Aborting: setsDataTable is missing")
         return
     end
 
-    lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = {}
+    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = {}
     for setId, setItemIdsOfSetId in pairs(setsDataTable) do
         --Transfer the setItemIds to an integer key table without gaps
         local helperTabNoGapIndex = {}
         for k, _ in pairs(setItemIdsOfSetId) do
             tins(helperTabNoGapIndex, k)
         end
-        table.sort(setItemIdsOfSetId)
-        lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = {}
-        lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = compressSetItemIdTable(helperTabNoGapIndex)
+        tsort(setItemIdsOfSetId)
+        lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = compressSetItemIdTable(helperTabNoGapIndex)
     end
     d(">>> [" .. MAJOR .. "] Compression of set itemIds has finished and saved to SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED .. "\'")
     if noReloadInfo == true then return end
@@ -490,7 +526,7 @@ lib.DebugCompressSetItemIdsNow = compressSetItemIdsNow
 --(and there were found new sets which are not already in the table LibSets_Data.lua->LibSets.setItemIds), then the new setIds
 --will be added here and dumped to the SavedVariables as well!
 function lib.DebugGetAllSetNames(noReloadInfo)
-    d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tostring(clientLang))
+    d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tos(clientLang))
     noReloadInfo = noReloadInfo or false
     --Use the SavedVariables to get the setNames of the current client language
     local svLoadedAlready = false
@@ -511,8 +547,8 @@ function lib.DebugGetAllSetNames(noReloadInfo)
         -->Done within checkForNewSetIds/getAllSetItemIds now already and transfered to lib.CachedSetItemIdsTable, which here is
         -->allSetItemIds now!
         --[[
-        if lib.svData and lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] then
-            local scannedSVSetItemIds = lib.svData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
+        if lib.svDebugData and lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] then
+            local scannedSVSetItemIds = lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
             for setId, setItemIds in pairs(scannedSVSetItemIds) do
                 if not allSetItemIds[setId] then
                     allSetItemIds[setId] = setItemIds
@@ -527,7 +563,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
             if setsItemIds then
                 for itemIdToCheck, _ in pairs(setsItemIds) do
                     if not setWasChecked and itemIdToCheck ~= nil then
-                        local isSet, setName, setId = lib.IsSetByItemId(itemIdToCheck)
+                        local isSet, setName, setId = isSetByItemId(itemIdToCheck)
                         if isSet and setId == setIdToCheck then
                             local isNewSet = false
                             for _, setIdNewFound in ipairs(newSetIdsFound) do
@@ -537,10 +573,10 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                                 end
                             end
                             setWasChecked = true
-                            setName = ZO_CachedStrFormat("<<C:1>>", setName)
+                            setName = zocstrfor("<<C:1>>", setName)
 
                             if isNewSet == true then
-    --d(">new SetId found: " ..tostring(setId) .. ", name: " ..tostring(setName))
+    --d(">new SetId found: " ..tos(setId) .. ", name: " ..tos(setName))
                             end
 
                             if setName ~= "" then
@@ -549,8 +585,8 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                                     LoadSavedVariables()
                                     svLoadedAlready = true
                                 end
-                                --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
-                                --lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] = setName
+                                --lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
+                                --lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] = setName
                                 tins(setIdsTable, setId)
                                 setNamesOfLangTable[setId] = setName
                                 setNamesAdded = setNamesAdded +1
@@ -572,25 +608,25 @@ function lib.DebugGetAllSetNames(noReloadInfo)
             svLoadedAlready = true
         end
         if svLoadedAlready == true then
-            table.sort(setIdsTable)
+            tsort(setIdsTable)
             for _, setId in ipairs(setIdsTable) do
                 local setName = setNamesOfLangTable[setId]
                 if setName and setName ~= "" then
-                    lib.svData[LIBSETS_TABLEKEY_SETNAMES] = lib.svData[LIBSETS_TABLEKEY_SETNAMES] or {}
-                    lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
-                    lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] = setName
+                    lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] or {}
+                    lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
+                    lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] = setName
                 end
             end
         end
         local foundNewSetsCount = (newSetIdsFound and #newSetIdsFound) or 0
-        d("-->Maximum setId found: " ..tostring(maxSetIdChecked) .. " / Added set names: " ..tostring(setNamesAdded) .. " / New setIds found: " .. tostring(foundNewSetsCount))
+        d("-->Maximum setId found: " ..tos(maxSetIdChecked) .. " / Added set names: " ..tos(setNamesAdded) .. " / New setIds found: " .. tos(foundNewSetsCount))
         if foundNewSetsCount > 0 then
             for _, setIdNewFound in ipairs(newSetIdsFound) do
-                local setNameOfNewSet = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound] and lib.svData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound][clientLang] or unknownName
-                d("--->new setId: " ..tostring(setIdNewFound) .. ", name: " .. tostring(setNameOfNewSet))
+                local setNameOfNewSet = lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound] and lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound][clientLang] or unknownName
+                d("--->new setId: " ..tos(setIdNewFound) .. ", name: " .. tos(setNameOfNewSet))
             end
         end
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tostring(clientLang).."\'")
+        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tos(clientLang).."\'")
         if noReloadInfo == true then return end
         d(">Please do a /reloadui to update the file properly!")
     end
@@ -626,10 +662,10 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
     --No more itemIds to scan as we did not find any new setIds since 5 packages? Finish then!
     if not finished and noFurtherItemsFound == true then finished = true end
 
-    d(debugOutputStartLine .."[" .. MAJOR .."]Scanned package \'" .. tostring(packageNr) .."\' - itemIds: " .. tostring(itemIdsScanned))
-    d("-> Sets found: "..tostring(setCount))
-    d("-> Set items found: "..tostring(itemCount))
-    df("-->Armor: %s / Jewelry: %s / Weapons: %s", tostring(itemArmorCount), tostring(itemJewelryCount), tostring(itemWeaponsCount))
+    d(debugOutputStartLine .."[" .. MAJOR .."]Scanned package \'" .. tos(packageNr) .."\' - itemIds: " .. tos(itemIdsScanned))
+    d("-> Sets found: "..tos(setCount))
+    d("-> Set items found: "..tos(itemCount))
+    df("-->Armor: %s / Jewelry: %s / Weapons: %s", tos(itemArmorCount), tos(itemJewelryCount), tos(itemWeaponsCount))
 
     if finished == true then
         noFurtherItemsFound = true
@@ -648,16 +684,16 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
             end
             newSetsFound = (newSetIdsFound ~= nil and #newSetIdsFound) or 0
             if newSetsFound > 0 then
-                d(">> !!! Found " .. tostring(newSetsFound) .. " new setIds !!!")
+                d(">> !!! Found " .. tos(newSetsFound) .. " new setIds !!!")
                 for idx, newSetId in pairs(newSetIdsFound) do
                     local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] and
                             (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId]["en"])) or unknownName
                     if newSetName ~= unknownName then
-                        newSetName = ZO_CachedStrFormat("<<C:1>>", newSetName)
+                        newSetName = zocstrfor("<<C:1>>", newSetName)
                     else
                         newSetName = unknownName .. " - Name unknown in LibSets.setDataPreloaded[\'" .. LIBSETS_TABLEKEY_SETNAMES .. "\']"
                     end
-                    d(string.format(">>>New setId found at index %s: %s -> name: %s", tostring(idx), tostring(newSetId), tostring(newSetName)))
+                    d(strfor(">>>New setId found at index %s: %s -> name: %s", tos(idx), tos(newSetId), tos(newSetName)))
                     --Update the value of the table entry with the index|setId
                     newSetIdsFound[idx] = newSetId
                 end
@@ -670,33 +706,33 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
             --First save the new found setIds to the SavedVariables table ""
             if newSetsFound > 0 then
                 --Add the dateTime and APIversion the new setIds were scanned
-                local apiVersionUpdatedStr = tostring(apiVersion) .. "_UpdateInfo"
-                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] or {}
-                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] or {}
-                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersion] = newSetIdsFound
-                lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersionUpdatedStr] = {
+                local apiVersionUpdatedStr = tos(apiVersion) .. "_UpdateInfo"
+                lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS] = lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS] or {}
+                lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] or {}
+                lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersion] = newSetIdsFound
+                lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersionUpdatedStr] = {
                     ["UpdateType"]  = "LibSets.DebugScanAllSetData()",
                     ["DateTime"]    = os.date("%c")
                 }
             end
 
             --Save the set data to the SV
-            lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = {}
-            lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
+            lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = {}
+            lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = sets
             --Save the set's armorType, equipmentTypes, weaponTypes and jewelryTypes to the SV
-            lib.svData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = setsEquipTypes
-            --lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR]         = setsArmor
-            lib.svData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = setsArmorTypes
-            lib.svData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = setsJewelry
-            --lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = setsWeapons
-            lib.svData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = setsWeaponTypes
+            lib.svDebugData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = setsEquipTypes
+            --lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR]         = setsArmor
+            lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = setsArmorTypes
+            lib.svDebugData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = setsJewelry
+            --lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = setsWeapons
+            lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = setsWeaponTypes
 
             --Compress the itemIds now to lower the fileSize of LibSets_Data_all.lua later (copied setItemIds from SavedVariables)
             compressSetItemIdsNow(sets, noReloadInfo)
             --Keep the uncompressed setItemIds, or delete them again?
             if not keepUncompressedetItemIds then
                 --Free the SavedVariables of the uncompressed set itemIds
-                lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+                lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
                 d(">>> SavedVariables file \'" .. MAJOR .. ".lua\'s table \'" .. LIBSETS_TABLEKEY_SETITEMIDS .. "\' was deleted again to free space and speed-up the loading screens! <<<")
             end
         end
@@ -736,14 +772,14 @@ local function loadSetsByIds(packageNr, from, to, noReloadInfo)
         for setItemId=from, to do
             itemIdsScanned = itemIdsScanned + 1
             --Generate link for item
-            local itemLink = lib.buildItemLink(setItemId)
+            local itemLink = buildItemLink(setItemId)
             if itemLink and itemLink ~= "" then
-                if not IsItemLinkCrafted(itemLink) then
+                if not isilc(itemLink) then
                     -- hasSet bool, setName string, numBonuses integer, numEquipped integer, maxEquipped integer, setId integer
-                    local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+                    local isSet, setName, _, _, _, setId = gilsetinf(itemLink, false)
                     if isSet == true then
                         --Check the itemType etc.
-                        local itemType = GetItemLinkItemType(itemLink)
+                        local itemType = gilit(itemLink)
                         --Some set items are only "containers" ...
                         if lib.setItemTypes[itemType] then
                             if sets[setId] == nil then
@@ -753,7 +789,7 @@ local function loadSetsByIds(packageNr, from, to, noReloadInfo)
 
                                 --Update the set name of the client language, if missing
                                 if setName ~= nil and not setNames[setId] or setNames[setId] ~= nil and not setNames[setId][clientLang] then
-                                    local setNameClean = ZO_CachedStrFormat("<<C:1>>", setName)
+                                    local setNameClean = zocstrfor("<<C:1>>", setName)
                                     if setNameClean ~= nil then
                                         setNames[setId] = setNames[setId] or {}
                                         setNames[setId][clientLang] = setNameClean
@@ -776,7 +812,7 @@ local function loadSetsByIds(packageNr, from, to, noReloadInfo)
                                 setsWeaponTypes = {}
                             ]]
                             --Check the item's equipment type
-                            local equipType = GetItemLinkEquipType(itemLink)
+                            local equipType = gilet(itemLink)
                             if equipType > EQUIP_TYPE_INVALID then
                                 setsEquipTypes[equipType] = setsEquipTypes[equipType] or {}
                                 setsEquipTypes[equipType][setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
@@ -793,7 +829,7 @@ local function loadSetsByIds(packageNr, from, to, noReloadInfo)
                                     end
                                     setsWeapons[setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
 
-                                    local weaponType = GetItemLinkWeaponType(itemLink)
+                                    local weaponType = gilwt(itemLink)
                                     if weaponType > WEAPONTYPE_NONE then
                                         setsWeaponTypes[weaponType] = setsWeaponTypes[weaponType] or {}
                                         setsWeaponTypes[weaponType][setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
@@ -805,7 +841,7 @@ local function loadSetsByIds(packageNr, from, to, noReloadInfo)
                                     end
                                     setsArmor[setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
 
-                                    local armorType = GetItemLinkArmorType(itemLink)
+                                    local armorType = gilat(itemLink)
                                     if armorType > ARMORTYPE_NONE then
                                         setsArmorTypes[armorType] = setsArmorTypes[armorType] or {}
                                         setsArmorTypes[armorType][setId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
@@ -824,7 +860,7 @@ end
 --Scan all sets data by scanning all itemIds in the game via a 5000 itemId package size (5000 itemIds scanned at once),
 --for x loops (where x is the multiplier number e.g. 40, so 40x5000 itemIds will be scanned for set data)
 --This takes some time and the chat will show information about found sets and item counts during the packages get scanned.
---The parameter doNotKeepUncompressedetItemIds boolean specifies if the table lib.svData[LIBSETS_TABLEKEY_SETITEMIDS] will be
+--The parameter doNotKeepUncompressedetItemIds boolean specifies if the table lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] will be
 --kept after the set itemIds were scanned. The SV file is pretty big because of this table so normally only the compressed
 --itemIds will be kept!
 local summaryAndPostprocessingDelay = 0
@@ -838,7 +874,7 @@ local function scanAllSetData(keepUncompressedetItemIds, noReloadInfo)
     local itemIdsToScanTotal = numItemIdPackages * numItemIdPackageSize
     d(debugOutputStartLine)
     d("[" .. MAJOR .."]Start to load all set data. This could take a few minutes to finish!\nWatch the chat output for further information.")
-    d(">Scanning " ..tostring(numItemIdPackages) .. " packages with each " .. tostring(numItemIdPackageSize) .. " itemIds (total: " .. tostring(itemIdsToScanTotal) ..") now...")
+    d(">Scanning " ..tos(numItemIdPackages) .. " packages with each " .. tos(numItemIdPackageSize) .. " itemIds (total: " .. tos(itemIdsToScanTotal) ..") now...")
 
     --Clear all set data
     sets = {}
@@ -885,7 +921,7 @@ local function scanAllSetData(keepUncompressedetItemIds, noReloadInfo)
         zo_callLater(function()
             --There were further sets found?
             if not summaryMet and not noFurtherItemsFound then
-d(">loadSetsByIds, packageNr: " ..tostring(packageNr))
+d(">loadSetsByIds, packageNr: " ..tos(packageNr))
                 loadSetsByIds(packageNr, packageData.from, packageData.to, noReloadInfo)
             end
             --Last loop or no further setIds were found during the last 5 loops
@@ -896,7 +932,7 @@ d(">lastLoop or noFurtherItemsFound!")
                 --missing call in the loop, so that results are shown "now" (+2 seconds)
                 local loopsLeft = numPackageLoops - packageNr
                 if loopsLeft < 0 then loopsLeft = 0 end
-d(">>#fromTo: " ..tostring(#fromTo) ..", packageNr: " ..tostring(packageNr) .. ", loopsLeft: " ..tostring(loopsLeft) .. ", summaryAndPostprocessingDelay: " ..tostring(summaryAndPostprocessingDelay))
+d(">>#fromTo: " ..tos(#fromTo) ..", packageNr: " ..tos(packageNr) .. ", loopsLeft: " ..tos(loopsLeft) .. ", summaryAndPostprocessingDelay: " ..tos(summaryAndPostprocessingDelay))
                 --Were all item IDs scanned? Show the results list and update the SavedVariables
                 showSetCountsScanned(true, keepUncompressedetItemIds, noReloadInfo, "Summary")
             end
@@ -923,8 +959,8 @@ local function getNewSetName(newSetId)
     local setItemLink = buildItemLink(itemId)
     if not setItemLink or setItemLink == "" then return unknownName end
     --                hasSet bool, setName string, numBonuses integer, numEquipped integer, maxEquipped integer, setId integer
-    local hasSet, setName, _, _, _, setId = GetItemLinkSetInfo(setItemLink, false)
-    if hasSet == true and setId == newSetId then return ZO_CachedStrFormat("<<C:1>>", setName) end
+    local hasSet, setName, _, _, _, setId = gilsetinf(setItemLink, false)
+    if hasSet == true and setId == newSetId then return zocstrfor("<<C:1>>", setName) end
     return unknownName
 end
 
@@ -948,12 +984,12 @@ local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenT
             if substMadeCount > 0 then
                 isVeteranDungeon = true
             end
-            local dungeonData = data.id .. "|" .. nameClean .. "|" .. data.zoneId .. "|" .. tostring(isVeteranDungeon)
+            local dungeonData = data.id .. "|" .. nameClean .. "|" .. data.zoneId .. "|" .. tos(isVeteranDungeon)
             tins(retTableDungeons, dungeonData)
             dungeonsAddedCounter = dungeonsAddedCounter +1
         end
     end
-    table.sort(retTableDungeons)
+    tsort(retTableDungeons)
     return dungeonsAddedCounter
 end
 
@@ -1019,9 +1055,9 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
     end
     if retTableDungeons and #retTableDungeons>0 and dungeonsAdded >0 then
         LoadSavedVariables()
-        lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = {}
-        lib.svData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
-        d("->Stored " .. tostring(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_DUNGEONFINDER_DATA .. "\', language: \'" ..tostring(clientLang).."\'")
+        lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
+        d("->Stored " .. tos(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_DUNGEONFINDER_DATA .. "\', language: \'" ..tos(clientLang).."\'")
         if noReloadInfo == true then return end
         d(">Please do a /reloadui to update the file properly!")
     else
@@ -1047,20 +1083,20 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId, n
     local collectibleDataScanned
     for i=collectibleStartId, collectibleEndId, 1 do
         local topLevelIndex, categoryIndex = GetCategoryInfoFromAchievementId(i)
-        local collectibleName = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
+        local collectibleName = zocstrfor("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
         if collectibleName and collectibleName ~= "" then
             collectibleDataScanned = collectibleDataScanned or {}
-            collectibleDataScanned[i] = tostring(i) .. "|" .. collectibleName
+            collectibleDataScanned[i] = tos(i) .. "|" .. collectibleName
             collectiblesAdded = collectiblesAdded +1
         end
     end
     if collectiblesAdded > 0 then
-        table.sort(collectibleDataScanned)
+        tsort(collectibleDataScanned)
         LoadSavedVariables()
-        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] or {}
-        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = {}
-        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = collectibleDataScanned
-        d("->Stored " .. tostring(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tostring(clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = collectibleDataScanned
+        d("->Stored " .. tos(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tos(clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
         if noReloadInfo == true then return end
         d("Please do a /reloadui or logout to update the SavedVariables data now!")
     end
@@ -1083,7 +1119,7 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
         for i=1, numCollectibles do
             local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex, i)
             local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-            collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+            collectibleName = zocstrfor("<<C:1>>", collectibleName)
             dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
             collectiblesAdded = collectiblesAdded +1
         end
@@ -1095,7 +1131,7 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
         for i=1, numCollectibles do
             local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex, i)
             local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-            collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+            collectibleName = zocstrfor("<<C:1>>", collectibleName)
             dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
             collectiblesAdded = collectiblesAdded +1
         end
@@ -1105,23 +1141,23 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleIndex)
         local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-        collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+        collectibleName = zocstrfor("<<C:1>>", collectibleName)
         dlcNames[collectibleId] = collectibleId .. "|DLC|" .. collectibleName
         collectiblesAdded = collectiblesAdded +1
     end
     for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleIndex)
         local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-        collectibleName = ZO_CachedStrFormat("<<C:1>>", collectibleName)
+        collectibleName = zocstrfor("<<C:1>>", collectibleName)
         dlcNames[collectibleId] = collectibleId .. "|CHAPTER|" .. collectibleName
         collectiblesAdded = collectiblesAdded +1
     end
     if collectiblesAdded > 0 then
         LoadSavedVariables()
-        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] or {}
-        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES][clientLang] = {}
-        lib.svData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES][clientLang] = dlcNames
-        d("->Stored " .. tostring(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES .. "\', language: \'" ..tostring(clientLang).."\'")
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES][clientLang] = dlcNames
+        d("->Stored " .. tos(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES .. "\', language: \'" ..tos(clientLang).."\'")
         if noReloadInfo == true then return end
         d("Please do a /reloadui or logout to update the SavedVariables data now!")
     end
@@ -1146,13 +1182,13 @@ function lib.DebugShowNewSetIds(noChatOutput)
     --Output the new sets data (id and name)
     local newSetsFound = (newSetIdsFound and #newSetIdsFound) or 0
     if newSetsFound > 0 then
-        if not noChatOutput then d(">Found " .. tostring(newSetsFound) .. " new setIds!") end
+        if not noChatOutput then d(">Found " .. tos(newSetsFound) .. " new setIds!") end
         for idx, newSetId in ipairs(newSetIdsFound) do
             local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] and
                     (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId]["en"]))
             newSetName = newSetName or getNewSetName(newSetId)
-            newSetName = ZO_CachedStrFormat("<<C:1>>", newSetName)
-            if not noChatOutput then d(string.format(">>New setId found: %s -> name: %s", tostring(newSetId), tostring(newSetName))) end
+            newSetName = zocstrfor("<<C:1>>", newSetName)
+            if not noChatOutput then d(strfor(">>New setId found: %s -> name: %s", tos(newSetId), tos(newSetName))) end
             if newSetName and newSetName ~= unknownName then
                 tempSetNamesOfClientLang = tempSetNamesOfClientLang or {}
                 tempSetNamesOfClientLang[newSetId] = newSetName
@@ -1171,19 +1207,19 @@ function lib.DebugShowNewSetIds(noChatOutput)
         end
         --First save the new found setIds to the SavedVariables table ""
         --Add the dateTime and APIversion the new setIds were scanned
-        local apiVersionUpdatedStr = tostring(apiVersion) .. "_UpdateInfo"
-        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] = lib.svData[LIBSETS_TABLEKEY_NEWSETIDS] or {}
-        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] or {}
-        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersion] = newSetIdsFound
-        lib.svData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersionUpdatedStr] = {
+        local apiVersionUpdatedStr = tos(apiVersion) .. "_UpdateInfo"
+        lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS] = lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] = lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersion] = newSetIdsFound
+        lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersionUpdatedStr] = {
             ["UpdateType"]  = "LibSets.DebugShowNewSetIds()",
             ["DateTime"]    = os.date("%c")
         }
         if tempSetNamesOfClientLang ~= nil then
-            lib.svData[LIBSETS_TABLEKEY_SETNAMES] = lib.svData[LIBSETS_TABLEKEY_SETNAMES] or {}
+            lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] or {}
             for setId, setName in pairs(tempSetNamesOfClientLang) do
-                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
-                lib.svData[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] = setName
+                lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId] = lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId] or {}
+                lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] = setName
             end
         end
     end
@@ -1212,12 +1248,19 @@ end
 local debugGetAllNames = lib.DebugGetAllNames
 
 --Run this once after a new PTS was released to get all the new data scanned to the SV tables.
---The UI wil autoamtically change the language to the supported languages, once after another, and update the language
+--The UI wil automatically change the language to the supported languages, once after another, and update the language
 --dependent variables each time!
 --If the parameter resetApiData is true the current scanned data of the apiversion will be reset and all will be
---scanned new again, includig the set itemIds
-function lib.DebugGetAllData(resetApiData)
+--scanned new again, includig the set itemIds.
+--If parameter noItemIds is true all data will be rescanned, excluding the itemIds
+
+--todo: Find bug within GetAllSetNames -> New setNames in languages AFTER the clientLanguage where the setItemIds were scanned,
+--todo: do not update and just find "n/a" -> Somehow the setItemIds or setIds are missing and not read properly from SavedVariables
+--todo: (where they have been scanned to before) after the reladoui to next language
+
+function lib.DebugGetAllData(resetApiData, noItemIds)
     resetApiData = resetApiData or false
+    noItemIds = noItemIds or false
 
     local newRun = false
     local languageToScanNext
@@ -1226,30 +1269,35 @@ function lib.DebugGetAllData(resetApiData)
     LoadSavedVariables()
     --Is the function called the 1st time for the current APIversion?
     --or is it executed after a reloadui e.g.?
-    lib.svData.DebugGetAllData = lib.svData.DebugGetAllData or {}
+    lib.svDebugData.DebugGetAllData = lib.svDebugData.DebugGetAllData or {}
 
-    if resetApiData == true or lib.svData.DebugGetAllData[apiVersion] == nil then
+    if resetApiData == true or lib.svDebugData.DebugGetAllData[apiVersion] == nil then
         newRun = true
-        lib.svData.DebugGetAllData[apiVersion] = {}
+        lib.svDebugData.DebugGetAllData[apiVersion] = {}
         --Save the original chosen client language
-        lib.svData.DebugGetAllData[apiVersion].clientLang = clientLang
-        lib.svData.DebugGetAllData[apiVersion].running = true
-        lib.svData.DebugGetAllData[apiVersion].DateTimeStart = os.date("%c")
-    elseif lib.svData.DebugGetAllData[apiVersion] ~= nil and lib.svData.DebugGetAllData[apiVersion].running == true then
-        alreadyFinished = (lib.svData.DebugGetAllData[apiVersion].finished == true) or false
+        lib.svDebugData.DebugGetAllData[apiVersion].clientLang = clientLang
+        lib.svDebugData.DebugGetAllData[apiVersion].running = true
+        lib.svDebugData.DebugGetAllData[apiVersion].DateTimeStart = os.date("%c")
+    elseif lib.svDebugData.DebugGetAllData[apiVersion] ~= nil and lib.svDebugData.DebugGetAllData[apiVersion].running ~= nil then
+        alreadyFinished = (lib.svDebugData.DebugGetAllData[apiVersion].finished == true) or false
     else
         return
     end
 
     d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    d("[" .. MAJOR .. "]>>>DebugGetAllData START for API \'" ..  tostring(apiVersion) .. "\' - newRun: " .. tostring(newRun) .. ", resetApiData: " ..tostring(resetApiData))
+    d("[" .. MAJOR .. "]>>>DebugGetAllData START for API \'" ..  tos(apiVersion) .. "\' - newRun: " .. tos(newRun) .. ", resetApiData: " ..tos(resetApiData) .. ", noItemIds: " ..tos(noItemIds))
     if not alreadyFinished then
         if newRun == true then
             debugResetSavedVariables(true)
-            d(">>>--------------->>>")
-            --This will take some time! Will only be done once per first reloadui as it will get the setIds and itemIds of the sets
-            scanAllSetData(false, true)
-            d(">>>--------------->>>")
+            --If no itemIds are requested: Skip the scan
+            if not noItemIds then
+                d(">>>--------------->>>")
+                --This will take some time! Will only be done once per first reloadui as it will get the setIds and itemIds of the sets
+                scanAllSetData(false, true)
+                d(">>>--------------->>>")
+            else
+                noFurtherItemsFound = true
+            end
         else
             noFurtherItemsFound = true
         end
@@ -1262,11 +1310,13 @@ function lib.DebugGetAllData(resetApiData)
             EM:UnregisterForUpdate(noFurtherItemsFoundUpdateName)
 
             --Update the SavedVariables with the current scanned language
-            lib.svData.DebugGetAllData[apiVersion].langDone = lib.svData.DebugGetAllData[apiVersion].langDone or {}
-            lib.svData.DebugGetAllData[apiVersion].langDone[clientLang] = os.date("%c")
+            lib.svDebugData.DebugGetAllData[apiVersion].langDone = lib.svDebugData.DebugGetAllData[apiVersion].langDone or {}
+            lib.svDebugData.DebugGetAllData[apiVersion].langDone[clientLang] = os.date("%c")
 
             --Get all client language dependent data now
-            debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
+            --if not noItemIds then
+                debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
+            --end
             debugGetAllNames(true)
             d(">>>--------------->>>")
 
@@ -1278,11 +1328,11 @@ function lib.DebugGetAllData(resetApiData)
                 debugGetAllWayshrineInfo(true)
             end
 
-            d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tostring(clientLang))
+            d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
             d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
             --Get the language to scan as next one, if not all were scanned already
-            local runData = lib.svData.DebugGetAllData[apiVersion]
+            local runData = lib.svDebugData.DebugGetAllData[apiVersion]
             local numLangsScanned = NonContiguousCount(runData.langDone)
             if numLangsScanned < numSupportedLangs then
                 for langStr, isSupported in pairs(supportedLanguages) do
@@ -1295,39 +1345,39 @@ function lib.DebugGetAllData(resetApiData)
                 end
                 --Reload the UI via client language switch or do a normal reload
                 if languageToScanNext ~= nil and languageToScanNext ~= "" and supportedLanguages[languageToScanNext] == true then
-                    lib.svData.DebugGetAllData[apiVersion].finished = false
-                    lib.svData.DebugGetAllData[apiVersion].running = true
-                    lib.svData.DebugGetAllData[apiVersion].LanguageChangeDateTime = os.date("%c")
-                    lib.svData.DebugGetAllData[apiVersion].LanguageChangeTo = languageToScanNext
+                    lib.svDebugData.DebugGetAllData[apiVersion].finished = false
+                    lib.svDebugData.DebugGetAllData[apiVersion].running = true
+                    lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeDateTime = os.date("%c")
+                    lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeTo = languageToScanNext
                     SetCVar("language.2", languageToScanNext) --> Will do a reloadUI and change the client language
                 else
-                    local errorText = "<<<[ERROR]Language to scan next \'".. tostring(languageToScanNext) .. "\' is not supported! Aborting now..."
+                    local errorText = "<<<[ERROR]Language to scan next \'".. tos(languageToScanNext) .. "\' is not supported! Aborting now..."
                     d(errorText)
-                    lib.svData.DebugGetAllData[apiVersion].running = false
-                    lib.svData.DebugGetAllData[apiVersion].finished = true
+                    lib.svDebugData.DebugGetAllData[apiVersion].running = false
+                    lib.svDebugData.DebugGetAllData[apiVersion].finished = true
                     local dateTime = os.date("%c")
-                    lib.svData.DebugGetAllData[apiVersion].DateTimeEnd = dateTime
-                    lib.svData.DebugGetAllData[apiVersion].LastErrorDateTime = dateTime
-                    lib.svData.DebugGetAllData[apiVersion].LastError = errorText
+                    lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = dateTime
+                    lib.svDebugData.DebugGetAllData[apiVersion].LastErrorDateTime = dateTime
+                    lib.svDebugData.DebugGetAllData[apiVersion].LastError = errorText
                 end
             else
-                local origClientLang = lib.svData.DebugGetAllData[apiVersion].clientLang
+                local origClientLang = lib.svDebugData.DebugGetAllData[apiVersion].clientLang
                 origClientLang = origClientLang or "en"
-                d("[" .. MAJOR .. "]DebugGetAllData was finished! Resetting to your original language again: " .. tostring(origClientLang))
+                d("[" .. MAJOR .. "]DebugGetAllData was finished! Resetting to your original language again: " .. tos(origClientLang))
                 --All languages were scanned already. Switch back to original client language, or "en" as fallback
-                lib.svData.DebugGetAllData[apiVersion].running = false
-                lib.svData.DebugGetAllData[apiVersion].finished = true
-                lib.svData.DebugGetAllData[apiVersion].DateTimeEnd = os.date("%c")
+                lib.svDebugData.DebugGetAllData[apiVersion].running = false
+                lib.svDebugData.DebugGetAllData[apiVersion].finished = true
+                lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = os.date("%c")
                 SetCVar("language.2", origClientLang) --> Will do a reloadUI and change the client language
             end
         end
         EM:RegisterForUpdate(noFurtherItemsFoundUpdateName, 2000, runIfNoFurtherItemsFound)
     else
-        local errorText = "> APIversion \'".. tostring(apiVersion) .. "\' was scanned and updated already on: " ..tostring(lib.svData.DebugGetAllData[apiVersion].DateTimeEnd)
-        lib.svData.DebugGetAllData[apiVersion].LastErrorDateTime = os.date("%c")
-        lib.svData.DebugGetAllData[apiVersion].LastError = errorText
+        local errorText = "> APIversion \'".. tos(apiVersion) .. "\' was scanned and updated already on: " ..tos(lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd)
+        lib.svDebugData.DebugGetAllData[apiVersion].LastErrorDateTime = os.date("%c")
+        lib.svDebugData.DebugGetAllData[apiVersion].LastError = errorText
         d(errorText)
-        d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tostring(clientLang))
+        d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
         d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     end
 end
@@ -1374,7 +1424,7 @@ function lib.debugBuildMixedSetNames()
         --Debug output of all given preloaded setIds, languages and names
         for setId, setData in pairs(copyOfPreloadedSetNames) do
             for lang, setName in pairs(setData) do
-                d(string.format(">setId: %s, lang: %s, name: %s", tostring(setId), tostring(lang), tostring(setName)))
+                d(strfor(">setId: %s, lang: %s, name: %s", tos(setId), tos(lang), tos(setName)))
             end
         end
     ]]
@@ -1392,24 +1442,24 @@ function lib.debugBuildMixedSetNames()
             local setDataToCombineForLangKey = setDataToCombine[lang]
             if setDataToCombineForLangKey and setDataToCombineForLangKey ~= "" then
                 --Use existing or create setId in the new table for the SavedVariables
-                copyOfPreloadedSetNames[tonumber(setId)] = copyOfPreloadedSetNames[tonumber(setId)] or {}
+                copyOfPreloadedSetNames[ton(setId)] = copyOfPreloadedSetNames[ton(setId)] or {}
                 --Use existing or create lang subtable in the new setId table entry for the SavedVariables
-                copyOfPreloadedSetNames[tonumber(setId)][lang] = copyOfPreloadedSetNames[tonumber(setId)][lang] or {}
-                copyOfPreloadedSetNames[tonumber(setId)][lang] = setDataToCombineForLangKey
+                copyOfPreloadedSetNames[ton(setId)][lang] = copyOfPreloadedSetNames[ton(setId)][lang] or {}
+                copyOfPreloadedSetNames[ton(setId)][lang] = setDataToCombineForLangKey
                 setIdsChanged = setIdsChanged + 1
                 setIdsChangedTotal = setIdsChangedTotal + setIdsChanged
             end
         end
         --Update the SavedVariables now
         if setIdsChanged > 0 then
-            d("<Updated " ..tostring(setIdsChanged).. "/" .. tostring(setIdsFound) .." setNames for language: " ..tostring(lang))
+            d("<Updated " ..tos(setIdsChanged).. "/" .. tos(setIdsFound) .." setNames for language: " ..tos(lang))
         end
     end
     if setIdsChangedTotal > 0 then
         LoadSavedVariables()
         --Reset the combined setNames table in the SavedVariables
-        lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = {}
-        lib.svData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = copyOfPreloadedSetNames
+        lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = copyOfPreloadedSetNames
         d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MIXED_SETNAMES.."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     else
         d("<No setIds were updated!")

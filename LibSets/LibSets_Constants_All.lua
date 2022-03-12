@@ -2,8 +2,12 @@
 if IsLibSetsAlreadyLoaded(false) then return end
 
 --This file contains the constant values needed for the library to work
-LibSets = LibSets or {}
 local lib = LibSets
+
+local gaci =        GetAchievementCategoryInfo
+local gcifa =       GetCategoryInfoFromAchievementId
+local gci =         GetCollectibleInfo
+local zocstrfor =   ZO_CachedStrFormat
 
 --Helper function for the API check
 local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
@@ -34,12 +38,13 @@ local possibleDlcIds = {
     [21] = "DLC_FLAMES_OF_AMBITION",
     [22] = "DLC_BLACKWOOD",
     [23] = "DLC_WAKING_FLAME",
+    [24] = "DLC_DEADLANDS",
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_<name_here>"
-    possibleDlcIds[#possibleDlcIds + 1] = "DLC_DEADLANDS"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_ASCENDING_TIDE" --25
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -56,43 +61,43 @@ end
 
 --[[
 --Collectible IDs
---DLC Dungeons
-[375] = "375|2|Ruins of Mazzatun",
-[491] = "491|2|Cradle of Shadows",
-[1165] = "1165|2|Bloodroot Forge",
-[1331] = "1331|2|Fang Lair",
-[1355] = "1355|2|Falkreath Hold",
-[5008] = "5008|2|Moon Hunter Keep",
-[5009] = "5009|2|March of Sacrifices",
-[6040] = "6040|2|Moongrave Fane",
-[6041] = "6041|2|Lair of Maarselok",
-[4703] = "4703|2|Scalecaller Peak",
-[5473] = "5473|2|Frostvault",
-[5474] = "5474|2|Depths of Malatar",
-[6647] = "6647|2|Unhallowed Grave",
-[6646] = "6646|2|Icereach",
-[7430] = "7430|2|Stone Garden",
-[7431] = "7431|2|Castle Thorn",
-[8216] = "8216|2|Black Drake Villa",
-[8217] = "8217|2|The Cauldron",
-[9375] = "9375|2|The Dread Cellar",
-[9374] = "9374|2|Red Petal Bastion",
-
---DLCs (missing some)
-[154] = "154|3|Imperial City",
-[215] = "215|3|Orsinium",
-[254] = "254|3|Thieves Guild",
-[306] = "306|3|Dark Brotherhood",
-[593] = "593|3|Morrowind",
-[1240] = "1240|3|Clockwork City",
-[5107] = "5107|3|Summerset",
-[5755] = "5755|3|Murkmire",
-[5843] = "5843|3|Elsweyr",
-[6920] = "6920|3|Dragonhold",
-[7466] = "7466|3|Greymoor",
-[8388] = "8388|3|Markarth",
-[8659] = "8659|1|Blackwood",
-[9365] = "9365|DLC|The Deadlands",
+154|DLC|Imperial City
+215|DLC|Orsinium
+254|DLC|Thieves Guild
+306|DLC|Dark Brotherhood
+375|DLC|Ruins of Mazzatun
+491|DLC|Cradle of Shadows
+593|DLC|Morrowind
+1165|DLC|Bloodroot Forge
+1240|DLC|Clockwork City
+1331|DLC|Fang Lair
+1355|DLC|Falkreath Hold
+4703|DLC|Scalecaller Peak
+5008|DLC|Moon Hunter Keep
+5009|DLC|March of Sacrifices
+5107|DLC|Summerset
+5473|DLC|Frostvault
+5474|DLC|Depths of Malatar
+5755|DLC|Murkmire
+5843|DLC|Elsweyr
+6040|DLC|Moongrave Fane
+6041|DLC|Lair of Maarselok
+6646|DLC|Icereach
+6647|DLC|Unhallowed Grave
+6920|DLC|Dragonhold
+7430|DLC|Stone Garden
+7431|DLC|Castle Thorn
+7466|DLC|Greymoor
+8216|DLC|Black Drake Villa
+8217|DLC|The Cauldron
+8388|DLC|Markarth
+8659|CHAPTER|Blackwood
+9365|DLC|The Deadlands
+9374|DLC|Red Petal Bastion
+9375|DLC|The Dread Cellar
+9651|DLC|Coral Aerie
+9652|DLC|Shipwright's Regret
+10053|CHAPTER|High Isle
 ]]
 
 --Internal collectible example ids of the ESO DLCs and chapters (first collectible found from each DLC category)
@@ -145,10 +150,14 @@ lib.dlcAndChapterCollectibleIds = {
     [DLC_BLACKWOOD] = 8659,             --OK
     --Waking Flames
     [DLC_WAKING_FLAME] = "3093",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    --Deadlands
+    [DLC_DEADLANDS] = 9365              --OK
+    --Ascending Tide
+    --on PTS
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterAchievementIds[DLC_<name_here>] = <id of achievement>
-    lib.dlcAndChapterCollectibleIds[DLC_DEADLANDS] = 9365
+    lib.dlcAndChapterCollectibleIds[DLC_ASCENDING_TIDE] = "3102" --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
@@ -157,12 +166,13 @@ local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds
 lib.DLCData = {}
 local DLCandCHAPTERdata = lib.DLCData
 lib.DLCData[DLC_BASE_GAME] = "Elder Scrolls Online"
+local dlcStrFormatPattern = "<<C:1>>"
 for dlcId, dlcAndChapterCollectibleOrAchievementId in ipairs(dlcAndChapterCollectibleIds) do
     if dlcId and dlcAndChapterCollectibleOrAchievementId then
         if type(dlcAndChapterCollectibleOrAchievementId) == "number" then
-            DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetCollectibleInfo(dlcAndChapterCollectibleOrAchievementId))
+            DLCandCHAPTERdata[dlcId] = zocstrfor(dlcStrFormatPattern, gci(dlcAndChapterCollectibleOrAchievementId))
         else
-            DLCandCHAPTERdata[dlcId] = ZO_CachedStrFormat("<<C:1>>", GetAchievementCategoryInfo(GetCategoryInfoFromAchievementId(dlcAndChapterCollectibleOrAchievementId)))
+            DLCandCHAPTERdata[dlcId] = zocstrfor(dlcStrFormatPattern, gaci(gcifa(dlcAndChapterCollectibleOrAchievementId)))
         end
     end
 end

@@ -25,6 +25,31 @@
     For more information, please refer to <http://unlicense.org/>
 ========================================================================
 
+
+========================================================================================================================
+ !!! TODO / BUGs list !!!
+========================================================================================================================
+ Last updated: 2022-02-22, Baertram, PTS AP101033 Ascending Tide
+------------------------------------------------------------------------------------------------------------------------
+
+ --Known bugs--
+ --Custom tooltips of set items via LAM settings menu in LibSets_Tooltips.lua not working
+
+
+ --Todo list--
+ --Add localized translations
+
+    --Unique item detection, sirinsidiator 2022-03-07 e.g. "Pulsing Dremora Ring" and "Leviathan Rings", different itemIds
+    so basically convert itemId to setId+slotId back to itemId and then compare input itemId to output itemId and if it's the same you got the non-unique version, otherwise it's the unique one
+    you could actually do that in LibSets while scanning sets and then mark your data accordingly
+
+
+
+ --Currently working on--
+ --2022-02-22
+ ----Tooltips
+
+
 ========================================================================================================================
  !!! API VERSION UPDATE - What needs to be scanned and done in this library and the Excel file?                     !!!
 ========================================================================================================================
@@ -48,7 +73,7 @@ in the game which needs to be added to the excel (itemIds are only kept in the l
       Do a /reloadui in chat afterwards to write the empty SV file on the harddisk/ssd!
 
    The table inside the SavedVariables filename LibSets.lua, where all data is saved, is:
-   LibSets_SV_Data =
+   LibSets_SV_DEBUG_Data =
     {
         ["Default"] =
         {
@@ -248,7 +273,7 @@ lib.setDataPreloaded = {
 6) After updating all the set relevant information to the excel file you can have a look at the excel map "Sets data".
 It contains all the data combined from the other excel maps. You need to add new rows for each new set and fill in the new setIds,
 and the data. Be sure to drag&drop down ALL excel formulas from the rows above to the new rows as well!
-Be sure to update the columns here like washrines, settype, dlcId, traits needed, isVeteran, the drop zones and drop mechanic + dropmechanic names of the bosses etc.
+Be sure to update the columns here like washrines, settype, dlcId, traits needed, isVeteran, the drop zones and drop mechanic + dropmechanic names (of the bosses, drop location, drop info)
 This info in all the columns from left to right will generate the lua data in the most right columns which your are able to copy to the file LibSets_Data_All.lua at the end!
 
 The new setids are the ones that are, compared to the maximum setId from the existing rows, are higher (newer).
@@ -304,21 +329,52 @@ LibSets_Data.All, table lib.setDataPreloaded, key LIBSETS_TABLEKEY_SET_PROCS
 --Check if the library was loaded before already w/o chat output
 if IsLibSetsAlreadyLoaded(false) then return end
 
-LibSets = LibSets or {}
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local apiVersion = GetAPIVersion()
+local worldName = GetWorldName()
+
+--The actual clients language
+local fallbackLang = lib.fallbackLang
+local clientLang = lib.clientLang
 
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
 local EM = EVENT_MANAGER
+local ISCDM = ITEM_SET_COLLECTIONS_DATA_MANAGER
+
+local tos = tostring
 local strgmatch = string.gmatch
 local strlower = string.lower
 --local strlen = string.len
+local strfind = string.find
+local strsub = string.sub
+local strfor = string.format
+
 local tins = table.insert
 local trem = table.remove
+local tsort = table.sort
 local unp = unpack
+local zocstrfor = ZO_CachedStrFormat
+
+local gzidx = GetZoneIndex
+local gzid = GetZoneId
+local gpzid = GetParentZoneId
+local gcmzidx = GetCurrentMapZoneIndex
+local gmidbzid = GetMapIndexByZoneId
+local gznbid = GetZoneNameById
+
+local gilsetinf = GetItemLinkSetInfo
+
+local gilet = GetItemLinkEquipType
+local giltt = GetItemLinkTraitType
+local gildeid = GetItemLinkDefaultEnchantId
+local gesct = GetEnchantSearchCategoryType
+local gilsi = GetItemLinkSetInfo
+local giliscs = GetItemLinkItemSetCollectionSlot
+local id64tos = Id64ToString
+
 
 ------------Global variables--------------
 --Get counter suffix
@@ -334,6 +390,24 @@ local noSetIdSets       = lib.noSetIdSets           -- <-- this table contains t
 
 --Wayshrine node index -> zoneId mapping
 local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
+
+local libZone
+
+
+--local lib variables
+local supportedLanguages =              lib.supportedLanguages
+local undauntedChestIds =               lib.undauntedChestIds
+local allowedDropMechanics =            lib.allowedDropMechanics
+local dropMechanicIdToName =            lib.dropMechanicIdToName
+local dropMechanicIdToNameTooltip =     lib.dropMechanicIdToNameTooltip
+
+
+--local lib functions
+local checkIfSetsAreLoadedProperly
+local buildItemLink
+local isNoESOSet
+local getDropMechanicName
+
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -353,13 +427,51 @@ local function toboolean(value)
     return value
 end
 
+local function removeLanguages(tabVar, langToKeep)
+    if not tabVar or not langToKeep or langToKeep == "" then return end
+    local retTab = {}
+    for idx, languagesTab in ipairs(tabVar) do
+        for langStr, languageData in pairs(languagesTab) do
+            if langStr == langToKeep then
+                retTab[idx] = {
+                    [langStr] = languageData
+                }
+                break
+            end
+        end
+    end
+    return retTab
+end
+
+
 ------------------------------------------------------------------------
 --======= SavedVariables ===============================================================================================
 --Load the SavedVariables
 local function LoadSavedVariables()
     --SavedVars were loaded already before?
     if lib.svData ~= nil then return end
-    local defaults =
+
+    --For the library settings like tooltips
+    local defaults = {
+        modifyTooltips = false,
+        tooltipModifications = {
+            tooltipTextures = true,
+            addSetType      = true,
+            addDropLocation = true,
+            addBossName     = true,
+            addDropMechanic = true,
+            addNeededTraits = true,
+            addDLC          = true,
+        },
+        useCustomTooltipPattern = "",
+    }
+    lib.defaultSV = defaults
+    --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
+    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, worldName, "$AllAccounts")
+    --------------------------------------------------------------------------------------------------------------------
+
+    --For debugging and preloaded data
+    local defaultsDebug =
     {
         [LIBSETS_TABLEKEY_NEWSETIDS]                = {},
         [LIBSETS_TABLEKEY_MAPS]                     = {},
@@ -374,7 +486,7 @@ local function LoadSavedVariables()
         [LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]    = {},
     }
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
-    lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, nil, "$AllAccounts")
+    lib.svDebugData = ZO_SavedVars:NewAccountWide(lib.svDebugName, 1, nil, defaultsDebug, nil, "$AllAccounts")
 end
 lib.LoadSavedVariables = LoadSavedVariables
 
@@ -405,15 +517,15 @@ local function decompressSetIdItemIds(setId)
         --The itemId is a String (e.g. "200020, 3" -> Means itemId 200020 and 200020+1 and 200020+2 and 200020+3).
         --Split it at the , to get the starting itemId and the number of following itemIds
         elseif itemIdType == "string" then
-            local commaSpot = string.find(IdSource[j],",")
-			local firstPart = tonumber(string.sub(IdSource[j], 1, commaSpot-1))
-			local lastPart = tonumber(string.sub(IdSource[j], commaSpot+1))
+            local commaSpot = strfind(IdSource[j],",")
+			local firstPart = tonumber(strsub(IdSource[j], 1, commaSpot-1))
+			local lastPart = tonumber(strsub(IdSource[j], commaSpot+1))
 			for i = 0, lastPart do
 				workingTable[firstPart + i] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
 			end
 		end
 	end
-    table.sort(workingTable)
+    tsort(workingTable)
 	CachedSetItemIdsTable[setId] = workingTable
 	return workingTable
 end
@@ -423,7 +535,7 @@ lib.DecompressSetIdItemIds = decompressSetIdItemIds
 --Check if an itemLink is a set and return the set's data from ESO API function GetItemLinkSetInfo
 local function checkSet(itemLink)
     if itemLink == nil or itemLink == "" then return false, "", 0, 0, 0, 0 end
-    local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = GetItemLinkSetInfo(itemLink, false)
+    local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = gilsetinf(itemLink, false)
     if not isSet then isSet = false end
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
@@ -431,7 +543,8 @@ end
 --Get equipped numbers of a set's itemId, returnin the setId and the item's link + equipped numbers
 local function getSetEquippedInfo(itemId)
     if not itemId then return nil, nil, nil end
-    local itemLink = lib.buildItemLink(itemId)
+    buildItemLink = buildItemLink or lib.buildItemLink
+    local itemLink = buildItemLink(itemId)
     local _, _, setId, _, equippedItems, maxEquipped = checkSet(itemLink)
     return setId, equippedItems, maxEquipped, itemLink
 end
@@ -467,7 +580,8 @@ local function checkIfSetExists(setId)
         end
     end
     if firstItemIdFound ~= nil then
-        local itemLink = lib.buildItemLink(firstItemIdFound)
+        buildItemLink = buildItemLink or lib.buildItemLink
+        local itemLink = buildItemLink(firstItemIdFound)
         if itemLink and itemLink ~= "" then
             local isSet, _, _, _, _, _ = checkSet(itemLink)
             isSet = isSet or false
@@ -490,7 +604,7 @@ local function checkNoSetIdSet(itemId)
             --Found the itemId in the sepcial sets itemIds table?
             if specialSetsItemIds and specialSetsItemIds[itemId] then
                 isSet = true
-                setName = noESOsetIdSetNames[noESOSetId][lib.clientLang] or ""
+                setName = noESOsetIdSetNames[noESOSetId][clientLang] or ""
                 numBonuses = specialSetData[LIBSETS_TABLEKEY_NUMBONUSES] or 0
                 numEquipped = lib.getNumEquippedItemsByItemIds(specialSetsItemIds)
                 maxEquipped = specialSetData[LIBSETS_TABLEKEY_MAXEQUIPPED] or 0
@@ -552,8 +666,8 @@ local function LoadSets()
                 local setType = setData[LIBSETS_TABLEKEY_SETTYPE]
                 if setType ~= nil then
                     local internalLibsSetVariableNames = setTypeToLibraryInternalVariableNames[setType]
-                    if internalLibsSetVariableNames and internalLibsSetVariableNames["tableName"] then
-                        local internalLibsSetTableName = internalLibsSetVariableNames["tableName"]
+                    local internalLibsSetTableName = internalLibsSetVariableNames ~= nil and internalLibsSetVariableNames["tableName"]
+                    if internalLibsSetTableName then
                         local internalLibsSetCounterName = internalLibsSetTableName .. counterSuffix
                         if lib[internalLibsSetTableName] and lib[internalLibsSetCounterName] then
                             lib[internalLibsSetTableName][setId] = setData
@@ -750,6 +864,108 @@ local function getSetTypeSetsData(setType)
     end
 end
 
+--======= Drop mechanic ================================================================================================
+--Helper function to return the custom dropMechnicLocationNames (if a setId is specified)
+local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
+--d("getDropMechanicAndDropLocationNames-setId: " ..tos(setId) .. ", langToUse: " ..tos(langToUse))
+    local dropMechanicNamesTable, dropMechanicDropLocationNamesTable, dropMechanicTooltipsTable
+    if setId == nil and setData == nil then return nil, nil, nil, setData end
+    if setData == nil then
+        local isNonEsoSetId = isNoESOSet(setId)
+        local preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS
+        local preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES
+        if isNonEsoSetId == true then
+            setData                     = noSetIdSets[setId]
+            preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID
+            preloadedSetNamesTableKey   = LIBSETS_TABLEKEY_SETNAMES_NO_SETID
+        else
+            if setInfo[setId] == nil then return nil, nil, nil, nil end
+            setData = setInfo[setId]
+        end
+        if setData == nil then return nil, nil, nil, nil end
+        setData["setId"] = setId
+    end
+--lib._setData = setData
+    local dropMechanicTable = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
+    if dropMechanicTable ~= nil then
+        if supportedLanguages then
+            local supportedLanguageData
+            local onlyOneLanguage = (langToUse ~= nil and true) or false
+--d(">onlyOneLanguage: " ..tos(onlyOneLanguage))
+            if onlyOneLanguage then
+                supportedLanguageData = supportedLanguages[langToUse]
+                if not supportedLanguageData and langToUse ~= fallbackLang then
+                    langToUse = fallbackLang
+                    supportedLanguageData = supportedLanguages[langToUse]
+                end
+                if not supportedLanguageData then return nil, nil, nil, setData end
+            end
+--d(">onlyOneLanguage: " ..tos(onlyOneLanguage) .. ", langTouse: " ..tos(langToUse))
+
+            local dropMechanicProvidedDropLocationNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES]
+--d(">2")
+
+            --For each entry in the drop mechanic table: Check if a custom name is given, else determine the standard dropMechanic name via API function
+            for idx, dropMechanic in ipairs(dropMechanicTable) do
+--d(">idx: " ..tos(idx) .. ", dropMechanic: " ..tos(dropMechanic))
+                --The drop mechanic is no monster name, so get the names of the drop mechanic via LibSets API function
+                if onlyOneLanguage then
+                    dropMechanicNamesTable                 = dropMechanicNamesTable or {}
+                    dropMechanicNamesTable[idx]            = dropMechanicNamesTable[idx] or {}
+                    dropMechanicTooltipsTable              = dropMechanicTooltipsTable or {}
+                    dropMechanicTooltipsTable[idx]         = dropMechanicTooltipsTable[idx] or {}
+                    dropMechanicNamesTable[idx][langToUse], dropMechanicTooltipsTable[idx][langToUse] = getDropMechanicName(dropMechanic, langToUse)
+--d(">>3")
+                    --Are custom drop names added (monster name, mob type, etc.)
+                    if dropMechanicProvidedDropLocationNames ~= nil then
+                        --First client language or language to use from parameter
+                        --Is the language of the dropLocation not given in the desired language: Use EN fallback then
+                        local langTouseForProvidedNames = langToUse
+                        if dropMechanicProvidedDropLocationNames[langTouseForProvidedNames] == nil then
+                            if langToUse ~= fallbackLang and dropMechanicProvidedDropLocationNames[fallbackLang] ~= nil then
+                                langTouseForProvidedNames = fallbackLang
+                            end
+                        end
+--d(">>>dropMechanicProvidedDropLocationNames-langTouseForProvidedNames: " ..tos(langTouseForProvidedNames))
+                        if dropMechanicProvidedDropLocationNames[langTouseForProvidedNames] ~= nil and dropMechanicProvidedDropLocationNames[langTouseForProvidedNames][idx]
+                            and dropMechanicProvidedDropLocationNames[langTouseForProvidedNames][idx] ~= "" then
+                            dropMechanicDropLocationNamesTable                                 = dropMechanicDropLocationNamesTable or {}
+                            dropMechanicDropLocationNamesTable[idx]                            = dropMechanicDropLocationNamesTable[idx] or {}
+                            dropMechanicDropLocationNamesTable[idx][langTouseForProvidedNames] = dropMechanicProvidedDropLocationNames[langTouseForProvidedNames][idx]
+                        end
+                    end
+                else
+                    for supportedLanguage, isSupported in pairs(supportedLanguages) do
+                        if isSupported == true then
+                            dropMechanicNamesTable                         = dropMechanicNamesTable or {}
+                            dropMechanicNamesTable[idx]                    = dropMechanicNamesTable[idx] or {}
+                            dropMechanicTooltipsTable                      = dropMechanicTooltipsTable or {}
+                            dropMechanicTooltipsTable[idx]                 = dropMechanicTooltipsTable[idx] or {}
+                            dropMechanicNamesTable[idx][supportedLanguage], dropMechanicTooltipsTable[idx][supportedLanguage] = getDropMechanicName(dropMechanic, supportedLanguage)
+                        end
+                    end
+                    --Are custom names added (monster name, mob type, etc.)
+                    if dropMechanicProvidedDropLocationNames ~= nil then
+--d(">>4")
+                        --All languages - Take same index of dropMechanics for the dropLocationName
+                        for supportedLanguage, isSupported in pairs(supportedLanguages) do
+                            if isSupported == true then
+                                if dropMechanicProvidedDropLocationNames[supportedLanguage] and dropMechanicProvidedDropLocationNames[supportedLanguage][idx]
+                                    and dropMechanicProvidedDropLocationNames[supportedLanguage][idx] ~= "" then
+                                    dropMechanicDropLocationNamesTable      = dropMechanicDropLocationNamesTable or {}
+                                    dropMechanicDropLocationNamesTable[idx] = dropMechanicDropLocationNamesTable[idx] or {}
+                                    dropMechanicDropLocationNamesTable[idx][supportedLanguage] = dropMechanicProvidedDropLocationNames[supportedLanguage][idx]
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return dropMechanicNamesTable, dropMechanicDropLocationNamesTable, dropMechanicTooltipsTable, setData
+end
+
 ------------------------------------------------------------------------
 -- 	Global helper functions
 ------------------------------------------------------------------------
@@ -767,18 +983,21 @@ end
 --> Returns:    itemLink String: The generated itemLink for the item with the given quality
 function lib.buildItemLink(itemId, itemQualitySubType)
     if itemId == nil or itemId == 0 then return end
+    buildItemLink = buildItemLink or lib.buildItemLink
     --itemQualitySubType is used for the itemLinks quality, see UESP website for a description of the itemLink: https://en.uesp.net/wiki/Online:Item_Link
     itemQualitySubType = itemQualitySubType or 366 -- Normal
     --itemQualitySubType values for Level 50 items:
-    --return '|H1:item:'..tostring(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
-    return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, itemQualitySubType, ITEMSTYLE_NONE, 0, 10000)
+    --return '|H1:item:'..tos(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
+    return strfor("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, itemQualitySubType, ITEMSTYLE_NONE, 0, 10000)
 end
+buildItemLink = lib.buildItemLink
+
 
 --Open the worldmap and show the map of the zoneId
 --> Parameters: zoneId number: The zone's zoneId
 function lib.openMapOfZoneId(zoneId)
     if not zoneId then return false end
-    local mapIndex = GetMapIndexByZoneId(zoneId)
+    local mapIndex = gmidbzid(zoneId)
     if mapIndex then
         showWorldMap()
         zo_callLater(function()
@@ -786,6 +1005,7 @@ function lib.openMapOfZoneId(zoneId)
         end, 50)
     end
 end
+local openMapOfZoneId = lib.openMapOfZoneId
 
 --Open the worldmap, get the zoneId of the wayshrine wayshrineNodeId and show the wayshrine wayshrineNodeId on the map
 --> Parameters: wayshrineNodeId number: The wayshrine's nodeIndex
@@ -793,7 +1013,7 @@ function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)
     if not wayshrineNodeId then return false end
     local zoneId = lib.GetWayshrinesZoneId(wayshrineNodeId)
     if not zoneId then return end
-    lib.openMapOfZoneId(zoneId)
+    openMapOfZoneId(zoneId)
     zo_callLater(function()
         ZO_WorldMap_PanToWayshrine(wayshrineNodeId)
     end, 100)
@@ -818,16 +1038,17 @@ end
 --> Returns:    boolean isCraftedSet
 function lib.IsCraftedSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.craftedSets[setId] ~= nil or false
 end
+local isCraftedSet = lib.IsCraftedSet
 
 --Returns true if the setId provided is a monster set
 --> Parameters: setId number: The set's setId
 --> Returns:    boolean isMonsterSet
 function lib.IsMonsterSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.monsterSets[setId] ~= nil or false
 end
 
@@ -836,7 +1057,7 @@ end
 --> Returns:    boolean isDungeonSet
 function lib.IsDungeonSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.dungeonSets[setId] ~= nil or false
 end
 
@@ -845,7 +1066,7 @@ end
 --> Returns:    boolean isTrialSet, boolean isMultiTrialSet
 function lib.IsTrialSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local trialSetData = lib.trialSets[setId] or false
     local isTrialSet = false
     local isMultiTrialSet = false
@@ -863,7 +1084,7 @@ end
 --> Returns:    boolean isArenaSet
 function lib.IsArenaSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.arenaSets[setId] ~= nil or false
 end
 
@@ -872,7 +1093,7 @@ end
 --> Returns:    boolean isOverlandSet
 function lib.IsOverlandSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.overlandSets[setId] ~= nil or false
 end
 
@@ -881,7 +1102,7 @@ end
 --> Returns:    boolean isCyrodiilSet
 function lib.IsCyrodiilSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.cyrodiilSets[setId] ~= nil or false
 end
 
@@ -890,7 +1111,7 @@ end
 --> Returns:    boolean isBattlegroundSet
 function lib.IsBattlegroundSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.battlegroundSets[setId] ~= nil or false
 end
 
@@ -899,7 +1120,7 @@ end
 --> Returns:    boolean isImperialCitySet
 function lib.IsImperialCitySet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.imperialCitySets[setId] ~= nil or false
 end
 
@@ -908,7 +1129,7 @@ end
 --> Returns:    boolean isSpecialSet
 function lib.IsSpecialSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.specialSets[setId] ~= nil or false
 end
 
@@ -917,7 +1138,7 @@ end
 --> Returns:    boolean isDailyRandomDungeonAndImperialCityRewardSet
 function lib.IsDailyRandomDungeonAndImperialCityRewardSet(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.dailyRandomDungeonAndImperialCityRewardSets[setId] ~= nil or false
 end
 
@@ -927,7 +1148,7 @@ end
 function lib.IsMythicSet(setId)
     if not checkIfPTSAPIVersionIsLive() then return false end
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.mythicSets[setId] ~= nil or false
 end
 
@@ -937,17 +1158,18 @@ end
 --> Returns:    boolean isNonESOSet
 function lib.IsNoESOSet(noESOSetId)
     if noESOSetId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local isNoESOSetId = noSetIdSets[noESOSetId] ~= nil or false
     return isNoESOSetId
 end
+isNoESOSet = lib.IsNoESOSet
 
 --Returns information about the set if the itemId provides it is a set item
 --> Parameters: itemId number: The item's itemId
 --> Returns:    isSet boolean, setName String, setId number, numBonuses number, numEquipped number, maxEquipped number
 function lib.IsSetByItemId(itemId)
     if itemId == nil then return end
-    local itemLink = lib.buildItemLink(itemId)
+    local itemLink = buildItemLink(itemId)
     local isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSet(itemLink)
     if not isSet then
         --Maybe it is a set with no ESO setId, but an own defined setId
@@ -963,7 +1185,7 @@ function lib.IsSetByItemLink(itemLink)
     local isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkSet(itemLink)
     if not isSet then
         --Maybe it is a set with no ESO setId, but an own defined setId
-        isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkNoSetIdSet(itemId)
+        isSet, setName, setId, numBonuses, numEquipped, maxEquipped = checkNoSetIdSet(GetItemLinkItemId(itemLink))
     end
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
@@ -977,7 +1199,7 @@ end
 -->                              against these.
 --> Returns:    isVeteranSet boolean
 function lib.IsVeteranSet(setId, itemLink)
-	if not lib.checkIfSetsAreLoadedProperly() then return false end
+	if not checkIfSetsAreLoadedProperly() then return false end
 	local isVeteranSet = false
 	if setId and itemLink then
 		local setData = setInfo[setId] or noSetIdSets[setId]
@@ -985,7 +1207,7 @@ function lib.IsVeteranSet(setId, itemLink)
 			local veteranData = setData.veteran
 			if veteranData then
 				if type(veteranData) == "table" then
-					local equipType = GetItemLinkEquipType(itemLink)
+					local equipType = gilet(itemLink)
 					if equipType then
 						for equipTypeVeteranCheck, isVeteran in pairs(veteranData) do
 							if equipTypeVeteranCheck == equipType then
@@ -1007,7 +1229,7 @@ end
 -->             armorType number: The armorType to check for
 --> Returns:    isArmorTypeSet boolean
 function lib.IsArmorTypeSet(setId, armorType)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId or not armorType then return end
     return lib.armorTypesSets[armorType][setId] or false
 end
@@ -1016,7 +1238,7 @@ end
 --> Parameters: setId number: The set's setId
 --> Returns:    isLightArmorSet boolean
 function lib.IsLightArmorSet(setId)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId then return end
     return lib.armorTypesSets[ARMORTYPE_LIGHT][setId] or false
 end
@@ -1025,7 +1247,7 @@ end
 --> Parameters: setId number: The set's setId
 --> Returns:    isMediumArmorSet boolean
 function lib.IsMediumArmorSet(setId)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId then return end
     return lib.armorTypesSets[ARMORTYPE_MEDIUM][setId] or false
 end
@@ -1034,7 +1256,7 @@ end
 --> Parameters: setId number: The set's setId
 --> Returns:    isHeavyArmorSet boolean
 function lib.IsHeavyArmorSet(setId)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId then return end
     return lib.armorTypesSets[ARMORTYPE_HEAVY][setId] or false
 end
@@ -1043,7 +1265,7 @@ end
 --> Parameters: setId number: The set's setId
 --> Returns:    isArmorSet boolean
 function lib.IsArmorSet(setId)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId then return end
     return lib.armorSets[setId] or false
 end
@@ -1052,7 +1274,7 @@ end
 --> Parameters: setId number: The set's setId
 --> Returns:    isJewelrySet boolean
 function lib.IsJewelrySet(setId)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId then return end
     return lib.jewelrySets[setId] or false
 end
@@ -1061,7 +1283,7 @@ end
 --> Parameters: setId number: The set's setId
 --> Returns:    isWeaponSet boolean
 function lib.IsWeaponSet(setId)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId then return end
     return lib.weaponSets[setId] or false
 end
@@ -1071,7 +1293,7 @@ end
 -->             weaponType number: The weaponType to check for
 --> Returns:    isWeaponTypeSet boolean
 function lib.IsWeaponTypeSet(setId, weaponType)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId or not weaponType then return end
     return lib.weaponTypesSets[weaponType][setId] or false
 end
@@ -1081,7 +1303,7 @@ end
 -->             equipType number: The equipType to check for
 --> Returns:    isEquipTypeSet boolean
 function lib.IsEquipTypeSet(setId, equipType)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not setId or not equipType then return end
     return lib.equipTypesSets[equipType][setId] or false
 end
@@ -1094,7 +1316,7 @@ end
 --> Parameters: armorType number: The armorType to check for
 --> Returns:    armorTypeSetIds table
 function lib.GetAllArmorTypeSets(armorType)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not armorType then return end
     return lib.armorTypesSets[armorType]
 end
@@ -1102,14 +1324,14 @@ end
 --Returns a table of setIds where the set got items with an armorType
 --> Returns:    armorSet table
 function lib.GetAllArmorSets()
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     return lib.armorSets
 end
 
 --Returns a table of setIds where the set got items with a jewelryType
 --> Returns:    jewelrySets table
 function lib.GetAllJewelrySets()
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     return lib.jewelrySets
 end
 
@@ -1117,7 +1339,7 @@ end
 --Returns a table of setIds where the set got items with a weaponType
 --> Returns:    weaponSets table
 function lib.GetAllWeaponSets()
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     return lib.weaponSets
 end
 
@@ -1125,7 +1347,7 @@ end
 --> Parameters: weaponType number: The weaponType to check for
 --> Returns:    weaponTypeSetIds table
 function lib.GetAllWeaponTypeSets(weaponType)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not weaponType then return end
     return lib.weaponTypesSets[weaponType]
 end
@@ -1134,7 +1356,7 @@ end
 --> Parameters: equipType number: The equipType to check for
 --> Returns:    equipTypeSetIds table
 function lib.GetAllEquipTypeSets(equipType)
-    if not lib.checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return false end
     if not equipType then return end
     return lib.equipTypesSets[equipType]
 end
@@ -1149,7 +1371,7 @@ end
 function lib.GetWayshrineIds(setId, withRelatedZoneIds)
     withRelatedZoneIds = withRelatedZoneIds or false
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setData = setInfo[setId]
     if setData == nil or setData[LIBSETS_TABLEKEY_WAYSHRINES] == nil then return end
     local wayshrineNodsId2ZoneId
@@ -1169,7 +1391,7 @@ end
 --> Returns:    zoneId number
 function lib.GetWayshrinesZoneId(wayshrineNodeId)
     if wayshrineNodeId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     --Get the zoneId for each wayshrineNodeId, read it from the preloaded setdata
     if not wayshrine2zone then return end
     return wayshrine2zone[wayshrineNodeId]
@@ -1180,7 +1402,7 @@ end
 --> Returns:    zoneIds table, or NIL if set's DLCid is unknown
 function lib.GetZoneIds(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setData = setInfo[setId]
     if setData == nil or setData[LIBSETS_TABLEKEY_ZONEIDS] == nil then return end
     return setData[LIBSETS_TABLEKEY_ZONEIDS]
@@ -1191,7 +1413,7 @@ end
 --> Returns:    dlcId number, or NIL if set's DLCid is unknown
 function lib.GetDLCId(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setData = setInfo[setId]
     if setData == nil or setData.dlcId == nil then return end
     return setData.dlcId
@@ -1203,7 +1425,7 @@ end
 --> Returns:    wasAddedWithCurrentDLC Boolean, or NIL if set's DLCid is unknown
 function lib.IsCurrentDLC(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setData = setInfo[setId]
     if setData == nil or setData.dlcId == nil then return end
     local wasAddedWithCurrentDLC = (DLC_ITERATION_END and setData.dlcId >= DLC_ITERATION_END) or false
@@ -1220,7 +1442,7 @@ end
 --> Returns:    traitsNeededToCraft number
 function lib.GetTraitsNeeded(setId)
     if setId == nil then return end
-    if not lib.IsCraftedSet(setId) then return end
+    if not isCraftedSet(setId) then return end
     local setData = setInfo[setId]
     if setData == nil or setData.traitsNeeded == nil then return end
     return setData.traitsNeeded
@@ -1232,10 +1454,10 @@ end
 ---> Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 function lib.GetSetType(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setData = setInfo[setId]
     if setData == nil then
-        if lib.IsNoESOSet(setId) then
+        if isNoESOSet(setId) then
             setData = noSetIdSets[setId]
         else
             return
@@ -1251,9 +1473,9 @@ end
 --> Returns:    String setTypeName
 function lib.GetSetTypeName(libSetsSetType, lang)
     if libSetsSetType == nil then return end
-    lang = lang or lib.clientLang
-    lang = string.lower(lang)
-    if not lib.supportedLanguages[lang] then return end
+    lang = lang or clientLang
+    lang = strlower(lang)
+    if not supportedLanguages[lang] then return end
     local allowedLibSetsSetTypes = lib.allowedSetTypes
     local allowedSetType = allowedLibSetsSetTypes[libSetsSetType] or false
     if not allowedSetType then return end
@@ -1271,98 +1493,123 @@ function lib.GetAllSetTypes()
     return lib.allowedSetTypes
 end
 
---Returns the dropMechanicIDs of the setId!
---> Parameters: setId number:           The set's setId
--->             withNames bolean:       Should the function return the dropMechanic names as well?
---> Returns:    LibSetsDropMechanicIds  table, LibSetsDropMechanicNamesForEachId table, LibSetsDropMechanicTooltipForEachId table
----> table LibSetsDropMechanicIds: The key is a number starting at 1 and increasing by 1, and the value is one of the dropMechanics
----> of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
----> table LibSetsDropMechanicNamesForEachId: The key is the dropMechanicId (value of each line in table LibSetsDropMechanicIds)
----> and the value is a subtable containing each language as key and the localized String as the value.
----> table LibSetsDropMechanicTooltipForEachId: The key is the dropMechanicId (value of each line in table LibSetsDropMechanicIds)
----> and the value is a subtable containing each language as key and the localized String as the value.
-function lib.GetDropMechanic(setId, withNames)
-    if setId == nil then return nil, nil end
-    if not lib.checkIfSetsAreLoadedProperly() then return nil, nil end
-    withNames = withNames or false
-    local setData = setInfo[setId]
-    if setData == nil then
-        if lib.IsNoESOSet(setId) then
-            setData = noSetIdSets[setId]
-        else
-            return
-        end
-    end
-    if setData == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC] == nil then return nil, nil end
-    local dropMechanicIds = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
-    local dropMechanicNames
-    local dropMechanicTooltips
-    if withNames then
-        if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]["en"] ~= nil then
-            dropMechanicNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
-            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES] ~= nil and setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES]["en"] ~= nil then
-                dropMechanicTooltips =  setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES]
-            end
-        else
-            dropMechanicNames = {}
-            dropMechanicTooltips = {}
-            local supportedLanguages = lib.supportedLanguages
-            if supportedLanguages then
-                for _, dropMechanicEntry in ipairs(dropMechanicIds) do
-                    for supportedLanguage, isSupported in pairs(supportedLanguages) do
-                        dropMechanicNames[dropMechanicEntry] = dropMechanicNames[dropMechanicEntry] or {}
-                        dropMechanicTooltips[dropMechanicEntry] = dropMechanicTooltips[dropMechanicEntry] or {}
-                        if isSupported then
-                            local dropMechanicName, dropMechanicTooltip = lib.GetDropMechanicName(dropMechanicEntry, supportedLanguage)
-                            dropMechanicNames[dropMechanicEntry][supportedLanguage] = dropMechanicName
-                            dropMechanicTooltips[dropMechanicEntry][supportedLanguage] = dropMechanicTooltip
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return dropMechanicIds, dropMechanicNames, dropMechanicTooltips
-end
-
---Returns the name of the drop mechanic ID (a drop locations boss, city, email, ..)
+--Returns the name of the drop mechanic ID (Aren cstage chest, worldboss, city, email rewards for the worthy, ...)
+-->Will not contain the dropLocationName like boss name, mob name, loot name, etc.! Use function lib.GetDropMechanic(setId, withNames)
 --> Parameters: dropMechanicId number: The LibSetsDropMechanidIc (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 -->             lang String: The 2char language String for the used translation. If left empty the current client's
 -->             language will be used.
 --> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc, String dropMechanicNameTooltipLocalized: The tooltip of the dropMechanic
 function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return end
-    local allowedDropMechanics = lib.allowedDropMechanics
     if not allowedDropMechanics[libSetsDropMechanicId] then return end
-    lang = lang or lib.clientLang
-    lang = string.lower(lang)
-    if not lib.supportedLanguages[lang] then return end
-    local dropMechanicNames = lib.dropMechanicIdToName[lang]
-    local dropMechanicTooltipNames = lib.dropMechanicIdToNameTooltip[lang]
+    lang = lang or clientLang
+    lang = strlower(lang)
+    if not supportedLanguages[lang] then return end
+    local dropMechanicNames = dropMechanicIdToName[lang]
+    local dropMechanicTooltipNames = dropMechanicIdToNameTooltip[lang]
     if dropMechanicNames == nil or dropMechanicTooltipNames == nil then return false end
     local dropMechanicName = dropMechanicNames[libSetsDropMechanicId]
     local dropMechanicTooltip = dropMechanicTooltipNames[libSetsDropMechanicId]
-    if not dropMechanicName or dropMechanicName == "" then return end
+    if not dropMechanicName or dropMechanicName == "" then return nil, nil, nil end
     return dropMechanicName, dropMechanicTooltip
+end
+getDropMechanicName = lib.GetDropMechanicName
+
+--Returns the dropMechanicIDs of the setId!
+--> Parameters: setId number:           The set's setId
+-->             withNames bolean:       Should the function return the dropMechanic names as well?
+--> Returns:    LibSetsDropMechanicIds  table, LibSetsDropMechanicNamesForEachId table, LibSetsDropMechanicTooltipForEachId table, LibSetsDropMechanicLocationNames table, LibSetsZoneIdsOfDrop table
+---> table LibSetsDropMechanicIds: The key is a number starting at 1 and increasing by 1, and the value is one of the dropMechanics
+--->   of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
+---> table LibSetsDropMechanicNamesForEachId: The key is an index, same as the index in table LibSetsDropMechanicIds,
+--->   and the value is a subtable containing each language as key and the localized String as the value.
+--->   table LibSetsDropMechanicTooltipForEachId: The key is an index, same as the index in table LibSetsDropMechanicIds,
+--->   and the value is a subtable containing each language as key and the localized String as the value.
+--->   table LibSetsDropMechanicLocationNames: The key is an index, same as the index in table LibSetsDropMechanicIds,
+--->   and the value is a subtable containing each language as key and the localized String of the dropLocation (e.g. monster name, loot, mob type, ...) as the value.
+--->   table LibSetsZoneIdsOfDrop: The key is an index, same as the index in table LibSetsDropMechanicIds,
+--->   and the value is the zoneId where the setItem drops
+function lib.GetDropMechanic(setId, withNames, lang)
+    if setId == nil then return nil, nil, nil, nil, nil end
+    if not checkIfSetsAreLoadedProperly() then return nil, nil, nil, nil, nil end
+    withNames = withNames or false
+    local supportedLanguageData
+    local onlyOneLanguage = (lang ~= nil and true) or false
+    if onlyOneLanguage then
+        supportedLanguageData = supportedLanguages[lang]
+        if not supportedLanguageData and lang ~= fallbackLang then
+            lang = fallbackLang
+            supportedLanguageData = supportedLanguages[lang]
+        end
+--d(">lang: " ..tos(lang))
+        if not supportedLanguageData then return nil, nil, nil, nil, nil end
+    end
+
+    local setData = setInfo[setId]
+    if setData == nil then
+        if isNoESOSet(setId) then
+            setData = noSetIdSets[setId]
+        end
+    end
+    if setData == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC] == nil then return nil, nil, nil, nil, nil end
+--d(">setData found")
+    local dropMechanicIds = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
+    local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
+    local dropMechanicNames
+    local dropMechanicLocationNames
+    local dropMechanicTooltips
+    if withNames == true then
+        local buildNames = false
+        if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil then
+            dropMechanicNames = ZO_ShallowTableCopy(setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES])
+            if lang ~= nil then
+                dropMechanicNames = removeLanguages(dropMechanicNames, lang)
+            end
+        else
+            buildNames = true
+        end
+        if not buildNames and setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES] ~= nil then
+            dropMechanicTooltips = ZO_ShallowTableCopy(setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES])
+            if lang ~= nil then
+                dropMechanicTooltips = removeLanguages(dropMechanicTooltips, lang)
+            end
+        else
+            buildNames = true
+        end
+        if not buildNames and setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] ~= nil then
+            dropMechanicLocationNames = ZO_ShallowTableCopy(setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES])
+            if lang ~= nil then
+                dropMechanicLocationNames = removeLanguages(dropMechanicLocationNames, lang)
+            end
+        else
+            buildNames = true
+        end
+        if buildNames then
+--d(">>buildNames")
+            dropMechanicNames, dropMechanicLocationNames, dropMechanicTooltips = getDropMechanicAndDropLocationNames(setId, lang, setData)
+        end
+    end
+    return dropMechanicIds, dropMechanicNames, dropMechanicTooltips, dropMechanicLocationNames, dropZoneIds
 end
 
 --Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 function lib.GetAllDropMechanics()
-    return lib.allowedDropMechanics
+    return allowedDropMechanics
 end
+
 
 --Returns a sorted table of all set ids. Key is the setId, value is the boolean value true.
 --Attention: The table can have a gap in it's index as not all setIds are gap-less in ESO!
 --> Returns: setIds table
 function lib.GetAllSetIds()
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return lib.setIds
 end
 
 --Returns all sets itemIds as table. Key is the setId, value is a subtable with the key=itemId and value = boolean value true.
 --> Returns: setItemIds table
 function lib.GetAllSetItemIds()
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     --Decompress all the setId's itemIds (if not already done before)
     --and create the whole cached table CachedSetItemIdsTable this way
     for setId, isActive in pairs(lib.setIds) do
@@ -1382,14 +1629,12 @@ function lib.GetSetItemIds(setId, isNoESOSetId)
     if setId == nil then return end
     isNoESOSetId = isNoESOSetId or false
     if isNoESOSetId == false then
-        isNoESOSetId = lib.IsNoESOSet(setId)
+        isNoESOSetId = isNoESOSet(setId)
     end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setItemIds
     if isNoESOSetId == true then
-        if preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId] ~= nil then
-            setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId]
-        end
+        setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId]
     else
         setItemIds = decompressSetIdItemIds(setId)
     end
@@ -1440,21 +1685,21 @@ function lib.GetSetItemId(setId, equipType, traitType, enchantSearchCategoryType
         --Anything we need an itemlink for?
         if needItemLinkOfItemId == true then
             --Create itemLink of the itemId
-            local itemLink = lib.buildItemLink(setItemId)
+            local itemLink = buildItemLink(setItemId)
             if itemLink ~= nil and itemLink ~= "" then
                 local isValidItemId = false
 
                 if equipTypeValid == true then
-                    local ilEquipType = GetItemLinkEquipType(itemLink)
+                    local ilEquipType = gilet(itemLink)
                     if ilEquipType ~= nil and ilEquipType == equipType then isValidItemId = true end
                 end
                 if isValidItemId == true and traitTypeValid == true then
-                    local ilTraitType = GetItemLinkTraitType(itemLink)
+                    local ilTraitType = giltt(itemLink)
                     if ilTraitType ~= nil and ilTraitType == traitType then isValidItemId = true end
                 end
                 if isValidItemId == true and enchantSearchCategoryTypeValid == true then
-                    local ilenchantId = GetItemLinkDefaultEnchantId(itemLink)
-                    local ilenchantSearchCategoryType = GetEnchantSearchCategoryType(ilenchantId)
+                    local ilenchantId = gildeid(itemLink)
+                    local ilenchantSearchCategoryType = gesct(ilenchantId)
                     if ilenchantSearchCategoryType ~= nil and ilenchantSearchCategoryType == enchantSearchCategoryType then isValidItemId = true end
                 end
                 if isValidItemId == true then
@@ -1474,12 +1719,12 @@ end
 --> lang String: The language to return the setName in. Can be left empty and the client language will be used then
 --> Returns:    String setName
 function lib.GetSetName(setId, lang)
-    lang = lang or lib.clientLang
-    lang = string.lower(lang)
-    if not lib.supportedLanguages[lang] then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    lang = lang or clientLang
+    lang = strlower(lang)
+    if not supportedLanguages[lang] then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setNames = {}
-    if lib.IsNoESOSet(setId) then
+    if isNoESOSet(setId) then
         setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
     else
         setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
@@ -1496,9 +1741,9 @@ end
 ----> Contains a table with the different names of the set, for each scanned language (setNames = {["de"] = String nameDE, ["en"] = String nameEN})
 function lib.GetSetNames(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setNames = {}
-    if lib.IsNoESOSet(setId) then
+    if isNoESOSet(setId) then
         setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
     else
         setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
@@ -1512,7 +1757,7 @@ end
 --{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
 --> Returns: setNames table
 function lib.GetAllSetNames()
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local setNames = {}
     local setIds = lib.GetAllSetIds()
     if not setIds then return end
@@ -1528,7 +1773,9 @@ function lib.GetAllSetNames()
 end
 
 --Returns the set info as a table
---> Parameters: setId number: The set's setId
+--> Parameters: setId number: The set's setId,
+-->             noItemIds boolean optional: Set this to true if you do not need the itemIds subtable LIBSETS_TABLEKEY_SETITEMIDS in the return table. Dafault will be false
+-->             lang String optional: The 2char language String to use for language dependent info. If left nil all supported languages will be returned.
 --> Returns:    table setInfo
 ----> Contains:
 ----> number setId
@@ -1543,8 +1790,11 @@ end
 ------>The table can contain 1 to 3 entries (one for each faction e.g.) and contains the wayshrineNodeId nearest to the set's crafting table/in the drop zone
 ----> table zoneIds containing the zoneIds (one to n) where this set drops, or can be obtained
 ----> table dropMechanic containing a number non-gap key and the LibSetsDropMechanic of the set as value
---->  table dropMechanicNames: The key is the dropMechanicId (value of each line in table dropMechanics) and the value is a subtable containing each language as key
------> and the localized String as the value.
+--->  table dropMechanicNames: The key is the same index as used within table "dropMechanic". And the value is a subtable containing each (or the specified lang parameter) language as key,
+--->  and the localized String as the value. dropMechanicNames returns the names of the dropMechanic, e.g. "worldboss", "delve boss", ...
+--->  table dropMechanicLocationNames: The key is the same index as used within table "dropMechanic". And the value is a subtable containing each (or the specified lang parameter) language as key.
+-----> dropMechanicLocationNames returns the names of the mob/boss/... that drops the setItem, e.g. "Velidreth", "Mob type Daedra", ...
+-----> !!!Attention: dropMechanicLocationNames can now apply to all setTypes, not only anymore to monster sets!!!
 -------Example for setId 408
 --- ["setId"] = 408,
 --- ["dlcId"] = 12,    --DLC_MURKMIRE
@@ -1572,20 +1822,53 @@ end
 --      [2] = LIBSETS_DROP_MECHANIC_...,
 --  },
 --  ["dropMechanicNames"] = {
---      ["en"] = "DropMechanicNameEN",
---      ["de"] = "DropMechanicNameDE",
---      ["fr"] = "DropMechanicNameFR",
+--      [1] = {
+--        ["en"] = "DropMechanicNameEN",
+--          ["de"] = "DropMechanicNameDE",
+--          ["fr"] = "DropMechanicNameFR",
+--          [...] = "...",
+--      },
+--      [2] = {
+--        ["en"] = "DropMechanic...NameEN",
+--        ["de"] = "DropMechanic...NameDE",
+--        ["fr"] = "DropMechanic....NameFR",
+--        [...] = "...",
+--      },
+--  },
+--  ["dropMechanicLocationNames"] = {
+--      [1] = {
+--        ["en"] = "DropMechanicMonsterNameEN",
+--          ["de"] = "DropMechanicMonsterNameDE",
+--          ["fr"] = "DropMechanicMonsterNameFR",
+--          [...] = "...",
+--      },
+--      [2] = nil, --as it got no monster or other dropMechanicLocation name,
 --  },
 --}
-function lib.GetSetInfo(setId)
+function lib.GetSetInfo(setId, noItemIds, lang)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
-    local isNonEsoSetId = lib.IsNoESOSet(setId)
+    if not checkIfSetsAreLoadedProperly() then return end
+    noItemIds = noItemIds or false
+    local isNonEsoSetId = isNoESOSet(setId)
     local setInfoTable
+    local setInfoTableCopy
     local itemIds
     local setNames
+    local langToUse
+    local supportedLanguageData
+    local onlyOneLanguage = (lang ~= nil and true) or false
+    if onlyOneLanguage then
+        langToUse = lang
+        supportedLanguageData = supportedLanguages[langToUse]
+        if not supportedLanguageData and lang ~= fallbackLang then
+            langToUse = fallbackLang
+            supportedLanguageData = supportedLanguages[langToUse]
+        end
+    end
+
     local preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS
     local preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES
+
     if isNonEsoSetId == true then
         setInfoTable = noSetIdSets[setId]
         preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID
@@ -1596,45 +1879,55 @@ function lib.GetSetInfo(setId)
     end
     if setInfoTable == nil then return end
     setInfoTable["setId"] = setId
-    local dropMechanicNamesTable
-    if setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC] ~= nil then
-        local dropMechanicTable = setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC]
-        --For each entry in the drop mechanic table:
-        for _, dropMechanic in ipairs(dropMechanicTable) do
-            --The drop mechanic is no monster name, so get the names of the drop mechanic via LibSets API function
-            if dropMechanic ~= LIBSETS_DROP_MECHANIC_MONSTER_NAME then
-                local supportedLanguages = lib.supportedLanguages
-                if supportedLanguages then
-                    for supportedLanguage, isSupported in pairs(supportedLanguages) do
-                        if isSupported then
-                            dropMechanicNamesTable = dropMechanicNamesTable or {}
-                            dropMechanicNamesTable[dropMechanic] = {}
-                            dropMechanicNamesTable[dropMechanic][supportedLanguage] = lib.GetDropMechanicName(dropMechanic, supportedLanguage)
-                        end
-                    end
-                end
-            else
-                --DropMechanic is a monster's name: So use the specified names from the setInfo's table LIBSETS_TABLEKEY_DROPMECHANIC_NAMES
-                if setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil and setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]["en"] ~= nil then
-                    dropMechanicNamesTable = dropMechanicNamesTable or {}
-                    dropMechanicNamesTable[dropMechanic] = setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
-                end
-            end
-        end
-    end
-    setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
-    --itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
-    if isNonEsoSetId == true then
-        itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
+
+    local returnTableRef
+    local dropMechanicNamesTable, dropMechanicDropLocationNamesTable = getDropMechanicAndDropLocationNames(setId, langToUse, setInfoTable)
+
+    if onlyOneLanguage or noItemIds then
+        setInfoTableCopy = ZO_ShallowTableCopy(setInfoTable)
+        setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
+        setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
+        returnTableRef = setInfoTableCopy
     else
-        itemIds = decompressSetIdItemIds(setId)
+        setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
+        setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
+        returnTableRef = setInfoTable
     end
-    setNames = preloaded[preloadedSetNamesTableKey][setId]
-    if itemIds then setInfoTable[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
-    if setNames then setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames end
-    local isCurrentDLC = (DLC_ITERATION_END and setInfoTable["dlcId"] and setInfoTable["dlcId"] >= DLC_ITERATION_END) or false
-    setInfoTable.isCurrentDLC = isCurrentDLC
-    return setInfoTable
+
+    if not noItemIds then
+        if isNonEsoSetId == true then
+            itemIds = preloaded[preloadedSetItemIdsTableKey][setId]
+        else
+            itemIds = decompressSetIdItemIds(setId)
+        end
+        if itemIds then returnTableRef[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
+    else
+        returnTableRef[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+    end
+    if onlyOneLanguage then
+        local setNameInLang = preloaded[preloadedSetNamesTableKey][setId][langToUse]
+        if setNameInLang ~= nil then
+            setNames = {
+                [langToUse] = setNameInLang
+            }
+        end
+    else
+        setNames = preloaded[preloadedSetNamesTableKey][setId]
+    end
+    if setNames then returnTableRef[LIBSETS_TABLEKEY_SETNAMES] = setNames end
+    local isCurrentDLC = (DLC_ITERATION_END and returnTableRef["dlcId"] and returnTableRef["dlcId"] >= DLC_ITERATION_END) or false
+    returnTableRef.isCurrentDLC = isCurrentDLC
+
+--[[
+lib._setInfo = {
+    setId = setId,
+    setInfoTable = setInfoTable,
+    dropMechanicNamesTable = dropMechanicNamesTable,
+    dropMechanicDropLocationNamesTable = dropMechanicDropLocationNamesTable,
+    returnTableRef = returnTableRef,
+}
+]]
+    return returnTableRef
 end
 
 --Returns the possible armor types's of a set
@@ -1650,7 +1943,7 @@ function lib.GetSetArmorTypes(setId)
     if not setItemIds then return false end
     --Build an itemLink from the itemId
     for itemId, _ in pairs(setItemIds) do
-        local itemLink = lib.buildItemLink(itemId)
+        local itemLink = buildItemLink(itemId)
         if itemLink then
             --Scan each itemId and get the armor type.
             local armorTypeOfSetItem = GetItemLinkArmorType(itemLink)
@@ -1679,7 +1972,7 @@ end
 --> Returns:    number armorTypeOfSetItem: The armorType (https://wiki.esoui.com/Globals#ArmorType) of the setItem
 function lib.GetItemsArmorType(itemId)
     --Build an itemLink from the itemId
-    local itemLink = lib.buildItemLink(itemId)
+    local itemLink = buildItemLink(itemId)
     if itemLink then
         --Scan each itemId and get the armor type.
         local armorTypeOfSetItem = GetItemLinkArmorType(itemLink)
@@ -1703,7 +1996,7 @@ function lib.GetSetWeaponTypes(setId)
     if not setItemIds then return false end
     --Build an itemLink from the itemId
     for itemId, _ in pairs(setItemIds) do
-        local itemLink = lib.buildItemLink(itemId)
+        local itemLink = buildItemLink(itemId)
         if itemLink then
             --Scan each itemId and get the weapon type.
             local weaponTypeOfSetItem = GetItemLinkWeaponType(itemLink)
@@ -1732,7 +2025,7 @@ end
 --> Returns:    number weaponTypeOfSetItem: The weaponType (https://wiki.esoui.com/Globals#WeaponType) of the setItem
 function lib.GetItemsWeaponType(itemId)
     --Build an itemLink from the itemId
-    local itemLink = lib.buildItemLink(itemId)
+    local itemLink = buildItemLink(itemId)
     if itemLink then
         --Scan each itemId and get the weapon type.
         local weaponTypeOfSetItem = GetItemLinkWeaponType(itemLink)
@@ -1821,6 +2114,33 @@ function lib.GetSetEquipTypes(setId)
 end
 
 
+--Returns the id number of the set nameprovided
+--> Parameters: setName String: The set's name
+--> lang String: The language to check for. Can be left empty and the client language will be used then
+--> Returns:  NILABLE number setId, NILABLE table setNames
+function lib.GetSetByName(setName, lang)
+    lang = lang or clientLang
+    lang = strlower(lang)
+    if not supportedLanguages[lang] then return end
+    if not checkIfSetsAreLoadedProperly() then return end
+    local setNamesNonESO = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+    local setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
+    for setId, namesOfSets in pairs(setNames) do
+        local setNameInLanguageToSearch = namesOfSets[lang]
+        if setNameInLanguageToSearch ~= nil and setNameInLanguageToSearch == setName then
+            return setId, namesOfSets
+        end
+    end
+    for setId, namesOfSetsNonESO in pairs(setNamesNonESO) do
+        local setNameNonESOInLanguageToSearch = namesOfSetsNonESO[lang]
+        if setNameNonESOInLanguageToSearch ~= nil and setNameNonESOInLanguageToSearch == setName then
+            return setId, namesOfSetsNonESO
+        end
+    end
+    return nil
+end
+
+
 ------------------------------------------------------------------------
 -- 	Global set misc. functions
 ------------------------------------------------------------------------
@@ -1830,13 +2150,13 @@ end
 -->             OPTIONAL factionIndex: The index of the faction (1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact)
 function lib.JumpToSetId(setId, factionIndex)
     if setId == nil or setInfo[setId] == nil or setInfo[setId][LIBSETS_TABLEKEY_WAYSHRINES] == nil then return false end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     --Then use the faction Id 1 (AD), 2 (DC) to 3 (EP)
     factionIndex = factionIndex or 1
     if factionIndex < 1 or factionIndex > 3 then factionIndex = 1 end
     local jumpToNode = -1
     local setWayshrines
-    if lib.IsNoESOSet(setId) then
+    if isNoESOSet(setId) then
         setWayshrines = setInfo[setId][LIBSETS_TABLEKEY_WAYSHRINES]
     else
         setWayshrines = noSetIdSets[setId][LIBSETS_TABLEKEY_WAYSHRINES]
@@ -1845,8 +2165,8 @@ function lib.JumpToSetId(setId, factionIndex)
     jumpToNode = setWayshrines[factionIndex]
     --Jump now?
     if jumpToNode and jumpToNode > 0 then
-    FastTravelToNode(jumpToNode)
-    return true
+        FastTravelToNode(jumpToNode)
+        return true
     end
     return false
 end
@@ -1868,13 +2188,13 @@ end
 --> Returns:    name undauntedChestName
 function lib.GetUndauntedChestName(undauntedChestId, lang)
     if undauntedChestId < 1 or undauntedChestId > lib.countUndauntedChests then return end
-    lang = lang or lib.clientLang
-    lang = string.lower(lang)
-    if not lib.supportedLanguages[lang] then return end
-    if not lib.undauntedChestIds or not lib.undauntedChestIds[lang] or not lib.undauntedChestIds[lang][undauntedChestId] then return end
-    local undauntedChestNameLang = lib.undauntedChestIds[lang]
+    lang = lang or clientLang
+    lang = strlower(lang)
+    if not supportedLanguages[lang] then return end
+    if not undauntedChestIds or not undauntedChestIds[lang] or not undauntedChestIds[lang][undauntedChestId] then return end
+    local undauntedChestNameLang = undauntedChestIds[lang]
     --Fallback language "EN"
-    if not undauntedChestNameLang then undauntedChestNameLang = lib.undauntedChestIds["en"] end
+    if not undauntedChestNameLang then undauntedChestNameLang = undauntedChestIds["en"] end
     return undauntedChestNameLang[undauntedChestId]
 end
 
@@ -1884,13 +2204,13 @@ end
 --> Returns:    name zoneName
 function lib.GetZoneName(zoneId, lang)
     if not zoneId then return end
-    lang = lang or lib.clientLang
-    lang = string.lower(lang)
+    lang = lang or clientLang
+    lang = strlower(lang)
     local zoneName = ""
-    if lib.libZone ~= nil then
-        zoneName = lib.libZone:GetZoneName(zoneId, lang)
+    if libZone ~= nil then
+        zoneName = libZone:GetZoneName(zoneId, lang)
     else
-        zoneName = ZO_CachedStrFormat("<<C:1>>", GetZoneNameById(zoneId) )
+        zoneName = zocstrfor("<<C:1>>", gznbid(zoneId) )
     end
     return zoneName
 end
@@ -1927,12 +2247,19 @@ end
 ------------------------------------------------------------------------
 -- 	Item set collections functions
 ------------------------------------------------------------------------
---Local helper function to open the categoryData of a categoryId in the item set collections book UI
-local function openItemSetCollectionBookOfZoneCategoryData(categoryId)
-    local itemSetCollectionCategoryDataOfParentZone = lib.GetItemSetCollectionCategoryData(categoryId)
-    if not itemSetCollectionCategoryDataOfParentZone then return end
-    local retVar = lib.OpenItemSetCollectionBookOfCategoryData(itemSetCollectionCategoryDataOfParentZone)
-    return retVar
+
+--Returns string itemSetCollectionKey "setId:itemSetCollectionSlotId" of the itemLink
+--identifying a set item by setId and the equipment slot (e.g. hands, chest, ...) which potentially could have different
+--itemIds
+function lib.GetItemSetCollectionsSlotKey(itemLink)
+    if not itemLink then return nil end
+    local setId = select(6, gilsi(itemLink))
+    if not setId or setId <= 0 then
+        return
+    end
+    local itemSetCollectionSlot = giliscs(itemLink)
+    if not itemSetCollectionSlot or itemSetCollectionSlot == "" then return end
+    return strfor("%d:%s", setId, id64tos(itemSetCollectionSlot))
 end
 
 
@@ -1940,44 +2267,55 @@ end
 --+ the current zone's index and parent zone index
 --> Returns: number currentZoneId, number currentZoneParentId, number currentZoneIndex, number currentZoneParentIndex
 function lib.GetCurrentZoneIds()
-    local currentZoneIndex = GetCurrentMapZoneIndex()
-    local currentZoneId = GetZoneId(currentZoneIndex)
-    local currentZoneParentId = GetParentZoneId(currentZoneId)
-    local currentZoneParentIndex = GetZoneIndex(currentZoneParentId)
+    local currentZoneIndex = gcmzidx()
+    local currentZoneId = gzid(currentZoneIndex)
+    local currentZoneParentId = gpzid(currentZoneId)
+    local currentZoneParentIndex = gzidx(currentZoneParentId)
     return currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex
 end
+local getCurrentZoneIds = lib.GetCurrentZoneIds
 
+
+--Returns the complete mapping table between set item collecitons parentCategory, category and zoneIds
+--> See file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
+local preloadedSetItemCollectionMappingToZoneCopy
+function lib.GetItemSetCollectionToZoneIds()
+    preloadedSetItemCollectionMappingToZoneCopy = preloadedSetItemCollectionMappingToZoneCopy or ZO_ShallowTableCopy(preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING])
+    return preloadedSetItemCollectionMappingToZoneCopy
+end
 
 --Returns the zoneIds (table) which are linked to a item set collection's categoryId
 --Not all categories are connected to a zone though! The result will be nil in these cases.
 --Example return table: {148}
 function lib.GetItemSetCollectionZoneIds(categoryId)
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     if categoryId == nil then return end
     if lib.setItemCollectionCategory2ZoneId[categoryId] then
         return lib.setItemCollectionCategory2ZoneId[categoryId]
     end
     return
 end
+local getItemSetCollectionZoneIds = lib.GetItemSetCollectionZoneIds
 
 --Returns the categoryIds (table) which are linked to a item set collection's zoneId
 --Not all zoneIds are connected to a category though! The result will be nil in these cases.
 --Example return table: {39}
 function lib.GetItemSetCollectionCategoryIds(zoneId)
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     if zoneId == nil then return end
     if lib.setItemCollectionZoneId2Category[zoneId] then
         return lib.setItemCollectionZoneId2Category[zoneId]
     end
     return
 end
+local getItemSetCollectionCategoryIds = lib.GetItemSetCollectionCategoryIds
 
 --Returns the parent category data (table) containing the zoneIds, and possible boolean parameters
 --isDungeon, isArena, isTrial of ALL categoryIds below this parent -> See file LibSets_data_all.lua ->
 --table lib.setDataPreloaded -> table key LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
 --Example return table: { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
 function lib.GetItemSetCollectionParentCategoryData(parentCategoryId)
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     if parentCategoryId == nil then return end
     local parentCategorySubCategories = lib.setItemCollectionParentCategories[parentCategoryId]
     if parentCategorySubCategories then
@@ -1991,19 +2329,63 @@ end
 --table key LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
 --Example return table: { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
 function lib.GetItemSetCollectionCategoryData(categoryId)
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     if categoryId == nil then return end
     if lib.setItemCollectionCategories[categoryId] then
         return lib.setItemCollectionCategories[categoryId]
     end
     return
 end
+local getItemSetCollectionCategoryData = lib.GetItemSetCollectionCategoryData
+
+
+local function getItemSetCollectionUnlockedAndTotal(zoneId)
+    local sumNumUnlocked = 0
+    local sumNumTotal = 0
+    local categoryIds = getItemSetCollectionCategoryIds(zoneId)
+    for _, categoryId in ipairs(categoryIds) do
+        local categoryData = ISCDM:GetItemSetCollectionCategoryData(categoryId)
+        local numUnlocked, numTotal = categoryData:GetNumUnlockedAndTotalPieces()
+        sumNumUnlocked = sumNumUnlocked + numUnlocked
+        sumNumTotal = sumNumTotal + numTotal
+    end
+    return sumNumUnlocked, sumNumTotal
+end
+
+
+--Get the number of unlocked and total itemSetCollection pieces in a categoryId (categoryId needs to be the categoryId of
+--the Item Set Collections UI, see mapping table at file LibSets_Data_All.lua ->
+--number categoryId The zone's categoryId
+--returns number sumNumUnlocked, number sumNumTotal
+function lib.GetNumItemSetCollectionCategoryUnlockedPieces(categoryId)
+    if not categoryId then return nil, nil end
+    local zoneIdsOfCategory = getItemSetCollectionZoneIds(categoryId)
+    local sumNumUnlocked, sumNumTotal
+    for _, zoneId in ipairs(zoneIdsOfCategory) do
+        local numUnlockedOfZone, numTotalOfZone = getItemSetCollectionUnlockedAndTotal(zoneId)
+        sumNumUnlocked = sumNumUnlocked + numUnlockedOfZone
+        sumNumTotal = sumNumTotal + numTotalOfZone
+    end
+    return sumNumUnlocked, sumNumTotal
+end
+
+
+--Get the number of unlocked and total itemSetCollection pieces in a zoneId
+--number zoneId The zone's ID
+--returns number sumNumUnlocked, number sumNumTotal
+function lib.GetNumItemSetCollectionZoneUnlockedPieces(zoneId)
+    if not zoneId or zoneId == 0 then return nil, nil end
+    return getItemSetCollectionUnlockedAndTotal(zoneId)
+end
+
 
 --Open a node in the item set collections book for teh given category data table
 -->the table categoryData must be determined via lib.GetItemSetCollectionCategoryData before
 -->categoryData.parentId must be given and > 0! categoryData.category can be nil or <= 0, then the parentId will be shown
+local openItemSetCollectionBookOfCategoryData
 function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
+    openItemSetCollectionBookOfCategoryData = openItemSetCollectionBookOfCategoryData or lib.OpenItemSetCollectionBookOfCategoryData
     if not categoryData or type(categoryData) ~= "table"
             or categoryData.parentCategory == nil or categoryData.parentCategory <= 0 then
         return
@@ -2030,7 +2412,7 @@ function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
     --Nothing found? Try again after 250ms
     if not parentCategories then
         zo_callLater(function()
-            return lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
+            return openItemSetCollectionBookOfCategoryData(categoryData)
         end, 250)
         return
     end
@@ -2065,33 +2447,20 @@ function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
     categoryTree:SelectNode(nodeToOpen)
     return (categoryTree.selectedNode == nodeToOpen) or false
 end
+openItemSetCollectionBookOfCategoryData = lib.OpenItemSetCollectionBookOfCategoryData
 
---Open the item set collections book of the current parentZoneId. If more than 1 categoryId was found for the parentZoneId,
---the 1st will be opened!
-function lib.OpenItemSetCollectionBookOfCurrentParentZone()
-    local _, currentParentZone, _, _ = lib.GetCurrentZoneIds()
-    if not currentParentZone or currentParentZone <= 0 then return end
-    local categoryIdsOfParentZone = lib.GetItemSetCollectionCategoryIds(currentParentZone)
-    if not categoryIdsOfParentZone then return end
-    if #categoryIdsOfParentZone == 1 then
-        return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfParentZone[1])
-    else
-        for _, categoryId in ipairs(categoryIdsOfParentZone) do
-            if openItemSetCollectionBookOfZoneCategoryData(categoryId) then
-                return true
-            end
-        end
-        return false
-    end
+
+--Local helper function to open the categoryData of a categoryId in the item set collections book UI
+local function openItemSetCollectionBookOfZoneCategoryData(categoryId)
+    local itemSetCollectionCategoryDataOfParentZone = getItemSetCollectionCategoryData(categoryId)
+    if not itemSetCollectionCategoryDataOfParentZone then return end
+    local retVar = openItemSetCollectionBookOfCategoryData(itemSetCollectionCategoryDataOfParentZone)
+    return retVar
 end
 
---Open the item set collections book of the current zoneId. If more than 1 categoryId was found for the zoneId,
---the 1st will be opened!
-function lib.OpenItemSetCollectionBookOfCurrentZone()
-    local currentZone, _, _, _ = lib.GetCurrentZoneIds()
-    if not currentZone or currentZone <= 0 then return end
-    local categoryIdsOfZone = lib.GetItemSetCollectionCategoryIds(currentZone)
-    if not categoryIdsOfZone then return end
+local function openItemSetCollectionsBookOfZoneId(zoneId)
+    local categoryIdsOfZone = getItemSetCollectionCategoryIds(zoneId)
+    if not categoryIdsOfZone then return false end
     if #categoryIdsOfZone == 1 then
         return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfZone[1])
     else
@@ -2102,6 +2471,30 @@ function lib.OpenItemSetCollectionBookOfCurrentZone()
         end
         return false
     end
+end
+
+--Open the item set collections book of the current parentZoneId. If more than 1 categoryId was found for the parentZoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfCurrentParentZone()
+    local _, currentParentZone, _, _ = getCurrentZoneIds()
+    if not currentParentZone or currentParentZone <= 0 then return end
+    return openItemSetCollectionsBookOfZoneId(currentParentZone)
+end
+
+--Open the item set collections book of the current zoneId. If more than 1 categoryId was found for the zoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfCurrentZone()
+    local currentZone, _, _, _ = getCurrentZoneIds()
+    if not currentZone or currentZone <= 0 then return end
+    return openItemSetCollectionsBookOfZoneId(currentParentZone)
+end
+
+
+--Open the item set collections book of the zoneId. If more than 1 categoryId was found for the zoneId,
+--the 1st will be opened!
+function lib.OpenItemSetCollectionBookOfZone(zoneId)
+    if not zoneId or zoneId <= 0 then return end
+    return openItemSetCollectionsBookOfZoneId(zoneId)
 end
 
 
@@ -2166,16 +2559,17 @@ end
 --> Returns:    boolean isSetWithProcAllowedInPvP
 function lib.IsSetWithProcAllowedInPvP(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
-    local isSetWithProcAllowedInPvP = ( preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP] ~= nil and preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP][setId] ~= nil ) or false
+    if not checkIfSetsAreLoadedProperly() then return end
+    local isSetWithProcAllowedInPvP = ( preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP] ~= nil
+            and preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP][setId] ~= nil ) or false
     return isSetWithProcAllowedInPvP
 end
 
 --Returns the setsData of all the setIds which are allowed proc sets in PvP/AvA campaigns
 --> Parameters: none
 --> Returns:    nilable:LibSetsAllSetProcDataAllowedInPvP table
-function lib.GetAllSetDataWihtProcAllowedInPvP()
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+function lib.GetAllSetDataWithProcAllowedInPvP()
+    if not checkIfSetsAreLoadedProperly() then return end
     return preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP]
 end
 
@@ -2186,7 +2580,7 @@ end
 --> Returns:    boolean isSetWithProc
 function lib.IsSetWithProc(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local isSetWithProc = ( preloaded[LIBSETS_TABLEKEY_SET_PROCS] ~= nil and preloaded[LIBSETS_TABLEKEY_SET_PROCS][setId] ~= nil ) or false
     return isSetWithProc
 end
@@ -2196,7 +2590,7 @@ end
 --> Parameters: none
 --> Returns:    nilable:LibSetsAllSetProcData table
 function lib.GetAllSetProcData()
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return preloaded[LIBSETS_TABLEKEY_SET_PROCS]
 end
 
@@ -2239,7 +2633,7 @@ end
 ]]
 function lib.GetSetProcData(setId)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     return getSetProcData(setId)
 end
 
@@ -2252,7 +2646,7 @@ end
 --> Returns:    nilable:LibSetsSetProcDataAbilityIds table {[index1] = abilityId1, [index2] = abilityId2}
 function lib.GetSetProcAbilityIds(setId, setProcCheckType, procIndex)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local dataTableKey = "abilityIds"
     local setProcDataAbilityIds = getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKey)
     return setProcDataAbilityIds
@@ -2267,7 +2661,7 @@ end
 --> Returns:    nilable:LibSetsSetProcDataDebuffIds table {[index1] = debuffId1, [index2] = debuffId2}
 function lib.GetSetProcDebuffIds(setId, setProcCheckType, procIndex)
     if setId == nil then return end
-    if not lib.checkIfSetsAreLoadedProperly() then return end
+    if not checkIfSetsAreLoadedProperly() then return end
     local dataTableKey = "debuffIds"
     local setProcDataDebuffIds = getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKey)
     return setProcDataDebuffIds
@@ -2313,7 +2707,7 @@ local supportedSetprocEventIds = {
 local function buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityId)
     local uniqueAddonNamespaceEventName = addOnEventNamespace
     if abilityId ~= nil then
-        uniqueAddonNamespaceEventName = uniqueAddonNamespaceEventName .. "_" .. tostring(abilityId)
+        uniqueAddonNamespaceEventName = uniqueAddonNamespaceEventName .. "_" .. tos(abilityId)
     end
     return uniqueAddonNamespaceEventName
 end
@@ -2477,6 +2871,7 @@ function lib.UnRegisterSetProcEventCallbackForSetId(addOnEventNamespace, eventId
     return nil
 end
 
+
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
@@ -2490,20 +2885,24 @@ function lib.AreSetsLoaded()
     local areSetsLoaded = (lib.setsLoaded and lib.setIds ~= nil) or false
     return areSetsLoaded
 end
+local areSetsLoaded = lib.AreSetsLoaded
 
 --Returns a boolean value, true if the sets of the game are currently scanned and added/updated/ false if not
 --> Returns:    boolean isCurrentlySetsScanning
 function lib.IsSetsScanning()
     return lib.setsScanning
 end
+local isSetsScanning = lib.IsSetsScanning
 
 --Returns a boolean value, true if the sets database is properly loaded yet and is not currently scanning
 --or false if not.
 --This functions combines the result values of the functions LibSets.AreSetsLoaded() and LibSets.IsSetsScanning()
 function lib.checkIfSetsAreLoadedProperly()
-    if lib.IsSetsScanning() or not lib.AreSetsLoaded() then return false end
+    checkIfSetsAreLoadedProperly = checkIfSetsAreLoadedProperly or lib.checkIfSetsAreLoadedProperly
+    if isSetsScanning() or not areSetsLoaded() then return false end
     return true
 end
+checkIfSetsAreLoadedProperly = checkIfSetsAreLoadedProperly or lib.checkIfSetsAreLoadedProperly
 
 
 --SLASH COMMANDS
@@ -2599,7 +2998,7 @@ local function onPlayerActivated(eventId, isFirst)
 
     if lib.debugGetAllDataIsRunning == true then
         --Continue to get all data until it is finished
-        d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - language now: " ..tostring(lib.clientLang))
+        d("[" .. lib.name .."]Resuming scan of \'DebugGetAllData\' after reloadui - language now: " ..tos(clientLang))
         lib.DebugGetAllData(false)
     end
 end
@@ -2614,14 +3013,9 @@ local function onLibraryLoaded(event, name)
 
     --Check for libraries
     -->LibZone
-    lib.libZone = LibZone
-
-    --The actual clients language
-    lib.clientLang = GetCVar("language.2")
-    lib.clientLang = string.lower(lib.clientLang)
-    if not lib.supportedLanguages[lib.clientLang] then
-        lib.clientLang = "en" --Fallback language if client language is not supported: English
-    end
+    libZone = LibZone
+    lib.libZone = libZone
+    lib.libAddonMenu = LibAddonMenu2
 
     --The actual API version
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
@@ -2633,12 +3027,12 @@ local function onLibraryLoaded(event, name)
 
     --Is the DebugGetAllData function running and reloadUI's are done? -> See EVENT_PLAYER_ACTIVATED then
     lib.debugGetAllDataIsRunning = false
-    if lib.svData and lib.svData.DebugGetAllData and lib.svData.DebugGetAllData[apiVersion] then
-        if lib.svData.DebugGetAllData[apiVersion].running == true and lib.svData.DebugGetAllData[apiVersion].finished == false then
+    if lib.svDebugData and lib.svDebugData.DebugGetAllData and lib.svDebugData.DebugGetAllData[apiVersion] then
+        if lib.svDebugData.DebugGetAllData[apiVersion].running == true and lib.svDebugData.DebugGetAllData[apiVersion].finished == false then
             lib.debugGetAllDataIsRunning = true
             goOn = false
             EM:RegisterForEvent(MAJOR, EVENT_PLAYER_ACTIVATED, onPlayerActivated)
-        elseif not lib.svData.DebugGetAllData[apiVersion].running or lib.svData.DebugGetAllData[apiVersion].finished == true then
+        elseif not lib.svDebugData.DebugGetAllData[apiVersion].running or lib.svDebugData.DebugGetAllData[apiVersion].finished == true then
             goOn = true
         end
     else
@@ -2659,12 +3053,31 @@ local function onLibraryLoaded(event, name)
         --own tables of the library, to be used from the LibSets API functions
         LoadSets()
 
+        --Tooltips
+        lib.loadTooltipHooks()
+
         --Slash commands
         createSlashCommands()
 
         --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
         --work properly now
         lib.fullyLoaded = true
+
+
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --For debugging only!
+        --[[
+        if GetDisplayName() == "@Baertram" then
+            function lib.testDropMechanic(setId, lang)
+                lib._dropMechanicIds, lib._dropMechanicNames, lib._dropMechanicTooltips, lib._dropMechanicLocationNames, lib._dropZoneIds = lib.GetDropMechanic(setId, true, lang)
+            end
+        end
+        ]]
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+        --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     end
 end
 
