@@ -2343,6 +2343,7 @@ local function getItemSetCollectionUnlockedAndTotal(zoneId)
     local sumNumUnlocked = 0
     local sumNumTotal = 0
     local categoryIds = getItemSetCollectionCategoryIds(zoneId)
+    if not categoryIds or type(categoryIds) ~= "table" then return nil, nil end
     for _, categoryId in ipairs(categoryIds) do
         local categoryData = ISCDM:GetItemSetCollectionCategoryData(categoryId)
         local numUnlocked, numTotal = categoryData:GetNumUnlockedAndTotalPieces()
@@ -2351,7 +2352,6 @@ local function getItemSetCollectionUnlockedAndTotal(zoneId)
     end
     return sumNumUnlocked, sumNumTotal
 end
-
 
 --Get the number of unlocked and total itemSetCollection pieces in a categoryId (categoryId needs to be the categoryId of
 --the Item Set Collections UI, see mapping table at file LibSets_Data_All.lua ->
@@ -2460,7 +2460,7 @@ end
 
 local function openItemSetCollectionsBookOfZoneId(zoneId)
     local categoryIdsOfZone = getItemSetCollectionCategoryIds(zoneId)
-    if not categoryIdsOfZone then return false end
+    if not categoryIdsOfZone or type(categoryIdsOfZone) ~= "table" then return false end
     if #categoryIdsOfZone == 1 then
         return openItemSetCollectionBookOfZoneCategoryData(categoryIdsOfZone[1])
     else
