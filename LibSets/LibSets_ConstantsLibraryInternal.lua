@@ -348,16 +348,16 @@ local setTypesToName = {
     },
     [LIBSETS_SETTYPE_TRIAL]                         = {
         ["de"] = "Prüfungen", --SI_LFGACTIVITY4
-        ["en"] = "Ensayo",
-        ["es"] = "Arena",
+        ["en"] = "Trial",
+        ["es"] = "Ensayo",
         ["fr"] = "Épreuves",
         ["jp"] = "試練",
         ["ru"] = "Испытание",
     },
     [LIBSETS_SETTYPE_MYTHIC]                        = {
         ["de"] = "Mythisch",
-        ["en"] = "Mítico",
-        ["es"] = "Arena",
+        ["en"] = "Mythic",
+        ["es"] = "Mítico",
         ["fr"] = "Mythique",
         ["jp"] = "神話上の",
         ["ru"] = "мифический",
