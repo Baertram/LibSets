@@ -856,7 +856,8 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=37, zoneIds={1133}},--Southern Elsweyr
         { parentCategory=4, category=38, zoneIds={1160}},--Western Skyrim
         { parentCategory=4, category=89, zoneIds={1207}},--The Reach
-        { parentCategory=4, category=97, zoneIds={1286}},--The Deadlands
+        { parentCategory=4, category=93, zoneIds={1261}},--Blackwood
+        { parentCategory=4, category=97, zoneIds={1272}},--The Deadlands
         --Dungeons
         { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
         { parentCategory=5, category=40, zoneIds={380,935}, isDungeon=true},--The Banished Cells I
