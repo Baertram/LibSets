@@ -45,21 +45,7 @@ local zoneIdsOfNewAPIVersionOnly
 --}
 setsOfNewerAPIVersion = {
     --setIds not yet on live server - BEGIN
-    --- Sets of ApiVersion 101033: Ascending Tides
-    619,
-    620,
-    621,
-    622,
-    623,
-    624,
-    629,
-    630,
-    631,
-    632,
-    633,
-    634,
-    635,
-    636,
+    --- Sets of ApiVersion 10103x: xxxxxxx
     --setIds not yet on live server - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
@@ -72,7 +58,7 @@ lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
 --}
 zoneIdsOfNewAPIVersionOnly = {
     --zoneIds not yet on live server - BEGIN
-    --xxx API1xxxxx
+    --xxx API10103x
     --zoneIds not yet on live server - END
 }
 lib.zoneIdsOfNewAPIVersionOnly = zoneIdsOfNewAPIVersionOnly
@@ -123,6 +109,7 @@ lib.setInfo = {
     ------------------------------------------------------------------------------------------------------------------------
     ---Active sets------------------------------------------------------------------------------------------------------
     --[SetId] = {table with setData}, -- SetName EN / SetName DE [Drop zone name 1 EN, Drop zone name 2 EN, Drop zone name 3 EN, ...]
+
 [19] = {wayshrines={185,185,185,}, dlcId=DLC_BASE_GAME	, zoneIds={31,382,382}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS,LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS}	}, --Vestments of the Warlock / Gewänder des Hexers   [Selene's Web, Reaper's March, Reaper's March]
 [20] = {wayshrines={109,109,109,}, dlcId=DLC_BASE_GAME	, zoneIds={103,103,103,103}, veteran=false	, setType=LIBSETS_SETTYPE_OVERLAND	, dropMechanic={LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST}	}, --Witchman Armor / Hexenwerk   [The Rift, The Rift, The Rift, The Rift]
 [21] = {wayshrines={93,93,93,}, dlcId=DLC_BASE_GAME	, zoneIds={101,101,101,101}, veteran=false	, setType=LIBSETS_SETTYPE_OVERLAND	, isProcSetAllowedInPvP=1, dropMechanic={LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST}	}, --Akaviri Dragonguard / Akavirische Drachengarde   [Eastmarch, Eastmarch, Eastmarch, Eastmarch]
@@ -290,7 +277,7 @@ lib.setInfo = {
 [198] = {wayshrines={247,247,247,}, dlcId=DLC_IMPERIAL_CITY	, zoneIds={688,584}, veteran=false	, setType=LIBSETS_SETTYPE_DUNGEON	, dropMechanic={LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS,LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS}	}, --Essence Thief / Essenzdieb   [White-Gold Tower, Imperial City]
 [199] = {wayshrines={-1,-1,-1,}, dlcId=DLC_IMPERIAL_CITY	, zoneIds={643}, veteran=false	, setType=LIBSETS_SETTYPE_IMPERIALCITY	, isProcSetAllowedInPvP=1, dropMechanic={LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT}	}, --Shield Breaker / Schildbrecher   [Imperial Sewers]
 [200] = {wayshrines={-1,-1,-1,}, dlcId=DLC_IMPERIAL_CITY	, zoneIds={643}, veteran=false	, setType=LIBSETS_SETTYPE_IMPERIALCITY	, dropMechanic={LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT}	}, --Phoenix / Phönix   [Imperial Sewers]
-[201] = {wayshrines={-1,-1,-1,}, dlcId=DLC_IMPERIAL_CITY	, zoneIds={643}, veteran=false	, setType=LIBSETS_SETTYPE_IMPERIALCITY	, dropMechanic={LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT}	}, --Reactive Armor / Reaktive Rüstung   [Imperial Sewers]
+[201] = {wayshrines={-1,-1,-1,}, dlcId=DLC_IMPERIAL_CITY	, zoneIds={643}, veteran=false	, setType=LIBSETS_SETTYPE_IMPERIALCITY	, dropMechanic={LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT,LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD}, dropMechanicDropLocationNames={['en']={'','Daily random dungeon reward mail','','','','',},['de']={'','Tägliches Zufallsverlies Belohnungsemail','','','','',},}	}, --Reactive Armor / Reaktive Rüstung   [Imperial Sewers]
 [204] = {wayshrines={-1,-1,-1,}, dlcId=DLC_BASE_GAME	, zoneIds={584}, veteran=false	, setType=LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD	, isProcSetAllowedInPvP=1, dropMechanic={LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS,LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD}, dropMechanicDropLocationNames={['en']={'','By mail','','','','',},['de']={'','Durch Nachricht','','','','',},}	}, --Endurance / Beständigkeit   [Imperial City]
 [205] = {wayshrines={-1,-1,-1,}, dlcId=DLC_BASE_GAME	, zoneIds={584}, veteran=false	, setType=LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD	, isProcSetAllowedInPvP=1, dropMechanic={LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS,LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD}, dropMechanicDropLocationNames={['en']={'','By mail','','','','',},['de']={'','Durch Nachricht','','','','',},}	}, --Willpower / Willenskraft   [Imperial City]
 [206] = {wayshrines={-1,-1,-1,}, dlcId=DLC_BASE_GAME	, zoneIds={584}, veteran=false	, setType=LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD	, isProcSetAllowedInPvP=1, dropMechanic={LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS,LIBSETS_DROP_MECHANIC_CRAFTED}, dropMechanicDropLocationNames={['en']={'','By mail','','','','',},['de']={'','Durch Nachricht','','','','',},}	}, --Agility / Agilität   [Imperial City]
@@ -450,12 +437,12 @@ lib.setInfo = {
 [374] = {wayshrines={249,249,249,}, dlcId=DLC_ORSINIUM	, zoneIds={677,684,684}, veteran=false	, setType=LIBSETS_SETTYPE_ARENA	, dropMechanic={LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST,LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST}, dropMechanicDropLocationNames={['en']={'','Arena stage chest','','','','',},['de']={'','Arena-Phasen Schatztruhe','','','','',},}	}, --Precise Regeneration / Präzise Regeneration   [Maelstrom Arena, Wrothgar, Wrothgar]
 [380] = {wayshrines={-1,-1,-1,}, dlcId=DLC_BASE_GAME	, veteran=false	, setType=LIBSETS_SETTYPE_SPECIAL	, dropMechanic={LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD}	}, --Prophet\'s / Prophet   [!Level up advisor]
 [381] = {wayshrines={-1,-1,-1,}, dlcId=DLC_BASE_GAME	, veteran=false	, setType=LIBSETS_SETTYPE_SPECIAL	, dropMechanic={LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD}	}, --Broken Soul / Zerbrochene Seele   [!Level up advisor]
-[382] = {wayshrines={355,355,355,}, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_OVERLAND	, dropMechanic={LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST}	}, --Grace of Gloom / Anmut der Gräue   [Summerset, Summerset, Summerset, Summerset]
-[383] = {wayshrines={355,355,355,}, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_OVERLAND	, dropMechanic={LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST}	}, --Gryphon\'s Ferocity / Wildheit des Greifen   [Summerset, Summerset, Summerset, Summerset]
-[384] = {wayshrines={355,355,355,}, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_OVERLAND	, dropMechanic={LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST}	}, --Wisdom of Vanus / Weisheit von Vanus   [Summerset, Summerset, Summerset, Summerset]
-[385] = {wayshrines={359,359,359,}, traitsNeeded=3, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_CRAFTED	, dropMechanic={LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED}	}, --Adept Rider / Versierter Reiter   [Summerset, Summerset, Summerset]
-[386] = {wayshrines={360,360,360,}, traitsNeeded=6, dlcId=DLC_SUMMERSET	, zoneIds={1027,1027,1027}, veteran=false	, setType=LIBSETS_SETTYPE_CRAFTED	, dropMechanic={LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED}	}, --Sload\'s Semblance / Kreckenantlitz   [Artaeum, Artaeum, Artaeum]
-[387] = {wayshrines={354,354,354,}, traitsNeeded=9, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_CRAFTED	, dropMechanic={LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED}	}, --Nocturnal\'s Favor / Nocturnals Gunst   [Summerset, Summerset, Summerset]
+[382] = {wayshrines={355,355,355,}, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011,1011,1027,1027}, veteran=false	, setType=LIBSETS_SETTYPE_OVERLAND	, dropMechanic={LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST}	}, --Grace of Gloom / Anmut der Gräue   [Summerset, Summerset, Summerset, Summerset, Artaeum, Artaeum]
+[383] = {wayshrines={355,355,355,}, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011,1011,1027,1027}, veteran=false	, setType=LIBSETS_SETTYPE_OVERLAND	, dropMechanic={LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST}	}, --Gryphon\'s Ferocity / Wildheit des Greifen   [Summerset, Summerset, Summerset, Summerset, Artaeum, Artaeum]
+[384] = {wayshrines={355,355,355,}, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011,1011,1027,1027}, veteran=false	, setType=LIBSETS_SETTYPE_OVERLAND	, dropMechanic={LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_OVERLAND_CHEST}	}, --Wisdom of Vanus / Weisheit von Vanus   [Summerset, Summerset, Summerset, Summerset, Artaeum, Artaeum]
+[385] = {wayshrines={359,359,359,}, traitsNeeded=3, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_CRAFTED	, dropMechanic={LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED}	}, --Adept Rider / Versierter Reiter   [Summerset, Summerset, Summerset]
+[386] = {wayshrines={360,360,360,}, traitsNeeded=6, dlcId=DLC_SUMMERSET	, zoneIds={1027,1027,1027}, veteran=false	, setType=LIBSETS_SETTYPE_CRAFTED	, dropMechanic={LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED}	}, --Sload\'s Semblance / Kreckenantlitz   [Artaeum, Artaeum, Artaeum]
+[387] = {wayshrines={354,354,354,}, traitsNeeded=9, dlcId=DLC_SUMMERSET	, zoneIds={1011,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_CRAFTED	, dropMechanic={LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED,LIBSETS_DROP_MECHANIC_CRAFTED}	}, --Nocturnal\'s Favor / Nocturnals Gunst   [Summerset, Summerset, Summerset]
 [388] = {wayshrines={364,364,364,}, dlcId=DLC_SUMMERSET	, zoneIds={1051,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_TRIAL	, dropMechanic={LIBSETS_DROP_MECHANIC_TRIAL_BOSS}	}, --Aegis of Galenwe / Ägis von Galenwe   [Cloudrest, Summerset, Summerset]
 [389] = {wayshrines={364,364,364,}, dlcId=DLC_SUMMERSET	, zoneIds={1051,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_TRIAL	, dropMechanic={LIBSETS_DROP_MECHANIC_TRIAL_BOSS}	}, --Arms of Relequen / Waffen von Relequen   [Cloudrest, Summerset, Summerset]
 [390] = {wayshrines={364,364,364,}, dlcId=DLC_SUMMERSET	, zoneIds={1051,1011,1011}, veteran=false	, setType=LIBSETS_SETTYPE_TRIAL	, dropMechanic={LIBSETS_DROP_MECHANIC_TRIAL_BOSS}	}, --Mantle of Siroria / Mantel von Siroria   [Cloudrest, Summerset, Summerset]
@@ -675,11 +662,12 @@ lib.setInfo = {
 [629] = {wayshrines={-1,-1,-1,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={181}, veteran=false	, setType=LIBSETS_SETTYPE_CYRODIIL	, dropMechanic={LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY}	}, --Rallying Cry / Schlachtruf   [Cyrodiil]
 [630] = {wayshrines={-1,-1,-1,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={181}, veteran=false	, setType=LIBSETS_SETTYPE_CYRODIIL	, dropMechanic={LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY}	}, --Hew and Sunder  / Kappspalter   [Cyrodiil]
 [631] = {wayshrines={-1,-1,-1,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={181}, veteran=false	, setType=LIBSETS_SETTYPE_CYRODIIL	, dropMechanic={LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY}	}, --Enervating Aura  / Enervierende Aura   [Cyrodiil]
-[632] = {wayshrines={497,497,497,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={1301,1011,1011}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER, undauntedChestId=3	, dropMechanic={LIBSETS_DROP_MECHANIC_MONSTER_NAME}, dropMechanicDropLocationNames={['en']={'Varallion','','','','','',},['de']={'Varallion','','','','','',},}	}, --Kargaeda / Kargaeda   [Coral Aerie, Summerset, Summerset]
+[632] = {wayshrines={497,497,497,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={1301,1011,1011}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER, BD2=3	, dropMechanic={LIBSETS_DROP_MECHANIC_MONSTER_NAME}, dropMechanicDropLocationNames={['en']={'Varallion','','','','','',},['de']={'Varallion','','','','','',},}	}, --Kargaeda / Kargaeda   [Coral Aerie, Summerset, Summerset]
 [633] = {wayshrines={498,498,498,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={1302,20,20}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER, undauntedChestId=3	, dropMechanic={LIBSETS_DROP_MECHANIC_MONSTER_NAME}, dropMechanicDropLocationNames={['en']={'Nazaray ','','','','','',},['de']={'Nazaray ','','','','','',},}	}, --Nazaray  / Nazaray    [Shipwright's Regret, Rivenspire, Rivenspire]
 [634] = {wayshrines={-1,-1,-1,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={584,643}, veteran=false	, setType=LIBSETS_SETTYPE_IMPERIALCITY_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_MONSTER_NAME,LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT}, dropMechanicDropLocationNames={['en']={'Nunatak (Memorial district, north)','','','','','',},['de']={'Nunatak (Gedenkbezirk, Norden)','','','','','',},}	}, --Nunatak / Nunatak   [Imperial City, Imperial Sewers]
 [635] = {wayshrines={-1,-1,-1,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={584,643}, veteran=false	, setType=LIBSETS_SETTYPE_IMPERIALCITY_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_MONSTER_NAME,LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT}, dropMechanicDropLocationNames={['en']={'Fürstin Malygda (Aboretum, south-east)','','','','','',},['de']={'Lady Malydga (Arboretum, Süd-Osten)','','','','','',},}	}, --Lady Malydga / Fürstin Malygda   [Imperial City, Imperial Sewers]
 [636] = {wayshrines={-1,-1,-1,}, dlcId=DLC_ASCENDING_TIDE	, zoneIds={584,643}, veteran=false	, setType=LIBSETS_SETTYPE_IMPERIALCITY_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_MONSTER_NAME,LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT}, dropMechanicDropLocationNames={['en']={'Baron Thirsk Nobles district, south-west)','','','','','',},['de']={'Baron Thirsk (Adelsbezirk, Süd-Westen)','','','','','',},}	}, --Baron Thirsk / Baron Thirsk   [Imperial City, Imperial Sewers]
+
 }
 --lib.setInfo
 --**********************************************************************************************************************
