@@ -2486,7 +2486,7 @@ end
 function lib.OpenItemSetCollectionBookOfCurrentZone()
     local currentZone, _, _, _ = getCurrentZoneIds()
     if not currentZone or currentZone <= 0 then return end
-    return openItemSetCollectionsBookOfZoneId(currentParentZone)
+    return openItemSetCollectionsBookOfZoneId(currentZone)
 end
 
 

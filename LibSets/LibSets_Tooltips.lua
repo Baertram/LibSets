@@ -247,6 +247,7 @@ local function isTooltipOfSetItem(itemLink, tooltipData)
     return isSet, setId
 end
 
+
 local function getItemLinkFromControl(rowControl)
     local name
     local parentCtrl
@@ -254,11 +255,14 @@ local function getItemLinkFromControl(rowControl)
     local itemLink
 
     if rowControl.itemLink then return rowControl.itemLink end
-    if rowControl.itemlink then return rowControl.itemlink end
 
     if rowControl.GetParent then
         parentCtrl = rowControl:GetParent()
-        name = parentCtrl:GetName()
+        if parentCtrl ~= nil then
+            name = parentCtrl:GetName()
+        else
+            name = rowControl:GetName()
+        end
     else
         name = rowControl:GetName()
     end
@@ -271,11 +275,11 @@ local function getItemLinkFromControl(rowControl)
             if IIfAclicked ~= nil then
                 return gil(IIfAclicked.bagId, IIfAclicked.slotIndex)
             end
-        else
-            --Plain IIfA
-            if IIfACtrlNames[name:sub(1, 13)] then
-                return rowControl.itemLink
-            end
+        end
+
+        --Plain IIfA
+        if IIfACtrlNames[name:sub(1, 13)] then
+            return rowControl.itemLink
         end
     end
 
@@ -341,6 +345,9 @@ local function getItemLinkFromControl(rowControl)
             if rowControl.bagId and rowControl.slotIndex then
                 return gil(rowControl.bagId, rowControl.slotIndex)
             end
+        elseif (dataEntryData ~= nil and (dataEntryData.timeRemaining ~= nil and dataEntryData.timeRemaining > 0) and dataEntryData.itemLink ~= nil) then
+                --and name:sub(1, 44) == "ZO_TradingHouseItemPaneSearchResultsContents" or name:sub(1, 48) == "ZO_TradingHouseBrowseItemsRightPaneSearchResults" then
+		    return dataEntryData.itemLink
 
         --Other addons
         elseif MasterMerchant and rowControl.GetText and strfind(name, "MasterMerchant", 1, true) ~= nil then
@@ -360,6 +367,7 @@ local function getItemLinkFromControl(rowControl)
 
     return itemLink
 end
+
 
 local function getMouseoverLink()
 	local itemLink = getItemLinkFromControl(moc())
