@@ -829,13 +829,13 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=30, zoneIds={816}},--Hew's Bane
         { parentCategory=4, category=31, zoneIds={823}},--Gold Coast
         { parentCategory=4, category=32, zoneIds={849}},--Vvardenfell
-        { parentCategory=4, category=33, zoneIds={980}},--Clockwork City
+        { parentCategory=4, category=33, zoneIds={980,981}},--Clockwork City/Brass Fortress
         { parentCategory=4, category=34, zoneIds={1011,1027}},--Summerset/Artaeum
         { parentCategory=4, category=35, zoneIds={726}},--Murkmire
         { parentCategory=4, category=36, zoneIds={1086}},--Northern Elsweyr
         { parentCategory=4, category=37, zoneIds={1133}},--Southern Elsweyr
-        { parentCategory=4, category=38, zoneIds={1160}},--Western Skyrim
-        { parentCategory=4, category=89, zoneIds={1207}},--The Reach
+        { parentCategory=4, category=38, zoneIds={1160,1161}},--Western Skyrim/Blackreach: Greymoor Caverns
+        { parentCategory=4, category=89, zoneIds={1207,1208}},--The Reach/Blackreach: Arkthzand Cavern
         { parentCategory=4, category=93, zoneIds={1261}},--Blackwood
         { parentCategory=4, category=97, zoneIds={1286,1282,1283}},--The Deadlands/Fargrave/The Shambles
         --Dungeons
