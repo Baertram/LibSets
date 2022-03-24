@@ -46,7 +46,24 @@ local gil =         GetItemLink
 ------------------------------------------------------------------------------------------------------------------------
 --SetIds which are blacklisted for zone related tooltip text (as they got no zoneId where they drop)
 local blacklistedSetIdsForZoneTooltips = {
-    [360] = true, --Prophet's: No zone, drops by level up reward
+    --Battlegrounds
+    [326] = true, --Vanguard\'s Challenge	Battleground
+    [327] = true, --Coward\'s Gear	Battleground
+    [328] = true, --Knight Slayer	Battleground
+    [329] = true, --Wizard\'s Riposte	Battleground
+    [334] = true, --Impregnable Armor	Battleground
+    --Level up advisor
+    [380] = true, --Prophet's: No zone, drops by level up reward
+    [381] = true, --Broken Soul: No zone, drops by level up reward
+    --Special/test sets PTS
+    [483] = true, --Template_Drop_Magi
+	[484] = true, --Template_Drop_Stamina
+    [485] = true, --Template_Drop_Tank
+    [486] = true, --Template_Drop_Healer
+    [509] = true, --Template_Drop_Healer P
+    [510] = true, --Template_Drop_Tank P
+    [511] = true, --Template_Drop_Stamina P
+    [512] = true, --Template_Drop_Magi P
 }
 ------------------------------------------------------------------------------------------------------------------------
 
