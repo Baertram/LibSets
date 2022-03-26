@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.43
+local MAJOR, MINOR = "LibSets", 0.44
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -901,6 +901,7 @@ lib.localization                 = {
         dropZoneImperialSewers   = "Kanalisation der Kaiserstadt",
         droppedBy                = "Drop durch",
         setType                  = "Set Art",
+        reconstructionCosts      = "Rekonstruktions Kosten",
         neededTraits             = "Eigenschaften benötigt (Analyse)",
         dropMechanic             = "Drop Mechanik",
         undauntedChest           = undauntedStr .. " Truhe",
@@ -932,6 +933,7 @@ lib.localization                 = {
         dropZoneSpecial          = GetString(SI_HOTBARCATEGORY9),
         dropZoneMythic           = GetString(SI_ITEMDISPLAYQUALITY6),
         droppedBy                = "Dropped by",
+        reconstructionCosts      = "Reconstruction cost",
         setType                  = "Set type",
         neededTraits             = "Traits needed (research)",
         dropMechanic             = "Drop mechanics",

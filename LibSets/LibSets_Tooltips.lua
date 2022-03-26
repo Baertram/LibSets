@@ -41,7 +41,8 @@ local gsil =        GetStoreItemLink
 local gqril =       GetQuestRewardItemLink
 local glil =        GetLootItemLink
 local gil =         GetItemLink
-
+local isilscp =     IsItemLinkSetCollectionPiece
+local gircoc =      GetItemReconstructionCurrencyOptionCost
 
 ------------------------------------------------------------------------------------------------------------------------
 --SetIds which are blacklisted for zone related tooltip text (as they got no zoneId where they drop)
@@ -95,6 +96,7 @@ local imperialSewersStr =       localization.dropZoneImperialSewers
 local veteranDungeonIconStr =   zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
 --local bossStr =                 localization.boss
 --local setTypeStr =              localization.setType
+local reconstructionCostsStr =  localization.reconstructionCosts
 local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
 local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
@@ -156,6 +158,7 @@ local IIfACtrlNames = {
 
 --Variables
 local tooltipSV
+local addReconstructionCost
 local addDLC
 local addDropLocation
 local addDropMechanic
@@ -169,6 +172,7 @@ local lastTooltipItemLink
 
 local useCustomTooltip = false
 --local customTooltipPlaceholdersNeeded = {}
+local setReconstructionCostPlaceholder = false
 local setTypePlaceholder = false
 local dropMechanicPlaceholder = false
 local dropZonesPlaceholder = false
@@ -193,6 +197,7 @@ end
     <<6>>   Chapter/DLC name set was introduced with",
 ]]
 local function isCustomTooltipEnabled(value)
+    setReconstructionCostPlaceholder = false
     setTypePlaceholder = false
     dropMechanicPlaceholder = false
     dropZonesPlaceholder = false
@@ -212,9 +217,6 @@ local function isCustomTooltipEnabled(value)
                 if placeholder == "<<1>>" then
                     setTypePlaceholder = true
                     doAdd = true
-                elseif placeholder == "<<1>>" then
-                    setTypePlaceholder = true
-                    doAdd = true
                 elseif placeholder == "<<2>>" then
                     dropMechanicPlaceholder = true
                     doAdd = true
@@ -226,6 +228,7 @@ local function isCustomTooltipEnabled(value)
                     doAdd = true
                 elseif placeholder == "<<5>>" then
                     neededTraitsPlaceholder = true
+                    setReconstructionCostPlaceholder = true
                     doAdd = true
                 elseif placeholder == "<<6>>" then
                     dlcNamePlaceHolder = true
@@ -270,6 +273,14 @@ local function isTooltipOfSetItem(itemLink, tooltipData)
 -- @return hasSet bool, setName string, numBonuses integer, numNormalEquipped integer, maxEquipped integer, setId integer, numPerfectedEquipped integer
     local isSet, _, _, _, _, setId, _ = gilsetinf(itemLink, false)
     return isSet, setId
+end
+
+local function getSetReconstructionCost(itemLink, setId)
+    if not itemLink or not setId then return end
+    if isilscp(itemLink) == true then
+        return gircoc(setId, 5)
+    end
+    return
 end
 
 
@@ -846,6 +857,17 @@ local function buildSetDLCInfo(setData)
     return dlcName
 end
 
+local function buildReconstructionCostInfo(setData, itemLink)
+    local reconstructionCostsText
+    local setId = setData.setId
+    local reconstructionCost = getSetReconstructionCost(itemLink, setId)
+    if reconstructionCost ~= nil then
+        reconstructionCostsText = tos(reconstructionCost)
+        --todo Add transmute crystal currency texture?
+    end
+    return reconstructionCostsText
+end
+
 local function buildSetTypeInfo(setData)
     local setType = setData.setType
     if not setType then return end
@@ -945,6 +967,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     --      [2] = nil, --as it got no monster or other dropMechanicLocation name,
     --  },
     --}
+    local reconstructionCostText
     local setTypeText, setTypeTexture
     local setNeededTraitsText
     local setDropZoneStr
@@ -963,14 +986,24 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         dlcNamePlaceHolder =        placeholder == "<<6>>"
     ]]
 
+    --local setId = setData.setId
+    local setType = setData.setType
+
 --d(string.format("<<1>> %s, <<2>> %s, <<3>> %s, <<4>> %s, <<5>> %s, <<6>> %s",
 --        tos(setTypePlaceholder), tos(dropMechanicPlaceholder), tos(dropZonesPlaceholder), tos(bossNamePlaceholder), tos(neededTraitsPlaceholder), tos(dlcNamePlaceHolder)))
+    local isReconstructableSet = false
+    if (useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost) then
+        reconstructionCostText = buildReconstructionCostInfo(setData)
+        if reconstructionCostText ~= nil then
+            isReconstructableSet = true
+        end
+    end
 
     if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
 --d(">setTypeText: " ..tos(setTypeText))
     end
-    if (useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits) then
+    if not isReconstructableSet ((useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits)) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
 --d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
     end
@@ -1020,16 +1053,18 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     --Use custom defined string? -> Build output string for the tooltip, based on chosen LAM settings
     if useCustomTooltip == true then
         --Check which placeholder is used and pass in the texts
-        if not setTypePlaceholder then
+        if not isReconstructableSet or not setReconstructionCostPlaceholder then
+            reconstructionCostText = ""
+        elseif not setTypePlaceholder then
             setTypeText = ""
             setTypeTexture = ""
-            --d(">1")
+--d(">1")
         else
             if tooltipTextures == true and setTypeTexture ~= nil and setTypeTexture ~= "" then
-                setTypeText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
+        setTypeText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
             end
         end
-        if not neededTraitsPlaceholder then
+        if isReconstructableSet or not neededTraitsPlaceholder then
             setNeededTraitsText = ""
 --d(">2")
         end
@@ -1049,6 +1084,9 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
             setDropLocationsText = ""
 --d(">6")
         end
+        if isReconstructableSet and reconstructionCostText ~= nil and reconstructionCostText ~= "" then
+            setNeededTraitsText = reconstructionCostText
+        end
         --[[
         --Custom tooltip placeholders
             <<1>>   Set type
@@ -1065,7 +1103,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
                 setDropMechanicText,
                 setDropZoneStr,
                 setDropLocationsText,
-                setNeededTraitsText,
+                setNeededTraitsText, --or reconstructableSetCosts for non craftable sets!
                 setDLCText
         )
 
@@ -1085,8 +1123,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
                 setInfoText = setDropLocationsText
             end
         end
-        local setType = setData.setType
-        if addNeededTraits and setType ~= nil and setType == LIBSETS_SETTYPE_CRAFTED then
+        if not isReconstructableSet and addNeededTraits and setType ~= nil and setType == LIBSETS_SETTYPE_CRAFTED then
             if addSetType then
                 if setInfoText ~= nil then
                     setInfoText = setInfoText .. " (" .. setNeededTraitsText .. ")"
@@ -1096,6 +1133,19 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
                     setInfoText = setInfoText .. neededTraitsStr .. ": " .. setNeededTraitsText
                 else
                     setInfoText = neededTraitsStr .. ": " .. setNeededTraitsText
+                end
+            end
+        end
+        if addReconstructionCost and isReconstructableSet then
+            if addSetType then
+                if setInfoText ~= nil then
+                    setInfoText = setInfoText .. " (" .. reconstructionCostText .. ")"
+                end
+            else
+                if setInfoText ~= nil then
+                    setInfoText = setInfoText .. reconstructionCostsStr .. ": " .. reconstructionCostText
+                else
+                    setInfoText = reconstructionCostsStr .. ": " .. reconstructionCostText
                 end
             end
         end
