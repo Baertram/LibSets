@@ -259,8 +259,8 @@ local function isLibSetsTooltipEnabled()
     addBossName =               tooltipSV.addBossName
     addSetType =                tooltipSV.addSetType
     addNeededTraits =           tooltipSV.addNeededTraits
-    --currentl addReconstructionCost uses the same setting like addNeededTraits
-    addReconstructionCost = addNeededTraits
+    --currently addReconstructionCost uses the same setting like addNeededTraits
+    addReconstructionCost =     tooltipSV.addReconstructionCost
 
     anyTooltipInfoToAdd = ((useCustomTooltip == true
                                 or (not useCustomTooltip and (addDropLocation == true or addDropMechanic == true or addDLC == true
@@ -281,7 +281,21 @@ end
 local function getSetReconstructionCost(itemLink, setId)
     if not itemLink or not setId then return end
     if isilscp(itemLink) == true then
-        return gircoc(setId, 5)
+        local currencyCosts = gircoc(setId, 5)
+        if currencyCosts ~= nil then
+            if tooltipTextures == true then
+                local currencyType = CURT_CHAOTIC_CREATIA
+                local formatType = ZO_CURRENCY_FORMAT_STRIKETHROUGH_AMOUNT_ICON
+                local extraOptions =
+                {
+                    color = ZO_DEFAULT_TEXT,
+                    iconInheritColor = true,
+                }
+                return zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, tonumber(currencyCosts), formatType, extraOptions))
+            else
+                return tos(currencyCosts)
+            end
+        end
     end
     return
 end
@@ -1131,7 +1145,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
                 end
             else
                 if setInfoText ~= nil then
-                    setInfoText = setInfoText .. neededTraitsStr .. ": " .. setNeededTraitsText
+                    setInfoText = setInfoText .. " " .. neededTraitsStr .. ": " .. setNeededTraitsText
                 else
                     setInfoText = neededTraitsStr .. ": " .. setNeededTraitsText
                 end
@@ -1144,7 +1158,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
                 end
             else
                 if setInfoText ~= nil then
-                    setInfoText = setInfoText .. reconstructionCostsStr .. ": " .. reconstructionCostText
+                    setInfoText = setInfoText .. " " .. reconstructionCostsStr .. ": " .. reconstructionCostText
                 else
                     setInfoText = reconstructionCostsStr .. ": " .. reconstructionCostText
                 end
