@@ -285,7 +285,7 @@ local function getSetReconstructionCost(itemLink, setId)
         if currencyCosts ~= nil then
             if tooltipTextures == true then
                 local currencyType = CURT_CHAOTIC_CREATIA
-                local formatType = ZO_CURRENCY_FORMAT_STRIKETHROUGH_AMOUNT_ICON
+                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
                 local extraOptions =
                 {
                     color = ZO_DEFAULT_TEXT,
