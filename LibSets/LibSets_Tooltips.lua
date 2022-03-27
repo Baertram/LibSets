@@ -259,10 +259,13 @@ local function isLibSetsTooltipEnabled()
     addBossName =               tooltipSV.addBossName
     addSetType =                tooltipSV.addSetType
     addNeededTraits =           tooltipSV.addNeededTraits
+    --currentl addReconstructionCost uses the same setting like addNeededTraits
+    addReconstructionCost = addNeededTraits
 
     anyTooltipInfoToAdd = ((useCustomTooltip == true
                                 or (not useCustomTooltip and (addDropLocation == true or addDropMechanic == true or addDLC == true
-                                                            or addBossName == true or addSetType == true or addNeededTraits == true))
+                                                            or addBossName == true or addSetType == true or addNeededTraits == true
+                                                            or addReconstructionCost == true))
                             ) and true) or false
 end
 lib.IsLibSetsTooltipEnabled = isLibSetsTooltipEnabled
@@ -991,12 +994,9 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
 
 --d(string.format("<<1>> %s, <<2>> %s, <<3>> %s, <<4>> %s, <<5>> %s, <<6>> %s",
 --        tos(setTypePlaceholder), tos(dropMechanicPlaceholder), tos(dropZonesPlaceholder), tos(bossNamePlaceholder), tos(neededTraitsPlaceholder), tos(dlcNamePlaceHolder)))
-    local isReconstructableSet = false
-    if (useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost) then
-        reconstructionCostText = buildReconstructionCostInfo(setData)
-        if reconstructionCostText ~= nil then
-            isReconstructableSet = true
-        end
+    local isReconstructableSet = isilscp(itemLink)
+    if isReconstructableSet and ((useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost)) then
+        reconstructionCostText = buildReconstructionCostInfo(setData, itemLink)
     end
 
     if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
@@ -1055,17 +1055,18 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         --Check which placeholder is used and pass in the texts
         if not isReconstructableSet or not setReconstructionCostPlaceholder then
             reconstructionCostText = ""
-        elseif not setTypePlaceholder then
+        end
+        if not setTypePlaceholder then
             setTypeText = ""
             setTypeTexture = ""
---d(">1")
+            --d(">1")
         else
             if tooltipTextures == true and setTypeTexture ~= nil and setTypeTexture ~= "" then
-        setTypeText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
+                setTypeText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
             end
         end
         if isReconstructableSet or not neededTraitsPlaceholder then
-            setNeededTraitsText = ""
+           setNeededTraitsText = ""
 --d(">2")
         end
         if not dlcNamePlaceHolder then
