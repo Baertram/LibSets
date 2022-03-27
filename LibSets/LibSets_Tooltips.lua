@@ -1003,7 +1003,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
 --d(">setTypeText: " ..tos(setTypeText))
     end
-    if not isReconstructableSet ((useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits)) then
+    if not isReconstructableSet and ((useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits)) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
 --d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
     end
