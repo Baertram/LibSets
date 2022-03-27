@@ -1331,11 +1331,12 @@ local function loadLAMSettingsMenu()
         },
         {
             type =      "checkbox",
-            name =      localization.neededTraits,
-            tooltip =   localization.neededTraits,
+            name =      localization.neededTraitsOrReconstructionCost,
+            tooltip =   localization.neededTraitsOrReconstructionCost,
             getFunc =   function() return settings.tooltipModifications.addNeededTraits end,
             setFunc =   function(value)
                 lib.svData.tooltipModifications.addNeededTraits = value
+                lib.svData.tooltipModifications.addReconstructionCost = value
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addNeededTraits,
