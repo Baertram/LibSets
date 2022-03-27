@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.42
+local MAJOR, MINOR = "LibSets", 0.44
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -110,6 +110,7 @@ if not supportedLanguages[clientLang] then
     clientLang = fallbackLang --Fallback language if client language is not supported: English
 end
 lib.clientLang                                         = clientLang
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --Constants for the table keys of setInfo, setNames etc.
@@ -900,16 +901,18 @@ lib.localization                 = {
         dropZoneImperialSewers   = "Kanalisation der Kaiserstadt",
         droppedBy                = "Drop durch",
         setType                  = "Set Art",
-        neededTraits             = "Eigenschaften benötigt (Analyse)",
+        reconstructionCosts      = "Rekonstruktions Kosten",
+        neededTraits             = "Eigenschaften benötigt",
+        neededTraitsOrReconstructionCost = "Eigenschaften (Analyse)/Rekonstruktion Kosten",
         dropMechanic             = "Drop Mechanik",
         undauntedChest           = undauntedStr .. " Truhe",
         modifyTooltip            = "Tooltip um Set Infos erweitern",
         tooltipTextures          = "Zeige Tooltip Symbole",
         tooltipTextures_T        = "Zeige Symbole für Set Art, Drop Mechanik, Location/Boss Name, ... im Tooltip",
         defaultTooltipPattern    = "Voreingestellter Tooltip",
-        defaultTooltipPattern_TT = "Nutze die Auswahlfelder um die entsprechende Information über die Set Gegenstände im Gegenstandstooltip anzuzeigen.\nDas standard Ausgabeformat ist:\n\n\<Symbol><Set Art Name> <wenn handwerklich herstellbar: (Eigenschaften benötigt)>\n<Drop Zonen Info> [bestehend aus <ZonenName> (<DropMechanik>: <DropMechanikDropName>)]\<DLC Name>\nWenn alle Zonen identisch sind werden DropMechanic und Ort/Boss Namen ; getrennt als 1 Zeile ausgegeben.",
+        defaultTooltipPattern_TT = "Nutze die Auswahlfelder um die entsprechende Information über die Set Gegenstände im Gegenstandstooltip anzuzeigen.\nDas standard Ausgabeformat ist:\n\n\<Symbol><Set Art Name> <wenn handwerklich herstellbar: (Eigenschaften benötigt)/wenn nicht Handwerklich herstellbar: (Rekonstruktionskosten)>\n<Drop Zonen Info> [bestehend aus <ZonenName> (<DropMechanik>: <DropMechanikDropName>)]\<DLC Name>\nWenn alle Zonen identisch sind werden DropMechanic und Ort/Boss Namen ; getrennt als 1 Zeile ausgegeben.",
         customTooltipPattern     = "Selbst definierter Tooltip Text",
-        customTooltipPattern_TT  = "Definiere deinen eigenen Tooltip Text, inklusive vor-definierter Platzhalter. Beispiel: \'Art <<1>>/Drop <<2>> <<3>> <<4>>\'.\nLasse dieses Textfeld leer, um den eigenen Tooltip Text zu deaktivieren!\nPlatzhalter müssen mit << beginnen, danach folt eine 1stellige Nummer, und beendet werden diese mit >>, z.B. <<1>> oder <<5>>. Es gibt maximal 6 Platzhalter in einem Text. Zeilenumbruch: <br>\n\nMögliche Platzhalter sind:\n<<1>>   Set Art\n<<2>>   Drop Mechaniken [können mehrere \',\' getrennte sein, je Zone 1]\n<<3>>   Drop Zonen [können mehrere \',\' getrennte sein, je Zone 1] Sind alle Zonen identisch wird nur 1 ausgegeben\n<<4>>   Boss/Drop durch Namen [können mehrere \',\' getrennte sein, je Zone 1]\n<<5>>   Benötigte Anzahl analysierter Eigenschaten\n<<6>>   Kapitel/DLC Name mit dem das Set eingeführt wurde.\n\n|cFF0000Achtung|r: Wenn du einen ungültigen Tooltip Text, ohne irgendeinen <<Nummer>> Platzhalter, eingibst wird sich das Textfeld automatisch selber leeren!",
+        customTooltipPattern_TT  = "Definiere deinen eigenen Tooltip Text, inklusive vor-definierter Platzhalter. Beispiel: \'Art <<1>>/Drop <<2>> <<3>> <<4>>\'.\nLasse dieses Textfeld leer, um den eigenen Tooltip Text zu deaktivieren!\nPlatzhalter müssen mit << beginnen, danach folt eine 1stellige Nummer, und beendet werden diese mit >>, z.B. <<1>> oder <<5>>. Es gibt maximal 6 Platzhalter in einem Text. Zeilenumbruch: <br>\n\nMögliche Platzhalter sind:\n<<1>>   Set Art\n<<2>>   Drop Mechaniken [können mehrere \',\' getrennte sein, je Zone 1]\n<<3>>   Drop Zonen [können mehrere \',\' getrennte sein, je Zone 1] Sind alle Zonen identisch wird nur 1 ausgegeben\n<<4>>   Boss/Drop durch Namen [können mehrere \',\' getrennte sein, je Zone 1]\n<<5>>   Benötigte Anzahl analysierter Eigenschaten, oder Rekonstruktionskosten\n<<6>>   Kapitel/DLC Name mit dem das Set eingeführt wurde.\n\n|cFF0000Achtung|r: Wenn du einen ungültigen Tooltip Text, ohne irgendeinen <<Nummer>> Platzhalter, eingibst wird sich das Textfeld automatisch selber leeren!",
     },
     ["en"] = {
         dlc                      = "Chapter/DLC",
@@ -931,8 +934,10 @@ lib.localization                 = {
         dropZoneSpecial          = GetString(SI_HOTBARCATEGORY9),
         dropZoneMythic           = GetString(SI_ITEMDISPLAYQUALITY6),
         droppedBy                = "Dropped by",
+        reconstructionCosts      = "Reconstruction cost",
         setType                  = "Set type",
         neededTraits             = "Traits needed (research)",
+        neededTraitsOrReconstructionCost = "Traits (research)/Reconstruction costs",
         dropMechanic             = "Drop mechanics",
         undauntedChest           = undauntedStr .. " chest",
         boss                     = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501),
@@ -940,9 +945,9 @@ lib.localization                 = {
         tooltipTextures          = "Show tooltip textures",
         tooltipTextures_T        = "Show textures for the set type, drop mechanics and location/boss names ... within the tooltip",
         defaultTooltipPattern    = "Default tooltip",
-        defaultTooltipPattern_TT = "Use the checkboxes to add this information about set items at the item tooltips.\nThe default output format is:\n\n<texture><set type name> <if craftable set: (traits needed>)\n<Drop zone info> [containing <zoneName> (<dropMechanic>: dropMechanicDropLocation>)]\n<DLC name>\nIf all zones are the same the dropMechanic and locatiton/boss names will be added as 1 line ; separated.",
+        defaultTooltipPattern_TT = "Use the checkboxes to add this information about set items at the item tooltips.\nThe default output format is:\n\n<texture><set type name> <if craftable set: (traits needed)/if not craftable: (reconstruction costs)>\n<Drop zone info> [containing <zoneName> (<dropMechanic>: dropMechanicDropLocation>)]\n<DLC name>\nIf all zones are the same the dropMechanic and locatiton/boss names will be added as 1 line ; separated.",
         customTooltipPattern     = "Custom tooltip text",
-        customTooltipPattern_TT  = "Define your own custom tooltip text, including the possibility to use some pre-defined placeholders in your text. Example: \'Type <<1>>/Drops <<2>> <<3>> <<4>>\'.\nLeave the text field empty to disable this custom tooltip!\nPlaceholders need to start with prefix << followed by a 1 digit number and a suffix of >>, e.g. <<1>> or <<5>>.\nThere can be only a maximum of 6 placeholders in the text. Line break: <br>\n\nBelow you'll find the possible placeholders:\n<<1>>   Set type\n<<2>>   Drop mechanics [could be several, for each zone, separated by \',\']\n<<3>>   Drop zones [could be several, for each zone, separated by \',\'] If all zones are the same they will be condensed\n<<4>>   Boss/Dropped by names [could be several, for each zone, separated by \',\']\n<<5>>   Number of needed traits researched\n<<6>>   Chapter/DLC name set was introduced with.\n\n|cFF0000Attention|r: If you enter an invalid tooltip text, without any <<number>> placeholder the editfield will automatically clear itsself!",
+        customTooltipPattern_TT  = "Define your own custom tooltip text, including the possibility to use some pre-defined placeholders in your text. Example: \'Type <<1>>/Drops <<2>> <<3>> <<4>>\'.\nLeave the text field empty to disable this custom tooltip!\nPlaceholders need to start with prefix << followed by a 1 digit number and a suffix of >>, e.g. <<1>> or <<5>>.\nThere can be only a maximum of 6 placeholders in the text. Line break: <br>\n\nBelow you'll find the possible placeholders:\n<<1>>   Set type\n<<2>>   Drop mechanics [could be several, for each zone, separated by \',\']\n<<3>>   Drop zones [could be several, for each zone, separated by \',\'] If all zones are the same they will be condensed\n<<4>>   Boss/Dropped by names [could be several, for each zone, separated by \',\']\n<<5>>   Number of needed traits researched, or reconstruction costs\n<<6>>   Chapter/DLC name set was introduced with.\n\n|cFF0000Attention|r: If you enter an invalid tooltip text, without any <<number>> placeholder the editfield will automatically clear itsself!",
     },
     ["es"] = {
         dlc                    = "Capítulo/DLC",

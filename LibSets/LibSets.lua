@@ -461,6 +461,7 @@ local function LoadSavedVariables()
             addBossName     = true,
             addDropMechanic = true,
             addNeededTraits = true,
+            addReconstructionCost = true, --shares the same LAM checkbox as addNeededTraits
             addDLC          = true,
         },
         useCustomTooltipPattern = "",
