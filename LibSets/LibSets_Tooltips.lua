@@ -875,14 +875,14 @@ local function buildSetDLCInfo(setData)
 end
 
 local function buildReconstructionCostInfo(setData, itemLink)
-    local reconstructionCostsText
+    local lreconstructionCostsText
     local setId = setData.setId
-    local reconstructionCost = getSetReconstructionCost(itemLink, setId)
-    if reconstructionCost ~= nil then
-        reconstructionCostsText = tos(reconstructionCost)
-        --todo Add transmute crystal currency texture?
+    if not setId or not itemLink then return end
+    local lreconstructionCost = getSetReconstructionCost(itemLink, setId)
+    if lreconstructionCost ~= nil then
+        lreconstructionCostsText = tos(lreconstructionCost)
     end
-    return reconstructionCostsText
+    return lreconstructionCostsText
 end
 
 local function buildSetTypeInfo(setData)
@@ -1009,7 +1009,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
 --d(string.format("<<1>> %s, <<2>> %s, <<3>> %s, <<4>> %s, <<5>> %s, <<6>> %s",
 --        tos(setTypePlaceholder), tos(dropMechanicPlaceholder), tos(dropZonesPlaceholder), tos(bossNamePlaceholder), tos(neededTraitsPlaceholder), tos(dlcNamePlaceHolder)))
     local isReconstructableSet = isilscp(itemLink)
-    if isReconstructableSet and ((useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost)) then
+    if isReconstructableSet == true and ((useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost)) then
         reconstructionCostText = buildReconstructionCostInfo(setData, itemLink)
     end
 
@@ -1151,7 +1151,7 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
                 end
             end
         end
-        if addReconstructionCost and isReconstructableSet then
+        if isReconstructableSet and addReconstructionCost and reconstructionCostText ~= nil and reconstructionCostText ~= "" then
             if addSetType then
                 if setInfoText ~= nil then
                     setInfoText = setInfoText .. " (" .. reconstructionCostText .. ")"
