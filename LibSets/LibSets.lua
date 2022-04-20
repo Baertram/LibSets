@@ -286,7 +286,7 @@ After all info is updated you can look at the columns AX to BB which provide the
     from file LibSets.lua). So just keep them also in this table "lib.SetInfo"!
 
 
-7) -[ For the set procs ]-
+7) -[ For the set procs ]- -> !!! Disabled since 2022-04-20 !!!
 You need to find out the set procs and abilityIds of the procs and add them to the excel's tab "SetProcs" at the relevant setId.
 Each setId should have 1 row and in column D you need to add the procData table in this format, 1 new row for each different
 LIBSETS_SETPROC_CHECKTYPE_* (see file LibSets_ConstantsLibraryInternal.lua for the possible SetprocCheckTypes), and 1 new
@@ -2506,6 +2506,8 @@ end
 ------------------------------------------------------------------------
 -- 	Set PROC functions
 ------------------------------------------------------------------------
+--[[
+2022-04-20 Disabled
 --Internal helper function to read the set's procData, if it exists
 local function getSetProcData(setId)
     if setId == nil then return end
@@ -2552,7 +2554,7 @@ local function getSetProcDataIds(setId, setProcCheckType, procIndex, dataTableKe
     end
     return setProcDataIds
 end
-
+]]
 ------------------------------------------------------------------------------------------------------------------------
 
 --Returns true if the setId provided got a set proc which is currently allowed within PvP/AvA campaigns
@@ -2575,6 +2577,8 @@ function lib.GetAllSetDataWithProcAllowedInPvP()
 end
 
 ------------------------------------------------------------------------------------------------------------------------
+--[[
+2022-04-20 Disabled
 
 --Returns true if the setId provided got a set proc
 --> Parameters: setId number: The set's setId
@@ -2599,7 +2603,7 @@ end
 --Returns the procData of the setId as table, containing the abilityIds, unitTag, cooldown, icon, etc.
 --> Parameters: setId number: The set's setId
 --> Returns:    nilable:LibSetsSetProcData table
---[[
+--[ [
     [number setId] = {
         [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
             [number index1toN] = {
@@ -2631,7 +2635,7 @@ end
         ...
         --String comment name of the set -> description of the proc EN / description of the proc DE
     },
-]]
+   ] ]
 function lib.GetSetProcData(setId)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly() then return end
@@ -2871,6 +2875,7 @@ function lib.UnRegisterSetProcEventCallbackForSetId(addOnEventNamespace, eventId
     end
     return nil
 end
+]]
 
 
 ------------------------------------------------------------------------
