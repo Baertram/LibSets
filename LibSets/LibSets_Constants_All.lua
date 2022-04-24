@@ -39,12 +39,13 @@ local possibleDlcIds = {
     [22] = "DLC_BLACKWOOD",
     [23] = "DLC_WAKING_FLAME",
     [24] = "DLC_DEADLANDS",
+    [25] = "DLC_ASCENDING_TIDE",
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_<name_here>"
-    possibleDlcIds[#possibleDlcIds + 1] = "DLC_ASCENDING_TIDE" --25
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_HIGH_ISLE" --26
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -151,13 +152,15 @@ lib.dlcAndChapterCollectibleIds = {
     --Waking Flames
     [DLC_WAKING_FLAME] = "3093",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
     --Deadlands
-    [DLC_DEADLANDS] = 9365              --OK
+    [DLC_DEADLANDS] = 9365,             --OK
     --Ascending Tide
-    --on PTS
+    [DLC_ASCENDING_TIDE] = "3102"          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    --High Isle
+    --[DLC_HIGH_ISLE]--on PTS
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterAchievementIds[DLC_<name_here>] = <id of achievement>
-    lib.dlcAndChapterCollectibleIds[DLC_ASCENDING_TIDE] = "3102" --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    lib.dlcAndChapterCollectibleIds[DLC_HIGH_ISLE] = 10053 --High Isle
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
