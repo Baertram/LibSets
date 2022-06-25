@@ -45,26 +45,10 @@ local zoneIdsOfNewAPIVersionOnly
 --}
 setsOfNewerAPIVersion = {
     --setIds not yet on live server - BEGIN
-    --- Sets of ApiVersion 101034: High Isle
-    [1] = 640,
-    [2] = 641,
-    [3] = 642,
-    [4] = 643,
-    [5] = 644,
-    [6] = 645,
-    [7] = 646,
-    [8] = 647,
-    [9] = 648,
-    [10] = 649,
-    [11] = 650,
-    [12] = 651,
-    [13] = 652,
-    [14] = 653,
-    [15] = 654,
-    [16] = 655,
-    [17] = 656,
-    [18] = 657,
-    [19] = 658,
+    --- Sets of ApiVersion 10103x: xxxxx
+    --xxx,
+    --yyy,
+    --....
     --setIds not yet on live server - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
@@ -77,7 +61,7 @@ lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
 --}
 zoneIdsOfNewAPIVersionOnly = {
     --zoneIds not yet on live server - BEGIN
-    --xxx API10103x
+    --xxx APIVersion 10103x: xxxx
     --zoneIds not yet on live server - END
 }
 lib.zoneIdsOfNewAPIVersionOnly = zoneIdsOfNewAPIVersionOnly
@@ -885,6 +869,7 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=89, zoneIds={1207,1208}},--The Reach/Blackreach: Arkthzand Cavern
         { parentCategory=4, category=93, zoneIds={1261}},--Blackwood
         { parentCategory=4, category=97, zoneIds={1286,1282,1283}},--The Deadlands/Fargrave/The Shambles
+        { parentCategory=4, category=100, zoneIds={1318}},--High Isle
         --Dungeons
         { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
         { parentCategory=5, category=40, zoneIds={380,935}, isDungeon=true},--The Banished Cells I
