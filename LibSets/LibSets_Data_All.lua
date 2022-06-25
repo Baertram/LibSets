@@ -937,7 +937,7 @@ lib.setDataPreloaded = {
         { parentCategory=7, category=77, zoneIds={1051}, isTrial=true},--Cloudrest
         { parentCategory=7, category=78, zoneIds={1121}, isTrial=true},--Sunspire
         { parentCategory=7, category=79, zoneIds={1196}, isTrial=true},--Kyne's Aegis
-        { parentCategory=7, category=101,zoneIds={1318}, isTrial=true},--Dreadsail Reef
+        { parentCategory=7, category=101,zoneIds={1344}, isTrial=true},--Dreadsail Reef
         --Arenas
         { parentCategory=8, category=80, zoneIds={635}, isArena=true},--Dragonstar Arena
         { parentCategory=8, category=81, zoneIds={677}, isArena=true},--Maelstrom Arena

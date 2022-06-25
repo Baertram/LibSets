@@ -2304,7 +2304,7 @@ local getItemSetCollectionZoneIds = lib.GetItemSetCollectionZoneIds
 function lib.GetItemSetCollectionCategoryIds(zoneId)
     if not checkIfSetsAreLoadedProperly() then return end
     if zoneId == nil then return end
-    if lib.setItemCollectionZoneId2Category[zoneId] then
+    if lib.setItemCollectionZoneId2Category[zoneId] ~= nil then
         return lib.setItemCollectionZoneId2Category[zoneId]
     end
     return
@@ -2347,6 +2347,7 @@ local function getItemSetCollectionUnlockedAndTotal(zoneId)
     if not categoryIds or type(categoryIds) ~= "table" then return nil, nil end
     for _, categoryId in ipairs(categoryIds) do
         local categoryData = ISCDM:GetItemSetCollectionCategoryData(categoryId)
+        if categoryData == nil then return nil, nil end
         local numUnlocked, numTotal = categoryData:GetNumUnlockedAndTotalPieces()
         sumNumUnlocked = sumNumUnlocked + numUnlocked
         sumNumTotal = sumNumTotal + numTotal
