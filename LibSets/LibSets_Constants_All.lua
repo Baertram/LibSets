@@ -45,7 +45,8 @@ local possibleDlcIds = {
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
-    --possibleDlcIds[#possibleDlcIds + 1] = "DLC_<name_here>"
+    --possibleDlcIds[#possibleDlcIds + 1] = "DLC_xxx"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_LOST_DEPTHS"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -159,7 +160,8 @@ lib.dlcAndChapterCollectibleIds = {
     [DLC_HIGH_ISLE] = 10053,            --OK
 }
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dlcAndChapterAchievementIds[DLC_<name_here>] = <id of achievement>
+    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = <id of achievement>
+    lib.dlcAndChapterCollectibleIds[DLC_LOST_DEPTHS] = 0 --TODO
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters

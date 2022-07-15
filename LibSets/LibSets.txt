@@ -10,8 +10,8 @@
 ## Description: List of all ingame sets and functions to check what set type they are, set names, itemIds, drop locations, etc.
 ## Author: Baertram
 ## APIVersion: 101034 101035
-## Version: 0.4.7
-## AddOnVersion: 000407
+## Version: 0.4.8
+## AddOnVersion: 000408
 ## IsLibrary: true
 ## SavedVariables: LibSets_SV_Data LibSets_SV_DEBUG_Data
 ## OptionalDependsOn: LibZone>=076 LibAddonMenu>=34

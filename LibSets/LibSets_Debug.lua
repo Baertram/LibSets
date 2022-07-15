@@ -1016,6 +1016,7 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
     local dungeonsAddedNormal = 0
     local dungeonsAddedVet = 0
     local dungeonsAdded = 0
+    local openDungeonFinderNow = false
     if dungeonFinder and dungeonFinder.navigationTree and dungeonFinder.navigationTree.rootNode then
         local dfRootNode = dungeonFinder.navigationTree.rootNode
         if dfRootNode.children then
@@ -1042,18 +1043,11 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
                 return
             else
                 preventEndlessCallDungeonFinderData = true
-                --Open the group menu
-                GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment())
-                --Select entry "Sepcific dungeon" from dungeon dropdown
-                zo_callLater(function()
-                    ZO_DungeonFinder_KeyboardFilter.m_comboBox:SelectItemByIndex(3)
-
-                    lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
-                end, 250)
+                openDungeonFinderNow = true
             end
         end
     end
-    if retTableDungeons and #retTableDungeons>0 and dungeonsAdded >0 then
+    if not openDungeonFinderNow and retTableDungeons and #retTableDungeons > 0 and dungeonsAdded > 0 then
         LoadSavedVariables()
         lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = {}
         lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
@@ -1062,8 +1056,16 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
         d(">Please do a /reloadui to update the file properly!")
     else
         local noDataFoundText = "<No dungeon data was found!"
-        if preventEndlessCallDungeonFinderData == true then
+        if preventEndlessCallDungeonFinderData == true and openDungeonFinderNow == true then
             noDataFoundText = noDataFoundText .. " Opening the group panel now, and selecting the \'Specific dungeon\' entry!"
+            --Open the group menu
+            GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment())
+            zo_callLater(function()
+                --Select entry "Sepcific dungeon" from dungeon dropdown
+                ZO_DungeonFinder_KeyboardFilter.m_comboBox:SelectItemByIndex(3)
+                --Redundant call to the same function
+                lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
+            end, 250)
         end
         d(noDataFoundText)
     end
@@ -1315,61 +1317,71 @@ function lib.DebugGetAllData(resetApiData, noItemIds)
 
             --Get all client language dependent data now
             --if not noItemIds then
-                debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
+            debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
             --end
             debugGetAllNames(true)
             d(">>>--------------->>>")
 
+            local delay = 0
             if newRun == true then
-                --Will open the dungeonfinder!
-                debugGetDungeonFinderData(true)
+                --Will open the group menu, then select "specific dungeon", delayed by 250ms after group menu open
+                debugGetDungeonFinderData(nil, true)
                 d(">>>--------------->>>")
                 --Will open the map and right click until at the current zone map
-                debugGetAllWayshrineInfo(true)
+                delay = 500
+                -->Delay by 500ms so that the dungeon finder data was collected properly
+                zo_callLater(function()
+                    debugGetAllWayshrineInfo(true)
+                end, delay)
             end
 
             d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
             d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            --Call the language check and switch via reloadui delayed by 500ms
+            delay = delay + 500
+            zo_callLater(function()
 
-            --Get the language to scan as next one, if not all were scanned already
-            local runData = lib.svDebugData.DebugGetAllData[apiVersion]
-            local numLangsScanned = NonContiguousCount(runData.langDone)
-            if numLangsScanned < numSupportedLangs then
-                for langStr, isSupported in pairs(supportedLanguages) do
-                    if isSupported == true then
-                        if not runData.langDone[langStr] then
-                            languageToScanNext = langStr
-                            break
+                --Get the language to scan as next one, if not all were scanned already
+                local runData = lib.svDebugData.DebugGetAllData[apiVersion]
+                local numLangsScanned = NonContiguousCount(runData.langDone)
+                if numLangsScanned < numSupportedLangs then
+                    for langStr, isSupported in pairs(supportedLanguages) do
+                        if isSupported == true then
+                            if not runData.langDone[langStr] then
+                                languageToScanNext = langStr
+                                break
+                            end
                         end
                     end
-                end
-                --Reload the UI via client language switch or do a normal reload
-                if languageToScanNext ~= nil and languageToScanNext ~= "" and supportedLanguages[languageToScanNext] == true then
-                    lib.svDebugData.DebugGetAllData[apiVersion].finished = false
-                    lib.svDebugData.DebugGetAllData[apiVersion].running = true
-                    lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeDateTime = os.date("%c")
-                    lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeTo = languageToScanNext
-                    SetCVar("language.2", languageToScanNext) --> Will do a reloadUI and change the client language
+                    --Reload the UI via client language switch or do a normal reload
+                    if languageToScanNext ~= nil and languageToScanNext ~= "" and supportedLanguages[languageToScanNext] == true then
+                        lib.svDebugData.DebugGetAllData[apiVersion].finished = false
+                        lib.svDebugData.DebugGetAllData[apiVersion].running = true
+                        lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeDateTime = os.date("%c")
+                        lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeTo = languageToScanNext
+                        SetCVar("language.2", languageToScanNext) --> Will do a reloadUI and change the client language
+                    else
+                        local errorText = "<<<[ERROR]Language to scan next \'".. tos(languageToScanNext) .. "\' is not supported! Aborting now..."
+                        d(errorText)
+                        lib.svDebugData.DebugGetAllData[apiVersion].running = false
+                        lib.svDebugData.DebugGetAllData[apiVersion].finished = true
+                        local dateTime = os.date("%c")
+                        lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = dateTime
+                        lib.svDebugData.DebugGetAllData[apiVersion].LastErrorDateTime = dateTime
+                        lib.svDebugData.DebugGetAllData[apiVersion].LastError = errorText
+                    end
                 else
-                    local errorText = "<<<[ERROR]Language to scan next \'".. tos(languageToScanNext) .. "\' is not supported! Aborting now..."
-                    d(errorText)
+                    local origClientLang = lib.svDebugData.DebugGetAllData[apiVersion].clientLang
+                    origClientLang = origClientLang or "en"
+                    d("[" .. MAJOR .. "]DebugGetAllData was finished! Resetting to your original language again: " .. tos(origClientLang))
+                    --All languages were scanned already. Switch back to original client language, or "en" as fallback
                     lib.svDebugData.DebugGetAllData[apiVersion].running = false
                     lib.svDebugData.DebugGetAllData[apiVersion].finished = true
-                    local dateTime = os.date("%c")
-                    lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = dateTime
-                    lib.svDebugData.DebugGetAllData[apiVersion].LastErrorDateTime = dateTime
-                    lib.svDebugData.DebugGetAllData[apiVersion].LastError = errorText
+                    lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = os.date("%c")
+                    SetCVar("language.2", origClientLang) --> Will do a reloadUI and change the client language
                 end
-            else
-                local origClientLang = lib.svDebugData.DebugGetAllData[apiVersion].clientLang
-                origClientLang = origClientLang or "en"
-                d("[" .. MAJOR .. "]DebugGetAllData was finished! Resetting to your original language again: " .. tos(origClientLang))
-                --All languages were scanned already. Switch back to original client language, or "en" as fallback
-                lib.svDebugData.DebugGetAllData[apiVersion].running = false
-                lib.svDebugData.DebugGetAllData[apiVersion].finished = true
-                lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = os.date("%c")
-                SetCVar("language.2", origClientLang) --> Will do a reloadUI and change the client language
-            end
+
+            end, delay)
         end
         EM:RegisterForUpdate(noFurtherItemsFoundUpdateName, 2000, runIfNoFurtherItemsFound)
     else

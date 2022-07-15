@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.47
+local MAJOR, MINOR = "LibSets", 0.48
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -43,9 +43,10 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
--->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
+-->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 101034 --Ascending Tide, 2022-02-12
+---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
+lib.lastSetsPreloadedCheckAPIVersion = 101034 --High Isle, 2022-04-20
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -64,7 +65,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101034 --Ascending Tide, 2022-02-12
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101034 -- High Isle (2022-04-20, PTS, API 101034)
+APIVersions["PTS"]                   = 101035 -- Lost Depths (2022-07-13, PTS, API 101035)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,7 +92,7 @@ lib.fallbackLang               = fallbackLang
 local supportedLanguages       = {
     ["de"] = true,
     ["en"] = true,
-    ["es"] = false, --TODO not yet supported as only on PTS!
+    ["es"] = true,
     ["fr"] = true,
     ["ru"] = true,
     ["jp"] = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath
