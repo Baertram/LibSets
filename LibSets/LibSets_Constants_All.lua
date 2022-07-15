@@ -63,43 +63,45 @@ end
 
 --[[
 --Collectible IDs
-154|DLC|Imperial City
-215|DLC|Orsinium
-254|DLC|Thieves Guild
-306|DLC|Dark Brotherhood
-375|DLC|Ruins of Mazzatun
-491|DLC|Cradle of Shadows
-593|DLC|Morrowind
-1165|DLC|Bloodroot Forge
-1240|DLC|Clockwork City
-1331|DLC|Fang Lair
-1355|DLC|Falkreath Hold
-4703|DLC|Scalecaller Peak
-5008|DLC|Moon Hunter Keep
-5009|DLC|March of Sacrifices
-5107|DLC|Summerset
-5473|DLC|Frostvault
-5474|DLC|Depths of Malatar
-5755|DLC|Murkmire
-5843|DLC|Elsweyr
-6040|DLC|Moongrave Fane
-6041|DLC|Lair of Maarselok
-6646|DLC|Icereach
-6647|DLC|Unhallowed Grave
-6920|DLC|Dragonhold
-7430|DLC|Stone Garden
-7431|DLC|Castle Thorn
-7466|DLC|Greymoor
-8216|DLC|Black Drake Villa
-8217|DLC|The Cauldron
-8388|DLC|Markarth
-8659|CHAPTER|Blackwood
-9365|DLC|The Deadlands
-9374|DLC|Red Petal Bastion
-9375|DLC|The Dread Cellar
-9651|DLC|Coral Aerie
-9652|DLC|Shipwright's Regret
-10053|CHAPTER|High Isle
+[8388] = "8388|DLC|Markarth",
+[10053] = "10053|CHAPTER|High Isle",
+[7430] = "7430|DLC|Stone Garden",
+[7431] = "7431|DLC|Castle Thorn",
+[6920] = "6920|DLC|Dragonhold",
+[1355] = "1355|DLC|Falkreath Hold",
+[1165] = "1165|DLC|Bloodroot Forge",
+[5008] = "5008|DLC|Moon Hunter Keep",
+[5009] = "5009|DLC|March of Sacrifices",
+[8659] = "8659|DLC|Blackwood",
+[9365] = "9365|DLC|The Deadlands",
+[215] = "215|DLC|Orsinium",
+[1240] = "1240|DLC|Clockwork City",
+[6041] = "6041|DLC|Lair of Maarselok",
+[154] = "154|DLC|Imperial City",
+[9374] = "9374|DLC|Red Petal Bastion",
+[4703] = "4703|DLC|Scalecaller Peak",
+[10400] = "10400|DLC|Earthen Root Enclave",
+[5473] = "5473|DLC|Frostvault",
+[5474] = "5474|DLC|Depths of Malatar",
+[7466] = "7466|DLC|Greymoor",
+[491] = "491|DLC|Cradle of Shadows",
+[10401] = "10401|DLC|Graven Deep",
+[9375] = "9375|DLC|The Dread Cellar",
+[9651] = "9651|DLC|Coral Aerie",
+[306] = "306|DLC|Dark Brotherhood",
+[5107] = "5107|DLC|Summerset",
+[9652] = "9652|DLC|Shipwright's Regret",
+[5843] = "5843|DLC|Elsweyr",
+[6646] = "6646|DLC|Icereach",
+[375] = "375|DLC|Ruins of Mazzatun",
+[8217] = "8217|DLC|The Cauldron",
+[8216] = "8216|DLC|Black Drake Villa",
+[6647] = "6647|DLC|Unhallowed Grave",
+[5755] = "5755|DLC|Murkmire",
+[1331] = "1331|DLC|Fang Lair",
+[593] = "593|DLC|Morrowind",
+[254] = "254|DLC|Thieves Guild",
+[6040] = "6040|DLC|Moongrave Fane",
 ]]
 
 --Internal collectible example ids of the ESO DLCs and chapters (first collectible found from each DLC category)
@@ -161,7 +163,7 @@ lib.dlcAndChapterCollectibleIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = <id of achievement>
-    lib.dlcAndChapterCollectibleIds[DLC_LOST_DEPTHS] = 0 --TODO
+    lib.dlcAndChapterCollectibleIds[DLC_LOST_DEPTHS] = 3133 --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters

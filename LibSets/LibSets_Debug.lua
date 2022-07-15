@@ -1254,7 +1254,7 @@ local debugShowNewSetIds = lib.DebugShowNewSetIds
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames(noReloadInfo)
     noReloadInfo = noReloadInfo or false
-    --lib.DebugGetAllCollectibleNames(nil, nil, noReloadInfo)
+    debugGetAllCollectibleNames(nil, nil, noReloadInfo)
     d(">>>--------------->>>")
     debugGetAllCollectibleDLCNames(noReloadInfo)
     d(">>>--------------->>>")
