@@ -163,7 +163,7 @@ lib.dlcAndChapterCollectibleIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = <id of achievement>
-    lib.dlcAndChapterCollectibleIds[DLC_LOST_DEPTHS] = 3133 --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    lib.dlcAndChapterCollectibleIds[DLC_LOST_DEPTHS] = "3133" --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
