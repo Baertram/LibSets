@@ -231,10 +231,13 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
     --Combine the preloaded setItemIds with new ones from the SV?
     local tableToProcess = {}
     if combineFromSV == true then
-        --setIdTable -> lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
-        --SV table of all new itemIds scanned: lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS]
         LoadSavedVariables()
         svLoadedAlready = true
+        --setIdTable -> lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+        --SV table of all new itemIds scanned: lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] -> Might have been cleared already again due to
+        --itemIds having been compressed already!
+        --The compressed itemIds of new scanned set itemIds are found here:
+        --SV table of all new itemIds scanned AND compressed lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
         local loadedCompressedSetItemIdsFromSV = lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
 --lib._loadedCompressedSetItemIdsFromSV = loadedCompressedSetItemIdsFromSV
         MyCombineNonContiguousTables(tableToProcess, setIdTable, loadedCompressedSetItemIdsFromSV)
@@ -292,6 +295,8 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
                 --if newSetIdToCheckStr ~= nil and newSetIdToCheckStr ~= "" then
                 --    newSetIdToCheck = ton(newSetIdToCheckStr)
                 if newSetIdToCheck ~= nil then
+                    --Is the setId of a scaned newSetId (from debug SavedVariables NewSetIDs) already the same as an entry in the above scanned
+                    --newSetIdsFound table (from debug SavedVariables setItemIds_Compressed): Then skip it
                     for _, newSetIdLoadedBefore in ipairs(newSetIdsFound) do
 --d(">>>newSetIdToCheck: " ..tos(newSetIdToCheck) .. ", newSetIdLoadedBefore: " ..tos(newSetIdLoadedBefore))
                         if newSetIdToCheck == newSetIdLoadedBefore then
@@ -390,13 +395,14 @@ local debugGetAllMapNames = lib.DebugGetAllMapNames
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for wayshrines -> Save them in the SavedVariables "wayshrines"
 --> You need to open a map (zone map, no city or sub-zone maps!) in order to let the function work properly
+--> It will not get all wayshrines of ALL maps, only the currently opened one!
 ------------------------------------------------------------------------------------------------------------------------
 --Returns a list of the wayshrine data (nodes) in the current client language and saves it to the SavedVars table "wayshrines" in this format:
 --wayshrines[i] = wayshrineNodeId .."|"..currentMapIndex.."|"..currentMapId.."|"..currentMapNameLocalizedInClientLanguage.."|"
 --..currentMapsZoneIndex.."|"..currentZoneId.."|"..currentZoneNameLocalizedInClientLanguage.."|"..wayshrinesPOIType.."|".. wayshrineNameCleanLocalizedInClientLanguage
 -->RegEx to transfer [1]= "1|WayshrineNodeId|mapIndex|mapId|mapName|zoneIndex|zoneId|zoneName|POIType|wayshrineName", to 1|WayshrineNodeId|mapIndex|mapId|mapName|zoneIndex|zoneId|zoneName|POIType|wayshrineName:   \[\d*\] = \"(.*)\" -> replace with $1
 --->Afterwards put into excel and split at | into columns
-function lib.DebugGetAllWayshrineInfo()
+function lib.DebugGetAllWayshrineInfoOfCurrentMap()
     local delay = 0
     local wayshrinesAvailable = false
     if not ZO_WorldMap_IsWorldMapShowing() then
@@ -435,7 +441,7 @@ function lib.DebugGetAllWayshrineInfo()
         end, delay)
     end
 end
-local debugGetAllWayshrineInfo = lib.DebugGetAllWayshrineInfo
+local debugGetAllWayshrineInfoOfCurrentMap = lib.DebugGetAllWayshrineInfoOfCurrentMap
 
 --Returns a list of the wayshrine names in the current client language and saves it to the SavedVars table "wayshrineNames" in this format:
 --wayshrineNames[clientLanguage][wayshrineNodeId] = wayshrineNodeId .. "|" .. wayshrineLocalizedNameCleanInClientLanguage
@@ -1038,7 +1044,7 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
             end
         else
             if preventEndlessCallDungeonFinderData == true then
-                d("<Please open the dungeon finder and choose the \'Specifiy dungeon\' entry from the dropdown box at the top-right edge! Then try this function again.")
+                d("<Please open the dungeon finder and choose the \'Specific dungeon\' entry from the dropdown box at the top-right edge! Then try this function again.")
                 preventEndlessCallDungeonFinderData = false
                 return
             else
@@ -1057,9 +1063,26 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
     else
         local noDataFoundText = "<No dungeon data was found!"
         if preventEndlessCallDungeonFinderData == true and openDungeonFinderNow == true then
-            noDataFoundText = noDataFoundText .. " Opening the group panel now, and selecting the \'Specific dungeon\' entry!"
-            --Open the group menu
-            GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment())
+            --Select the category of the dungeon finder
+            --ZO_UI_SYSTEM_MANAGER:RequestOpenUISystem(UI_SYSTEM_DUNGEON_FINDER)
+            GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment()) --> TODO 20220715 Does not work anymore!!!???
+            --Open the group menu -> Should be done within GROUP_MENU_KEYBOARD:ShowCategory(categoryFragment)
+            if not KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
+              SCENE_MANAGER:Show("groupMenuKeyboard")
+            end
+            --[[
+            --Hide the currently shown fragment
+            if GROUP_MENU_KEYBOARD.currentCategoryFragment then
+                SCENE_MANAGER:RemoveFragment(GROUP_MENU_KEYBOARD.currentCategoryFragment)
+            end
+            local dungeonFinderKeyboardFragment = dungeonFinder:GetFragment()
+            SCENE_MANAGER:AddFragment(dungeonFinderKeyboardFragment)
+            GROUP_MENU_KEYBOARD.currentCategoryFragment = dungeonFinderKeyboardFragment
+            ]]
+            if not dungeonFinder or not dungeonFinder.navigationTree or not dungeonFinder.navigationTree.rootNode
+                    or not dungeonFinder.navigationTree.rootNode.children then
+                ZO_GroupMenu_KeyboardCategoriesScrollChildZO_GroupMenuKeyboard_StatusIconChildlessHeader3:OnMouseUp(MOUSE_BUTTON_INDEX_LEFT, true)
+            end
             zo_callLater(function()
                 --Select entry "Sepcific dungeon" from dungeon dropdown
                 ZO_DungeonFinder_KeyboardFilter.m_comboBox:SelectItemByIndex(3)
@@ -1331,15 +1354,15 @@ function lib.DebugGetAllData(resetApiData, noItemIds)
                 delay = 500
                 -->Delay by 500ms so that the dungeon finder data was collected properly
                 zo_callLater(function()
-                    debugGetAllWayshrineInfo(true)
+                    debugGetAllWayshrineInfoOfCurrentMap()
                 end, delay)
             end
 
-            d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
-            d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
             --Call the language check and switch via reloadui delayed by 500ms
             delay = delay + 500
             zo_callLater(function()
+                d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
+                d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
                 --Get the language to scan as next one, if not all were scanned already
                 local runData = lib.svDebugData.DebugGetAllData[apiVersion]
