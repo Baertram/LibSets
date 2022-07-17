@@ -1234,7 +1234,7 @@ local function loadLAMSettingsMenu()
         name 				= MAJOR,
         displayName 		= MAJOR,
         author 				= "Baertram",
-        version 			= MINOR,
+        version 			= tos(MINOR),
         registerForRefresh 	= true,
         registerForDefaults = true,
         slashCommand 		= "/libsetss",
