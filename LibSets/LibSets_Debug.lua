@@ -326,28 +326,42 @@ local function getAllSetItemIds()
 end
 
 --This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
-function lib.DebugResetSavedVariables(noReloadInfo)
+function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
+    onlyNames = onlyNames or false
     noReloadInfo = noReloadInfo or false
+    local onlyNamesText = (not onlyNames and "") or " of names"
     LoadSavedVariables()
-    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
-    --lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
-    --lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
-    d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'.")
+    if onlyNames == true then
+        lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+
+    else
+        lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
+        --lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
+        --lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
+
+        lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+    end
+    d("[" .. MAJOR .. "]Cleared all SavedVariables".. onlyNamesText .." in file \'" .. MAJOR .. ".lua\'.")
     if noReloadInfo == true then return end
     d(">Please do a /reloadui or logout to update the SavedVariables data now!")
 end
@@ -1278,12 +1292,12 @@ local debugGetAllNames = lib.DebugGetAllNames
 --If the parameter resetApiData is true the current scanned data of the apiversion will be reset and all will be
 --scanned new again, includig the set itemIds.
 --If parameter noItemIds is true all data will be rescanned, excluding the itemIds
-
+--if the parameter onlyNames is true then only the name SavedVariables will be deleted and completely updated
 --todo: Find bug within GetAllSetNames -> New setNames in languages AFTER the clientLanguage where the setItemIds were scanned,
 --todo: do not update and just find "n/a" -> Somehow the setItemIds or setIds are missing and not read properly from SavedVariables
 --todo: (where they have been scanned to before) after the reladoui to next language
 
-function lib.DebugGetAllData(resetApiData, noItemIds)
+function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
     resetApiData = resetApiData or false
     noItemIds = noItemIds or false
 
@@ -1313,7 +1327,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds)
     d("[" .. MAJOR .. "]>>>DebugGetAllData START for API \'" ..  tos(apiVersion) .. "\' - newRun: " .. tos(newRun) .. ", resetApiData: " ..tos(resetApiData) .. ", noItemIds: " ..tos(noItemIds))
     if not alreadyFinished then
         if newRun == true then
-            debugResetSavedVariables(true)
+            debugResetSavedVariables(true, onlyNames)
             --If no itemIds are requested: Skip the scan
             if not noItemIds then
                 d(">>>--------------->>>")
