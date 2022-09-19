@@ -35,11 +35,11 @@ local createPreviewTooltipAndShow = lib.CreatePreviewTooltipAndShow
 -- 	Library - Chat autocomplete functions (using LibSlashCommander)
 ------------------------------------------------------------------------
 
---Build the autocompletion entries for zoneNames for a given language.
---You need to use the chat slash command for the current client language /lzt or for a desired target language /lzt<language>.
---You'll have to enter a space and then the zone name of the language e.g. Shadowfen.
---After that a space or press the auto completion key TABULATOR to see a list of the translated zone namesof other languages.
---Selecting an entry will take this translated zone name to your chat's editbox.
+--Build the autocompletion entries for setNames for a given language.
+--You need to use the chat slash command for the current client language /lsp or for a desired target language /lsp<language>.
+--You'll have to enter a space and then the set name of the language e.g. Spellpower cure.
+--After that a space or press the auto completion key TABULATOR to see a list of the translated set names of other languages.
+--Selecting an entry will take this translated set's ID and show a tooltip of an setItem.
 function lib.buildAutoComplete(command, langToUse)
     --Get/Create instance of LibSlashCommander
     local lscLib = lib.libSlashCommander
@@ -75,58 +75,58 @@ function lib.buildAutoComplete(command, langToUse)
         local repStr = "·"
         local langUpper = localization[langToUse][langToUse]
         for setId, setLanguagesData in pairs(cachedSetNames) do
-                local setNameInClientLang = setLanguagesData[clientLang]
-                --Replace the spaces in the zone name so LibSlashCommander will find them with the auto complete properly
-                --try to use %s instead of just a space. if that doesn't work use [\t-\r ] instead
-                local setNameNoSpaces = strgsub(setNameInClientLang, "%s+", repStr)
-                if setNameNoSpaces == "" then setNameNoSpaces = setNameInClientLang end
-                if not command:HasSubCommandAlias(setNameNoSpaces) then
-                    --Add a setName entry as subcommand so the first auto complete will show all set names as the user types /lsp into chat
-                    local setSubCommand = command:RegisterSubCommand()
-                    setSubCommand:AddAlias(setNameNoSpaces)
-                    setSubCommand:SetDescription(langUpper)
-                    setSubCommand:SetCallback(function(input)
-                        --StartChatInput(input)
-                        createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
-                        createPreviewTooltipAndShow(setId)
-                    end)
-                    --Get the translated zone names
-                    local otherLanguagesSetName                     = {} -- Only a temp table
-                    local otherLanguagesNoDuplicateSetName          = {} -- Only a temp table
-                    local alreadyAddedCleanTranslatedSetNames       = {} -- The resultsList for the autocomplete provider
-                    local alreadyAddedCleanTranslatedSetNamesLookup = {} -- The lookupList for the autocomplete provider
-                    for langIdx, lang in pairs(supportedLanguagesIndex) do
-                        local otherLanguageSetName = cachedSetNames[setId][lang]
-                        if otherLanguageSetName ~= nil and otherLanguageSetName ~= "" then
-                            otherLanguagesSetName[langIdx] = otherLanguageSetName
-                        end
+            local setNameInClientLang = setLanguagesData[clientLang]
+            --Replace the spaces in the zone name so LibSlashCommander will find them with the auto complete properly
+            --try to use %s instead of just a space. if that doesn't work use [\t-\r ] instead
+            local setNameNoSpaces = strgsub(setNameInClientLang, "%s+", repStr)
+            if setNameNoSpaces == "" then setNameNoSpaces = setNameInClientLang end
+            if not command:HasSubCommandAlias(setNameNoSpaces) then
+                --Add a setName entry as subcommand so the first auto complete will show all set names as the user types /lsp into chat
+                local setSubCommand = command:RegisterSubCommand()
+                setSubCommand:AddAlias(setNameNoSpaces)
+                setSubCommand:SetDescription(langUpper)
+                setSubCommand:SetCallback(function(input)
+                    --StartChatInput(input)
+                    createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
+                    createPreviewTooltipAndShow(setId)
+                end)
+                --Get the translated zone names
+                local otherLanguagesSetName                     = {} -- Only a temp table
+                local otherLanguagesNoDuplicateSetName          = {} -- Only a temp table
+                local alreadyAddedCleanTranslatedSetNames       = {} -- The resultsList for the autocomplete provider
+                local alreadyAddedCleanTranslatedSetNamesLookup = {} -- The lookupList for the autocomplete provider
+                for langIdx, lang in pairs(supportedLanguagesIndex) do
+                    local otherLanguageSetName = cachedSetNames[setId][lang]
+                    if otherLanguageSetName ~= nil and otherLanguageSetName ~= "" then
+                        otherLanguagesSetName[langIdx] = otherLanguageSetName
                     end
-                    if #otherLanguagesSetName >= 1 then
-                        local langStr = ""
-                        for langIdx, cleanTranslatedSetName in ipairs(otherLanguagesSetName) do
-                            local lang = supportedLanguagesIndex[langIdx]
-                            local upperLangStr = localization[langToUse][lang]
-                            if otherLanguagesNoDuplicateSetName[cleanTranslatedSetName] == nil then
-                                langStr = ""
-                            else
-                                langStr = otherLanguagesNoDuplicateSetName[cleanTranslatedSetName]
-                            end
-                            if langStr == "" then
-                                langStr = upperLangStr
-                            else
-                                langStr = langStr .. ", " .. upperLangStr
-                            end
-                            otherLanguagesNoDuplicateSetName[cleanTranslatedSetName] = langStr
-                        end
-                        for cleanTranslatedSetNameLoop, langStrLoop in pairs(otherLanguagesNoDuplicateSetName) do
-                            local label                                                               = strfor("%s|caaaaaa - %s", cleanTranslatedSetNameLoop, langStrLoop)
-                            alreadyAddedCleanTranslatedSetNames[zostrlow(cleanTranslatedSetNameLoop)] = label
-                            alreadyAddedCleanTranslatedSetNamesLookup[label]                          = cleanTranslatedSetNameLoop
-                        end
-                    end
-                    local autocomplete = MyAutoCompleteProvider:New(alreadyAddedCleanTranslatedSetNames, alreadyAddedCleanTranslatedSetNamesLookup, langToUse)
-                    setSubCommand:SetAutoComplete(autocomplete)
                 end
+                if #otherLanguagesSetName >= 1 then
+                    local langStr = ""
+                    for langIdx, cleanTranslatedSetName in ipairs(otherLanguagesSetName) do
+                        local lang = supportedLanguagesIndex[langIdx]
+                        local upperLangStr = localization[langToUse][lang]
+                        if otherLanguagesNoDuplicateSetName[cleanTranslatedSetName] == nil then
+                            langStr = ""
+                        else
+                            langStr = otherLanguagesNoDuplicateSetName[cleanTranslatedSetName]
+                        end
+                        if langStr == "" then
+                            langStr = upperLangStr
+                        else
+                            langStr = langStr .. ", " .. upperLangStr
+                        end
+                        otherLanguagesNoDuplicateSetName[cleanTranslatedSetName] = langStr
+                    end
+                    for cleanTranslatedSetNameLoop, langStrLoop in pairs(otherLanguagesNoDuplicateSetName) do
+                        local label                                                               = strfor("%s|caaaaaa - %s", cleanTranslatedSetNameLoop, langStrLoop)
+                        alreadyAddedCleanTranslatedSetNames[zostrlow(cleanTranslatedSetNameLoop)] = label
+                        alreadyAddedCleanTranslatedSetNamesLookup[label]                          = cleanTranslatedSetNameLoop
+                    end
+                end
+                local autocomplete = MyAutoCompleteProvider:New(alreadyAddedCleanTranslatedSetNames, alreadyAddedCleanTranslatedSetNamesLookup, langToUse)
+                setSubCommand:SetAutoComplete(autocomplete)
+            end
         end
     end
 end
@@ -138,15 +138,19 @@ function lib.buildLSCSetSearchAutoComplete()
     if lscLib == nil then return end
 
     lib.commandsLsp = {}
-    lib.commandsLsp["all"] = lscLib:Register({"/libsetspreview", "/setpreview", "/setsp", "/lsp"}, nil, libPrefix .. localization[clientLang]["slashCommandDescriptionClient"])
+    lib.commandsLsp["all"] = lscLib:Register({"/libsetspreview", "/setpreview", "/setsp", "/lsp"},
+            nil,
+            libPrefix .. localization[clientLang]["slashCommandDescriptionClient"])
     lib.buildAutoComplete(lib.commandsLsp["all"], clientLang)
-    for _,lang in pairs(lib.supportedLanguages) do
-        local transForLang = localization[tostring(lang)]
-        if transForLang~= nil and transForLang["slashCommandDescription"] ~= nil then
-            lib.commandsLsp[tostring(lang)] = lscLib:Register({"/libsetspreview" .. tostring(lang), "/setpreview" .. tostring(lang), "/setsp" .. tostring(lang), "/lsp" .. tostring(lang)},
+
+    for _, lang in pairs(supportedLanguagesIndex) do
+        local langStr = tostring(lang)
+        local transForLang = localization[langStr]
+        if transForLang ~= nil and transForLang["slashCommandDescription"] ~= nil then
+            lib.commandsLsp[langStr] = lscLib:Register({"/libsetspreview" .. langStr, "/setpreview" .. langStr, "/setsp" .. langStr, "/lsp" .. langStr},
                     nil,
-                    libPrefix .. localization[tostring(lang)]["slashCommandDescription"])
-            lib.buildAutoComplete(lib.commandsLsp[tostring(lang)], tostring(lang))
+                    libPrefix .. transForLang["slashCommandDescription"])
+            lib.buildAutoComplete(lib.commandsLsp[langStr], langStr)
         end
     end
 end
