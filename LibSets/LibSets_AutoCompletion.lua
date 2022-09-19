@@ -8,6 +8,7 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = "["..MAJOR.."]"
 
+local tos = tostring
 local strgsub = string.gsub
 local strfor = string.format
 local zostrlow = zo_strlower
@@ -15,7 +16,7 @@ local zostrlow = zo_strlower
 local clientLang =      lib.clientLang
 local fallbackLang =    lib.fallbackLang
 --local doesClientLangEqualFallbackLang = (clientLang == fallbackLang and true) or false
-local localization         =    lib.localization[clientLang]
+local localization       = lib.localization
 local supportedLanguages = lib.supportedLanguages
 local supportedLanguagesIndex = lib.supportedLanguagesIndex
 
