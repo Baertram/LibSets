@@ -1523,7 +1523,7 @@ local function previewSetTooltipBySlashCommand(args)
         if setName == nil or setName == "" then return end
         --Get the set names of all sets, in all languages
 
-        if not LibSlashCommander then
+        if not lib.libSlashCommander then
             allSetNamesCached = allSetNamesCached or lib_getAllSetNames()
             --Search the set's ID by it's provided criteria "name", first start with the client language
             for setIdOfSearchedData, setNameOfEachLanguage in pairs(allSetNamesCached) do
@@ -1554,10 +1554,12 @@ local function previewSetTooltipBySlashCommand(args)
 end
 
 local function createSetTooltipPreviewSlashCommand()
-    SLASH_COMMANDS["/libsetspreview"] = previewSetTooltipBySlashCommand
-    SLASH_COMMANDS["/setpreview"] =     previewSetTooltipBySlashCommand
-    SLASH_COMMANDS["/setsp"] =          previewSetTooltipBySlashCommand
-    SLASH_COMMANDS["/lsp"] =            previewSetTooltipBySlashCommand
+    if not lib.libSlashCommander then
+        SLASH_COMMANDS["/libsetspreview"] = previewSetTooltipBySlashCommand
+        SLASH_COMMANDS["/setpreview"] =     previewSetTooltipBySlashCommand
+        SLASH_COMMANDS["/setsp"] =          previewSetTooltipBySlashCommand
+        SLASH_COMMANDS["/lsp"] =            previewSetTooltipBySlashCommand
+    end
 end
 
 ------------------------------------------------------------------------------------------------------------------------
