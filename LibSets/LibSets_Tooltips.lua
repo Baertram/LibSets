@@ -1497,6 +1497,7 @@ local function createPreviewTooltipAndShow(setId)
     d(libPrefix .."Preview tooltip of setId \'".. tos(setId) .."\': " ..itemLink)
     ZO_PopupTooltip_SetLink(itemLink)
 end
+lib.CreatePreviewTooltipAndShow = createPreviewTooltipAndShow
 
 local allSetNamesCached
 local function previewSetTooltipBySlashCommand(args)
@@ -1552,6 +1553,7 @@ local function previewSetTooltipBySlashCommand(args)
     if setId == nil then return end
     createPreviewTooltipAndShow(setId)
 end
+
 
 local function createSetTooltipPreviewSlashCommand()
     if not lib.libSlashCommander then

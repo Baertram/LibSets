@@ -39,15 +39,14 @@ LibSets_Data_All.lua
 ##-->Currently disabled!
 ##LibSets_Data_$(APIVersion).lua
 
-##Optional: If library LibSlashCommander is loaded: Chat auto completion for set names
-LibSets_AutoCompletion.lua
-
 ##Functions and base library code
 LibSets.lua
 
 ##Tooltip functions
 LibSets_Tooltips.lua
 
+##Optional: If library LibSlashCommander is loaded: Chat auto completion for set names
+LibSets_AutoCompletion.lua
 
 ##Debug functions
 LibSets_Debug.lua

@@ -25,7 +25,7 @@ local cachedSetNames
 
 local getSetName
 local getAllSetNames
-
+local createPreviewTooltipAndShow = lib.CreatePreviewTooltipAndShow
 
 ------------------------------------------------------------------------
 -- 	Helper functions
@@ -86,7 +86,9 @@ function lib.buildAutoComplete(command, langToUse)
                     setSubCommand:AddAlias(setNameNoSpaces)
                     setSubCommand:SetDescription(langUpper)
                     setSubCommand:SetCallback(function(input)
-                        StartChatInput(input)
+                        --StartChatInput(input)
+                        createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
+                        createPreviewTooltipAndShow(setId)
                     end)
                     --Get the translated zone names
                     local otherLanguagesSetName                     = {} -- Only a temp table
@@ -102,7 +104,7 @@ function lib.buildAutoComplete(command, langToUse)
                     if #otherLanguagesSetName >= 1 then
                         local langStr = ""
                         for langIdx, cleanTranslatedSetName in ipairs(otherLanguagesSetName) do
-                            local lang = supportedLanguages[langIdx]
+                            local lang = supportedLanguagesIndex[langIdx]
                             local upperLangStr = localization[langToUse][lang]
                             if otherLanguagesNoDuplicateSetName[cleanTranslatedSetName] == nil then
                                 langStr = ""
