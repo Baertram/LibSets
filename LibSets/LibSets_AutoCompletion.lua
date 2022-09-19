@@ -76,14 +76,15 @@ function lib.buildAutoComplete(command, langToUse)
         local langUpper = localization[langToUse][langToUse]
         for setId, setLanguagesData in pairs(cachedSetNames) do
             local setNameInClientLang = setLanguagesData[clientLang]
-            --Replace the spaces in the zone name so LibSlashCommander will find them with the auto complete properly
+            --Replace the spaces in the set name so LibSlashCommander will find them with the auto complete properly
             --try to use %s instead of just a space. if that doesn't work use [\t-\r ] instead
             local setNameNoSpaces = strgsub(setNameInClientLang, "%s+", repStr)
             if setNameNoSpaces == "" then setNameNoSpaces = setNameInClientLang end
             if not command:HasSubCommandAlias(setNameNoSpaces) then
                 --Add a setName entry as subcommand so the first auto complete will show all set names as the user types /lsp into chat
                 local setSubCommand = command:RegisterSubCommand()
-                setSubCommand:AddAlias(setNameNoSpaces)
+                --setSubCommand:AddAlias(setNameNoSpaces)
+                setSubCommand:AddAlias(setNameNoSpaces .. " (ID: " ..tos(setId)..")")
                 setSubCommand:SetDescription(langUpper)
                 setSubCommand:SetCallback(function(input)
                     --StartChatInput(input)
