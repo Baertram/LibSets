@@ -51,18 +51,7 @@ setsOfNewerAPIVersion = {
     --....
     --setIds not yet on live server - END
 
-    --setIds of APIversion 101035 Lost Depths
-    [1] = 660,
-    [2] = 661,
-    [3] = 662,
-    [4] = 663,
-    [5] = 664,
-    [6] = 665,
-    [7] = 666,
-    [8] = 667,
-    [9] = 668,
-    [10] = 669,
-    [11] = 670,
+    --setIds of APIversion 101036 ???
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
 ---------------------------------------------------------------------------------------------------------------------------

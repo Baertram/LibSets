@@ -16,15 +16,16 @@ local EM = EVENT_MANAGER
 
 local tos = tostring
 local strgmatch = string.gmatch
---local strlower = string.lower
+local strlower = string.lower
 --local strlen = string.len
 local strfind = string.find
 local strgsub = string.gsub
 --local strfor = string.format
 
-local tins = table.insert
+--local tins = table.insert
 --local trem = table.remove
 local tsort = table.sort
+local tconcat = table.concat
 --local unp = unpack
 local zostrfor = zo_strformat
 --local zocstrfor = ZO_CachedStrFormat
@@ -82,9 +83,13 @@ local undauntedChestTexture =               setTypeToTexture["undaunted chest"]
 local setTypeToDropZoneLocalizationStr =    lib.setTypeToDropZoneLocalizationStr
 local getDropMechanicName =                 lib.GetDropMechanicName
 
+local lib_buildItemLink = lib.buildItemLink
+local lib_getSetItemId = lib.GetSetItemId
+local lib_getAllSetNames = lib.GetAllSetNames
 
 local clientLang =      lib.clientLang
 local fallbackLang =    lib.fallbackLang
+local doesClientLangEqualFallbackLang = (clientLang == fallbackLang and true) or false
 local localization         =    lib.localization[clientLang]
 local dropLocationZonesStr =    localization.dropZones
 --local dlcStr =                  localization.dlc
@@ -102,6 +107,13 @@ local dropMechanicStr =         localization.dropMechanic
 local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 local undauntedChestStr =       localization.undauntedChest
 local undauntedChestIdNames =   lib.undauntedChestIds[clientLang]
+
+local isJewelryEquipType =      lib.isJewelryEquipType
+local isWeaponEquipType =       lib.isWeaponEquipType
+local isArmorEquipType =        lib.isArmorEquipType
+local isJewelryTraitType =      lib.isJewelryTraitType
+local isWeaponTraitType =       lib.isWeaponTraitType
+local isArmorTraitType =        lib.isArmorTraitType
 
 local monsterSetTypes = {
     [LIBSETS_SETTYPE_MONSTER] =                 true,
@@ -179,6 +191,10 @@ local dropZonesPlaceholder = false
 local bossNamePlaceholder = false
 local neededTraitsPlaceholder = false
 local dlcNamePlaceHolder = false
+
+
+--Variables for set preview tooltip
+local setPreviewTooltipSV
 
 
 --Functions
@@ -599,7 +615,7 @@ local function getSetDropMechanicInfo(setData)
         --Add the drop mechanic drop location text (if given)
         if dropMechanicDropLocationNamesOfSet ~= nil and dropMechanicDropLocationNamesOfSet[p_idx] then
             local dropMechanicDropLocationNameOfZone = dropMechanicDropLocationNamesOfSet[p_idx][clientLang]
-            if (dropMechanicDropLocationNameOfZone == nil or dropMechanicDropLocationNameOfZone == "") and fallbackLang ~= clientLang then
+            if (dropMechanicDropLocationNameOfZone == nil or dropMechanicDropLocationNameOfZone == "") and not doesClientLangEqualFallbackLang then
                 dropMechanicDropLocationNameOfZone = dropMechanicDropLocationNamesOfSet[p_idx][fallbackLang]
             end
             if dropMechanicDropLocationNameOfZone ~= nil then
@@ -1433,6 +1449,117 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
 end
 
 
+
+------------------------------------------------------------------------------------------------------------------------
+-- Tooltip preview
+------------------------------------------------------------------------------------------------------------------------
+local function getLibSetsSetPreviewTooltipSavedVariables()
+    if not lib.svData then return end
+    return lib.svData.setPreviewTooltips
+end
+
+local function createPreviewTooltipAndShow(setId)
+    if popupTooltip and not popupTooltip:IsControlHidden() then
+        ZO_PopupTooltip_Hide()
+    end
+    if setId == nil or setId <= 0 then return end
+
+    local equipType =                   setPreviewTooltipSV.equipType
+    local traitType =                   setPreviewTooltipSV.traitType
+    local enchantSearchCategoryType =   setPreviewTooltipSV.enchantSearchCategoryType
+    local quality =                     setPreviewTooltipSV.quality
+
+    --If the setId only got 1 itemId this function returns this itemId of the setId provided.
+    --If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
+    --If the 2nd parameter equipType is not specified: The first random itemId found will be returned
+    --If the 2nd parameter equipType is specified:  Each itemId of the setId will be turned into an itemLink where the given equipType is checked against.
+    --If the 3rd to ... parameter *Type is specified: Each itemId of the setId will be turned into an itemLink where the given *type is cheched against.
+    --Only the itemId where the parameters fits will be returned. Else the return value will be nil
+    --> Parameters: setId number: The set's setId
+    -->             equipType optional number: The equipType to check the itemId against
+    -->             traitType optional number: The traitType to check the itemId against
+    -->             enchantSearchCategoryType optional EnchantmentSearchCategoryType: The enchanting search category to check the itemId against
+    --> Returns:    number setItemId
+    local setItemIdOfPferedCriteria = lib_getSetItemId(setId, equipType, traitType, enchantSearchCategoryType)
+    if setItemIdOfPferedCriteria == nil or setItemIdOfPferedCriteria <= 0 then
+        --Maybe this set does not provide any chosen armor/weapon/jewelry equip type, trait or enchantment?
+        --Return any generic setId's itemlink for the equipType
+        setItemIdOfPferedCriteria = lib_getSetItemId(setId, equipType)
+        if setItemIdOfPferedCriteria == nil or setItemIdOfPferedCriteria <= 0 then
+            --If this still fails return any!
+            setItemIdOfPferedCriteria = lib_getSetItemId(setId)
+        end
+    end
+    if setItemIdOfPferedCriteria == nil or setItemIdOfPferedCriteria <= 0 then return end
+
+    local itemLink = lib_buildItemLink(setItemIdOfPferedCriteria, quality)
+    if itemLink == nil or itemLink == "" then return end
+    d(libPrefix .."Preview tooltip of setId \'".. tos(setId) .."\': " ..itemLink)
+    ZO_PopupTooltip_SetLink(itemLink)
+end
+
+local allSetNamesCached
+local function previewSetTooltipBySlashCommand(args)
+    if args == nil or args == "" then return end
+
+    --Parse the arguments string
+    local options = {}
+    --local searchResult = {} --old: searchResult = { string.match(args, "^(%S*)%s*(.-)$") }
+    for param in strgmatch(args, "([^%s]+)%s*") do
+        if (param ~= nil and param ~= "") then
+            options[#options+1] = strlower(param)
+        end
+    end
+
+    local options1Number = tonumber(options[1])
+    local setId
+    if options1Number ~= nil and type(options1Number) == "number" then
+        --Search by setId
+        setId = options1Number
+    else
+        --Search by set name
+        local setName = args --tconcat(options, " ") --concatenate the string
+--d("SetName: " ..tos(setName))
+        if setName == nil or setName == "" then return end
+        --Get the set names of all sets, in all languages
+
+        if not LibSlashCommander then
+            allSetNamesCached = allSetNamesCached or lib_getAllSetNames()
+            --Search the set's ID by it's provided criteria "name", first start with the client language
+            for setIdOfSearchedData, setNameOfEachLanguage in pairs(allSetNamesCached) do
+                local setNameInClientLang = strlower(setNameOfEachLanguage[clientLang])
+                if setNameInClientLang ~= nil and setNameInClientLang ~= "" and (
+                        setNameInClientLang == setName or strfind(setNameInClientLang, setName, 1, true) ~= nil
+                ) then
+                    setId = setIdOfSearchedData
+                    break --end the loop
+                else
+                    if not doesClientLangEqualFallbackLang then
+                        local setNameInFallbackLang = strlower(setNameOfEachLanguage[fallbackLang])
+                        if setNameInFallbackLang ~= nil and setNameInFallbackLang ~= "" and (
+                                setNameInFallbackLang == setName or strfind(setNameInFallbackLang, setName, 1, true) ~= nil
+                        ) then
+                            setId = setIdOfSearchedData
+                            break --end the loop
+                        end
+                    end
+                end
+            end
+        --else
+            --Use LibSlashCommander for the set names and search: See file LibSets_AutoCompletion
+        end
+    end
+    if setId == nil then return end
+    createPreviewTooltipAndShow(setId)
+end
+
+local function createSetTooltipPreviewSlashCommand()
+    SLASH_COMMANDS["/libsetspreview"] = previewSetTooltipBySlashCommand
+    SLASH_COMMANDS["/setpreview"] =     previewSetTooltipBySlashCommand
+    SLASH_COMMANDS["/setsp"] =          previewSetTooltipBySlashCommand
+    SLASH_COMMANDS["/lsp"] =            previewSetTooltipBySlashCommand
+end
+
 ------------------------------------------------------------------------------------------------------------------------
 -- EVENTs
 ------------------------------------------------------------------------------------------------------------------------
@@ -1443,7 +1570,15 @@ local function onPlayerActivatedTooltips()
     clientLang = clientLang or lib.clientLang
     localization = localization or lib.localization[clientLang]
 
-    --Get the settngs for the tooltips
+    --Get the settings for the set preview tooltip
+    --Create the slash command
+    setPreviewTooltipSV = getLibSetsSetPreviewTooltipSavedVariables()
+    if not lib.svData or not setPreviewTooltipSV then return end
+    createSetTooltipPreviewSlashCommand()
+
+
+
+    --Get the settings for the tooltips
     tooltipSV = getLibSetsTooltipSavedVariables()
     if not lib.svData or not tooltipSV then return end
 
