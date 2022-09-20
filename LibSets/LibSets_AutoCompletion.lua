@@ -96,7 +96,7 @@ function lib.buildAutoComplete(command, langToUse)
                 local setSubCommand = command:RegisterSubCommand()
                 --setSubCommand:AddAlias(setNameNoSpaces)
                 setSubCommand:AddAlias(setNameNoSpaces)
-                setSubCommand:SetDescription(langUpper)
+                setSubCommand:SetDescription(langUpper .. " (ID: " ..tos(setId)..")")
                 setSubCommand:SetCallback(function(input)
                     --StartChatInput(input)
                     createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
