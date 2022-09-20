@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.49
+local MAJOR, MINOR = "LibSets", 0.50
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -46,7 +46,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101035 --Lost Depths, 2022-07-16
+lib.lastSetsPreloadedCheckAPIVersion = 101036 --Firesong, (2022-09-20, PTS, API 101036)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -65,7 +65,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101035 --Lost Depths, 2022-07-16
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101035 -- Lost Depths (2022-07-16, PTS, API 101035)
+APIVersions["PTS"]                   = 101036 -- Firesong (2022-09-20, PTS, API 101036)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
