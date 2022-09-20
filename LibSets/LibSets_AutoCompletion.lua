@@ -76,7 +76,10 @@ function lib.buildAutoComplete(command, langToUse)
             createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
             local setId = tonumber(input)
             if setId ~= nil and type(setId) == "number" then
-                createPreviewTooltipAndShow(setId)
+                local itemLink = createPreviewTooltipAndShow(setId)
+                if itemLink ~= nil then
+                    StartChatInput(itemLink)
+                end
             end
         end)
 
@@ -98,9 +101,11 @@ function lib.buildAutoComplete(command, langToUse)
                 setSubCommand:AddAlias(setNameNoSpaces)
                 setSubCommand:SetDescription(langUpper .. " (ID: " ..tos(setId)..")")
                 setSubCommand:SetCallback(function(input)
-                    --StartChatInput(input)
                     createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
-                    createPreviewTooltipAndShow(setId)
+                    local itemLink = createPreviewTooltipAndShow(setId)
+                    if itemLink ~= nil then
+                        StartChatInput(itemLink)
+                    end
                 end)
                 --Get the translated zone names
                 local otherLanguagesSetName                     = {} -- Only a temp table

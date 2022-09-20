@@ -1494,8 +1494,9 @@ local function createPreviewTooltipAndShow(setId)
 
     local itemLink = lib_buildItemLink(setItemIdOfPferedCriteria, quality)
     if itemLink == nil or itemLink == "" then return end
-    d(libPrefix .."Preview tooltip of setId \'".. tos(setId) .."\': " ..itemLink)
+    d(libPrefix .."SetId \'".. tos(setId) .."\': " ..itemLink)
     ZO_PopupTooltip_SetLink(itemLink)
+    return itemLink
 end
 lib.CreatePreviewTooltipAndShow = createPreviewTooltipAndShow
 
