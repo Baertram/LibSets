@@ -453,6 +453,7 @@ local function LoadSavedVariables()
 
     --For the library settings like tooltips
     local defaults = {
+        --Tooltip set info
         modifyTooltips = false,
         tooltipModifications = {
             tooltipTextures = true,
@@ -465,6 +466,14 @@ local function LoadSavedVariables()
             addDLC          = true,
         },
         useCustomTooltipPattern = "",
+
+        --Created tooltip for set preview
+        setPreviewTooltips = {
+            equipType = EQUIP_TYPE_CHEST,
+            traitType = ITEM_TRAIT_TYPE_ARMOR_DIVINES,
+            enchantSearchCategoryType = ENCHANTMENT_SEARCH_CATEGORY_NONE,
+            quality = 370, --legendary
+        }
     }
     lib.defaultSV = defaults
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
@@ -1606,6 +1615,7 @@ function lib.GetAllSetIds()
     if not checkIfSetsAreLoadedProperly() then return end
     return lib.setIds
 end
+local lib_GetAllSetIds = lib.GetAllSetIds
 
 --Returns all sets itemIds as table. Key is the setId, value is a subtable with the key=itemId and value = boolean value true.
 --> Returns: setItemIds table
@@ -1642,6 +1652,7 @@ function lib.GetSetItemIds(setId, isNoESOSetId)
     if setItemIds == nil then return end
     return setItemIds
 end
+local lib_GetSetItemIds = lib.GetSetItemIds
 
 --If the setId only got 1 itemId this function returns this itemId of the setId provided.
 --If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
@@ -1673,7 +1684,7 @@ function lib.GetSetItemId(setId, equipType, traitType, enchantSearchCategoryType
         enchantSearchCategoryTypeValid = enchantSearchCategoryTypesValid[enchantSearchCategoryType] or false
     end
 
-    local setItemIds = lib.GetSetItemIds(setId)
+    local setItemIds = lib_GetSetItemIds(setId)
     if not setItemIds then return end
 
     local needItemLinkOfItemId = (equipTypeValid == true or traitTypeValid == true or enchantSearchCategoryTypeValid == true) or false
@@ -1752,25 +1763,30 @@ function lib.GetSetNames(setId)
     if setNames[setId] == nil then return end
     return setNames[setId]
 end
+local lib_GetSetNames = lib.GetSetNames
 
 --Returns all sets names as table.
 --The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.
 --{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
 --> Returns: setNames table
+local allSetNamesCached
 function lib.GetAllSetNames()
     if not checkIfSetsAreLoadedProperly() then return end
-    local setNames = {}
-    local setIds = lib.GetAllSetIds()
-    if not setIds then return end
-    for setId, isActive in pairs(setIds) do
-        if isActive == true then
-            local setNamesOfSetId = lib.GetSetNames(setId)
-            if setNamesOfSetId then
-                setNames[setId] = setNamesOfSetId
+    if allSetNamesCached == nil then
+        local setNames = {}
+        local setIds = lib_GetAllSetIds()
+        if not setIds then return end
+        for setId, isActive in pairs(setIds) do
+            if isActive == true then
+                local setNamesOfSetId = lib_GetSetNames(setId)
+                if setNamesOfSetId then
+                    setNames[setId] = setNamesOfSetId
+                end
             end
         end
+        allSetNamesCached = setNames
     end
-    return setNames
+    return allSetNamesCached
 end
 
 --Returns the set info as a table
@@ -3023,6 +3039,7 @@ local function onLibraryLoaded(event, name)
     libZone = LibZone
     lib.libZone = libZone
     lib.libAddonMenu = LibAddonMenu2
+    lib.libSlashCommander = LibSlashCommander
 
     --The actual API version
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
@@ -3070,6 +3087,10 @@ local function onLibraryLoaded(event, name)
         --work properly now
         lib.fullyLoaded = true
 
+
+        --Optional: Build the libSlashCommander autocomplete stuff, if LibSlashCommander is present and activated
+        -->See file LibSet_AutoCompletion.lua
+        lib.buildLSCSetSearchAutoComplete()
 
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO

@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.47
+local MAJOR, MINOR = "LibSets", 0.49
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -43,9 +43,10 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
--->Update here after a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
+-->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
-lib.lastSetsPreloadedCheckAPIVersion = 101034 --Ascending Tide, 2022-02-12
+---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
+lib.lastSetsPreloadedCheckAPIVersion = 101035 --Lost Depths, 2022-07-16
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -64,7 +65,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101034 --Ascending Tide, 2022-02-12
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101034 -- High Isle (2022-04-20, PTS, API 101034)
+APIVersions["PTS"]                   = 101035 -- Lost Depths (2022-07-16, PTS, API 101035)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,12 +92,23 @@ lib.fallbackLang               = fallbackLang
 local supportedLanguages       = {
     ["de"] = true,
     ["en"] = true,
-    ["es"] = false, --TODO not yet supported as only on PTS!
+    ["es"] = true,
     ["fr"] = true,
     ["ru"] = true,
-    ["jp"] = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath
+    ["jp"] = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath e.g.
 }
 lib.supportedLanguages         = supportedLanguages
+local supportedLanguagesIndex = {
+    [1] = "de",
+    [2] = "en",
+    [3] = "es",
+    [4] = "fr",
+    [5] = "ru",
+    --[6] = "jp", --TODO: Working on: Waiting for SetNames & other translations by Calamath e.g.
+}
+lib.supportedLanguagesIndex         = supportedLanguagesIndex
+
+
 local numSupportedLangs        = 0
 for _, isSupported in pairs(supportedLanguages) do
     if isSupported == true then numSupportedLangs = numSupportedLangs + 1 end
@@ -430,6 +442,22 @@ lib.isWeaponEquipType               = {
     [EQUIP_TYPE_ONE_HAND]  = true,
     [EQUIP_TYPE_TWO_HAND]  = true,
 }
+--Armor
+lib.isArmorEquipType               = {
+    [EQUIP_TYPE_CHEST]     = true,
+    [EQUIP_TYPE_FEET]      = true,
+    [EQUIP_TYPE_HAND]      = true,
+    [EQUIP_TYPE_HEAD]      = true,
+    [EQUIP_TYPE_LEGS]      = true,
+    [EQUIP_TYPE_MAIN_HAND] = true,
+    [EQUIP_TYPE_NECK]      = true,
+    [EQUIP_TYPE_OFF_HAND]  = true,
+    [EQUIP_TYPE_ONE_HAND]  = true,
+    [EQUIP_TYPE_RING]      = true,
+    [EQUIP_TYPE_SHOULDERS] = true,
+    [EQUIP_TYPE_TWO_HAND]  = true,
+    [EQUIP_TYPE_WAIST]     = true,
+}
 
 --The trait types valid for set items
 lib.traitTypesValid                 = {
@@ -473,6 +501,51 @@ lib.traitTypesValid                 = {
     [ITEM_TRAIT_TYPE_WEAPON_SHARPENED]     = true,
     [ITEM_TRAIT_TYPE_WEAPON_TRAINING]      = true,
 }
+--The trait type check tables
+--Jewelry
+lib.isJewelryTraitType              = {
+    [ITEM_TRAIT_TYPE_JEWELRY_ARCANE]       = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY] = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_HARMONY]      = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_HEALTHY]      = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_INFUSED]      = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_INTRICATE]    = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_ORNATE]       = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE]   = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_ROBUST]       = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_SWIFT]        = true,
+    [ITEM_TRAIT_TYPE_JEWELRY_TRIUNE]       = true,
+}
+--Weapons
+lib.isWeaponTraitType               = {
+    [ITEM_TRAIT_TYPE_WEAPON_CHARGED]       = true,
+    [ITEM_TRAIT_TYPE_WEAPON_DECISIVE]      = true,
+    [ITEM_TRAIT_TYPE_WEAPON_DEFENDING]     = true,
+    [ITEM_TRAIT_TYPE_WEAPON_INFUSED]       = true,
+    [ITEM_TRAIT_TYPE_WEAPON_INTRICATE]     = true,
+    [ITEM_TRAIT_TYPE_WEAPON_NIRNHONED]     = true,
+    [ITEM_TRAIT_TYPE_WEAPON_ORNATE]        = true,
+    [ITEM_TRAIT_TYPE_WEAPON_POWERED]       = true,
+    [ITEM_TRAIT_TYPE_WEAPON_PRECISE]       = true,
+    [ITEM_TRAIT_TYPE_WEAPON_SHARPENED]     = true,
+    [ITEM_TRAIT_TYPE_WEAPON_TRAINING]      = true,
+}
+--Armor
+lib.isArmorTraitType               = {
+    [ITEM_TRAIT_TYPE_ARMOR_DIVINES]        = true,
+    [ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE]   = true,
+    [ITEM_TRAIT_TYPE_ARMOR_INFUSED]        = true,
+    [ITEM_TRAIT_TYPE_ARMOR_INTRICATE]      = true,
+    [ITEM_TRAIT_TYPE_ARMOR_NIRNHONED]      = true,
+    [ITEM_TRAIT_TYPE_ARMOR_ORNATE]         = true,
+    [ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS]     = true,
+    [ITEM_TRAIT_TYPE_ARMOR_REINFORCED]     = true,
+    [ITEM_TRAIT_TYPE_ARMOR_STURDY]         = true,
+    [ITEM_TRAIT_TYPE_ARMOR_TRAINING]       = true,
+    [ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED]    = true,
+}
+
+
 --The enchanting EnchantmentSearchCategoryType that are valid
 lib.enchantSearchCategoryTypesValid = {
     --Not allowed
@@ -895,6 +968,13 @@ local dungeonStr                 = GetString(SI_INSTANCEDISPLAYTYPE2)
 local setTypeArenaName           = setTypesToName[LIBSETS_SETTYPE_ARENA]
 lib.localization                 = {
     ["de"] = {
+        de                             = "Deutsch",
+        en                              = "Englisch",
+        fr                              = "Französisch",
+        jp                              = "Japanisch",
+        ru                              = "Russisch",
+        pl                              = "Polnisch",
+        es                              = "Spanisch",
         dlc                      = "Kapitel/DLC",
         dropZones                = "Drop Zonen",
         dropZoneArena            = setTypeArenaName["de"],
@@ -913,8 +993,17 @@ lib.localization                 = {
         defaultTooltipPattern_TT = "Nutze die Auswahlfelder um die entsprechende Information über die Set Gegenstände im Gegenstandstooltip anzuzeigen.\nDas standard Ausgabeformat ist:\n\n\<Symbol><Set Art Name> <wenn handwerklich herstellbar: (Eigenschaften benötigt)/wenn nicht Handwerklich herstellbar: (Rekonstruktionskosten)>\n<Drop Zonen Info> [bestehend aus <ZonenName> (<DropMechanik>: <DropMechanikDropName>)]\<DLC Name>\nWenn alle Zonen identisch sind werden DropMechanic und Ort/Boss Namen ; getrennt als 1 Zeile ausgegeben.",
         customTooltipPattern     = "Selbst definierter Tooltip Text",
         customTooltipPattern_TT  = "Definiere deinen eigenen Tooltip Text, inklusive vor-definierter Platzhalter. Beispiel: \'Art <<1>>/Drop <<2>> <<3>> <<4>>\'.\nLasse dieses Textfeld leer, um den eigenen Tooltip Text zu deaktivieren!\nPlatzhalter müssen mit << beginnen, danach folt eine 1stellige Nummer, und beendet werden diese mit >>, z.B. <<1>> oder <<5>>. Es gibt maximal 6 Platzhalter in einem Text. Zeilenumbruch: <br>\n\nMögliche Platzhalter sind:\n<<1>>   Set Art\n<<2>>   Drop Mechaniken [können mehrere \',\' getrennte sein, je Zone 1]\n<<3>>   Drop Zonen [können mehrere \',\' getrennte sein, je Zone 1] Sind alle Zonen identisch wird nur 1 ausgegeben\n<<4>>   Boss/Drop durch Namen [können mehrere \',\' getrennte sein, je Zone 1]\n<<5>>   Benötigte Anzahl analysierter Eigenschaten, oder Rekonstruktionskosten\n<<6>>   Kapitel/DLC Name mit dem das Set eingeführt wurde.\n\n|cFF0000Achtung|r: Wenn du einen ungültigen Tooltip Text, ohne irgendeinen <<Nummer>> Platzhalter, eingibst wird sich das Textfeld automatisch selber leeren!",
+        slashCommandDescription         = "Suche übersetzte Set Namen",
+        slashCommandDescriptionClient   = "Suche Set ID/Namen (Spiel Sprache)",
     },
     ["en"] = {
+        de  = "German",
+        en  = "English",
+        fr  = "French",
+        jp  = "Japanese",
+        ru  = "Russian",
+        pl  = "Polish",
+        es  = "Spanish",
         dlc                      = "Chapter/DLC",
         dropZones                = "Drop zones",
         dropZoneDelve            = GetString(SI_INSTANCEDISPLAYTYPE7),
@@ -948,8 +1037,17 @@ lib.localization                 = {
         defaultTooltipPattern_TT = "Use the checkboxes to add this information about set items at the item tooltips.\nThe default output format is:\n\n<texture><set type name> <if craftable set: (traits needed)/if not craftable: (reconstruction costs)>\n<Drop zone info> [containing <zoneName> (<dropMechanic>: dropMechanicDropLocation>)]\n<DLC name>\nIf all zones are the same the dropMechanic and locatiton/boss names will be added as 1 line ; separated.",
         customTooltipPattern     = "Custom tooltip text",
         customTooltipPattern_TT  = "Define your own custom tooltip text, including the possibility to use some pre-defined placeholders in your text. Example: \'Type <<1>>/Drops <<2>> <<3>> <<4>>\'.\nLeave the text field empty to disable this custom tooltip!\nPlaceholders need to start with prefix << followed by a 1 digit number and a suffix of >>, e.g. <<1>> or <<5>>.\nThere can be only a maximum of 6 placeholders in the text. Line break: <br>\n\nBelow you'll find the possible placeholders:\n<<1>>   Set type\n<<2>>   Drop mechanics [could be several, for each zone, separated by \',\']\n<<3>>   Drop zones [could be several, for each zone, separated by \',\'] If all zones are the same they will be condensed\n<<4>>   Boss/Dropped by names [could be several, for each zone, separated by \',\']\n<<5>>   Number of needed traits researched, or reconstruction costs\n<<6>>   Chapter/DLC name set was introduced with.\n\n|cFF0000Attention|r: If you enter an invalid tooltip text, without any <<number>> placeholder the editfield will automatically clear itsself!",
+        slashCommandDescription         = "Search translations of set names",
+        slashCommandDescriptionClient   = "Search set ID/names (game client language)",
     },
     ["es"] = {
+        de  = "Alemán",
+        en  = "Inglés",
+        fr  = "Francés",
+        jp  = "Japonés",
+        ru  = "Ruso",
+        pl  = "Polaco",
+        es  = "Español",
         dlc                    = "Capítulo/DLC",
         dropZones              = "Zonas de caída",
         dropZoneArena          = setTypeArenaName["es"],
@@ -961,6 +1059,13 @@ lib.localization                 = {
         modifyTooltip          = "Mejorar información sobre herramientas por información de conjunto",
     },
     ["fr"] = {
+        de  = "Allemand",
+        en  = "Anglais",
+        fr  = "Français",
+        jp  = "Japonais",
+        ru  = "Russe",
+        pl  = "Polonais",
+        es  = "Espagnol",
         dlc                    = "Chapitre/DLC",
         dropZones              = "Zones de largage",
         dropZoneArena          = setTypeArenaName["fr"],
@@ -970,8 +1075,17 @@ lib.localization                 = {
         dropMechanic           = "Mécanique de largage",
         undauntedChest         = "Poitrine de " .. undauntedStr,
         modifyTooltip          = "Améliorer l'info-bulle par les informations sur l'ensemble",
+        slashCommandDescription = "Rechercher des traductions de noms de sets",
+        slashCommandDescriptionClient = "Rechercher des IDs/noms de sets (langue du jeu)",
     },
     ["ru"] = {
+        de  = "Нeмeцкий",
+        en  = "Aнглийcкий",
+        fr  = "Фpaнцузcкий",
+        jp  = "Япoнcкий",
+        ru  = "Pуccкий",
+        pl  = "польский",
+        es  = "испанский",
         dlc                    = "Глава/DLC",
         dropZones              = "Зоны сброса",
         dropZoneArena          = setTypeArenaName["ru"],
@@ -981,8 +1095,17 @@ lib.localization                 = {
         dropMechanic           = "Механика падения",
         undauntedChest         = undauntedStr .. " грудь",
         modifyTooltip          = "Улучшить всплывающую подсказку с помощью информации о наборе элементов",
+        slashCommandDescription = "Найти переводы названий наборов",
+        slashCommandDescriptionClient = "Поиск по названию набора (язык игры)",
     },
     ["jp"] = {
+        de  = "ドイツ語",
+        en  = "英語",
+        fr  = "フランス語",
+        jp  = "日本語",
+        ru  = "ロシア",
+        pl  = "ポーランド語",
+        es  = "スペイン語",
         dlc                    = "チャプター/ DLC",
         dropZones              = "ドロップゾーン",
         dropZoneArena          = setTypeArenaName["jp"],
@@ -992,6 +1115,8 @@ lib.localization                 = {
         dropMechanic           = "ドロップメカニック",
         undauntedChest         = undauntedStr .. " 胸",
         modifyTooltip          = "アイテムセット情報によるツールチップの強化",
+        slashCommandDescription = "セット名の翻訳を検索",
+        slashCommandDescriptionClient = "セット名の検索 (ゲーム言語)",
     },
 }
 

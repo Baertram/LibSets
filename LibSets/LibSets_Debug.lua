@@ -231,10 +231,13 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
     --Combine the preloaded setItemIds with new ones from the SV?
     local tableToProcess = {}
     if combineFromSV == true then
-        --setIdTable -> lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
-        --SV table of all new itemIds scanned: lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS]
         LoadSavedVariables()
         svLoadedAlready = true
+        --setIdTable -> lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+        --SV table of all new itemIds scanned: lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] -> Might have been cleared already again due to
+        --itemIds having been compressed already!
+        --The compressed itemIds of new scanned set itemIds are found here:
+        --SV table of all new itemIds scanned AND compressed lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
         local loadedCompressedSetItemIdsFromSV = lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
 --lib._loadedCompressedSetItemIdsFromSV = loadedCompressedSetItemIdsFromSV
         MyCombineNonContiguousTables(tableToProcess, setIdTable, loadedCompressedSetItemIdsFromSV)
@@ -292,6 +295,8 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
                 --if newSetIdToCheckStr ~= nil and newSetIdToCheckStr ~= "" then
                 --    newSetIdToCheck = ton(newSetIdToCheckStr)
                 if newSetIdToCheck ~= nil then
+                    --Is the setId of a scaned newSetId (from debug SavedVariables NewSetIDs) already the same as an entry in the above scanned
+                    --newSetIdsFound table (from debug SavedVariables setItemIds_Compressed): Then skip it
                     for _, newSetIdLoadedBefore in ipairs(newSetIdsFound) do
 --d(">>>newSetIdToCheck: " ..tos(newSetIdToCheck) .. ", newSetIdLoadedBefore: " ..tos(newSetIdLoadedBefore))
                         if newSetIdToCheck == newSetIdLoadedBefore then
@@ -321,28 +326,42 @@ local function getAllSetItemIds()
 end
 
 --This function will reset all SavedVariables to nil (empty them) to speed up the loading of the library
-function lib.DebugResetSavedVariables(noReloadInfo)
+function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
+    onlyNames = onlyNames or false
     noReloadInfo = noReloadInfo or false
+    local onlyNamesText = (not onlyNames and "") or " of names"
     LoadSavedVariables()
-    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
-    --lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
-    --lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
-    lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
-    d("[" .. MAJOR .. "]Cleared all SavedVariables in file \'" .. MAJOR .. ".lua\'.")
+    if onlyNames == true then
+        lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+
+    else
+        lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]   = nil
+        --lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR]         = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]   = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETS_JEWELRY]       = nil
+        --lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS]       = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = nil
+
+        lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+    end
+    d("[" .. MAJOR .. "]Cleared all SavedVariables".. onlyNamesText .." in file \'" .. MAJOR .. ".lua\'.")
     if noReloadInfo == true then return end
     d(">Please do a /reloadui or logout to update the SavedVariables data now!")
 end
@@ -390,13 +409,14 @@ local debugGetAllMapNames = lib.DebugGetAllMapNames
 ------------------------------------------------------------------------------------------------------------------------
 -- Scan for wayshrines -> Save them in the SavedVariables "wayshrines"
 --> You need to open a map (zone map, no city or sub-zone maps!) in order to let the function work properly
+--> It will not get all wayshrines of ALL maps, only the currently opened one!
 ------------------------------------------------------------------------------------------------------------------------
 --Returns a list of the wayshrine data (nodes) in the current client language and saves it to the SavedVars table "wayshrines" in this format:
 --wayshrines[i] = wayshrineNodeId .."|"..currentMapIndex.."|"..currentMapId.."|"..currentMapNameLocalizedInClientLanguage.."|"
 --..currentMapsZoneIndex.."|"..currentZoneId.."|"..currentZoneNameLocalizedInClientLanguage.."|"..wayshrinesPOIType.."|".. wayshrineNameCleanLocalizedInClientLanguage
 -->RegEx to transfer [1]= "1|WayshrineNodeId|mapIndex|mapId|mapName|zoneIndex|zoneId|zoneName|POIType|wayshrineName", to 1|WayshrineNodeId|mapIndex|mapId|mapName|zoneIndex|zoneId|zoneName|POIType|wayshrineName:   \[\d*\] = \"(.*)\" -> replace with $1
 --->Afterwards put into excel and split at | into columns
-function lib.DebugGetAllWayshrineInfo()
+function lib.DebugGetAllWayshrineInfoOfCurrentMap()
     local delay = 0
     local wayshrinesAvailable = false
     if not ZO_WorldMap_IsWorldMapShowing() then
@@ -435,7 +455,7 @@ function lib.DebugGetAllWayshrineInfo()
         end, delay)
     end
 end
-local debugGetAllWayshrineInfo = lib.DebugGetAllWayshrineInfo
+local debugGetAllWayshrineInfoOfCurrentMap = lib.DebugGetAllWayshrineInfoOfCurrentMap
 
 --Returns a list of the wayshrine names in the current client language and saves it to the SavedVars table "wayshrineNames" in this format:
 --wayshrineNames[clientLanguage][wayshrineNodeId] = wayshrineNodeId .. "|" .. wayshrineLocalizedNameCleanInClientLanguage
@@ -1016,6 +1036,7 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
     local dungeonsAddedNormal = 0
     local dungeonsAddedVet = 0
     local dungeonsAdded = 0
+    local openDungeonFinderNow = false
     if dungeonFinder and dungeonFinder.navigationTree and dungeonFinder.navigationTree.rootNode then
         local dfRootNode = dungeonFinder.navigationTree.rootNode
         if dfRootNode.children then
@@ -1037,23 +1058,16 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
             end
         else
             if preventEndlessCallDungeonFinderData == true then
-                d("<Please open the dungeon finder and choose the \'Specifiy dungeon\' entry from the dropdown box at the top-right edge! Then try this function again.")
+                d("<Please open the dungeon finder and choose the \'Specific dungeon\' entry from the dropdown box at the top-right edge! Then try this function again.")
                 preventEndlessCallDungeonFinderData = false
                 return
             else
                 preventEndlessCallDungeonFinderData = true
-                --Open the group menu
-                GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment())
-                --Select entry "Sepcific dungeon" from dungeon dropdown
-                zo_callLater(function()
-                    ZO_DungeonFinder_KeyboardFilter.m_comboBox:SelectItemByIndex(3)
-
-                    lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
-                end, 250)
+                openDungeonFinderNow = true
             end
         end
     end
-    if retTableDungeons and #retTableDungeons>0 and dungeonsAdded >0 then
+    if not openDungeonFinderNow and retTableDungeons and #retTableDungeons > 0 and dungeonsAdded > 0 then
         LoadSavedVariables()
         lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = {}
         lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
@@ -1062,8 +1076,33 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
         d(">Please do a /reloadui to update the file properly!")
     else
         local noDataFoundText = "<No dungeon data was found!"
-        if preventEndlessCallDungeonFinderData == true then
-            noDataFoundText = noDataFoundText .. " Opening the group panel now, and selecting the \'Specific dungeon\' entry!"
+        if preventEndlessCallDungeonFinderData == true and openDungeonFinderNow == true then
+            --Select the category of the dungeon finder
+            --ZO_UI_SYSTEM_MANAGER:RequestOpenUISystem(UI_SYSTEM_DUNGEON_FINDER)
+            GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment()) --> TODO 20220715 Does not work anymore!!!???
+            --Open the group menu -> Should be done within GROUP_MENU_KEYBOARD:ShowCategory(categoryFragment)
+            if not KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
+              SCENE_MANAGER:Show("groupMenuKeyboard")
+            end
+            --[[
+            --Hide the currently shown fragment
+            if GROUP_MENU_KEYBOARD.currentCategoryFragment then
+                SCENE_MANAGER:RemoveFragment(GROUP_MENU_KEYBOARD.currentCategoryFragment)
+            end
+            local dungeonFinderKeyboardFragment = dungeonFinder:GetFragment()
+            SCENE_MANAGER:AddFragment(dungeonFinderKeyboardFragment)
+            GROUP_MENU_KEYBOARD.currentCategoryFragment = dungeonFinderKeyboardFragment
+            ]]
+            if not dungeonFinder or not dungeonFinder.navigationTree or not dungeonFinder.navigationTree.rootNode
+                    or not dungeonFinder.navigationTree.rootNode.children then
+                ZO_GroupMenu_KeyboardCategoriesScrollChildZO_GroupMenuKeyboard_StatusIconChildlessHeader3:OnMouseUp(MOUSE_BUTTON_INDEX_LEFT, true)
+            end
+            zo_callLater(function()
+                --Select entry "Sepcific dungeon" from dungeon dropdown
+                ZO_DungeonFinder_KeyboardFilter.m_comboBox:SelectItemByIndex(3)
+                --Redundant call to the same function
+                lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
+            end, 250)
         end
         d(noDataFoundText)
     end
@@ -1229,7 +1268,7 @@ local debugShowNewSetIds = lib.DebugShowNewSetIds
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames(noReloadInfo)
     noReloadInfo = noReloadInfo or false
-    --lib.DebugGetAllCollectibleNames(nil, nil, noReloadInfo)
+    debugGetAllCollectibleNames(nil, nil, noReloadInfo)
     d(">>>--------------->>>")
     debugGetAllCollectibleDLCNames(noReloadInfo)
     d(">>>--------------->>>")
@@ -1253,12 +1292,12 @@ local debugGetAllNames = lib.DebugGetAllNames
 --If the parameter resetApiData is true the current scanned data of the apiversion will be reset and all will be
 --scanned new again, includig the set itemIds.
 --If parameter noItemIds is true all data will be rescanned, excluding the itemIds
-
+--if the parameter onlyNames is true then only the name SavedVariables will be deleted and completely updated
 --todo: Find bug within GetAllSetNames -> New setNames in languages AFTER the clientLanguage where the setItemIds were scanned,
 --todo: do not update and just find "n/a" -> Somehow the setItemIds or setIds are missing and not read properly from SavedVariables
 --todo: (where they have been scanned to before) after the reladoui to next language
 
-function lib.DebugGetAllData(resetApiData, noItemIds)
+function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
     resetApiData = resetApiData or false
     noItemIds = noItemIds or false
 
@@ -1288,7 +1327,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds)
     d("[" .. MAJOR .. "]>>>DebugGetAllData START for API \'" ..  tos(apiVersion) .. "\' - newRun: " .. tos(newRun) .. ", resetApiData: " ..tos(resetApiData) .. ", noItemIds: " ..tos(noItemIds))
     if not alreadyFinished then
         if newRun == true then
-            debugResetSavedVariables(true)
+            debugResetSavedVariables(true, onlyNames)
             --If no itemIds are requested: Skip the scan
             if not noItemIds then
                 d(">>>--------------->>>")
@@ -1315,61 +1354,71 @@ function lib.DebugGetAllData(resetApiData, noItemIds)
 
             --Get all client language dependent data now
             --if not noItemIds then
-                debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
+            debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
             --end
             debugGetAllNames(true)
             d(">>>--------------->>>")
 
+            local delay = 0
             if newRun == true then
-                --Will open the dungeonfinder!
-                debugGetDungeonFinderData(true)
+                --Will open the group menu, then select "specific dungeon", delayed by 250ms after group menu open
+                debugGetDungeonFinderData(nil, true)
                 d(">>>--------------->>>")
                 --Will open the map and right click until at the current zone map
-                debugGetAllWayshrineInfo(true)
+                delay = 500
+                -->Delay by 500ms so that the dungeon finder data was collected properly
+                zo_callLater(function()
+                    debugGetAllWayshrineInfoOfCurrentMap()
+                end, delay)
             end
 
-            d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
-            d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            --Call the language check and switch via reloadui delayed by 500ms
+            delay = delay + 500
+            zo_callLater(function()
+                d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
+                d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
-            --Get the language to scan as next one, if not all were scanned already
-            local runData = lib.svDebugData.DebugGetAllData[apiVersion]
-            local numLangsScanned = NonContiguousCount(runData.langDone)
-            if numLangsScanned < numSupportedLangs then
-                for langStr, isSupported in pairs(supportedLanguages) do
-                    if isSupported == true then
-                        if not runData.langDone[langStr] then
-                            languageToScanNext = langStr
-                            break
+                --Get the language to scan as next one, if not all were scanned already
+                local runData = lib.svDebugData.DebugGetAllData[apiVersion]
+                local numLangsScanned = NonContiguousCount(runData.langDone)
+                if numLangsScanned < numSupportedLangs then
+                    for langStr, isSupported in pairs(supportedLanguages) do
+                        if isSupported == true then
+                            if not runData.langDone[langStr] then
+                                languageToScanNext = langStr
+                                break
+                            end
                         end
                     end
-                end
-                --Reload the UI via client language switch or do a normal reload
-                if languageToScanNext ~= nil and languageToScanNext ~= "" and supportedLanguages[languageToScanNext] == true then
-                    lib.svDebugData.DebugGetAllData[apiVersion].finished = false
-                    lib.svDebugData.DebugGetAllData[apiVersion].running = true
-                    lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeDateTime = os.date("%c")
-                    lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeTo = languageToScanNext
-                    SetCVar("language.2", languageToScanNext) --> Will do a reloadUI and change the client language
+                    --Reload the UI via client language switch or do a normal reload
+                    if languageToScanNext ~= nil and languageToScanNext ~= "" and supportedLanguages[languageToScanNext] == true then
+                        lib.svDebugData.DebugGetAllData[apiVersion].finished = false
+                        lib.svDebugData.DebugGetAllData[apiVersion].running = true
+                        lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeDateTime = os.date("%c")
+                        lib.svDebugData.DebugGetAllData[apiVersion].LanguageChangeTo = languageToScanNext
+                        SetCVar("language.2", languageToScanNext) --> Will do a reloadUI and change the client language
+                    else
+                        local errorText = "<<<[ERROR]Language to scan next \'".. tos(languageToScanNext) .. "\' is not supported! Aborting now..."
+                        d(errorText)
+                        lib.svDebugData.DebugGetAllData[apiVersion].running = false
+                        lib.svDebugData.DebugGetAllData[apiVersion].finished = true
+                        local dateTime = os.date("%c")
+                        lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = dateTime
+                        lib.svDebugData.DebugGetAllData[apiVersion].LastErrorDateTime = dateTime
+                        lib.svDebugData.DebugGetAllData[apiVersion].LastError = errorText
+                    end
                 else
-                    local errorText = "<<<[ERROR]Language to scan next \'".. tos(languageToScanNext) .. "\' is not supported! Aborting now..."
-                    d(errorText)
+                    local origClientLang = lib.svDebugData.DebugGetAllData[apiVersion].clientLang
+                    origClientLang = origClientLang or "en"
+                    d("[" .. MAJOR .. "]DebugGetAllData was finished! Resetting to your original language again: " .. tos(origClientLang))
+                    --All languages were scanned already. Switch back to original client language, or "en" as fallback
                     lib.svDebugData.DebugGetAllData[apiVersion].running = false
                     lib.svDebugData.DebugGetAllData[apiVersion].finished = true
-                    local dateTime = os.date("%c")
-                    lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = dateTime
-                    lib.svDebugData.DebugGetAllData[apiVersion].LastErrorDateTime = dateTime
-                    lib.svDebugData.DebugGetAllData[apiVersion].LastError = errorText
+                    lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = os.date("%c")
+                    SetCVar("language.2", origClientLang) --> Will do a reloadUI and change the client language
                 end
-            else
-                local origClientLang = lib.svDebugData.DebugGetAllData[apiVersion].clientLang
-                origClientLang = origClientLang or "en"
-                d("[" .. MAJOR .. "]DebugGetAllData was finished! Resetting to your original language again: " .. tos(origClientLang))
-                --All languages were scanned already. Switch back to original client language, or "en" as fallback
-                lib.svDebugData.DebugGetAllData[apiVersion].running = false
-                lib.svDebugData.DebugGetAllData[apiVersion].finished = true
-                lib.svDebugData.DebugGetAllData[apiVersion].DateTimeEnd = os.date("%c")
-                SetCVar("language.2", origClientLang) --> Will do a reloadUI and change the client language
-            end
+
+            end, delay)
         end
         EM:RegisterForUpdate(noFurtherItemsFoundUpdateName, 2000, runIfNoFurtherItemsFound)
     else
