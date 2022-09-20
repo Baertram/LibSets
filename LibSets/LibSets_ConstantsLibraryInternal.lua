@@ -994,7 +994,7 @@ lib.localization                 = {
         customTooltipPattern     = "Selbst definierter Tooltip Text",
         customTooltipPattern_TT  = "Definiere deinen eigenen Tooltip Text, inklusive vor-definierter Platzhalter. Beispiel: \'Art <<1>>/Drop <<2>> <<3>> <<4>>\'.\nLasse dieses Textfeld leer, um den eigenen Tooltip Text zu deaktivieren!\nPlatzhalter müssen mit << beginnen, danach folt eine 1stellige Nummer, und beendet werden diese mit >>, z.B. <<1>> oder <<5>>. Es gibt maximal 6 Platzhalter in einem Text. Zeilenumbruch: <br>\n\nMögliche Platzhalter sind:\n<<1>>   Set Art\n<<2>>   Drop Mechaniken [können mehrere \',\' getrennte sein, je Zone 1]\n<<3>>   Drop Zonen [können mehrere \',\' getrennte sein, je Zone 1] Sind alle Zonen identisch wird nur 1 ausgegeben\n<<4>>   Boss/Drop durch Namen [können mehrere \',\' getrennte sein, je Zone 1]\n<<5>>   Benötigte Anzahl analysierter Eigenschaten, oder Rekonstruktionskosten\n<<6>>   Kapitel/DLC Name mit dem das Set eingeführt wurde.\n\n|cFF0000Achtung|r: Wenn du einen ungültigen Tooltip Text, ohne irgendeinen <<Nummer>> Platzhalter, eingibst wird sich das Textfeld automatisch selber leeren!",
         slashCommandDescription         = "Suche übersetzte Set Namen",
-        slashCommandDescriptionClient   = "Suche Set Namen (Spiel Sprache)",
+        slashCommandDescriptionClient   = "Suche Set ID/Namen (Spiel Sprache)",
     },
     ["en"] = {
         de  = "German",
@@ -1038,7 +1038,7 @@ lib.localization                 = {
         customTooltipPattern     = "Custom tooltip text",
         customTooltipPattern_TT  = "Define your own custom tooltip text, including the possibility to use some pre-defined placeholders in your text. Example: \'Type <<1>>/Drops <<2>> <<3>> <<4>>\'.\nLeave the text field empty to disable this custom tooltip!\nPlaceholders need to start with prefix << followed by a 1 digit number and a suffix of >>, e.g. <<1>> or <<5>>.\nThere can be only a maximum of 6 placeholders in the text. Line break: <br>\n\nBelow you'll find the possible placeholders:\n<<1>>   Set type\n<<2>>   Drop mechanics [could be several, for each zone, separated by \',\']\n<<3>>   Drop zones [could be several, for each zone, separated by \',\'] If all zones are the same they will be condensed\n<<4>>   Boss/Dropped by names [could be several, for each zone, separated by \',\']\n<<5>>   Number of needed traits researched, or reconstruction costs\n<<6>>   Chapter/DLC name set was introduced with.\n\n|cFF0000Attention|r: If you enter an invalid tooltip text, without any <<number>> placeholder the editfield will automatically clear itsself!",
         slashCommandDescription         = "Search translations of set names",
-        slashCommandDescriptionClient   = "Search set names (game client language)",
+        slashCommandDescriptionClient   = "Search set ID/names (game client language)",
     },
     ["es"] = {
         de  = "Alemán",
@@ -1076,7 +1076,7 @@ lib.localization                 = {
         undauntedChest         = "Poitrine de " .. undauntedStr,
         modifyTooltip          = "Améliorer l'info-bulle par les informations sur l'ensemble",
         slashCommandDescription = "Rechercher des traductions de noms de sets",
-        slashCommandDescriptionClient = "Rechercher des noms de sets (langue du jeu)",
+        slashCommandDescriptionClient = "Rechercher des IDs/noms de sets (langue du jeu)",
     },
     ["ru"] = {
         de  = "Нeмeцкий",

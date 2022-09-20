@@ -72,7 +72,6 @@ function lib.buildAutoComplete(command, langToUse)
             return self.lookupList[label] or label
         end
 
-        command:SetDescription("Search by setId")
         command:SetCallback(function(input)
             createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
             local setId = tonumber(input)
