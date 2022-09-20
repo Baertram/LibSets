@@ -72,6 +72,15 @@ function lib.buildAutoComplete(command, langToUse)
             return self.lookupList[label] or label
         end
 
+        command:SetDescription("Search by setId")
+        command:SetCallback(function(input)
+            createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
+            local setId = tonumber(input)
+            if setId ~= nil and type(setId) == "number" then
+                createPreviewTooltipAndShow(setId)
+            end
+        end)
+
         local repStr = "·"
         local langUpper = localization[langToUse][langToUse]
         for setId, setLanguagesData in pairs(cachedSetNames) do
@@ -80,11 +89,14 @@ function lib.buildAutoComplete(command, langToUse)
             --try to use %s instead of just a space. if that doesn't work use [\t-\r ] instead
             local setNameNoSpaces = strgsub(setNameInClientLang, "%s+", repStr)
             if setNameNoSpaces == "" then setNameNoSpaces = setNameInClientLang end
+
+            command:AddAlias(tos(setId) .. setNameNoSpaces)
+
             if not command:HasSubCommandAlias(setNameNoSpaces) then
                 --Add a setName entry as subcommand so the first auto complete will show all set names as the user types /lsp into chat
                 local setSubCommand = command:RegisterSubCommand()
                 --setSubCommand:AddAlias(setNameNoSpaces)
-                setSubCommand:AddAlias(setNameNoSpaces .. " (ID: " ..tos(setId)..")")
+                setSubCommand:AddAlias(setNameNoSpaces)
                 setSubCommand:SetDescription(langUpper)
                 setSubCommand:SetCallback(function(input)
                     --StartChatInput(input)
