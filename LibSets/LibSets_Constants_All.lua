@@ -12,6 +12,33 @@ local zocstrfor =   ZO_CachedStrFormat
 --Helper function for the API check
 local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
 
+--DLC & chapter type constants
+DLC_TYPE_BASE_GAME =    0
+local possibleDlcTypes = {
+    [1] = "DLC_TYPE_CHAPTER",
+    [2] = "DLC_TYPE_DUNGEONS",
+    [3] = "DLC_TYPE_ZONE",
+}
+lib.possibleDlcTypes = possibleDlcTypes
+--Enable DLCids that are not live yet e.g. only on PTS
+if checkIfPTSAPIVersionIsLive() then
+    ---DLC_TYPE_+++
+    --possibleDlcTypes[#possibleDlcTypes + 1] = "DLC_TYPE_xxx"
+end
+--Loop over the possible DLC types and create them in the global table _G
+for dlcTypeId, dlcTypeName in ipairs(possibleDlcTypes) do
+    _G[dlcTypeName] = dlcTypeId
+end
+local maxDlcTypes = #possibleDlcTypes
+
+--Iterators for the ESO dlc and chapter constants
+DLC_TYPE_ITERATION_BEGIN = DLC_TYPE_BASE_GAME
+DLC_TYPE_ITERATION_END   = _G[possibleDlcTypes[maxDlcTypes]]
+lib.allowedDLCTypes = {}
+for i = DLC_TYPE_ITERATION_BEGIN, DLC_TYPE_ITERATION_END do
+    lib.allowedDLCTypes[i] = true
+end
+
 --DLC & Chapter ID constants (for LibSets)
 DLC_BASE_GAME = 0
 local possibleDlcIds = {
@@ -43,6 +70,7 @@ local possibleDlcIds = {
     [26] = "DLC_HIGH_ISLE",
     [27] = "DLC_LOST_DEPTHS",
 }
+lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
@@ -111,79 +139,96 @@ end
 --Internal collectible example ids of the ESO DLCs and chapters (first collectible found from each DLC category)
 lib.dlcAndChapterCollectibleIds = {
     --Base game
-    [DLC_BASE_GAME] = -1,               --OK
+    [DLC_BASE_GAME] =               {collectibleId=-1, achievementCategoryId=-1, type=DLC_TYPE_BASE_GAME},
     --Imperial city
-    [DLC_IMPERIAL_CITY] = 154,          --OK
+    [DLC_IMPERIAL_CITY] =           {collectibleId=154, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
     --Orsinium
-    [DLC_ORSINIUM] = 215,               --OK
+    [DLC_ORSINIUM] =                {collectibleId=215, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
     --Thieves Guild
-    [DLC_THIEVES_GUILD] = 254,          --OK
+    [DLC_THIEVES_GUILD] =           {collectibleId=254, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Dark Brotherhood
-    [DLC_DARK_BROTHERHOOD] = 306,       --OK
+    [DLC_DARK_BROTHERHOOD] =        {collectibleId=306, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Shadows of the Hist
-    [DLC_SHADOWS_OF_THE_HIST] = "1796",   --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_SHADOWS_OF_THE_HIST] =     {collectibleId=nil, achievementCategoryId=1796, type=DLC_TYPE_DUNGEONS},
     --Morrowind
-    [DLC_MORROWIND] = 593,              --OK
+    [DLC_MORROWIND] =               {collectibleId=593, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Horns of the Reach
-    [DLC_HORNS_OF_THE_REACH] = "2098",    --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_HORNS_OF_THE_REACH] =      {collectibleId=nil, achievementCategoryId=2098, type=DLC_TYPE_DUNGEONS},
     --Clockwork City
-    [DLC_CLOCKWORK_CITY] = 1240,        --OK
+    [DLC_CLOCKWORK_CITY] =          {collectibleId=1240, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Dragon Bones
-    [DLC_DRAGON_BONES] = "2190",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_DRAGON_BONES] =            {collectibleId=nil, achievementCategoryId=2190, type=DLC_TYPE_DUNGEONS},
     --Summerset
-    [DLC_SUMMERSET] = 5107,             --OK
+    [DLC_SUMMERSET] =               {collectibleId=5107, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Wolfhunter
-    [DLC_WOLFHUNTER] = "2311",            --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_WOLFHUNTER] =              {collectibleId=nil, achievementCategoryId=2311, type=DLC_TYPE_DUNGEONS},
     --Murkmire
-    [DLC_MURKMIRE] = 5755,              --OK
+    [DLC_MURKMIRE] =                {collectibleId=5755, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Wrathstone
-    [DLC_WRATHSTONE] = "2265",            --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_WRATHSTONE] =              {collectibleId=nil, achievementCategoryId=2265, type=DLC_TYPE_DUNGEONS},
     --Elsweyr
-    [DLC_ELSWEYR] = 5843,               --OK
+    [DLC_ELSWEYR] =                 {collectibleId=5843, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
     --Scalebreaker
-    [DLC_SCALEBREAKER] = "2584",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_SCALEBREAKER] =            {collectibleId=nil, achievementCategoryId=2584, type=DLC_TYPE_DUNGEONS},
     --Dragonhold
-    [DLC_DRAGONHOLD] = 6920,            --OK
+    [DLC_DRAGONHOLD] =              {collectibleId=6920, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Harrowstorm
-    [DLC_HARROWSTORM] = "2683",           --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_HARROWSTORM] =             {collectibleId=nil, achievementCategoryId=2683, type=DLC_TYPE_DUNGEONS},
     --Greymoor
-    [DLC_GREYMOOR] = 7466,              --OK
+    [DLC_GREYMOOR] =                {collectibleId=7466, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
     --Stonethorn
-    [DLC_STONETHORN] = "2827",            --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_STONETHORN] =              {collectibleId=nil, achievementCategoryId=2827, type=DLC_TYPE_DUNGEONS},
     --Markarth
-    [DLC_MARKARTH] = 8388,              --OK
+    [DLC_MARKARTH] =                {collectibleId=8388, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Flames of Ambition
-    [DLC_FLAMES_OF_AMBITION] = "2984",    --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_FLAMES_OF_AMBITION] =      {collectibleId=nil, achievementCategoryId=2984, type=DLC_TYPE_DUNGEONS},
     --Blackwood
-    [DLC_BLACKWOOD] = 8659,             --OK
+    [DLC_BLACKWOOD] =               {collectibleId=8659, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
     --Waking Flames
-    [DLC_WAKING_FLAME] = "3093",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_WAKING_FLAME] =            {collectibleId=nil, achievementCategoryId=3093, type=DLC_TYPE_DUNGEONS},
     --Deadlands
-    [DLC_DEADLANDS] = 9365,             --OK
+    [DLC_DEADLANDS] =               {collectibleId=9365, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
     --Ascending Tide
-    [DLC_ASCENDING_TIDE] = "3102",        --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_ASCENDING_TIDE] =          {collectibleId=nil, achievementCategoryId=3102, type=DLC_TYPE_DUNGEONS},
     --High Isle
-    [DLC_HIGH_ISLE] = 10053,            --OK
-    [DLC_LOST_DEPTHS] = "3133",          --not given by LibSets.DebugGetAllCollectibleDLCNames -> Only dungeon names...
+    [DLC_HIGH_ISLE] =               {collectibleId=10053, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
+    --Lost Depths
+    [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=3133, type=DLC_TYPE_DUNGEONS},
+    --Firesong - PTS
+    --Coming as on live
 }
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = <id of achievement>
-    lib.dlcAndChapterCollectibleIds[DLC_FIRESONG] = 10660 --OK
+    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx }
+    lib.dlcAndChapterCollectibleIds[DLC_FIRESONG] = {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS} --OK
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
 local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds
 --For each entry in the list of example achievements above get the name of it's parent category (DLC, chapter)
-lib.DLCData = {}
-local DLCandCHAPTERdata = lib.DLCData
-lib.DLCData[DLC_BASE_GAME] = "Elder Scrolls Online"
+lib.DLCAndCHAPTERData = {}
+lib.DLCandCHAPTERLookupdata = {}
+local DLCandCHAPTERdata =   lib.DLCAndCHAPTERData
+local DLCandCHAPTERLookupdata = lib.DLCandCHAPTERLookupdata
+DLCandCHAPTERdata[DLC_BASE_GAME] = "Elder Scrolls Online"
+DLCandCHAPTERLookupdata[DLC_TYPE_BASE_GAME] = {
+    [DLC_BASE_GAME] = DLCandCHAPTERdata[DLC_BASE_GAME]
+}
+--CHAPTERdata[DLC_BASE_GAME] = "Elder Scrolls Online"
 local dlcStrFormatPattern = "<<C:1>>"
-for dlcId, dlcAndChapterCollectibleOrAchievementId in ipairs(dlcAndChapterCollectibleIds) do
-    if dlcId and dlcAndChapterCollectibleOrAchievementId then
-        if type(dlcAndChapterCollectibleOrAchievementId) == "number" then
-            DLCandCHAPTERdata[dlcId] = zocstrfor(dlcStrFormatPattern, gci(dlcAndChapterCollectibleOrAchievementId))
-        else
-            DLCandCHAPTERdata[dlcId] = zocstrfor(dlcStrFormatPattern, gaci(gcifa(dlcAndChapterCollectibleOrAchievementId)))
+for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
+    local collectibleId = dlcAndChapterData.collectibleId
+    local achievementCategoryId = dlcAndChapterData.achievementCategoryId
+    local dlcType = dlcAndChapterData.type
+    if dlcType ~= nil then
+        DLCandCHAPTERLookupdata[dlcType] = DLCandCHAPTERLookupdata[dlcType] or {}
+        if collectibleId ~= nil and collectibleId ~= -1 then
+            local name = zocstrfor(dlcStrFormatPattern, gci(collectibleId))
+            DLCandCHAPTERdata[dlcId] = name
+            DLCandCHAPTERLookupdata[dlcType][dlcId] = name
+        elseif achievementCategoryId ~= nil and achievementCategoryId ~= -1 then
+            local name = zocstrfor(dlcStrFormatPattern, gaci(gcifa(achievementCategoryId)))
+            DLCandCHAPTERdata[dlcId] = name
+            DLCandCHAPTERLookupdata[dlcType][dlcId] = name
         end
     end
 end
