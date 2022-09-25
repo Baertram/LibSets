@@ -1455,6 +1455,7 @@ function lib.GetAllDLCIds()
     return allowedDLCIds
 end
 
+
 --Returns the dlcType as number for the setId
 --> Parameters: setId number: The set's setId
 --> Returns:    dlcType number, or NIL if set's DLCType is unknown
@@ -1469,7 +1470,6 @@ function lib.GetDLCType(setId)
     return
 end
 
-
 --Returns the name of the DLC type by help of the DLC type id
 --> Parameters: dlcId number: The DLC id given in a set's info
 --> Returns:    name dlcTypeName
@@ -1479,12 +1479,10 @@ function lib.GetDLCTypeName(dlcTypeId)
     return dlcTypeName
 end
 
-
 --Returns the table of DLC types of LibSets (the constants in LibSets.allowedDLCTypes, see file LibSets_ConstantsLibraryInternal.lua)
 function lib.GetAllDLCTypes()
     return lib.allowedDLCTypes
 end
-
 
 --Returns the number of researched traits needed to craft this set. This will only check the craftable sets!
 --> Parameters: setId number: The set's setId
@@ -3058,7 +3056,8 @@ local function slashcommand_dlcs()
         for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
             local dlcType = dlcAndChapterCollectibleIds[dlcId].type
             if dlcType == DLC_TYPE_DUNGEONS or dlcType == DLC_TYPE_ZONE then
-                table.insert(dlcsInOrderLookupTable, {dlcId=dlcId, name=dlcName})
+                dlcsInOrderLookupTable = dlcsInOrderLookupTable or {}
+                tins(dlcsInOrderLookupTable, {dlcId=dlcId, name=dlcName})
             end
         end
     end
@@ -3074,7 +3073,8 @@ local function slashcommand_chapters()
     if chaptersInOrderLookupTable == nil then
         for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
             if dlcAndChapterCollectibleIds[dlcId].type == DLC_TYPE_CHAPTER then
-                table.insert(chaptersInOrderLookupTable, {dlcId=dlcId, name=dlcName})
+                chaptersInOrderLookupTable = chaptersInOrderLookupTable or {}
+                tins(chaptersInOrderLookupTable, {dlcId=dlcId, name=dlcName})
             end
         end
     end
