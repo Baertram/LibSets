@@ -137,69 +137,70 @@ end
 ]]
 
 --Internal collectible example ids of the ESO DLCs and chapters (first collectible found from each DLC category)
+-->https://eso-hub.com/en/dlc / https://en.uesp.net/wiki/Online:Chapters /
 lib.dlcAndChapterCollectibleIds = {
     --Base game
-    [DLC_BASE_GAME] =               {collectibleId=-1, achievementCategoryId=-1, type=DLC_TYPE_BASE_GAME},
+    [DLC_BASE_GAME] =               {collectibleId=-1, achievementCategoryId=-1, type=DLC_TYPE_BASE_GAME, releaseDate=1396569600},
     --Imperial city
-    [DLC_IMPERIAL_CITY] =           {collectibleId=154, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
+    [DLC_IMPERIAL_CITY] =           {collectibleId=154, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1440979200},
     --Orsinium
-    [DLC_ORSINIUM] =                {collectibleId=215, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
+    [DLC_ORSINIUM] =                {collectibleId=215, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1446422400},
     --Thieves Guild
-    [DLC_THIEVES_GUILD] =           {collectibleId=254, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_THIEVES_GUILD] =           {collectibleId=254, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1457308800},
     --Dark Brotherhood
-    [DLC_DARK_BROTHERHOOD] =        {collectibleId=306, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_DARK_BROTHERHOOD] =        {collectibleId=306, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1464652800},
     --Shadows of the Hist
-    [DLC_SHADOWS_OF_THE_HIST] =     {collectibleId=nil, achievementCategoryId=1796, type=DLC_TYPE_DUNGEONS},
+    [DLC_SHADOWS_OF_THE_HIST] =     {collectibleId=nil, achievementCategoryId=1796, type=DLC_TYPE_DUNGEONS, releaseDate=1470009600},
     --Morrowind
-    [DLC_MORROWIND] =               {collectibleId=593, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_MORROWIND] =               {collectibleId=593, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1496620800},
     --Horns of the Reach
-    [DLC_HORNS_OF_THE_REACH] =      {collectibleId=nil, achievementCategoryId=2098, type=DLC_TYPE_DUNGEONS},
+    [DLC_HORNS_OF_THE_REACH] =      {collectibleId=nil, achievementCategoryId=2098, type=DLC_TYPE_DUNGEONS, releaseDate=1502668800},
     --Clockwork City
-    [DLC_CLOCKWORK_CITY] =          {collectibleId=1240, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_CLOCKWORK_CITY] =          {collectibleId=1240, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1508716800},
     --Dragon Bones
-    [DLC_DRAGON_BONES] =            {collectibleId=nil, achievementCategoryId=2190, type=DLC_TYPE_DUNGEONS},
+    [DLC_DRAGON_BONES] =            {collectibleId=nil, achievementCategoryId=2190, type=DLC_TYPE_DUNGEONS, releaseDate=1518393600},
     --Summerset
-    [DLC_SUMMERSET] =               {collectibleId=5107, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_SUMMERSET] =               {collectibleId=5107, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1528156800},
     --Wolfhunter
-    [DLC_WOLFHUNTER] =              {collectibleId=nil, achievementCategoryId=2311, type=DLC_TYPE_DUNGEONS},
+    [DLC_WOLFHUNTER] =              {collectibleId=nil, achievementCategoryId=2311, type=DLC_TYPE_DUNGEONS, releaseDate=1534118400},
     --Murkmire
-    [DLC_MURKMIRE] =                {collectibleId=5755, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_MURKMIRE] =                {collectibleId=5755, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1540166400},
     --Wrathstone
-    [DLC_WRATHSTONE] =              {collectibleId=nil, achievementCategoryId=2265, type=DLC_TYPE_DUNGEONS},
+    [DLC_WRATHSTONE] =              {collectibleId=nil, achievementCategoryId=2265, type=DLC_TYPE_DUNGEONS, releaseDate=1551052800},
     --Elsweyr
-    [DLC_ELSWEYR] =                 {collectibleId=5843, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
+    [DLC_ELSWEYR] =                 {collectibleId=5843, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1558310400},
     --Scalebreaker
-    [DLC_SCALEBREAKER] =            {collectibleId=nil, achievementCategoryId=2584, type=DLC_TYPE_DUNGEONS},
+    [DLC_SCALEBREAKER] =            {collectibleId=nil, achievementCategoryId=2584, type=DLC_TYPE_DUNGEONS, releaseDate=1565568000},
     --Dragonhold
-    [DLC_DRAGONHOLD] =              {collectibleId=6920, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_DRAGONHOLD] =              {collectibleId=6920, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1571616000},
     --Harrowstorm
-    [DLC_HARROWSTORM] =             {collectibleId=nil, achievementCategoryId=2683, type=DLC_TYPE_DUNGEONS},
+    [DLC_HARROWSTORM] =             {collectibleId=nil, achievementCategoryId=2683, type=DLC_TYPE_DUNGEONS, releaseDate=1582502400},
     --Greymoor
-    [DLC_GREYMOOR] =                {collectibleId=7466, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
+    [DLC_GREYMOOR] =                {collectibleId=7466, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1590451200},
     --Stonethorn
-    [DLC_STONETHORN] =              {collectibleId=nil, achievementCategoryId=2827, type=DLC_TYPE_DUNGEONS},
+    [DLC_STONETHORN] =              {collectibleId=nil, achievementCategoryId=2827, type=DLC_TYPE_DUNGEONS, releaseDate=1598227200},
     --Markarth
-    [DLC_MARKARTH] =                {collectibleId=8388, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_MARKARTH] =                {collectibleId=8388, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1604275200},
     --Flames of Ambition
-    [DLC_FLAMES_OF_AMBITION] =      {collectibleId=nil, achievementCategoryId=2984, type=DLC_TYPE_DUNGEONS},
+    [DLC_FLAMES_OF_AMBITION] =      {collectibleId=nil, achievementCategoryId=2984, type=DLC_TYPE_DUNGEONS, releaseDate=1615161600},
     --Blackwood
-    [DLC_BLACKWOOD] =               {collectibleId=8659, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
+    [DLC_BLACKWOOD] =               {collectibleId=8659, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1622505600},
     --Waking Flames
-    [DLC_WAKING_FLAME] =            {collectibleId=nil, achievementCategoryId=3093, type=DLC_TYPE_DUNGEONS},
+    [DLC_WAKING_FLAME] =            {collectibleId=nil, achievementCategoryId=3093, type=DLC_TYPE_DUNGEONS, releaseDate=1635724800},
     --Deadlands
-    [DLC_DEADLANDS] =               {collectibleId=9365, achievementCategoryId=nil, type=DLC_TYPE_ZONE},
+    [DLC_DEADLANDS] =               {collectibleId=9365, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1635724800},
     --Ascending Tide
-    [DLC_ASCENDING_TIDE] =          {collectibleId=nil, achievementCategoryId=3102, type=DLC_TYPE_DUNGEONS},
+    [DLC_ASCENDING_TIDE] =          {collectibleId=nil, achievementCategoryId=3102, type=DLC_TYPE_DUNGEONS, releaseDate=1647216000},
     --High Isle
-    [DLC_HIGH_ISLE] =               {collectibleId=10053, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER},
+    [DLC_HIGH_ISLE] =               {collectibleId=10053, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1654473600},
     --Lost Depths
-    [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=3133, type=DLC_TYPE_DUNGEONS},
+    [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=3133, type=DLC_TYPE_DUNGEONS, releaseDate=1661126400},
     --Firesong - PTS
     --Coming as on live
 }
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx }
-    lib.dlcAndChapterCollectibleIds[DLC_FIRESONG] = {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS} --OK
+    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
+    lib.dlcAndChapterCollectibleIds[DLC_FIRESONG] = {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS, releaseDate=1667260800}
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters

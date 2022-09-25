@@ -3047,7 +3047,11 @@ local dlcsInOrderLookupTable
 local chaptersInOrderLookupTable
 
 local function outputDLCorChapterRow(dlcId, dlcName, dlcType)
-    d("> [(" ..tos(dlcId) ..")" ..tos(possibleDlcIds[dlcId]) .. "]" .. dlcName .. " (".. tos(possibleDlcTypes[dlcType])  .. ")")
+    local dlcTypeSuffix = ""
+    if dlcType ~= nil then
+        dlcTypeSuffix = "  (".. tos(possibleDlcTypes[dlcType])  .. ")"
+    end
+    d("> [" ..tos(possibleDlcIds[dlcId]) .."] " .. dlcName .. dlcTypeSuffix)
 end
 
 local function slashcommand_dlcs()
@@ -3061,7 +3065,7 @@ local function slashcommand_dlcs()
             end
         end
     end
-    d(libPrefix .. "DLCs in order of appearance [(<number>)<LibSetsDLCId>]<name> (<LibSetsDLCtype>)")
+    d(libPrefix .. "DLCs in order of appearance [<LibSetsDLCId>] <name>  (<LibSetsDLCtype>)")
     for _, chapterData in ipairs(dlcsInOrderLookupTable) do
         local dlcId = chapterData.dlcId
         outputDLCorChapterRow(dlcId, chapterData.name, dlcAndChapterCollectibleIds[dlcId].type)
@@ -3078,7 +3082,7 @@ local function slashcommand_chapters()
             end
         end
     end
-    d(libPrefix .. "Chapters in order of appearance [(<number>)<LibSetsDLCId>]<name> (<LibSetsDLCtype>)")
+    d(libPrefix .. "Chapters in order of appearance [<LibSetsDLCId>] <name>  (DLC_TYPE_CHAPTER)")
     for _, chapterData in ipairs(chaptersInOrderLookupTable) do
         local dlcId = chapterData.dlcId
         outputDLCorChapterRow(dlcId, chapterData.name, dlcAndChapterCollectibleIds[dlcId].type)
@@ -3087,7 +3091,7 @@ end
 
 local function slashcommand_dlcsandchapter()
     if DLCandCHAPTERdata == nil then return end
-    d(libPrefix .. "DLCs & chapters in order of appearance [(<number>)<LibSetsDLCId>]<name> (<LibSetsDLCtype>)")
+    d(libPrefix .. "DLCs & chapters in order of appearance [<LibSetsDLCId>] <name>  (<LibSetsDLCtype>)")
     for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
         outputDLCorChapterRow(dlcId, dlcName, dlcAndChapterCollectibleIds[dlcId].type)
     end
@@ -3107,7 +3111,7 @@ local function createSlashCommands()
     SLASH_COMMANDS["/dlcsandchapters"] = slashcommand_dlcsandchapter
     SLASH_COMMANDS["/libsetsdlcs"] = slashcommand_dlcs
     SLASH_COMMANDS["/dlcs"] = slashcommand_dlcs
-    SLASH_COMMANDS["/libsetschapters"] = slashcommand_dlcsandchapter
+    SLASH_COMMANDS["/libsetschapters"] = slashcommand_chapters
     SLASH_COMMANDS["/chapters"] = slashcommand_chapters
 end
 
