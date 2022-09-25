@@ -3104,6 +3104,7 @@ local function createSlashCommands()
 
     --Add the slash command for the DLC/chapter info
     SLASH_COMMANDS["/libsetsdlcsandchapters"] = slashcommand_dlcsandchapter
+    SLASH_COMMANDS["/dlcsandchapters"] = slashcommand_dlcsandchapter
     SLASH_COMMANDS["/libsetsdlcs"] = slashcommand_dlcs
     SLASH_COMMANDS["/dlcs"] = slashcommand_dlcs
     SLASH_COMMANDS["/libsetschapters"] = slashcommand_dlcsandchapter
