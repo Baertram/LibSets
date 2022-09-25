@@ -3075,7 +3075,7 @@ local function outputDLCorChapterRow(dlcId, dlcName, dlcType)
         onlyDateWithoutTimeStr = onlyDateWithoutTimeStr .. ": "
     end
 
-    d("> [" ..tos(possibleDlcIds[dlcId]) .."] " .. onlyDateWithoutTimeStr .. dlcName .. dlcTypeSuffix)
+    d("> [".. tos(dlcId]) .."] " .. onlyDateWithoutTimeStr .. dlcName .. dlcTypeSuffix)
 end
 
 local function slashcommand_dlcs()
