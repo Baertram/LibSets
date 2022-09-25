@@ -696,7 +696,8 @@ local possibleDropMechanics         = {
     [27] = "LIBSETS_DROP_MECHANIC_MOB_TYPE", --A type of mob/critter
     [28] = "LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS", --Bosses in group dungeons
     [29] = "LIBSETS_DROP_MECHANIC_CRAFTED", --Crafted
-    [30] = "LIBSETS_DROP_MECHANIC_OVERLAND_CHEST_PUBLIC_DUNGEON" --Chest in a public dungeon
+    [30] = "LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST" --Chest in a public dungeon
+
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -749,7 +750,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosse in Prüfungen",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Gegner Typ",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosse in Gruppenverliesen",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST_PUBLIC_DUNGEON]        = "Truhen in Öffentlichen Verlieses",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Truhen in Öffentlichen Verlieses",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Rewards for the worthy",
@@ -778,7 +779,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Mob/Critter type",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosses in group dungeons",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST_PUBLIC_DUNGEON]        = "Chests in public dungeons",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Chests in public dungeons",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -811,7 +812,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Jefes en mazmorras de prueba",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Tipo de enemigo/bicho",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Jefes en mazmorras grupales",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST_PUBLIC_DUNGEON]        = "Cofres en mazmorra públicas",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Cofres en mazmorra públicas",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "La récompense des braves",
@@ -840,7 +841,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Type de créature/mob",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Boss dans les donjons de groupe",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST_PUBLIC_DUNGEON]        = "Les coffres des donjons public",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Les coffres des donjons public",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Награда достойным",
@@ -869,7 +870,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Боссы в пробных подземельях",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Тип моба/животного",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Боссы в групповых подземельях",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST_PUBLIC_DUNGEON]        = "Сундуки открытых подземелий",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Сундуки открытых подземелий",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "貢献に見合った報酬です",
@@ -898,7 +899,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "試練のダンジョンのボス",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "モブ/クリッターの種類",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "グループダンジョンのボス",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST_PUBLIC_DUNGEON]        = "パブリックダンジ 宝箱",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "パブリックダンジ 宝箱",
     },
 }
 lib.dropMechanicIdToNameTooltip   = {
@@ -1189,7 +1190,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds",
     [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "/esoui/art/icons/pet_slateskinneddaedrat.dds",
     [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "/esoui/art/journal/journal_quest_group_instance.dds",
-    [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST_PUBLIC_DUNGEON]        = "/esoui/art/icons/undaunted_mediumcoffer.dds",
+    [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "/esoui/art/icons/undaunted_mediumcoffer.dds",
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
     --["golden chest"] =        "/esoui/art/icons/undaunted_dungeoncoffer.dds",
