@@ -3051,7 +3051,31 @@ local function outputDLCorChapterRow(dlcId, dlcName, dlcType)
     if dlcType ~= nil then
         dlcTypeSuffix = "  (".. tos(possibleDlcTypes[dlcType])  .. ")"
     end
-    d("> [" ..tos(possibleDlcIds[dlcId]) .."] " .. dlcName .. dlcTypeSuffix)
+    local releaseDateTimestamp = dlcAndChapterCollectibleIds[dlcId].releaseDate
+    local releaseDateStr
+    local onlyDateWithoutTimeStr
+    if releaseDateTimestamp ~= nil and type(releaseDateTimestamp) == "number" and releaseDateTimestamp >= 0 and releaseDateTimestamp <= 2147483647 then
+        releaseDateStr = os.date("%c", releaseDateTimestamp)
+        --Strip the hours, minutes, seconds at the space
+        if string.find(releaseDateStr, " ", 1, true) ~= nil then
+            for param in strgmatch(releaseDateStr, "([^%s]+)%s*") do
+                if param ~= nil and param ~= "" then
+                    onlyDateWithoutTimeStr =  param
+                    break
+                end
+            end
+        else
+            onlyDateWithoutTimeStr = releaseDateStr
+        end
+    end
+    if onlyDateWithoutTimeStr == nil then
+        onlyDateWithoutTimeStr = ""
+    end
+    if onlyDateWithoutTimeStr ~= "" then
+        onlyDateWithoutTimeStr = onlyDateWithoutTimeStr .. ": "
+    end
+
+    d("> [" ..tos(possibleDlcIds[dlcId]) .."] " .. onlyDateWithoutTimeStr .. dlcName .. dlcTypeSuffix)
 end
 
 local function slashcommand_dlcs()
