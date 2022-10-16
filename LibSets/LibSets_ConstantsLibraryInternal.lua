@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.49
+local MAJOR, MINOR = "LibSets", 0.50
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -46,7 +46,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101035 --Lost Depths, 2022-07-16
+lib.lastSetsPreloadedCheckAPIVersion = 101036 --Firesong, (2022-09-20, PTS, API 101036)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -65,7 +65,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101035 --Lost Depths, 2022-07-16
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101035 -- Lost Depths (2022-07-16, PTS, API 101035)
+APIVersions["PTS"]                   = 101036 -- Firesong (2022-09-20, PTS, API 101036)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -696,6 +696,8 @@ local possibleDropMechanics         = {
     [27] = "LIBSETS_DROP_MECHANIC_MOB_TYPE", --A type of mob/critter
     [28] = "LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS", --Bosses in group dungeons
     [29] = "LIBSETS_DROP_MECHANIC_CRAFTED", --Crafted
+    [30] = "LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST" --Chest in a public dungeon
+
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -748,6 +750,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosse in Prüfungen",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Gegner Typ",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosse in Gruppenverliesen",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Truhen in Öffentlichen Verlieses",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Rewards for the worthy",
@@ -776,6 +779,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Mob/Critter type",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosses in group dungeons",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Chests in public dungeons",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -808,6 +812,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Jefes en mazmorras de prueba",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Tipo de enemigo/bicho",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Jefes en mazmorras grupales",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Cofres en mazmorra públicas",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "La récompense des braves",
@@ -824,18 +829,19 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]     = "Courrier de récompense de donjon journalière",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                 = "Cité impériale voûte",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                      = "Récompense de niveau supérieur",
-        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "Tel Var equipment lockbox merchant, IC sewer base",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
-        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                        = "A named NPC rewards with this item",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
-        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, Magical anomalies reward",
-        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                        = "Chests in a dungeon",
-        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]            = "Daily quest reward coffer",
-        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "Fishing hole",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "Loot from overland items",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "Marchand de coffres-forts d'équipement Tel Var, base d'égout IC",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "Marchand de coffres-forts d'équipement d'élite de points d'alliance, Cyrodiil/Vvardenfell",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                        = "Un PNJ nommé récompense avec cet objet",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Coffre du boss final du portail Oblivion",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, récompense des anomalies magiques",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                        = "Coffres dans un donjon",
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]            = "Coffre de récompense de quête quotidienne",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "Trou de pêche",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "Butin d'objets terrestres",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
-        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Mob/Critter type",
-        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosses in group dungeons",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Type de créature/mob",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Boss dans les donjons de groupe",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Les coffres des donjons public",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Награда достойным",
@@ -852,18 +858,19 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]     = "Письмо с наградой за ежедневное случайное подземелье",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                 = "Хранилища Имперского города",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                      = "Вознаграждение за повышение уровня",
-        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "Tel Var equipment lockbox merchant, IC sewer base",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
-        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                        = "A named NPC rewards with this item",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
-        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, Magical anomalies reward",
-        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                        = "Chests in a dungeon",
-        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]            = "Daily quest reward coffer",
-        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "Fishing hole",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "Loot from overland items",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
-        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Mob/Critter type",
-        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosses in group dungeons",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "Тель-Вар, торговец сейфами с оборудованием, канализационная база IC",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "Очки Альянса Торговец элитным снаряжением, Сиродил/Вварденфелл",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                        = "Именованный NPC награждает этим предметом",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Сундук финального босса портала Обливион",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Дольмены, Мрачные бури, Награда за магические аномалии",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                        = "Сундуки в подземелье",
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]            = "Сундук с наградами за ежедневные квесты",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "Рыболовная яма",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "Добыча из сухопутных предметов",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Боссы в пробных подземельях",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Тип моба/животного",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Боссы в групповых подземельях",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Сундуки открытых подземелий",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "貢献に見合った報酬です",
@@ -880,18 +887,19 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]     = "デイリーランダムダンジョン報酬メール",
         [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                 = "帝都の宝物庫",
         [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                      = "レベルアップ報酬",
-        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "Tel Var equipment lockbox merchant, IC sewer base",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "Alliance points elite gear lockbox merchant, Cyrodiil/Vvardenfell",
-        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                        = "A named NPC rewards with this item",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Oblivion portal final boss chest",
-        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, Magical anomalies reward",
-        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                        = "Chests in a dungeon",
-        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]            = "Daily quest reward coffer",
-        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "Fishing hole",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "Loot from overland items",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
-        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Mob/Critter type",
-        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosses in group dungeons",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "テルバー装備保管庫商人、IC下水道基地",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "アライアンス ポイント エリート ギア ロックボックス マーチャント、シロディール/ヴァーデンフェル",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                        = "指名されたNPCはこのアイテムで報酬を得る",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "オブリビオンポータルの最終ボスのチェスト",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "ドルメン、Harrowstorms、魔法の異常の報酬",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                        = "ダンジョンの宝箱",
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]            = "デイリークエストの報酬箱",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "釣り穴",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "陸上アイテムから略奪する",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "試練のダンジョンのボス",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "モブ/クリッターの種類",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "グループダンジョンのボス",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "パブリックダンジ 宝箱",
     },
 }
 lib.dropMechanicIdToNameTooltip   = {
@@ -1182,6 +1190,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds",
     [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "/esoui/art/icons/pet_slateskinneddaedrat.dds",
     [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "/esoui/art/journal/journal_quest_group_instance.dds",
+    [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "/esoui/art/icons/undaunted_mediumcoffer.dds",
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
     --["golden chest"] =        "/esoui/art/icons/undaunted_dungeoncoffer.dds",

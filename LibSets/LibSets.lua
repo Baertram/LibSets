@@ -331,6 +331,7 @@ if IsLibSetsAlreadyLoaded(false) then return end
 
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
+local libPrefix = "["..MAJOR.."]"
 local apiVersion = GetAPIVersion()
 local worldName = GetWorldName()
 
@@ -400,7 +401,13 @@ local undauntedChestIds =               lib.undauntedChestIds
 local allowedDropMechanics =            lib.allowedDropMechanics
 local dropMechanicIdToName =            lib.dropMechanicIdToName
 local dropMechanicIdToNameTooltip =     lib.dropMechanicIdToNameTooltip
-
+local possibleDlcTypes =                lib.possibleDlcTypes
+local possibleDlcIds =                  lib.possibleDlcIds
+local DLCandCHAPTERdata =               lib.DLCAndCHAPTERData
+local DLCandCHAPTERLookupdata =         lib.DLCandCHAPTERLookupdata
+local allowedDLCTypes =                 lib.allowedDLCTypes
+local allowedDLCIds =                   lib.allowedDLCIds
+local dlcAndChapterCollectibleIds =     lib.dlcAndChapterCollectibleIds
 
 --local lib functions
 local checkIfSetsAreLoadedProperly
@@ -1428,6 +1435,7 @@ function lib.GetDLCId(setId)
     if setData == nil or setData.dlcId == nil then return end
     return setData.dlcId
 end
+local lib_GetDLCId = lib.GetDLCId
 
 --Returns Boolean true/false if the set's dlcId is the currently active DLC.
 --Means the set is "new added with this DLC".
@@ -1444,7 +1452,36 @@ end
 
 --Returns the table of DLCIDs of LibSets (the constants in LibSets.allowedDLCIds, see file LibSets_ConstantsLibraryInternal.lua)
 function lib.GetAllDLCIds()
-    return lib.allowedDLCIds
+    return allowedDLCIds
+end
+
+
+--Returns the dlcType as number for the setId
+--> Parameters: setId number: The set's setId
+--> Returns:    dlcType number, or NIL if set's DLCType is unknown
+function lib.GetDLCType(setId)
+    local dlcId = lib_GetDLCId(setId)
+    if dlcId ~= nil and allowedDLCIds[dlcId] then
+        local dlcType = dlcAndChapterCollectibleIds[dlcId].type
+        if allowedDLCTypes[dlcType] then
+            return dlcType
+        end
+    end
+    return
+end
+
+--Returns the name of the DLC type by help of the DLC type id
+--> Parameters: dlcId number: The DLC id given in a set's info
+--> Returns:    name dlcTypeName
+function lib.GetDLCTypeName(dlcTypeId)
+    if not lib.possibleDlcTypes then return end
+    local dlcTypeName = lib.possibleDlcTypes[dlcTypeId] or ""
+    return dlcTypeName
+end
+
+--Returns the table of DLC types of LibSets (the constants in LibSets.allowedDLCTypes, see file LibSets_ConstantsLibraryInternal.lua)
+function lib.GetAllDLCTypes()
+    return lib.allowedDLCTypes
 end
 
 --Returns the number of researched traits needed to craft this set. This will only check the craftable sets!
@@ -2195,8 +2232,8 @@ end
 --> Parameters: dlcId number: The DLC id given in a set's info
 --> Returns:    name dlcName
 function lib.GetDLCName(dlcId)
-    if not lib.DLCData then return end
-    local dlcName = lib.DLCData[dlcId] or ""
+    if not DLCandCHAPTERdata then return end
+    local dlcName = DLCandCHAPTERdata[dlcId] or ""
     return dlcName
 end
 
@@ -3005,6 +3042,85 @@ local function command_handler(args)
     end
 end
 
+
+local dlcsInOrderLookupTable
+local chaptersInOrderLookupTable
+
+local function outputDLCorChapterRow(dlcId, dlcName, dlcType)
+    local dlcTypeSuffix = ""
+    if dlcType ~= nil then
+        dlcTypeSuffix = "  (".. tos(possibleDlcTypes[dlcType])  .. ")"
+    end
+    local releaseDateTimestamp = dlcAndChapterCollectibleIds[dlcId].releaseDate
+    local releaseDateStr
+    local onlyDateWithoutTimeStr
+    if releaseDateTimestamp ~= nil and type(releaseDateTimestamp) == "number" and releaseDateTimestamp >= 0 and releaseDateTimestamp <= 2147483647 then
+        releaseDateStr = os.date("%c", releaseDateTimestamp)
+        --Strip the hours, minutes, seconds at the space
+        if string.find(releaseDateStr, " ", 1, true) ~= nil then
+            for param in strgmatch(releaseDateStr, "([^%s]+)%s*") do
+                if param ~= nil and param ~= "" then
+                    onlyDateWithoutTimeStr =  param
+                    break
+                end
+            end
+        else
+            onlyDateWithoutTimeStr = releaseDateStr
+        end
+    end
+    if onlyDateWithoutTimeStr == nil then
+        onlyDateWithoutTimeStr = ""
+    end
+    if onlyDateWithoutTimeStr ~= "" then
+        onlyDateWithoutTimeStr = onlyDateWithoutTimeStr .. ": "
+    end
+
+    d("> [".. tos(dlcId) .."] " .. onlyDateWithoutTimeStr .. dlcName .. dlcTypeSuffix)
+end
+
+local function slashcommand_dlcs()
+    if DLCandCHAPTERdata == nil then return end
+    if dlcsInOrderLookupTable == nil then
+        for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
+            local dlcType = dlcAndChapterCollectibleIds[dlcId].type
+            if dlcType == DLC_TYPE_DUNGEONS or dlcType == DLC_TYPE_ZONE then
+                dlcsInOrderLookupTable = dlcsInOrderLookupTable or {}
+                tins(dlcsInOrderLookupTable, {dlcId=dlcId, name=dlcName})
+            end
+        end
+    end
+    d(libPrefix .. "DLCs in order of appearance [<LibSetsDLCId>] <name>  (<LibSetsDLCtype>)")
+    for _, chapterData in ipairs(dlcsInOrderLookupTable) do
+        local dlcId = chapterData.dlcId
+        outputDLCorChapterRow(dlcId, chapterData.name, dlcAndChapterCollectibleIds[dlcId].type)
+    end
+end
+
+local function slashcommand_chapters()
+    if DLCandCHAPTERdata == nil then return end
+    if chaptersInOrderLookupTable == nil then
+        for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
+            if dlcAndChapterCollectibleIds[dlcId].type == DLC_TYPE_CHAPTER then
+                chaptersInOrderLookupTable = chaptersInOrderLookupTable or {}
+                tins(chaptersInOrderLookupTable, {dlcId=dlcId, name=dlcName})
+            end
+        end
+    end
+    d(libPrefix .. "Chapters in order of appearance [<LibSetsDLCId>] <name>  (DLC_TYPE_CHAPTER)")
+    for _, chapterData in ipairs(chaptersInOrderLookupTable) do
+        local dlcId = chapterData.dlcId
+        outputDLCorChapterRow(dlcId, chapterData.name, dlcAndChapterCollectibleIds[dlcId].type)
+    end
+end
+
+local function slashcommand_dlcsandchapter()
+    if DLCandCHAPTERdata == nil then return end
+    d(libPrefix .. "DLCs & chapters in order of appearance [<LibSetsDLCId>] <name>  (<LibSetsDLCtype>)")
+    for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
+        outputDLCorChapterRow(dlcId, dlcName, dlcAndChapterCollectibleIds[dlcId].type)
+    end
+end
+
 local function createSlashCommands()
     SLASH_COMMANDS["/libsets"] = command_handler
     if SLASH_COMMANDS["/sets"] == nil then
@@ -3013,6 +3129,14 @@ local function createSlashCommands()
     if SLASH_COMMANDS["/ls"] == nil then
         SLASH_COMMANDS["/ls"] = command_handler
     end
+
+    --Add the slash command for the DLC/chapter info
+    SLASH_COMMANDS["/libsetsdlcsandchapters"] = slashcommand_dlcsandchapter
+    SLASH_COMMANDS["/dlcsandchapters"] = slashcommand_dlcsandchapter
+    SLASH_COMMANDS["/libsetsdlcs"] = slashcommand_dlcs
+    SLASH_COMMANDS["/dlcs"] = slashcommand_dlcs
+    SLASH_COMMANDS["/libsetschapters"] = slashcommand_chapters
+    SLASH_COMMANDS["/chapters"] = slashcommand_chapters
 end
 
 
