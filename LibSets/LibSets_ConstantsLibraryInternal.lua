@@ -1,5 +1,5 @@
 --Library base values
-local MAJOR, MINOR = "LibSets", 0.50
+local MAJOR, MINOR = "LibSets", 0.51
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -89,31 +89,31 @@ lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the clien
 --The supported languages of this library
 local fallbackLang             = "en"
 lib.fallbackLang               = fallbackLang
+--During debugging these languages will be scanned for their setNames and an automatic langauge switch and reloadUI will
+--be done -> If the value == true
 local supportedLanguages       = {
     ["de"] = true,
     ["en"] = true,
     ["es"] = true,
     ["fr"] = true,
     ["ru"] = true,
-    ["jp"] = false, --TODO: Working on: Waiting for SetNames & other translations by Calamath e.g.
+    ["zh"] = true,
+    ["jp"] = false, --TODO: Working on: Waiting for SetNames & other translations (by Calamath e.g.)
 }
 lib.supportedLanguages         = supportedLanguages
-local supportedLanguagesIndex = {
-    [1] = "de",
-    [2] = "en",
-    [3] = "es",
-    [4] = "fr",
-    [5] = "ru",
-    --[6] = "jp", --TODO: Working on: Waiting for SetNames & other translations by Calamath e.g.
-}
-lib.supportedLanguagesIndex         = supportedLanguagesIndex
-
 
 local numSupportedLangs        = 0
-for _, isSupported in pairs(supportedLanguages) do
-    if isSupported == true then numSupportedLangs = numSupportedLangs + 1 end
+local supportedLanguagesIndex = {}
+for supportedLanguage, isSupported in pairs(supportedLanguages) do
+    if isSupported == true then
+        numSupportedLangs = numSupportedLangs + 1
+        supportedLanguagesIndex[#supportedLanguagesIndex + 1] = supportedLanguage
+    end
 end
 lib.numSupportedLangs = numSupportedLangs
+table.sort(supportedLanguagesIndex)
+lib.supportedLanguagesIndex = supportedLanguagesIndex
+
 
 --The actual clients language
 local clientLang      = GetCVar("language.2")
@@ -286,6 +286,7 @@ local setTypesToName = {
         ["fr"] = "Arène",
         ["jp"] = "アリーナ",
         ["ru"] = "Aрена",
+        ["zh"] = "Arena",
     },
     [LIBSETS_SETTYPE_BATTLEGROUND]                  = {
         ["de"] = "Schlachtfeld", --SI_LEADERBOARDTYPE4,
@@ -294,6 +295,7 @@ local setTypesToName = {
         ["fr"] = "Champ de bataille",
         ["jp"] = "バトルグラウンド",
         ["ru"] = "Поле сражений",
+        ["zh"] = "Battleground",
     },
     [LIBSETS_SETTYPE_CRAFTED]                       = {
         ["de"] = "Handwerklich hergestellt", --SI_ITEM_FORMAT_STR_CRAFTED
@@ -302,6 +304,7 @@ local setTypesToName = {
         ["fr"] = "Fabriqué",
         ["jp"] = "クラフトセット",
         ["ru"] = "Созданный",
+        ["zh"] = "Crafted",
     },
     [LIBSETS_SETTYPE_CYRODIIL]                      = {
         ["de"] = "Cyrodiil", --SI_CAMPAIGNRULESETTYPE1,
@@ -310,6 +313,7 @@ local setTypesToName = {
         ["fr"] = "Cyrodiil",
         ["jp"] = "シロディール",
         ["ru"] = "Сиродил",
+        ["zh"] = "Cyrodiil",
     },
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = {
         ["de"] = "Zufälliges Verlies & Kaiserstadt Belohnung", --SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT & SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR
@@ -318,6 +322,7 @@ local setTypesToName = {
         ["fr"] = "Donjons aléatoires & Cité impßériale " .. zocstrfor("<<c:1>>", "Récompense"),
         ["jp"] = "デイリー報酬",
         ["ru"] = "Случайное ежедневное подземелье и награда Имперского города",
+        ["zh"] = "Random Dungeons & Imperial city " .. zocstrfor("<<c:1>>", "Reward"),
     },
     [LIBSETS_SETTYPE_DUNGEON]                       = {
         ["de"] = "Verlies", --SI_INSTANCEDISPLAYTYPE2
@@ -326,6 +331,7 @@ local setTypesToName = {
         ["fr"] = "Donjon",
         ["jp"] = "ダンジョン",
         ["ru"] = "Подземелье",
+        ["zh"] = "Dungeon",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY]                  = {
         ["de"] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
@@ -334,6 +340,7 @@ local setTypesToName = {
         ["fr"] = "Cité impériale",
         ["jp"] = "帝都",
         ["ru"] = "Имперский город",
+        ["zh"] = "Imperial city",
     },
     [LIBSETS_SETTYPE_MONSTER]                       = {
         ["de"] = "Monster",
@@ -342,6 +349,7 @@ local setTypesToName = {
         ["fr"] = "Monstre",
         ["jp"] = "モンスター",
         ["ru"] = "Монстр",
+        ["zh"] = "Monster",
     },
     [LIBSETS_SETTYPE_OVERLAND]                      = {
         ["de"] = "Überland",
@@ -350,6 +358,7 @@ local setTypesToName = {
         ["fr"] = "Zone ouverte",
         ["jp"] = "陸上",
         ["ru"] = "Поверхности",
+        ["zh"] = "Overland",
     },
     [LIBSETS_SETTYPE_SPECIAL]                       = {
         ["de"] = "Besonders", --SI_HOTBARCATEGORY9
@@ -358,6 +367,7 @@ local setTypesToName = {
         ["fr"] = "Spécial",
         ["jp"] = "スペシャル",
         ["ru"] = "Специальный",
+        ["zh"] = "Special",
     },
     [LIBSETS_SETTYPE_TRIAL]                         = {
         ["de"] = "Prüfungen", --SI_LFGACTIVITY4
@@ -366,6 +376,7 @@ local setTypesToName = {
         ["fr"] = "Épreuves",
         ["jp"] = "試練",
         ["ru"] = "Испытание",
+        ["zh"] = "Trial",
     },
     [LIBSETS_SETTYPE_MYTHIC]                        = {
         ["de"] = "Mythisch",
@@ -374,6 +385,7 @@ local setTypesToName = {
         ["fr"] = "Mythique",
         ["jp"] = "神話上の",
         ["ru"] = "мифический",
+        ["zh"] = "Mythic",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = {
         ["de"] = "Kaiserstadt Monster",
@@ -382,6 +394,7 @@ local setTypesToName = {
         ["fr"] = "Cité impériale monstre",
         ["jp"] = "帝都 モンスター",
         ["ru"] = "Имперский город Монстр",
+        ["zh"] = "Imperial city monster",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
@@ -393,6 +406,7 @@ if checkIfPTSAPIVersionIsLive() then
         ["fr"] = "",
         ["jp"] = "",
         ["ru"] = "",
+        ["zh"] = "",
     }
     ]]
 end
@@ -633,6 +647,11 @@ local undauntedChestIds             = {
         [1] = "Глирион Краснобородый",
         [2] = "Мадж аль-Рагат",
         [3] = "Ургарлаг Бич Вождей",
+    },
+    ["zh"] = {
+        [1] = "Glirion the Redbeard",
+        [2] = "Maj al-Ragath",
+        [3] = "Urgarlag Chief-bane",
     },
     ["jp"] = {
         [1] = "赤髭グリリオン",
@@ -899,7 +918,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "試練のダンジョンのボス",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "モブ/クリッターの種類",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "グループダンジョンのボス",
-        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "パブリックダンジ 宝箱",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "パブリックダンジ 宝箱",
     },
 }
 lib.dropMechanicIdToNameTooltip   = {
@@ -961,6 +980,9 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "「インペリアルシティ下水道の派閥基地にあるTelVar機器ベンダーでTelVarストーンと交換できるチェスト。」",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
+    ["zh"] = {
+        --todo
+    },
 }
 --DropMechanic translations only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -983,6 +1005,7 @@ lib.localization                 = {
         ru                              = "Russisch",
         pl                              = "Polnisch",
         es                              = "Spanisch",
+        zh                              = "Chinesisch",
         dlc                      = "Kapitel/DLC",
         dropZones                = "Drop Zonen",
         dropZoneArena            = setTypeArenaName["de"],
@@ -1003,6 +1026,10 @@ lib.localization                 = {
         customTooltipPattern_TT  = "Definiere deinen eigenen Tooltip Text, inklusive vor-definierter Platzhalter. Beispiel: \'Art <<1>>/Drop <<2>> <<3>> <<4>>\'.\nLasse dieses Textfeld leer, um den eigenen Tooltip Text zu deaktivieren!\nPlatzhalter müssen mit << beginnen, danach folt eine 1stellige Nummer, und beendet werden diese mit >>, z.B. <<1>> oder <<5>>. Es gibt maximal 6 Platzhalter in einem Text. Zeilenumbruch: <br>\n\nMögliche Platzhalter sind:\n<<1>>   Set Art\n<<2>>   Drop Mechaniken [können mehrere \',\' getrennte sein, je Zone 1]\n<<3>>   Drop Zonen [können mehrere \',\' getrennte sein, je Zone 1] Sind alle Zonen identisch wird nur 1 ausgegeben\n<<4>>   Boss/Drop durch Namen [können mehrere \',\' getrennte sein, je Zone 1]\n<<5>>   Benötigte Anzahl analysierter Eigenschaten, oder Rekonstruktionskosten\n<<6>>   Kapitel/DLC Name mit dem das Set eingeführt wurde.\n\n|cFF0000Achtung|r: Wenn du einen ungültigen Tooltip Text, ohne irgendeinen <<Nummer>> Platzhalter, eingibst wird sich das Textfeld automatisch selber leeren!",
         slashCommandDescription         = "Suche übersetzte Set Namen",
         slashCommandDescriptionClient   = "Suche Set ID/Namen (Spiel Sprache)",
+        previewTT                = "Set Vorschau",
+        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <set name> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.",
+        previewTTToChatToo       = "Vorschauf ItemLink in den Chat",
+        previewTTToChatToo_TT    = "Wenn diese Option aktiviert ist wird der ItemLink des Vorschau Set Gegenstandes auch in deine Chat Eingabebox gesendet, damit du diesen jemanden schicken/ihn mit der Maus und STRG+C in deine Zwischenablage kopieren kannst.",
     },
     ["en"] = {
         de  = "German",
@@ -1012,6 +1039,7 @@ lib.localization                 = {
         ru  = "Russian",
         pl  = "Polish",
         es  = "Spanish",
+        zh  = "Chinese",
         dlc                      = "Chapter/DLC",
         dropZones                = "Drop zones",
         dropZoneDelve            = GetString(SI_INSTANCEDISPLAYTYPE7),
@@ -1047,6 +1075,10 @@ lib.localization                 = {
         customTooltipPattern_TT  = "Define your own custom tooltip text, including the possibility to use some pre-defined placeholders in your text. Example: \'Type <<1>>/Drops <<2>> <<3>> <<4>>\'.\nLeave the text field empty to disable this custom tooltip!\nPlaceholders need to start with prefix << followed by a 1 digit number and a suffix of >>, e.g. <<1>> or <<5>>.\nThere can be only a maximum of 6 placeholders in the text. Line break: <br>\n\nBelow you'll find the possible placeholders:\n<<1>>   Set type\n<<2>>   Drop mechanics [could be several, for each zone, separated by \',\']\n<<3>>   Drop zones [could be several, for each zone, separated by \',\'] If all zones are the same they will be condensed\n<<4>>   Boss/Dropped by names [could be several, for each zone, separated by \',\']\n<<5>>   Number of needed traits researched, or reconstruction costs\n<<6>>   Chapter/DLC name set was introduced with.\n\n|cFF0000Attention|r: If you enter an invalid tooltip text, without any <<number>> placeholder the editfield will automatically clear itsself!",
         slashCommandDescription         = "Search translations of set names",
         slashCommandDescriptionClient   = "Search set ID/names (game client language)",
+        previewTT                = "Set preview",
+        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <set name> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is writtent to the chat entry editbox) you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.",
+        previewTTToChatToo       = "Preview itemLink to chat",
+        previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to yoru clipboard using CTRL+C.",
     },
     ["es"] = {
         de  = "Alemán",
@@ -1126,36 +1158,40 @@ lib.localization                 = {
         slashCommandDescription = "セット名の翻訳を検索",
         slashCommandDescriptionClient = "セット名の検索 (ゲーム言語)",
     },
+    ["zh"] = {
+        --todo
+    },
 }
 
---Set metatable to get EN entries for missing other languages
+
+--Set metatable to get EN entries for missing other languages (fallback values)
 local dropMechanicNames          = lib.dropMechanicIdToName
-local dropMechanicNamesEn        = dropMechanicNames["en"]
+local dropMechanicNamesEn        = dropMechanicNames[fallbackLang]  --fallback value English
 
 local dropMechanicTooltipNames   = lib.dropMechanicIdToNameTooltip
-local dropMechanicTooltipNamesEn = dropMechanicTooltipNames["en"]
+local dropMechanicTooltipNamesEn = dropMechanicTooltipNames[fallbackLang]  --fallback value English
 
 local localization               = lib.localization
-local localizationEn             = lib.localization["en"]
+local localizationEn             = lib.localization[fallbackLang] --fallback value English
 
-setmetatable(dropMechanicNames["de"], { __index = dropMechanicNamesEn })
-setmetatable(dropMechanicNames["es"], { __index = dropMechanicNamesEn })
-setmetatable(dropMechanicNames["fr"], { __index = dropMechanicNamesEn })
-setmetatable(dropMechanicNames["jp"], { __index = dropMechanicNamesEn })
-setmetatable(dropMechanicNames["ru"], { __index = dropMechanicNamesEn })
-
-setmetatable(dropMechanicTooltipNames["de"], { __index = dropMechanicTooltipNamesEn })
-setmetatable(dropMechanicTooltipNames["es"], { __index = dropMechanicTooltipNamesEn })
-setmetatable(dropMechanicTooltipNames["fr"], { __index = dropMechanicTooltipNamesEn })
-setmetatable(dropMechanicTooltipNames["jp"], { __index = dropMechanicTooltipNamesEn })
-setmetatable(dropMechanicTooltipNames["ru"], { __index = dropMechanicTooltipNamesEn })
-
-setmetatable(localization["de"], { __index = localizationEn })
-setmetatable(localization["es"], { __index = localizationEn })
-setmetatable(localization["fr"], { __index = localizationEn })
-setmetatable(localization["jp"], { __index = localizationEn })
-setmetatable(localization["ru"], { __index = localizationEn })
-local clientLocalization               = localization[clientLang]
+for supportedLanguage, isSupported in pairs(supportedLanguages) do
+    if isSupported == true and supportedLanguage ~= fallbackLang then
+        if dropMechanicNames[supportedLanguage] ~= nil then
+            setmetatable(dropMechanicNames[supportedLanguage],          { __index = dropMechanicNamesEn })
+        end
+        if dropMechanicTooltipNames[supportedLanguage] ~= nil then
+            setmetatable(dropMechanicTooltipNames[supportedLanguage],   { __index = dropMechanicTooltipNamesEn })
+        end
+        if localization[supportedLanguage] ~= nil then
+            setmetatable(localization[supportedLanguage],               { __index = localizationEn })
+        end
+    end
+end
+--Set here first/again so that metatables already added fallbackLang (en) entries!
+localization                     = lib.localization
+dropMechanicNames                = lib.dropMechanicIdToName
+dropMechanicTooltipNames         = lib.dropMechanicIdToNameTooltip
+local clientLocalization         = localization[clientLang]
 
 
 --Mapping for tooltips

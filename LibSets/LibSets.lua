@@ -476,6 +476,7 @@ local function LoadSavedVariables()
 
         --Created tooltip for set preview
         setPreviewTooltips = {
+            sendToChatToo = true,
             equipType = EQUIP_TYPE_CHEST,
             traitType = ITEM_TRAIT_TYPE_ARMOR_DIVINES,
             enchantSearchCategoryType = ENCHANTMENT_SEARCH_CATEGORY_NONE,
@@ -507,6 +508,11 @@ local function LoadSavedVariables()
 end
 lib.LoadSavedVariables = LoadSavedVariables
 
+local function getLibSetsSetPreviewTooltipSavedVariables()
+    if not lib.svData then return end
+    return lib.svData.setPreviewTooltips
+end
+lib.getLibSetsSetPreviewTooltipSavedVariables = getLibSetsSetPreviewTooltipSavedVariables
 
 --======= SET ItemId decompression =====================================================================================
 --Thanks to Dolgubon for the base function code from his LibLazyCrafting!
