@@ -111,6 +111,7 @@ for supportedLanguage, isSupported in pairs(supportedLanguages) do
     end
 end
 lib.numSupportedLangs = numSupportedLangs
+table.sort(supportedLanguagesIndex)
 lib.supportedLanguagesIndex = supportedLanguagesIndex
 
 
@@ -1174,10 +1175,10 @@ for supportedLanguage, isSupported in pairs(supportedLanguages) do
             setmetatable(dropMechanicNames[supportedLanguage],          { __index = dropMechanicNamesEn })
         end
         if dropMechanicTooltipNames[supportedLanguage] ~= nil then
-            setmetatable(dropMechanicTooltipNames[supportedLanguage],   { __index = dropMechanicNamesEn })
+            setmetatable(dropMechanicTooltipNames[supportedLanguage],   { __index = dropMechanicTooltipNamesEn })
         end
         if localization[supportedLanguage] ~= nil then
-            setmetatable(localization[supportedLanguage],               { __index = dropMechanicNamesEn })
+            setmetatable(localization[supportedLanguage],               { __index = localizationEn })
         end
     end
 end
