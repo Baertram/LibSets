@@ -78,6 +78,7 @@ local function buildAutoComplete(command, langToUse)
             return self.lookupList[label] or label
         end
 
+        --Callback to create a setItem tooltp into the chat editbox
         command:SetCallback(function(input)
             createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
             local setId = tonumber(input)
@@ -108,8 +109,8 @@ local function buildAutoComplete(command, langToUse)
 
                 command:AddAlias(tos(setId) .. setNameInSlashCommandLangNoSpaces)
 
+                --Add a setName entry as subcommand so the first auto complete will show all set names as the user types /lsp into chat
                 if not command:HasSubCommandAlias(setNameInSlashCommandLangNoSpaces) then
-                    --Add a setName entry as subcommand so the first auto complete will show all set names as the user types /lsp into chat
                     local setSubCommand = command:RegisterSubCommand()
                     setSubCommand:AddAlias(setNameInSlashCommandLangNoSpaces)
                     setSubCommand:SetDescription(langUpper .. " (ID: " ..tos(setId)..")")
