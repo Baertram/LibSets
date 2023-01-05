@@ -50,16 +50,10 @@ setsOfNewerAPIVersion = {
     --yyy,
     --....
 
-    --setIds of APIversion 101036
-    [1] = 671,
-    [2] = 672,
-    [3] = 673,
-    [4] = 674,
-    [5] = 675,
-    [6] = 676,
-    [7] = 677,
-    [8] = 678,
-    [9] = 679,
+    --setIds of APIversion 101037
+    --???
+    --???
+    --???
 
     --setIds not yet on live server - END
 }
