@@ -45,6 +45,8 @@ local gil =         GetItemLink
 local isilscp =     IsItemLinkSetCollectionPiece
 local gircoc =      GetItemReconstructionCurrencyOptionCost
 
+local getLibSetsSetPreviewTooltipSavedVariables = lib.getLibSetsSetPreviewTooltipSavedVariables
+
 ------------------------------------------------------------------------------------------------------------------------
 --SetIds which are blacklisted for zone related tooltip text (as they got no zoneId where they drop)
 local blacklistedSetIdsForZoneTooltips = {
@@ -1419,7 +1421,29 @@ local function loadLAMSettingsMenu()
             default = defaultSettings.useCustomTooltipPattern,
             reference = "LibSets_LAM_EditBox_CustomTooltipPattern",
             --requiresReload = true,
-        }
+        },
+
+        ----------------------------------------------------------------------------------------------------------------
+        --- Slash command /lsp preview tooltip
+        {
+            type  = "description",
+            title = localization.previewTT,
+            text  = localization.previewTT_TT,
+        },
+        {
+            type =      "checkbox",
+            name =      localization.previewTTToChatToo,
+            tooltip =   localization.previewTTToChatToo_TT,
+            getFunc =   function() return settings.setPreviewTooltips.sendToChatToo end,
+            setFunc =   function(value)
+                lib.svData.settings.setPreviewTooltips.sendToChatToo = value
+            end,
+            default =   defaultSettings.setPreviewTooltips.sendToChatToo,
+            disabled =  function() return false end,
+            width =     "full",
+        },
+
+
     }
     lam:RegisterOptionControls(LAMPanelName, optionsTable)
 end
@@ -1453,11 +1477,6 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- Tooltip preview
 ------------------------------------------------------------------------------------------------------------------------
-local function getLibSetsSetPreviewTooltipSavedVariables()
-    if not lib.svData then return end
-    return lib.svData.setPreviewTooltips
-end
-
 local function createPreviewTooltipAndShow(setId)
     if popupTooltip and not popupTooltip:IsControlHidden() then
         ZO_PopupTooltip_Hide()
@@ -1502,6 +1521,7 @@ lib.CreatePreviewTooltipAndShow = createPreviewTooltipAndShow
 
 local allSetNamesCached
 local function previewSetTooltipBySlashCommand(args)
+    if lib.libSlashCommander ~= nil then return end
     if args == nil or args == "" then return end
 
     --Parse the arguments string
@@ -1521,34 +1541,39 @@ local function previewSetTooltipBySlashCommand(args)
     else
         --Search by set name
         local setName = args --tconcat(options, " ") --concatenate the string
---d("SetName: " ..tos(setName))
+        --d("SetName: " ..tos(setName))
         if setName == nil or setName == "" then return end
+        setName = strlower(setName)
+        local setNameToSearch = strgsub(setName, "%s+", "·") --replace spaces by .
+        if setNameToSearch == "" then setNameToSearch = setNameToSearch end
+
         --Get the set names of all sets, in all languages
 
-        if not lib.libSlashCommander then
-            allSetNamesCached = allSetNamesCached or lib_getAllSetNames()
-            --Search the set's ID by it's provided criteria "name", first start with the client language
-            for setIdOfSearchedData, setNameOfEachLanguage in pairs(allSetNamesCached) do
-                local setNameInClientLang = strlower(setNameOfEachLanguage[clientLang])
-                if setNameInClientLang ~= nil and setNameInClientLang ~= "" and (
-                        setNameInClientLang == setName or strfind(setNameInClientLang, setName, 1, true) ~= nil
-                ) then
-                    setId = setIdOfSearchedData
-                    break --end the loop
-                else
-                    if not doesClientLangEqualFallbackLang then
-                        local setNameInFallbackLang = strlower(setNameOfEachLanguage[fallbackLang])
-                        if setNameInFallbackLang ~= nil and setNameInFallbackLang ~= "" and (
-                                setNameInFallbackLang == setName or strfind(setNameInFallbackLang, setName, 1, true) ~= nil
-                        ) then
-                            setId = setIdOfSearchedData
-                            break --end the loop
-                        end
+        allSetNamesCached = allSetNamesCached or lib_getAllSetNames()
+        --Search the set's ID by it's provided criteria "name", first start with the client language
+        for setIdOfSearchedData, setNameOfEachLanguage in pairs(allSetNamesCached) do
+            local setNameInClientLang = strlower(setNameOfEachLanguage[clientLang])
+            local setNameNoSpaces = strgsub(setNameInClientLang, "%s+", "·") --replace spaces by .
+            if setNameNoSpaces == "" then setNameNoSpaces = setNameInClientLang end
+            if setNameInClientLang ~= nil and setNameInClientLang ~= "" and setNameNoSpaces ~= "" and (
+                    setNameInClientLang == setNameToSearch or strfind(setNameInClientLang, setNameToSearch, 1, true) ~= nil
+            ) then
+                setId = setIdOfSearchedData
+                break --end the loop
+            else
+                if not doesClientLangEqualFallbackLang then
+                    local setNameInFallbackLang = strlower(setNameOfEachLanguage[fallbackLang])
+                    setNameNoSpaces = ""
+                    setNameNoSpaces = strgsub(setNameInFallbackLang, "%s+", "·") --replace spaces by .
+                    if setNameNoSpaces == "" then setNameNoSpaces = setNameInFallbackLang end
+                    if setNameInFallbackLang ~= nil and setNameInFallbackLang ~= "" and setNameNoSpaces ~= "" and (
+                            setNameInFallbackLang == setNameToSearch or strfind(setNameInFallbackLang, setNameToSearch, 1, true) ~= nil
+                    ) then
+                        setId = setIdOfSearchedData
+                        break --end the loop
                     end
                 end
             end
-        --else
-            --Use LibSlashCommander for the set names and search: See file LibSets_AutoCompletion
         end
     end
     if setId == nil then return end
