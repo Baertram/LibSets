@@ -980,6 +980,9 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "「インペリアルシティ下水道の派閥基地にあるTelVar機器ベンダーでTelVarストーンと交換できるチェスト。」",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
+    ["zh"] = {
+        --todo
+    },
 }
 --DropMechanic translations only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -1155,6 +1158,9 @@ lib.localization                 = {
         slashCommandDescription = "セット名の翻訳を検索",
         slashCommandDescriptionClient = "セット名の検索 (ゲーム言語)",
     },
+    ["zh"] = {
+        --todo
+    },
 }
 
 
@@ -1167,7 +1173,6 @@ local dropMechanicTooltipNamesEn = dropMechanicTooltipNames[fallbackLang]  --fal
 
 local localization               = lib.localization
 local localizationEn             = lib.localization[fallbackLang] --fallback value English
-local clientLocalization         = localization[clientLang]
 
 for supportedLanguage, isSupported in pairs(supportedLanguages) do
     if isSupported == true and supportedLanguage ~= fallbackLang then
@@ -1182,6 +1187,12 @@ for supportedLanguage, isSupported in pairs(supportedLanguages) do
         end
     end
 end
+--Set here first/again so that metatables already added fallbackLang (en) entries!
+localization                     = lib.localization
+dropMechanicNames                = lib.dropMechanicIdToName
+dropMechanicTooltipNames         = lib.dropMechanicIdToNameTooltip
+local clientLocalization         = localization[clientLang]
+
 
 --Mapping for tooltips
 --Textures for the drop mechanic tooltips
