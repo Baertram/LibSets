@@ -389,6 +389,8 @@ local setInfo           = lib.setInfo               -- <--this table contains al
 --The special sets
 local noSetIdSets       = lib.noSetIdSets           -- <-- this table contains the set information for special sets which got no ESO own unique setId, but a new generated setId starting with 9999xxx
 
+local allSetNamesCached
+
 --Wayshrine node index -> zoneId mapping
 local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 
@@ -397,6 +399,10 @@ local libZone
 
 --local lib variables
 local supportedLanguages =              lib.supportedLanguages
+local supportedLanguageChoices =        lib.supportedLanguageChoices
+local supportedLanguageChoicesValues =  lib.supportedLanguageChoicesValues
+local supportedLanguageChoicesTooltips =lib.supportedLanguageChoicesTooltips
+
 local undauntedChestIds =               lib.undauntedChestIds
 local allowedDropMechanics =            lib.allowedDropMechanics
 local dropMechanicIdToName =            lib.dropMechanicIdToName
@@ -1042,16 +1048,6 @@ function lib.showWayshrineNodeIdOnMap(wayshrineNodeId)
     end, 100)
 end
 
---Returns the armor types's name
---> Parameters: armorType ESOArmorType: The ArmorType (https://wiki.esoui.com/Globals#ArmorType)
---> Returns:    String armorTypeName: The name fo the armor type in the current client's language
-function lib.GetArmorTypeName(armorType)
-    if armorType == ARMORTYPE_NONE then return end
-    local armorTypeNames = lib.armorTypeNames
-    if not armorType or not armorTypeNames then return end
-    local armorTypeName = armorTypeNames[armorType]
-    return armorTypeName
-end
 
 ------------------------------------------------------------------------
 -- 	Global set check functions
@@ -1461,7 +1457,6 @@ function lib.GetAllDLCIds()
     return allowedDLCIds
 end
 
-
 --Returns the dlcType as number for the setId
 --> Parameters: setId number: The set's setId
 --> Returns:    dlcType number, or NIL if set's DLCType is unknown
@@ -1774,17 +1769,22 @@ end
 --> lang String: The language to return the setName in. Can be left empty and the client language will be used then
 --> Returns:    String setName
 function lib.GetSetName(setId, lang)
+    if setId == nil then return end
     lang = lang or clientLang
+    if not checkIfSetsAreLoadedProperly() then return end
     lang = strlower(lang)
     if not supportedLanguages[lang] then return end
-    if not checkIfSetsAreLoadedProperly() then return end
     local setNames = {}
-    if isNoESOSet(setId) then
-        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+    if allSetNamesCached == nil or allSetNamesCached[setId] == nil or allSetNamesCached[setId][lang] == nil then
+        if isNoESOSet(setId) then
+            setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+        else
+            setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
+        end
     else
-        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
+        setNames =  allSetNamesCached
     end
-    if setId == nil or setNames[setId] == nil or setNames[setId][lang] == nil then return end
+    if setNames[setId] == nil or setNames[setId][lang] == nil then return end
     return setNames[setId][lang]
 end
 
@@ -1798,10 +1798,14 @@ function lib.GetSetNames(setId)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly() then return end
     local setNames = {}
-    if isNoESOSet(setId) then
-        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+    if allSetNamesCached == nil or allSetNamesCached[setId] == nil then
+        if isNoESOSet(setId) then
+            setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+        else
+            setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
+        end
     else
-        setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
+        setNames =  allSetNamesCached
     end
     if setNames[setId] == nil then return end
     return setNames[setId]
@@ -1812,7 +1816,6 @@ local lib_GetSetNames = lib.GetSetNames
 --The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.
 --{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
 --> Returns: setNames table
-local allSetNamesCached
 function lib.GetAllSetNames()
     if not checkIfSetsAreLoadedProperly() then return end
     if allSetNamesCached == nil then
@@ -1831,6 +1834,7 @@ function lib.GetAllSetNames()
     end
     return allSetNamesCached
 end
+
 
 --Returns the set info as a table
 --> Parameters: setId number: The set's setId,
@@ -2025,6 +2029,17 @@ function lib.GetSetArmorTypes(setId)
     --If it's not already added to the armorTypesOfSet table add it
     --Return the armorTypesOfSet table
     return armorTypesOfSet
+end
+
+--Returns the armor types's name
+--> Parameters: armorType ESOArmorType: The ArmorType (https://wiki.esoui.com/Globals#ArmorType)
+--> Returns:    String armorTypeName: The name fo the armor type in the current client's language
+function lib.GetArmorTypeName(armorType)
+    if armorType == ARMORTYPE_NONE then return end
+    local armorTypeNames = lib.armorTypeNames
+    if not armorType or not armorTypeNames then return end
+    local armorTypeName = armorTypeNames[armorType]
+    return armorTypeName
 end
 
 --Returns the armor types of a set's item
@@ -2300,6 +2315,17 @@ function lib.GetSetTypeSetsData(setType)
     return setsData
 end
 
+
+------------------------------------------------------------------------
+-- 	Global LibAddonMenu helper functions
+------------------------------------------------------------------------
+--Returns 3 tables for a libAddonMenu-2.0 dropdown widget:
+--table choices
+--table choicesValues
+--table choicesValuesTooltip
+function lib.GetSupportedLanguageChoices()
+    return supportedLanguageChoices, supportedLanguageChoicesValues, supportedLanguageChoicesTooltips
+end
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
