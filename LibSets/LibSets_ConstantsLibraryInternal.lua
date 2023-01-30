@@ -1,5 +1,5 @@
---Library base values
-local MAJOR, MINOR = "LibSets", 0.51
+--Library base values: Name, Version
+local MAJOR, MINOR = "LibSets", 0.53
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -46,7 +46,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101036 --Firesong, (2022-09-20, PTS, API 101036)
+lib.lastSetsPreloadedCheckAPIVersion = 101037 -- Scribes Of Fate (2023-01-30, PTS, API 101037)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -65,7 +65,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101036 --Firesong, (2022-09-20, PTS, API 
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101036 -- Firesong (2022-09-20, PTS, API 101036)
+APIVersions["PTS"]                   = 101037 -- Scribes Of Fate (2023-01-30, PTS, API 101037)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -115,13 +115,38 @@ table.sort(supportedLanguagesIndex)
 lib.supportedLanguagesIndex = supportedLanguagesIndex
 
 
+--Sorted table of supported languages which does not change it's index!
+-->Can be used as a LibAddonMenu choices table, see function LibSets.GetSupportedLanguageChoices()
+local supportedLanguageChoices, supportedLanguageChoicesValues
+supportedLanguageChoices = {
+    [1] = "de",
+    [2] = "en",
+    [3] = "es",
+    [4] = "fr",
+    [5] = "ru",
+    [6] = "zh",
+    --[xx] = "jp", --not supported yet JP
+}
+supportedLanguageChoicesValues = {
+    [1] = 1,
+    [2] = 2,
+    [3] = 3,
+    [4] = 4,
+    [5] = 5,
+    [6] = 6,
+    --[xx] = xx, --not supported yet JP
+}
+lib.supportedLanguageChoices = supportedLanguageChoices
+lib.supportedLanguageChoicesValues = supportedLanguageChoicesValues
+
+
 --The actual clients language
 local clientLang      = GetCVar("language.2")
 clientLang            = strlower(clientLang)
 if not supportedLanguages[clientLang] then
     clientLang = fallbackLang --Fallback language if client language is not supported: English
 end
-lib.clientLang                                         = clientLang
+lib.clientLang        = clientLang
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -1192,6 +1217,19 @@ localization                     = lib.localization
 dropMechanicNames                = lib.dropMechanicIdToName
 dropMechanicTooltipNames         = lib.dropMechanicIdToNameTooltip
 local clientLocalization         = localization[clientLang]
+
+--Tooltips in client language, for LibAddonMenu-2.0 dropdown widget choices and choicesTooltips
+local supportedLanguageChoicesTooltips = {}
+for langIndex, langStr in ipairs(supportedLanguageChoices) do
+    local langStrLong = clientLocalization[langStr]
+    if langStrLong == nil or langStrLong == "" then langStrLong = langStr end
+    supportedLanguageChoicesTooltips[langIndex] = langStrLong
+    --Update the table lib.supportedLanguageChoices too!
+    if langStr ~= langStrLong then
+        supportedLanguageChoices[langIndex] = langStrLong
+    end
+end
+lib.supportedLanguageChoicesTooltips = supportedLanguageChoicesTooltips
 
 
 --Mapping for tooltips
