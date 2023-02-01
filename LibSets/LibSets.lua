@@ -410,9 +410,9 @@ local allowedDLCTypes =                 lib.allowedDLCTypes
 local allowedDLCIds =                   lib.allowedDLCIds
 local dlcAndChapterCollectibleIds =     lib.dlcAndChapterCollectibleIds
 
-local customTooltipHooksNeeded = lib.customTooltipHook.needed
-local customTooltipHooksHooked = lib.customTooltipHook.hooked
-local customTooltipHooksEventPlayerActivatedCalled = lib.customTooltipHook.eventPlayerActivatedCalled
+local customTooltipHooksNeeded =        lib.customTooltipHooks.needed
+--local customTooltipHooksHooked =        lib.customTooltipHooks.hooked
+local customTooltipHooksEventPlayerActivatedCalled = lib.customTooltipHooks.eventPlayerActivatedCalled
 
 
 --local lib functions
@@ -2601,14 +2601,18 @@ end
 -->Returns true if LibSets tooltip hook was added to the internal tables (will be hooked at EVENT_PLAYER_ACTIVATED once, or if a new hook is added later via this function)
 -->Returns false if it was already added
 -->Returns nil if any error happens
-local tooltipControlNameAndInheritErrorStr = "[" .. MAJOR .. "]ERROR - %q: RegisterCustomTooltipHook - parameter \'tooltipCtrlName\' (%s) must be the name of an exising TooltipControl of type CT_TOOLTIP, inheriting from ZO_ItemIconTooltip, providing function \'OnAddGameData\'"
+local tooltipControlNameAndInheritErrorStr = "[" .. MAJOR .. "]:RegisterCustomTooltipHook ERROR - addon: %q - parameter \'tooltipCtrlName\' (%s) must be the name of an existing TooltipControl of type CT_TOOLTIP, inheriting from ZO_ItemIconTooltip, providing function \'OnAddGameData\'"
 function lib.RegisterCustomTooltipHook(tooltipCtrlName, addonName)
     --TooltipControl name is provided and a String
     assert(tooltipCtrlName ~= nil and tooltipCtrlName ~= "", strfor(tooltipControlNameAndInheritErrorStr, tos(addonName), tos(tooltipCtrlName)))
+d(">customTooltipControlName found")
     --Tooltip Control is provided and it's type is CT_TOOLTIP (11) and got the function 'OnAddGameData'
     local ttCtrl = GetControl(tooltipCtrlName)
     local ttCtrltype = (ttCtrl.GetType ~= nil and ttCtrl:GetType()) or nil
+d(">ttCtrltype: " ..tos(ttCtrltype))
+lib._ttCtrlLastAdded = ttCtrltype
     assert(ttCtrl ~= nil and ttCtrl.OnAddGameData ~= nil and ttCtrltype ~= nil and ttCtrltype == CT_TOOLTIP, strfor(tooltipControlNameAndInheritErrorStr, tos(addonName), tos(tooltipCtrlName)))
+d(">customTooltipControl found")
     --Check if the same conrolName was already added and provide feedback
     local customTooltipHooks = lib.customTooltipHooks
     for index, ttData in ipairs(customTooltipHooks.needed) do

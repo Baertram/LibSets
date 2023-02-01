@@ -1598,6 +1598,9 @@ local customTooltipHooksHooked = lib.customTooltipHooks.hooked
 local baseTooltipHooksDone = false
 local customAddonTooltipControlHooksCount = 0
 
+--For Debugging
+lib.customTooltipHooks.hooksCount = customAddonTooltipControlHooksCount
+
 local function hookCustomTooltipControlChecks(customTooltipControl)
     local ttCtrlName = (customTooltipControl ~= nil and customTooltipControl.GetName and customTooltipControl:GetName()) or nil
     --Was the tooltip's controlName already added?
@@ -1612,11 +1615,12 @@ local function hookCustomTooltipControlChecks(customTooltipControl)
 end
 
 function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
-    if not lib.svData then return end
+    local svData = lib.svData
+    if not svData then return end
     onlyAddonAdded = onlyAddonAdded or false
 
     --hook into the tooltip types?
-    if lib.svData.modifyTooltips == true then
+    if svData.modifyTooltips == true then
         if not onlyAddonAdded and baseTooltipHooksDone == false then
             --d("Hooks loaded")
             ZO_PreHookHandler(popupTooltip, 'OnAddGameData', tooltipOnAddGameData)
@@ -1656,6 +1660,7 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
             end
             if wasHookedInLoop > 0 then
                 customAddonTooltipControlHooksCount = customAddonTooltipControlHooksCount + 1
+                lib.customTooltipHooks.hooksCount = customAddonTooltipControlHooksCount
             end
         end
     end
