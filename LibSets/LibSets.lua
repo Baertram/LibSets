@@ -412,7 +412,7 @@ local dlcAndChapterCollectibleIds =     lib.dlcAndChapterCollectibleIds
 
 local customTooltipHooksNeeded =        lib.customTooltipHooks.needed
 --local customTooltipHooksHooked =        lib.customTooltipHooks.hooked
-local customTooltipHooksEventPlayerActivatedCalled = lib.customTooltipHooks.eventPlayerActivatedCalled
+--local customTooltipHooksEventPlayerActivatedCalled = lib.customTooltipHooks.eventPlayerActivatedCalled
 
 
 --local lib functions
@@ -2605,14 +2605,13 @@ local tooltipControlNameAndInheritErrorStr = "[" .. MAJOR .. "]:RegisterCustomTo
 function lib.RegisterCustomTooltipHook(tooltipCtrlName, addonName)
     --TooltipControl name is provided and a String
     assert(tooltipCtrlName ~= nil and tooltipCtrlName ~= "", strfor(tooltipControlNameAndInheritErrorStr, tos(addonName), tos(tooltipCtrlName)))
-d(">customTooltipControlName found")
+--d(">customTooltipControlName found")
     --Tooltip Control is provided and it's type is CT_TOOLTIP (11) and got the function 'OnAddGameData'
     local ttCtrl = GetControl(tooltipCtrlName)
     local ttCtrltype = (ttCtrl.GetType ~= nil and ttCtrl:GetType()) or nil
-d(">ttCtrltype: " ..tos(ttCtrltype))
-lib._ttCtrlLastAdded = ttCtrltype
-    assert(ttCtrl ~= nil and ttCtrl.OnAddGameData ~= nil and ttCtrltype ~= nil and ttCtrltype == CT_TOOLTIP, strfor(tooltipControlNameAndInheritErrorStr, tos(addonName), tos(tooltipCtrlName)))
-d(">customTooltipControl found")
+--d(">ttCtrltype: " ..tos(ttCtrltype))
+    assert(ttCtrl ~= nil and ttCtrltype ~= nil and ttCtrltype == CT_TOOLTIP, strfor(tooltipControlNameAndInheritErrorStr, tos(addonName), tos(tooltipCtrlName))) --and ttCtrl.OnAddGameData ~= nil
+--d(">customTooltipControl found")
     --Check if the same conrolName was already added and provide feedback
     local customTooltipHooks = lib.customTooltipHooks
     for index, ttData in ipairs(customTooltipHooks.needed) do
@@ -2625,12 +2624,12 @@ d(">customTooltipControl found")
 
     --Add the needed hook to the internal tables
     tins(customTooltipHooksNeeded, {
-        tooltipCtrlName = tooltipCtrlName,
-        addonName = addonName,
+        tooltipCtrlName =   tooltipCtrlName,
+        addonName =         addonName,
     })
 
     --Check if EVENT_PLAYER_ACTIVATED was already run and if so: Apply the hook for the new registered TooltipControl now
-    if customTooltipHooksEventPlayerActivatedCalled == true then
+    if lib.customTooltipHooks.eventPlayerActivatedCalled == true then
         lib.HookTooltipControls(true, ttCtrl)
     end
     return true

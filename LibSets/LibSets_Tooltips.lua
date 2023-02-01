@@ -1603,18 +1603,22 @@ lib.customTooltipHooks.hooksCount = customAddonTooltipControlHooksCount
 
 local function hookCustomTooltipControlChecks(customTooltipControl)
     local ttCtrlName = (customTooltipControl ~= nil and customTooltipControl.GetName and customTooltipControl:GetName()) or nil
+--d("[hookCustomTooltipControlChecks]name: " ..tos(ttCtrlName))
     --Was the tooltip's controlName already added?
     if ttCtrlName ~= nil and ttCtrlName ~= "" and not customTooltipHooksHooked[ttCtrlName] then
         --Is it a valid tooltip control?
         local ttCtrltype = (customTooltipControl.GetType ~= nil and customTooltipControl:GetType()) or nil
-        if customTooltipControl ~= nil and customTooltipControl.OnAddGameData ~= nil and ttCtrltype == CT_TOOLTIP then
+        if customTooltipControl ~= nil and ttCtrltype == CT_TOOLTIP then -- and customTooltipControl.OnAddGameData ~= nil
+--d(">true")
             return true
         end
     end
+--d("<false")
     return false
 end
 
 function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
+--d("[LibSets]HookTooltipControls")
     local svData = lib.svData
     if not svData then return end
     onlyAddonAdded = onlyAddonAdded or false
@@ -1639,8 +1643,10 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
             local wasHookedInLoop = 0
             --Only apply a hook of one custom tooltip control, registered after EVENT_PLAYER_ACTIVATED of LibSets was run already?
             if onlyAddonAdded == true and customAddonTooltipCtrl ~= nil then
+--d(">onlyAddonAdded: true, control: " ..tos(customAddonTooltipCtrl:GetName()))
                 if hookCustomTooltipControlChecks(customAddonTooltipCtrl) == true then
                     ZO_PreHook(customAddonTooltipCtrl, 'OnAddGameData', tooltipOnAddGameData)
+--d(">>1preHook done!")
                     customTooltipHooksHooked[customAddonTooltipCtrl:GetName()] = true
                     wasHookedInLoop = wasHookedInLoop + 1
                 end
@@ -1649,9 +1655,11 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
                 for _, toHookData in ipairs(customTooltipHooksNeeded) do
                     local ttCtrlName = (toHookData ~= nil and toHookData.tooltipCtrlName) or nil
                     if ttCtrlName ~= nil and ttCtrlName ~= "" then
+--d(">onlyAddonAdded: ttCtrlName: " ..tos(ttCtrlName))
                         local ttCtrl = GetControl(ttCtrlName)
                         if hookCustomTooltipControlChecks(ttCtrl) == true then
                             ZO_PreHook(ttCtrl, 'OnAddGameData', tooltipOnAddGameData)
+--d(">>2preHook done!")
                             customTooltipHooksHooked[ttCtrlName] = true
                             wasHookedInLoop = wasHookedInLoop + 1
                         end
@@ -1699,7 +1707,6 @@ local function onPlayerActivatedTooltips()
 
     --Hook the base game tooltip controls now, and also checkf or addon added custom tooltip controls to hook
     hookTooltipControls()
-
     lib.customTooltipHooks.eventPlayerActivatedCalled = true
 end
 
