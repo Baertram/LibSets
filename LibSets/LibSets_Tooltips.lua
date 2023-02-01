@@ -370,7 +370,6 @@ local function getItemLinkFromControl(rowControl)
     local isDataNil = (data == nil and true) or false
 
     local dataEntryData = (isDataEntryNil == false and dataEntry.data) or nil
-    local dataData = (isDataNil == false and data) or nil
 
     --use rowControl = case to handle equiped items
     --bag/index = case to handle list dialog, list dialog uses index instead of slotIndex and bag instead of bagId...?
