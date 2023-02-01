@@ -69,13 +69,14 @@ local possibleDlcIds = {
     [25] = "DLC_ASCENDING_TIDE",
     [26] = "DLC_HIGH_ISLE",
     [27] = "DLC_LOST_DEPTHS",
+    [28] = "DLC_FIRESONG",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_xxx"
-    possibleDlcIds[#possibleDlcIds + 1] = "DLC_FIRESONG"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_SCRIBES_OF_FATE"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -133,7 +134,9 @@ end
     [1331] = "1331|DLC|Fang Lair",
     [9375] = "9375|DLC|The Dread Cellar",
     [254] = "254|DLC|Thieves Guild",
-    [10475] = "10475|CHAPTER|U38",
+    [10475] = "10475|CHAPTER|Necrom",
+    [10839] = "10839|DLC|Scrivener's Hall",
+    [10838] = "10838|DLC|Bal Sunnar",
 ]]
 
 --Internal collectible example ids of the ESO DLCs and chapters (first collectible found from each DLC category)
@@ -195,12 +198,12 @@ lib.dlcAndChapterCollectibleIds = {
     [DLC_HIGH_ISLE] =               {collectibleId=10053, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1654473600},
     --Lost Depths
     [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=3133, type=DLC_TYPE_DUNGEONS, releaseDate=1661126400},
-    --Firesong - PTS
-    --Coming as on live
+    --Firesong
+    [DLC_FIRESONG] =                {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS, releaseDate=1667260800}
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
-    lib.dlcAndChapterCollectibleIds[DLC_FIRESONG] = {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS, releaseDate=1667260800}
+    lib.dlcAndChapterCollectibleIds[DLC_SCRIBES_OF_FATE] = {collectibleId=nil, achievementCategoryId=3466, type=DLC_TYPE_DUNGEONS, releaseDate=1678662000}
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters

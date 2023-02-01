@@ -1,5 +1,5 @@
---Library base values
-local MAJOR, MINOR = "LibSets", 0.52
+--Library base values: Name, Version
+local MAJOR, MINOR = "LibSets", 0.53
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -35,6 +35,14 @@ lib.setsScanning                     = false
 lib.fullyLoaded                      = false
 lib.startedLoading                   = true
 ------------------------------------------------------------------------------------------------------------------------
+--Custom tooltip hooks to add the LibSets data, via function LibSets.RegisterCustomTooltipHook(tooltipCtrlName)
+lib.customTooltipHooks = {
+    needed = {},
+    hooked = {},
+    eventPlayerActivatedCalled = false,
+}
+
+---------------------------------------------------------------------------------
 local APIVersions                    = {}
 --The actual API version on the live server we are logged in
 APIVersions["live"]                  = GetAPIVersion()
@@ -46,7 +54,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101036 --Firesong, (2022-09-20, PTS, API 101036)
+lib.lastSetsPreloadedCheckAPIVersion = 101037 -- Scribes Of Fate (2023-01-30, PTS, API 101037)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -65,7 +73,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101036 --Firesong, (2022-09-20, PTS, API 
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101036 -- Firesong (2022-09-20, PTS, API 101036)
+APIVersions["PTS"]                   = 101037 -- Scribes Of Fate (2023-01-30, PTS, API 101037)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -740,8 +748,8 @@ local possibleDropMechanics         = {
     [27] = "LIBSETS_DROP_MECHANIC_MOB_TYPE", --A type of mob/critter
     [28] = "LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS", --Bosses in group dungeons
     [29] = "LIBSETS_DROP_MECHANIC_CRAFTED", --Crafted
-    [30] = "LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST" --Chest in a public dungeon
-
+    [30] = "LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST", --Chest in a public dungeon
+    [31] = "LIBSETS_DROP_MECHANIC_HARVEST_NODES", --Harvest crafting nodes
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -794,7 +802,8 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosse in Prüfungen",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Gegner Typ",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosse in Gruppenverliesen",
-        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Truhen in Öffentlichen Verlieses",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Truhen in Öffentlichen Verlieses",
+        [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "Handwerks-Knoten abernten",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Rewards for the worthy",
@@ -823,7 +832,8 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Mob/Critter type",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosses in group dungeons",
-        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Chests in public dungeons",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Chests in public dungeons",
+        [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "Harvest crafting nodes",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -856,7 +866,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Jefes en mazmorras de prueba",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Tipo de enemigo/bicho",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Jefes en mazmorras grupales",
-        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Cofres en mazmorra públicas",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Cofres en mazmorra públicas",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "La récompense des braves",
@@ -885,7 +895,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Type de créature/mob",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Boss dans les donjons de groupe",
-        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Les coffres des donjons public",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Les coffres des donjons public",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Награда достойным",
@@ -914,7 +924,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Боссы в пробных подземельях",
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Тип моба/животного",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Боссы в групповых подземельях",
-        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "Сундуки открытых подземелий",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Сундуки открытых подземелий",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "貢献に見合った報酬です",
@@ -1264,7 +1274,8 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds",
     [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "/esoui/art/icons/pet_slateskinneddaedrat.dds",
     [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "/esoui/art/journal/journal_quest_group_instance.dds",
-    [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]        = "/esoui/art/icons/undaunted_mediumcoffer.dds",
+    [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "/esoui/art/icons/undaunted_mediumcoffer.dds",
+    [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "/esoui/art/crafting/smithing_tabicon_refine_up.dds",
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
     --["golden chest"] =        "/esoui/art/icons/undaunted_dungeoncoffer.dds",
