@@ -1590,6 +1590,78 @@ local function createSetTooltipPreviewSlashCommand()
     end
 end
 
+
+--Hook the tooltip controls now, if needed
+local customTooltipHooksNeeded = lib.customTooltipHooks.needed
+local customTooltipHooksHooked = lib.customTooltipHooks.hooked
+
+local baseTooltipHooksDone = false
+local customAddonTooltipControlHooksCount = 0
+
+local function hookCustomTooltipControlChecks(customTooltipControl)
+    local ttCtrlName = (customTooltipControl ~= nil and customTooltipControl.GetName and customTooltipControl:GetName()) or nil
+    --Was the tooltip's controlName already added?
+    if ttCtrlName ~= nil and ttCtrlName ~= "" and not customTooltipHooksHooked[ttCtrlName] then
+        --Is it a valid tooltip control?
+        local ttCtrltype = (customTooltipControl.GetType ~= nil and customTooltipControl:GetType()) or nil
+        if customTooltipControl ~= nil and customTooltipControl.OnAddGameData ~= nil and ttCtrltype == CT_TOOLTIP then
+            return true
+        end
+    end
+    return false
+end
+
+function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
+    if not lib.svData then return end
+    onlyAddonAdded = onlyAddonAdded or false
+
+    --hook into the tooltip types?
+    if lib.svData.modifyTooltips == true then
+        if not onlyAddonAdded and baseTooltipHooksDone == false then
+            --d("Hooks loaded")
+            ZO_PreHookHandler(popupTooltip, 'OnAddGameData', tooltipOnAddGameData)
+            --ZO_PreHookHandler(popupTooltip, 'OnHide', tooltipOnHide)
+
+            ZO_PreHookHandler(itemTooltip, 'OnAddGameData', tooltipOnAddGameData)
+            --ZO_PreHookHandler(itemTooltip, 'OnHide', tooltipOnHide)
+
+            ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink) lastTooltipItemLink = itemLink end)
+
+            baseTooltipHooksDone = true
+        end
+
+        --Any custom tooltips added by addons?
+        if customTooltipHooksNeeded ~= nil and #customTooltipHooksNeeded then
+            local wasHookedInLoop = 0
+            --Only apply a hook of one custom tooltip control, registered after EVENT_PLAYER_ACTIVATED of LibSets was run already?
+            if onlyAddonAdded == true and customAddonTooltipCtrl ~= nil then
+                if hookCustomTooltipControlChecks(customAddonTooltipCtrl) == true then
+                    ZO_PreHook(customAddonTooltipCtrl, 'OnAddGameData', tooltipOnAddGameData)
+                    customTooltipHooksHooked[customAddonTooltipCtrl:GetName()] = true
+                    wasHookedInLoop = wasHookedInLoop + 1
+                end
+            else
+                --Apply all custom tooltip hooks at EVENT_PLAYER_ACTIVATED of LibSets tooltips
+                for _, toHookData in ipairs(customTooltipHooksNeeded) do
+                    local ttCtrlName = (toHookData ~= nil and toHookData.tooltipCtrlName) or nil
+                    if ttCtrlName ~= nil and ttCtrlName ~= "" then
+                        local ttCtrl = GetControl(ttCtrlName)
+                        if hookCustomTooltipControlChecks(ttCtrl) == true then
+                            ZO_PreHook(ttCtrl, 'OnAddGameData', tooltipOnAddGameData)
+                            customTooltipHooksHooked[ttCtrlName] = true
+                            wasHookedInLoop = wasHookedInLoop + 1
+                        end
+                    end
+                end
+            end
+            if wasHookedInLoop > 0 then
+                customAddonTooltipControlHooksCount = customAddonTooltipControlHooksCount + 1
+            end
+        end
+    end
+end
+local hookTooltipControls = lib.HookTooltipControls
+
 ------------------------------------------------------------------------------------------------------------------------
 -- EVENTs
 ------------------------------------------------------------------------------------------------------------------------
@@ -1620,18 +1692,10 @@ local function onPlayerActivatedTooltips()
     --Build the settings menu for the tooltip
     loadLAMSettingsMenu()
 
+    --Hook the base game tooltip controls now, and also checkf or addon added custom tooltip controls to hook
+    hookTooltipControls()
 
-    --hook into the tooltip types?
-    if lib.svData.modifyTooltips == true then
---d("Hooks loaded")
-        ZO_PreHookHandler(popupTooltip, 'OnAddGameData', tooltipOnAddGameData)
-        --ZO_PreHookHandler(popupTooltip, 'OnHide', tooltipOnHide)
-
-        ZO_PreHookHandler(itemTooltip, 'OnAddGameData', tooltipOnAddGameData)
-        --ZO_PreHookHandler(itemTooltip, 'OnHide', tooltipOnHide)
-
-        ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink) lastTooltipItemLink = itemLink end)
-    end
+    lib.customTooltipHooks.eventPlayerActivatedCalled = true
 end
 
 local function loadTooltipHooks()

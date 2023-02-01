@@ -33,11 +33,8 @@
 ------------------------------------------------------------------------------------------------------------------------
 
  --Known bugs--
- --Custom tooltips of set items via LAM settings menu in LibSets_Tooltips.lua not working
-
 
  --Todo list--
- --Add localized translations
 
     --Unique item detection, sirinsidiator 2022-03-07 e.g. "Pulsing Dremora Ring" and "Leviathan Rings", different itemIds
     so basically convert itemId to setId+slotId back to itemId and then compare input itemId to output itemId and if it's the same you got the non-unique version, otherwise it's the unique one
@@ -46,8 +43,6 @@
 
 
  --Currently working on--
- --2022-02-22
- ----Tooltips
 
 
 ========================================================================================================================
@@ -414,6 +409,11 @@ local DLCandCHAPTERLookupdata =         lib.DLCandCHAPTERLookupdata
 local allowedDLCTypes =                 lib.allowedDLCTypes
 local allowedDLCIds =                   lib.allowedDLCIds
 local dlcAndChapterCollectibleIds =     lib.dlcAndChapterCollectibleIds
+
+local customTooltipHooksNeeded = lib.customTooltipHook.needed
+local customTooltipHooksHooked = lib.customTooltipHook.hooked
+local customTooltipHooksEventPlayerActivatedCalled = lib.customTooltipHook.eventPlayerActivatedCalled
+
 
 --local lib functions
 local checkIfSetsAreLoadedProperly
@@ -2582,6 +2582,54 @@ end
 function lib.OpenItemSetCollectionBookOfZone(zoneId)
     if not zoneId or zoneId <= 0 then return end
     return openItemSetCollectionsBookOfZoneId(zoneId)
+end
+
+
+
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- 	Tooltips API
+------------------------------------------------------------------------
+--Register a custom tooltip control of type CT_TOOLTIP that inherits from ZO_ItemIconTooltip for the LibSets added tooltip data
+--(added to the bottom, during function OnAddGameData is called)
+--tooltipCtrlName String
+--addonName String
+-->Returns true if LibSets tooltip hook was added to the internal tables (will be hooked at EVENT_PLAYER_ACTIVATED once, or if a new hook is added later via this function)
+-->Returns false if it was already added
+-->Returns nil if any error happens
+local tooltipControlNameAndInheritErrorStr = "[" .. MAJOR .. "]ERROR - %q: RegisterCustomTooltipHook - parameter \'tooltipCtrlName\' (%s) must be the name of an exising TooltipControl of type CT_TOOLTIP, inheriting from ZO_ItemIconTooltip, providing function \'OnAddGameData\'"
+function lib.RegisterCustomTooltipHook(tooltipCtrlName, addonName)
+    --TooltipControl name is provided and a String
+    assert(tooltipCtrlName ~= nil and tooltipCtrlName ~= "", strfor(tooltipControlNameAndInheritErrorStr, tos(addonName), tos(tooltipCtrlName)))
+    --Tooltip Control is provided and it's type is CT_TOOLTIP (11) and got the function 'OnAddGameData'
+    local ttCtrl = GetControl(tooltipCtrlName)
+    local ttCtrltype = (ttCtrl.GetType ~= nil and ttCtrl:GetType()) or nil
+    assert(ttCtrl ~= nil and ttCtrl.OnAddGameData ~= nil and ttCtrltype ~= nil and ttCtrltype == CT_TOOLTIP, strfor(tooltipControlNameAndInheritErrorStr, tos(addonName), tos(tooltipCtrlName)))
+    --Check if the same conrolName was already added and provide feedback
+    local customTooltipHooks = lib.customTooltipHooks
+    for index, ttData in ipairs(customTooltipHooks.needed) do
+        local tooltipCtrlNameAlreadyAdded = ttData.tooltipCtrlName
+        if tooltipCtrlNameAlreadyAdded ~= nil and tooltipCtrlNameAlreadyAdded ~= "" and tooltipCtrlNameAlreadyAdded == tooltipCtrlName then
+            d("[" .. MAJOR .. "]Tooltip control name \'" .. tos(tooltipCtrlNameAlreadyAdded) .. "\' was already added with addon \'" .. tos(ttData.addonName) .. "\'")
+            return false
+        end
+    end
+
+    --Add the needed hook to the internal tables
+    tins(customTooltipHooksNeeded, {
+        tooltipCtrlName = tooltipCtrlName,
+        addonName = addonName,
+    })
+
+    --Check if EVENT_PLAYER_ACTIVATED was already run and if so: Apply the hook for the new registered TooltipControl now
+    if customTooltipHooksEventPlayerActivatedCalled == true then
+        lib.HookTooltipControls(true, ttCtrl)
+    end
+    return true
 end
 
 

@@ -35,6 +35,14 @@ lib.setsScanning                     = false
 lib.fullyLoaded                      = false
 lib.startedLoading                   = true
 ------------------------------------------------------------------------------------------------------------------------
+--Custom tooltip hooks to add the LibSets data, via function LibSets.RegisterCustomTooltipHook(tooltipCtrlName)
+lib.customTooltipHooks = {
+    needed = {},
+    hooked = {},
+    eventPlayerActivatedCalled = false,
+}
+
+---------------------------------------------------------------------------------
 local APIVersions                    = {}
 --The actual API version on the live server we are logged in
 APIVersions["live"]                  = GetAPIVersion()
