@@ -203,7 +203,7 @@ lib.dlcAndChapterCollectibleIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
-    lib.dlcAndChapterCollectibleIds[DLC_SCRIBES_OF_FATE] = {collectibleId=nil, achievementCategoryId=3466, type=DLC_TYPE_DUNGEONS, releaseDate=1667260800}
+    lib.dlcAndChapterCollectibleIds[DLC_SCRIBES_OF_FATE] = {collectibleId=nil, achievementCategoryId=3466, type=DLC_TYPE_DUNGEONS, releaseDate=1678662000}
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
