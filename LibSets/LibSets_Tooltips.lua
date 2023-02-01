@@ -1653,12 +1653,10 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
 
             baseTooltipHooksDone = true
 
-            --[[
             --Only for debugging
             ZO_PreHook("ZO_Tooltip_OnAddGameData", function(tooltipControl, gameDataType, ...)
-d("[ZO_Tooltip_OnAddGameData]name: " .. tos(tooltipControl:GetName()) .. ", gameDataType: " ..tos(gameDataType))
+--d("[ZO_Tooltip_OnAddGameData]name: " .. tos(tooltipControl:GetName()) .. ", gameDataType: " ..tos(gameDataType))
             end)
-            ]]
         end
 
         --Any custom tooltips added by addons?
@@ -1683,7 +1681,7 @@ d("[ZO_Tooltip_OnAddGameData]name: " .. tos(tooltipControl:GetName()) .. ", game
                     end
 
 
---d(">>1preHook done!")
+--d(">>1 SetHandler OnAddGameData done!")
                     customTooltipHooksHooked[customAddonTooltipCtrl:GetName()] = true
                     wasHookedInLoop = wasHookedInLoop + 1
                 end
@@ -1708,7 +1706,7 @@ d("[ZO_Tooltip_OnAddGameData]name: " .. tos(tooltipControl:GetName()) .. ", game
                                     tooltipOnAddGameData(...)
                                 end)
                             end
---d(">>2preHook done!")
+--d(">>2 SetHandler OnAddGameData done!")
                             customTooltipHooksHooked[ttCtrlName] = true
                             wasHookedInLoop = wasHookedInLoop + 1
                         end
