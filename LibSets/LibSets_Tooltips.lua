@@ -45,6 +45,14 @@ local gil =         GetItemLink
 local isilscp =     IsItemLinkSetCollectionPiece
 local gircoc =      GetItemReconstructionCurrencyOptionCost
 
+--Custom tooltips
+local customTooltipHooksNeeded = lib.customTooltipHooks.needed
+local customTooltipHooksHooked = lib.customTooltipHooks.hooked
+
+local baseTooltipHooksDone = false
+local customAddonTooltipControlHooksCount = 0
+
+
 local getLibSetsSetPreviewTooltipSavedVariables = lib.getLibSetsSetPreviewTooltipSavedVariables
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -356,14 +364,24 @@ local function getItemLinkFromControl(rowControl)
 
     --gotta do this in case deconstruction, or player equipment
     local dataEntry = rowControl.dataEntry
+    local data = rowControl.data
+
     local isDataEntryNil = (dataEntry == nil and true) or false
+    local isDataNil = (data == nil and true) or false
+
     local dataEntryData = (isDataEntryNil == false and dataEntry.data) or nil
+    local dataData = (isDataNil == false and data) or nil
 
     --use rowControl = case to handle equiped items
     --bag/index = case to handle list dialog, list dialog uses index instead of slotIndex and bag instead of bagId...?
     if isDataEntryNil == true then
-        bagId = rowControl.bagId
-        slotIndex = rowControl.slotIndex
+        if isDataNil == true then
+            bagId = rowControl.bagId
+            slotIndex = rowControl.slotIndex
+        else
+            --Custom added controls providing an itemLink
+            itemLink = data.itemLink
+        end
     else
         if dataEntryData then
             if dataEntryData.lootId then
@@ -372,8 +390,6 @@ local function getItemLinkFromControl(rowControl)
                 return gqril(rowControl.index, LINK_STYLE_BRACKETS)
             elseif dataEntryData.itemLink then
                 return dataEntryData.itemLink
-            elseif dataEntryData.itemlink then
-                return dataEntryData.itemlink
             else
                 bagId = dataEntryData.bagId
                 bagId = bagId or dataEntryData.bag
@@ -399,7 +415,7 @@ local function getItemLinkFromControl(rowControl)
         end
     end
 
-    if bagId ~= nil and slotIndex ~= nil then
+    if itemLink == nil and bagId ~= nil and slotIndex ~= nil then
         itemLink = gil(bagId, slotIndex)
     end
 
@@ -416,6 +432,7 @@ local function getItemLinkFromControl(rowControl)
             if rowControl.bagId and rowControl.slotIndex then
                 return gil(rowControl.bagId, rowControl.slotIndex)
             end
+        --Trading house listed items
         elseif (dataEntryData ~= nil and (dataEntryData.timeRemaining ~= nil and dataEntryData.timeRemaining > 0) and dataEntryData.itemLink ~= nil) then
                 --and name:sub(1, 44) == "ZO_TradingHouseItemPaneSearchResultsContents" or name:sub(1, 48) == "ZO_TradingHouseBrowseItemsRightPaneSearchResults" then
 		    return dataEntryData.itemLink
@@ -435,12 +452,11 @@ local function getItemLinkFromControl(rowControl)
             return rowControl.data[1].Name
         end
     end
-
     return itemLink
 end
 
 
-local function getMouseoverLink()
+local function getMouseOverLink()
 	local itemLink = getItemLinkFromControl(moc())
     return itemLink
 end
@@ -450,9 +466,15 @@ local function getLastItemLink(tooltipControl)
     if tooltipControl == popupTooltip then
         itemLink = lastTooltipItemLink		-- this gets set on the prehook of PopupTooltip:SetLink
     elseif tooltipControl == itemTooltip or tooltipControl == infoTooltip then
-        itemLink = getMouseoverLink()
+        itemLink = getMouseOverLink()
         lastTooltipItemLink = itemLink
-	end
+    elseif tooltipControl.GetName ~= nil then
+        --Custom added tooltips
+        if customTooltipHooksHooked[tooltipControl:GetName()] == true then
+            itemLink = getMouseOverLink()
+            lastTooltipItemLink = itemLink
+        end
+    end
 	return itemLink
 end
 
@@ -1459,9 +1481,10 @@ end
 ]]
 
 local function tooltipOnAddGameData(tooltipControl, tooltipData)
+--d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
     --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
     if tooltipData == tooltipGameDataEntryToAddAfter then
---d("anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
+--d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
         if not anyTooltipInfoToAdd then return end
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
@@ -1592,12 +1615,6 @@ end
 
 
 --Hook the tooltip controls now, if needed
-local customTooltipHooksNeeded = lib.customTooltipHooks.needed
-local customTooltipHooksHooked = lib.customTooltipHooks.hooked
-
-local baseTooltipHooksDone = false
-local customAddonTooltipControlHooksCount = 0
-
 --For Debugging
 lib.customTooltipHooks.hooksCount = customAddonTooltipControlHooksCount
 
@@ -1636,6 +1653,13 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
             ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink) lastTooltipItemLink = itemLink end)
 
             baseTooltipHooksDone = true
+
+            --[[
+            --Only for debugging
+            ZO_PreHook("ZO_Tooltip_OnAddGameData", function(tooltipControl, gameDataType, ...)
+d("[ZO_Tooltip_OnAddGameData]name: " .. tos(tooltipControl:GetName()) .. ", gameDataType: " ..tos(gameDataType))
+            end)
+            ]]
         end
 
         --Any custom tooltips added by addons?
@@ -1645,7 +1669,21 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
             if onlyAddonAdded == true and customAddonTooltipCtrl ~= nil then
 --d(">onlyAddonAdded: true, control: " ..tos(customAddonTooltipCtrl:GetName()))
                 if hookCustomTooltipControlChecks(customAddonTooltipCtrl) == true then
-                    ZO_PreHook(customAddonTooltipCtrl, 'OnAddGameData', tooltipOnAddGameData)
+                    --> OnAddGameData should call ZO_ItemTooltip_OnAddGameData -> ItemTooltipBase
+                    if customAddonTooltipCtrl:GetHandler("OnAddGameData") == nil then
+                        customAddonTooltipCtrl:SetHandler("OnAddGameData", tooltipOnAddGameData)
+                    else
+                        --ZO_PreHook(customAddonTooltipCtrl, 'OnAddGameData', tooltipOnAddGameData)
+                        local origOnAddGameData = customAddonTooltipCtrl:GetHandler("OnAddGameData")
+                        customAddonTooltipCtrl:SetHandler('OnAddGameData', function(...)
+--d("customAddonTooltipCtrl:OnAddGameData")
+                            --ZO_Tooltip_OnAddGameData(...)
+                            origOnAddGameData(...)
+                            tooltipOnAddGameData(...)
+                        end)
+                    end
+
+
 --d(">>1preHook done!")
                     customTooltipHooksHooked[customAddonTooltipCtrl:GetName()] = true
                     wasHookedInLoop = wasHookedInLoop + 1
@@ -1658,7 +1696,19 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
 --d(">onlyAddonAdded: ttCtrlName: " ..tos(ttCtrlName))
                         local ttCtrl = GetControl(ttCtrlName)
                         if hookCustomTooltipControlChecks(ttCtrl) == true then
-                            ZO_PreHook(ttCtrl, 'OnAddGameData', tooltipOnAddGameData)
+                            --> OnAddGameData should call ZO_ItemTooltip_OnAddGameData -> ItemTooltipBase
+                            if ttCtrl:GetHandler("OnAddGameData") == nil then
+                                ttCtrl:SetHandler("OnAddGameData", tooltipOnAddGameData)
+                            else
+                                --ZO_PreHook(ttCtrl, 'OnAddGameData', tooltipOnAddGameData)
+                                local origOnAddGameData = ttCtrl:GetHandler("OnAddGameData")
+                                ttCtrl:SetHandler('OnAddGameData', function(...)
+--d("ttCtrl:OnAddGameData")
+                                    --ZO_Tooltip_OnAddGameData(...)
+                                    origOnAddGameData(...)
+                                    tooltipOnAddGameData(...)
+                                end)
+                            end
 --d(">>2preHook done!")
                             customTooltipHooksHooked[ttCtrlName] = true
                             wasHookedInLoop = wasHookedInLoop + 1

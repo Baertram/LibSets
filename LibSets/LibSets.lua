@@ -2596,6 +2596,8 @@ end
 ------------------------------------------------------------------------
 --Register a custom tooltip control of type CT_TOOLTIP that inherits from ZO_ItemIconTooltip for the LibSets added tooltip data
 --(added to the bottom, during function OnAddGameData is called)
+-->Important: The tooltipCtrl of tooltipCtrlName !must! have a subtable dataEntry.data or .data which contains an entry .itemLink with the itemLink of the item,
+-->           or the tooltipCtrl of tooltipCtrlName !must! have the entries .bagIndex and .slotIndex where the itemLink can be build from!
 --tooltipCtrlName String
 --addonName String
 -->Returns true if LibSets tooltip hook was added to the internal tables (will be hooked at EVENT_PLAYER_ACTIVATED once, or if a new hook is added later via this function)
