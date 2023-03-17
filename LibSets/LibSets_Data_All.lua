@@ -50,18 +50,7 @@ setsOfNewerAPIVersion = {
     --yyy,
     --....
 
-    --setIds of APIversion 101037 "Scribes of Fate"
-    680,
-    681,
-    682,
-    683,
-    684,
-    685,
-    686,
-    687,
-    688,
-    689,
-    690,
+    --setIds of APIversion 101038 "xxx"
     --setIds not yet on live server - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
@@ -928,7 +917,7 @@ lib.setDataPreloaded = {
         { parentCategory=5, category=42, zoneIds={64}, isDungeon=true},--Blessed Crucible
         { parentCategory=5, category=43, zoneIds={176,681}, isDungeon=true},--City of Ash I
         { parentCategory=5, category=44, zoneIds={130,932}, isDungeon=true},--Crypt of Hearts I
-        { parentCategory=5, category=45, zoneIds={63,93}, isDungeon=true},--Darkshade Caverns I
+        { parentCategory=5, category=45, zoneIds={63,930}, isDungeon=true},--Darkshade Caverns I
         { parentCategory=5, category=46, zoneIds={449}, isDungeon=true},--Direfrost Keep
         { parentCategory=5, category=47, zoneIds={126,931}, isDungeon=true},--Elden Hollow I
         { parentCategory=5, category=48, zoneIds={283,934}, isDungeon=true},--Fungal Grotto I
