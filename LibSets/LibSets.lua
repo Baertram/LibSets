@@ -3107,45 +3107,51 @@ end
 ---
 local function addUIButtons()
     local addSetCollectionsCurrentZoneButton = lib.svData.addSetCollectionsCurrentZoneButton
-    if addSetCollectionsCurrentZoneButton == true and lib.itemSetCollectionBookMoreOptionsButton == nil then
-        local localization = lib.localization[clientLang]
+    if addSetCollectionsCurrentZoneButton == true then
 
-        --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_MORE_OPTIONS,            localization.moreOptions)   --"More Options")
-        --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_CURRENT_PARENT_ZONE,     localization.parentZone)    --"Parent zone")
-        --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_CURRENT_ZONE,            localization.currentZone)   --"Current zone")
+        if lib.itemSetCollectionBookMoreOptionsButton == nil then
+            local localization = lib.localization[clientLang]
 
-        --Add "show current parent zone" button to item set collection UI top right corner
-        local buttonDataOpenCurrentParentZone =
-        {
-            buttonName      = "MoreOptions",
-            parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
-            tooltip         = (LibCustomMenu ~= nil and localization.moreOptions) or localization.currentZone,
-            callback        = function()
-                if LibCustomMenu ~= nil then
-                    ClearMenu()
-                    AddCustomMenuItem(localization.parentZone, function()
-                        openSetItemCollectionBrowserForCurrentZone(true)
-                    end)
-                    AddCustomMenuItem(localization.currentZone, function()
+            --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_MORE_OPTIONS,            localization.moreOptions)   --"More Options")
+            --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_CURRENT_PARENT_ZONE,     localization.parentZone)    --"Parent zone")
+            --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_CURRENT_ZONE,            localization.currentZone)   --"Current zone")
+
+            --Add "show current parent zone" button to item set collection UI top right corner
+            local buttonDataOpenCurrentParentZone =
+            {
+                buttonName      = "MoreOptions",
+                parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
+                tooltip         = libPrefix .. (LibCustomMenu ~= nil and localization.moreOptions) or localization.currentZone,
+                callback        = function()
+                    if LibCustomMenu ~= nil then
+                        ClearMenu()
+                        AddCustomMenuItem(localization.parentZone, function()
+                            openSetItemCollectionBrowserForCurrentZone(true)
+                        end)
+                        AddCustomMenuItem(localization.currentZone, function()
+                            if not openSetItemCollectionBrowserForCurrentZone(false) then
+                                openSetItemCollectionBrowserForCurrentZone(true)
+                            end
+                        end)
+                        ShowMenu(lib.itemSetCollectionBookMoreOptionsButton)
+                    else
                         if not openSetItemCollectionBrowserForCurrentZone(false) then
                             openSetItemCollectionBrowserForCurrentZone(true)
                         end
-                    end)
-                    ShowMenu(lib.itemSetCollectionBookMoreOptionsButton)
-                else
-                    if not openSetItemCollectionBrowserForCurrentZone(false) then
-                        openSetItemCollectionBrowserForCurrentZone(true)
                     end
-                end
-            end,
-            width           = 20,
-            height          = 20,
-            normal          = "/esoui/art/buttons/dropbox_arrow_normal.dds",
-            pressed         = "/esoui/art/buttons/dropbox_arrow_mousedown.dds",
-            highlight       = "/esoui/art/buttons/dropbox_arrow_mouseover.dds",
-            disabled        = "/esoui/art/buttons/dropbox_arrow_disabled.dds",
-        }
-        lib.itemSetCollectionBookMoreOptionsButton = addButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFilters, RIGHT, (buttonDataOpenCurrentParentZone.width+4)*-1, 10, buttonDataOpenCurrentParentZone)
+                end,
+                width           = 20,
+                height          = 20,
+                normal          = "/esoui/art/buttons/dropbox_arrow_normal.dds",
+                pressed         = "/esoui/art/buttons/dropbox_arrow_mousedown.dds",
+                highlight       = "/esoui/art/buttons/dropbox_arrow_mouseover.dds",
+                disabled        = "/esoui/art/buttons/dropbox_arrow_disabled.dds",
+            }
+            lib.itemSetCollectionBookMoreOptionsButton = addButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFilters, RIGHT, (buttonDataOpenCurrentParentZone.width+4)*-1, 10, buttonDataOpenCurrentParentZone)
+            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(false)
+        else
+            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(false)
+        end
     elseif not addSetCollectionsCurrentZoneButton then
         if lib.itemSetCollectionBookMoreOptionsButton ~= nil then
             lib.itemSetCollectionBookMoreOptionsButton:SetHidden(true)
