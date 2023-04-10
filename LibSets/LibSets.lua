@@ -338,6 +338,7 @@ local clientLang = lib.clientLang
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
 local EM = EVENT_MANAGER
+local WM = WINDOW_MANAGER
 local ISCDM = ITEM_SET_COLLECTIONS_DATA_MANAGER
 
 local tos = tostring
@@ -487,7 +488,10 @@ local function LoadSavedVariables()
             traitType = ITEM_TRAIT_TYPE_ARMOR_DIVINES,
             enchantSearchCategoryType = ENCHANTMENT_SEARCH_CATEGORY_NONE,
             quality = 370, --legendary
-        }
+        },
+
+        --UI stuff
+        addSetCollectionsCurrentZoneButton = true,
     }
     lib.defaultSV = defaults
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
@@ -2567,6 +2571,7 @@ function lib.OpenItemSetCollectionBookOfCurrentParentZone()
     if not currentParentZone or currentParentZone <= 0 then return end
     return openItemSetCollectionsBookOfZoneId(currentParentZone)
 end
+local openItemSetCollectionBookOfCurrentParentZone = lib.OpenItemSetCollectionBookOfCurrentParentZone
 
 --Open the item set collections book of the current zoneId. If more than 1 categoryId was found for the zoneId,
 --the 1st will be opened!
@@ -2575,7 +2580,7 @@ function lib.OpenItemSetCollectionBookOfCurrentZone()
     if not currentZone or currentZone <= 0 then return end
     return openItemSetCollectionsBookOfZoneId(currentZone)
 end
-
+local openItemSetCollectionBookOfCurrentZone = lib.OpenItemSetCollectionBookOfCurrentZone
 
 --Open the item set collections book of the zoneId. If more than 1 categoryId was found for the zoneId,
 --the 1st will be opened!
@@ -2584,6 +2589,15 @@ function lib.OpenItemSetCollectionBookOfZone(zoneId)
     return openItemSetCollectionsBookOfZoneId(zoneId)
 end
 
+
+function lib.OpenSetItemCollectionBrowserForCurrentZone(useParentZone)
+    if useParentZone == true then
+        return openItemSetCollectionBookOfCurrentParentZone()
+    else
+        return openItemSetCollectionBookOfCurrentZone()
+    end
+end
+local openSetItemCollectionBrowserForCurrentZone = lib.OpenSetItemCollectionBrowserForCurrentZone
 
 
 
@@ -3017,6 +3031,140 @@ end
 ]]
 
 
+
+
+------------------------------------------------------------------------
+-- 	UI related stuff
+------------------------------------------------------------------------
+local function addButton(myAnchorPoint, relativeTo, relativePoint, offsetX, offsetY, buttonData)
+    if not buttonData or not buttonData.parentControl or not buttonData.buttonName or not buttonData.callback then return end
+    local button
+    --Does the button already exist?
+    local btnName = buttonData.parentControl:GetName() .. MAJOR .. buttonData.buttonName
+    button = WM:GetControlByName(btnName, "")
+    if button == nil then
+        --Create the button control at the parent
+        button = WM:CreateControl(btnName, buttonData.parentControl, CT_BUTTON)
+    end
+    --Button was created?
+    if button ~= nil then
+        --Set the button's size
+        button:SetDimensions(buttonData.width or 32, buttonData.height or 32)
+
+        --SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+        button:SetAnchor(myAnchorPoint, relativeTo, relativePoint, offsetX, offsetY)
+
+        --Texture
+        local texture
+
+        --Check if texture exists
+        texture = WM:GetControlByName(btnName, "Texture")
+        if texture == nil then
+            --Create the texture for the button to hold the image
+            texture = WM:CreateControl(btnName .. "Texture", button, CT_TEXTURE)
+        end
+        texture:SetAnchorFill()
+
+        --Set the texture for normale state now
+        texture:SetTexture(buttonData.normal)
+
+        --Do we have seperate textures for the button states?
+        button.upTexture 	  = buttonData.normal
+        button.mouseOver 	  = buttonData.highlight
+        button.clickedTexture = buttonData.pressed
+
+        button.tooltipText	= buttonData.tooltip
+        button.tooltipAlign = TOP
+        button:SetHandler("OnMouseEnter", function(self)
+        self:GetChild(1):SetTexture(self.mouseOver)
+            ZO_Tooltips_ShowTextTooltip(self, self.tooltipAlign, self.tooltipText)
+        end)
+        button:SetHandler("OnMouseExit", function(self)
+            self:GetChild(1):SetTexture(self.upTexture)
+            ZO_Tooltips_HideTextTooltip()
+        end)
+        --Set the callback function of the button
+        button:SetHandler("OnClicked", function(...)
+            buttonData.callback(...)
+        end)
+        button:SetHandler("OnMouseUp", function(butn, mouseButton, upInside)
+            if upInside then
+                butn:GetChild(1):SetTexture(butn.upTexture)
+            end
+        end)
+        button:SetHandler("OnMouseDown", function(butn)
+            butn:GetChild(1):SetTexture(butn.clickedTexture)
+        end)
+
+        --Show the button and make it react on mouse input
+        button:SetHidden(false)
+        button:SetMouseEnabled(true)
+
+        --Return the button control
+        return button
+    end
+end
+---
+local function addUIButtons()
+    local addSetCollectionsCurrentZoneButton = lib.svData.addSetCollectionsCurrentZoneButton
+    if addSetCollectionsCurrentZoneButton == true then
+
+        if lib.itemSetCollectionBookMoreOptionsButton == nil then
+            local localization = lib.localization[clientLang]
+
+            --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_MORE_OPTIONS,            localization.moreOptions)   --"More Options")
+            --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_CURRENT_PARENT_ZONE,     localization.parentZone)    --"Parent zone")
+            --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_CURRENT_ZONE,            localization.currentZone)   --"Current zone")
+
+            --Add "show current parent zone" button to item set collection UI top right corner
+            local buttonDataOpenCurrentParentZone =
+            {
+                buttonName      = "MoreOptions",
+                parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
+                tooltip         = libPrefix .. (LibCustomMenu ~= nil and localization.moreOptions) or localization.currentZone,
+                callback        = function()
+                    if LibCustomMenu ~= nil then
+                        ClearMenu()
+                        AddCustomMenuItem(localization.parentZone, function()
+                            openSetItemCollectionBrowserForCurrentZone(true)
+                        end)
+                        AddCustomMenuItem(localization.currentZone, function()
+                            if not openSetItemCollectionBrowserForCurrentZone(false) then
+                                openSetItemCollectionBrowserForCurrentZone(true)
+                            end
+                        end)
+                        ShowMenu(lib.itemSetCollectionBookMoreOptionsButton)
+                    else
+                        if not openSetItemCollectionBrowserForCurrentZone(false) then
+                            openSetItemCollectionBrowserForCurrentZone(true)
+                        end
+                    end
+                end,
+                width           = 20,
+                height          = 20,
+                normal          = "/esoui/art/buttons/dropbox_arrow_normal.dds",
+                pressed         = "/esoui/art/buttons/dropbox_arrow_mousedown.dds",
+                highlight       = "/esoui/art/buttons/dropbox_arrow_mouseover.dds",
+                disabled        = "/esoui/art/buttons/dropbox_arrow_disabled.dds",
+            }
+            lib.itemSetCollectionBookMoreOptionsButton = addButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFilters, RIGHT, (buttonDataOpenCurrentParentZone.width+4)*-1, 10, buttonDataOpenCurrentParentZone)
+            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(false)
+        else
+            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(false)
+        end
+    elseif not addSetCollectionsCurrentZoneButton then
+        if lib.itemSetCollectionBookMoreOptionsButton ~= nil then
+            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(true)
+        end
+    end
+end
+lib.addUIButtons = addUIButtons
+
+local function createUIStuff()
+    --Add buttons to jump to current zon at the set collections
+    addUIButtons()
+end
+
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
@@ -3296,6 +3444,9 @@ local function onLibraryLoaded(event, name)
         --work properly now
         lib.fullyLoaded = true
 
+
+        --Add UI related stuff like the "jump to set collections' current zone"
+        createUIStuff()
 
         --Optional: Build the libSlashCommander autocomplete stuff, if LibSlashCommander is present and activated
         -->See file LibSet_AutoCompletion.lua

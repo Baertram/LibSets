@@ -1292,6 +1292,30 @@ local function loadLAMSettingsMenu()
 
     local optionsTable                            =
     {
+------------------------------------------------------------------------------------------------------------------------
+        {
+            type = "header",
+            name = localization.headerUIStuff,
+        },
+        {
+            type =      "checkbox",
+            name =      localization.addSetCollectionsCurrentZoneButton,
+            tooltip =   localization.addSetCollectionsCurrentZoneButton,
+            getFunc =   function() return settings.addSetCollectionsCurrentZoneButton end,
+            setFunc =   function(value)
+                lib.svData.addSetCollectionsCurrentZoneButton = value
+                lib.addUIButtons()
+            end,
+            default =   defaultSettings.addSetCollectionsCurrentZoneButton,
+            disabled =  function() return false end,
+            requiresReload = false,
+            width =     "full",
+        },
+------------------------------------------------------------------------------------------------------------------------
+        {
+            type = "header",
+            name = localization.headerTooltips,
+        },
         {
             type =      "checkbox",
             name =      localization.modifyTooltip,
