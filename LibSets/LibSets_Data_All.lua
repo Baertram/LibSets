@@ -909,6 +909,7 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=89, zoneIds={1207,1208}},--The Reach/Blackreach: Arkthzand Cavern
         { parentCategory=4, category=93, zoneIds={1261}},--Blackwood
         { parentCategory=4, category=97, zoneIds={1286,1282,1283}},--The Deadlands/Fargrave/The Shambles
+        { parentCategory=4, category=100, zoneIds={1318}},--High isle
         { parentCategory=4, category=104, zoneIds={1383}},--Galen
         --Dungeons
         { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
