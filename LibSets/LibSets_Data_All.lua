@@ -978,7 +978,7 @@ lib.setDataPreloaded = {
         { parentCategory=9, category=84, zoneIds={584}},--Imperial City
         { parentCategory=9, category=85},--Battlegrounds
         --Miscellaneous
-        { parentCategory=10, category=26},--Beginner zones
+        { parentCategory=10, category=26, zoneIds={280,281,534,535,537}},   --Beginner zones
         { parentCategory=10, category=27, zoneIds={347}},--Coldharbour
         { parentCategory=10, category=28, zoneIds={888}},--Craglorn
         { parentCategory=10, category=86},--Antiquities

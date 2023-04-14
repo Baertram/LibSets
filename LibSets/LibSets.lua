@@ -3117,11 +3117,12 @@ local function addUIButtons()
             --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_CURRENT_ZONE,            localization.currentZone)   --"Current zone")
 
             --Add "show current parent zone" button to item set collection UI top right corner
+            local moreOptionsButtonTooltip = (LibCustomMenu ~= nil and tos(localization.moreOptions)) or tos(localization.currentZone)
             local buttonDataOpenCurrentParentZone =
             {
                 buttonName      = "MoreOptions",
                 parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
-                tooltip         = libPrefix .. (LibCustomMenu ~= nil and localization.moreOptions) or localization.currentZone,
+                tooltip         = libPrefix .. moreOptionsButtonTooltip,
                 callback        = function()
                     if LibCustomMenu ~= nil then
                         ClearMenu()
