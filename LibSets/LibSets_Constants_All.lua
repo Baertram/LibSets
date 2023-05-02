@@ -77,6 +77,7 @@ lib.possibleDlcIds = possibleDlcIds
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_xxx"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_NECROM" --DLC 30
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -205,6 +206,8 @@ lib.dlcAndChapterCollectibleIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
+    lib.dlcAndChapterCollectibleIds[DLC_NECROM] = {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000} --June 5th 2023
+
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
