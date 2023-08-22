@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.59
+local MAJOR, MINOR = "LibSets", 0.61
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -54,7 +54,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101038 -- Necrom (2023-04-18, PTS, API 101038)
+lib.lastSetsPreloadedCheckAPIVersion = 101039 -- Necrom (2023-04-18, PTS, API 101038)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -73,7 +73,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101038 -- Necrom (2023-04-18, PTS, API 10
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101038 -- Necrom (2023-04-18, PTS, API 101038)
+APIVersions["PTS"]                   = 101039 -- QOL patches version 39 (2023-07-10, PTS, API 101039)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -232,6 +232,7 @@ local possibleSetTypes                                 = {
     [11] = "LIBSETS_SETTYPE_TRIAL", --"Trial"
     [12] = "LIBSETS_SETTYPE_MYTHIC", --"Mythic"
     [13] = "LIBSETS_SETTYPE_IMPERIALCITY_MONSTER", --"Imperial City Monster"
+    [14] = "LIBSETS_SETTYPE_CYRODIIL_MONSTER", --"Cyrodiil Monster"
 }
 --SetTypes only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -292,6 +293,9 @@ lib.setTypeToLibraryInternalVariableNames = {
         ["tableName"] = "mythicSets",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = {
+        ["tableName"] = "monsterSets",
+    },
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = {
         ["tableName"] = "monsterSets",
     },
 }
@@ -428,6 +432,15 @@ local setTypesToName = {
         ["jp"] = "帝都 モンスター",
         ["ru"] = "Имперский город Монстр",
         ["zh"] = "Imperial city monster",
+    },
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER]          = {
+        ["de"] = "Cyrodiil Monster",
+        ["en"] = "Cyrodiil monster",
+        ["es"] = "Cyrodiil monstruo",
+        ["fr"] = "Cyrodiil monstre",
+        ["jp"] = "シロディール モンスター",
+        ["ru"] = "Сиродил Монстр",
+        ["zh"] = "Cyrodiil monster",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
@@ -1311,6 +1324,7 @@ local setTypeToTexture                 = {
     [LIBSETS_SETTYPE_TRIAL]                         = "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds", --"Trial"
     [LIBSETS_SETTYPE_MYTHIC]                        = "/esoui/art/icons/antiquities_u30_mythic_ring02.dds", --"Mythic"
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster" --todo change to other monster icon!
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = "/esoui/art/icons/quest_head_monster_012.dds", --"Cyrodiil monster" --todo change to other monster icon!
     ["vet_dung"]                                    = "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds", --"Veteran Dungeon"
     ["undaunted chest"]                             = "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
 }
@@ -1330,6 +1344,7 @@ local setTypeToDropZoneLocalizationStr = {
     [LIBSETS_SETTYPE_TRIAL]                         = clientLocalization.dropZoneTrial,
     [LIBSETS_SETTYPE_MYTHIC]                        = clientLocalization.dropZoneMythic,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = clientLocalization.dropZoneImperialCity,
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = clientLocalization.dropZoneCyrodiil,
     ["vet_dung"]                                    = clientLocalization.dropZoneDungeon,
 }
 lib.setTypeToDropZoneLocalizationStr   = setTypeToDropZoneLocalizationStr

@@ -1792,7 +1792,7 @@ function lib.GetSetName(setId, lang)
     return setNames[setId][lang]
 end
 
---Returns all names as String of the setId provided.
+--Returns all names of the setId as a table
 --The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.
 --{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
 --> Parameters: setId number: The set's setId
@@ -1817,7 +1817,8 @@ end
 local lib_GetSetNames = lib.GetSetNames
 
 --Returns all sets names as table.
---The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.
+--The table returned uses the key=setId and value = table of setNames.
+--The key in the table of setNames is [language] (2 characters String e.g. "en") and the value = name String, e.g.
 --{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
 --> Returns: setNames table
 function lib.GetAllSetNames()
@@ -3233,10 +3234,13 @@ local function command_handler(args)
     --Possible parameters
     -->help
     local callHelpParams = {
-        help    = true,
-        hilfe   = true,
-        list    = true,
-        aide    = true,
+        ["list"]    = true, --English
+        ["help"]    = true, --English
+        ["hilfe"]   = true, --German
+        ["aide"]    = true, --French
+        ["ayuda"]   = true, --Spanish
+        ["помощь"]  = true, --Russian
+        ["帮助"]    = true, --Chinese
     }
     -->debug functions
     local callDebugParams = {
