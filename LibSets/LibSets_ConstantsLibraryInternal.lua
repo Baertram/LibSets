@@ -733,9 +733,9 @@ lib.weaponTypeNames                 = {
 --Drop mechanics / cities / etc. for additional drop location information
 local possibleDropMechanics         = {
     [1]  = "LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY", --Rewards for the worthy (Cyrodiil/Battleground mail)
-    [2]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA", --City Bruma (quartermaster)
-    [3]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD", --City Cropsford (quartermaster)
-    [4]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS", --City Vlastarus (quartermaster)
+    [2]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA", --Cyrodiil City Bruma (quartermaster)
+    [3]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD", --Cyrodiil City Cropsford (quartermaster)
+    [4]  = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS", --Cyrodiil City Vlastarus (quartermaster)
     [5]  = "LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST", --Arena stage chest
     [6]  = "LIBSETS_DROP_MECHANIC_MONSTER_NAME", --The name of a monster (e.g. a boss in a dungeon) is specified in the excel and transfered to the setInfo table entry with the attribute "dropMechanicNames" (a table containing the monster name in different languages)
     [7]  = "LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE", --Overland delve bosses
@@ -763,6 +763,11 @@ local possibleDropMechanics         = {
     [29] = "LIBSETS_DROP_MECHANIC_CRAFTED", --Crafted
     [30] = "LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST", --Chest in a public dungeon
     [31] = "LIBSETS_DROP_MECHANIC_HARVEST_NODES", --Harvest crafting nodes
+    [32] = "LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
+    [33] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL", -- Cyrodiil Cheydinhal city
+    [34] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY", -- Cyrodiil Weyon Priory, Chorrol
+    [35] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
+    [36] = "LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS", -- Cyrodiil board missions
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -790,9 +795,9 @@ local cyrodiilAndBattlegroundText = GetString(SI_CAMPAIGNRULESETTYPE1) .. "/" ..
 lib.dropMechanicIdToName          = {
     ["de"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Gerechter Lohn (" .. cyrodiilAndBattlegroundText .. " eMail)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil Stadt: Bruma (Quartiermeister)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil Stadt: Erntefurt (Quartiermeister)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil Stadt: Vlastarus (Quartiermeister)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil Stadt: Bruma (Quartiermeister/Tägliche Quest)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil Stadt: Erntefurt (Quartiermeister/Tägliche Quest)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil Stadt: Vlastarus (Quartiermeister/Tägliche Quest)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "Arena-Phasen Schatztruhe",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                         = "Monster Name",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "Bosse in Gewölben",
@@ -817,12 +822,17 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosse in Gruppenverliesen",
         [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Truhen in Öffentlichen Verlieses",
         [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "Handwerks-Knoten abernten",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "Kaiserstadt Gier Schatzgoblin",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Stadt Cheydinhal",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Weynon Priorei, bei Chorrol",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil: Stadt Cheydinhal / Weynon Priorei, bei Chorrol",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Auftragstafeln",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Rewards for the worthy",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil City: Bruma (quartermaster)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil City: Cropsford (quartermaster)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil City: Vlastarus (quartermaster)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil City: Bruma (quartermaster/daily quest)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil City: Cropsford (quartermaster/daily quest)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil City: Vlastarus (quartermaster/daily quest)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "Arena stage chest",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                         = "Monster name",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "Delve bosses",
@@ -847,6 +857,11 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Bosses in group dungeons",
         [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Chests in public dungeons",
         [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "Harvest crafting nodes",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "Imperial city treasure Trove scamp",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -854,9 +869,9 @@ lib.dropMechanicIdToName          = {
     },
     ["es"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Ciudad Cyrodiil: Bruma (intendente)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Ciudad Cyrodiil: Cropsford (intendente)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Ciudad Cyrodiil: Vlastarus (intendente)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Ciudad Cyrodiil: Bruma (intendente/búsqueda diaria)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Ciudad Cyrodiil: Cropsford (intendente/búsqueda diaria)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Ciudad Cyrodiil: Vlastarus (intendente/búsqueda diaria)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "Cofre de escenario Arena",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                         = "Nombre del monstruo",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "Los jefes de cuevas",
@@ -880,12 +895,17 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Tipo de enemigo/bicho",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Jefes en mazmorras grupales",
         [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Cofres en mazmorra públicas",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "Imperial city treasure Trove scamp",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "La récompense des braves",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil Ville: Bruma (maître de manœuvre)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil Ville: Gué-les-Champs (maître de manœuvre)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil Ville: Vlastrus (maître de manœuvre)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil Ville: Bruma (maître de manœuvre/quête quotidienne)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil Ville: Gué-les-Champs (maître de manœuvre/quête quotidienne)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil Ville: Vlastrus (maître de manœuvre/quête quotidienne)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "Coffre d'étape Arena",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                         = "Nom du monstre",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "Les boss de petit donjon",
@@ -909,12 +929,17 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Type de créature/mob",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Boss dans les donjons de groupe",
         [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Les coffres des donjons public",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "Imperial city treasure Trove scamp",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Награда достойным",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Сиродил: город Брума (квартирмейстер)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Сиродил: город Кропсфорд (квартирмейстер)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Сиродил: город Властарус (квартирмейстер)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Сиродил: город Брума (квартирмейстер/ежедневный квест)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Сиродил: город Кропсфорд (квартирмейстер/ежедневный квест)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Сиродил: город Властарус (квартирмейстер/ежедневный квест)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "Этап арены",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                         = "Имя монстра",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "Боссы вылазок",
@@ -938,12 +963,17 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Тип моба/животного",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Боссы в групповых подземельях",
         [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Сундуки открытых подземелий",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "Imperial city treasure Trove scamp",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "貢献に見合った報酬です",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil シティ: ブルーマ (補給係)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil シティ: クロップスフォード (補給係)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil シティ: ヴラスタルス (補給係)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil シティ: ブルーマ (補給係/デイリークエスト)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil シティ: クロップスフォード (補給係/デイリークエスト)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil シティ: ヴラスタルス (補給係/デイリークエスト)",
         [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "アリーナステージチェスト",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                         = "モンスター名",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "洞窟ボス",
@@ -967,11 +997,16 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "モブ/クリッターの種類",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "グループダンジョンのボス",
         [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "パブリックダンジ 宝箱",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "Imperial city treasure Trove scamp",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
     },
 }
 lib.dropMechanicIdToNameTooltip   = {
     ["de"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = cyrodiilAndBattlegroundText .. " mail",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = cyrodiilAndBattlegroundText .. " mail - Enthält nur die neuesten Gegenstandssets!\nDa weiterhin neue Sets hinzugefügt werden, werden ältere Sets hier entfernt und anderen Cyrodiil-Quellen hinzugefügt:\nAlle PvP-Gegenstandssets werden jetzt in Cyrodiil-Dungeons, Dolmen und Missionen gefunden.\nTägliche Quests und Händler in der Stadt werden nach Leicht, Mittel und Schwer aufgeteilt. Ausnahme: Cheydinhal und Chorrol/Weynon Priory droppen jedes Set.\nAlle PvP-Sets sind als Einzelcontainer sowohl bei Stadthändlern als auch bei Elite-Ausrüstungshändlern erhältlich.\nDungeons lassen Taillen- und Fuß-Gegenstandssets fallen.\nDolmen lassen Schmuck fallen.\nBoard-Missionen lassen alle anderen Rüstungsteile fallen.\nBei Kopfgeld- und Scout-Missionen erhältst du Rüstungsteile.\nKampf- und Kriegsfront-Missionen geben Waffenslot-Items.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Bosse in Gewölben haben die Chance, eine Taille oder Füße fallen zu lassen.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Überland Gruppenbosse haben eine Chance von 100%, Kopf, Brust, Beine oder Waffen fallen zu lassen.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Öffentliche Dungeon-Bosse haben die Möglichkeit, eine Schulter, Handschuhe oder eine Waffe fallen zu lassen.",
@@ -981,7 +1016,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Alle Bosse: Hände, Taille, Füße, Brust, Schultern, Kopf, Beine\nLetzte Bosse: Waffen, Schild\nQuest Belohnung: Schmuck, Waffe, Schild (Gebunden beim Aufheben)",
     },
     ["en"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail) - Contains only newest item sets!\nAs new sets continue to get added, older sets will be removed here and added into other Cyrodiil sources:\nAll PvP item sets will now drop from Cyrodiil delves, dolmens and board missions.\nTown Daily Quest and Merchants will be divided by Light, Medium and Heavy. Exception: Cheydinhal and Chorrol/Weynon Priory reward any set.\nAll PvP sets are available as individual containers on both Town Merchants and Elite Gear Vendors.\nDelves will drop waist and feet item sets\nDolmens will drop jewelry\nBoard Missions will drop all other armor pieces.\nBounty and Scout missions will award armor pieces.\nBattle and Warfront missions will reward weapon slot pieces.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Delve bosses have a chance to drop a waist or feet.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Public dungeon bosses have a chance to drop a shoulder, hand, or weapon.",
@@ -992,44 +1027,44 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
     ["es"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Recompensa por el mérito (" .. cyrodiilAndBattlegroundText .. " mail)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Recompensa por el mérito (" .. cyrodiilAndBattlegroundText .. " mail) - ¡Contiene solo conjuntos de artículos más nuevos!\nA medida que se sigan agregando nuevos conjuntos, los conjuntos más antiguos se eliminarán aquí y se agregarán a otras fuentes de Cyrodiil:\nTodos los conjuntos de elementos PvP ahora aparecerán en las excavaciones, dólmenes y misiones de tablero de Cyrodiil.\nLas misiones diarias de la ciudad y los comerciantes se dividirán por Luz , Medio y Pesado. Excepción: Cheydinhal y Chorrol/Weynon Priory recompensan cualquier conjunto.\nTodos los conjuntos PvP están disponibles como contenedores individuales tanto en los comerciantes de la ciudad como en los vendedores de equipo de élite.\nLos excavadores arrojarán conjuntos de artículos para cintura y pies\nLos dólmenes arrojarán joyas\nLas misiones del tablero arrojarán todos otras piezas de armadura.\nLas misiones de recompensa y exploración otorgarán piezas de armadura.\nLas misiones de batalla y frente de guerra recompensarán piezas de ranuras para armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Los jefes de cuevas pueden soltar cinturones o calzado.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Los jefes del mundo sueltan siempre piezas de cabeza, pecho, piernas, o armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Los jefes de mazmorras públicas pueden soltar hombreras, guantes, o armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "Los cofres de áncoras oscuras sueltan siempre anillos o amuletos.\nLos cofres encontrados por el mundo pueden soltar cualquier pieza de armadura de un conjunto propio de la zona:\n-Los cofres sencillos tienen una ligera probabilidad\n-Los cofres intermedios tienen una buena probabilidad\n-Los cofres avanzados o de maestro tienen 100% de probabilidad\n-Los cofres encontrados con un mapa del tesoro tienen 100% de probabilidad",
         --todo
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers.",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Todos los jefes: manos, cintura, pies, pecho, hombros, cabeza, piernas\Jefes finales: arma, escudo\Contenedores de recompensa de misión: joyas, arma, escudo (se vincula al recogerlo))",
     },
     ["fr"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email) - Contient uniquement les ensembles d'objets les plus récents!\nÀ mesure que de nouveaux ensembles continuent d'être ajoutés, les anciens ensembles seront supprimés ici et ajoutés à d'autres sources de Cyrodiil :\nTous les ensembles d'objets PvP seront désormais récupérés dans les fouilles, les dolmens et les missions du plateau de Cyrodiil.\nLes quêtes quotidiennes de la ville et les marchands seront divisés par Lumière. , Moyen et Lourd. Exception : le Prieuré de Cheydinhal et Chorrol/Weynon récompense n'importe quel ensemble.\nTous les ensembles PvP sont disponibles sous forme de conteneurs individuels chez les marchands de la ville et les vendeurs d'équipement d'élite.\nLes fouilles laisseront tomber les ensembles d'objets de taille et de pieds\nLes dolmens donneront des bijoux\nLes missions de plateau donneront tous d'autres pièces d'armure.\nLes missions Bounty et Scout attribueront des pièces d'armure.\nLes missions de combat et de front de guerre récompenseront des pièces d'emplacement d'armes.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Les boss de petit donjon ont une chance de laisser tomber une taille ou des pieds.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Les boss de zone ouvertes ont 100% de chances de laisser tomber la tête, la poitrine, les jambes ou l'arme.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Les boss de donjon public ont une chance de laisser tomber une épaule, une main ou une arme.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "Les coffres obtenus en battant une ancre noire ont 100% de chances de laisser tomber un anneau ou une amulette.\nLes coffres au trésor trouvés dans le monde ont une chance d'accorder n'importe quelle pièce fixe qui peut tomber dans cette zone:\n-les coffres simples ont une légère chance \n-Les coffres intermédiaires ont de bonnes chances\n-Les coffres avancés et les maîtres ont une chance garantie\n-Les coffres au trésor trouvés sur une carte au trésor ont une chance garantie",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Coffre qui peut être échangé contre des pierres TelVar auprès d'un vendeur d'équipement TelVar dans votre base de faction, dans les égouts de la cité impériale.",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Tous les boss: mains, taille, pieds, poitrine, épaules, tête, jambes\Boss finaux: arme, bouclier\Conteneurs de récompense de quête: bijoux, arme, bouclier (liés lors du ramassage))",
     },
     ["ru"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " почта)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " почта) - Содержит только новейшие наборы предметов!\nПо мере добавления новых наборов старые наборы будут удалены отсюда и добавлены в другие источники Сиродила:\nВсе наборы PvP-предметов теперь будут выпадать из подземелий, дольменов и миссий на доске Сиродила.\nГородские ежедневные задания и торговцы будут разделены по Свету. , средний и тяжелый. Исключение: Чейдинхол и Приорат Коррола/Вейнона дают награду за любой набор.\nВсе PvP-наборы доступны в виде отдельных контейнеров как у городских торговцев, так и у продавцов элитного снаряжения.\nВ Дельвах из комплектов предметов для талии и ног выпадут все.\nИз дольменов выпадут драгоценности.\nИз настольных миссий выпадут все. другие части доспехов.\nЗа миссии Bounty и Scout будут выдаваться части доспехов.\nЗа миссии Battle and Warfront будут выдаваться части слотов для оружия.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Боссы вылазок дают шанс выпадания талии или голени.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Групповые боссы дают 100% шанс выпадания головы, груди, ног или оружия.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Боссы открытых подземелий дают шанс выпадания плечей, рук или оружия.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "Сундуки, полученные после побед над Тёмными якорями, имеют 100% шанс выпадания кольца или амулета.\nСундуки сокровищ, найденные в мире, дают шанс получить любую часть комплекта, выпадающую в этой зоне:\n- простые сундуки дают незначительный шанс\n- средние сундуки дают хороший шанс\n- продвинутые и мастерские сундуки дают гарантированный шанс\n- сундуки сокровищ, найденные по Карте сокровищ, дают гарантированный шанс",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Сундук, который можно обменять на камни ТелВар у продавца оборудования ТелВар на базе вашей фракции в канализации Имперского города",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Все боссы: Руки, Поясница, Ноги, Грудь, Плечо, Голова, Ноги\Финальные боссы: Оружие, Щит\Контейнеры с наградами за квест: Ювелирные изделия, Оружие, Щит (привязывается при получении))",
     },
     ["jp"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール)",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール) - 最新アイテムセットのみを収録！\n新しいセットが追加され続けるため、古いセットはここで削除され、シロディールの他のソースに追加されます:\nすべての PvP アイテム セットはシロディールの洞窟、ドルメン、ボード ミッションからドロップされます。\nタウンのデイリー クエストと商人は光によって分割されます。 、ミディアムとヘビー。 例外: シェイディンハルとチョロル/ウェイノン修道院はどのセットでも報酬を獲得します。\nすべての PvP セットは、町の商人およびエリート装備ベンダーの両方で個別のコンテナとして入手できます。\nデルブは腰と足のアイテム セットをドロップします\nドルメンはジュエリーをドロップします\nボード ミッションはすべてをドロップします 他のアーマー ピース。\n賞金稼ぎミッションとスカウト ミッションではアーマー ピースが獲得できます。\nバトル ミッションとウォーフロント ミッションでは武器スロット ピースが獲得できます。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "洞窟ボスは、胴体や足装備をドロップすることがあります。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "ワールドボスは、頭、腰、脚の各防具、または武器のいずれかが必ずドロップします。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "パブリックダンジョンのボスは、肩、手の各防具、または武器をドロップすることがあります。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "「インペリアルシティ下水道の派閥基地にあるTelVar機器ベンダーでTelVarストーンと交換できるチェスト。」",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "すべてのボス: 手、腰、足、胸、肩、頭、脚\最終ボス: 武器、盾\クエスト報酬コンテナ: ジュエリー、武器、盾 (ピックアップ時にバインド))",
     },
     ["zh"] = {
-        --todo
+        --todo 2023-08-24 Translate by native Chinese speaker
     },
 }
 --DropMechanic translations only available on current PTS, or automatically available if PTS->live
@@ -1046,14 +1081,14 @@ local dungeonStr                 = GetString(SI_INSTANCEDISPLAYTYPE2)
 local setTypeArenaName           = setTypesToName[LIBSETS_SETTYPE_ARENA]
 lib.localization                 = {
     ["de"] = {
-        de                             = "Deutsch",
-        en                              = "Englisch",
-        fr                              = "Französisch",
-        jp                              = "Japanisch",
-        ru                              = "Russisch",
-        pl                              = "Polnisch",
-        es                              = "Spanisch",
-        zh                              = "Chinesisch",
+        de                       = "Deutsch",
+        en                       = "Englisch",
+        fr                       = "Französisch",
+        jp                       = "Japanisch",
+        ru                       = "Russisch",
+        pl                       = "Polnisch",
+        es                       = "Spanisch",
+        zh                       = "Chinesisch",
         dlc                      = "Kapitel/DLC",
         dropZones                = "Drop Zonen",
         dropZoneArena            = setTypeArenaName["de"],
@@ -1150,6 +1185,7 @@ lib.localization                 = {
         ru  = "Ruso",
         pl  = "Polaco",
         es  = "Español",
+        zh  = "Chino",
         dlc                    = "Capítulo/DLC",
         dropZones              = "Zonas de caída",
         dropZoneArena          = setTypeArenaName["es"],
@@ -1168,6 +1204,7 @@ lib.localization                 = {
         ru  = "Russe",
         pl  = "Polonais",
         es  = "Espagnol",
+        zh  = "Chinois",
         dlc                    = "Chapitre/DLC",
         dropZones              = "Zones de largage",
         dropZoneArena          = setTypeArenaName["fr"],
@@ -1188,6 +1225,7 @@ lib.localization                 = {
         ru  = "Pуccкий",
         pl  = "польский",
         es  = "испанский",
+        zh  = "Китайский",
         dlc                    = "Глава/DLC",
         dropZones              = "Зоны сброса",
         dropZoneArena          = setTypeArenaName["ru"],
@@ -1208,6 +1246,7 @@ lib.localization                 = {
         ru  = "ロシア",
         pl  = "ポーランド語",
         es  = "スペイン語",
+        zh  = "中国語",
         dlc                    = "チャプター/ DLC",
         dropZones              = "ドロップゾーン",
         dropZoneArena          = setTypeArenaName["jp"],
@@ -1221,7 +1260,7 @@ lib.localization                 = {
         slashCommandDescriptionClient = "セット名の検索 (ゲーム言語)",
     },
     ["zh"] = {
-        --todo
+        --todo 2023-08-24 Translate by native Chinese speaker
     },
 }
 
@@ -1303,6 +1342,14 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "/esoui/art/journal/journal_quest_group_instance.dds",
     [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "/esoui/art/icons/undaunted_mediumcoffer.dds",
     [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "/esoui/art/crafting/smithing_tabicon_refine_up.dds",
+    --TODO 2023-08-24
+    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]            = "/esoui/art/icons/mapkey/mapkey_avatown.dds", -- Cyrodiil Cheydinhal city
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY] = "/esoui/art/icons/mapkey/mapkey_avatown.dds", -- Cyrodiil Weyon Priory, Chorrol
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "/esoui/art/icons/mapkey/mapkey_avatown.dds",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
+    [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]             = "", -- Cyrodiil board missions
+
+
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
     --["golden chest"] =        "/esoui/art/icons/undaunted_dungeoncoffer.dds",
