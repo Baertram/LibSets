@@ -680,9 +680,9 @@ local undauntedChestIds             = {
         [3] = "Urgarlag Chief-bane",
     },
     ["es"] = {
-        [1] = "Glirion the Redbeard",   --todo
-        [2] = "Maj al-Ragath",          --todo
-        [3] = "Urgarlag Chief-bane",    --todo
+        [1] = "Glirion el Barbarroja",
+        [2] = "Maj al-Ragath",
+        [3] = "Urgarlag la Castradora",
     },
     ["fr"] = {
         [1] = "Glirion Barbe-Rousse",
@@ -695,9 +695,9 @@ local undauntedChestIds             = {
         [3] = "Ургарлаг Бич Вождей",
     },
     ["zh"] = {
-        [1] = "Glirion the Redbeard",   --todo
-        [2] = "Maj al-Ragath",          --todo
-        [3] = "Urgarlag Chief-bane",    --todo
+        [1] = "紅胡子格利里恩",
+        [2] = "瑪吉·阿示拉加斯",
+        [3] = "烏示加拉格·酋長克星",
     },
     ["jp"] = {
         [1] = "赤髭グリリオン",
@@ -1370,8 +1370,8 @@ local setTypeToTexture                 = {
     [LIBSETS_SETTYPE_SPECIAL]                       = "/esoui/art/tutorial/campaignbrowser_indexicon_specialevents_up.dds", --"Special"
     [LIBSETS_SETTYPE_TRIAL]                         = "/esoui/art/treeicons/gamepad/gp_reconstruction_tabicon_trialgroup.dds", --"Trial"
     [LIBSETS_SETTYPE_MYTHIC]                        = "/esoui/art/icons/antiquities_u30_mythic_ring02.dds", --"Mythic"
-    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster" --todo change to other monster icon!
-    [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = "/esoui/art/icons/quest_head_monster_012.dds", --"Cyrodiil monster" --todo change to other monster icon!
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster"
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = "/esoui/art/icons/quest_head_monster_011.dds", --"Cyrodiil monster"
     ["vet_dung"]                                    = "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds", --"Veteran Dungeon"
     ["undaunted chest"]                             = "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
 }
