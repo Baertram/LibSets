@@ -2332,6 +2332,7 @@ function lib.GetSupportedLanguageChoices()
     return supportedLanguageChoices, supportedLanguageChoicesValues, supportedLanguageChoicesTooltips
 end
 
+
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
@@ -2599,6 +2600,17 @@ function lib.OpenSetItemCollectionBrowserForCurrentZone(useParentZone)
     end
 end
 local openSetItemCollectionBrowserForCurrentZone = lib.OpenSetItemCollectionBrowserForCurrentZone
+
+
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- 	Item sets search API
+------------------------------------------------------------------------
+--todo add API functions to search and return sets by name and other parameters e.g.
+-->use within /libsets slash command too e.g. via /libsetss or /lss
 
 
 
