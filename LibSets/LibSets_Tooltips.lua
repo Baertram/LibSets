@@ -108,6 +108,7 @@ local dungeonStr =              localization.dropZoneDungeon
 local vetDungeonStr =           localization.dropZoneVeteranDungeon
 local imperialCityStr =         localization.dropZoneImperialCity
 local imperialSewersStr =       localization.dropZoneImperialSewers
+local cyrodiilStr =             localization.dropZoneCyrodiil
 local veteranDungeonIconStr =   zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
 --local bossStr =                 localization.boss
 --local setTypeStr =              localization.setType
@@ -128,14 +129,17 @@ local isArmorTraitType =        lib.isArmorTraitType
 local monsterSetTypes = {
     [LIBSETS_SETTYPE_MONSTER] =                 true,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    true,
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER] =        true,
 }
 local monsterSetTypeToVeteranStr = {
     [LIBSETS_SETTYPE_MONSTER] =                 veteranDungeonIconStr,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialCityStr,
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER] =        cyrodiilStr,
 }
 local monsterSetTypeToNoVeteranStr = {
     [LIBSETS_SETTYPE_MONSTER] =                 undauntedChestStr,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialSewersStr,
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER] =        cyrodiilStr,
 }
 
 
@@ -543,7 +547,7 @@ local function getDungeonDifficultyStr(setData, itemLink)
                     return veteranStr, true
                 else
                     local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
-                    if setData.undauntedChestId then
+                    if setData.undauntedChestId ~= nil then
                         nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
                     end
                     return nonVeteranStr, false
@@ -552,7 +556,7 @@ local function getDungeonDifficultyStr(setData, itemLink)
         else
             if not veteranData then
                 local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
-                if setData.undauntedChestId then
+                if setData.undauntedChestId ~= nil then
                     nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
                 end
                 return nonVeteranStr, false

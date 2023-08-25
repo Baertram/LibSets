@@ -18,6 +18,7 @@ local possibleDlcTypes = {
     [1] = "DLC_TYPE_CHAPTER",
     [2] = "DLC_TYPE_DUNGEONS",
     [3] = "DLC_TYPE_ZONE",
+    [4] = "DLC_TYPE_NORMAL_PATCH",
 }
 lib.possibleDlcTypes = possibleDlcTypes
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -71,6 +72,7 @@ local possibleDlcIds = {
     [27] = "DLC_LOST_DEPTHS",
     [28] = "DLC_FIRESONG",
     [29] = "DLC_SCRIBES_OF_FATE",
+    [30] = "NO_DLC_UPDATE39",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -150,16 +152,19 @@ lib.dlcAndChapterCollectibleIds = {
     --High Isle
     [DLC_HIGH_ISLE] =               {collectibleId=10053, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1654473600},
     --Lost Depths
-    [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=3133, type=DLC_TYPE_DUNGEONS, releaseDate=1661126400},
+    [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=3373, type=DLC_TYPE_DUNGEONS, releaseDate=1661126400},
     --Firesong
     [DLC_FIRESONG] =                {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS, releaseDate=1667260800},
     --Scribes of Fate
     [DLC_SCRIBES_OF_FATE] =         {collectibleId=nil, achievementCategoryId=3466, type=DLC_TYPE_DUNGEONS, releaseDate=1678662000},
+    --Necrom
+    [DLC_NECROM] =                  {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000}, --June 5th 2023
+    --Update 38 QOL patch
+    [NO_DLC_UPDATE39] =             {collectibleId=nil, achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1692604800}, --August 21st 2023
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
-    lib.dlcAndChapterCollectibleIds[DLC_NECROM] = {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000} --June 5th 2023
-
+    --lib.dlcAndChapterCollectibleIds[DLC_NECROM] = {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000} --June 5th 2023
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
@@ -189,6 +194,8 @@ for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
             local name = zocstrfor(dlcStrFormatPattern, gaci(gcifa(achievementCategoryId)))
             DLCandCHAPTERdata[dlcId] = name
             DLCandCHAPTERLookupdata[dlcType][dlcId] = name
+        --else
+            --no collectibleId and no achievementCategoryId provided? -> Normal patch with QOL features then
         end
     end
 end
