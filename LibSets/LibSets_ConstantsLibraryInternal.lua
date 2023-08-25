@@ -1032,8 +1032,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Los jefes del mundo sueltan siempre piezas de cabeza, pecho, piernas, o armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Los jefes de mazmorras públicas pueden soltar hombreras, guantes, o armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "Los cofres de áncoras oscuras sueltan siempre anillos o amuletos.\nLos cofres encontrados por el mundo pueden soltar cualquier pieza de armadura de un conjunto propio de la zona:\n-Los cofres sencillos tienen una ligera probabilidad\n-Los cofres intermedios tienen una buena probabilidad\n-Los cofres avanzados o de maestro tienen 100% de probabilidad\n-Los cofres encontrados con un mapa del tesoro tienen 100% de probabilidad",
-        --todo
-        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers.",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Cofre que se puede canjear por Piedras TelVar en un vendedor de equipos TelVar en la base de tu facción, en las alcantarillas de la Ciudad Imperial.",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Todos los jefes: manos, cintura, pies, pecho, hombros, cabeza, piernas\Jefes finales: arma, escudo\Contenedores de recompensa de misión: joyas, arma, escudo (se vincula al recogerlo))",
     },
     ["fr"] = {
@@ -1342,13 +1341,11 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "/esoui/art/journal/journal_quest_group_instance.dds",
     [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "/esoui/art/icons/undaunted_mediumcoffer.dds",
     [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "/esoui/art/crafting/smithing_tabicon_refine_up.dds",
-    --TODO 2023-08-24
-    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]            = "/esoui/art/icons/mapkey/mapkey_avatown.dds", -- Cyrodiil Cheydinhal city
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY] = "/esoui/art/icons/mapkey/mapkey_avatown.dds", -- Cyrodiil Weyon Priory, Chorrol
-    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "/esoui/art/icons/mapkey/mapkey_avatown.dds",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
-    [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]             = "", -- Cyrodiil board missions
-
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]            = "/esoui/art/icons/poi/poi_town_complete.dds", -- Cyrodiil Cheydinhal city
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY] = "/esoui/art/icons/poi/poi_town_complete.dds", -- Cyrodiil Weyon Priory, Chorrol
+    [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "/esoui/art/icons/poi/poi_town_complete.dds",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
+    [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]             = "/esoui/art/icons/housing_gen_lsb_announcementboard001.dds", -- Cyrodiil board missions
+    [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "/esoui/art/icons/achievement_ic_treasurescamp.dds", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
