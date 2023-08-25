@@ -826,7 +826,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Stadt Cheydinhal",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Weynon Priorei, bei Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil: Stadt Cheydinhal / Weynon Priorei, bei Chorrol",
-        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Auftragstafeln",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Auftragstafeln",
     },
     ["en"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Rewards for the worthy",
@@ -861,7 +861,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
-        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -899,7 +899,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
-        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "La récompense des braves",
@@ -933,7 +933,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
-        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Награда достойным",
@@ -967,7 +967,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
-        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "貢献に見合った報酬です",
@@ -1001,7 +1001,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
-        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrdoiil Board missions",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
 }
 lib.dropMechanicIdToNameTooltip   = {
