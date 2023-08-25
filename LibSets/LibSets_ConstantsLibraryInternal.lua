@@ -680,9 +680,9 @@ local undauntedChestIds             = {
         [3] = "Urgarlag Chief-bane",
     },
     ["es"] = {
-        [1] = "Glirion the Redbeard", --todo
-        [2] = "Maj al-Ragath", --todo
-        [3] = "Urgarlag Chief-bane", --todo
+        [1] = "Glirion the Redbeard",   --todo
+        [2] = "Maj al-Ragath",          --todo
+        [3] = "Urgarlag Chief-bane",    --todo
     },
     ["fr"] = {
         [1] = "Glirion Barbe-Rousse",
@@ -695,9 +695,9 @@ local undauntedChestIds             = {
         [3] = "Ургарлаг Бич Вождей",
     },
     ["zh"] = {
-        [1] = "Glirion the Redbeard",
-        [2] = "Maj al-Ragath",
-        [3] = "Urgarlag Chief-bane",
+        [1] = "Glirion the Redbeard",   --todo
+        [2] = "Maj al-Ragath",          --todo
+        [3] = "Urgarlag Chief-bane",    --todo
     },
     ["jp"] = {
         [1] = "赤髭グリリオン",

@@ -152,7 +152,7 @@ lib.dlcAndChapterCollectibleIds = {
     --High Isle
     [DLC_HIGH_ISLE] =               {collectibleId=10053, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1654473600},
     --Lost Depths
-    [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=3133, type=DLC_TYPE_DUNGEONS, releaseDate=1661126400},
+    [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=3373, type=DLC_TYPE_DUNGEONS, releaseDate=1661126400},
     --Firesong
     [DLC_FIRESONG] =                {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS, releaseDate=1667260800},
     --Scribes of Fate
