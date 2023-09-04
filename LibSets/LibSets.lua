@@ -3212,7 +3212,23 @@ end
 checkIfSetsAreLoadedProperly = checkIfSetsAreLoadedProperly or lib.checkIfSetsAreLoadedProperly
 
 
+
 --SLASH COMMANDS
+--Parse the arguments string
+local function getOptionsFromSlashCommandString(slashCommandString)
+    local options = {}
+    --local searchResult = {} --old: searchResult = { string.match(args, "^(%S*)%s*(.-)$") }
+    for param in strgmatch(args, "([^%s]+)%s*") do
+        if (param ~= nil and param ~= "") then
+            local paramBoolOrOther = toboolean(strlower(param))
+
+            options[#options+1] = paramBoolOrOther
+        end
+    end
+    return options
+end
+
+
 local function slash_help()
     d(">>> [" .. lib.name .. "] |c0000FFSlash command help -|r BEGIN >>>")
     d("|-> \'resetsv\'              Resets the SavedVariables")
@@ -3232,16 +3248,7 @@ local function slash_help()
 end
 
 local function command_handler(args)
-    --Parse the arguments string
-    local options = {}
-    --local searchResult = {} --old: searchResult = { string.match(args, "^(%S*)%s*(.-)$") }
-    for param in strgmatch(args, "([^%s]+)%s*") do
-        if (param ~= nil and param ~= "") then
-            local paramBoolOrOther = toboolean(strlower(param))
-
-            options[#options+1] = paramBoolOrOther
-        end
-    end
+    local options = getOptionsFromSlashCommandString(args)
 
     --Possible parameters
     -->help
@@ -3250,10 +3257,25 @@ local function command_handler(args)
         ["help"]    = true, --English
         ["hilfe"]   = true, --German
         ["aide"]    = true, --French
+        ["ヘルプ"]   = true, --Japanese
         ["ayuda"]   = true, --Spanish
         ["помощь"]  = true, --Russian
         ["帮助"]    = true, --Chinese
     }
+
+    -->search
+    --[[
+    local callSearchParams = {
+        ["search"]  = true, --Englisch
+        ["suche"]   = true,  --German
+        ["cherche"] = true, --French
+        ["検索"]    = true, --Japanese
+        ["buscar"]  = true, --Spanish
+        ["поиск"]   = true, --Russian
+        ["搜索"]    = true, --Chinese
+    }
+    ]]
+
     -->debug functions
     local callDebugParams = {
         resetsv             = "DebugResetSavedVariables",
@@ -3281,6 +3303,11 @@ local function command_handler(args)
     local firstParam = options and options[1]
     if #options == 0 or firstParam == nil or firstParam == "" or callHelpParams[firstParam] == true then
         slash_help()
+    --[[
+    elseif firstParam ~= nil and callSearchParams[firstParam] == true then
+        trem(options, 1)
+        slash_search(nil, options)
+    ]]
     elseif firstParam ~= nil and firstParam ~= "" then
         local debugFunc = callDebugParams[firstParam]
         if debugFunc ~= nil then
@@ -3379,6 +3406,12 @@ local function createSlashCommands()
     if SLASH_COMMANDS["/ls"] == nil then
         SLASH_COMMANDS["/ls"] = command_handler
     end
+    --[[
+    SLASH_COMMANDS["/libsetss"] = slash_search
+    if SLASH_COMMANDS["/lss"] == nil then
+        SLASH_COMMANDS["/lss"] = slash_search
+    end
+    ]]
 
     --Add the slash command for the DLC/chapter info
     SLASH_COMMANDS["/libsetsdlcsandchapters"] = slashcommand_dlcsandchapter
