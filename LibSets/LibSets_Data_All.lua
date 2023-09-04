@@ -930,6 +930,7 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=97, zoneIds={1286,1282,1283}},--The Deadlands/Fargrave/The Shambles
         { parentCategory=4, category=100, zoneIds={1318}},--High isle
         { parentCategory=4, category=104, zoneIds={1383}},--Galen
+        { parentCategory=4, category=107, zoneIds={1413,1414}},--Apocrypha/Telvanni Peninsula
         --Dungeons
         { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
         { parentCategory=5, category=40, zoneIds={380,935}, isDungeon=true},--The Banished Cells I
