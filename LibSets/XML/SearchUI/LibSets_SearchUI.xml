@@ -1,4 +1,9 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+<!-- LibSets Search UI - Font definitions -->
+	<Font name="MyFontGame16" font="$(MEDIUM_FONT)|$(KB_16)|soft-shadow-thin" />
+    <Font name="MyFontGame18" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thik" />
+    <Font name="MyFontGame20" font="$(BOLD_FONT)|$(KB_20)|soft-shadow-thik" />
+
     <Controls>
 <!-- LibSets Search UI - Virtual template -->
         <TopLevelControl name="LibSets_SearchUI_TLC_Shared" mouseEnabled="true" movable="true" hidden="true" virtual="true" level="1">
@@ -17,7 +22,7 @@
         <!-- Virtual Sort headers -->
         <Control name="LibSetsSearchUISortHeader" inherits="ZO_SortHeaderBehavior" virtual="true" level="2">
             <Controls>
-                <Label name="$(parent)Name" font="MyFontGame20" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                <Label name="$(parent)Name" font="MyFontGame18" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
                         <AnchorFill />
                 </Label>
             </Controls>
@@ -42,16 +47,19 @@
 				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
 				<Label name="$(parent)Name" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" />
-					<Dimensions x="200" y="30" />
+					<Dimensions y="30" />
+                    <DimensionConstraints minX="350" />
 				</Label>
 				<Label name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" />
-					<Dimensions x="100" y="30" />
+					<Dimensions y="30" />
+                    <DimensionConstraints minX="40" />
 				</Label>
-				<Label name="$(parent)Slot" inherits="LibSetsSearchUIRowLabel">
+				<Label name="$(parent)EquipSlot" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
 					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
-					<Dimensions x="90" y="30" />
+					<Dimensions y="30" />
+                    <DimensionConstraints minX="40" />
 				</Label>
 			</Controls>
 		</Control>
@@ -71,8 +79,8 @@
 				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" tier="LOW" layer="BACKGROUND" level="0"/>
 
                 <Control name="$(parent)Filters" override="true" level="0">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
-                    <Dimensions y="200" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="10" />
+                    <Dimensions y="125" />
                     <Controls>
                         <Control name="$(parent)SetTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="5" offsetY="5" />
@@ -131,10 +139,9 @@
                             <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)SetTypeFilter" offsetX="0" offsetY="5" />
                             <Dimensions x="200" />
                             <Controls>
-                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop"/>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" />
                             </Controls>
                         </Backdrop>
-
 
                         <Control name="$(parent)DLCIdFilter" inherits="ZO_MultiselectComboBox" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ArmorTypeFilter" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="5" />
@@ -162,48 +169,64 @@
                                 ClearTooltip(InformationTooltip)
                             </OnMouseExit>
                         </Control>
+
+                        <Backdrop name="$(parent)BonusTextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)TextSearch" offsetX="0" offsetY="5" />
+                            <Dimensions x="200" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" />
+                            </Controls>
+                        </Backdrop>
+
                     </Controls>
                 </Control>
 
                 <Control name="$(parent)Content" override="true" level="0">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Filters" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="0" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="-50" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="-5" />
                     <Controls>
-                        <Control name="$(parent)Headers">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)TextSearch" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10" />
+
+                        <!-- ZO_SortFilterScrollList - Sort header -->
+                        <Control name="$(parent)Headers" level="1">
+                            <Dimensions y="30" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
                             <Controls>
                                 <Control name="$(parent)Name" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
                                         ZO_SortHeader_Initialize(self, "Set name", "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DateTime" />
-                                    <Dimensions x="200" y="32" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="350" />
                                 </Control>
                                 <Control name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, "Armor/Weapon type", "armorOrWeaponTypeName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                        ZO_SortHeader_Initialize(self, "Armor/Weapon type", "armorOrWeaponType", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
-                                    <Dimensions x="100" y="32" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="40" />
                                 </Control>
-                                <Control name="$(parent)Slot" inherits="LibSetsSearchUISortHeader">
+                                <Control name="$(parent)EquipSlot" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, "Equip slot", "slotName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                        ZO_SortHeader_Initialize(self, "Equip slot", "equipSlot", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
                                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
-                                    <Dimensions x="90" y="32" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="40" />
                                 </Control>
                             </Controls>
                         </Control>
 
+                        <!-- ZO_SortFilterScrollList -->
                         <Control name="$(parent)List" inherits="ZO_ScrollList" level="1">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="LEFT" offsetY="0" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="0" />
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="-6" />
                         </Control>
 
                         <Label name="$(parent)Counter" font="ZoFontGameSmall" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" level="1">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="6" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="0" />
                         </Label>
                     </Controls>
                 </Control>

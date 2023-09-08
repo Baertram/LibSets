@@ -33,11 +33,13 @@ end
 
 function LibSets_SearchUI_List:Setup( )
 	--Scroll UI
-	ZO_ScrollList_AddDataType(self.list, 1, "LibSetsSearchUIRow", 30, function(control, data)
+	ZO_ScrollList_AddDataType(self.list, searchUI.scrollListDataTypeDefault, "LibSetsSearchUIRow", 30, function(control, data)
         self:SetupItemRow(control, data)
     end)
 	ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
 	self:SetAlternateRowBackgrounds(true)
+
+    self:SetEmptyText("No sets (matching search criteria) found")
 
 	self.masterList = { }
 
@@ -57,10 +59,10 @@ function LibSets_SearchUI_List:Setup( )
 	end
 
     --Sort headers
-	self.headers = self.parentControl:GetNamedChild("Headers")
-    self.headerName = self.headers:GetNamedChild("Name")
-	self.headerArmorOrWeaponType = self.headers:GetNamedChild("ArmorOrWeaponType")
-	self.headerSlot = self.headers:GetNamedChild("Slot")
+	self.headers =                  self.control:GetNamedChild("Headers")
+    self.headerName =               self.headers:GetNamedChild("Name")
+	self.headerArmorOrWeaponType =  self.headers:GetNamedChild("ArmorOrWeaponType")
+	self.headerSlot =               self.headers:GetNamedChild("EquipSlot")
 
     --Build initial masterlist via self:BuildMasterList()
     self:RefreshData()
@@ -71,35 +73,39 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     --d(">>>      [LibSets_SearchUI_List:SetupItemRow] " ..tostring(data.names[clientLang]))
     control.data = data
 
+    local lastColumn
+
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
-    if not data.columnWidth then data.columnWidth = 200 end
-    nameColumn:SetDimensions(data.columnWidth, 30)
-
     nameColumn:ClearAnchors()
     nameColumn:SetAnchor(LEFT, control, nil, 0, 0)
-    nameColumn:SetHidden(false)
     nameColumn:SetText(data.name or "test name")
+    nameColumn:SetHidden(false)
 
     local armorOrWeaponTypeColumn = control:GetNamedChild("ArmorOrWeaponType")
-    armorOrWeaponTypeColumn:SetHidden(false)
+    armorOrWeaponTypeColumn:ClearAnchors()
+    armorOrWeaponTypeColumn:SetAnchor(LEFT, nameColumn, RIGHT, 0, 0)
     armorOrWeaponTypeColumn:SetText(data.armorOrWeaponType or "")
+    armorOrWeaponTypeColumn:SetHidden(false)
 
-    local slotColumn = control:GetNamedChild("Slot")
-    slotColumn:SetHidden(false)
+    local slotColumn = control:GetNamedChild("EquipSlot")
+    slotColumn:ClearAnchors()
+    slotColumn:SetAnchor(LEFT, armorOrWeaponTypeColumn, RIGHT, 0, 0)
     slotColumn:SetText(data.equipSlot or "")
-    slotColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
+    slotColumn:SetHidden(false)
+
+    --Anchor the last column's right edge to the right edge of the row
+    lastColumn = slotColumn
+    lastColumn:SetAnchor(RIGHT, control, RIGHT, -10, 0)
 
     --Set the row to the list now
     ZO_SortFilterList.SetupRow(self, control, data)
 end
 
-function LibSets_SearchUI_List:BuildMasterList(calledFromFilterFunction)
-    calledFromFilterFunction = calledFromFilterFunction or false
-d("[LibSets_SearchUI_List:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
-    --Sets tab row creation from savedvars sets list
-------------------------------------------------------------------------------------------------------------------------
+function LibSets_SearchUI_List:BuildMasterList()
+d("[LibSets_SearchUI_List:BuildMasterList]")
     self.masterList = {}
+
     local setsData = lib.setInfo
     for setId, setData in pairs(setsData) do
         table.insert(self.masterList, self:CreateEntryForSet(setId, setData))
@@ -109,7 +115,7 @@ d("[LibSets_SearchUI_List:BuildMasterList]calledFromFilterFunction: " ..tostring
 end
 
 function LibSets_SearchUI_List:FilterScrollList()
---d("[WishListWindow:FilterScrollList]")
+d("[LibSets_SearchUI_List:FilterScrollList]")
 	local scrollData = ZO_ScrollList_GetDataList(self.list)
 	ZO_ClearNumericallyIndexedTable(scrollData)
 
@@ -117,15 +123,15 @@ function LibSets_SearchUI_List:FilterScrollList()
     --self.searchType = self.searchDrop:GetSelectedItemData().id
 
     --Check the search text
-
-    local searchInput = self._parentObject.searchEditBox:GetText()
+    local searchInput = self._parentObject.searchEditBoxControl:GetText()
+    local searchIsEmpty = (searchInput == "" and true) or false
 
     for i = 1, #self.masterList do
         --Get the data of each set item
         local data = self.masterList[i]
         --Search for text/set bonuses
-        if searchInput == "" or self._parentObject:CheckForMatch(data, searchInput) then
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(1, data))
+        if searchIsEmpty == true or self._parentObject:CheckForMatch(data, searchInput) then
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(searchUI.scrollListDataTypeDefault, data))
         end
     end
 
@@ -133,10 +139,33 @@ function LibSets_SearchUI_List:FilterScrollList()
     self:UpdateCounter(scrollData)
 end
 
+function LibSets_SearchUI_List:SortScrollList( )
+    --Build the sortkeys depending on the settings
+    self:BuildSortKeys()
+    --Get the current sort header's key and direction
+    self.currentSortKey = self.sortHeaderGroup:GetCurrentSortKey()
+    self.currentSortOrder = self.sortHeaderGroup:GetSortDirection()
+d("[LibSets_SearchUI_List:SortScrollList] sortKey: " .. tostring(self.currentSortKey) .. ", sortOrder: " ..tostring(self.currentSortOrder))
+	if (self.currentSortKey ~= nil and self.currentSortOrder ~= nil) then
+        --Update the scroll list and re-sort it -> Calls "SetupItemRow" internally!
+		local scrollData = ZO_ScrollList_GetDataList(self.list)
+        if scrollData and #scrollData > 0 then
+            table.sort(scrollData, self.sortFunction)
+            self:RefreshVisible()
+        end
+	end
+end
+
+
+--[[
+function LibSets_SearchUI_List:CommitScrollList( )
+end
+]]
+
 
 function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local nameColumnValue = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
-
+--d(">name: " ..tostring(nameColumnValue))
     --[[
 	local itemId = lib.GetFirstItemIdOfSetId(setId, nil)
     if itemId == nil then return nil end
@@ -158,12 +187,15 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
 
     --Table entry for the ZO_ScrollList data
 	return({
-        type                = 1,     -- for the search function!!!
+        --Internal, for text search etc.
+        type                = searchUI.searchTypeDefault,     -- for the search function -> Processor. !!!Needs to match!!!
+
+        --Set ID
         setId               = setId,
         --Single columns for the output row -> See function self:SetupItemRow
         name                = nameColumnValue,
-        armorOrWeaponType   = "",
-        equipSlot           = "",
+        armorOrWeaponType   = "1",
+        equipSlot           = "2",
 
         --Pass in whole table of set's info
         setData     = setData,
@@ -178,29 +210,12 @@ function LibSets_SearchUI_List:BuildSortKeys()
         --["gearId"]                  = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         ["name"]                    = { caseInsensitive = true },
         ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = "name" },
-        ["slotName"]                = { caseInsensitive = true, tiebreaker = "name" },
+        ["equipSlot"]                = { caseInsensitive = true, tiebreaker = "name" },
         --["traitName"]               = { caseInsensitive = true, tiebreaker = "name" },
         --["quality"]                 = { caseInsensitive = true, tiebreaker = "name" },
         --["username"]                = { caseInsensitive = true, tiebreaker = "name" },
         --["locality"]                = { caseInsensitive = true, tiebreaker = "name" },
     }
-end
-
-function LibSets_SearchUI_List:SortScrollList( )
-    --Build the sortkeys depending on the settings
-    self:BuildSortKeys()
-    --Get the current sort header's key and direction
-    self.currentSortKey = self.sortHeaderGroup:GetCurrentSortKey()
-    self.currentSortOrder = self.sortHeaderGroup:GetSortDirection()
-d("[LibSets_SearchUI_List:SortScrollList] sortKey: " .. tostring(self.currentSortKey) .. ", sortOrder: " ..tostring(self.currentSortOrder))
-	if (self.currentSortKey ~= nil and self.currentSortOrder ~= nil) then
-        --Update the scroll list and re-sort it -> Calls "SetupItemRow" internally!
-		local scrollData = ZO_ScrollList_GetDataList(self.list)
-        if scrollData and #scrollData > 0 then
-            table.sort(scrollData, self.sortFunction)
-            self:RefreshVisible()
-        end
-	end
 end
 
 function LibSets_SearchUI_List:UpdateCounter(scrollData)
@@ -211,7 +226,7 @@ function LibSets_SearchUI_List:UpdateCounter(scrollData)
     else
         listCountAndTotal = string.format("%d / %d", #scrollData, #self.masterList)
     end
-    self.parentControl:GetNamedChild("Counter"):SetText(listCountAndTotal)
+    self._parentObject.counterControl:SetText(listCountAndTotal)
 end
 
 
@@ -236,39 +251,53 @@ end
 function LibSets_SearchUI_Keyboard:Initialize(control)
     LibSets_SearchUI_Shared.Initialize(self, control)
 
-    local filters = self.filters
-    local content = self.content
+    local filters = self.filtersControl
+    local content = self.contentControl
 
+    --Buttons
     self.resetButton = self.control:GetNamedChild("ButtonReset")
     self.searchButton = self.control:GetNamedChild("ButtonSearch")
 
 
-    --Results list -> ZO_SortFilterList
-    self.counter = content:GetNamedChild("Counter")
-    self.resultsListControl = content:GetNamedChild("List")
-    self.resultsList = LibSets_SearchUI_List:New(content, self) --pass in the parent control of "Headers" and "List" -> "Contents"
-
     --Filters
-    self.searchEditBox = filters:GetNamedChild("TextSearchBox")
+    self.searchEditBoxControl = filters:GetNamedChild("TextSearchBox")
+    self.searchEditBoxControl:SetDefaultText("Names/IDs , separated")
 	--ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
-    self.searchEditBox:SetHandler("OnTextChanged", function() self.resultsList:RefreshFilters() end)
-    self.searchEditBox:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
+    self.searchEditBoxControl:SetHandler("OnTextChanged", function() self.resultsList:RefreshFilters() end)
+    self.searchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
 d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp")
         if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
-            --self:OnSearchEditBoxContextMenu(self.searchEditBox)
+            --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
+        end
+    end)
+
+    self.bonusSearchEditBoxControl = filters:GetNamedChild("BonusTextSearchBox")
+    self.bonusSearchEditBoxControl:SetDefaultText("Bonus")
+	--ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+    self.bonusSearchEditBoxControl:SetHandler("OnTextChanged", function() self.resultsList:RefreshFilters() end)
+    self.bonusSearchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
+d("[LibSets]LibSets_SearchUI_Keyboard - bonusSearchEditBoxControl - OnMouseUp")
+        if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
+            --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
         end
     end)
 
     --Multiselect dropdowns
-    self.setTypeFilters =                   filters:GetNamedChild("SetTypeFilter")
-    self.armorTypeFilters =                 filters:GetNamedChild("ArmorTypeFilter")
-    self.weaponTypeFilters =                filters:GetNamedChild("WeaponTypeFilter")
-    self.equipmentTypeFilters =             filters:GetNamedChild("EquipmentTypeFilter")
-    self.DCLIdFilters =                     filters:GetNamedChild("DLCIdFilter")
-    self.enchantSearchCategoryTypeFilters = filters:GetNamedChild("EnchantSearchCategoryTypeFilter")
-
+    self.setTypeFiltersControl =                   filters:GetNamedChild("SetTypeFilter")
+    self.armorTypeFiltersControl =                 filters:GetNamedChild("ArmorTypeFilter")
+    self.weaponTypeFiltersControl =                filters:GetNamedChild("WeaponTypeFilter")
+    self.equipmentTypeFiltersControl =             filters:GetNamedChild("EquipmentTypeFilter")
+    self.DCLIdFiltersControl =                     filters:GetNamedChild("DLCIdFilter")
+    self.enchantSearchCategoryTypeFiltersControl = filters:GetNamedChild("EnchantSearchCategoryTypeFilter")
 
     self:InitializeFilters() --> Filter data was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
+
+
+
+    --Results list -> ZO_SortFilterList
+    self.counterControl = content:GetNamedChild("Counter")
+    self.resultsListControl = content:GetNamedChild("List")
+    self.resultsList = LibSets_SearchUI_List:New(content, self) --pass in the parent control of "Headers" and "List" -> "Contents"
 
 
     --Tooltip
@@ -299,13 +328,15 @@ function LibSets_SearchUI_Keyboard:ResetUI()
     LibSets_SearchUI_Shared.ResetUI()
 
     --Reset all UI elements to the default values
-    self.searchEditBox:SetText("")
-    self.setTypeFilters.m_comboBox:ClearAllSelections()
-    self.armorTypeFilters.m_comboBox:ClearAllSelections()
-    self.weaponTypeFilters.m_comboBox:ClearAllSelections()
-    self.equipmentTypeFilters.m_comboBox:ClearAllSelections()
-    self.DCLIdFilters.m_comboBox:ClearAllSelections()
-    self.enchantSearchCategoryTypeFilters.m_comboBox:ClearAllSelections()
+    self.searchEditBoxControl:SetText("")
+    self.bonusSearchEditBoxControl:SetText("")
+
+    self.setTypeFiltersControl.m_comboBox:ClearAllSelections()
+    self.armorTypeFiltersControl.m_comboBox:ClearAllSelections()
+    self.weaponTypeFiltersControl.m_comboBox:ClearAllSelections()
+    self.equipmentTypeFiltersControl.m_comboBox:ClearAllSelections()
+    self.DCLIdFiltersControl.m_comboBox:ClearAllSelections()
+    self.enchantSearchCategoryTypeFiltersControl.m_comboBox:ClearAllSelections()
 end
 
 ------------------------------------------------
@@ -332,7 +363,7 @@ end
 
 function LibSets_SearchUI_Keyboard:InitializeFilters()
     -- Initialize the Set Types multiselect combobox.
-    local setTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.setTypeFilters)
+    local setTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.setTypeFiltersControl)
     self.setTypeFiltersDropdown = setTypeDropdown
     setTypeDropdown:ClearItems()
     setTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -349,7 +380,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
 
     -- Initialize the armor Types multiselect combobox.
-    local armorTypeDropdown     = ZO_ComboBox_ObjectFromContainer(self.armorTypeFilters)
+    local armorTypeDropdown     = ZO_ComboBox_ObjectFromContainer(self.armorTypeFiltersControl)
     self.armorTypeFiltersDropdown = armorTypeDropdown
     armorTypeDropdown:ClearItems()
     armorTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -364,7 +395,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
 
     -- Initialize the weapon Types multiselect combobox.
-    local weaponTypeDropdown    = ZO_ComboBox_ObjectFromContainer(self.weaponTypeFilters)
+    local weaponTypeDropdown    = ZO_ComboBox_ObjectFromContainer(self.weaponTypeFiltersControl)
     self.weaponTypeFiltersDropdown = weaponTypeDropdown
     weaponTypeDropdown:ClearItems()
     weaponTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -388,7 +419,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
 
     -- Initialize the equipment Types multiselect combobox.
-    local equipmentTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.equipmentTypeFilters)
+    local equipmentTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.equipmentTypeFiltersControl)
     self.equipmentTypeFiltersDropdown = equipmentTypeDropdown
     equipmentTypeDropdown:ClearItems()
     equipmentTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -414,7 +445,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the DLC Types multiselect combobox.
 
-    local DLCIdDropdown         = ZO_ComboBox_ObjectFromContainer(self.DCLIdFilters)
+    local DLCIdDropdown         = ZO_ComboBox_ObjectFromContainer(self.DCLIdFiltersControl)
     self.DLCIdFiltersDropdown = DLCIdDropdown
     DLCIdDropdown:ClearItems()
     DLCIdDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -431,7 +462,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
 
     -- Initialize the enchantment search category Types multiselect combobox.
-    local enchantmentSearchCategoryTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.enchantSearchCategoryTypeFilters)
+    local enchantmentSearchCategoryTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.enchantSearchCategoryTypeFiltersControl)
     self.enchantSearchCategoryTypeFiltersDropdown = enchantmentSearchCategoryTypeDropdown
     enchantmentSearchCategoryTypeDropdown:ClearItems()
     enchantmentSearchCategoryTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -453,11 +484,15 @@ end
 --- Handlers
 ------------------------------------------------
 function LibSets_SearchUI_Keyboard:OnRowMouseEnter(rowControl)
+    self.resultsList:Row_OnMouseEnter(rowControl)
+
     self.tooltipControl.data = rowControl.data
     self:ShowItemLinkTooltip(rowControl, rowControl.data, nil, nil, nil, nil)
 end
 
 function LibSets_SearchUI_Keyboard:OnRowMouseExit(rowControl)
+    self.resultsList:Row_OnMouseExit(rowControl)
+
     self:HideItemLinkTooltip()
     self.tooltipControl.data = nil
 end

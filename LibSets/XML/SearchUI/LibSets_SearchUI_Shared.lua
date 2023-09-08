@@ -10,6 +10,14 @@ local searchUI = LibSets.SearchUI
 searchUI.name = MAJOR .. "_SearchUI"
 local searchUIName = searchUI.name
 
+
+--Search type - For the string comparison "processor". !!!Needs to match the SetupRow of the ZO_ScrollList!!!
+searchUI.searchTypeDefault = 1
+
+--Scroll list datatype - Default text
+searchUI.scrollListDataTypeDefault = 1
+
+
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
 ------------------------------------------------------------------------------------------------------------------------
@@ -29,9 +37,9 @@ function LibSets_SearchUI_Shared:Initialize(control)
     control._object = self
 
     local filters = self.control:GetNamedChild("Filters")
-    self.filters = filters
+    self.filtersControl = filters
     local content = self.control:GetNamedChild("Content")
-    self.content = content
+    self.contentControl = content
 
     self.searchResults = nil
     --[[
@@ -49,7 +57,7 @@ function LibSets_SearchUI_Shared:Initialize(control)
 
     --ZO_StringSearch
 	self.stringSearch = ZO_StringSearch:New()
-	self.stringSearch:AddProcessor(1, function(stringSearch, data, searchTerm, cache)
+	self.stringSearch:AddProcessor(searchUI.searchTypeDefault, function(stringSearch, data, searchTerm, cache)
         return(self:ProcessItemEntry(stringSearch, data, searchTerm, cache))
     end)
 end
@@ -206,20 +214,36 @@ end
 --- Filters
 ------------------------------------------------
 
-function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
-d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
-    --Search by name
-    local isMatch = false
-    local searchInputNumber = tonumber(searchInput)
-    if searchInputNumber ~= nil then
-        local searchValueType = type(searchInputNumber)
-        if searchValueType == "number" then
-            isMatch = searchInputNumber == data.setId or false
-        end
-    else
-        isMatch = self.stringSearch:IsMatch(searchInput, data)
+local function string_split (inputstr, sep)
+    sep = sep or "%s"
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
     end
-    return isMatch
+    return t
+end
+
+function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
+    d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
+    --Search by name or setId
+    -->Split at ,
+    local namesOrIdsTab = string_split(searchInput, ",")
+    if namesOrIdsTab == nil or #namesOrIdsTab == 0 then return false end
+
+    local isMatch = false
+    for _, nameOrId in ipairs(namesOrIdsTab) do
+        local searchInputNumber = tonumber(nameOrId)
+        if searchInputNumber ~= nil then
+            local searchValueType = type(searchInputNumber)
+            if searchValueType == "number" then
+                isMatch = searchInputNumber == data.setId or false
+            end
+        else
+            isMatch = self.stringSearch:IsMatch(nameOrId, data)
+        end
+        if isMatch == true then return true end
+    end
+    return false
 end
 
 
@@ -281,7 +305,7 @@ function LibSets_SearchUI_Shared:ShowItemLinkTooltip(parent, data, anchor1, offs
     self:HideItemLinkTooltip()
     local TT_control = self.tooltipControl
     data = data or (TT_control and TT_control.data)
-    if not data then return end
+    if data == nil or data.itemLink == nil then return end
 
     anchor1 = anchor1 or TOPRIGHT
     anchor2 = anchor2 or TOPLEFT
