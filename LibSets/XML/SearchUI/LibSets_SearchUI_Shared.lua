@@ -172,8 +172,8 @@ function LibSets_SearchUI_Shared:ValidateSearchParams()
 d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
     --Validate the search parameters and raise an error message if something does not match
 
-    local searchParams = self.searchParams
-    if searchParams == nil then return end
+    --local searchParams = self.searchParams
+    --if searchParams == nil then return end
 
     --todo Other validation needed?
 
@@ -313,26 +313,121 @@ function LibSets_SearchUI_Shared:OnFilterChanged()
     local searchParams = {}
 
     local setTypesSelected =                    self:GetSelectedMultiSelectDropdownFilters(self.setTypeFiltersDropdown)
-    searchParams.setTypes = setTypesSelected
+    if NonContiguousCount(setTypesSelected) > 0 then
+        searchParams.setTypes = setTypesSelected
+    end
 
     local armorTypesSelected =                  self:GetSelectedMultiSelectDropdownFilters(self.armorTypeFiltersDropdown)
-    searchParams.armorTypes = armorTypesSelected
+    if NonContiguousCount(armorTypesSelected) > 0 then
+        searchParams.armorTypes = armorTypesSelected
+    end
 
     local weaponTypesSelected =                 self:GetSelectedMultiSelectDropdownFilters(self.weaponTypeFiltersDropdown)
-    searchParams.weaponTypes = weaponTypesSelected
+    if NonContiguousCount(weaponTypesSelected) > 0 then
+        searchParams.weaponTypes = weaponTypesSelected
+    end
 
     local equipmentTypesSelected =              self:GetSelectedMultiSelectDropdownFilters(self.equipmentTypeFiltersDropdown)
-    searchParams.equipmentTypes = equipmentTypesSelected
+    if NonContiguousCount(equipmentTypesSelected) > 0 then
+        searchParams.equipmentTypes = equipmentTypesSelected
+    end
 
     local dlcIdsSelected =                      self:GetSelectedMultiSelectDropdownFilters(self.DLCIdFiltersDropdown)
-    searchParams.dlcIds = dlcIdsSelected
+    if NonContiguousCount(dlcIdsSelected) > 0 then
+        searchParams.dlcIds = dlcIdsSelected
+    end
 
     local enchantSearchCategoryTypesSelected =  self:GetSelectedMultiSelectDropdownFilters(self.enchantSearchCategoryTypeFiltersDropdown)
-    searchParams.enchantSearchCategoryTypes = enchantSearchCategoryTypesSelected
+    if NonContiguousCount(enchantSearchCategoryTypesSelected) > 0 then
+        searchParams.enchantSearchCategoryTypes = enchantSearchCategoryTypesSelected
+    end
 
     self.searchParams = searchParams
 end
 
+--Pre-Filter the masterlist table of e.g. a ZO_SortFilterScrollList
+function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
+    --The search parameters of the filters (multiselect dropdowns) were provided?
+    -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
+    local searchParams = self.searchParams
+    if searchParams ~= nil and NonContiguousCount(searchParams) > 0 then
+        local setsBaseList = {}
+
+        --searchParams is a table with the following possible entries
+        --[[
+        searchParams = {
+            setTypes = {[1]=true, [2]=true, [3]=true}         --The set type selected at the multiselect dropdown box
+            armorTypes = {[1]=true, [2]=true, [3]=true}        --The armor type selected at the multiselect dropdown box
+            weaponTypes = {[1]=true, [2]=true, [3]=true}       --The weapon type selected at the multiselect dropdown box
+            equipmentTypes = {[1]=true, [2]=true, [3]=true}    --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
+            dlcIds = {[1]=true, [2]=true, [3]=true}          --The DLC type selected at the multiselect dropdown box
+            enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true} --The enchantment search category types selected at the multiselect dropdown box
+        }
+        ]]
+        --Pre-Filter the master list now, based on the Multiselect dropdowns
+        for setId, setData in pairs(defaultMasterListBase) do
+            local isAllowed = true
+            if searchParams.setTypes ~= nil then
+                isAllowed = false
+                if setData.setType ~= nil and searchParams.setTypes[setData.setType] then
+                    isAllowed = true
+                end
+            end
+            if isAllowed == true then
+                if searchParams.dlcIds ~= nil then
+                    isAllowed = false
+                    if setData.dlcId ~= nil and searchParams.dlcIds[setData.dlcId] then
+                        isAllowed = true
+                    end
+                end
+            end
+            if isAllowed == true then
+                if searchParams.armorTypes ~= nil then
+                    isAllowed = false
+                    for armorType, isFiltered in pairs(searchParams.armorTypes) do
+                        if isFiltered == true and lib.armorTypeSets[armorType][setId] then
+                            isAllowed = true
+                        end
+                    end
+                end
+            end
+            if isAllowed == true then
+                if searchParams.weaponTypes ~= nil then
+                    isAllowed = false
+                    for weaponType, isFiltered in pairs(searchParams.weaponTypes) do
+                        if isFiltered == true and lib.weaponTypeSets[weaponType][setId] then
+                            isAllowed = true
+                        end
+                    end
+                end
+            end
+            if isAllowed == true then
+                if searchParams.equipmentTypes ~= nil then
+                    isAllowed = false
+                    for equipType, isFiltered in pairs(searchParams.equipmentTypes) do
+                        if isFiltered == true and lib.equipTypesSets[equipType][setId] then
+                            isAllowed = true
+                        end
+                    end
+                end
+            end
+            --todo
+            if isAllowed == true then
+                if searchParams.enchantSearchCategoryTypes ~= nil then
+                    isAllowed = false
+                end
+            end
+
+            --Add to masterList?
+            if isAllowed == true then
+                setsBaseList[setId] = setData
+            end
+        end
+
+        return setsBaseList
+    end
+    return defaultMasterListBase
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared - Helper functions

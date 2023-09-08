@@ -57,9 +57,14 @@
 				</Label>
 				<Label name="$(parent)EquipSlot" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
-					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
 					<Dimensions y="30" />
                     <DimensionConstraints minX="40" />
+				</Label>
+				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)EquipSlot" />
+					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
+					<Dimensions y="30" />
+                    <DimensionConstraints minX="20" />
 				</Label>
 			</Controls>
 		</Control>
@@ -212,9 +217,17 @@
                                         ZO_SortHeader_Initialize(self, "Equip slot", "equipSlot", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
-                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
                                     <Dimensions y="30" />
                                     <DimensionConstraints minX="40" />
+                                </Control>
+                                <Control name="$(parent)SetId" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, "ID", "setId", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)EquipSlot" />
+                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="20" />
                                 </Control>
                             </Controls>
                         </Control>

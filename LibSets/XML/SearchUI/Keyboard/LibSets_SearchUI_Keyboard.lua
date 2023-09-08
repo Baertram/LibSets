@@ -70,6 +70,7 @@ function LibSets_SearchUI_List:Setup( )
     self.headerName =               self.headers:GetNamedChild("Name")
 	self.headerArmorOrWeaponType =  self.headers:GetNamedChild("ArmorOrWeaponType")
 	self.headerSlot =               self.headers:GetNamedChild("EquipSlot")
+	self.headerSetId =              self.headers:GetNamedChild("SetId")
 
     --Build initial masterlist via self:BuildMasterList()
     self:RefreshData()
@@ -101,88 +102,27 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     slotColumn:SetText(data.equipSlot or "")
     slotColumn:SetHidden(false)
 
+    local setIdColumn = control:GetNamedChild("SetId")
+    setIdColumn:ClearAnchors()
+    setIdColumn:SetAnchor(LEFT, slotColumn, RIGHT, 0, 0)
+    setIdColumn:SetText(data.setId or "")
+    setIdColumn:SetHidden(false)
+
     --Anchor the last column's right edge to the right edge of the row
-    lastColumn = slotColumn
+    lastColumn = setIdColumn
     lastColumn:SetAnchor(RIGHT, control, RIGHT, -10, 0)
 
     --Set the row to the list now
     ZO_SortFilterList.SetupRow(self, control, data)
 end
 
+
 function LibSets_SearchUI_List:BuildMasterList()
 d("[LibSets_SearchUI_List:BuildMasterList]")
     local setsData = lib.setInfo
-    local setsBaseList
     self.masterList = {}
 
-    --The search parameters of the filters (multiselect dropdowns) were provided?
-    -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
-    local searchParams = self.searchParams
-    if searchParams ~= nil and NonContiguousCount(searchParams) > 0 then
-        setsBaseList = {}
-
-        --searchParams is a table with the following possible entries
-        --[[
-        searchParams = {
-            setTypes = {[1]=true, [2]=true, [3]=true}         --The set type selected at the multiselect dropdown box
-            armorTypes = {[1]=true, [2]=true, [3]=true}        --The armor type selected at the multiselect dropdown box
-            weaponTypes = {[1]=true, [2]=true, [3]=true}       --The weapon type selected at the multiselect dropdown box
-            equipmentTypes = {[1]=true, [2]=true, [3]=true}    --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
-            dlcIds = {[1]=true, [2]=true, [3]=true}          --The DLC type selected at the multiselect dropdown box
-            enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true} --The enchantment search category types selected at the multiselect dropdown box
-        }
-        ]]
-        --Pre-Filter the master list now, based on the Multiselect dropdowns
-        for setId, setData in pairs(setsData) do
-            local isAllowed = true
-            if searchParams.setTypes ~= nil then
-                isAllowed = false
-                if setData.setType ~= nil and searchParams.setTypes[setData.setType] then
-                    isAllowed = true
-                end
-            end
-            if isAllowed == true then
-                if searchParams.armorTypes ~= nil or searchParams.weaponTypes ~= nil then
-                    isAllowed = false
-                    if setData.armorOrWeaponType ~= nil and
-                            ((searchParams.armorTypes ~= nil and searchParams.armorTypes[setData.armorOrWeaponType]) or
-                            (searchParams.weaponTypes ~= nil and searchParams.weaponTypes[setData.armorOrWeaponType])) then
-                        isAllowed = true
-                    end
-
-                end            end
-            if isAllowed == true then
-                if searchParams.dlcIds ~= nil then
-                    isAllowed = false
-                    if setData.dlcId ~= nil and searchParams.dlcIds[setData.dlcId] then
-                        isAllowed = true
-                    end
-                end
-            end
-
-            --todo
-            if isAllowed == true then
-                if searchParams.equipmentTypes ~= nil then
-                    isAllowed = false
-                    if setData.equipmentType ~= nil and searchParams.equipmentTypes[setData.equipmentType] then
-                        isAllowed = true
-                    end
-                end
-            end
-            --todo
-            if isAllowed == true then
-                if searchParams.enchantSearchCategoryTypes ~= nil then
-                    isAllowed = false
-                end
-            end
-
-            if isAllowed == true then
-                setsBaseList[setId] = setData
-            end
-        end
-    else
-        setsBaseList = setsData
-    end
+    local setsBaseList = self._parentObject:PreFilterMasterList(setsData)
 
     for setId, setData in pairs(setsBaseList) do
         table.insert(self.masterList, self:CreateEntryForSet(setId, setData))
@@ -329,8 +269,9 @@ function LibSets_SearchUI_List:BuildSortKeys()
         --["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         --["gearId"]                  = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         ["name"]                    = { caseInsensitive = true },
-        ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = "name" },
-        ["equipSlot"]                = { caseInsensitive = true, tiebreaker = "name" },
+        ["armorOrWeaponTypeName"]   = { isId64 = true,          tiebreaker = "name" },
+        ["equipSlot"]               = { isId64 = true,          tiebreaker = "name" },
+        ["setId"]                   = { isId64          = true, tiebreaker = "name" },
         --["traitName"]               = { caseInsensitive = true, tiebreaker = "name" },
         --["quality"]                 = { caseInsensitive = true, tiebreaker = "name" },
         --["username"]                = { caseInsensitive = true, tiebreaker = "name" },
