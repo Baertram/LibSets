@@ -133,37 +133,45 @@ d("[LibSets_SearchUI_List:BuildMasterList]")
         ]]
         --Pre-Filter the master list now, based on the Multiselect dropdowns
         for setId, setData in pairs(setsData) do
-            local isAllowed = false
-            if searchParams.setTypes ~= nil and setData.setType ~= nil and searchParams.setTypes[setData.setType] then
-                isAllowed = true
-            end
-            if isAllowed == true then
+            local isAllowed = true
+            if searchParams.setTypes ~= nil then
                 isAllowed = false
-                if setData.armorOrWeaponType ~= nil and
-                    ((searchParams.armorTypes ~= nil and searchParams.armorTypes[setData.armorOrWeaponType]) or
-                    (searchParams.weaponTypes ~= nil and searchParams.weaponTypes[setData.armorOrWeaponType])) then
+                if setData.setType ~= nil and searchParams.setTypes[setData.setType] then
                     isAllowed = true
                 end
             end
             if isAllowed == true then
-                isAllowed = false
-                if searchParams.dlcIds ~= nil and setData.dlcId ~= nil and searchParams.dlcIds[setData.dlcId] then
-                    isAllowed = true
+                if searchParams.armorTypes ~= nil or searchParams.weaponTypes ~= nil then
+                    isAllowed = false
+                    if setData.armorOrWeaponType ~= nil and
+                            ((searchParams.armorTypes ~= nil and searchParams.armorTypes[setData.armorOrWeaponType]) or
+                            (searchParams.weaponTypes ~= nil and searchParams.weaponTypes[setData.armorOrWeaponType])) then
+                        isAllowed = true
+                    end
+
+                end            end
+            if isAllowed == true then
+                if searchParams.dlcIds ~= nil then
+                    isAllowed = false
+                    if setData.dlcId ~= nil and searchParams.dlcIds[setData.dlcId] then
+                        isAllowed = true
+                    end
                 end
             end
 
             --todo
             if isAllowed == true then
-                --isAllowed = false
-                if searchParams.equipmentTypes ~= nil and setData.equipmentType ~= nil and searchParams.equipmentTypes[setData.equipmentType] then
-                    isAllowed = true
+                if searchParams.equipmentTypes ~= nil then
+                    isAllowed = false
+                    if setData.equipmentType ~= nil and searchParams.equipmentTypes[setData.equipmentType] then
+                        isAllowed = true
+                    end
                 end
             end
             --todo
             if isAllowed == true then
-                --isAllowed = false
                 if searchParams.enchantSearchCategoryTypes ~= nil then
-
+                    isAllowed = false
                 end
             end
 
