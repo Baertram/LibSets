@@ -385,7 +385,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 if searchParams.armorTypes ~= nil then
                     isAllowed = false
                     for armorType, isFiltered in pairs(searchParams.armorTypes) do
-                        if isFiltered == true and lib.armorTypeSets[armorType][setId] then
+                        if isFiltered == true and lib.armorTypesSets[armorType][setId] then
                             isAllowed = true
                         end
                     end
@@ -395,7 +395,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 if searchParams.weaponTypes ~= nil then
                     isAllowed = false
                     for weaponType, isFiltered in pairs(searchParams.weaponTypes) do
-                        if isFiltered == true and lib.weaponTypeSets[weaponType][setId] then
+                        if isFiltered == true and lib.weaponTypesSets[weaponType][setId] then
                             isAllowed = true
                         end
                     end
