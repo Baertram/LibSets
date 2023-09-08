@@ -116,10 +116,11 @@ d("[LibSets_SearchUI_List:BuildMasterList]")
     self.masterList = {}
 
     --The search parameters of the filters (multiselect dropdowns) were provided?
-    if self.searchParams ~= nil then
+    -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
+    local searchParams = self.searchParams
+    if searchParams ~= nil and NonContiguousCount(searchParams) > 0 then
         setsBaseList = {}
 
-        local searchParams = self.searchParams
         --searchParams is a table with the following possible entries
         --[[
         searchParams = {
@@ -187,6 +188,7 @@ d("[LibSets_SearchUI_List:BuildMasterList]")
         table.insert(self.masterList, self:CreateEntryForSet(setId, setData))
     end
 
+    --Clear the search parameters passed in from the LibSets_SearchUI_Shared:StartSearch() function
     self.searchParams = nil
 
     --self:updateSortHeaderAnchorsAndPositions(maxNameColumnWidth, 32)

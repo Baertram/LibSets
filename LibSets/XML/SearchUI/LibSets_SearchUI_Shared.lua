@@ -169,6 +169,7 @@ d("[LibSets]LibSets_SearchUI_Shared:Cancel")
 end
 
 function LibSets_SearchUI_Shared:ValidateSearchParams()
+d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
     --Validate the search parameters and raise an error message if something does not match
 
     local searchParams = self.searchParams
@@ -180,23 +181,26 @@ function LibSets_SearchUI_Shared:ValidateSearchParams()
 end
 
 function LibSets_SearchUI_Shared:StartSearch()
+d("[LibSets]LibSets_SearchUI_Shared:StartSearch")
     --Fire callback for "Search was started"
     CM:FireCallbacks(searchUIName .. "_SearchBegin", self)
 
     if self:ValidateSearchParams() == true then
         if self.resultsList ~= nil then
             --At "BuildMasterList" the self.searchParams will be pre-filtered, and at FilterScrollList the text search filters will be added
+            -->Pass the search parameters to the ZO_SortFilterScrollList
             self.resultsList.searchParams = self.searchParams
             self.resultsList:RefreshData() --> -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+            -->The search parameters at the ZO_SortFilterScrollList have been clearea again at the function BuildMasterList
+            return true
         end
-    else
-        return false
     end
+    return false
 end
 
 
 function LibSets_SearchUI_Shared:Search()
---d("[LibSets]LibSets_SearchUI_Shared:Search")
+d("[LibSets]LibSets_SearchUI_Shared:Search")
     if not self:IsShown() then return end
 
 	--Inherited keyboard / gamepad mode search will be done at the relating class function LibSets_SearchUI_Keyboard/Gamepad:Search() function call!
