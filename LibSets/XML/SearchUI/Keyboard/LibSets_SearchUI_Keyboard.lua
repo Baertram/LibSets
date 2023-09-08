@@ -111,18 +111,81 @@ end
 
 function LibSets_SearchUI_List:BuildMasterList()
 d("[LibSets_SearchUI_List:BuildMasterList]")
+    local setsData = lib.setInfo
+    local setsBaseList
     self.masterList = {}
 
-    local setsData = lib.setInfo
-    for setId, setData in pairs(setsData) do
+    --The search parameters of the filters (multiselect dropdowns) were provided?
+    if self.searchParams ~= nil then
+        setsBaseList = {}
+
+        local searchParams = self.searchParams
+        --searchParams is a table with the following possible entries
+        --[[
+        searchParams = {
+            setTypes = {[1]=true, [2]=true, [3]=true}         --The set type selected at the multiselect dropdown box
+            armorTypes = {[1]=true, [2]=true, [3]=true}        --The armor type selected at the multiselect dropdown box
+            weaponTypes = {[1]=true, [2]=true, [3]=true}       --The weapon type selected at the multiselect dropdown box
+            equipmentTypes = {[1]=true, [2]=true, [3]=true}    --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
+            dlcIds = {[1]=true, [2]=true, [3]=true}          --The DLC type selected at the multiselect dropdown box
+            enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true} --The enchantment search category types selected at the multiselect dropdown box
+        }
+        ]]
+        --Pre-Filter the master list now, based on the Multiselect dropdowns
+        for setId, setData in pairs(setsData) do
+            local isAllowed = false
+            if searchParams.setTypes ~= nil and setData.setType ~= nil and searchParams.setTypes[setData.setType] then
+                isAllowed = true
+            end
+            if isAllowed == true then
+                isAllowed = false
+                if setData.armorOrWeaponType ~= nil and
+                    ((searchParams.armorTypes ~= nil and searchParams.armorTypes[setData.armorOrWeaponType]) or
+                    (searchParams.weaponTypes ~= nil and searchParams.weaponTypes[setData.armorOrWeaponType])) then
+                    isAllowed = true
+                end
+            end
+            if isAllowed == true then
+                isAllowed = false
+                if searchParams.dlcIds ~= nil and setData.dlcId ~= nil and searchParams.dlcIds[setData.dlcId] then
+                    isAllowed = true
+                end
+            end
+
+            --todo
+            if isAllowed == true then
+                --isAllowed = false
+                if searchParams.equipmentTypes ~= nil and setData.equipmentType ~= nil and searchParams.equipmentTypes[setData.equipmentType] then
+                    isAllowed = true
+                end
+            end
+            --todo
+            if isAllowed == true then
+                --isAllowed = false
+                if searchParams.enchantSearchCategoryTypes ~= nil then
+
+                end
+            end
+
+            if isAllowed == true then
+                setsBaseList[setId] = setData
+            end
+        end
+    else
+        setsBaseList = setsData
+    end
+
+    for setId, setData in pairs(setsBaseList) do
         table.insert(self.masterList, self:CreateEntryForSet(setId, setData))
     end
+
+    self.searchParams = nil
 
     --self:updateSortHeaderAnchorsAndPositions(maxNameColumnWidth, 32)
 end
 
 function LibSets_SearchUI_List:FilterScrollList()
-d("[LibSets_SearchUI_List:FilterScrollList]")
+--d("[LibSets_SearchUI_List:FilterScrollList]")
 	local scrollData = ZO_ScrollList_GetDataList(self.list)
 	ZO_ClearNumericallyIndexedTable(scrollData)
 
@@ -141,11 +204,17 @@ d("[LibSets_SearchUI_List:FilterScrollList]")
         --Get the data of each set item
         local data = self.masterList[i]
 
+        local addItemToList = false
+
         --Search for text/set bonuses
         if searchIsEmpty == true or self._parentObject:CheckForMatch(data, searchInput) then
             if bonusSearchIsEmpty == true or self._parentObject:SearchSetBonuses(data.bonuses, bonusSearchInput) then
-                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(searchUI.scrollListDataTypeDefault, data))
+                addItemToList = true
             end
+        end
+
+        if addItemToList == true then
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(searchUI.scrollListDataTypeDefault, data))
         end
     end
 
@@ -159,7 +228,7 @@ function LibSets_SearchUI_List:SortScrollList( )
     --Get the current sort header's key and direction
     self.currentSortKey = self.sortHeaderGroup:GetCurrentSortKey()
     self.currentSortOrder = self.sortHeaderGroup:GetSortDirection()
-d("[LibSets_SearchUI_List:SortScrollList] sortKey: " .. tostring(self.currentSortKey) .. ", sortOrder: " ..tostring(self.currentSortOrder))
+--d("[LibSets_SearchUI_List:SortScrollList] sortKey: " .. tostring(self.currentSortKey) .. ", sortOrder: " ..tostring(self.currentSortOrder))
 	if (self.currentSortKey ~= nil and self.currentSortOrder ~= nil) then
         --Update the scroll list and re-sort it -> Calls "SetupItemRow" internally!
 		local scrollData = ZO_ScrollList_GetDataList(self.list)
@@ -220,12 +289,15 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
         --Internal, for text search etc.
         type                = searchUI.searchTypeDefault,     -- for the search function -> Processor. !!!Needs to match!!!
 
-        --Set ID
+        --Set info
         setId               = setId,
+        dlcId               = setData.dlcId,
+        setType             = setData.setType,
+        traitsNeeded        = setData.traitsNeeded, --will be nil for non-craftable sets
 
         --Itemlink
         itemLink            = itemLink,
-        itemId              = itemId,
+        --itemId              = itemId,
 
         --Single columns for the output row -> See function self:SetupItemRow
         name                = nameColumnValue,
@@ -236,7 +308,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
         bonuses             = setData.bonuses,
 
         --Pass in whole table of set's info
-        setData     = setData,
+        setData             = setData,
 	})
 end
 
@@ -321,7 +393,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.bonusSearchEditBoxControl = filters:GetNamedChild("BonusTextSearchBox")
     self.bonusSearchEditBoxControl:SetDefaultText("Bonus space separated (+/-)")
     self.bonusSearchEditBoxControl:SetHandler("OnMouseEnter", function()
-        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+        InitializeTooltip(InformationTooltip, self.bonusSearchEditBoxControl, BOTTOM, 0, -10)
         SetTooltipText(InformationTooltip, "Enter multiple bonus separated by a space.\nUse the + or - prefix to include or exclude a bonus from the search results.")
     end)
     self.bonusSearchEditBoxControl:SetHandler("OnMouseExit", function() ClearTooltip(InformationTooltip)  end)
@@ -336,6 +408,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         end
     end)
 
+
     --Multiselect dropdowns
     self.setTypeFiltersControl =                   filters:GetNamedChild("SetTypeFilter")
     self.armorTypeFiltersControl =                 filters:GetNamedChild("ArmorTypeFilter")
@@ -347,11 +420,12 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self:InitializeFilters() --> Filter data was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
 
 
-
     --Results list -> ZO_SortFilterList
     self.counterControl = content:GetNamedChild("Counter")
+
     self.resultsListControl = content:GetNamedChild("List")
     self.resultsList = LibSets_SearchUI_List:New(content, self) --pass in the parent control of "Headers" and "List" -> "Contents"
+
 
 
     --Tooltip
@@ -411,11 +485,22 @@ end
 ------------------------------------------------
 --- Filters
 ------------------------------------------------
-local function OnFilterChanged()
-    d("[LibSets]OnFilterChanged - MultiSelect dropdown - hidden")
+
+function LibSets_SearchUI_Keyboard:GetSelectedMultiSelectDropdownFilters(multiSelectDropdown)
+    local selectedFilterTypes = {}
+    for _, item in ipairs(multiSelectDropdown:GetItems()) do
+        if multiSelectDropdown:IsItemSelected(item) then
+            selectedFilterTypes[item.filterType] = true
+        end
+    end
+    return selectedFilterTypes
 end
 
 function LibSets_SearchUI_Keyboard:InitializeFilters()
+    local function OnFilterChanged()
+        self:OnFilterChanged()
+    end
+
     -- Initialize the Set Types multiselect combobox.
     local setTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.setTypeFiltersControl)
     self.setTypeFiltersDropdown = setTypeDropdown
@@ -499,7 +584,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the DLC Types multiselect combobox.
 
-    local DLCIdDropdown         = ZO_ComboBox_ObjectFromContainer(self.DCLIdFiltersControl)
+    local DLCIdDropdown       = ZO_ComboBox_ObjectFromContainer(self.DCLIdFiltersControl)
     self.DLCIdFiltersDropdown = DLCIdDropdown
     DLCIdDropdown:ClearItems()
     DLCIdDropdown:SetHideDropdownCallback(OnFilterChanged)

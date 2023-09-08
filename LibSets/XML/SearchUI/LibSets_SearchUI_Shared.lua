@@ -43,6 +43,20 @@ function LibSets_SearchUI_Shared:Initialize(control)
     local content = self.control:GetNamedChild("Content")
     self.contentControl = content
 
+    self.searchParams = nil
+    --searchParams is a table with the following possible entries
+    -->See function LibSets_SearchUI_Shared:OnFilterChanged()
+    --[[
+    searchParams = {
+        setTypes = {[1]=true, [2]=true, [3]=true}         --The set type selected at the multiselect dropdown box
+        armorTypes = {[1]=true, [2]=true, [3]=true}        --The armor type selected at the multiselect dropdown box
+        weaponTypes = {[1]=true, [2]=true, [3]=true}       --The weapon type selected at the multiselect dropdown box
+        equipmentTypes = {[1]=true, [2]=true, [3]=true}    --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
+        dlcIds = {[1]=true, [2]=true, [3]=true}          --The DLC type selected at the multiselect dropdown box
+        enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true} --The enchantment search category types selected at the multiselect dropdown box
+    }
+    ]]
+
     self.searchResults = nil
     --[[
     {
@@ -57,7 +71,8 @@ function LibSets_SearchUI_Shared:Initialize(control)
     --self.searchErrorCallback = nil --callback function called as a search was not done due to any error
     --self.searchCanceledCallback = nil --callback function called as a search was canceled
 
-    --ZO_StringSearch
+
+    --ZO_StringSearch - For string comparison of setNames and setBonus
 	self.stringSearch = ZO_StringSearch:New()
 	self.stringSearch:AddProcessor(searchUI.searchTypeDefault, function(stringSearch, data, searchTerm, cache)
         return(self:ProcessItemEntry(stringSearch, data, searchTerm, cache))
@@ -70,6 +85,7 @@ end
 ------------------------------------------------
 function LibSets_SearchUI_Shared:ResetInternal()
     --Reset internal data like the search results
+    self.searchParams = nil
     self.searchResults = nil
 
     --Reset callbacks
@@ -116,23 +132,6 @@ end
 function LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchErrorCallback, searchCanceledCallback)
     --Search parameters, passed in (preset UI elements with them, if provided)
     self.searchParams = searchParams
-    --searchParams is a table with the following possible entries
-    --[[
-    searchParams = {
-        name = {"hunding", 111, "test}           --The text entered at the name search editbox, as a table, split at spaces. Could contain setIds too, so it will be a mixed nameString!
-        armorType = {1, 2, 3}       --The armor type selected at the multiselect dropdown box
-        weaponType = {1, 2, 3}      --The weapon type selected at the multiselect dropdown box
-        jewelryType = {1, 2, 3}     --The jewelry type selected at the multiselect dropdown box
-        equipmentType = {1, 2, 3}   --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
-        dlcType = {1, 2, 3}         --The DLC type selected at the multiselect dropdown box
-        setType = {1, 2, 3}         --The set type selected at the multiselect dropdown box
-
---TODO Other search options
-        dropZone = {1, 2, 3}        --The drop zones selected at the multiselect dropdown box
-        ...
-    }
-    ]]
-
 
 	--Callbacks
     self.searchDoneCallback = searchDoneCallback
@@ -173,10 +172,9 @@ function LibSets_SearchUI_Shared:ValidateSearchParams()
     --Validate the search parameters and raise an error message if something does not match
 
     local searchParams = self.searchParams
-    if searchParams == nil or NonContiguousCount(searchParams) == 0 then return end
+    if searchParams == nil then return end
 
-    --todo Pass in the searched set name, and other data to self.searchParams, afterwards validate them here
-
+    --todo Other validation needed?
 
     return true --all search parameters are valid
 end
@@ -185,12 +183,20 @@ function LibSets_SearchUI_Shared:StartSearch()
     --Fire callback for "Search was started"
     CM:FireCallbacks(searchUIName .. "_SearchBegin", self)
 
-    return self:ValidateSearchParams()
+    if self:ValidateSearchParams() == true then
+        if self.resultsList ~= nil then
+            --At "BuildMasterList" the self.searchParams will be pre-filtered, and at FilterScrollList the text search filters will be added
+            self.resultsList.searchParams = self.searchParams
+            self.resultsList:RefreshData() --> -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+        end
+    else
+        return false
+    end
 end
 
 
 function LibSets_SearchUI_Shared:Search()
-d("[LibSets]LibSets_SearchUI_Shared:Search")
+--d("[LibSets]LibSets_SearchUI_Shared:Search")
     if not self:IsShown() then return end
 
 	--Inherited keyboard / gamepad mode search will be done at the relating class function LibSets_SearchUI_Keyboard/Gamepad:Search() function call!
@@ -251,7 +257,7 @@ end
 
 
 function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm)
-d("[LibSets_SearchUI_Keyboard.ProcessItemEntry] stringSearch: " ..tostring(stringSearch) .. ", setName: " .. tostring(data.name:lower()) .. ", searchTerm: " .. tostring(searchTerm))
+--d("[LibSets_SearchUI_Keyboard.ProcessItemEntry] stringSearch: " ..tostring(stringSearch) .. ", setName: " .. tostring(data.name:lower()) .. ", searchTerm: " .. tostring(searchTerm))
 	if zo_plainstrfind(data.name:lower(), searchTerm) then
 		return true
 	end
@@ -297,8 +303,30 @@ function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
 	return true
 end
 
-function LibSets_SearchUI_Shared:SearchByCriteria(data, searchInput, searchType)
-    --todo combine all passed in search criteria and filter the results list
+function LibSets_SearchUI_Shared:OnFilterChanged()
+    d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
+    self.searchParams = nil
+    local searchParams = {}
+
+    local setTypesSelected =                    self:GetSelectedMultiSelectDropdownFilters(self.setTypeFiltersDropdown)
+    searchParams.setTypes = setTypesSelected
+
+    local armorTypesSelected =                  self:GetSelectedMultiSelectDropdownFilters(self.armorTypeFiltersDropdown)
+    searchParams.armorTypes = armorTypesSelected
+
+    local weaponTypesSelected =                 self:GetSelectedMultiSelectDropdownFilters(self.weaponTypeFiltersDropdown)
+    searchParams.weaponTypes = weaponTypesSelected
+
+    local equipmentTypesSelected =              self:GetSelectedMultiSelectDropdownFilters(self.equipmentTypeFiltersDropdown)
+    searchParams.equipmentTypes = equipmentTypesSelected
+
+    local dlcIdsSelected =                      self:GetSelectedMultiSelectDropdownFilters(self.DLCIdFiltersDropdown)
+    searchParams.dlcIds = dlcIdsSelected
+
+    local enchantSearchCategoryTypesSelected =  self:GetSelectedMultiSelectDropdownFilters(self.enchantSearchCategoryTypeFiltersDropdown)
+    searchParams.enchantSearchCategoryTypes = enchantSearchCategoryTypesSelected
+
+    self.searchParams = searchParams
 end
 
 
