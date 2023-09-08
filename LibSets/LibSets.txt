@@ -50,3 +50,9 @@ LibSets_AutoCompletion.lua
 
 ##Debug functions
 LibSets_Debug.lua
+
+##XML - Search
+XML/SearchUI/LibSets_SearchUI_Shared.lua
+XML/SearchUI/LibSets_SearchUI.xml
+XML/SearchUI/Keyboard/LibSets_SearchUI_Keyboard.lua
+XML/SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua

@@ -1,0 +1,284 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+<!-- LibSets Search UI - Virtual template -->
+        <TopLevelControl name="LibSets_SearchUI_TLC_Shared" mouseEnabled="true" movable="true" hidden="true" virtual="true" level="1">
+            <Controls>
+                <Control name="$(parent)Filters">
+                    <Controls>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Content">
+                    <Controls>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <!-- Virtual Sort headers -->
+        <Control name="LibSetsSearchUISortHeader" inherits="ZO_SortHeaderBehavior" virtual="true" level="2">
+            <Controls>
+                <Label name="$(parent)Name" font="MyFontGame20" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                        <AnchorFill />
+                </Label>
+            </Controls>
+        </Control>
+
+		<!-- Virtual labels -->
+        <Label name="LibSetsSearchUIRowLabel" font="MyFontGame16" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER" virtual="true" />
+
+        <!-- Virtual Rows -->
+		<Control name="LibSetsSearchUIRow" mouseEnabled="true" virtual="true" hidden="false">
+			<Dimensions y="30" />
+			<OnMouseEnter>
+				LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseEnter(self)
+			</OnMouseEnter>
+			<OnMouseExit>
+				LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseExit(self)
+			</OnMouseExit>
+            <OnMouseUp>
+                LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseUp(self, button, upInside)
+			</OnMouseUp>
+			<Controls>
+				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+				<Label name="$(parent)Name" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" />
+					<Dimensions x="200" y="30" />
+				</Label>
+				<Label name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" />
+					<Dimensions x="100" y="30" />
+				</Label>
+				<Label name="$(parent)Slot" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
+					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
+					<Dimensions x="90" y="30" />
+				</Label>
+			</Controls>
+		</Control>
+
+<!-- LibSets Search UI - Keyboard mode -->
+        <TopLevelControl name="LibSets_SearchUI_TLC_Keyboard" inherits="LibSets_SearchUI_TLC_Shared">
+            <Dimensions x="900" y="600"/>
+            <DimensionConstraints minX="900" minY="600"/>
+            <Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="CENTER" offsetX="0" offsetY="0"/>
+
+            <OnInitialized>
+                --Not done here, but at LibSets.lua, EVENT_ADD_ON_LOADED, after all set data was prepared for the filters!
+                --LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" tier="LOW" layer="BACKGROUND" level="0"/>
+
+                <Control name="$(parent)Filters" override="true" level="0">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
+                    <Dimensions y="200" />
+                    <Controls>
+                        <Control name="$(parent)SetTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="5" offsetY="5" />
+                            <Dimensions x="200" />
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, "Choose Set types")
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Control>
+                        <Control name="$(parent)ArmorTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SetTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="200" />
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, "Choose armor types")
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Control>
+                        <Control name="$(parent)WeaponTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ArmorTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="200" />
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, "Choose weapon types")
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Control>
+                        <Control name="$(parent)EquipmentTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="200" />
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, "Choose equip types")
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Control>
+
+                        <Backdrop name="$(parent)TextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)SetTypeFilter" offsetX="0" offsetY="5" />
+                            <Dimensions x="200" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop"/>
+                            </Controls>
+                        </Backdrop>
+
+
+                        <Control name="$(parent)DLCIdFilter" inherits="ZO_MultiselectComboBox" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ArmorTypeFilter" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="5" />
+                            <Dimensions x="200" />
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, "Choose DLC ID")
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Control>
+                        <Control name="$(parent)EnchantSearchCategoryTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DLCIdFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="200" />
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, "Choose Enchant search category types")
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Content" override="true" level="0">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Filters" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="0" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="-50" />
+                    <Controls>
+                        <Control name="$(parent)Headers">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TextSearch" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10" />
+                            <Controls>
+                                <Control name="$(parent)Name" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, "Set name", "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DateTime" />
+                                    <Dimensions x="200" y="32" />
+                                </Control>
+                                <Control name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, "Armor/Weapon type", "armorOrWeaponTypeName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
+                                    <Dimensions x="100" y="32" />
+                                </Control>
+                                <Control name="$(parent)Slot" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, "Equip slot", "slotName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
+                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
+                                    <Dimensions x="90" y="32" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)List" inherits="ZO_ScrollList" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="LEFT" offsetY="0" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="-6" />
+                        </Control>
+
+                        <Label name="$(parent)Counter" font="ZoFontGameSmall" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" level="1">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="6" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)ButtonClose" tier="LOW" layer="CONTROLS" level="2">
+					<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT"
+							offsetX="6"  offsetY="4" />
+                    <Dimensions x="36" y="36" />
+                    <Textures normal="/esoui/art/buttons/closebutton_up.dds"
+                              pressed="/esoui/art/buttons/closebutton_down.dds"
+                              mouseOver="/esoui/art/buttons/closebutton_mouseOver.dds"
+                              disabled="/esoui/art/buttons/closebutton_disabled.dds" />
+                    <OnClicked>
+                        self:GetParent()._object:HideUI()
+                    </OnClicked>
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                        SetTooltipText(InformationTooltip, GetString(SI_DIALOG_CLOSE))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Button>
+
+                <Button name="$(parent)ButtonSearch" level="1">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="7" />
+                    <Dimensions x="26" y="26" />
+                    <Textures normal="/esoui/art/buttons/searchbutton_normal.dds"
+                              pressed="/esoui/art/buttons/searchbutton_mousedown.dds"
+                              mouseOver="/esoui/art/buttons/searchbutton_mouseOver.dds"
+                              disabled="/esoui/art/buttons/searchbutton_disabled.dds" />
+                    <OnClicked>
+                        self:GetParent()._object:Search()
+                    </OnClicked>
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                        SetTooltipText(InformationTooltip, GetString(SI_SCREEN_NARRATION_EDIT_BOX_SEARCH_NAME))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Button>
+
+                <Button name="$(parent)ButtonReset" level="1">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ButtonSearch" relativePoint="TOPLEFT" offsetX="-5" offsetY="0" />
+                    <Dimensions x="26" y="26" />
+                    <Textures normal="/esoui/art/buttons/switch_up.dds"
+                              pressed="/esoui/art/buttons/switch_down.dds"
+                              mouseOver="/esoui/art/buttons/switch_mouseOver.dds"
+                              disabled="/esoui/art/buttons/switch_disabled.dds" />
+                    <OnClicked>
+                        self:GetParent()._object:Reset()
+                    </OnClicked>
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                        SetTooltipText(InformationTooltip, GetString(SI_OPTIONS_RESET))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Button>
+
+            </Controls>
+        </TopLevelControl>
+
+
+<!-- LibSets Search UI - Keybaord mode - Set tooltip -->
+		<TopLevelControl name="LibSets_SearchUI_TooltipTopLevel" inherits="TooltipTopLevel">
+			<Controls>
+				<Tooltip name="LibSets_SearchUI_Tooltip" inherits="ZO_ItemIconTooltip"/>
+			</Controls>
+		</TopLevelControl>
+    </Controls>
+</GuiXml>
+
+
+
+

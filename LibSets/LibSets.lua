@@ -573,7 +573,7 @@ local function checkSet(itemLink)
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
---Get equipped numbers of a set's itemId, returnin the setId and the item's link + equipped numbers
+--Get equipped numbers of a set's itemId, returning the setId and the item's link + equipped numbers
 local function getSetEquippedInfo(itemId)
     if not itemId then return nil, nil, nil end
     buildItemLink = buildItemLink or lib.buildItemLink
@@ -649,6 +649,14 @@ local function checkNoSetIdSet(itemId)
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
 
+
+--Initialize the search UI now
+local function InitSearchUI()
+    if not lib.fullyLoaded then return end
+    LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(LibSets_SearchUI_TLC_Keyboard)
+    --todo enable after it was build properly
+    --LibSets_SearchUI_Gamepad_TopLevel_OnInitialized(LibSets_SearchUI_TLC_Gamepad)
+end
 
 --Check which setIds were found and get the set's info from the preloaded data table "setInfo",
 --sort them into their appropriate set table and increase the counter for each table
@@ -1673,6 +1681,7 @@ function lib.GetAllSetItemIds()
     return CachedSetItemIdsTable
 end
 
+
 --Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
 --The key is the itemId and the value is the boolean value true
 --> Parameters: setId number: The set's setId
@@ -1695,6 +1704,16 @@ function lib.GetSetItemIds(setId, isNoESOSetId)
     return setItemIds
 end
 local lib_GetSetItemIds = lib.GetSetItemIds
+
+--Returns the first itemId of a passed in setId
+--> Parameters: setId number: The set's setId
+-->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
+--> Returns:    number setItemId
+function lib.GetFirstItemIdOfSetId(setId, isNoESOSetId)
+    local setItemIds = lib_GetSetItemIds(setId, isNoESOSetId)
+    if setItemIds == nil or NonContiguousCount(setItemIds) == 0 then return end
+    return next(setItemIds)
+end
 
 --If the setId only got 1 itemId this function returns this itemId of the setId provided.
 --If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
@@ -3218,7 +3237,7 @@ checkIfSetsAreLoadedProperly = checkIfSetsAreLoadedProperly or lib.checkIfSetsAr
 local function getOptionsFromSlashCommandString(slashCommandString)
     local options = {}
     --local searchResult = {} --old: searchResult = { string.match(args, "^(%S*)%s*(.-)$") }
-    for param in strgmatch(args, "([^%s]+)%s*") do
+    for param in strgmatch(slashCommandString, "([^%s]+)%s*") do
         if (param ~= nil and param ~= "") then
             local paramBoolOrOther = toboolean(strlower(param))
 
@@ -3228,6 +3247,11 @@ local function getOptionsFromSlashCommandString(slashCommandString)
     return options
 end
 
+
+local function slash_search()
+    --LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchErrorCallback, searchCanceledCallback)
+    LibSets_SearchUI_Shared_ToggleUI()
+end
 
 local function slash_help()
     d(">>> [" .. lib.name .. "] |c0000FFSlash command help -|r BEGIN >>>")
@@ -3264,7 +3288,6 @@ local function command_handler(args)
     }
 
     -->search
-    --[[
     local callSearchParams = {
         ["search"]  = true, --Englisch
         ["suche"]   = true,  --German
@@ -3274,7 +3297,6 @@ local function command_handler(args)
         ["поиск"]   = true, --Russian
         ["搜索"]    = true, --Chinese
     }
-    ]]
 
     -->debug functions
     local callDebugParams = {
@@ -3303,11 +3325,9 @@ local function command_handler(args)
     local firstParam = options and options[1]
     if #options == 0 or firstParam == nil or firstParam == "" or callHelpParams[firstParam] == true then
         slash_help()
-    --[[
     elseif firstParam ~= nil and callSearchParams[firstParam] == true then
         trem(options, 1)
         slash_search(nil, options)
-    ]]
     elseif firstParam ~= nil and firstParam ~= "" then
         local debugFunc = callDebugParams[firstParam]
         if debugFunc ~= nil then
@@ -3406,12 +3426,10 @@ local function createSlashCommands()
     if SLASH_COMMANDS["/ls"] == nil then
         SLASH_COMMANDS["/ls"] = command_handler
     end
-    --[[
-    SLASH_COMMANDS["/libsetss"] = slash_search
+    SLASH_COMMANDS["/libsetssearch"] = slash_search
     if SLASH_COMMANDS["/lss"] == nil then
         SLASH_COMMANDS["/lss"] = slash_search
     end
-    ]]
 
     --Add the slash command for the DLC/chapter info
     SLASH_COMMANDS["/libsetsdlcsandchapters"] = slashcommand_dlcsandchapter
@@ -3494,13 +3512,15 @@ local function onLibraryLoaded(event, name)
         --work properly now
         lib.fullyLoaded = true
 
-
         --Add UI related stuff like the "jump to set collections' current zone"
         createUIStuff()
 
         --Optional: Build the libSlashCommander autocomplete stuff, if LibSlashCommander is present and activated
         -->See file LibSet_AutoCompletion.lua
         lib.buildLSCSetSearchAutoComplete()
+
+        --Search UI
+        InitSearchUI()
 
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
