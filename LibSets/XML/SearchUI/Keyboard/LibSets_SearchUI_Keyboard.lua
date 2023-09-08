@@ -6,6 +6,9 @@ local libPrefix = "["..MAJOR.."]"
 local searchUI = LibSets.SearchUI
 local searchUIName = searchUI.name
 
+local searchUIThrottledSearchHandlerName = searchUIName .. "_ThrottledSearch"
+local searchUIThrottledDelay = 500
+
 local twoHandWeaponTypes = {
     [WEAPONTYPE_TWO_HANDED_AXE] = true,
     [WEAPONTYPE_TWO_HANDED_HAMMER] = true,
@@ -23,6 +26,10 @@ LibSets_SearchUI_List = ZO_SortFilterList:Subclass()
 -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
 -- ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
 -- ZO_SortFilterList:RefreshSort()                                                      =>  SortScrollList()    =>  CommitScrollList()
+
+local function refreshSearchFilters(selfVar)
+    selfVar.resultsList:RefreshFilters()
+end
 
 function LibSets_SearchUI_List:New(listParentControl, parentObject)
 	local listObject = ZO_SortFilterList.New(self, listParentControl)
@@ -126,12 +133,19 @@ d("[LibSets_SearchUI_List:FilterScrollList]")
     local searchInput = self._parentObject.searchEditBoxControl:GetText()
     local searchIsEmpty = (searchInput == "" and true) or false
 
+    --Check the bonus search text
+    local bonusSearchInput = self._parentObject.bonusSearchEditBoxControl:GetText()
+    local bonusSearchIsEmpty = (bonusSearchInput == "" and true) or false
+
     for i = 1, #self.masterList do
         --Get the data of each set item
         local data = self.masterList[i]
+
         --Search for text/set bonuses
         if searchIsEmpty == true or self._parentObject:CheckForMatch(data, searchInput) then
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(searchUI.scrollListDataTypeDefault, data))
+            if bonusSearchIsEmpty == true or self._parentObject:SearchSetBonuses(data.bonuses, bonusSearchInput) then
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(searchUI.scrollListDataTypeDefault, data))
+            end
         end
     end
 
@@ -166,11 +180,10 @@ end
 function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local nameColumnValue = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
 --d(">name: " ..tostring(nameColumnValue))
-    --[[
 	local itemId = lib.GetFirstItemIdOfSetId(setId, nil)
     if itemId == nil then return nil end
     local itemLink = lib.buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
-    local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
+    --[[
     --Get the drop location(s) of the set via LibSets
     local dropLocationsText = ""
     local dropLocationsZoneIds = setData.zoneIds
@@ -185,6 +198,23 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local traitsNeeded = lib.GetTraitsNeeded(setId)
     ]]
 
+    local equipType = GetItemLinkEquipType(itemLink)
+    local itemType = GetItemLinkItemType(itemLink)
+    local armorOrWeaponType
+    if itemType == ITEMTYPE_ARMOR then
+        armorOrWeaponType = GetItemLinkArmorType(itemLink)
+    elseif itemType == ITEMTYPE_WEAPON then
+        armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+    end
+
+    local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
+    local bonuses = (numBonuses == 0 and {}) or setData.bonuses
+    if numBonuses > 0 and (bonuses == nil or type(bonuses) == "number") then
+        -- Lazy initialization of set bonus data
+        setData.bonuses = lib.GetSetBonuses(itemLink, numBonuses)
+        bonuses = setData.bonuses
+    end
+
     --Table entry for the ZO_ScrollList data
 	return({
         --Internal, for text search etc.
@@ -192,10 +222,18 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
 
         --Set ID
         setId               = setId,
+
+        --Itemlink
+        itemLink            = itemLink,
+        itemId              = itemId,
+
         --Single columns for the output row -> See function self:SetupItemRow
         name                = nameColumnValue,
-        armorOrWeaponType   = "1",
-        equipSlot           = "2",
+        armorOrWeaponType   = armorOrWeaponType,
+        equipSlot           = equipType,
+
+        --Set bonuses
+        bonuses             = setData.bonuses,
 
         --Pass in whole table of set's info
         setData     = setData,
@@ -231,6 +269,8 @@ end
 
 
 
+
+
 --======================================================================================================================
 --======================================================================================================================
 --======================================================================================================================
@@ -251,8 +291,13 @@ end
 function LibSets_SearchUI_Keyboard:Initialize(control)
     LibSets_SearchUI_Shared.Initialize(self, control)
 
+    local backGround = self.control:GetNamedChild("BG")
+    backGround:SetAlpha(1)
+
     local filters = self.filtersControl
     local content = self.contentControl
+
+    local selfVar = self
 
     --Buttons
     self.resetButton = self.control:GetNamedChild("ButtonReset")
@@ -262,21 +307,30 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     --Filters
     self.searchEditBoxControl = filters:GetNamedChild("TextSearchBox")
     self.searchEditBoxControl:SetDefaultText("Names/IDs , separated")
-	--ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
-    self.searchEditBoxControl:SetHandler("OnTextChanged", function() self.resultsList:RefreshFilters() end)
+    --ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+    self.searchEditBoxControl:SetHandler("OnTextChanged", function()
+        selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar)
+    end)
     self.searchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
-d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp")
+        d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp")
         if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
             --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
         end
     end)
 
     self.bonusSearchEditBoxControl = filters:GetNamedChild("BonusTextSearchBox")
-    self.bonusSearchEditBoxControl:SetDefaultText("Bonus")
-	--ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
-    self.bonusSearchEditBoxControl:SetHandler("OnTextChanged", function() self.resultsList:RefreshFilters() end)
+    self.bonusSearchEditBoxControl:SetDefaultText("Bonus space separated (+/-)")
+    self.bonusSearchEditBoxControl:SetHandler("OnMouseEnter", function()
+        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+        SetTooltipText(InformationTooltip, "Enter multiple bonus separated by a space.\nUse the + or - prefix to include or exclude a bonus from the search results.")
+    end)
+    self.bonusSearchEditBoxControl:SetHandler("OnMouseExit", function() ClearTooltip(InformationTooltip)  end)
+    --ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+    self.bonusSearchEditBoxControl:SetHandler("OnTextChanged", function()
+        selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar)
+    end)
     self.bonusSearchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
-d("[LibSets]LibSets_SearchUI_Keyboard - bonusSearchEditBoxControl - OnMouseUp")
+        d("[LibSets]LibSets_SearchUI_Keyboard - bonusSearchEditBoxControl - OnMouseUp")
         if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
             --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
         end
@@ -487,7 +541,7 @@ function LibSets_SearchUI_Keyboard:OnRowMouseEnter(rowControl)
     self.resultsList:Row_OnMouseEnter(rowControl)
 
     self.tooltipControl.data = rowControl.data
-    self:ShowItemLinkTooltip(rowControl, rowControl.data, nil, nil, nil, nil)
+    self:ShowItemLinkTooltip(self.control, rowControl.data, nil, nil, nil, nil)
 end
 
 function LibSets_SearchUI_Keyboard:OnRowMouseExit(rowControl)

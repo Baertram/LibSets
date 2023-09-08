@@ -6,7 +6,7 @@
 
     <Controls>
 <!-- LibSets Search UI - Virtual template -->
-        <TopLevelControl name="LibSets_SearchUI_TLC_Shared" mouseEnabled="true" movable="true" hidden="true" virtual="true" level="1">
+        <TopLevelControl name="LibSets_SearchUI_TLC_Shared" mouseEnabled="true" movable="true" clampedToScreen="true" hidden="true" virtual="true" level="1">
             <Controls>
                 <Control name="$(parent)Filters">
                     <Controls>
@@ -44,7 +44,7 @@
                 LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseUp(self, button, upInside)
 			</OnMouseUp>
 			<Controls>
-				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
 				<Label name="$(parent)Name" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" />
 					<Dimensions y="30" />

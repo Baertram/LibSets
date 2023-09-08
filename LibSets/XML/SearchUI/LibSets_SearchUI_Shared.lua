@@ -1,4 +1,5 @@
 local CM = CALLBACK_MANAGER
+local EM = EVENT_MANAGER
 
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
@@ -16,6 +17,7 @@ searchUI.searchTypeDefault = 1
 
 --Scroll list datatype - Default text
 searchUI.scrollListDataTypeDefault = 1
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -224,7 +226,7 @@ local function string_split (inputstr, sep)
 end
 
 function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
-    d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
+    --d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
     --Search by name or setId
     -->Split at ,
     local namesOrIdsTab = string_split(searchInput, ",")
@@ -232,6 +234,7 @@ function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
 
     local isMatch = false
     for _, nameOrId in ipairs(namesOrIdsTab) do
+        isMatch = false
         local searchInputNumber = tonumber(nameOrId)
         if searchInputNumber ~= nil then
             local searchValueType = type(searchInputNumber)
@@ -298,19 +301,57 @@ function LibSets_SearchUI_Shared:SearchByCriteria(data, searchInput, searchType)
     --todo combine all passed in search criteria and filter the results list
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
+--Search UI shared - Helper functions
+------------------------------------------------------------------------------------------------------------------------
+--Run a function throttled (check if it should run already and overwrite the old call then with a new one to
+--prevent running it multiple times in a short time)
+function LibSets_SearchUI_Shared:ThrottledCall(callbackName, timer, callback, ...)
+    if not callbackName or callbackName == "" or not callback then return end
+    EM:UnregisterForUpdate(callbackName)
+    local args
+    if ... ~= nil then
+        args = {...}
+    end
+    local function Update()
+        EM:UnregisterForUpdate(callbackName)
+        if args ~= nil then
+            callback(unpack(args))
+        else
+            callback()
+        end
+    end
+    EM:RegisterForUpdate(callbackName, timer, Update)
+end
+
+
 ------------------------------------------------
 --- Tooltip
 ------------------------------------------------
 function LibSets_SearchUI_Shared:ShowItemLinkTooltip(parent, data, anchor1, offsetX, offsetY, anchor2)
     self:HideItemLinkTooltip()
+
     local TT_control = self.tooltipControl
     data = data or (TT_control and TT_control.data)
     if data == nil or data.itemLink == nil then return end
 
-    anchor1 = anchor1 or TOPRIGHT
-    anchor2 = anchor2 or TOPLEFT
-    offsetX = offsetX or -50
-    offsetY = offsetY or 0
+    --Get the current position of the UI. If  the UI is moved to the left, show the tooltip right, and vice versa
+    --local screenWidth, screenHeight = GuiRoot:GetDimensions()
+    local currentLeft = self.control:GetLeft()
+    if currentLeft < TT_control:GetWidth() then
+        anchor1 = anchor1 or LEFT
+        anchor2 = anchor2 or RIGHT
+        offsetX = offsetX or 25
+        offsetY = offsetY or 0
+    else
+        anchor1 = anchor1 or RIGHT
+        anchor2 = anchor2 or LEFT
+        offsetX = offsetX or -25
+        offsetY = offsetY or 0
+    end
+
+    --Show the tooltip
     InitializeTooltip(TT_control, parent, anchor1, offsetX, offsetY, anchor2)
     TT_control:SetLink(data.itemLink)
 end

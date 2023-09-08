@@ -2213,7 +2213,7 @@ function lib.GetSetEquipTypes(setId)
 end
 
 
---Returns the id number of the set nameprovided
+--Returns the id number of the set name provided
 --> Parameters: setName String: The set's name
 --> lang String: The language to check for. Can be left empty and the client language will be used then
 --> Returns:  NILABLE number setId, NILABLE table setNames
@@ -2237,6 +2237,25 @@ function lib.GetSetByName(setName, lang)
         end
     end
     return nil
+end
+
+--Returns the bonus description text of a set itemlink, as a table (each bonus description text = 1 table entry)
+--> Parameters: itemLink String: The set item's itemlink
+--> Returns:  NILABLE table bonuses
+function lib.GetSetBonuses(itemLink, numBonuses)
+    local bonuses
+    if numBonuses > 0 then
+        bonuses = { }
+        for i = 1, numBonuses do
+            local _, description = GetItemLinkSetBonusInfo(itemLink, false, i)
+            table.insert(bonuses, description)
+        end
+    else
+        -- Arena weapons are not sets, use the enchantment description instead
+        local _, _, description = GetItemLinkEnchantInfo(itemLink)
+        bonuses = { description }
+    end
+    return bonuses
 end
 
 
