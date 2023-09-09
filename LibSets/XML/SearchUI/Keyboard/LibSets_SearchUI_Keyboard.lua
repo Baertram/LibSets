@@ -359,11 +359,16 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
             --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
         end
     end)
-    --The
-    itbox filters
-    self.editBoxFilter = {
+
+    --The editbox filters
+    self.editBoxFilters = {
         self.searchEditBoxControl,
         self.bonusSearchEditBoxControl,
+    }
+    --Mapping between edibox and it's name in the searchParams
+    self.editBoxFilterToSearchParamName = {
+        [self.searchEditBoxControl] =                       "names",
+        [self.bonusSearchEditBoxControl] =                  "bonuses",
     }
 
 
@@ -436,7 +441,7 @@ function LibSets_SearchUI_Keyboard:ResetUI()
     LibSets_SearchUI_Shared.ResetUI()
 
     --Reset all UI elements to the default values
-    for _, editBoxControl in ipairs(self.editBoxFilter) do
+    for _, editBoxControl in ipairs(self.editBoxFilters) do
         editBoxControl:SetText("")
     end
 
@@ -446,12 +451,28 @@ function LibSets_SearchUI_Keyboard:ResetUI()
 end
 
 function LibSets_SearchUI_Keyboard:ApplySearchParamsToUI()
-    local searchParams = self.searchParams
-    if searchParams == nil then return end
     if not self:IsShown() then return end
 
-    --todo
-    --apply each searchParam entry to the UI's multiselect dropdown box, editfields, etc.
+    local searchParams = self.searchParams
+    if searchParams == nil then return end
+
+    --Apply each searchParam entry to the UI's multiselect dropdown box, editfields, etc.
+    --Multi select dropdown boxes
+    for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
+        local entriesToSelect = searchParams[self.multiSelectFilterDropdownToSearchParamName[dropdownControl]]
+        if entriesToSelect ~= nil and NonContiguousCount(entriesToSelect) > 0 then
+            self:SetMultiSelectDropdownFilters(dropdownControl, entriesToSelect)
+        end
+    end
+
+    --Edit fields
+    for _, editBoxControl in ipairs(self.editBoxFilters) do
+        local entryToSetText = searchParams[self.editBoxFilterToSearchParamName[editBoxControl]]
+        if entryToSetText ~= nil then
+            editBoxControl:SetText(entryToSetText)
+        end
+    end
+
 end
 
 ------------------------------------------------
@@ -472,16 +493,6 @@ end
 ------------------------------------------------
 --- Filters
 ------------------------------------------------
-
-function LibSets_SearchUI_Keyboard:GetSelectedMultiSelectDropdownFilters(multiSelectDropdown)
-    local selectedFilterTypes = {}
-    for _, item in ipairs(multiSelectDropdown:GetItems()) do
-        if multiSelectDropdown:IsItemSelected(item) then
-            selectedFilterTypes[item.filterType] = true
-        end
-    end
-    return selectedFilterTypes
-end
 
 function LibSets_SearchUI_Keyboard:InitializeFilters()
     local function OnFilterChanged()
@@ -620,6 +631,32 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
 end
 
+function LibSets_SearchUI_Keyboard:GetSelectedMultiSelectDropdownFilters(multiSelectDropdown)
+    local selectedFilterTypes = {}
+    if multiSelectDropdown:GetNumSelectedEntries() == 0 then return selectedFilterTypes end
+
+    for _, item in ipairs(multiSelectDropdown:GetItems()) do
+        if multiSelectDropdown:IsItemSelected(item) then
+            selectedFilterTypes[item.filterType] = true
+        end
+    end
+    return selectedFilterTypes
+end
+
+function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownFilters(multiSelectDropdown, entriesToSelect)
+    self:ResetMultiSelectDropdown(multiSelectDropdown)
+    for _, item in ipairs(multiSelectDropdown:GetItems()) do
+        for entry, shouldSelect in pairs(entriesToSelect) do
+            if shouldSelect == true and entry == item.filterType then
+                multiSelectDropdown:AddItemToSelected(item)
+                break -- inner loop
+            end
+        end
+    end
+end
+
+
+--Will be called as the multiselect dropdown boxes got closed again (and entries might have changed)
 function LibSets_SearchUI_Keyboard:OnFilterChanged()
     d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     LibSets_SearchUI_Shared.OnFilterChanged(self)
@@ -633,43 +670,6 @@ function LibSets_SearchUI_Keyboard:OnFilterChanged()
             searchParams[self.multiSelectFilterDropdownToSearchParamName[dropdownControl]] = selectedEntries
         end
     end
-
-    --[[
-    local setTypesSelected =                    self:GetSelectedMultiSelectDropdownFilters(self.setTypeFiltersDropdown)
-    if NonContiguousCount(setTypesSelected) > 0 then
-        searchParams.setTypes = setTypesSelected
-    end
-
-    local armorTypesSelected =                  self:GetSelectedMultiSelectDropdownFilters(self.armorTypeFiltersDropdown)
-    if NonContiguousCount(armorTypesSelected) > 0 then
-        searchParams.armorTypes = armorTypesSelected
-    end
-
-    local weaponTypesSelected =                 self:GetSelectedMultiSelectDropdownFilters(self.weaponTypeFiltersDropdown)
-    if NonContiguousCount(weaponTypesSelected) > 0 then
-        searchParams.weaponTypes = weaponTypesSelected
-    end
-
-    local equipmentTypesSelected =              self:GetSelectedMultiSelectDropdownFilters(self.equipmentTypeFiltersDropdown)
-    if NonContiguousCount(equipmentTypesSelected) > 0 then
-        searchParams.equipmentTypes = equipmentTypesSelected
-    end
-
-    local dlcIdsSelected =                      self:GetSelectedMultiSelectDropdownFilters(self.DLCIdFiltersDropdown)
-    if NonContiguousCount(dlcIdsSelected) > 0 then
-        searchParams.dlcIds = dlcIdsSelected
-    end
-
-    local enchantSearchCategoryTypesSelected =  self:GetSelectedMultiSelectDropdownFilters(self.enchantSearchCategoryTypeFiltersDropdown)
-    if NonContiguousCount(enchantSearchCategoryTypesSelected) > 0 then
-        searchParams.enchantSearchCategoryTypes = enchantSearchCategoryTypesSelected
-    end
-
-    local numBonusesSelected =                  self:GetSelectedMultiSelectDropdownFilters(self.numBonusFiltersDropdown)
-    if NonContiguousCount(numBonusesSelected) > 0 then
-        searchParams.numBonuses = numBonusesSelected
-    end
-    ]]
 
     --Editboxes
     -->Will be handled at OnTextChanged handler directly at the editboxes
