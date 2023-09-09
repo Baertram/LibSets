@@ -11,6 +11,8 @@ local searchUI = LibSets.SearchUI
 searchUI.name = MAJOR .. "_SearchUI"
 local searchUIName = searchUI.name
 
+--Maximum number of set bonuses
+searchUI.MAX_NUM_SET_BONUS = 6 --2023-09-09
 
 --Search type - For the string comparison "processor". !!!Needs to match the SetupRow of the ZO_ScrollList!!!
 searchUI.searchTypeDefault = 1
@@ -48,12 +50,13 @@ function LibSets_SearchUI_Shared:Initialize(control)
     -->See function LibSets_SearchUI_Shared:OnFilterChanged()
     --[[
     searchParams = {
-        setTypes = {[1]=true, [2]=true, [3]=true}         --The set type selected at the multiselect dropdown box
-        armorTypes = {[1]=true, [2]=true, [3]=true}        --The armor type selected at the multiselect dropdown box
-        weaponTypes = {[1]=true, [2]=true, [3]=true}       --The weapon type selected at the multiselect dropdown box
-        equipmentTypes = {[1]=true, [2]=true, [3]=true}    --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
-        dlcIds = {[1]=true, [2]=true, [3]=true}          --The DLC type selected at the multiselect dropdown box
-        enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true} --The enchantment search category types selected at the multiselect dropdown box
+        setTypes = {[1]=true, [2]=true, [3]=true}                       --The set type selected at the multiselect dropdown box
+        armorTypes = {[1]=true, [2]=true, [3]=true}                     --The armor type selected at the multiselect dropdown box
+        weaponTypes = {[1]=true, [2]=true, [3]=true}                    --The weapon type selected at the multiselect dropdown box
+        equipmentTypes = {[1]=true, [2]=true, [3]=true}                 --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
+        dlcIds = {[1]=true, [2]=true, [3]=true}                         --The DLC type selected at the multiselect dropdown box
+        enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true}   --The enchantment search category types selected at the multiselect dropdown box
+        numBonuses = { {[1]=true, [2]=true, [3]=true}                   --The number of bonuses selected at the multiselect dropdown box
     }
     ]]
 
@@ -98,11 +101,14 @@ function LibSets_SearchUI_Shared:ResetUI()
     --Reset all UI elements to the default values
 end
 
-
 function LibSets_SearchUI_Shared:Reset()
     --Reset all data, internal and the chanegd UI elements
     self:ResetInternal()
     self:ResetUI()
+end
+
+function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
+    dropdownControl.m_comboBox:ClearAllSelections()
 end
 
 
@@ -310,39 +316,6 @@ end
 function LibSets_SearchUI_Shared:OnFilterChanged()
     d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     self.searchParams = nil
-    local searchParams = {}
-
-    local setTypesSelected =                    self:GetSelectedMultiSelectDropdownFilters(self.setTypeFiltersDropdown)
-    if NonContiguousCount(setTypesSelected) > 0 then
-        searchParams.setTypes = setTypesSelected
-    end
-
-    local armorTypesSelected =                  self:GetSelectedMultiSelectDropdownFilters(self.armorTypeFiltersDropdown)
-    if NonContiguousCount(armorTypesSelected) > 0 then
-        searchParams.armorTypes = armorTypesSelected
-    end
-
-    local weaponTypesSelected =                 self:GetSelectedMultiSelectDropdownFilters(self.weaponTypeFiltersDropdown)
-    if NonContiguousCount(weaponTypesSelected) > 0 then
-        searchParams.weaponTypes = weaponTypesSelected
-    end
-
-    local equipmentTypesSelected =              self:GetSelectedMultiSelectDropdownFilters(self.equipmentTypeFiltersDropdown)
-    if NonContiguousCount(equipmentTypesSelected) > 0 then
-        searchParams.equipmentTypes = equipmentTypesSelected
-    end
-
-    local dlcIdsSelected =                      self:GetSelectedMultiSelectDropdownFilters(self.DLCIdFiltersDropdown)
-    if NonContiguousCount(dlcIdsSelected) > 0 then
-        searchParams.dlcIds = dlcIdsSelected
-    end
-
-    local enchantSearchCategoryTypesSelected =  self:GetSelectedMultiSelectDropdownFilters(self.enchantSearchCategoryTypeFiltersDropdown)
-    if NonContiguousCount(enchantSearchCategoryTypesSelected) > 0 then
-        searchParams.enchantSearchCategoryTypes = enchantSearchCategoryTypesSelected
-    end
-
-    self.searchParams = searchParams
 end
 
 --Pre-Filter the masterlist table of e.g. a ZO_SortFilterScrollList
@@ -356,12 +329,13 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
         --searchParams is a table with the following possible entries
         --[[
         searchParams = {
-            setTypes = {[1]=true, [2]=true, [3]=true}         --The set type selected at the multiselect dropdown box
-            armorTypes = {[1]=true, [2]=true, [3]=true}        --The armor type selected at the multiselect dropdown box
-            weaponTypes = {[1]=true, [2]=true, [3]=true}       --The weapon type selected at the multiselect dropdown box
-            equipmentTypes = {[1]=true, [2]=true, [3]=true}    --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
-            dlcIds = {[1]=true, [2]=true, [3]=true}          --The DLC type selected at the multiselect dropdown box
-            enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true} --The enchantment search category types selected at the multiselect dropdown box
+            setTypes = {[1]=true, [2]=true, [3]=true}                       --The set type selected at the multiselect dropdown box
+            armorTypes = {[1]=true, [2]=true, [3]=true}                     --The armor type selected at the multiselect dropdown box
+            weaponTypes = {[1]=true, [2]=true, [3]=true}                    --The weapon type selected at the multiselect dropdown box
+            equipmentTypes = {[1]=true, [2]=true, [3]=true}                 --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
+            dlcIds = {[1]=true, [2]=true, [3]=true}                         --The DLC type selected at the multiselect dropdown box
+            enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true}   --The enchantment search category types selected at the multiselect dropdown box
+            numBonuses = { {[1]=true, [2]=true, [3]=true}                   --The number of bonuses selected at the multiselect dropdown box
         }
         ]]
         --Pre-Filter the master list now, based on the Multiselect dropdowns
@@ -387,6 +361,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     for armorType, isFiltered in pairs(searchParams.armorTypes) do
                         if isFiltered == true and lib.armorTypesSets[armorType][setId] then
                             isAllowed = true
+                            break
                         end
                     end
                 end
@@ -397,6 +372,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     for weaponType, isFiltered in pairs(searchParams.weaponTypes) do
                         if isFiltered == true and lib.weaponTypesSets[weaponType][setId] then
                             isAllowed = true
+                            break
                         end
                     end
                 end
@@ -407,10 +383,31 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     for equipType, isFiltered in pairs(searchParams.equipmentTypes) do
                         if isFiltered == true and lib.equipTypesSets[equipType][setId] then
                             isAllowed = true
+                            break
                         end
                     end
                 end
             end
+            if isAllowed == true then
+                if searchParams.numBonuses ~= nil then
+                    isAllowed = false
+                    local itemId = lib.GetFirstItemIdOfSetId(setId, nil)
+                    if itemId ~= nil then
+                        local itemLink = lib.buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
+                        local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
+
+                        for numBonus, isFiltered in pairs(searchParams.numBonuses) do
+                            if isFiltered == true then
+                                if numBonuses == numBonus then
+                                    isAllowed = true
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+
             --todo
             if isAllowed == true then
                 if searchParams.enchantSearchCategoryTypes ~= nil then

@@ -183,6 +183,21 @@
                             </Controls>
                         </Backdrop>
 
+                        <Control name="$(parent)NumBonusFilter" inherits="ZO_MultiselectComboBox" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BonusTextSearch" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="80" />
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                                SetTooltipText(InformationTooltip, "Number of bonus")
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Control>
+
+
                     </Controls>
                 </Control>
 

@@ -15,7 +15,7 @@ local twoHandWeaponTypes = {
     [WEAPONTYPE_TWO_HANDED_SWORD] = true,
 }
 
-
+local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search results list for keyboard mode
@@ -255,6 +255,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
         equipSlot           = equipType,
 
         --Set bonuses
+        numBonuses          = numBonuses,
         bonuses             = setData.bonuses,
 
         --Pass in whole table of set's info
@@ -269,9 +270,9 @@ function LibSets_SearchUI_List:BuildSortKeys()
         --["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         --["gearId"]                  = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         ["name"]                    = { caseInsensitive = true },
-        ["armorOrWeaponTypeName"]   = { isId64 = true,          tiebreaker = "name" },
-        ["equipSlot"]               = { isId64 = true,          tiebreaker = "name" },
-        ["setId"]                   = { isId64          = true, tiebreaker = "name" },
+        ["armorOrWeaponType"]       = { isId64 = true,              tiebreaker = "name" },
+        ["equipSlot"]               = { isId64 = true,              tiebreaker = "name" },
+        ["setId"]                   = { isId64 = true,              tiebreaker = "name" },
         --["traitName"]               = { caseInsensitive = true, tiebreaker = "name" },
         --["quality"]                 = { caseInsensitive = true, tiebreaker = "name" },
         --["username"]                = { caseInsensitive = true, tiebreaker = "name" },
@@ -359,6 +360,10 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         end
     end)
 
+    self.editBoxFilter = {
+        self.searchEditBoxControl,
+        self.bonusSearchEditBoxControl,
+    }
 
     --Multiselect dropdowns
     self.setTypeFiltersControl =                   filters:GetNamedChild("SetTypeFilter")
@@ -367,6 +372,17 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.equipmentTypeFiltersControl =             filters:GetNamedChild("EquipmentTypeFilter")
     self.DCLIdFiltersControl =                     filters:GetNamedChild("DLCIdFilter")
     self.enchantSearchCategoryTypeFiltersControl = filters:GetNamedChild("EnchantSearchCategoryTypeFilter")
+    self.numBonusFiltersControl =                  filters:GetNamedChild("NumBonusFilter")
+
+    self.multiSelectFilterDropdowns = {
+        self.setTypeFiltersControl,
+        self.armorTypeFiltersControl,
+        self.weaponTypeFiltersControl,
+        self.equipmentTypeFiltersControl,
+        self.DCLIdFiltersControl,
+        self.enchantSearchCategoryTypeFiltersControl,
+        self.numBonusFiltersControl,
+    }
 
     self:InitializeFilters() --> Filter data was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
 
@@ -407,15 +423,13 @@ function LibSets_SearchUI_Keyboard:ResetUI()
     LibSets_SearchUI_Shared.ResetUI()
 
     --Reset all UI elements to the default values
-    self.searchEditBoxControl:SetText("")
-    self.bonusSearchEditBoxControl:SetText("")
+    for _, editBoxControl in ipairs(self.editBoxFilter) do
+        editBoxControl:SetText("")
+    end
 
-    self.setTypeFiltersControl.m_comboBox:ClearAllSelections()
-    self.armorTypeFiltersControl.m_comboBox:ClearAllSelections()
-    self.weaponTypeFiltersControl.m_comboBox:ClearAllSelections()
-    self.equipmentTypeFiltersControl.m_comboBox:ClearAllSelections()
-    self.DCLIdFiltersControl.m_comboBox:ClearAllSelections()
-    self.enchantSearchCategoryTypeFiltersControl.m_comboBox:ClearAllSelections()
+    for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
+        self:ResetMultiSelectDropdown(dropdownControl)
+    end
 end
 
 ------------------------------------------------
@@ -567,6 +581,65 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             enchantmentSearchCategoryTypeDropdown:AddItem(entry)
         end
     end
+
+    -- Initialize the Number of bonuses multiselect combobox.
+    local numBonusDropdown = ZO_ComboBox_ObjectFromContainer(self.numBonusFiltersControl)
+    self.numBonusFiltersDropdown = numBonusDropdown
+    numBonusDropdown:ClearItems()
+    numBonusDropdown:SetHideDropdownCallback(OnFilterChanged)
+    numBonusDropdown:SetNoSelectionText("# bonus")
+    numBonusDropdown:SetMultiSelectionTextFormatter(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DROPDOWN_TEXT)
+    numBonusDropdown:SetSortsItems(true)
+
+    for numBonus=1, MAX_NUM_SET_BONUS, 1 do
+        local entry = numBonusDropdown:CreateItemEntry(tostring(numBonus))
+        entry.filterType = numBonus
+        numBonusDropdown:AddItem(entry)
+    end
+end
+
+function LibSets_SearchUI_Keyboard:OnFilterChanged()
+    d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
+    LibSets_SearchUI_Shared.OnFilterChanged(self)
+
+    local searchParams = {}
+
+    local setTypesSelected =                    self:GetSelectedMultiSelectDropdownFilters(self.setTypeFiltersDropdown)
+    if NonContiguousCount(setTypesSelected) > 0 then
+        searchParams.setTypes = setTypesSelected
+    end
+
+    local armorTypesSelected =                  self:GetSelectedMultiSelectDropdownFilters(self.armorTypeFiltersDropdown)
+    if NonContiguousCount(armorTypesSelected) > 0 then
+        searchParams.armorTypes = armorTypesSelected
+    end
+
+    local weaponTypesSelected =                 self:GetSelectedMultiSelectDropdownFilters(self.weaponTypeFiltersDropdown)
+    if NonContiguousCount(weaponTypesSelected) > 0 then
+        searchParams.weaponTypes = weaponTypesSelected
+    end
+
+    local equipmentTypesSelected =              self:GetSelectedMultiSelectDropdownFilters(self.equipmentTypeFiltersDropdown)
+    if NonContiguousCount(equipmentTypesSelected) > 0 then
+        searchParams.equipmentTypes = equipmentTypesSelected
+    end
+
+    local dlcIdsSelected =                      self:GetSelectedMultiSelectDropdownFilters(self.DLCIdFiltersDropdown)
+    if NonContiguousCount(dlcIdsSelected) > 0 then
+        searchParams.dlcIds = dlcIdsSelected
+    end
+
+    local enchantSearchCategoryTypesSelected =  self:GetSelectedMultiSelectDropdownFilters(self.enchantSearchCategoryTypeFiltersDropdown)
+    if NonContiguousCount(enchantSearchCategoryTypesSelected) > 0 then
+        searchParams.enchantSearchCategoryTypes = enchantSearchCategoryTypesSelected
+    end
+
+    local numBonusesSelected =                  self:GetSelectedMultiSelectDropdownFilters(self.numBonusFiltersDropdown)
+    if NonContiguousCount(numBonusesSelected) > 0 then
+        searchParams.numBonuses = numBonusesSelected
+    end
+
+    self.searchParams = searchParams
 end
 
 
@@ -588,7 +661,15 @@ function LibSets_SearchUI_Keyboard:OnRowMouseExit(rowControl)
 end
 
 function LibSets_SearchUI_Keyboard:OnRowMouseUp(rowControl, mouseButton, upInside, shift, alt, ctrl, command)
-
+    if upInside then
+        if mouseButton == MOUSE_BUTTON_INDEX_LEFT then
+            local data = rowControl.data
+            if data.itemLink ~= nil then
+                d(libPrefix .."SetId \'".. tostring(data.setId) .."\': " ..data.itemLink)
+                StartChatInput(data.itemLink)
+            end
+        end
+    end
 end
 
 

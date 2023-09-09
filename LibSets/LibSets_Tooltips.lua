@@ -1549,19 +1549,19 @@ local function createPreviewTooltipAndShow(setId)
     -->             traitType optional number: The traitType to check the itemId against
     -->             enchantSearchCategoryType optional EnchantmentSearchCategoryType: The enchanting search category to check the itemId against
     --> Returns:    number setItemId
-    local setItemIdOfPferedCriteria = lib_getSetItemId(setId, equipType, traitType, enchantSearchCategoryType)
-    if setItemIdOfPferedCriteria == nil or setItemIdOfPferedCriteria <= 0 then
+    local setItemIdOfPreferedCriteria = lib_getSetItemId(setId, equipType, traitType, enchantSearchCategoryType)
+    if setItemIdOfPreferedCriteria == nil or setItemIdOfPreferedCriteria <= 0 then
         --Maybe this set does not provide any chosen armor/weapon/jewelry equip type, trait or enchantment?
         --Return any generic setId's itemlink for the equipType
-        setItemIdOfPferedCriteria = lib_getSetItemId(setId, equipType)
-        if setItemIdOfPferedCriteria == nil or setItemIdOfPferedCriteria <= 0 then
+        setItemIdOfPreferedCriteria = lib_getSetItemId(setId, equipType)
+        if setItemIdOfPreferedCriteria == nil or setItemIdOfPreferedCriteria <= 0 then
             --If this still fails return any!
-            setItemIdOfPferedCriteria = lib_getSetItemId(setId)
+            setItemIdOfPreferedCriteria = lib_getSetItemId(setId)
         end
     end
-    if setItemIdOfPferedCriteria == nil or setItemIdOfPferedCriteria <= 0 then return end
+    if setItemIdOfPreferedCriteria == nil or setItemIdOfPreferedCriteria <= 0 then return end
 
-    local itemLink = lib_buildItemLink(setItemIdOfPferedCriteria, quality)
+    local itemLink = lib_buildItemLink(setItemIdOfPreferedCriteria, quality)
     if itemLink == nil or itemLink == "" then return end
     d(libPrefix .."SetId \'".. tos(setId) .."\': " ..itemLink)
     ZO_PopupTooltip_SetLink(itemLink)
