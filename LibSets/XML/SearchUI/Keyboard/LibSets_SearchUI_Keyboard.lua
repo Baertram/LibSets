@@ -618,11 +618,12 @@ end
 
 function LibSets_SearchUI_Keyboard:GetSelectedMultiSelectDropdownFilters(multiSelectDropdown)
     local selectedFilterTypes = {}
+    local dropdownComboBox = multiSelectDropdown.m_comboBox
 
-    if multiSelectDropdown:GetNumSelectedEntries() == 0 then return selectedFilterTypes end
+    if dropdownComboBox:GetNumSelectedEntries() == 0 then return selectedFilterTypes end
 
-    for _, item in ipairs(multiSelectDropdown:GetItems()) do
-        if multiSelectDropdown:IsItemSelected(item) then
+    for _, item in ipairs(dropdownComboBox:GetItems()) do
+        if dropdownComboBox:IsItemSelected(item) then
             selectedFilterTypes[item.filterType] = true
         end
     end
@@ -631,11 +632,12 @@ end
 
 function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownFilters(multiSelectDropdown, entriesToSelect)
     self:ResetMultiSelectDropdown(multiSelectDropdown)
+    local dropdownComboBox = multiSelectDropdown.m_comboBox
 
-    for _, item in ipairs(multiSelectDropdown:GetItems()) do
+    for _, item in ipairs(dropdownComboBox:GetItems()) do
         for entry, shouldSelect in pairs(entriesToSelect) do
             if shouldSelect == true and entry == item.filterType then
-                multiSelectDropdown:AddItemToSelected(item)
+                dropdownComboBox:AddItemToSelected(item)
                 break -- inner loop
             end
         end
