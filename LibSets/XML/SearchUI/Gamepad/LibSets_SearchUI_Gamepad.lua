@@ -30,62 +30,38 @@ function LibSets_SearchUI_Gamepad:Initialize(control)
     SYSTEMS:RegisterGamepadObject(searchUIName, self)
 end
 
---[[
-function LibSets_SearchUI_Gamepad:InitializeFilters()
-    self.craftingTypeFilterEntries = ZO_MultiSelection_ComboBox_Data_Gamepad:New()
-    for _, craftingType in ipairs(ZO_UNIVERSAL_DECONSTRUCTION_CRAFTING_TYPES) do
-        local entry = ZO_ComboBox_Base:CreateItemEntry(GetString("SI_TRADESKILLTYPE", craftingType))
-        entry.craftingType = craftingType
+------------------------------------------------
+--- Filters
+------------------------------------------------
 
-        if craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
-            entry.onEnter = function(control, data)
-                local tooltipText = ZO_GetJewelryCraftingLockedMessage()
-                if tooltipText then
-                    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
-                end
-            end
+function LibSets_SearchUI_Gamepad:GetSelectedMultiSelectDropdownFilters(multiSelectDropdown)
+    local selectedFilterTypes = {}
 
-            entry.onExit = function(control, data)
-                local label = GetString(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_LABEL)
-                local description = GetString(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DESCRIPTION)
-                GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, label, description)
+    if multiSelectDropdown:GetNumSelectedItems() == 0 then return selectedFilterTypes end
+
+    for _, item in ipairs(multiSelectDropdown:GetAllItems()) do
+        if multiSelectDropdown:IsItemSelected(item) then
+            selectedFilterTypes[item.filterType] = true
+        end
+    end
+    return selectedFilterTypes
+end
+
+function LibSets_SearchUI_Gamepad:SetMultiSelectDropdownFilters(multiSelectDropdown, entriesToSelect)
+    self:ResetMultiSelectDropdown(multiSelectDropdown)
+
+    for _, item in ipairs(multiSelectDropdown:GetItems()) do
+        for entry, shouldSelect in pairs(entriesToSelect) do
+            if shouldSelect == true and entry == item.filterType then
+                multiSelectDropdown:AddItemToSelected(item)
+                break -- inner loop
             end
         end
-
-        self.craftingTypeFilterEntries:AddItem(entry)
     end
-    self:RefreshAccessibleCraftingTypeFilters()
 
-    self.filters =
-    {
-        [FILTER_INCLUDE_BANKED] =
-        {
-            header = GetString(SI_GAMEPAD_SMITHING_FILTERS),
-            filterName = GetString(SI_CRAFTING_INCLUDE_BANKED),
-            filterTooltip = GetString(SI_CRAFTING_INCLUDE_BANKED_TOOLTIP),
-            checked = false,
-        },
-        [FILTER_CRAFTING_TYPES] =
-        {
-            dropdownData = self.craftingTypeFilterEntries,
-            filterName = GetString(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_LABEL),
-            filterTooltip = GetString(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DESCRIPTION),
-            multiSelection = true,
-            multiSelectionTextFormatter = SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DROPDOWN_TEXT,
-            noSelectionText = GetString(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DROPDOWN_TEXT_DEFAULT),
-            sorted = true,
-        },
-    }
+    multiSelectDropdown:RefreshSelectedItemText()
 end
 
-function LibSets_SearchUI_Gamepad:RefreshAccessibleCraftingTypeFilters()
-    local craftingTypeItems = self.craftingTypeFilterEntries:GetAllItems()
-    for _, craftingTypeItem in ipairs(craftingTypeItems) do
-        local enabled = not (craftingTypeItem.craftingType == CRAFTING_TYPE_JEWELRYCRAFTING and not ZO_IsJewelryCraftingEnabled())
-        self.craftingTypeFilterEntries:SetItemEnabled(craftingTypeItem, enabled)
-    end
-end
-]]
 
 --[[ XML Handlers ]]--
 function LibSets_SearchUI_Gamepad_TopLevel_OnInitialized(self)

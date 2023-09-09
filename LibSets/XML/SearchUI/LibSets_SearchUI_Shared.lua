@@ -99,7 +99,13 @@ function LibSets_SearchUI_Shared:Reset()
 end
 
 function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
-    dropdownControl.m_comboBox:ClearAllSelections()
+    if dropdownControl.m_comboBox ~= nil then
+        --Keyboard
+        dropdownControl.m_comboBox:ClearAllSelections()
+    else
+        --Gamepad
+        dropdownControl:ClearAllSelections()
+    end
 end
 
 

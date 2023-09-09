@@ -633,6 +633,7 @@ end
 
 function LibSets_SearchUI_Keyboard:GetSelectedMultiSelectDropdownFilters(multiSelectDropdown)
     local selectedFilterTypes = {}
+
     if multiSelectDropdown:GetNumSelectedEntries() == 0 then return selectedFilterTypes end
 
     for _, item in ipairs(multiSelectDropdown:GetItems()) do
@@ -645,6 +646,7 @@ end
 
 function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownFilters(multiSelectDropdown, entriesToSelect)
     self:ResetMultiSelectDropdown(multiSelectDropdown)
+
     for _, item in ipairs(multiSelectDropdown:GetItems()) do
         for entry, shouldSelect in pairs(entriesToSelect) do
             if shouldSelect == true and entry == item.filterType then
@@ -653,6 +655,8 @@ function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownFilters(multiSelectDrop
             end
         end
     end
+
+    multiSelectDropdown:RefreshSelectedItemText()
 end
 
 
