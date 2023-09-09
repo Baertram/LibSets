@@ -50,7 +50,7 @@ end
 function LibSets_SearchUI_Gamepad:SetMultiSelectDropdownFilters(multiSelectDropdown, entriesToSelect)
     self:ResetMultiSelectDropdown(multiSelectDropdown)
 
-    for _, item in ipairs(multiSelectDropdown:GetItems()) do
+    for _, item in ipairs(multiSelectDropdown:GetAllItems()) do
         for entry, shouldSelect in pairs(entriesToSelect) do
             if shouldSelect == true and entry == item.filterType then
                 multiSelectDropdown:AddItemToSelected(item)

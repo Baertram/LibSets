@@ -9,12 +9,6 @@ local searchUIName = searchUI.name
 local searchUIThrottledSearchHandlerName = searchUIName .. "_ThrottledSearch"
 local searchUIThrottledDelay = 500
 
-local twoHandWeaponTypes = {
-    [WEAPONTYPE_TWO_HANDED_AXE] = true,
-    [WEAPONTYPE_TWO_HANDED_HAMMER] = true,
-    [WEAPONTYPE_TWO_HANDED_SWORD] = true,
-}
-
 local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -330,7 +324,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
 
     --Filters
     self.searchEditBoxControl = filters:GetNamedChild("TextSearchBox")
-    self.searchEditBoxControl:SetDefaultText("Names/IDs , separated")
+    self.searchEditBoxControl:SetDefaultText("Name/ID , separated")
     --ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
     self.searchEditBoxControl:SetHandler("OnTextChanged", function()
         selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar)
@@ -343,7 +337,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     end)
 
     self.bonusSearchEditBoxControl = filters:GetNamedChild("BonusTextSearchBox")
-    self.bonusSearchEditBoxControl:SetDefaultText("Bonus space separated (+/-)")
+    self.bonusSearchEditBoxControl:SetDefaultText("(+/-)Bonus , separated")
     self.bonusSearchEditBoxControl:SetHandler("OnMouseEnter", function()
         InitializeTooltip(InformationTooltip, self.bonusSearchEditBoxControl, BOTTOM, 0, -10)
         SetTooltipText(InformationTooltip, "Enter multiple bonus separated by a space.\nUse the + or - prefix to include or exclude a bonus from the search results.")
@@ -540,17 +534,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     weaponTypeDropdown:SetMultiSelectionTextFormatter(SI_SMITHING_DECONSTRUCTION_CRAFTING_TYPES_DROPDOWN_TEXT)
     weaponTypeDropdown:SetSortsItems(true)
 
-    local function modifyWeaponType2hd(weaponType)
-        local weaponTypeText = GetString("SI_WEAPONTYPE", weaponType)
-        if not twoHandWeaponTypes[weaponType] then
-            return weaponTypeText
-        else
-           return "2HD " .. weaponTypeText
-        end
-    end
-
     for weaponType, _ in pairs(lib.weaponTypesSets) do
-        local entry = weaponTypeDropdown:CreateItemEntry(modifyWeaponType2hd(weaponType))
+        local entry = weaponTypeDropdown:CreateItemEntry(self:ModifyWeaponType2hd(weaponType))
         entry.filterType = weaponType
         weaponTypeDropdown:AddItem(entry)
     end

@@ -20,7 +20,12 @@ searchUI.searchTypeDefault = 1
 --Scroll list datatype - Default text
 searchUI.scrollListDataTypeDefault = 1
 
-
+--Weapon types with 2hd weapons
+local twoHandWeaponTypes = {
+    [WEAPONTYPE_TWO_HANDED_AXE] = true,
+    [WEAPONTYPE_TWO_HANDED_HAMMER] = true,
+    [WEAPONTYPE_TWO_HANDED_SWORD] = true,
+}
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
@@ -291,7 +296,8 @@ function LibSets_SearchUI_Shared:OrderedSearch(haystack, needles)
 	haystack = haystack:lower()
 	needles = needles:lower()
 	local i = 0
-	for needle in needles:gmatch("%S+") do
+	--for needle in needles:gmatch("%S+") do -- No whitespace
+    for needle in needles:gmatch("[^,]+") do --No ,
 		i = haystack:find(needle, i + 1, true)
 		if not i then return false end
 	end
@@ -302,13 +308,15 @@ function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
 	local curpos = 1
 	local delim
 	local exclude = false
-
+    --Check the searchInput for prefix + (include) or - (exclude) and split at , to find all
+    --set bonuses
 	repeat
 		local found = false
 		delim = searchInput:find("[+,-]", curpos)
 		if not delim then delim = 0 end
 		local searchQuery = searchInput:sub(curpos, delim - 1)
-		if searchQuery:find("%S+") then
+		--if searchQuery:find("%S+") then   --find no whitepaces
+        if searchQuery:find("[^,]+") then      --find no ,
 			for i = 1, #bonuses do
 				if self:OrderedSearch(bonuses[i], searchQuery) then
 					found = true
@@ -316,7 +324,7 @@ function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
 				end
 			end
 
-			if (found == exclude) then return(false) end
+			if found == exclude then return false end
 		end
 		curpos = delim + 1
 		if delim ~= 0 then exclude = searchInput:sub(delim, delim) == "-" end
@@ -436,6 +444,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
     return defaultMasterListBase
 end
 
+
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared - Helper functions
 ------------------------------------------------------------------------------------------------------------------------
@@ -458,6 +467,16 @@ function LibSets_SearchUI_Shared:ThrottledCall(callbackName, timer, callback, ..
     end
     EM:RegisterForUpdate(callbackName, timer, Update)
 end
+
+function LibSets_SearchUI_Shared:ModifyWeaponType2hd(weaponType)
+    local weaponTypeText = GetString("SI_WEAPONTYPE", weaponType)
+    if not twoHandWeaponTypes[weaponType] then
+        return weaponTypeText
+    else
+       return "2HD " .. weaponTypeText
+    end
+end
+
 
 
 ------------------------------------------------
