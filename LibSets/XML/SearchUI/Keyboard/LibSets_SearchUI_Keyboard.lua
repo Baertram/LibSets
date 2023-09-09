@@ -11,6 +11,19 @@ local searchUIThrottledDelay = 500
 
 local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
 
+
+LibSets._debug = {} --todo remove after debugging/testing
+
+--Local helper functions
+local function addToIndexTable(t)
+    if NonContiguousCount(t) == 0 then return end
+    local retTab = {}
+    for k,_ in pairs(t) do
+        retTab[#retTab + 1] = k
+    end
+    return retTab
+end
+
 ------------------------------------------------------------------------------------------------------------------------
 --Search results list for keyboard mode
 ------------------------------------------------------------------------------------------------------------------------
@@ -112,20 +125,23 @@ end
 
 
 function LibSets_SearchUI_List:BuildMasterList()
-d("[LibSets_SearchUI_List:BuildMasterList]")
+--d("[LibSets_SearchUI_List:BuildMasterList]")
     local setsData = lib.setInfo
     self.masterList = {}
 
+    --Pr-Filter the masterlist and hide any sets that do not match e.g. the setType, DLCId etc.
     local setsBaseList = self._parentObject:PreFilterMasterList(setsData)
+
+    --Check if any other filters which need the set itemIds are active (multiselect dropdown boxes for armor/weapon/equipment type etc.)
+    local isAnyItemIdRelevantFilterActive = self._parentObject:IsAnyItemIdRelevantFilterActive()
+    self.isAnyItemIdRelevantFilterActive = isAnyItemIdRelevantFilterActive
+    if isAnyItemIdRelevantFilterActive == true then
+        self._parentObject.itemIdRelevantFilterKeys = self._parentObject:GetItemIdRelevantFilterKeys()
+    end
 
     for setId, setData in pairs(setsBaseList) do
         table.insert(self.masterList, self:CreateEntryForSet(setId, setData))
     end
-
-    --Clear the search parameters passed in from the LibSets_SearchUI_Shared:StartSearch() function
-    self.searchParams = nil
-
-    --self:updateSortHeaderAnchorsAndPositions(maxNameColumnWidth, 32)
 end
 
 function LibSets_SearchUI_List:FilterScrollList()
@@ -189,12 +205,31 @@ function LibSets_SearchUI_List:CommitScrollList( )
 end
 ]]
 
-
+--Create a row at teh resultslist, and respect the search filters (multiselect dropdowns of armor, weapon, equipment type,
+--enchantment, etc.)
 function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local nameColumnValue = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
---d(">name: " ..tostring(nameColumnValue))
-	local itemId = lib.GetFirstItemIdOfSetId(setId, nil)
+
+    local itemId
+
+    local parentObject = self._parentObject
+    if self.isAnyItemIdRelevantFilterActive == true then
+        --Get a matching (to the multiselect dropdown filters) itemId
+        local itemIds = parentObject:GetItemIdsForSetIdRespectingFilters(setId, true) --only 1 itemId
+        if itemIds == nil then return end
+        --Use the first itemId found
+        itemId = itemIds[1]
+    else
+        --Get "any" itemId (the first found of the setId)
+        itemId = lib.GetSetFirstItemId(setId, nil)
+    end
+
+    LibSets._debug.setToItemIds = LibSets._debug.setToItemIds or {}
+    LibSets._debug.setToItemIds[setId] = itemId
+
     if itemId == nil then return nil end
+
+
     local itemLink = lib.buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
     --[[
     --Get the drop location(s) of the set via LibSets
@@ -241,7 +276,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
 
         --Itemlink
         itemLink            = itemLink,
-        --itemId              = itemId,
+        itemId              = itemId,
 
         --Single columns for the output row -> See function self:SetupItemRow
         name                = nameColumnValue,
@@ -330,7 +365,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar)
     end)
     self.searchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
-        d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp")
+        --d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp")
         if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
             --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
         end
@@ -348,7 +383,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar)
     end)
     self.bonusSearchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
-        d("[LibSets]LibSets_SearchUI_Keyboard - bonusSearchEditBoxControl - OnMouseUp")
+        --d("[LibSets]LibSets_SearchUI_Keyboard - bonusSearchEditBoxControl - OnMouseUp")
         if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
             --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
         end
@@ -373,6 +408,9 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.equipmentTypeFiltersControl =             filters:GetNamedChild("EquipmentTypeFilter")
     self.DCLIdFiltersControl =                     filters:GetNamedChild("DLCIdFilter")
     self.enchantSearchCategoryTypeFiltersControl = filters:GetNamedChild("EnchantSearchCategoryTypeFilter")
+    --todo Disabled for the moment as it does not work! Maybe the self created itemLink does not contain the proper enchanting info?
+    self.enchantSearchCategoryTypeFiltersControl:SetHidden(true)
+
     self.numBonusFiltersControl =                  filters:GetNamedChild("NumBonusFilter")
 
     --The multiselect dropdown box filters
@@ -394,6 +432,13 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         [self.DCLIdFiltersControl] =                        "DLCIds",
         [self.enchantSearchCategoryTypeFiltersControl] =    "enchantSearchCategoryTypes",
         [self.numBonusFiltersControl] =                     "numBonuses",
+    }
+    --Is this multiselect dropdown relevant to change the itemIds of setIds (for the itemLink creation at the results list)
+    self.isItemIdRelevantMultiSelectFilterDropdown = {
+        [self.armorTypeFiltersControl] =                    true,
+        [self.weaponTypeFiltersControl] =                   true,
+        [self.equipmentTypeFiltersControl] =                true,
+        [self.enchantSearchCategoryTypeFiltersControl] =    true,
     }
 
     self:InitializeFilters() --> Filter data (masterlist base for ZO_SortFilterScrollList) was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
@@ -646,10 +691,131 @@ function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownFilters(multiSelectDrop
     multiSelectDropdown:RefreshSelectedItemText()
 end
 
+-->Check the searchParams for entries of the multiselect dropdown boxes, and other filter controls, which change the
+-->possible itemIds of an itemLink at the resultsList row
+function LibSets_SearchUI_Keyboard:IsAnyItemIdRelevantFilterActive()
+--d("LibSets_SearchUI_Keyboard:IsAnyItemIdRelevantFilterActive")
+    local searchParams = self.searchParams
+LibSets._debug.searchParams = searchParams
+    if searchParams == nil or NonContiguousCount(searchParams) == 0 then return false end
+
+    --Multiselect dropdown boxes
+    for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
+        if self.isItemIdRelevantMultiSelectFilterDropdown[dropdownControl] then
+            local searchParamEntryKey = self.multiSelectFilterDropdownToSearchParamName[dropdownControl]
+            local searchParamEntry = searchParams[searchParamEntryKey]
+            if searchParamEntry ~= nil and NonContiguousCount(searchParamEntry) > 0 then
+--d(">found filtered data in: " .. tostring(searchParamEntryKey))
+                return true
+            end
+        end
+    end
+
+    --Edit fields
+    -->Currently no itemId changes
+
+    return false
+end
+
+-->Get the searchParam entries of the multiselect dropdown boxes, and other filter controls, which change the
+-->possible itemIds of an itemLink at the resultsList row
+--Returns a table with key = searchParams key and value = boolean true, so you can loop over self.searchParams where key = returned key
+--and build a logic for the itemIds that you need
+function LibSets_SearchUI_Keyboard:GetItemIdRelevantFilterKeys()
+    --d("LibSets_SearchUI_Keyboard:GetItemIdRelevantFilterKeys")
+    local searchParamKeysOfItemIdAffectingFilters = {}
+    local searchParams = self.searchParams
+    if searchParams == nil or NonContiguousCount(searchParams) == 0 then return false end
+
+    --Multiselect dropdown boxes
+    for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
+        if self.isItemIdRelevantMultiSelectFilterDropdown[dropdownControl] then
+            local searchParamKey = self.multiSelectFilterDropdownToSearchParamName[dropdownControl]
+            local searchParamEntry = searchParams[searchParamKey]
+            if searchParamEntry ~= nil and NonContiguousCount(searchParamEntry) > 0 then
+                searchParamKeysOfItemIdAffectingFilters[searchParamKey] = true
+            end
+        end
+    end
+
+    --Edit fields
+    -->Currently no itemId changes
+
+    return searchParamKeysOfItemIdAffectingFilters
+end
+
+-->Get the itemIds mathcing to the searchParam entries of the multiselect dropdown boxes, and other filter controls, which change the
+-->possible itemIds of an itemLink at the resultsList row
+--Returns a table with key = counter and value = itemId
+function LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters(setId, onlyOneItemId)
+    --d("LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters-setId: " ..tostring(setId) .. ", onlyOneItemId: " ..tostring(onlyOneItemId))
+    onlyOneItemId = onlyOneItemId or false
+    local relevantItemIds = {}
+    local equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes
+
+    local itemIdFilterKeys = self.itemIdRelevantFilterKeys
+    if itemIdFilterKeys == nil then return end
+    local searchParams = self.searchParams
+
+    --Get the searchParam subtables and map their contents (e.g. [<armorTypeId>] = true) to the needed format for
+    --the LibSets API function calls (e.g. LibSets.GetSetItemId, where armorType needs a format like { [1]=<armorTypeId>, [2]=<armorTypeId>, ...})
+    for filterKey, _ in pairs(itemIdFilterKeys) do
+        local searchParamEntries = searchParams[filterKey]
+        if searchParamEntries ~= nil then
+            if filterKey == "armorTypes" then
+                armorTypes = addToIndexTable(searchParamEntries)
+            elseif filterKey == "weaponTypes" then
+                weaponTypes = addToIndexTable(searchParamEntries)
+            elseif filterKey == "equipmentTypes" then
+                equipmentTypes = addToIndexTable(searchParamEntries)
+            elseif filterKey == "enchantSearchCategoryTypes" then
+                enchantSearchCategoryTypes = addToIndexTable(searchParamEntries)
+            end
+        end
+    end
+
+    LibSets._debug.armorTypes = armorTypes
+    LibSets._debug.weaponTypes = weaponTypes
+    LibSets._debug.equipmentTypes = equipmentTypes
+    LibSets._debug.enchantSearchCategoryTypes = enchantSearchCategoryTypes
+
+    --Only 1 itemId:
+    local itemIdsMatchingFilters
+    if onlyOneItemId == true then
+        local itemIdMatchingFilters = lib.GetSetItemId(setId, equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes)
+        LibSets._debug.itemIdMatchingFilters = itemIdMatchingFilters
+        if itemIdMatchingFilters ~= nil then
+            itemIdsMatchingFilters = {}
+            itemIdsMatchingFilters[itemIdMatchingFilters] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+        end
+    else
+        --All itemIds:
+        itemIdsMatchingFilters = lib.GetSetItemIds(setId, nil, equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes)
+    end
+
+    LibSets._debug.itemIdsMatchingFilters = itemIdsMatchingFilters
+
+    if itemIdsMatchingFilters ~= nil then
+        relevantItemIds = {}
+        for itemId, _ in pairs(itemIdsMatchingFilters) do
+            relevantItemIds[#relevantItemIds + 1] = itemId
+        end
+        --Sort the itemIds so the same always are at the top
+        table.sort(relevantItemIds)
+
+        --d("LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters-setId: " ..tostring(setId) .. ", itemId: " ..tostring(relevantItemIds[1]))
+    end
+
+    LibSets._debug.relevantItemIds = relevantItemIds
+
+    return relevantItemIds
+end
+
+
 
 --Will be called as the multiselect dropdown boxes got closed again (and entries might have changed)
 function LibSets_SearchUI_Keyboard:OnFilterChanged()
-    d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
+    --d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     LibSets_SearchUI_Shared.OnFilterChanged(self)
 
     local searchParams = {}

@@ -1,0 +1,49 @@
+Adding a search UI so you can filter some sets criteria like name/ID, DLC it was added with, set type (crafted, overland, trial, ...), bonuses (number and description text contents like "stamina" or "weapon damage" etc.), and so on.
+It will show you a scrollable list of all found/matching set names and if you move the mouse above a row you will see a tooltip of an set item of that set (legendary quality).
+
+All of the possible criteria is collected within LibSets data already, so we do not have access to ALL stuff, but a lot (including drop zones of the game, drop type (overland boss chest, etc.).
+-> Many of the possible data can be shown at the set tooltips already today, via the LibSets settings menu.
+
+I need some assistance for the UI please (currently only Keyboard mode, Gamepad mode might follow in the future!!!)
+-What do you think about the current UI idea I've created?
+-Would you change anything at the UI?
+-What search / filter criteria would you add (if possible/available within LibSets or game API)?
+-What results list columns would you add?
+-Would you show the results list column entries as icon (e.g. armor type, slot type) or text (L/M/H, ...)?
+
+A beta version can be downloaded here (will be updated here and there so update it from the link regularly please):
+https://github.com/Baertram/LibSets/archive/refs/heads/PTS.zip
+(Attention: Make sure to only extract the "LibSets" folder in the zip's subfolder "LibSets-PTS" )
+
+-> You can open/close the Set search UI via the chat slash command /lss or /libsetssearch
+
+
+[Here is a description of the screenshot]
+https://i.imgur.com/tjfkIPA.jpg
+
+The LibSets Set Search UI is a rectangular movable UI with fixed size. It got some some search filters at the top: (1), (2).
+Some search (3) and reset (4) buttons.
+A scrollable results list (5) shows the set names found and the counter (6) shows the number of currently filtered /total sets. 
+
+(1) Search filters with Multi-Select dropdown boxes for "Set type", "Armor type", "Weapon type", "Equipment type (slot)", "DLC ID it was added with", "Enchantment search category" (basically the enchantment on the item -> !!!This filter is not working yet!!!): You can open the drodpowns and select 1 or multiple entries.
+-> Filters will be applied as a "base search" if you click on the "Search button" (3)!
+
+(2) Search filter edit boxes. You can enter multiple search terms comma separated.
+The search name field can also use setIds (e.g. 615, or 80 for Hunding's Rage).
+The bonuses field accepts a prefix + to include, and -to exclude a bonus. 
+The bonuses field will search the set's bonus description text in your client language, so you can use e.g. +stamina, -magicka to find any set where the bonus description contains stamina but does not contain magicka.
+
+Changing the search editfields (2) will start to update the resultslista fter 500 milliseconds, directly. You do not need to use the Search (3) button!
+
+(3) Search button: Applies the multiselect dropdown filters (1) as a prefilter to the results list (5).
+(4) Reset button: Resets the multiselect dropdown filters (1) and search edit boxes (2) to default values
+
+(5) Results list of filtered sets. If you move your mouse above a list row it will show the Set's tooltip (7) at the left/right (depending on the available space) of the Set's search UI rectangle.
+-> The tooltip will contain the LibSet's tooltip enhancements at the bottom, if enabled in LibSets' settings menu!
+
+The current columns of the results list are:
+a) Set name in client language (text)
+b) Armor or weapon type (number)
+c) Equipment type/slot (number)
+d) SetId (number)
+

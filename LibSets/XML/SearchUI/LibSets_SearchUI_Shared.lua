@@ -168,7 +168,7 @@ end
 --- Search
 ------------------------------------------------
 function LibSets_SearchUI_Shared:Cancel()
-d("[LibSets]LibSets_SearchUI_Shared:Cancel")
+--d("[LibSets]LibSets_SearchUI_Shared:Cancel")
 
     --Fire callback for "Search was canceled"
     CM:FireCallbacks(searchUIName .. "_SearchCanceled", self)
@@ -185,7 +185,7 @@ d("[LibSets]LibSets_SearchUI_Shared:Cancel")
 end
 
 function LibSets_SearchUI_Shared:ValidateSearchParams()
-d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
+--d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
     --Validate the search parameters and raise an error message if something does not match
 
     --todo Other validation needed?
@@ -194,17 +194,14 @@ d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
 end
 
 function LibSets_SearchUI_Shared:StartSearch(doNotShowUI)
-d("[LibSets]LibSets_SearchUI_Shared:StartSearch-doNotShowUI: " ..tostring(doNotShowUI))
+--d("[LibSets]LibSets_SearchUI_Shared:StartSearch-doNotShowUI: " ..tostring(doNotShowUI))
     --Fire callback for "Search was started"
     CM:FireCallbacks(searchUIName .. "_SearchBegin", self)
 
     if self:ValidateSearchParams() == true then
         if self.resultsList ~= nil then
             --At "BuildMasterList" the self.searchParams will be pre-filtered, and at FilterScrollList the text search filters will be added
-            -->Pass the search parameters to the ZO_SortFilterScrollList
-            self.resultsList.searchParams = self.searchParams
             self.resultsList:RefreshData() --> -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
-            -->The search parameters at the ZO_SortFilterScrollList have been cleared again at the function BuildMasterList
         end
         return true
     end
@@ -216,7 +213,7 @@ end
 --You can optionally pass in searchParams which will be used to do the search. If none are specified the UI's searchParams will be used (multiselect dropdowns, editboxes, ...)
 -->See format of searchParams at the Initialize function of this class, above!
 function LibSets_SearchUI_Shared:Search(doNotShowUI, searchParams)
-d("[LibSets]LibSets_SearchUI_Shared:Search")
+--d("[LibSets]LibSets_SearchUI_Shared:Search")
     doNotShowUI = doNotShowUI or false
 
     if not doNotShowUI and not self:IsShown() then return end
@@ -333,7 +330,7 @@ function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
 end
 
 function LibSets_SearchUI_Shared:OnFilterChanged() --Override!
-    d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
+    --d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     self.searchParams = nil
 end
 
@@ -404,7 +401,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParams.numBonuses ~= nil then
                     isAllowed = false
-                    local itemId = lib.GetFirstItemIdOfSetId(setId, nil)
+                    local itemId = lib.GetSetFirstItemId(setId, nil)
                     if itemId ~= nil then
                         local itemLink = lib.buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
                         local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
@@ -453,17 +450,10 @@ end
 function LibSets_SearchUI_Shared:ThrottledCall(callbackName, timer, callback, ...)
     if not callbackName or callbackName == "" or not callback then return end
     EM:UnregisterForUpdate(callbackName)
-    local args
-    if ... ~= nil then
-        args = {...}
-    end
+    local args = {...}
     local function Update()
         EM:UnregisterForUpdate(callbackName)
-        if args ~= nil then
-            callback(unpack(args))
-        else
-            callback()
-        end
+        callback(unpack(args))
     end
     EM:RegisterForUpdate(callbackName, timer, Update)
 end

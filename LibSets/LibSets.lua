@@ -364,8 +364,10 @@ local gznbid = GetZoneNameById
 
 local gilsetinf = GetItemLinkSetInfo
 
+local gilat = GetItemLinkArmorType
 local gilet = GetItemLinkEquipType
 local giltt = GetItemLinkTraitType
+local gilwt = GetItemLinkWeaponType
 local gildeid = GetItemLinkDefaultEnchantId
 local gesct = GetEnchantSearchCategoryType
 local gilsi = GetItemLinkSetInfo
@@ -455,6 +457,44 @@ local function removeLanguages(tabVar, langToKeep)
         end
     end
     return retTab
+end
+
+local function validateValueAgainstCheckTable(numberOrTable, checkTable, isAnyInCheckTable, doLocalDebug)
+    isAnyInCheckTable = isAnyInCheckTable or false
+    doLocalDebug = doLocalDebug or false
+if doLocalDebug == true then
+    d("[LibSets]validateValueAgainstCheckTable-isAnyInCheckTable: " ..tostring(isAnyInCheckTable))
+end
+    if checkTable == nil then return false end
+    local result
+    if type(numberOrTable) == "table" then
+        for _, value in ipairs(numberOrTable) do
+            result = checkTable[value] or false
+if doLocalDebug == true then
+    d(">>>result: " .. tostring(result))
+end
+            --Return false if any entry is not in the checkTable?
+            if isAnyInCheckTable == false then
+                if result == false then
+if doLocalDebug == true then
+    d("<<<FALSE entry not in checktable!")
+end
+                    return false
+                end
+            else
+                --Return true if any entry is in the checkTable?
+                if result == true then
+if doLocalDebug == true then
+    d("<<<TRUE any entry found in checktable!")
+end
+                    return true
+                end
+            end
+        end
+    else
+        return checkTable[numberOrTable] or false
+    end
+    return result
 end
 
 
@@ -862,6 +902,170 @@ local function LoadSets()
 
     lib.setsScanning = false
     lib.setsLoaded = true
+end
+
+--======= Set itemIds ==================================================================================================
+--Get the itemID(s) of a setId, filtered (if filter parameters are not nil).
+--Returns 1 matching itemId if returnSingleItemId == true, else it will return a table with key [itemId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+local function getSetItemIdsFiltered(returnSingleItemId, setId, allSetItemIds, equipType, traitType, enchantSearchCategoryType, armorType, weaponType)
+    local doLocalDebug = false
+
+    --todo: For debugging
+    if GetDisplayName() == "@Baertram" and setId == 999 then
+LibSets._debug.getSetItemIdsFiltered = {
+    returnSingleItemId = returnSingleItemId,
+    setId = setId,
+    allSetItemIds = allSetItemIds,
+    equipType = equipType,
+    traitType = traitType,
+    enchantSearchCategoryType = enchantSearchCategoryType,
+    armorType = armorType,
+    weaponType = weaponType,
+}
+        doLocalDebug = true
+        d("[LibSets]getSetItemIdsFiltered-setId: " ..tostring(setId))
+    end
+
+
+    if returnSingleItemId == nil then return end
+    if allSetItemIds == nil then return nil end
+
+    local anyItemIdFound = false
+    local foundItemIdsTable
+    if returnSingleItemId == false then
+        foundItemIdsTable = {}
+    end
+
+    local equipTypesValid = lib.equipTypesValid
+    local traitTypesValid = lib.traitTypesValid
+    local enchantSearchCategoryTypesValid = lib.enchantSearchCategoryTypesValid
+    local isArmorEquipType = lib.isArmorEquipType
+    local isWeaponEquipType = lib.isWeaponEquipType
+
+    local equipTypeValid = false
+    local traitTypeValid = false
+    local enchantSearchCategoryTypeValid = false
+    local armorTypeValid = false
+    local weaponTypeValid = false
+
+    if equipType ~= nil then
+        equipTypeValid = validateValueAgainstCheckTable(equipType, equipTypesValid, nil, doLocalDebug)
+        if doLocalDebug == true then d(">equipTypeValid: " ..tostring(equipTypeValid)) end
+    end
+    if traitType ~= nil then
+        traitTypeValid = validateValueAgainstCheckTable(traitType, traitTypesValid, nil, doLocalDebug)
+        if doLocalDebug == true then d(">traitTypeValid: " ..tostring(traitTypeValid)) end
+    end
+    if enchantSearchCategoryType ~= nil then
+        enchantSearchCategoryTypeValid = validateValueAgainstCheckTable(enchantSearchCategoryType, enchantSearchCategoryTypesValid, nil, doLocalDebug)
+        if doLocalDebug == true then d(">enchantSearchCategoryTypeValid: " ..tostring(enchantSearchCategoryTypeValid)) end
+    end
+    if armorType ~= nil then
+        if equipType ~= nil then
+            armorTypeValid = validateValueAgainstCheckTable(equipType, isArmorEquipType, nil, doLocalDebug)
+            if not armorTypeValid then return end
+        end
+        if doLocalDebug == true then d(">armorTypeValid: " ..tostring(armorTypeValid)) end
+        armorTypeValid = true
+    end
+    if weaponType ~= nil then
+        if equipType ~= nil then
+            weaponTypeValid = validateValueAgainstCheckTable(equipType, isWeaponEquipType, nil, doLocalDebug)
+            if not weaponTypeValid then return end
+        end
+        if doLocalDebug == true then d(">weaponTypeValid: " ..tostring(weaponTypeValid)) end
+        weaponTypeValid = true
+    end
+    if armorTypeValid == true and weaponTypeValid == true then return end
+
+if doLocalDebug == true then d(">---> got here") end
+
+    local returnGenericItemId = true
+    --Do we need to create an itemLink of the itemId to check equipType etc.?
+    local needItemLinkOfItemId = (equipTypeValid == true or traitTypeValid == true or enchantSearchCategoryTypeValid == true or armorTypeValid == true or weaponTypeValid == true) or false
+    if needItemLinkOfItemId == true then returnGenericItemId = false end
+if doLocalDebug == true then d(">>>returnGenericItemId: " .. tostring(returnGenericItemId) .. ", needItemLinkOfItemId: " .. tostring(needItemLinkOfItemId)) end
+
+
+    --Check all passed in set's itemIds now: Filter if needed
+    local foundItemId
+    for setItemId, isCorrect in pairs(allSetItemIds) do
+        foundItemId = nil
+        if setItemId ~= nil and isCorrect == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+            --Anything we need an itemlink for?
+            if needItemLinkOfItemId == true then
+                --Create itemLink of the itemId
+                local itemLink = buildItemLink(setItemId, nil) --Default quality (quality does not matter)
+if doLocalDebug == true then d(">>itemId: " .. tostring(setItemId) .. " " .. itemLink) end
+                if itemLink ~= nil and itemLink ~= "" then
+                    local isValidItemId = true
+
+                    if isValidItemId == true and equipTypeValid == true then
+                        isValidItemId = false
+                        local ilEquipType = gilet(itemLink)
+                        if ilEquipType ~= nil and validateValueAgainstCheckTable(equipType, {[ilEquipType]=true}, true) then isValidItemId = true end
+if doLocalDebug == true then d(">>>ilEquipType: " .. tostring(ilEquipType) .. ", isValid: " .. tostring(isValidItemId)) end
+                    end
+                    if isValidItemId == true and traitTypeValid == true then
+                        isValidItemId = false
+                        local ilTraitType = giltt(itemLink)
+                        if ilTraitType ~= nil and validateValueAgainstCheckTable(traitType, {[ilTraitType]=true}, true)  then isValidItemId = true end
+if doLocalDebug == true then d(">>>ilTraitType: " .. tostring(ilTraitType) .. ", isValid: " .. tostring(isValidItemId)) end
+                    end
+                    if isValidItemId == true and enchantSearchCategoryTypeValid == true then
+                        isValidItemId = false
+                        local ilenchantId = gildeid(itemLink)
+                        local ilenchantSearchCategoryType = gesct(ilenchantId)
+                        if ilenchantSearchCategoryType ~= nil and validateValueAgainstCheckTable(enchantSearchCategoryType, {[ilenchantSearchCategoryType]=true}, true) then isValidItemId = true end
+if doLocalDebug == true then d(">>>ilenchantSearchCategoryType: " .. tostring(ilenchantSearchCategoryType) .. ", isValid: " .. tostring(isValidItemId)) end
+                    end
+
+                    if isValidItemId == true and armorTypeValid == true then
+                        isValidItemId = false
+                        local ilArmorType = gilat(itemLink)
+                        if ilArmorType ~= nil and validateValueAgainstCheckTable(armorType, {[ilArmorType]=true}, true) then isValidItemId = true end
+if doLocalDebug == true then d(">>>ilArmorType: " .. tostring(ilArmorType) .. ", isValid: " .. tostring(isValidItemId)) end
+                    elseif isValidItemId == true and weaponTypeValid == true then
+                        isValidItemId = false
+                        local ilWeaponType = gilwt(itemLink)
+                        if ilWeaponType ~= nil and validateValueAgainstCheckTable(weaponType, {[ilWeaponType]=true}, true, doLocalDebug) then isValidItemId = true end
+if doLocalDebug == true then d(">>>ilWeaponType: " .. tostring(ilWeaponType) .. ", isValid: " .. tostring(isValidItemId)) end
+                    end
+
+                    --Found a matching itemId?
+                    if isValidItemId == true then
+                        foundItemId = setItemId
+                    end
+                end
+
+            else
+                --No matching itemId needed. Return "any" (first found) itemId
+                if returnGenericItemId == true then
+                    foundItemId = setItemId
+                end
+            end
+
+        end
+
+        --Found a valid itemId in the loop?
+        if foundItemId ~= nil then
+if doLocalDebug == true then d(">>>foundItemId: " .. tostring(foundItemId)) end
+            --Only return 1 itemId?
+            if returnSingleItemId == true then
+                return foundItemId
+            else
+                --Return all itemIds matching the criteria? -> Add to return table
+                foundItemIdsTable[foundItemId] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+                anyItemIdFound = true
+            end
+        end
+    end --for
+
+    --Return table with multiple founds itemIds?
+    if returnSingleItemId == false and foundItemIdsTable ~= nil and anyItemIdFound == true then
+        return foundItemIdsTable
+    end
+    return
 end
 
 --======= WORLDMAP =====================================================================================================
@@ -1683,17 +1887,27 @@ end
 
 
 --Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
---The key is the itemId and the value is the boolean value true
+--The key is the itemId and the value is the value LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+--If the 2nd to ... parameter *Type is not specified: All  itemIds found for the setId will be returned
+--If the 2rd to ... parameter *Type is specified: Each itemId of the setId will be turned into an itemLink where the given *type is cheched against.
+--Only the itemIds where the parameters fit will be returned as table. Else the return value will be nil
 --> Parameters: setId number: The set's setId
 -->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
---> Returns:    table setItemIds = {[setItemId1]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,[setItemId2]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK, ...}
-function lib.GetSetItemIds(setId, isNoESOSetId)
+-->             equipType optional number, or table with value = equipType number: The equipType to check the itemId against
+-->             traitType optional number, or table with value = traitType number: The traitType to check the itemId against
+-->             enchantSearchCategoryType optional number, or table with value = enchantSearchCategory number: The enchanting search category to check the itemId against
+-->             armorType optional number, or table with value = armorType number: The armorType to check the itemId against (Attention: either armorType or weaponType can be specified! If equipType was provided and the armorType does not match the equipType the function will return nil)
+-->             weaponType optional number, or table with value = weaponType number: The weaponType to check the itemId against (Attention: either armorType or weaponType can be specified! If equipType was provided and the weaponType does not match the equipType the function will return nil))
+--> Returns:    table:nilable setItemIds = {[setItemId1]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,[setItemId2]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK, ...}
+function lib.GetSetItemIds(setId, isNoESOSetId, equipType, traitType, enchantSearchCategoryType, armorType, weaponType)
     if setId == nil then return end
+    if armorType ~= nil and weaponType ~= nil then return end
+
+    if not checkIfSetsAreLoadedProperly() then return end
     isNoESOSetId = isNoESOSetId or false
     if isNoESOSetId == false then
         isNoESOSetId = isNoESOSet(setId)
     end
-    if not checkIfSetsAreLoadedProperly() then return end
     local setItemIds
     if isNoESOSetId == true then
         setItemIds = preloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId]
@@ -1701,90 +1915,51 @@ function lib.GetSetItemIds(setId, isNoESOSetId)
         setItemIds = decompressSetIdItemIds(setId)
     end
     if setItemIds == nil then return end
+
+    --Anything to filter?
+    if equipType ~= nil or traitType ~= nil or enchantSearchCategoryType ~= nil or armorType ~= nil or weaponType ~= nil then
+        --Return all found itemIds matching the search criteria
+        local validItemIds = getSetItemIdsFiltered(false, setId, setItemIds, equipType, traitType, enchantSearchCategoryType, armorType, weaponType)
+        return validItemIds
+    end
     return setItemIds
 end
 local lib_GetSetItemIds = lib.GetSetItemIds
+
+--Returns an itemId of the setId, matching the filter criteria passed in as parameters (params 2 to ... can be a single number or a table where the value is the number).
+--If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
+--If the 2nd to ... parameter *Type is not specified: The first random itemId found will be returned
+--If the 2rd to ... parameter *Type is specified: Each itemId of the setId will be turned into an itemLink where the given *type is cheched against.
+--Only the itemId where the parameters fits will be returned. Else the return value will be nil
+--> Parameters: setId number: The set's setId
+-->             equipType optional number, or table with value = equipType number: The equipType to check the itemId against
+-->             traitType optional number, or table with value = traitType number: The traitType to check the itemId against
+-->             enchantSearchCategoryType optional number, or table with value = enchantSearchCategory number: The enchanting search category to check the itemId against
+-->             armorType optional number, or table with value = armorType number: The armorType to check the itemId against (Attention: either armorType or weaponType can be specified! If equipType was provided and the armorType does not match the equipType the function will return nil)
+-->             weaponType optional number, or table with value = weaponType number: The weaponType to check the itemId against (Attention: either armorType or weaponType can be specified! If equipType was provided and the weaponType does not match the equipType the function will return nil))
+--> Returns:    number:nilable setItemId
+function lib.GetSetItemId(setId, equipType, traitType, enchantSearchCategoryType, armorType, weaponType)
+    if setId == nil then return end
+    if armorType ~= nil and weaponType ~= nil then return end
+    if not checkIfSetsAreLoadedProperly() then return end
+
+    --Get all itemIds of the setId
+    local setItemIds = lib_GetSetItemIds(setId)
+    if not setItemIds then return end
+
+    --Return the first found itemId matching the search criteria
+    return getSetItemIdsFiltered(true, setId, setItemIds, equipType, traitType, enchantSearchCategoryType, armorType, weaponType)
+end
 
 --Returns the first itemId of a passed in setId
 --> Parameters: setId number: The set's setId
 -->             isSpecialSet boolean: Read the set's itemIds from the special sets table or the normal?
 --> Returns:    number setItemId
-function lib.GetFirstItemIdOfSetId(setId, isNoESOSetId)
+function lib.GetSetFirstItemId(setId, isNoESOSetId)
+    if not checkIfSetsAreLoadedProperly() then return end
     local setItemIds = lib_GetSetItemIds(setId, isNoESOSetId)
     if setItemIds == nil or NonContiguousCount(setItemIds) == 0 then return end
     return next(setItemIds)
-end
-
---If the setId only got 1 itemId this function returns this itemId of the setId provided.
---If the setId got several itemIds this function returns one random itemId of the setId provided (depending on the 2nd parameter equipType)
---If the 2nd parameter equipType is not specified: The first random itemId found will be returned
---If the 2nd parameter equipType is specified:  Each itemId of the setId will be turned into an itemLink where the given equipType is checked against.
---If the 3rd to ... parameter *Type is specified: Each itemId of the setId will be turned into an itemLink where the given *type is cheched against.
---Only the itemId where the parameters fits will be returned. Else the return value will be nil
---> Parameters: setId number: The set's setId
--->             equipType optional number: The equipType to check the itemId against
--->             traitType optional number: The traitType to check the itemId against
--->             enchantSearchCategoryType optional EnchantmentSearchCategoryType: The enchanting search category to check the itemId against
---> Returns:    number setItemId
-function lib.GetSetItemId(setId, equipType, traitType, enchantSearchCategoryType)
-    if setId == nil then return end
-    local equipTypesValid = lib.equipTypesValid
-    local traitTypesValid = lib.traitTypesValid
-    local enchantSearchCategoryTypesValid = lib.enchantSearchCategoryTypesValid
-    local equipTypeValid = false
-    local traitTypeValid = false
-    local enchantSearchCategoryTypeValid = false
-
-    if equipType ~= nil then
-        equipTypeValid = equipTypesValid[equipType] or false
-    end
-    if traitType ~= nil then
-        traitTypeValid = traitTypesValid[traitType] or false
-    end
-    if enchantSearchCategoryType ~= nil then
-        enchantSearchCategoryTypeValid = enchantSearchCategoryTypesValid[enchantSearchCategoryType] or false
-    end
-
-    local setItemIds = lib_GetSetItemIds(setId)
-    if not setItemIds then return end
-
-    local needItemLinkOfItemId = (equipTypeValid == true or traitTypeValid == true or enchantSearchCategoryTypeValid == true) or false
-    local returnGenericItemId = true
-    if needItemLinkOfItemId == true then
-        returnGenericItemId = false
-    end
-
-    for setItemId, isCorrect in pairs(setItemIds) do
-        --Anything we need an itemlink for?
-        if needItemLinkOfItemId == true then
-            --Create itemLink of the itemId
-            local itemLink = buildItemLink(setItemId)
-            if itemLink ~= nil and itemLink ~= "" then
-                local isValidItemId = false
-
-                if equipTypeValid == true then
-                    local ilEquipType = gilet(itemLink)
-                    if ilEquipType ~= nil and ilEquipType == equipType then isValidItemId = true end
-                end
-                if isValidItemId == true and traitTypeValid == true then
-                    local ilTraitType = giltt(itemLink)
-                    if ilTraitType ~= nil and ilTraitType == traitType then isValidItemId = true end
-                end
-                if isValidItemId == true and enchantSearchCategoryTypeValid == true then
-                    local ilenchantId = gildeid(itemLink)
-                    local ilenchantSearchCategoryType = gesct(ilenchantId)
-                    if ilenchantSearchCategoryType ~= nil and ilenchantSearchCategoryType == enchantSearchCategoryType then isValidItemId = true end
-                end
-                if isValidItemId == true then
-                    return setItemId
-                end
-            end
-        end
-        if returnGenericItemId == true then
-            if setItemId ~= nil and isCorrect == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then return setItemId end
-        end
-    end --for
-    return
 end
 
 --Returns the name as String of the setId provided
