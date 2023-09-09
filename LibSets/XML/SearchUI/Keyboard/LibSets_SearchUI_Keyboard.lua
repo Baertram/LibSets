@@ -359,11 +359,13 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
             --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
         end
     end)
-
+    --The
+    itbox filters
     self.editBoxFilter = {
         self.searchEditBoxControl,
         self.bonusSearchEditBoxControl,
     }
+
 
     --Multiselect dropdowns
     self.setTypeFiltersControl =                   filters:GetNamedChild("SetTypeFilter")
@@ -374,6 +376,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.enchantSearchCategoryTypeFiltersControl = filters:GetNamedChild("EnchantSearchCategoryTypeFilter")
     self.numBonusFiltersControl =                  filters:GetNamedChild("NumBonusFilter")
 
+    --The multiselect dropdown box filters
     self.multiSelectFilterDropdowns = {
         self.setTypeFiltersControl,
         self.armorTypeFiltersControl,
@@ -383,8 +386,18 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         self.enchantSearchCategoryTypeFiltersControl,
         self.numBonusFiltersControl,
     }
+    --Mapping between multiselect dropdown and it's name in the searchParams
+    self.multiSelectFilterDropdownToSearchParamName = {
+        [self.setTypeFiltersControl] =                      "setTypes",
+        [self.armorTypeFiltersControl] =                    "armorTypes",
+        [self.weaponTypeFiltersControl] =                   "weaponTypes",
+        [self.equipmentTypeFiltersControl] =                "equipmentTypes",
+        [self.DCLIdFiltersControl] =                        "DLCIds",
+        [self.enchantSearchCategoryTypeFiltersControl] =    "enchantSearchCategoryTypes",
+        [self.numBonusFiltersControl] =                     "numBonuses",
+    }
 
-    self:InitializeFilters() --> Filter data was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
+    self:InitializeFilters() --> Filter data (masterlist base for ZO_SortFilterScrollList) was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
 
 
     --Results list -> ZO_SortFilterList
@@ -432,11 +445,20 @@ function LibSets_SearchUI_Keyboard:ResetUI()
     end
 end
 
+function LibSets_SearchUI_Keyboard:ApplySearchParamsToUI()
+    local searchParams = self.searchParams
+    if searchParams == nil then return end
+    if not self:IsShown() then return end
+
+    --todo
+    --apply each searchParam entry to the UI's multiselect dropdown box, editfields, etc.
+end
+
 ------------------------------------------------
 --- Search
 ------------------------------------------------
-function LibSets_SearchUI_Keyboard:StartSearch(control)
-    local searchWasValid = LibSets_SearchUI_Shared.StartSearch(self)
+function LibSets_SearchUI_Keyboard:StartSearch(doNotShowUI)
+    local searchWasValid = LibSets_SearchUI_Shared.StartSearch(self, doNotShowUI)
 
     --Show error?
     if not searchWasValid then
@@ -604,6 +626,15 @@ function LibSets_SearchUI_Keyboard:OnFilterChanged()
 
     local searchParams = {}
 
+    --Multiselect dropdown boxes
+    for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
+        local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(dropdownControl)
+        if NonContiguousCount(selectedEntries) > 0 then
+            searchParams[self.multiSelectFilterDropdownToSearchParamName[dropdownControl]] = selectedEntries
+        end
+    end
+
+    --[[
     local setTypesSelected =                    self:GetSelectedMultiSelectDropdownFilters(self.setTypeFiltersDropdown)
     if NonContiguousCount(setTypesSelected) > 0 then
         searchParams.setTypes = setTypesSelected
@@ -638,6 +669,10 @@ function LibSets_SearchUI_Keyboard:OnFilterChanged()
     if NonContiguousCount(numBonusesSelected) > 0 then
         searchParams.numBonuses = numBonusesSelected
     end
+    ]]
+
+    --Editboxes
+    -->Will be handled at OnTextChanged handler directly at the editboxes
 
     self.searchParams = searchParams
 end

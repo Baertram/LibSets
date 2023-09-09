@@ -287,7 +287,7 @@
                               mouseOver="/esoui/art/buttons/searchbutton_mouseOver.dds"
                               disabled="/esoui/art/buttons/searchbutton_disabled.dds" />
                     <OnClicked>
-                        self:GetParent()._object:Search()
+                        self:GetParent()._object:Search(false, nil)
                     </OnClicked>
                     <OnMouseEnter>
                         InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)

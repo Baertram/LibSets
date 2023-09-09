@@ -25,17 +25,11 @@ searchUI.scrollListDataTypeDefault = 1
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
 ------------------------------------------------------------------------------------------------------------------------
-LibSets_SearchUI_Shared = ZO_Object:Subclass()
+LibSets_SearchUI_Shared = ZO_InitializingObject:Subclass()
 
 ------------------------------------------------
 --- Initialization
 ------------------------------------------------
-function LibSets_SearchUI_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
 function LibSets_SearchUI_Shared:Initialize(control)
     self.control = control
     control._object = self
@@ -50,6 +44,11 @@ function LibSets_SearchUI_Shared:Initialize(control)
     -->See function LibSets_SearchUI_Shared:OnFilterChanged()
     --[[
     searchParams = {
+        --Edit fields
+        names = "hunding,121, 124, test",                              --String with the names or setIds, comma separated
+        bonuses = "+weapon damage,-magicka",                           --String with the bonus description contents, comma separated (use prefix + to include, or - to exclude)
+
+        --Multiselect dropdowns
         setTypes = {[1]=true, [2]=true, [3]=true}                       --The set type selected at the multiselect dropdown box
         armorTypes = {[1]=true, [2]=true, [3]=true}                     --The armor type selected at the multiselect dropdown box
         weaponTypes = {[1]=true, [2]=true, [3]=true}                    --The weapon type selected at the multiselect dropdown box
@@ -60,16 +59,8 @@ function LibSets_SearchUI_Shared:Initialize(control)
     }
     ]]
 
-    self.searchResults = nil
-    --[[
-    {
-        setIds = {
-            --[setId1]= true, [setId2] = true, ...
-        },
-        itemIds = {
-            --[setId] = {[1] = itemId1, [2] = itemId2, ...}
-        },
-    } ]] --table with found sets, and items of these sets matching the search params
+    self.searchResults = nil --table with found setIds, and below the data table with the names and itemIds etc. (from table LibSets.setInfo). Basically this is the masterList of the ZO_SortFilterScollList
+
     --self.searchDoneCallback = nil --callback function called as a search was done
     --self.searchErrorCallback = nil --callback function called as a search was not done due to any error
     --self.searchCanceledCallback = nil --callback function called as a search was canceled
@@ -135,14 +126,22 @@ function LibSets_SearchUI_Shared:HideUI()
     CM:FireCallbacks(searchUIName .. "_IsHidden", self)
 end
 
+--Show the Search UI and optionally pass in some searchParameters and/or callback functions
+--if the searchParams are passed in the search UI will set the values at the multiselect dropdowns and editboxes accordingly
+-->See format of searchParams at the Initialize function of this class, above!
 function LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchErrorCallback, searchCanceledCallback)
-    --Search parameters, passed in (preset UI elements with them, if provided)
-    self.searchParams = searchParams
+
+    if searchParams ~= nil then
+        --Search parameters, passed in (preset UI elements with them, if provided)
+        self.searchParams = searchParams
+
+        self:ApplySearchParamsToUI()
+    end
 
 	--Callbacks
-    self.searchDoneCallback = searchDoneCallback
-    self.searchErrorCallback = searchErrorCallback
-    self.searchCanceledCallback = searchCanceledCallback
+    self.searchDoneCallback =       searchDoneCallback
+    self.searchErrorCallback =      searchErrorCallback
+    self.searchCanceledCallback =   searchCanceledCallback
 
     --Show the UI now
     self:ShowUI()
@@ -178,16 +177,13 @@ function LibSets_SearchUI_Shared:ValidateSearchParams()
 d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
     --Validate the search parameters and raise an error message if something does not match
 
-    --local searchParams = self.searchParams
-    --if searchParams == nil then return end
-
     --todo Other validation needed?
 
     return true --all search parameters are valid
 end
 
-function LibSets_SearchUI_Shared:StartSearch()
-d("[LibSets]LibSets_SearchUI_Shared:StartSearch")
+function LibSets_SearchUI_Shared:StartSearch(doNotShowUI)
+d("[LibSets]LibSets_SearchUI_Shared:StartSearch-doNotShowUI: " ..tostring(doNotShowUI))
     --Fire callback for "Search was started"
     CM:FireCallbacks(searchUIName .. "_SearchBegin", self)
 
@@ -197,23 +193,32 @@ d("[LibSets]LibSets_SearchUI_Shared:StartSearch")
             -->Pass the search parameters to the ZO_SortFilterScrollList
             self.resultsList.searchParams = self.searchParams
             self.resultsList:RefreshData() --> -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
-            -->The search parameters at the ZO_SortFilterScrollList have been clearea again at the function BuildMasterList
-            return true
+            -->The search parameters at the ZO_SortFilterScrollList have been cleared again at the function BuildMasterList
         end
+        return true
     end
     return false
 end
 
-
-function LibSets_SearchUI_Shared:Search()
+--Start the search now. The search results will be accessible in self.searchResults
+--If parameter doNotShowUI is true the search will be done without opening the UI
+--You can optionally pass in searchParams which will be used to do the search. If none are specified the UI's searchParams will be used (multiselect dropdowns, editboxes, ...)
+-->See format of searchParams at the Initialize function of this class, above!
+function LibSets_SearchUI_Shared:Search(doNotShowUI, searchParams)
 d("[LibSets]LibSets_SearchUI_Shared:Search")
-    if not self:IsShown() then return end
+    doNotShowUI = doNotShowUI or false
+
+    if not doNotShowUI and not self:IsShown() then return end
+
+    if searchParams ~= nil then
+        self.searchParams = searchParams
+    end
 
 	--Inherited keyboard / gamepad mode search will be done at the relating class function LibSets_SearchUI_Keyboard/Gamepad:Search() function call!
     -->See other classes' functions
 
     --Start the search now, based on input parameters
-    if self:StartSearch() == true then
+    if self:StartSearch(doNotShowUI) == true then
         --Is a "search was done" callback function registered?
         if self.searchDoneCallback then
             self.searchDoneCallback(self) --passes in the object so that the callback function got access to self.searchResults table
@@ -313,7 +318,7 @@ function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
 	return true
 end
 
-function LibSets_SearchUI_Shared:OnFilterChanged()
+function LibSets_SearchUI_Shared:OnFilterChanged() --Override!
     d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     self.searchParams = nil
 end
@@ -327,20 +332,14 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
         local setsBaseList = {}
 
         --searchParams is a table with the following possible entries
-        --[[
-        searchParams = {
-            setTypes = {[1]=true, [2]=true, [3]=true}                       --The set type selected at the multiselect dropdown box
-            armorTypes = {[1]=true, [2]=true, [3]=true}                     --The armor type selected at the multiselect dropdown box
-            weaponTypes = {[1]=true, [2]=true, [3]=true}                    --The weapon type selected at the multiselect dropdown box
-            equipmentTypes = {[1]=true, [2]=true, [3]=true}                 --The equipment slot (head, shoulders, body, ...) selected at the multiselect dropdown box
-            dlcIds = {[1]=true, [2]=true, [3]=true}                         --The DLC type selected at the multiselect dropdown box
-            enchantSearchCategoryTypes = { {[1]=true, [2]=true, [3]=true}   --The enchantment search category types selected at the multiselect dropdown box
-            numBonuses = { {[1]=true, [2]=true, [3]=true}                   --The number of bonuses selected at the multiselect dropdown box
-        }
-        ]]
+        -->See format of searchParams at the Initialize function of this class, above!
+
         --Pre-Filter the master list now, based on the Multiselect dropdowns
         for setId, setData in pairs(defaultMasterListBase) do
             local isAllowed = true
+
+
+            --Multiselect dropdown boxes
             if searchParams.setTypes ~= nil then
                 isAllowed = false
                 if setData.setType ~= nil and searchParams.setTypes[setData.setType] then
@@ -415,6 +414,11 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 end
             end
 
+
+            --Edit fields
+            -->Are handled at the OnTextChanged directly at the editboxes
+
+            ------------------------------------------------------------------------------------------------------------
             --Add to masterList?
             if isAllowed == true then
                 setsBaseList[setId] = setData
