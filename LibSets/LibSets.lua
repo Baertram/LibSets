@@ -940,6 +940,7 @@ local function getSetItemIdsFiltered(returnSingleItemId, setId, allSetItemIds, e
     local doLocalDebug = false
 
     --todo: For debugging
+--[[
     if GetDisplayName() == "@Baertram" and setId == 999 then
 LibSets._debug.getSetItemIdsFiltered = {
     returnSingleItemId = returnSingleItemId,
@@ -954,7 +955,7 @@ LibSets._debug.getSetItemIdsFiltered = {
         doLocalDebug = true
         d("[LibSets]getSetItemIdsFiltered-setId: " ..tostring(setId))
     end
-
+]]
 
     if returnSingleItemId == nil then return end
     if allSetItemIds == nil then return nil end
@@ -3518,15 +3519,22 @@ end
 
 local function slash_search(slashOptions)
     --LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchErrorCallback, searchCanceledCallback)
-    if slashOptions ~= nil then
-        if LibSets_SearchUI_Shared_IsShown() == true then
+    if LibSets_SearchUI_Shared_IsShown() == true then
+        if slashOptions ~= nil and #slashOptions > 0 then
+            --Keep the UI shown -> Pass in search options form slash command
             LibSets_SearchUI_Shared_UpdateSearch(slashOptions)
         else
-            LibSets_SearchUI_Shared_ToggleUI(slashOptions)
+            LibSets_SearchUI_Shared_ToggleUI() --hide the UI again
         end
     else
-        LibSets_SearchUI_Shared_ToggleUI()
+        --Show the UI -> Pass in search options form slash command
+        LibSets_SearchUI_Shared_ToggleUI(slashOptions)
     end
+end
+
+local function slash_search_helper(args)
+    local options = getOptionsFromSlashCommandString(args)
+    slash_search(options)
 end
 
 local function slash_help()
@@ -3618,7 +3626,8 @@ local function command_handler(args)
         slash_help()
     elseif firstParam ~= nil and callSearchParams[firstParam] == true then
         trem(options, 1)
-        slash_search(nil, options)
+        trem(options, 2)
+        slash_search(options)
     elseif firstParam ~= nil and firstParam == "debug" then
         if secondParam ~= nil then
             local debugFunc = callDebugParams[secondParam]
@@ -3722,9 +3731,9 @@ local function createSlashCommands()
     if SLASH_COMMANDS["/ls"] == nil then
         SLASH_COMMANDS["/ls"] = command_handler
     end
-    SLASH_COMMANDS["/libsetssearch"] = slash_search
+    SLASH_COMMANDS["/libsetssearch"] = slash_search_helper
     if SLASH_COMMANDS["/lss"] == nil then
-        SLASH_COMMANDS["/lss"] = slash_search
+        SLASH_COMMANDS["/lss"] = slash_search_helper
     end
 
     --Add the slash command for the DLC/chapter info

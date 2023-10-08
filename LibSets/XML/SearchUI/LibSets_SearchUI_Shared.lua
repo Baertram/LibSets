@@ -171,10 +171,14 @@ end
 function LibSets_SearchUI_Shared:GetSetNameSearchString(tableOrString)
     --Build the search string from the slashOptions
     local setNameStr
-    if type(tableOrString) == "table" and #tableOrString > 0 then
-        setNameStr = table.concat(string.lower(tableOrString), " ")
+    if type(tableOrString) == "table" then
+        if #tableOrString > 0 then
+            setNameStr = table.concat(tableOrString, " ")
+        else
+            return
+        end
     else
-        setNameStr = tableOrString
+        setNameStr = tostring(tableOrString)
     end
     return setNameStr
 end

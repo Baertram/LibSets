@@ -224,8 +224,8 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
         itemId = lib.GetSetFirstItemId(setId, nil)
     end
 
-    LibSets._debug.setToItemIds = LibSets._debug.setToItemIds or {}
-    LibSets._debug.setToItemIds[setId] = itemId
+    --LibSets._debug.setToItemIds = LibSets._debug.setToItemIds or {}
+    --LibSets._debug.setToItemIds[setId] = itemId
 
     if itemId == nil then return nil end
 
@@ -466,11 +466,13 @@ end
 ------------------------------------------------
 
 function LibSets_SearchUI_Keyboard:UpdateSearchParamsFromSlashcommand(slashOptions)
+lib._debug._slashOptions = slashOptions
     if slashOptions ~= nil then
         --Reset all current search parameters
         self:ResetUI()
 
         local setNameSearchStr = self:GetSetNameSearchString(slashOptions)
+        if setNameSearchStr == nil or setNameSearchStr == "" then return end
 
         --Put the slash commands options to the editbox "name" of the search params
         self.searchParams = self.searchParams or {}
@@ -479,6 +481,7 @@ function LibSets_SearchUI_Keyboard:UpdateSearchParamsFromSlashcommand(slashOptio
         --Apply the search by name now
         self:ApplySearchParamsToUI()
     end
+lib._debug.searchParams = self.searchParams
 end
 
 function LibSets_SearchUI_Keyboard:ShowUI(slashOptions)
@@ -721,7 +724,6 @@ end
 function LibSets_SearchUI_Keyboard:IsAnyItemIdRelevantFilterActive()
 --d("LibSets_SearchUI_Keyboard:IsAnyItemIdRelevantFilterActive")
     local searchParams = self.searchParams
-LibSets._debug.searchParams = searchParams
     if searchParams == nil or NonContiguousCount(searchParams) == 0 then return false end
 
     --Multiselect dropdown boxes
@@ -799,16 +801,16 @@ function LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters(setId, on
         end
     end
 
-    LibSets._debug.armorTypes = armorTypes
-    LibSets._debug.weaponTypes = weaponTypes
-    LibSets._debug.equipmentTypes = equipmentTypes
-    LibSets._debug.enchantSearchCategoryTypes = enchantSearchCategoryTypes
+    --LibSets._debug.armorTypes = armorTypes
+    --LibSets._debug.weaponTypes = weaponTypes
+    --LibSets._debug.equipmentTypes = equipmentTypes
+    --LibSets._debug.enchantSearchCategoryTypes = enchantSearchCategoryTypes
 
     --Only 1 itemId:
     local itemIdsMatchingFilters
     if onlyOneItemId == true then
         local itemIdMatchingFilters = lib.GetSetItemId(setId, equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes)
-        LibSets._debug.itemIdMatchingFilters = itemIdMatchingFilters
+        --LibSets._debug.itemIdMatchingFilters = itemIdMatchingFilters
         if itemIdMatchingFilters ~= nil then
             itemIdsMatchingFilters = {}
             itemIdsMatchingFilters[itemIdMatchingFilters] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
@@ -818,7 +820,7 @@ function LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters(setId, on
         itemIdsMatchingFilters = lib.GetSetItemIds(setId, nil, equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes)
     end
 
-    LibSets._debug.itemIdsMatchingFilters = itemIdsMatchingFilters
+    --LibSets._debug.itemIdsMatchingFilters = itemIdsMatchingFilters
 
     if itemIdsMatchingFilters ~= nil then
         relevantItemIds = {}
@@ -831,7 +833,7 @@ function LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters(setId, on
         --d("LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters-setId: " ..tostring(setId) .. ", itemId: " ..tostring(relevantItemIds[1]))
     end
 
-    LibSets._debug.relevantItemIds = relevantItemIds
+    --LibSets._debug.relevantItemIds = relevantItemIds
 
     return relevantItemIds
 end
