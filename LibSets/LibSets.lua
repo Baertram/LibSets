@@ -417,13 +417,16 @@ local customTooltipHooksNeeded =        lib.customTooltipHooks.needed
 --local customTooltipHooksHooked =        lib.customTooltipHooks.hooked
 --local customTooltipHooksEventPlayerActivatedCalled = lib.customTooltipHooks.eventPlayerActivatedCalled
 
+local classData =                       lib.classData
+local allClassSets =                    lib.classSets
+
 
 --local lib functions
 local checkIfSetsAreLoadedProperly
 local buildItemLink
 local isNoESOSet
 local getDropMechanicName
-
+local getSetInfo
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -687,6 +690,32 @@ local function checkNoSetIdSet(itemId)
         end
     end
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
+end
+
+local function getSetsOfClassId(classId)
+    --ClassId is valid?
+    if classData.id2Index[classId] == nil then return end
+
+    --Did we already prepare a sets list for this classId?
+    if classData.setsList[classId] ~= nil then
+        return classData.setsList[classId]
+    end
+
+    --No, prepare a new list
+    local newSetsList = {}
+    allClassSets = allClassSets or lib.classSets
+    getSetInfo = getSetInfo or lib.GetSetInfo
+
+    for setId, classSetData in pairs(allClassSets) do
+        if classSetData.classId ~= nil and classSetData.classId == classId then
+            newSetsList[setId] = getSetInfo(setId)
+        end
+    end
+    if NonContiguousCount(newSetsList) > 0 then
+        classData.setsList[classId] = newSetsList
+        return newSetsList
+    end
+    return
 end
 
 
@@ -1387,6 +1416,31 @@ function lib.IsMythicSet(setId)
     return lib.mythicSets[setId] ~= nil or false
 end
 
+--Returns true if the setId provided is a class specific set
+--> Parameters: setId number: The set's setId
+-->             classId number:optional A class's Id
+--              if the classId is provided the set's data will be checked against compatibility with this class
+--> Returns:    boolean isClassSet
+function lib.IsClassSet(setId, classId)
+    if not checkIfPTSAPIVersionIsLive() then return false end
+    if setId == nil then return end
+    if not checkIfSetsAreLoadedProperly() then return end
+
+    local classSetData = lib.classSets[setId]
+    if classSetData == nil then return false end
+
+    if classId ~= nil then
+        if classSetData.classId ~= nil then
+            return classSetData.classId == classId
+        else
+            return false
+        end
+    else
+        return true
+    end
+end
+
+
 --Returns true if the setId provided is a non ESO, own defined setId
 --See file LibSets_SetData_(APIVersion).lua, table LibSets.lib.noSetIdSets and description above it.
 --> Parameters: noESOSetId number: The set's setId
@@ -1595,6 +1649,7 @@ function lib.GetAllEquipTypeSets(equipType)
     if not equipType then return end
     return lib.equipTypesSets[equipType]
 end
+
 
 --Returns the wayshrines as table for the setId. The table contains up to 3 wayshrines for wayshrine nodes in the different factions,
 --e.g. wayshrines={382,382,382}. All entries can be the same, or even a negative value which means: No weayshrine is known
@@ -2072,6 +2127,7 @@ end
 --  },
 --	["traitsNeeded"] = 7,
 --	["veteran"] = false,
+--  ["classId"] = 1,
 --	["wayshrines"] = {
 --		[1] = 375
 --		[2] = 375
@@ -2192,6 +2248,7 @@ lib._setInfo = {
 ]]
     return returnTableRef
 end
+getSetInfo = lib.GetSetInfo
 
 --Returns the possible armor types's of a set
 --> Parameters: setId number: The set's id
@@ -2431,6 +2488,23 @@ function lib.GetSetBonuses(itemLink, numBonuses)
         bonuses = { description }
     end
     return bonuses
+end
+
+--Returns table with setData for all sets that are class sets and match the classId specified
+--> Parameters: classId number:optional A class's Id
+--> Returns:    table setsInfo
+function lib.GetClassSets(classId)
+    if not checkIfPTSAPIVersionIsLive() then return false end
+    if classId == nil then return end
+    if not checkIfSetsAreLoadedProperly() then return end
+    return getSetsOfClassId(classId)
+end
+
+--Returns a table of setIds where the set is a class specific one
+--> Returns:    classSets table
+function lib.GetAllClassSets()
+    if not checkIfSetsAreLoadedProperly() then return false end
+    return lib.classSets
 end
 
 
@@ -3442,27 +3516,49 @@ local function getOptionsFromSlashCommandString(slashCommandString)
 end
 
 
-local function slash_search()
+local function slash_search(slashOptions)
     --LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchErrorCallback, searchCanceledCallback)
-    LibSets_SearchUI_Shared_ToggleUI()
+    if slashOptions ~= nil then
+        if LibSets_SearchUI_Shared_IsShown() == true then
+            LibSets_SearchUI_Shared_UpdateSearch(slashOptions)
+        else
+            LibSets_SearchUI_Shared_ToggleUI(slashOptions)
+        end
+    else
+        LibSets_SearchUI_Shared_ToggleUI()
+    end
 end
 
 local function slash_help()
     d(">>> [" .. lib.name .. "] |c0000FFSlash command help -|r BEGIN >>>")
-    d("|-> \'resetsv\'              Resets the SavedVariables")
+    d("|-> \'/libSets help\'        Write this information to the chat")
+    d("|-> \'/lss\' or \'libsets search\' <optional search term>        Show the search UI. If <optional search term> was provided the search UI will search this set name directly.")
+    d("|-> \'/lsp\' <optional search term>\'        Start a set search in the chat editbox and show found sets directly (only if LibSlashCommander is activated!). You can search by name or setId. Selecting a found set will show a preview of a set's item, and (if enabled in your LibSets settings menu) provide the itemlink in the chat editbox too.")
+    d("|-> \'/libSets debug\' <optional debug option>       Write debugging information to the chat. If <optional debug option> was provided, this function will be called (if valid).")
+    d("<<< [" .. lib.name .. "] |c0000FFSlash command help -|r END <<<")
+end
+
+local function slash_debug_help()
+    d(">>> [" .. lib.name .. "] |c0000FFSlash command DEBUG help -|r BEGIN >>>")
+    d("|--------------------------------------------------------")
+    d("| DEBUGING ")
+    d("|-> \'/libSets debug\' <optional debug option>       Write debugging information to the chat. If <optional debug option> was provided, this function will be called (if valid).")
+    d("|-> Valid functions are:")
+    d("|--------------------------------------------------------")
     d("|-> \'getall\'               Scan all set's and itemIds, maps, zones, wayshrines, dungeons, update the language dependent variables and put them into the SavedVariables.\n|cFF0000Attention:|r |cFFFFFFThe UI will reload several times for the supported languages of the library!|r")
-    d("|-> \'scanitemids\'          Scan all itemIds of sets")
     d("|-> \'getallnames\'          Get all names (sets, zones, maps, wayshrines, DLCs) of the current client language")
     d("|-> \'getzones\'             Get all zone data")
     d("|-> \'getmapnamess\'         Get all map names of the current client language")
     d("|-> \'getwayshrines\'        Get all wayshrine data of the currently shown zone. If the map is not opened it will be opened")
     d("|-> \'getwayshrinenames\'    Get all wayshrine names of the current client language")
     d("|-> \'getsetnames\'          Get all set names of the current client language")
-    d("|-> \'shownewsets\'          Show the new setIds and names of sets which were scanned and found but not transfered to the preoaded data yet. Needs to run \'scanitemids\' first!")
     d("|-> \'getdungeons\'          Get the dungeon data. If the dungeon's view at the group window is not yet opened it will be opened.")
     d("|-> \'getcollectiblenames\'  Get the collectible names of all collectibles of the current client language.")
     d("|-> \'getdlcnames\'          Get the DLC collectible names of the current client language.")
-    d("<<< [" .. lib.name .. "] |c0000FFSlash command help -|r END <<<")
+    d("|-> \'shownewsets\'          Show the new setIds and names of sets which were scanned and found but not transfered to the preoaded data yet. Needs to run \'scanitemids\' first!")
+    d("|-> \'scanitemids\'          Scan all itemIds of sets")
+    d("|-> \'resetsv\'              Resets the SavedVariables")
+    d("<<< [" .. lib.name .. "] |c0000FFSlash command DEBUG help -|r END <<<")
 end
 
 local function command_handler(args)
@@ -3517,18 +3613,24 @@ local function command_handler(args)
 
     --Help / status
     local firstParam = options and options[1]
+    local secondParam = options and options[2]
     if #options == 0 or firstParam == nil or firstParam == "" or callHelpParams[firstParam] == true then
         slash_help()
     elseif firstParam ~= nil and callSearchParams[firstParam] == true then
         trem(options, 1)
         slash_search(nil, options)
-    elseif firstParam ~= nil and firstParam ~= "" then
-        local debugFunc = callDebugParams[firstParam]
-        if debugFunc ~= nil then
-            trem(options, 1)
-            if lib[debugFunc] ~= nil then
-                lib[debugFunc](unp(options))
+    elseif firstParam ~= nil and firstParam == "debug" then
+        if secondParam ~= nil then
+            local debugFunc = callDebugParams[secondParam]
+            if debugFunc ~= nil then
+                trem(options, 1)
+                trem(options, 2)
+                if lib[debugFunc] ~= nil then
+                    lib[debugFunc](unp(options))
+                end
             end
+        else
+            slash_debug_help()
         end
     end
 end

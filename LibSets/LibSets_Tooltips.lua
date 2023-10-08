@@ -105,6 +105,7 @@ local dropLocationZonesStr =    localization.dropZones
 --local dlcStr =                  localization.dlc
 local droppedByStr =            localization.droppedBy
 local dungeonStr =              localization.dropZoneDungeon
+local endlessArchiveDungeonStr = localization.dropZoneEndlessArchive
 local vetDungeonStr =           localization.dropZoneVeteranDungeon
 local imperialCityStr =         localization.dropZoneImperialCity
 local imperialSewersStr =       localization.dropZoneImperialSewers

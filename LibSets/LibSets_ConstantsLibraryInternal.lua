@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.61
+local MAJOR, MINOR = "LibSets", 0.62
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -54,7 +54,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101039 -- Necrom (2023-04-18, PTS, API 101038)
+lib.lastSetsPreloadedCheckAPIVersion = 101040 -- Secret of the Telvanni, Patch U40 (2023-10-08, PTS, API 101040)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -73,7 +73,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101039 -- Necrom (2023-04-18, PTS, API 10
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101039 -- QOL patches version 39 (2023-07-10, PTS, API 101039)
+APIVersions["PTS"]                   = 101040 -- Secret of the Telvanni, Patch U40 (2023-10-08, PTS, API 101040)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -233,6 +233,7 @@ local possibleSetTypes                                 = {
     [12] = "LIBSETS_SETTYPE_MYTHIC", --"Mythic"
     [13] = "LIBSETS_SETTYPE_IMPERIALCITY_MONSTER", --"Imperial City Monster"
     [14] = "LIBSETS_SETTYPE_CYRODIIL_MONSTER", --"Cyrodiil Monster"
+    [15] = "LIBSETS_SETTYPE_CLASS",  --Class specific
 }
 --SetTypes only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -297,6 +298,9 @@ lib.setTypeToLibraryInternalVariableNames = {
     },
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = {
         ["tableName"] = "monsterSets",
+    },
+    [LIBSETS_SETTYPE_CLASS]                         = {
+        ["tableName"] = "classSets",
     },
 }
 --setTypeToLibraryInternalVariableNames only available on current PTS, or automatically available if PTS->live
@@ -441,6 +445,15 @@ local setTypesToName = {
         ["jp"] = "シロディール モンスター",
         ["ru"] = "Сиродил Монстр",
         ["zh"] = "Cyrodiil monster",
+    },
+    [LIBSETS_SETTYPE_CLASS] = {
+        ["de"] = "Klassen spezifisch",
+        ["en"] = "Class specific",
+        ["es"] = "Específico de la clase",
+        ["fr"] = "Spécifique à la classe",
+        ["jp"] = "クラス固有の",
+        ["ru"] = "Зависит от класса",
+        ["zh"] = "特定类别",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
@@ -768,6 +781,7 @@ local possibleDropMechanics         = {
     [34] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY", -- Cyrodiil Weyon Priory, Chorrol
     [35] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
     [36] = "LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS", -- Cyrodiil board missions
+    [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless Archive dungeon
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -866,6 +880,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
         [LIBSETS_DROP_MECHANIC_CRAFTED]                              = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+        [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
     },
     ["es"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
@@ -1144,6 +1159,7 @@ lib.localization                 = {
         dropZoneMonster          = dungeonStr,
         dropZoneImperialCity     = GetString(SI_CAMPAIGNRULESETTYPE4),
         dropZoneImperialSewers   = "Imperial City Sewers",
+        dropZoneEndlessArchive   = GetString(SI_ZONEDISPLAYTYPE12),
         --dropZoneOverland =          GetString(),
         dropZoneSpecial          = GetString(SI_HOTBARCATEGORY9),
         dropZoneMythic           = GetString(SI_ITEMDISPLAYQUALITY6),
@@ -1346,6 +1362,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "/esoui/art/icons/poi/poi_town_complete.dds",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
     [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]             = "/esoui/art/icons/housing_gen_lsb_announcementboard001.dds", -- Cyrodiil board missions
     [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "/esoui/art/icons/achievement_ic_treasurescamp.dds", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
+    [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                     = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds",
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
@@ -1369,6 +1386,7 @@ local setTypeToTexture                 = {
     [LIBSETS_SETTYPE_MYTHIC]                        = "/esoui/art/icons/antiquities_u30_mythic_ring02.dds", --"Mythic"
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster"
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = "/esoui/art/icons/quest_head_monster_011.dds", --"Cyrodiil monster"
+    [LIBSETS_SETTYPE_CLASS]                         = "/esoui/art/lfg/gamepad/lfg_activityicon_normaldungeon.dds", --"Class specific -> Endless Archive" --> todo
     ["vet_dung"]                                    = "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds", --"Veteran Dungeon"
     ["undaunted chest"]                             = "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
 }
@@ -1389,6 +1407,8 @@ local setTypeToDropZoneLocalizationStr = {
     [LIBSETS_SETTYPE_MYTHIC]                        = clientLocalization.dropZoneMythic,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = clientLocalization.dropZoneImperialCity,
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = clientLocalization.dropZoneCyrodiil,
+    [LIBSETS_SETTYPE_CLASS]                         = clientLocalization.dropZoneEndlessArchive,
     ["vet_dung"]                                    = clientLocalization.dropZoneDungeon,
 }
 lib.setTypeToDropZoneLocalizationStr   = setTypeToDropZoneLocalizationStr
+

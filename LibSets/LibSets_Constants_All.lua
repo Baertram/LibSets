@@ -73,6 +73,7 @@ local possibleDlcIds = {
     [28] = "DLC_FIRESONG",
     [29] = "DLC_SCRIBES_OF_FATE",
     [30] = "NO_DLC_UPDATE39",
+    [31] = "NO_DLC_SECRET_OF_THE_TELVANNI"
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -161,6 +162,8 @@ lib.dlcAndChapterCollectibleIds = {
     [DLC_NECROM] =                  {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000}, --June 5th 2023
     --Update 38 QOL patch
     [NO_DLC_UPDATE39] =             {collectibleId=nil, achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1692604800}, --August 21st 2023
+    --Update 40
+    [NO_DLC_SECRET_OF_THE_TELVANNI] = {collectibleId=nil, achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1698663600}, --Ocotber 30th 2023
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
@@ -200,3 +203,26 @@ for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
     end
 end
 
+
+--Class specific data
+local classData = {
+    index2Id = {},
+    id2Index = {},
+    names = {},
+    icons = {},
+    colors = {},
+    --
+    setsList = {}, --Will be dynamically filled upon need, by API function lib.GetClassSets(classId)
+}
+for i = 1, GetNumClasses(), 1 do
+    local classId, _, _, _, _, _, keyboardIcon, gamepadIcon = GetClassInfo(i)
+    if classId ~= nil then
+        local classIndex = GetClassIndexById(classId)
+        classData.index2Id[classIndex] = classId
+        classData.id2Index[classId] = classIndex
+        classData.names[classId] = zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))
+        classData.icons[classId] = zo_iconFormatInheritColor(ZO_GetClassIcon(classId), 32, 32)
+        classData.colors[classId] = GetClassColor(classId)
+    end
+end
+lib.classData = classData

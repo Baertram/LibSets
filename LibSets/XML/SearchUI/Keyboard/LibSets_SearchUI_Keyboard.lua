@@ -465,7 +465,23 @@ end
 --- UI
 ------------------------------------------------
 
-function LibSets_SearchUI_Keyboard:ShowUI(control)
+function LibSets_SearchUI_Keyboard:UpdateSearchParamsFromSlashcommand(slashOptions)
+    if slashOptions ~= nil then
+        --Reset all current search parameters
+        self:ResetUI()
+
+        local setNameSearchStr = self:GetSetNameSearchString(slashOptions)
+
+        --Put the slash commands options to the editbox "name" of the search params
+        self.searchParams = self.searchParams or {}
+        self.searchParams[self.editBoxFilterToSearchParamName[self.searchEditBoxControl]] = setNameSearchStr
+
+        --Apply the search by name now
+        self:ApplySearchParamsToUI()
+    end
+end
+
+function LibSets_SearchUI_Keyboard:ShowUI(slashOptions)
     if not self.tooltipKeyboardHookWasDone then
         --Activate the LibSets toolip hooks at the LibSets set search preview tooltip
         if lib.RegisterCustomTooltipHook("LibSets_SearchUI_Tooltip", searchUIName) == true then
@@ -474,6 +490,9 @@ function LibSets_SearchUI_Keyboard:ShowUI(control)
     end
 
     LibSets_SearchUI_Shared.ShowUI(self)
+
+    --Was called from slash command and any search term was entered?
+    self:UpdateSearchParamsFromSlashcommand(slashOptions)
 end
 
 function LibSets_SearchUI_Keyboard:ResetUI()
@@ -517,6 +536,12 @@ end
 ------------------------------------------------
 --- Search
 ------------------------------------------------
+--[[
+function LibSets_SearchUI_Keyboard:GetSetNameSearchString(tableOrString)
+    return LibSets_SearchUI_Shared.GetSetNameSearchString(LibSets_SearchUI_Keyboard, tableOrString)
+end
+]]
+
 function LibSets_SearchUI_Keyboard:StartSearch(doNotShowUI)
     local searchWasValid = LibSets_SearchUI_Shared.StartSearch(self, doNotShowUI)
 

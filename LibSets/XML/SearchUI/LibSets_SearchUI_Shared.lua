@@ -122,6 +122,7 @@ function LibSets_SearchUI_Shared:IsShown()
 end
 
 function LibSets_SearchUI_Shared:ShowUI()
+--d("LibSets_SearchUI_Shared:ShowUI")
     if self:IsShown() then return end
     self.control:SetHidden(false)
 
@@ -158,8 +159,8 @@ function LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchEr
     self:ShowUI()
 end
 
-function LibSets_SearchUI_Shared:ToggleUI()
-    if self:IsShown() then self:HideUI() else self:ShowUI() end
+function LibSets_SearchUI_Shared:ToggleUI(slashOptions)
+    if self:IsShown() then self:HideUI() else self:ShowUI(slashOptions) end
 end
 
 
@@ -167,6 +168,18 @@ end
 ------------------------------------------------
 --- Search
 ------------------------------------------------
+function LibSets_SearchUI_Shared:GetSetNameSearchString(tableOrString)
+    --Build the search string from the slashOptions
+    local setNameStr
+    if type(tableOrString) == "table" and #tableOrString > 0 then
+        setNameStr = table.concat(string.lower(tableOrString), " ")
+    else
+        setNameStr = tableOrString
+    end
+    return setNameStr
+end
+
+
 function LibSets_SearchUI_Shared:Cancel()
 --d("[LibSets]LibSets_SearchUI_Shared:Cancel")
 
@@ -506,14 +519,39 @@ end
 
 
 --[[ XML Handlers ]]--
-function LibSets_SearchUI_Shared_ToggleUI()
+function LibSets_SearchUI_Shared_ToggleUI(slashOptions)
     if IsInGamepadPreferredMode() then
         if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
-            LIBSETS_SEARCH_UI_GAMEPAD:ToggleUI()
+            LIBSETS_SEARCH_UI_GAMEPAD:ToggleUI(slashOptions)
         end
     else
         if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
-            LIBSETS_SEARCH_UI_KEYBOARD:ToggleUI()
+            LIBSETS_SEARCH_UI_KEYBOARD:ToggleUI(slashOptions)
+        end
+    end
+end
+
+function LibSets_SearchUI_Shared_IsShown()
+    if IsInGamepadPreferredMode() then
+        if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
+            return LIBSETS_SEARCH_UI_GAMEPAD:IsShown()
+        end
+    else
+        if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
+            return LIBSETS_SEARCH_UI_KEYBOARD:IsShown()
+        end
+    end
+    return
+end
+
+function LibSets_SearchUI_Shared_UpdateSearch(slashOptions)
+    if IsInGamepadPreferredMode() then
+        if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
+            LIBSETS_SEARCH_UI_GAMEPAD:UpdateSearchParamsFromSlashcommand(slashOptions)
+        end
+    else
+        if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
+            LIBSETS_SEARCH_UI_KEYBOARD:UpdateSearchParamsFromSlashcommand(slashOptions)
         end
     end
 end
