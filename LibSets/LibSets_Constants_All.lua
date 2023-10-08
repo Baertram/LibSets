@@ -221,7 +221,7 @@ for i = 1, GetNumClasses(), 1 do
         classData.index2Id[classIndex] = classId
         classData.id2Index[classId] = classIndex
         classData.names[classId] = zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))
-        classData.icons[classId] = zo_iconFormatInheritColor(ZO_GetClassIcon(classId), 32, 32)
+        classData.icons[classId] = ZO_GetClassIcon(classId)
         classData.colors[classId] = GetClassColor(classId)
     end
 end

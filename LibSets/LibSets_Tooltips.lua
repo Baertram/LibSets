@@ -938,7 +938,11 @@ local function buildSetTypeInfo(setData)
         if setData.isVeteran ~= nil then
             setTypeTexture = vetDungTexture
         else
-            setTypeTexture = setTypeToTexture[setType]
+            if setType == LIBSETS_SETTYPE_CLASS and setData.classId ~= nil then
+                setTypeTexture = lib.classData.icons[setData.classId]
+            else
+                setTypeTexture = setTypeToTexture[setType]
+            end
         end
     end
     return setTypeName, setTypeTexture

@@ -1386,7 +1386,7 @@ local setTypeToTexture                 = {
     [LIBSETS_SETTYPE_MYTHIC]                        = "/esoui/art/icons/antiquities_u30_mythic_ring02.dds", --"Mythic"
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster"
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = "/esoui/art/icons/quest_head_monster_011.dds", --"Cyrodiil monster"
-    [LIBSETS_SETTYPE_CLASS]                         = "/esoui/art/lfg/gamepad/lfg_activityicon_normaldungeon.dds", --"Class specific -> Endless Archive" --> todo
+    [LIBSETS_SETTYPE_CLASS]                         = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds", --"Class specific -> Endless Archive" -> Will be using classIcon at tooltip!
     ["vet_dung"]                                    = "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds", --"Veteran Dungeon"
     ["undaunted chest"]                             = "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
 }
