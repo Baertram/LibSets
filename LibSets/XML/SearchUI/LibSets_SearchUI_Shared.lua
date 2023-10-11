@@ -314,13 +314,18 @@ local function searchFilterPrefix(searchInput, searchTab)
 end
 
 function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
-    --d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
+--d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
     --Search by name or setId
-    -->Split at ,
-    local namesOrIdsTab = string_split(searchInput, ",")
-    if namesOrIdsTab == nil or #namesOrIdsTab == 0 then return false end
-
+    local namesOrIdsTab = {}
+    table.insert(namesOrIdsTab, data.name)
+    table.insert(namesOrIdsTab, tostring(data.setId))
     local isMatch = searchFilterPrefix(searchInput, namesOrIdsTab)
+    return isMatch
+    --[[
+    --Old code, not respecting prefix + or -
+    -->Split at ,
+    --local namesOrIdsTab = string_split(searchInput, ",")
+    --if namesOrIdsTab == nil or #namesOrIdsTab == 0 then return false end
     if isMatch == true then
         for _, nameOrId in ipairs(namesOrIdsTab) do
             isMatch = false
@@ -337,6 +342,7 @@ function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
         end
     end
     return false
+    ]]
 end
 
 
@@ -349,7 +355,11 @@ function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm
 end
 
 function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
-	return searchFilterPrefix(searchInput, bonuses)
+--lib._searchInputBonuses = searchInput
+--lib._dataBonuses = bonuses
+	local isMatchInBonuses = searchFilterPrefix(searchInput, bonuses)
+--lib._isMatchInBonuses = isMatchInBonuses
+    return isMatchInBonuses
 end
 
 function LibSets_SearchUI_Shared:OnFilterChanged() --Override!

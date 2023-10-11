@@ -1152,7 +1152,7 @@ lib.localization                 = {
         --Search UI
         multiSelectFilterSelectedText = "<<1[$d %s/$d %s]>>",
         noMultiSelectFiltered = "Keine %s gefiltert",
-        nameTextSearch = "Name/ID , getrennt",
+        nameTextSearch = "(+/-)Name/ID , getrennt",
         nameTextSearchTT = "Gib mehrere Namen/IDs durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Namen/die ID in der Textsuche ein- bzw. auszuschließen.",
         bonusTextSearch = "(+/-)Bonus , getrennt",
         bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.",
@@ -1221,7 +1221,7 @@ lib.localization                 = {
         --Search UI
         multiSelectFilterSelectedText = "<<1[$d %s/$d %s]>>",
         noMultiSelectFiltered = "No %s filtered",
-        nameTextSearch = "Name/ID , separated",
+        nameTextSearch = "(+/-)Name/ID , separated",
         nameTextSearchTT = "Enter multiple names/IDs separated by a comma (,).\nUse the + or - prefix to include or exclude a name/ID from the search results.",
         bonusTextSearch = "(+/-)Bonus , separated",
         bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.",
