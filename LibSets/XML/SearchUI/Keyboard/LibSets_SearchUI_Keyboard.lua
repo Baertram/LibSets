@@ -289,6 +289,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     setTypeDropdown:ClearItems()
     setTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("setType")
+    self.setTypeFiltersControl.tooltipText = filterTypeText
     setTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     setTypeDropdown:SetSortsItems(true)
 
@@ -306,6 +307,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     armorTypeDropdown:ClearItems()
     armorTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("armorType")
+    self.armorTypeFiltersControl.tooltipText = filterTypeText
     armorTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_APPAREL_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     armorTypeDropdown:SetSortsItems(true)
 
@@ -321,6 +323,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     weaponTypeDropdown:ClearItems()
     weaponTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("weaponType")
+    self.weaponTypeFiltersControl.tooltipText = filterTypeText
     weaponTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_WEAPON_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     weaponTypeDropdown:SetSortsItems(true)
 
@@ -336,6 +339,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     equipmentTypeDropdown:ClearItems()
     equipmentTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("equipmentType")
+    self.equipmentTypeFiltersControl.tooltipText = filterTypeText
     equipmentTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     equipmentTypeDropdown:SetSortsItems(true)
 
@@ -361,6 +365,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     DLCIdDropdown:ClearItems()
     DLCIdDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("dlc")
+    self.DCLIdFiltersControl.tooltipText = filterTypeText
     DLCIdDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     DLCIdDropdown:SetSortsItems(true)
 
@@ -378,6 +383,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     enchantmentSearchCategoryTypeDropdown:ClearItems()
     enchantmentSearchCategoryTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("enchantmentSearchCategory")
+    self.enchantSearchCategoryTypeFiltersControl.tooltipText = filterTypeText
     enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     enchantmentSearchCategoryTypeDropdown:SetSortsItems(true)
 
@@ -395,6 +401,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     numBonusDropdown:ClearItems()
     numBonusDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("numBonuses")
+    self.numBonusFiltersControl.tooltipText = filterTypeText
     numBonusDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     numBonusDropdown:SetSortsItems(true)
 
@@ -410,6 +417,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     dropZoneDropdown:ClearItems()
     dropZoneDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("dropZones")
+    self.dropZoneFiltersControl.tooltipText = filterTypeText
     dropZoneDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     dropZoneDropdown:SetSortsItems(true)
 
@@ -430,6 +438,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     dropMechanicsDropdown:ClearItems()
     dropMechanicsDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("dropMechanic")
+    self.dropMechanicsFiltersControl.tooltipText = filterTypeText
     dropMechanicsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     dropMechanicsDropdown:SetSortsItems(true)
 
@@ -447,6 +456,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     dropLocationsDropdown:ClearItems()
     dropLocationsDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("droppedBy")
+    self.dropLocationsFiltersControl.tooltipText = filterTypeText
     dropLocationsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     dropLocationsDropdown:SetSortsItems(true)
 
