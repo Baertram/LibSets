@@ -800,6 +800,16 @@ lib.allowedDropMechanics              = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
 end
+
+--For API usage
+lib.dropZones = {}
+lib.dropZone2SetIds = {}
+lib.setId2DropZones = {}
+lib.dropLocationNames = {}
+lib.dropLocationNames2SetIds = {}
+lib.setId2DropLocationNames = {}
+
+
 ------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets drop mechanics !!!
@@ -1109,6 +1119,11 @@ lib.localization                 = {
         dropZoneImperialSewers   = "Kanalisation der Kaiserstadt",
         droppedBy                = "Drop durch",
         setType                  = "Set Art",
+        armorType                = "Rüstungsart",
+        weaponType               = "Waffenart",
+        equipmentType            = "Ausrüstungs Slot",
+        enchantmentSearchCategory = "Verzaub. Kategorie",
+        numBonuses               = "# Bonus",
         reconstructionCosts      = "Rekonstruktions Kosten",
         neededTraits             = "Eigenschaften benötigt",
         neededTraitsOrReconstructionCost = "Eigenschaften (Analyse)/Rekonstruktion Kosten",
@@ -1134,6 +1149,9 @@ lib.localization                 = {
         moreOptions =           "Zeige mehr Optionen",
         parentZone =            "Übergeordnete Zone",
         currentZone =           "Aktuelle Zone",
+        --Search UI
+        multiSelectFilterSelectedText = "<<1[$d %s/$d %s]>>",
+        noMultiSelectFiltered = "Keine %s gefiltert",
     },
     ["en"] = {
         de  = "German",
@@ -1166,6 +1184,11 @@ lib.localization                 = {
         droppedBy                = "Dropped by",
         reconstructionCosts      = "Reconstruction cost",
         setType                  = "Set type",
+        armorType                = "Armor type",
+        weaponType               = "Weapon type",
+        equipmentType            = "Equipment slot",
+        enchantmentSearchCategory = "Enchantment cat.",
+        numBonuses               = "# bonus",
         neededTraits             = "Traits needed (research)",
         neededTraitsOrReconstructionCost = "Traits (research)/Reconstruction costs",
         dropMechanic             = "Drop mechanics",
@@ -1191,6 +1214,9 @@ lib.localization                 = {
         moreOptions = "More options",
         parentZone = "Parent zone",
         currentZone = "Current zone",
+        --Search UI
+        multiSelectFilterSelectedText = "<<1[$d %s/$d %s]>>",
+        noMultiSelectFiltered = "No %s filtered",
     },
     ["es"] = {
         de  = "Alemán",

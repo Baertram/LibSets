@@ -948,15 +948,12 @@ local function buildSetTypeInfo(setData)
     return setTypeName, setTypeTexture
 end
 
-local function addTooltipLine(tooltipControl, setData, itemLink)
+local function buildSetDataText(setData, itemLink, forTooltip)
     if not setData then return end
---d("addTooltipLine")
-    --local isPopupTooltip = tooltipControl == popupTooltip or false
-    --local isInformationTooltip = tooltipControl == infoTooltip or false
-    --local isItemTooltip = tooltipControl == itemTooltip or false
-    --local isComparativeTooltip = (tooltipControl == comparativeTooltip1 or tooltipControl == comparativeTooltip2) or false
+    forTooltip = forTooltip or false
 
     local setInfoText
+    local setInfoParts = {}
     local setInfoTextWasCreated = false
     local function addSetInfoText(textToAdd)
         setInfoTextWasCreated = (setInfoText ~= nil and setInfoText ~= "") or false
@@ -1056,24 +1053,57 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
 
 --d(string.format("<<1>> %s, <<2>> %s, <<3>> %s, <<4>> %s, <<5>> %s, <<6>> %s",
 --        tos(setTypePlaceholder), tos(dropMechanicPlaceholder), tos(dropZonesPlaceholder), tos(bossNamePlaceholder), tos(neededTraitsPlaceholder), tos(dlcNamePlaceHolder)))
+
+    --Reconstruction
     local isReconstructableSet = isilscp(itemLink)
     if isReconstructableSet == true and ((useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost)) then
         reconstructionCostText = buildReconstructionCostInfo(setData, itemLink)
     end
+    setInfoParts["reconstruction"] = {
+        enabled = isReconstructableSet,
+        --data = ,
+        text = reconstructionCostText,
+        --icon = "",
+    }
 
+    --Set Type
     if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
 --d(">setTypeText: " ..tos(setTypeText))
     end
+    setInfoParts["setType"] = {
+        enabled = setTypeText ~= nil,
+        data = setData.setType,
+        text = setTypeText,
+        icon = setTypeTexture,
+    }
+
+    --Craftable
     if not isReconstructableSet and ((useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits)) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
 --d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
     end
+    setInfoParts["crafted"] = {
+        enabled = not isReconstructableSet and checkTraitsNeededGiven(setData),
+        data = setData.traitsNeeded,
+        text = setNeededTraitsText,
+        --icon = ,
+    }
+
+    --DLC
     if (useCustomTooltip and dlcNamePlaceHolder) or (not useCustomTooltip and addDLC) then
         setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
 --d(">setDLCText: " ..tos(setDLCText))
     end
+    setInfoParts["DLC"] = {
+        enabled = setDLCText ~= nil,
+        data = setData.dlcid,
+        text = setDLCText,
+        --icon = ,
+    }
 
+
+    --Drop mechanics
     local runDropMechanic = (useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
                             or (not useCustomTooltip and (addDropMechanic or addBossName or addDropLocation))
     if runDropMechanic then
@@ -1102,6 +1132,32 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         end
 --d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
     end
+    setInfoParts["dropMechanics"] = {
+        enabled = dropMechanicNames ~= nil and NonContiguousCount(dropMechanicNames) > 0,
+        data = dropMechanicNames,
+        text = setDropMechanicText,
+        --icon = ,
+    }
+    setInfoParts["dropZones"] = {
+        enabled = dropZoneNames ~= nil and NonContiguousCount(dropZoneNames) > 0,
+        data = dropZoneNames,
+        text = setDropZoneStr,
+        --icon = ,
+    }
+    setInfoParts["dropLocations"] = {
+        enabled = dropLocationNames ~= nil and NonContiguousCount(dropLocationNames) > 0,
+        data = dropLocationNames,
+        text = setDropLocationsText,
+        --icon = ,
+    }
+    setInfoParts["overallTextsPerZone"] = {
+        enabled = setDropOverallTextsPerZone ~= nil and NonContiguousCount(setDropOverallTextsPerZone) > 0,
+        data = setDropOverallTextsPerZone,
+        --text =
+        --icon = ,
+    }
+
+
 
     --Remove duplicate SetType and SetDropLocation texts (e.g. "Dungeon")
     if setDropLocationsText ~= nil and setDropLocationsText ~= "" then
@@ -1251,6 +1307,21 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
         setInfoText = setInfoText,
     }
     ]]
+
+
+
+    return setInfoText, setInfoParts
+end
+lib.BuildSetDataText = buildSetDataText
+
+local function addTooltipLine(tooltipControl, setData, itemLink)
+--d("addTooltipLine")
+    --local isPopupTooltip = tooltipControl == popupTooltip or false
+    --local isInformationTooltip = tooltipControl == infoTooltip or false
+    --local isItemTooltip = tooltipControl == itemTooltip or false
+    --local isComparativeTooltip = (tooltipControl == comparativeTooltip1 or tooltipControl == comparativeTooltip2) or false
+
+    local setInfoText = buildSetDataText(setData, itemLink, true)
 
     --Output of the tooltip line at the bottom
     if setInfoText == nil or setInfoText == "" then return end

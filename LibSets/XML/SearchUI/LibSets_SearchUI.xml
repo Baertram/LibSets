@@ -5,7 +5,7 @@
     <Font name="MyFontGame20" font="$(BOLD_FONT)|$(KB_20)|soft-shadow-thik" />
 
     <Controls>
-<!-- LibSets Search UI - Virtual template -->
+        <!-- LibSets Search UI - Virtual template -->
         <TopLevelControl name="LibSets_SearchUI_TLC_Shared" mouseEnabled="true" movable="true" clampedToScreen="true" hidden="true" virtual="true" level="1">
             <Controls>
                 <Control name="$(parent)Filters">
@@ -23,9 +23,35 @@
         <Control name="LibSetsSearchUISortHeader" inherits="ZO_SortHeaderBehavior" virtual="true" level="2">
             <Controls>
                 <Label name="$(parent)Name" font="MyFontGame18" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
-                        <AnchorFill />
+                    <AnchorFill />
                 </Label>
             </Controls>
+            <OnMouseEnter>
+                LibSets_SearchUI_Shared_SortHeaderTooltip(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+        </Control>
+
+		<!--Virtual Backdrops - The background of the UI -->
+		<Backdrop name="LibSetsSearchUIBackdrop" inherits="ZO_DarkThinFrame" virtual="true" tier="LOW" layer="BACKGROUND" level="0">
+			<Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+            <Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
+            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+			<!--<Center file="/esoui/art/upsell/upsell_greymoor_bg.dds" /> -->
+        </Backdrop>
+
+
+        <!--Virtual Multiselect ComboBoxes -- Was ZO_MultiselectComboBox before! -->
+		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
+            <OnMouseEnter>
+                LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
         </Control>
 
 		<!-- Virtual labels -->
@@ -60,8 +86,13 @@
 					<Dimensions y="30" />
                     <DimensionConstraints minX="40" />
 				</Label>
-				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabel">
+				<Label name="$(parent)DropLocations" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)EquipSlot" />
+					<Dimensions y="30" />
+                    <DimensionConstraints minX="200" />
+				</Label>
+				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DropLocations" />
 					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
 					<Dimensions y="30" />
                     <DimensionConstraints minX="20" />
@@ -69,7 +100,7 @@
 			</Controls>
 		</Control>
 
-<!-- LibSets Search UI - Keyboard mode -->
+        <!-- LibSets Search UI - Keyboard mode -->
         <TopLevelControl name="LibSets_SearchUI_TLC_Keyboard" inherits="LibSets_SearchUI_TLC_Shared">
             <Dimensions x="900" y="600"/>
             <DimensionConstraints minX="900" minY="600"/>
@@ -81,66 +112,36 @@
             </OnInitialized>
 
             <Controls>
-				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" tier="LOW" layer="BACKGROUND" level="0"/>
+                <!-- Background -->
+		    	<Backdrop name="$(parent)BG" alpha="1" inherits="LibSetsSearchUIBackdrop" centerColor="666666">
+		    		<AnchorFill/>
+				</Backdrop>
 
-                <Control name="$(parent)Filters" override="true" level="0">
+                <!-- Filters at the top -->
+                <Control name="$(parent)Filters" override="true" level="1">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="10" />
                     <Dimensions y="125" />
+                    <!-- Filter MultiSelect dropdown boxes -->
                     <Controls>
-                        <Control name="$(parent)SetTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                        <Control name="$(parent)SetTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="5" offsetY="5" />
                             <Dimensions x="200" />
-
-                            <OnMouseEnter>
-                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                                SetTooltipText(InformationTooltip, "Choose Set types")
-                            </OnMouseEnter>
-
-                            <OnMouseExit>
-                                ClearTooltip(InformationTooltip)
-                            </OnMouseExit>
                         </Control>
-                        <Control name="$(parent)ArmorTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                        <Control name="$(parent)ArmorTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)SetTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                             <Dimensions x="200" />
-
-                            <OnMouseEnter>
-                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                                SetTooltipText(InformationTooltip, "Choose armor types")
-                            </OnMouseEnter>
-
-                            <OnMouseExit>
-                                ClearTooltip(InformationTooltip)
-                            </OnMouseExit>
                         </Control>
-                        <Control name="$(parent)WeaponTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                        <Control name="$(parent)WeaponTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ArmorTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                             <Dimensions x="200" />
-
-                            <OnMouseEnter>
-                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                                SetTooltipText(InformationTooltip, "Choose weapon types")
-                            </OnMouseEnter>
-
-                            <OnMouseExit>
-                                ClearTooltip(InformationTooltip)
-                            </OnMouseExit>
                         </Control>
-                        <Control name="$(parent)EquipmentTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                        <Control name="$(parent)EquipmentTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                             <Dimensions x="200" />
-
-                            <OnMouseEnter>
-                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                                SetTooltipText(InformationTooltip, "Choose equip types")
-                            </OnMouseEnter>
-
-                            <OnMouseExit>
-                                ClearTooltip(InformationTooltip)
-                            </OnMouseExit>
                         </Control>
 
-                        <Backdrop name="$(parent)TextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
+                        <!-- Filter edit box - Name text search -->
+                        <Backdrop name="$(parent)TextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)SetTypeFilter" offsetX="0" offsetY="5" />
                             <Dimensions x="200" />
                             <Controls>
@@ -148,34 +149,18 @@
                             </Controls>
                         </Backdrop>
 
-                        <Control name="$(parent)DLCIdFilter" inherits="ZO_MultiselectComboBox" level="1">
+                        <!-- Filter more MultiSelect dropdown boxes -->
+                        <Control name="$(parent)DLCIdFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ArmorTypeFilter" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="5" />
                             <Dimensions x="200" />
-
-                            <OnMouseEnter>
-                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                                SetTooltipText(InformationTooltip, "Choose DLC ID")
-                            </OnMouseEnter>
-
-                            <OnMouseExit>
-                                ClearTooltip(InformationTooltip)
-                            </OnMouseExit>
                         </Control>
-                        <Control name="$(parent)EnchantSearchCategoryTypeFilter" inherits="ZO_MultiselectComboBox" level="1">
+                        <Control name="$(parent)EnchantSearchCategoryTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)DLCIdFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                             <Dimensions x="200" />
-
-                            <OnMouseEnter>
-                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                                SetTooltipText(InformationTooltip, "Choose Enchant search category types")
-                            </OnMouseEnter>
-
-                            <OnMouseExit>
-                                ClearTooltip(InformationTooltip)
-                            </OnMouseExit>
                         </Control>
 
-                        <Backdrop name="$(parent)BonusTextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
+                        <!-- Filter edit box - Bonus text search -->
+                        <Backdrop name="$(parent)BonusTextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)TextSearch" offsetX="0" offsetY="5" />
                             <Dimensions x="200" />
                             <Controls>
@@ -183,31 +168,38 @@
                             </Controls>
                         </Backdrop>
 
-                        <Control name="$(parent)NumBonusFilter" inherits="ZO_MultiselectComboBox" level="1">
+                        <!-- Filter more MultiSelect dropdown boxes -->
+                        <Control name="$(parent)NumBonusFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)BonusTextSearch" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                             <Dimensions x="80" />
+                        </Control>
 
-                            <OnMouseEnter>
-                                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                                SetTooltipText(InformationTooltip, "Number of bonus")
-                            </OnMouseEnter>
-
-                            <OnMouseExit>
-                                ClearTooltip(InformationTooltip)
-                            </OnMouseExit>
+                        <!-- Filter more MultiSelect dropdown boxes -->
+                        <Control name="$(parent)DropZoneFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)NumBonusFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="190" />
+                        </Control>
+                        <Control name="$(parent)DropMechanicsFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DropZoneFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="200" />
+                        </Control>
+                        <Control name="$(parent)DropLocationsFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DropMechanicsFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="180" />
                         </Control>
 
 
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)Content" override="true" level="0">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Filters" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="0" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="-5" />
+                <!-- Filter results -->
+                <Control name="$(parent)Content" override="true" tier="LOW" layer="CONTROLS" level="0">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Filters" relativePoint="BOTTOMLEFT" offsetX="8" offsetY="0" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="-8" offsetY="-16" />
                     <Controls>
 
                         <!-- ZO_SortFilterScrollList - Sort header -->
-                        <Control name="$(parent)Headers" level="1">
+                        <Control name="$(parent)Headers" tier="LOW" layer="CONTROLS" level="1">
                             <Dimensions y="30" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
                             <Controls>
@@ -235,11 +227,19 @@
                                     <Dimensions y="30" />
                                     <DimensionConstraints minX="40" />
                                 </Control>
+                                <Control name="$(parent)DropLocations" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, "Drop locations", "dropLocationSort", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)EquipSlot" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="200" />
+                                </Control>
                                 <Control name="$(parent)SetId" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
                                         ZO_SortHeader_Initialize(self, "ID", "setId", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)EquipSlot" />
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DropLocations" />
                                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
                                     <Dimensions y="30" />
                                     <DimensionConstraints minX="20" />
@@ -248,17 +248,19 @@
                         </Control>
 
                         <!-- ZO_SortFilterScrollList -->
-                        <Control name="$(parent)List" inherits="ZO_ScrollList" level="1">
+                        <Control name="$(parent)List" inherits="ZO_ScrollList" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="0" />
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="-6" />
                         </Control>
 
-                        <Label name="$(parent)Counter" font="ZoFontGameSmall" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" level="1">
+                        <!-- Counter - Showing currently number of filtered rows -->
+                        <Label name="$(parent)Counter" font="ZoFontGameSmall" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="0" />
                         </Label>
                     </Controls>
                 </Control>
 
+                <!-- Buttons at the top -->
                 <Button name="$(parent)ButtonClose" tier="LOW" layer="CONTROLS" level="2">
 					<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT"
 							offsetX="6"  offsetY="4" />
@@ -279,7 +281,7 @@
                     </OnMouseExit>
                 </Button>
 
-                <Button name="$(parent)ButtonSearch" level="1">
+                <Button name="$(parent)ButtonSearch" tier="LOW" layer="CONTROLS" level="2">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="7" />
                     <Dimensions x="26" y="26" />
                     <Textures normal="/esoui/art/buttons/searchbutton_normal.dds"
@@ -291,14 +293,14 @@
                     </OnClicked>
                     <OnMouseEnter>
                         InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                        SetTooltipText(InformationTooltip, GetString(SI_SCREEN_NARRATION_EDIT_BOX_SEARCH_NAME))
+                        SetTooltipText(InformationTooltip, GetString(SI_TRADING_HOUSE_DO_SEARCH))
                     </OnMouseEnter>
                     <OnMouseExit>
                         ClearTooltip(InformationTooltip)
                     </OnMouseExit>
                 </Button>
 
-                <Button name="$(parent)ButtonReset" level="1">
+                <Button name="$(parent)ButtonReset" tier="LOW" layer="CONTROLS" level="1">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ButtonSearch" relativePoint="TOPLEFT" offsetX="-5" offsetY="0" />
                     <Dimensions x="26" y="26" />
                     <Textures normal="/esoui/art/buttons/switch_up.dds"
@@ -310,18 +312,17 @@
                     </OnClicked>
                     <OnMouseEnter>
                         InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-                        SetTooltipText(InformationTooltip, GetString(SI_OPTIONS_RESET))
+                        SetTooltipText(InformationTooltip, GetString(SI_TRADING_HOUSE_RESET_SEARCH))
                     </OnMouseEnter>
                     <OnMouseExit>
                         ClearTooltip(InformationTooltip)
                     </OnMouseExit>
                 </Button>
-
             </Controls>
         </TopLevelControl>
 
 
-<!-- LibSets Search UI - Keybaord mode - Set tooltip -->
+        <!-- LibSets Search UI - Keybaord mode - Set tooltip -->
 		<TopLevelControl name="LibSets_SearchUI_TooltipTopLevel" inherits="TooltipTopLevel">
 			<Controls>
 				<Tooltip name="LibSets_SearchUI_Tooltip" inherits="ZO_ItemIconTooltip"/>

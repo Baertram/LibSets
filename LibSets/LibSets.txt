@@ -54,5 +54,9 @@ LibSets_Debug.lua
 ##XML - Search
 XML/SearchUI/LibSets_SearchUI_Shared.lua
 XML/SearchUI/LibSets_SearchUI.xml
+## Keyboard
+XML/SearchUI/Keyboard/LibSets_SearchUI_List_Keyboard.lua
 XML/SearchUI/Keyboard/LibSets_SearchUI_Keyboard.lua
-XML/SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua
+## Gamepad
+## XML/SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua Non functional/supported as of 20231011
+

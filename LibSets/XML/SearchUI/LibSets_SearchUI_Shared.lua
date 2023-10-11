@@ -523,6 +523,26 @@ end
 
 
 --[[ XML Handlers ]]--
+function LibSets_SearchUI_Shared_ControlTooltip(control, myAnchorPoint, anchorTo, toAnchorPoint, offsetX, offsetY)
+    if control == nil or control.tooltipText == nil or control.tooltipText == "" then return end
+    myAnchorPoint = myAnchorPoint or BOTTOM
+    anchorTo = anchorTo or control
+    toAnchorPoint = toAnchorPoint or TOP
+    offsetX = offsetX or 0
+    offsetY = offsetY or 0
+    InitializeTooltip(InformationTooltip, anchorTo, myAnchorPoint, offsetX, offsetY, toAnchorPoint)
+    SetTooltipText(InformationTooltip, control.tooltipText)
+end
+
+function LibSets_SearchUI_Shared_SortHeaderTooltip(sortHeaderColumn)
+    if sortHeaderColumn == nil or sortHeaderColumn.name == nil or sortHeaderColumn.name == "" then return end
+    local nameLabel = sortHeaderColumn:GetNamedChild("Name")
+    if nameLabel ~= nil and nameLabel:WasTruncated() then
+        InitializeTooltip(InformationTooltip, sortHeaderColumn, BOTTOM, 0, -10, TOP)
+        SetTooltipText(InformationTooltip, sortHeaderColumn.name)
+    end
+end
+
 function LibSets_SearchUI_Shared_ToggleUI(slashOptions)
     if IsInGamepadPreferredMode() then
         if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then

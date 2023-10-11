@@ -394,17 +394,23 @@ local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
 
 local libZone
 
-
 --local lib variables
+local localizationData
 local supportedLanguages =              lib.supportedLanguages
 local supportedLanguageChoices =        lib.supportedLanguageChoices
 local supportedLanguageChoicesValues =  lib.supportedLanguageChoicesValues
 local supportedLanguageChoicesTooltips =lib.supportedLanguageChoicesTooltips
 
 local undauntedChestIds =               lib.undauntedChestIds
+local dropZones     =                   lib.dropZones
+local setId2ZoneIds =                   lib.setId2DropZones
+local zoneId2SetIds =                   lib.dropZone2SetIds
 local allowedDropMechanics =            lib.allowedDropMechanics
 local dropMechanicIdToName =            lib.dropMechanicIdToName
 local dropMechanicIdToNameTooltip =     lib.dropMechanicIdToNameTooltip
+local dropLocationNames =               lib.dropLocationNames
+local dropLocation2SetIds =             lib.dropLocationNames2SetIds
+local setId2DropLocations =             lib.setId2DropLocationNames
 local possibleDlcTypes =                lib.possibleDlcTypes
 local possibleDlcIds =                  lib.possibleDlcIds
 local DLCandCHAPTERdata =               lib.DLCAndCHAPTERData
@@ -461,6 +467,28 @@ local function removeLanguages(tabVar, langToKeep)
     end
     return retTab
 end
+
+local function langAllowedCheck(lang)
+    lang = lang or clientLang
+    lang = strlower(lang)
+    if not supportedLanguages[lang] then
+        lang = fallbackLang
+    end
+    return lang
+end
+
+local function getLocalizedText(textName, lang, ...)
+    localizationData = localizationData or lib.localization
+    lang = langAllowedCheck(lang)
+    local localizedText = localizationData[lang][textName]
+
+    local strForParams = {...}
+    if strForParams ~= nil and #strForParams <= 7 then
+        localizedText = string.format(localizedText, unpack(strForParams))
+    end
+    return localizedText or ""
+end
+lib.GetLocalizedText = getLocalizedText
 
 local function validateValueAgainstCheckTable(numberOrTable, checkTable, isAnyInCheckTable, doLocalDebug)
     isAnyInCheckTable = isAnyInCheckTable or false
@@ -733,6 +761,14 @@ local function LoadSets()
     if lib.setsScanning then return end
     lib.setsScanning = true
     --Reset variables
+    dropZones = {}
+    setId2ZoneIds = {}
+    zoneId2SetIds = {}
+    dropLocationNames = {}
+    setId2DropLocations = {}
+    dropLocation2SetIds = {}
+    local dropLocationNamesAdded = {}
+
     lib.setTypeToSetIdsForSetTypeTable = {}
     --The mapping table for the internal library set tables and counter variables
     local setTypeToLibraryInternalVariableNames = lib.setTypeToLibraryInternalVariableNames
@@ -786,7 +822,6 @@ local function LoadSets()
                             refToSetIdTable = lib[internalLibsSetTableName][setId]
                         end
                     end
-
                 end
                 --Store all other data to the set's table
                 if refToSetIdTable ~= nil then
@@ -811,8 +846,67 @@ local function LoadSets()
                     end
                     --Is the setsData containing the entry for "allowed proc set in PvP"?
                     if setInfo[setId] ~= nil and (setInfo[setId].isProcSetAllowedInPvP ~= nil and
-                        setInfo[setId].isProcSetAllowedInPvP == LIBSETS_SET_ITEMID_TABLE_VALUE_OK) then
+                            setInfo[setId].isProcSetAllowedInPvP == LIBSETS_SET_ITEMID_TABLE_VALUE_OK) then
                         preloadedSetsWithProcsAllowedInPvP[setId] = refToSetIdTable
+                    end
+                end
+
+                --Zone and drop location data
+                if setInfo[setId] ~= nil then
+                    if setInfo[setId].zoneIds ~= nil then
+                        setId2ZoneIds[setId] = {}
+                        for _, zoneId in ipairs(setInfo[setId].zoneIds) do
+                            dropZones[zoneId] = true
+                            setId2ZoneIds[setId][zoneId] = true
+                            zoneId2SetIds[zoneId] = zoneId2SetIds[zoneId] or {}
+                            zoneId2SetIds[zoneId][setId] = true
+                        end
+                    end
+                    if setInfo[setId].dropMechanicDropLocationNames ~= nil then
+                        for languageOfDropLocationName, dropLocationNamesInLang in pairs(setInfo[setId].dropMechanicDropLocationNames) do
+                            for _, dropLocationNameInLang in ipairs(dropLocationNamesInLang) do
+                                if dropLocationNameInLang ~= "" then
+                                    --Prevent duplicate entries, per language
+                                    if dropLocationNamesAdded[languageOfDropLocationName] == nil or not dropLocationNamesAdded[languageOfDropLocationName][dropLocationNameInLang] then
+                                        dropLocationNamesAdded[languageOfDropLocationName] = dropLocationNamesAdded[languageOfDropLocationName] or {}
+                                        dropLocationNamesAdded[languageOfDropLocationName][dropLocationNameInLang] = true
+
+                                        dropLocationNames[languageOfDropLocationName] = dropLocationNames[languageOfDropLocationName] or {}
+                                        dropLocationNames[languageOfDropLocationName][#dropLocationNames[languageOfDropLocationName] + 1] = dropLocationNameInLang
+                                    end
+
+                                    setId2DropLocations[setId] = setId2DropLocations[setId] or {}
+                                    setId2DropLocations[setId][languageOfDropLocationName] = setId2DropLocations[setId][languageOfDropLocationName] or {}
+                                    setId2DropLocations[setId][languageOfDropLocationName][dropLocationNameInLang] = true
+                                    dropLocation2SetIds[languageOfDropLocationName] = dropLocation2SetIds[languageOfDropLocationName] or {}
+                                    dropLocation2SetIds[languageOfDropLocationName][dropLocationNameInLang] = dropLocation2SetIds[languageOfDropLocationName][dropLocationNameInLang] or {}
+                                    dropLocation2SetIds[languageOfDropLocationName][dropLocationNameInLang][setId] = true
+                                end
+                            end
+                        end
+                    end
+                else
+                    setId2ZoneIds[setId] = nil
+                    if NonContiguousCount(zoneId2SetIds) > 0 then
+                        for zoneId, setIdsInZone in pairs(zoneId2SetIds) do
+                            for setIdInZone, isActive in pairs(setIdsInZone) do
+                                if setIdInZone == setId and isActive == true then
+                                    zoneId2SetIds[zoneId][setId] = nil
+                                end
+                            end
+                        end
+                    end
+                    setId2DropLocations[setId] = nil
+                    if NonContiguousCount(dropLocation2SetIds) > 0 then
+                        for languageOfDropLocationName, dropLocationNamesInLang in pairs(dropLocation2SetIds) do
+                            for dropLocationNamesInLang, setIdsOfDropLocationInLang in pairs(dropLocationNamesInLang) do
+                                for setIdForDropLocation, isActive in pairs(setIdsOfDropLocationInLang) do
+                                    if setIdForDropLocation == setId and isActive == true then
+                                        dropLocation2SetIds[languageOfDropLocationName][dropLocationNamesInLang][setIdForDropLocation] = nil
+                                    end
+                                end
+                            end
+                        end
                     end
                 end
             else
@@ -824,6 +918,29 @@ local function LoadSets()
                 preloadedSetNames[setId] = nil
                 preloadedNonESOsetIdSetNames[setId] = nil
                 preloadedSetsWithProcsAllowedInPvP[setId] = nil
+
+                setId2ZoneIds[setId] = nil
+                if NonContiguousCount(zoneId2SetIds) > 0 then
+                    for zoneId, setIdsInZone in pairs(zoneId2SetIds) do
+                        for setIdInZone, isActive in pairs(setIdsInZone) do
+                            if setIdInZone == setId and isActive == true then
+                                zoneId2SetIds[zoneId][setId] = nil
+                            end
+                        end
+                    end
+                end
+                setId2DropLocations[setId] = nil
+                if NonContiguousCount(dropLocation2SetIds) > 0 then
+                    for languageOfDropLocationName, dropLocationNamesInLang in pairs(dropLocation2SetIds) do
+                        for dropLocationNamesInLang, setIdsOfDropLocationInLang in pairs(dropLocationNamesInLang) do
+                            for setIdForDropLocation, isActive in pairs(setIdsOfDropLocationInLang) do
+                                if setIdForDropLocation == setId and isActive == true then
+                                    dropLocation2SetIds[languageOfDropLocationName][dropLocationNamesInLang][setIdForDropLocation] = nil
+                                end
+                            end
+                        end
+                    end
+                end
             end
         end
     end
@@ -1793,9 +1910,7 @@ end
 --> Returns:    String setTypeName
 function lib.GetSetTypeName(libSetsSetType, lang)
     if libSetsSetType == nil then return end
-    lang = lang or clientLang
-    lang = strlower(lang)
-    if not supportedLanguages[lang] then return end
+    lang = langAllowedCheck(lang)
     local allowedLibSetsSetTypes = lib.allowedSetTypes
     local allowedSetType = allowedLibSetsSetTypes[libSetsSetType] or false
     if not allowedSetType then return end
@@ -1822,9 +1937,7 @@ end
 function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return end
     if not allowedDropMechanics[libSetsDropMechanicId] then return end
-    lang = lang or clientLang
-    lang = strlower(lang)
-    if not supportedLanguages[lang] then return end
+    lang = langAllowedCheck(lang)
     local dropMechanicNames = dropMechanicIdToName[lang]
     local dropMechanicTooltipNames = dropMechanicIdToNameTooltip[lang]
     if dropMechanicNames == nil or dropMechanicTooltipNames == nil then return false end
@@ -1915,6 +2028,51 @@ end
 --Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 function lib.GetAllDropMechanics()
     return allowedDropMechanics
+end
+
+--Returns the table of dropZones of LibSets: All sets data was scanned for zoneIds where it could drop, and a complete list
+--of lib.dropZones = {[zoneId] = true, ... } was created
+function lib.GetAllDropZones()
+    if not checkIfSetsAreLoadedProperly() then return end
+    return dropZones
+end
+
+--Returns table LibSets.zoneId2SetId
+function lib.GetDropZonesBySetId(setId)
+    if not checkIfSetsAreLoadedProperly() then return end
+    if setId == nil or setId2ZoneIds[setId] == nil then return end
+    return setId2ZoneIds[setId]
+end
+
+--Returns table LibSets.setId2ZoneId was created.
+function lib.GetSetIdsByDropZone(zoneId)
+    if not checkIfSetsAreLoadedProperly() then return end
+    if zoneId == nil or zoneId2SetIds[zoneId] == nil then return end
+    return zoneId2SetIds[zoneId]
+end
+
+--Returns the table of dropLocationNames of LibSets: All sets data was scanned for dropLocation names, and a complete list
+--of lib.dropLocationNames = {["de"] = { "Name1", "Name2", ... }, ["en"] = { "Name1", "Name2", ...} } was created
+function lib.GetAllDropLocationNames(lang)
+    if not checkIfSetsAreLoadedProperly() then return end
+    lang = langAllowedCheck(lang)
+    return dropLocationNames[lang]
+end
+
+--Returns table LibSets.setId2DropLocationNames
+function lib.GetDropLocationNamesBySetId(setId, lang)
+    if not checkIfSetsAreLoadedProperly() then return end
+    if setId == nil or setId2DropLocations[setId] == nil then return end
+    lang = langAllowedCheck(lang)
+    return setId2DropLocations[setId][lang]
+end
+
+--Returns table LibSets.dropLocationNames2SetIds was created.
+function lib.GetSetIdsByDropLocationName(dropLocationName, lang)
+    if not checkIfSetsAreLoadedProperly() then return end
+    lang = langAllowedCheck(lang)
+    if dropLocationName == nil or dropLocation2SetIds[lang] == nil then return end
+    return dropLocation2SetIds[lang][dropLocationName]
 end
 
 
@@ -2024,10 +2182,8 @@ end
 --> Returns:    String setName
 function lib.GetSetName(setId, lang)
     if setId == nil then return end
-    lang = lang or clientLang
     if not checkIfSetsAreLoadedProperly() then return end
-    lang = strlower(lang)
-    if not supportedLanguages[lang] then return end
+    lang = langAllowedCheck(lang)
     local setNames = {}
     if allSetNamesCached == nil or allSetNamesCached[setId] == nil or allSetNamesCached[setId][lang] == nil then
         if isNoESOSet(setId) then
@@ -2451,10 +2607,8 @@ end
 --> lang String: The language to check for. Can be left empty and the client language will be used then
 --> Returns:  NILABLE number setId, NILABLE table setNames
 function lib.GetSetByName(setName, lang)
-    lang = lang or clientLang
-    lang = strlower(lang)
-    if not supportedLanguages[lang] then return end
     if not checkIfSetsAreLoadedProperly() then return end
+    lang = langAllowedCheck(lang)
     local setNamesNonESO = preloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
     local setNames = preloaded[LIBSETS_TABLEKEY_SETNAMES]
     for setId, namesOfSets in pairs(setNames) do
@@ -2556,9 +2710,7 @@ end
 --> Returns:    name undauntedChestName
 function lib.GetUndauntedChestName(undauntedChestId, lang)
     if undauntedChestId < 1 or undauntedChestId > lib.countUndauntedChests then return end
-    lang = lang or clientLang
-    lang = strlower(lang)
-    if not supportedLanguages[lang] then return end
+    lang = langAllowedCheck(lang)
     if not undauntedChestIds or not undauntedChestIds[lang] or not undauntedChestIds[lang][undauntedChestId] then return end
     local undauntedChestNameLang = undauntedChestIds[lang]
     --Fallback language "EN"
@@ -2572,8 +2724,7 @@ end
 --> Returns:    name zoneName
 function lib.GetZoneName(zoneId, lang)
     if not zoneId then return end
-    lang = lang or clientLang
-    lang = strlower(lang)
+    lang = langAllowedCheck(lang)
     local zoneName = ""
     if libZone ~= nil then
         zoneName = libZone:GetZoneName(zoneId, lang)
