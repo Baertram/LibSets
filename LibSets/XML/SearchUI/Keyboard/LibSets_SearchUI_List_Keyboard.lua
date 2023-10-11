@@ -161,7 +161,7 @@ function LibSets_SearchUI_List:FilterScrollList()
 
         local addItemToList = false
 
-        --Search for text/set bonuses
+        --Search for name/ID text, set bonuses text
         if searchIsEmpty == true or self._parentObject:CheckForMatch(data, searchInput) then
             if bonusSearchIsEmpty == true or self._parentObject:SearchSetBonuses(data.bonuses, bonusSearchInput) then
                 addItemToList = true

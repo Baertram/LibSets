@@ -271,40 +271,7 @@ local function string_split (inputstr, sep)
     return t
 end
 
-function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
-    --d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
-    --Search by name or setId
-    -->Split at ,
-    local namesOrIdsTab = string_split(searchInput, ",")
-    if namesOrIdsTab == nil or #namesOrIdsTab == 0 then return false end
-
-    local isMatch = false
-    for _, nameOrId in ipairs(namesOrIdsTab) do
-        isMatch = false
-        local searchInputNumber = tonumber(nameOrId)
-        if searchInputNumber ~= nil then
-            local searchValueType = type(searchInputNumber)
-            if searchValueType == "number" then
-                isMatch = searchInputNumber == data.setId or false
-            end
-        else
-            isMatch = self.stringSearch:IsMatch(nameOrId, data)
-        end
-        if isMatch == true then return true end
-    end
-    return false
-end
-
-
-function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm)
---d("[LibSets_SearchUI_Keyboard.ProcessItemEntry] stringSearch: " ..tostring(stringSearch) .. ", setName: " .. tostring(data.name:lower()) .. ", searchTerm: " .. tostring(searchTerm))
-	if zo_plainstrfind(data.name:lower(), searchTerm) then
-		return true
-	end
-	return false
-end
-
-function LibSets_SearchUI_Shared:OrderedSearch(haystack, needles)
+local function orderedSearch(haystack, needles)
 	-- A search for "spell damage" should match "Spell and Weapon Damage" but
 	-- not "damage from enemy spells", so search term order must be considered
 	haystack = haystack:lower()
@@ -318,12 +285,12 @@ function LibSets_SearchUI_Shared:OrderedSearch(haystack, needles)
 	return true
 end
 
-function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
+local function searchFilterPrefix(searchInput, searchTab)
 	local curpos = 1
 	local delim
 	local exclude = false
     --Check the searchInput for prefix + (include) or - (exclude) and split at , to find all
-    --set bonuses
+    --entries in the table searchTab (e.g. bonuses)
 	repeat
 		local found = false
 		delim = searchInput:find("[+,-]", curpos)
@@ -331,8 +298,8 @@ function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
 		local searchQuery = searchInput:sub(curpos, delim - 1)
 		--if searchQuery:find("%S+") then   --find no whitepaces
         if searchQuery:find("[^,]+") then      --find no ,
-			for i = 1, #bonuses do
-				if self:OrderedSearch(bonuses[i], searchQuery) then
+			for i = 1, #searchTab do
+				if orderedSearch(searchTab[i], searchQuery) then
 					found = true
 					break
 				end
@@ -344,6 +311,45 @@ function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
 		if delim ~= 0 then exclude = searchInput:sub(delim, delim) == "-" end
 	until delim == 0
 	return true
+end
+
+function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
+    --d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
+    --Search by name or setId
+    -->Split at ,
+    local namesOrIdsTab = string_split(searchInput, ",")
+    if namesOrIdsTab == nil or #namesOrIdsTab == 0 then return false end
+
+    local isMatch = searchFilterPrefix(searchInput, namesOrIdsTab)
+    if isMatch == true then
+        for _, nameOrId in ipairs(namesOrIdsTab) do
+            isMatch = false
+            local searchInputNumber = tonumber(nameOrId)
+            if searchInputNumber ~= nil then
+                local searchValueType = type(searchInputNumber)
+                if searchValueType == "number" then
+                    isMatch = searchInputNumber == data.setId or false
+                end
+            else
+                isMatch = self.stringSearch:IsMatch(nameOrId, data)
+            end
+            if isMatch == true then return true end
+        end
+    end
+    return false
+end
+
+
+function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm)
+--d("[LibSets_SearchUI_Keyboard.ProcessItemEntry] stringSearch: " ..tostring(stringSearch) .. ", setName: " .. tostring(data.name:lower()) .. ", searchTerm: " .. tostring(searchTerm))
+	if zo_plainstrfind(data.name:lower(), searchTerm) then
+		return true
+	end
+	return false
+end
+
+function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
+	return searchFilterPrefix(searchInput, bonuses)
 end
 
 function LibSets_SearchUI_Shared:OnFilterChanged() --Override!
