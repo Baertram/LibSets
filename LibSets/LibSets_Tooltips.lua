@@ -1612,10 +1612,10 @@ end
 ]]
 
 local function tooltipOnAddGameData(tooltipControl, tooltipData)
-d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
+--d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
     --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
     if tooltipData == tooltipGameDataEntryToAddAfter then
-d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
+--d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
         if not anyTooltipInfoToAdd then return end
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
