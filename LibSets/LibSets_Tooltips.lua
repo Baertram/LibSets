@@ -367,6 +367,25 @@ local function getItemLinkFromControl(rowControl)
         end
     end
 
+    --Is a master crafter set station with craftable set nodes?
+    local setData = rowControl.node ~= nil and rowControl.node.data
+    if type(setData) == "table" and setData.GetItemSetId ~= nil then
+        --return setData:GetItemSetId()
+        --These sets do not have any itemlink here, as we only select the setId to craft an item from and the tooltip shows only the geneeric set info.
+        --So we need to create one itemlink here unfortunately
+        local setId = setData:GetItemSetId()
+        if setId ~= nil then
+            local itemIdOfCraftableSetId = lib.GetSetFirstItemId(setId)
+            if itemIdOfCraftableSetId ~= nil then
+                local itemLinkOfCraftableSet = lib.buildItemLink(itemIdOfCraftableSetId)
+                if itemLinkOfCraftableSet ~= nil then
+                    return itemLinkOfCraftableSet, setId
+                end
+            end
+        end
+    end
+
+
     --gotta do this in case deconstruction, or player equipment
     local dataEntry = rowControl.dataEntry
     local data = rowControl.data
@@ -387,7 +406,15 @@ local function getItemLinkFromControl(rowControl)
             itemLink = data.itemLink
         end
     else
-        if dataEntryData then
+        if dataEntryData ~= nil then
+            --Set collections book? get SetId
+            --[[
+            local headerData = dataEntryData.header
+            if headerData ~= nil and headerData.GetId ~= nil then
+                return headerData:GetId()
+            end
+            ]]
+
             if dataEntryData.lootId then
                 return glil(dataEntryData.lootId, LINK_STYLE_BRACKETS)
             elseif rowControl.index and name == "ZO_InteractWindowRewardArea" then
@@ -461,16 +488,16 @@ end
 
 
 local function getMouseOverLink()
-	local itemLink = getItemLinkFromControl(moc())
-    return itemLink
+	local itemLink, setId = getItemLinkFromControl(moc())
+    return itemLink, setId
 end
 
 local function getLastItemLink(tooltipControl)
-	local itemLink
+	local itemLink, setId
     if tooltipControl == popupTooltip then
         itemLink = lastTooltipItemLink		-- this gets set on the prehook of PopupTooltip:SetLink
     elseif tooltipControl == itemTooltip or tooltipControl == infoTooltip then
-        itemLink = getMouseOverLink()
+        itemLink, setId = getMouseOverLink()
         lastTooltipItemLink = itemLink
     elseif tooltipControl.GetName ~= nil then
         --Custom added tooltips
@@ -479,7 +506,7 @@ local function getLastItemLink(tooltipControl)
             lastTooltipItemLink = itemLink
         end
     end
-	return itemLink
+	return itemLink, setId
 end
 
 local function checkTraitsNeededGiven(setData)
@@ -1334,10 +1361,11 @@ end
 
 local function tooltipItemCheck(tooltipControl, tooltipData)
     --Get the item
-    local itemLink = getLastItemLink(tooltipControl)
+    local itemLink, setIdOfCraftableSet = getLastItemLink(tooltipControl)
     if not itemLink or itemLink == "" then return false, nil end
     --Check if tooltip shows a set item
     local isSet, setId = isTooltipOfSetItem(itemLink, tooltipData)
+    if setIdOfCraftableSet ~= nil and setId ~= setIdOfCraftableSet then return false, nil, nil end
     return isSet, setId, itemLink
 end
 
@@ -1584,10 +1612,10 @@ end
 ]]
 
 local function tooltipOnAddGameData(tooltipControl, tooltipData)
---d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
+d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
     --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
     if tooltipData == tooltipGameDataEntryToAddAfter then
---d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
+d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
         if not anyTooltipInfoToAdd then return end
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
