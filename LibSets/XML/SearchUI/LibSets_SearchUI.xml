@@ -44,7 +44,7 @@
         </Backdrop>
 
 
-        <!--Virtual Multiselect ComboBoxes -- Was ZO_MultiselectComboBox before! -->
+        <!--Virtual Multiselect ComboBoxes - Was ZO_MultiselectComboBox before! -->
 		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
             <OnMouseEnter>
                 LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)

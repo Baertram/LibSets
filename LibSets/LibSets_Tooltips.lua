@@ -977,6 +977,10 @@ end
 
 local function buildSetDataText(setData, itemLink, forTooltip)
     if not setData then return end
+    if not setData.setId then
+d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
+        return
+    end
     forTooltip = forTooltip or false
 
     local setInfoText
@@ -1078,8 +1082,8 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     --local setId = setData.setId
     local setType = setData.setType
 
---d(string.format("<<1>> %s, <<2>> %s, <<3>> %s, <<4>> %s, <<5>> %s, <<6>> %s",
---        tos(setTypePlaceholder), tos(dropMechanicPlaceholder), tos(dropZonesPlaceholder), tos(bossNamePlaceholder), tos(neededTraitsPlaceholder), tos(dlcNamePlaceHolder)))
+    --d(string.format("<<1>> %s, <<2>> %s, <<3>> %s, <<4>> %s, <<5>> %s, <<6>> %s",
+    --        tos(setTypePlaceholder), tos(dropMechanicPlaceholder), tos(dropZonesPlaceholder), tos(bossNamePlaceholder), tos(neededTraitsPlaceholder), tos(dlcNamePlaceHolder)))
 
     --Reconstruction
     local isReconstructableSet = isilscp(itemLink)
@@ -1096,7 +1100,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     --Set Type
     if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
---d(">setTypeText: " ..tos(setTypeText))
+        --d(">setTypeText: " ..tos(setTypeText))
     end
     setInfoParts["setType"] = {
         enabled = setTypeText ~= nil,
@@ -1108,7 +1112,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     --Craftable
     if not isReconstructableSet and ((useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits)) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
---d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
+        --d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
     end
     setInfoParts["crafted"] = {
         enabled = not isReconstructableSet and checkTraitsNeededGiven(setData),
@@ -1120,7 +1124,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     --DLC
     if (useCustomTooltip and dlcNamePlaceHolder) or (not useCustomTooltip and addDLC) then
         setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
---d(">setDLCText: " ..tos(setDLCText))
+        --d(">setDLCText: " ..tos(setDLCText))
     end
     setInfoParts["DLC"] = {
         enabled = setDLCText ~= nil,
@@ -1132,7 +1136,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
 
     --Drop mechanics
     local runDropMechanic = (useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
-                            or (not useCustomTooltip and (addDropMechanic or addBossName or addDropLocation))
+            or (not useCustomTooltip and (addDropMechanic or addBossName or addDropLocation))
     if runDropMechanic then
         --dropZoneNames, dropMechanicNames, dropLocationNames
         getSetDropMechanicInfo(setData)
@@ -1157,7 +1161,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
         else
             setDropZoneStr, setDropMechanicText, setDropLocationsText, setDropOverallTextsPerZone = buildSetDropMechanicInfo(setData, itemLink)
         end
---d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
+        --d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
     end
     setInfoParts["dropMechanics"] = {
         enabled = dropMechanicNames ~= nil and NonContiguousCount(dropMechanicNames) > 0,
@@ -1211,24 +1215,24 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             end
         end
         if isReconstructableSet or not neededTraitsPlaceholder then
-           setNeededTraitsText = ""
---d(">2")
+            setNeededTraitsText = ""
+            --d(">2")
         end
         if not dlcNamePlaceHolder then
             setDLCText = ""
---d(">3")
+            --d(">3")
         end
         if not dropZonesPlaceholder then
             setDropZoneStr = ""
---d(">4")
+            --d(">4")
         end
         if not dropMechanicPlaceholder then
             setDropMechanicText = ""
---d(">5")
+            --d(">5")
         end
         if not bossNamePlaceholder then
             setDropLocationsText = ""
---d(">6")
+            --d(">6")
         end
         if isReconstructableSet and reconstructionCostText ~= nil and reconstructionCostText ~= "" then
             setNeededTraitsText = reconstructionCostText
@@ -1314,26 +1318,26 @@ local function buildSetDataText(setData, itemLink, forTooltip)
         end
     end
 
---d(">>setInfoText: " ..tos(setInfoText))
+    --d(">>setInfoText: " ..tos(setInfoText))
 
-   --[[
-    lib._tooltipData = {
-        setTypeText = setTypeText,
-        setTypeTexture = setTypeTexture,
-        setNeededTraitsText = setNeededTraitsText,
-        setDropZoneStr = setDropZoneStr,
-        setDropMechanicText = setDropMechanicText,
-        setDropLocationsText = setDropLocationsText,
-        setDLCText = setDLCText,
-        dropZoneNames = dropZoneNames,
-        dropMechanicNames = dropMechanicNames,
-        dropLocationNames = dropLocationNames,
-        setData = setData,
-        setDropOverallTextsPerZone = setDropOverallTextsPerZone,
-        --
-        setInfoText = setInfoText,
-    }
-    ]]
+    --[[
+     lib._tooltipData = {
+         setTypeText = setTypeText,
+         setTypeTexture = setTypeTexture,
+         setNeededTraitsText = setNeededTraitsText,
+         setDropZoneStr = setDropZoneStr,
+         setDropMechanicText = setDropMechanicText,
+         setDropLocationsText = setDropLocationsText,
+         setDLCText = setDLCText,
+         dropZoneNames = dropZoneNames,
+         dropMechanicNames = dropMechanicNames,
+         dropLocationNames = dropLocationNames,
+         setData = setData,
+         setDropOverallTextsPerZone = setDropOverallTextsPerZone,
+         --
+         setInfoText = setInfoText,
+     }
+     ]]
 
 
 

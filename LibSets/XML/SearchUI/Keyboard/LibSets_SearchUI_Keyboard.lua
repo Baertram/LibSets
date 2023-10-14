@@ -376,7 +376,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     for DLCId, isValid in pairs(lib.allowedDLCIds) do
         if isValid == true then
-            local entry = DLCIdDropdown:CreateItemEntry(lib.GetDLCName(DLCId, nil))
+            local entry = DLCIdDropdown:CreateItemEntry(lib.GetDLCName(DLCId))
             entry.filterType = DLCId
             DLCIdDropdown:AddItem(entry)
         end

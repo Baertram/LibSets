@@ -5,6 +5,8 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = "["..MAJOR.."]"
 
+local libSets_GetSetInfo = lib.GetSetInfo
+
 --The search UI table
 LibSets.SearchUI = {}
 local searchUI = LibSets.SearchUI
@@ -26,6 +28,40 @@ local twoHandWeaponTypes = {
     [WEAPONTYPE_TWO_HANDED_HAMMER] = true,
     [WEAPONTYPE_TWO_HANDED_SWORD] = true,
 }
+
+--Helper functions
+local function string_split (inputstr, sep)
+    sep = sep or "%s"
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
+local wasSetsDataDropLocationDataAdded = false
+--setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
+local function addDropLocationDataToSetsMasterListBase(defaultMasterListBase, p_setId, p_setData)
+    if p_setId ~= nil and p_setData ~= nil then
+        p_setData.setId = p_setData.setId or p_setId
+        --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
+        if p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
+            p_setData = libSets_GetSetInfo(p_setId, true, nil) --without itemIds, and names only in client laguage
+        end
+        return p_setData
+    else
+        for setId, setData in pairs(defaultMasterListBase) do
+            setData.setId = setData.setId or setId
+            --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
+            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
+                setData = libSets_GetSetInfo(setId, true, nil) --without itemIds, and names only in client laguage
+                defaultMasterListBase[setId] = setData
+            end
+        end
+        wasSetsDataDropLocationDataAdded = true
+        return defaultMasterListBase
+    end
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
@@ -101,6 +137,8 @@ function LibSets_SearchUI_Shared:Reset()
     --Reset all data, internal and the chanegd UI elements
     self:ResetInternal()
     self:ResetUI()
+    --Apply the reset search criteria now
+    self:ApplySearchParamsToUI()
 end
 
 function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
@@ -259,18 +297,8 @@ end
 
 
 ------------------------------------------------
---- Filters
+--- Search filters
 ------------------------------------------------
-
-local function string_split (inputstr, sep)
-    sep = sep or "%s"
-    local t={}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-        table.insert(t, str)
-    end
-    return t
-end
-
 local function orderedSearch(haystack, needles)
 	-- A search for "spell damage" should match "Spell and Weapon Damage" but
 	-- not "damage from enemy spells", so search term order must be considered
@@ -319,30 +347,7 @@ function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
     local namesOrIdsTab = {}
     table.insert(namesOrIdsTab, data.name)
     table.insert(namesOrIdsTab, tostring(data.setId))
-    local isMatch = searchFilterPrefix(searchInput, namesOrIdsTab)
-    return isMatch
-    --[[
-    --Old code, not respecting prefix + or -
-    -->Split at ,
-    --local namesOrIdsTab = string_split(searchInput, ",")
-    --if namesOrIdsTab == nil or #namesOrIdsTab == 0 then return false end
-    if isMatch == true then
-        for _, nameOrId in ipairs(namesOrIdsTab) do
-            isMatch = false
-            local searchInputNumber = tonumber(nameOrId)
-            if searchInputNumber ~= nil then
-                local searchValueType = type(searchInputNumber)
-                if searchValueType == "number" then
-                    isMatch = searchInputNumber == data.setId or false
-                end
-            else
-                isMatch = self.stringSearch:IsMatch(nameOrId, data)
-            end
-            if isMatch == true then return true end
-        end
-    end
-    return false
-    ]]
+    return searchFilterPrefix(searchInput, namesOrIdsTab)
 end
 
 
@@ -355,13 +360,13 @@ function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm
 end
 
 function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
---lib._searchInputBonuses = searchInput
---lib._dataBonuses = bonuses
-	local isMatchInBonuses = searchFilterPrefix(searchInput, bonuses)
---lib._isMatchInBonuses = isMatchInBonuses
-    return isMatchInBonuses
+    return searchFilterPrefix(searchInput, bonuses)
 end
 
+
+------------------------------------------------
+--- Filters
+------------------------------------------------
 function LibSets_SearchUI_Shared:OnFilterChanged() --Override!
     --d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     self.searchParams = nil
@@ -369,39 +374,60 @@ end
 
 --Pre-Filter the masterlist table of e.g. a ZO_SortFilterScrollList
 function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
+    if defaultMasterListBase == nil or NonContiguousCount(defaultMasterListBase) == 0 then return end
     --The search parameters of the filters (multiselect dropdowns) were provided?
     -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
     local searchParams = self.searchParams
     if searchParams ~= nil and NonContiguousCount(searchParams) > 0 then
         local setsBaseList = {}
 
+        local multiSelectFilterDropdownToSearchParamName = self.multiSelectFilterDropdownToSearchParamName
+
         --searchParams is a table with the following possible entries
         -->See format of searchParams at the Initialize function of this class, above!
+        local searchParamsSetType = searchParams[multiSelectFilterDropdownToSearchParamName[self.setTypeFiltersControl]]
+        local searchParamsDLCId = searchParams[multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]]
+        local searchParamsArmorType = searchParams[multiSelectFilterDropdownToSearchParamName[self.armorTypeFiltersControl]]
+        local searchParamsWeaponType = searchParams[multiSelectFilterDropdownToSearchParamName[self.weaponTypeFiltersControl]]
+        local searchParamsEquipmentType = searchParams[multiSelectFilterDropdownToSearchParamName[self.equipmentTypeFiltersControl]]
+        local searchParamsNumBonus = searchParams[multiSelectFilterDropdownToSearchParamName[self.numBonusFiltersControl]]
+        local searchParamsDropZone = searchParams[multiSelectFilterDropdownToSearchParamName[self.dropZoneFiltersControl]]
+        local searchParamsDropMechanic = searchParams[multiSelectFilterDropdownToSearchParamName[self.dropMechanicsFiltersControl]]
+        local searchParamsDropLocation = searchParams[multiSelectFilterDropdownToSearchParamName[self.dropLocationsFiltersControl]]
+        local searchParamsEnchantSearchCategory = searchParams[multiSelectFilterDropdownToSearchParamName[self.enchantSearchCategoryTypeFiltersControl]]
 
         --Pre-Filter the master list now, based on the Multiselect dropdowns
         for setId, setData in pairs(defaultMasterListBase) do
+            if not wasSetsDataDropLocationDataAdded then
+                setData = addDropLocationDataToSetsMasterListBase(defaultMasterListBase, setId, setData)
+                defaultMasterListBase[setId] = setData
+            end
+
             local isAllowed = true
 
 
-            --Multiselect dropdown boxes
-            if searchParams.setTypes ~= nil then
+            --[Multiselect dropdown box filters]
+            --SetTypes
+            if searchParamsSetType ~= nil then
                 isAllowed = false
-                if setData.setType ~= nil and searchParams.setTypes[setData.setType] then
+                if setData.setType ~= nil and searchParamsSetType[setData.setType] then
                     isAllowed = true
                 end
             end
+            --DLC IDs
             if isAllowed == true then
-                if searchParams.dlcIds ~= nil then
+                if searchParamsDLCId ~= nil then
                     isAllowed = false
-                    if setData.dlcId ~= nil and searchParams.dlcIds[setData.dlcId] then
+                    if setData.dlcId ~= nil and searchParamsDLCId[setData.dlcId] then
                         isAllowed = true
                     end
                 end
             end
+            --armorTypes
             if isAllowed == true then
-                if searchParams.armorTypes ~= nil then
+                if searchParamsArmorType ~= nil then
                     isAllowed = false
-                    for armorType, isFiltered in pairs(searchParams.armorTypes) do
+                    for armorType, isFiltered in pairs(searchParamsArmorType) do
                         if isFiltered == true and lib.armorTypesSets[armorType][setId] then
                             isAllowed = true
                             break
@@ -409,10 +435,11 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     end
                 end
             end
+            --weaponTypes
             if isAllowed == true then
-                if searchParams.weaponTypes ~= nil then
+                if searchParamsWeaponType ~= nil then
                     isAllowed = false
-                    for weaponType, isFiltered in pairs(searchParams.weaponTypes) do
+                    for weaponType, isFiltered in pairs(searchParamsWeaponType) do
                         if isFiltered == true and lib.weaponTypesSets[weaponType][setId] then
                             isAllowed = true
                             break
@@ -420,10 +447,11 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     end
                 end
             end
+            --equipmentTypes
             if isAllowed == true then
-                if searchParams.equipmentTypes ~= nil then
+                if searchParamsEquipmentType ~= nil then
                     isAllowed = false
-                    for equipType, isFiltered in pairs(searchParams.equipmentTypes) do
+                    for equipType, isFiltered in pairs(searchParamsEquipmentType) do
                         if isFiltered == true and lib.equipTypesSets[equipType][setId] then
                             isAllowed = true
                             break
@@ -431,30 +459,88 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     end
                 end
             end
+            --enchantSearchCategory
             if isAllowed == true then
-                if searchParams.numBonuses ~= nil then
+                if searchParamsEnchantSearchCategory ~= nil then
                     isAllowed = false
-                    local itemId = lib.GetSetFirstItemId(setId, nil)
-                    if itemId ~= nil then
-                        local itemLink = lib.buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
-                        local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
-
-                        for numBonus, isFiltered in pairs(searchParams.numBonuses) do
-                            if isFiltered == true then
-                                if numBonuses == numBonus then
-                                    isAllowed = true
-                                    break
-                                end
+                    --todo
+                end
+            end
+            --numBonuses
+            if isAllowed == true then
+                if searchParamsNumBonus ~= nil then
+                    isAllowed = false
+                    local numBonuses
+                    if setData.numBonuses == nil then
+                        local itemId = lib.GetSetFirstItemId(setId, nil)
+                        if itemId ~= nil then
+                            local itemLink = lib.buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
+                            local _, _, numBonuses_l = GetItemLinkSetInfo(itemLink, false)
+                            setData.numBonuses = numBonuses_l
+                            numBonuses = numBonuses_l
+                        end
+                    else
+                        numBonuses = setData.numBonuses
+                    end
+                    for numBonus, isFiltered in pairs(searchParamsNumBonus) do
+                        if isFiltered == true then
+                            if numBonuses == numBonus then
+                                isAllowed = true
+                                break
                             end
                         end
                     end
                 end
             end
-
-            --todo
+            --dropZones
             if isAllowed == true then
-                if searchParams.enchantSearchCategoryTypes ~= nil then
+                if searchParamsDropZone ~= nil then
                     isAllowed = false
+                    local dropZones = lib.GetDropZonesBySetId(setId)
+                    if dropZones ~= nil then
+                        for dropZoneId, isFiltered in pairs(searchParamsDropZone) do
+                            if isFiltered == true and dropZones[dropZoneId] then
+                                isAllowed = true
+                                break
+                            end
+                        end
+                    else
+                        isAllowed = true
+                    end
+                end
+            end
+            --dropMechanics
+            if isAllowed == true then
+                if searchParamsDropMechanic ~= nil then
+                    isAllowed = false
+                    local dropMechanics = lib.GetDropMechanic(setId)
+                    if dropMechanics ~= nil then
+                        for dropMechanicId, isFiltered in pairs(searchParamsDropZone) do
+                            if isFiltered == true and dropMechanics[dropMechanicId] then
+                                isAllowed = true
+                                break
+                            end
+                        end
+                    else
+                        isAllowed = true
+                    end
+                end
+            end
+            --dropLocations
+            if isAllowed == true then
+                if searchParamsDropLocation ~= nil then
+                    isAllowed = false
+                    local dropLocationNames = lib.GetDropLocationNamesBySetId(setId)
+                    if dropLocationNames ~= nil then
+                        for dropLocationName, isFiltered in pairs(searchParamsDropZone) do
+                            if isFiltered == true and dropLocationNames[dropLocationName] then
+                                isAllowed = true
+                                break
+                            end
+                        end
+                    else
+                        isAllowed = true
+                    end
                 end
             end
 
@@ -468,8 +554,13 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 setsBaseList[setId] = setData
             end
         end
+        wasSetsDataDropLocationDataAdded = true
 
         return setsBaseList
+    else
+        if not wasSetsDataDropLocationDataAdded then
+            defaultMasterListBase = addDropLocationDataToSetsMasterListBase(defaultMasterListBase, nil, nil)
+        end
     end
     return defaultMasterListBase
 end

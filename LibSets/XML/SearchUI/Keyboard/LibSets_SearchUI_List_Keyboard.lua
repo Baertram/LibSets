@@ -117,12 +117,14 @@ end
 --Build the masterlist based of the sets searched/filtered
 -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
 function LibSets_SearchUI_List:BuildMasterList()
---d("[LibSets_SearchUI_List:BuildMasterList]")
+    --d("[LibSets_SearchUI_List:BuildMasterList]")
     local setsData = lib.setInfo
     self.masterList = {}
 
     --Pr-Filter the masterlist and hide any sets that do not match e.g. the setType, DLCId etc.
     local setsBaseList = self._parentObject:PreFilterMasterList(setsData)
+lib._debugSetsBaseList = setsBaseList
+    if setsBaseList == nil or NonContiguousCount(setsBaseList) == 0 then return end
 
     --Check if any other filters which need the set itemIds are active (multiselect dropdown boxes for armor/weapon/equipment type etc.)
     local isAnyItemIdRelevantFilterActive = self._parentObject:IsAnyItemIdRelevantFilterActive()
@@ -134,6 +136,7 @@ function LibSets_SearchUI_List:BuildMasterList()
     for setId, setData in pairs(setsBaseList) do
         table.insert(self.masterList, self:CreateEntryForSet(setId, setData))
     end
+lib._debugSetsMasterList = self.masterList
 end
 
 --Filter the scroll list by fiter data
@@ -270,6 +273,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local dropLocationSort --a string containing the zoneId of a drop location first, and then the dropLocationIds at that zone?
 
     local setDataText, setInfoParts = buildSetDataText(setData, itemLink, false)
+    --todo add the setInfoParts tables to the data table -> For search comparison
     --[[
     Table setInfoParts contains subtables with keys
     "setType"
