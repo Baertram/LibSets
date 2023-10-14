@@ -39,30 +39,6 @@ local function string_split (inputstr, sep)
     return t
 end
 
-local wasSetsDataDropLocationDataAdded = false
---setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
-local function addDropLocationDataToSetsMasterListBase(defaultMasterListBase, p_setId, p_setData)
-    if p_setId ~= nil and p_setData ~= nil then
-        p_setData.setId = p_setData.setId or p_setId
-        --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
-        if p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
-            p_setData = libSets_GetSetInfo(p_setId, true, nil) --without itemIds, and names only in client laguage
-        end
-        return p_setData
-    else
-        for setId, setData in pairs(defaultMasterListBase) do
-            setData.setId = setData.setId or setId
-            --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
-            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
-                setData = libSets_GetSetInfo(setId, true, nil) --without itemIds, and names only in client laguage
-                defaultMasterListBase[setId] = setData
-            end
-        end
-        wasSetsDataDropLocationDataAdded = true
-        return defaultMasterListBase
-    end
-end
-
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
 ------------------------------------------------------------------------------------------------------------------------
@@ -137,8 +113,8 @@ function LibSets_SearchUI_Shared:Reset()
     --Reset all data, internal and the chanegd UI elements
     self:ResetInternal()
     self:ResetUI()
-    --Apply the reset search criteria now
-    self:ApplySearchParamsToUI()
+    --Apply the search without any criteria now
+    self:StartSearch()
 end
 
 function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
@@ -398,11 +374,6 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
 
         --Pre-Filter the master list now, based on the Multiselect dropdowns
         for setId, setData in pairs(defaultMasterListBase) do
-            if not wasSetsDataDropLocationDataAdded then
-                setData = addDropLocationDataToSetsMasterListBase(defaultMasterListBase, setId, setData)
-                defaultMasterListBase[setId] = setData
-            end
-
             local isAllowed = true
 
 
@@ -463,7 +434,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsEnchantSearchCategory ~= nil then
                     isAllowed = false
-                    --todo
+                    --todo 2023-10-14
                 end
             end
             --numBonuses
@@ -496,8 +467,9 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsDropZone ~= nil then
                     isAllowed = false
-                    local dropZones = lib.GetDropZonesBySetId(setId)
+                    local dropZones = setData.dropZones or lib.GetDropZonesBySetId(setId)
                     if dropZones ~= nil then
+                        setData.dropZones = dropZones
                         for dropZoneId, isFiltered in pairs(searchParamsDropZone) do
                             if isFiltered == true and dropZones[dropZoneId] then
                                 isAllowed = true
@@ -505,7 +477,10 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                             end
                         end
                     else
-                        isAllowed = true
+                        --DropZones are unknown at the setId -> And we selected the !Unknown ones?
+                        if searchParamsDropZone[-1] then
+                            isAllowed = true
+                        end
                     end
                 end
             end
@@ -513,16 +488,15 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsDropMechanic ~= nil then
                     isAllowed = false
-                    local dropMechanics = lib.GetDropMechanic(setId)
+                    local dropMechanics = setData[LIBSETS_TABLEKEY_DROPMECHANIC] or lib.GetDropMechanic(setId, nil, nil)
                     if dropMechanics ~= nil then
-                        for dropMechanicId, isFiltered in pairs(searchParamsDropZone) do
+                        setData[LIBSETS_TABLEKEY_DROPMECHANIC] = dropMechanics
+                        for dropMechanicId, isFiltered in pairs(searchParamsDropMechanic) do
                             if isFiltered == true and dropMechanics[dropMechanicId] then
                                 isAllowed = true
                                 break
                             end
                         end
-                    else
-                        isAllowed = true
                     end
                 end
             end
@@ -530,16 +504,15 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsDropLocation ~= nil then
                     isAllowed = false
-                    local dropLocationNames = lib.GetDropLocationNamesBySetId(setId)
+                    local dropLocationNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] or lib.GetDropLocationNamesBySetId(setId, nil)
                     if dropLocationNames ~= nil then
-                        for dropLocationName, isFiltered in pairs(searchParamsDropZone) do
+                        setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropLocationNames
+                        for dropLocationName, isFiltered in pairs(searchParamsDropLocation) do
                             if isFiltered == true and dropLocationNames[dropLocationName] then
                                 isAllowed = true
                                 break
                             end
                         end
-                    else
-                        isAllowed = true
                     end
                 end
             end
@@ -554,13 +527,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 setsBaseList[setId] = setData
             end
         end
-        wasSetsDataDropLocationDataAdded = true
-
         return setsBaseList
-    else
-        if not wasSetsDataDropLocationDataAdded then
-            defaultMasterListBase = addDropLocationDataToSetsMasterListBase(defaultMasterListBase, nil, nil)
-        end
     end
     return defaultMasterListBase
 end

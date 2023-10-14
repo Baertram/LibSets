@@ -15,7 +15,7 @@ local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
 
 
 --Debugging - TODO: Disable again
-LibSets._debug = {} --todo remove after debugging/testing
+--LibSets._debug = {} --todo remove after debugging/testing
 
 --Local helper functions
 local function addToIndexTable(t)
@@ -31,6 +31,15 @@ local function refreshSearchFilters(selfVar)
     selfVar.resultsList:RefreshFilters()
 end
 
+local function onFilterDropdownEntryMouseEnterCallback(comboBox, entry)
+    if entry == nil or entry.m_data == nil or entry.m_data.tooltipText == nil then return end
+    InitializeTooltip(InformationTooltip, entry, BOTTOM, 0, -10)
+    SetTooltipText(InformationTooltip, entry.m_data.tooltipText)
+end
+
+local function onFilterDropdownEntryMouseExitCallback(comboBox, entry)
+    ClearTooltip(InformationTooltip)
+end
 
 --======================================================================================================================
 --======================================================================================================================
@@ -188,7 +197,6 @@ end
 ------------------------------------------------
 
 function LibSets_SearchUI_Keyboard:UpdateSearchParamsFromSlashcommand(slashOptions)
-lib._debug._slashOptions = slashOptions
     if slashOptions ~= nil then
         --Reset all current search parameters
         self:ResetUI()
@@ -203,7 +211,6 @@ lib._debug._slashOptions = slashOptions
         --Apply the search by name now
         self:ApplySearchParamsToUI()
     end
-lib._debug.searchParams = self.searchParams
 end
 
 function LibSets_SearchUI_Keyboard:ShowUI(slashOptions)
@@ -282,7 +289,6 @@ end
 ------------------------------------------------
 --- Filters
 ------------------------------------------------
-
 function LibSets_SearchUI_Keyboard:InitializeFilters()
     local function OnFilterChanged()
         self:OnFilterChanged()
@@ -290,6 +296,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Set Types multiselect combobox.
     local setTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.setTypeFiltersControl)
+    setTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.setTypeFiltersDropdown = setTypeDropdown
     setTypeDropdown:ClearItems()
     setTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -308,6 +315,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the armor Types multiselect combobox.
     local armorTypeDropdown     = ZO_ComboBox_ObjectFromContainer(self.armorTypeFiltersControl)
+    armorTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.armorTypeFiltersDropdown = armorTypeDropdown
     armorTypeDropdown:ClearItems()
     armorTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -324,6 +332,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the weapon Types multiselect combobox.
     local weaponTypeDropdown    = ZO_ComboBox_ObjectFromContainer(self.weaponTypeFiltersControl)
+    weaponTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.weaponTypeFiltersDropdown = weaponTypeDropdown
     weaponTypeDropdown:ClearItems()
     weaponTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -340,6 +349,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the equipment Types multiselect combobox.
     local equipmentTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.equipmentTypeFiltersControl)
+    equipmentTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.equipmentTypeFiltersDropdown = equipmentTypeDropdown
     equipmentTypeDropdown:ClearItems()
     equipmentTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -366,6 +376,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the DLC Types multiselect combobox.
     local DLCIdDropdown       = ZO_ComboBox_ObjectFromContainer(self.DCLIdFiltersControl)
+    DLCIdDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.DLCIdFiltersDropdown = DLCIdDropdown
     DLCIdDropdown:ClearItems()
     DLCIdDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -384,6 +395,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the enchantment search category Types multiselect combobox.
     local enchantmentSearchCategoryTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.enchantSearchCategoryTypeFiltersControl)
+    enchantmentSearchCategoryTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.enchantSearchCategoryTypeFiltersDropdown = enchantmentSearchCategoryTypeDropdown
     enchantmentSearchCategoryTypeDropdown:ClearItems()
     enchantmentSearchCategoryTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -402,6 +414,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Number of bonuses multiselect combobox.
     local numBonusDropdown = ZO_ComboBox_ObjectFromContainer(self.numBonusFiltersControl)
+    numBonusDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.numBonusFiltersDropdown = numBonusDropdown
     numBonusDropdown:ClearItems()
     numBonusDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -428,10 +441,12 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     local dropZoneIds = lib.GetAllDropZones()
     if dropZoneIds ~= nil then
-        for dropZone, isValid in pairs(dropZoneIds) do
+        for dropZoneId, isValid in pairs(dropZoneIds) do
             if isValid == true then
-                local entry = dropZoneDropdown:CreateItemEntry(zo_strformat(SI_UNIT_NAME, GetZoneNameById(dropZone)))
-                entry.filterType = dropZone
+                local dropZoneName = dropZoneId ~= nil and zo_strformat(SI_UNIT_NAME, GetZoneNameById(dropZoneId))
+                dropZoneName = dropZoneName or "!Unknown"
+                local entry = dropZoneDropdown:CreateItemEntry(dropZoneName)
+                entry.filterType = dropZoneId or -1
                 dropZoneDropdown:AddItem(entry)
             end
         end
@@ -439,7 +454,9 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Drop mechanics multiselect combobox.
     local dropMechanicsDropdown  = ZO_ComboBox_ObjectFromContainer(self.dropMechanicsFiltersControl)
+    dropMechanicsDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.dropMechanicsFiltersDropdown = dropMechanicsDropdown
+
     dropMechanicsDropdown:ClearItems()
     dropMechanicsDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("dropMechanic")
@@ -447,16 +464,21 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     dropMechanicsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     dropMechanicsDropdown:SetSortsItems(true)
 
-    for dropMechanic, isValid in pairs(lib.allowedDropMechanics) do
+    for dropMechanicId, isValid in pairs(lib.allowedDropMechanics) do
         if isValid == true then
-            local entry = dropMechanicsDropdown:CreateItemEntry(lib.GetDropMechanicName(dropMechanic))
-            entry.filterType = dropMechanic
+            local dropMechanicName, dropMechanicTooltip = lib.GetDropMechanicName(dropMechanicId)
+            local entry = dropMechanicsDropdown:CreateItemEntry(dropMechanicName)
+            if dropMechanicTooltip ~= nil and dropMechanicTooltip ~= "" then
+                entry.tooltipText = dropMechanicTooltip
+            end
+            entry.filterType = dropMechanicId
             dropMechanicsDropdown:AddItem(entry)
         end
     end
 
     -- Initialize the Drop locations multiselect combobox.
     local dropLocationsDropdown  = ZO_ComboBox_ObjectFromContainer(self.dropLocationsFiltersControl)
+    dropLocationsDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.dropLocationsFiltersDropdown = dropLocationsDropdown
     dropLocationsDropdown:ClearItems()
     dropLocationsDropdown:SetHideDropdownCallback(OnFilterChanged)

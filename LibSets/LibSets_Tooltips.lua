@@ -934,7 +934,7 @@ local function buildSetDropMechanicInfo(setData, itemLink)
             end
         end
     end
-    --lib._setDropOverallTextsPerZone = setDropOverallTextsPerZone
+--lib._setDropOverallTextsPerZone = setDropOverallTextsPerZone
     return setDropZoneStr, setDropMechanicText, setDropLocationsText, setDropOverallTextsPerZone
 end
 
@@ -1300,8 +1300,11 @@ d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
             end
         end
         if runDropMechanic then
+--d(">runDropMechanic - addBossName: " ..tos(addBossName) .. ", addDropLocation: " .. tos(addDropLocation) .. ", addDropMechanic: " ..tos(addDropMechanic))
+--lib._debugSetDropOverallTextsPerZone = ZO_ShallowTableCopy(setDropOverallTextsPerZone)
             local setDropMechanicDropLocationsText = buildTextLinesFromTable(setDropOverallTextsPerZone, nil, true, false)
-            if setDropMechanicDropLocationsText and setDropMechanicDropLocationsText ~= "" then
+--lib._debugSetDropMechanicDropLocationsText = setDropMechanicDropLocationsText
+            if setDropMechanicDropLocationsText ~= nil and setDropMechanicDropLocationsText ~= "" then
                 local prefix = ""
                 if addBossName and not addDropLocation and not addDropMechanic then
                     prefix = droppedByStr .. ": "
@@ -1318,6 +1321,8 @@ d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
         end
     end
 
+--lib._debugSetDropOverallTextsPerZoneAtEnd = setDropOverallTextsPerZone
+--lib._debugsetInfoText = setInfoText
     --d(">>setInfoText: " ..tos(setInfoText))
 
     --[[

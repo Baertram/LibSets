@@ -401,22 +401,22 @@ local supportedLanguageChoices =        lib.supportedLanguageChoices
 local supportedLanguageChoicesValues =  lib.supportedLanguageChoicesValues
 local supportedLanguageChoicesTooltips =lib.supportedLanguageChoicesTooltips
 
-local undauntedChestIds =               lib.undauntedChestIds
 local dropZones     =                   lib.dropZones
 local setId2ZoneIds =                   lib.setId2DropZones
 local zoneId2SetIds =                   lib.dropZone2SetIds
 local allowedDropMechanics =            lib.allowedDropMechanics
-local dropMechanicIdToName =            lib.dropMechanicIdToName
-local dropMechanicIdToNameTooltip =     lib.dropMechanicIdToNameTooltip
 local dropLocationNames =               lib.dropLocationNames
 local dropLocation2SetIds =             lib.dropLocationNames2SetIds
 local setId2DropLocations =             lib.setId2DropLocationNames
+local dropMechanicIdToName =            lib.dropMechanicIdToName
+local dropMechanicIdToNameTooltip =     lib.dropMechanicIdToNameTooltip
+local undauntedChestIds =               lib.undauntedChestIds
 local possibleDlcTypes =                lib.possibleDlcTypes
-local possibleDlcIds =                  lib.possibleDlcIds
+--local possibleDlcIds =                  lib.possibleDlcIds
 local DLCandCHAPTERdata =               lib.DLCAndCHAPTERData
-local DLCandCHAPTERLookupdata =         lib.DLCandCHAPTERLookupdata
+--local DLCandCHAPTERLookupdata =         lib.DLCandCHAPTERLookupdata
 local NONDLCData =                      lib.NONDLCData
-local NONDLCLookupdata =                lib.NONDLCLookupdata
+--local NONDLCLookupdata =                lib.NONDLCLookupdata
 local allowedDLCTypes =                 lib.allowedDLCTypes
 local allowedDLCIds =                   lib.allowedDLCIds
 local dlcAndChapterCollectibleIds =     lib.dlcAndChapterCollectibleIds
@@ -858,10 +858,12 @@ local function LoadSets()
                     if setInfo[setId].zoneIds ~= nil then
                         setId2ZoneIds[setId] = {}
                         for _, zoneId in ipairs(setInfo[setId].zoneIds) do
-                            dropZones[zoneId] = true
-                            setId2ZoneIds[setId][zoneId] = true
-                            zoneId2SetIds[zoneId] = zoneId2SetIds[zoneId] or {}
-                            zoneId2SetIds[zoneId][setId] = true
+                            if zoneId > 0 then
+                                dropZones[zoneId] = true
+                                setId2ZoneIds[setId][zoneId] = true
+                                zoneId2SetIds[zoneId] = zoneId2SetIds[zoneId] or {}
+                                zoneId2SetIds[zoneId][setId] = true
+                            end
                         end
                     end
                     if setInfo[setId].dropMechanicDropLocationNames ~= nil then
@@ -1047,6 +1049,15 @@ local function LoadSets()
             end
         end
     end
+
+    lib.dropZones = dropZones
+    lib.setId2DropZones = setId2ZoneIds
+    lib.dropZone2SetIds = zoneId2SetIds
+    lib.allowedDropMechanics = allowedDropMechanics
+    lib.dropLocationNames = dropLocationNames
+    lib.dropLocationNames2SetIds = dropLocation2SetIds
+    lib.setId2DropLocationNames = setId2DropLocations
+
 
     lib.setsScanning = false
     lib.setsLoaded = true
@@ -1945,7 +1956,7 @@ function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     if dropMechanicNames == nil or dropMechanicTooltipNames == nil then return false end
     local dropMechanicName = dropMechanicNames[libSetsDropMechanicId]
     local dropMechanicTooltip = dropMechanicTooltipNames[libSetsDropMechanicId]
-    if not dropMechanicName or dropMechanicName == "" then return nil, nil, nil end
+    if not dropMechanicName or dropMechanicName == "" then return nil, nil end
     return dropMechanicName, dropMechanicTooltip
 end
 getDropMechanicName = lib.GetDropMechanicName

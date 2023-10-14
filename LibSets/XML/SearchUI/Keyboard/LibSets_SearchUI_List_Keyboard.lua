@@ -9,6 +9,32 @@ local searchUIName = searchUI.name
 
 --Library's local helpers
 local buildSetDataText = lib.BuildSetDataText
+local libSets_GetSetInfo = lib.GetSetInfo
+
+
+local wasSetsDataDropLocationDataAdded = true
+local function addDropLocationDataToSetsMasterListBase(defaultMasterListBase, p_setId, p_setData)
+    if p_setId ~= nil and p_setData ~= nil then
+        p_setData.setId = p_setData.setId or p_setId
+        --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
+        if p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
+            p_setData = libSets_GetSetInfo(p_setId, true, nil) --without itemIds, and names only in client laguage
+        end
+        return p_setData
+    else
+        for setId, setData in pairs(defaultMasterListBase) do
+            setData.setId = setData.setId or setId
+            --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
+            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
+                setData = libSets_GetSetInfo(setId, true, nil) --without itemIds, and names only in client laguage
+                defaultMasterListBase[setId] = setData
+            end
+        end
+        wasSetsDataDropLocationDataAdded = true
+        return defaultMasterListBase
+    end
+end
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search results list for keyboard mode
@@ -121,9 +147,15 @@ function LibSets_SearchUI_List:BuildMasterList()
     local setsData = lib.setInfo
     self.masterList = {}
 
+    --Add dropLocation data and texts to the lbib.setInfo data once
+    if not wasSetsDataDropLocationDataAdded then
+        setsData = addDropLocationDataToSetsMasterListBase(setsData, nil, nil)
+        wasSetsDataDropLocationDataAdded = true
+    end
+
     --Pr-Filter the masterlist and hide any sets that do not match e.g. the setType, DLCId etc.
     local setsBaseList = self._parentObject:PreFilterMasterList(setsData)
-lib._debugSetsBaseList = setsBaseList
+--lib._debugSetsBaseList = setsBaseList
     if setsBaseList == nil or NonContiguousCount(setsBaseList) == 0 then return end
 
     --Check if any other filters which need the set itemIds are active (multiselect dropdown boxes for armor/weapon/equipment type etc.)
@@ -136,7 +168,7 @@ lib._debugSetsBaseList = setsBaseList
     for setId, setData in pairs(setsBaseList) do
         table.insert(self.masterList, self:CreateEntryForSet(setId, setData))
     end
-lib._debugSetsMasterList = self.masterList
+--lib._debugSetsMasterList = self.masterList
 end
 
 --Filter the scroll list by fiter data
@@ -201,7 +233,6 @@ function LibSets_SearchUI_List:SortScrollList( )
 	end
 end
 
-
 --[[
 -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
 -- ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
@@ -214,7 +245,6 @@ end
 --enchantment, etc.)
 function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local nameColumnValue = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
-
     local itemId
 
     local parentObject = self._parentObject
@@ -297,49 +327,44 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     to provide additional output info at the columns
     ]]
 
+    local itemData = {}
+    --Internal for text search etc.
+    itemData.type                = searchUI.searchTypeDefault     -- for the search function -> Processor. !!!Needs to match!!!
+    --Pass in whole table of set's info
+    itemData._LibSets_setData    = setData
+    --Mix in the setData directly to the itemData
+    zo_mixin(itemData, setData)
+    
+    --And now add additional itemData
+    --Itemlink
+    itemData.itemLink            = itemLink
+    itemData.itemId              = itemId
+
+    --Set info
+    itemData.setId               = setId
+    --itemData.setType             = setData.setType
+    itemData.name                = nameColumnValue
+
+    --Set item related
+    itemData.armorOrWeaponType   = armorOrWeaponType
+    itemData.armorOrWeaponTypeText = armorOrWeaponTypeText
+    itemData.equipSlot           = equipType
+    itemData.equipSlotText       = equipSlotText
+
+    --Set bonuses
+    itemData.numBonuses          = numBonuses
+
+    --Drop zones and locations (and boss names)
+    itemData.dropLocationText    = dropLocationText
+    itemData.dropLocationSort    = dropLocationSort
+
+    --Pass in generated tooltip text
+    itemData.setDataText         = setDataText
+    --Pass in generated tooltip parts
+    itemData.setInfoParts        = setInfoParts
 
     --Table entry for the ZO_ScrollList data
-	return({
-        --Internal, for text search etc.
-        type                = searchUI.searchTypeDefault,     -- for the search function -> Processor. !!!Needs to match!!!
-
-        --Itemlink
-        itemLink            = itemLink,
-        itemId              = itemId,
-
-        --Set info
-        setId               = setId,
-        setType             = setData.setType,
-        name                = nameColumnValue,
-
-        --Set item related
-        armorOrWeaponType   = armorOrWeaponType,
-        armorOrWeaponTypeText = armorOrWeaponTypeText,
-        equipSlot           = equipType,
-        equipSlotText       = equipSlotText,
-
-        --Crafting related
-        traitsNeeded        = setData.traitsNeeded, --will be nil for non-craftable sets
-
-        --Set bonuses
-        numBonuses          = numBonuses,
-        bonuses             = setData.bonuses,
-
-        --Drop zones and locations (and boss names)
-        dropLocationText    = dropLocationText,
-        dropLocationSort    = dropLocationSort,
-
-        --DLC
-        dlcId               = setData.dlcId,
-
-        --Pass in whole table of set's info
-        setData             = setData,
-
-        --Pass in generated tooltip text
-        setDataText         = setDataText,
-        --Pass in generated tooltip parts
-        setInfoParts        = setInfoParts,
-	})
+	return itemData
 end
 
 --The sort keys for the sort headers of the list
