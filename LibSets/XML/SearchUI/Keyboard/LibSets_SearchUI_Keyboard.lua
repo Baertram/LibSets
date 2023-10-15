@@ -2,7 +2,11 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = "["..MAJOR.."]"
 
+local zoitf = zo_iconTextFormat
 local getLocalizedText = lib.GetLocalizedText
+local buildSetTypeInfo = lib.buildSetTypeInfo
+local getDropMechanicTexture = lib.GetDropMechanicTexture
+local libSets_GetSpecialZoneNameById = lib.GetSpecialZoneNameById
 
 --The search UI table
 local searchUI = LibSets.SearchUI
@@ -32,6 +36,7 @@ local function refreshSearchFilters(selfVar)
 end
 
 local function onFilterDropdownEntryMouseEnterCallback(comboBox, entry)
+    if not lib.svData or not lib.svData.setSearchTooltipsAtFilterEntries then return end
     if entry == nil or entry.m_data == nil or entry.m_data.tooltipText == nil then return end
     InitializeTooltip(InformationTooltip, entry, BOTTOM, 0, -10)
     SetTooltipText(InformationTooltip, entry.m_data.tooltipText)
@@ -289,6 +294,22 @@ end
 ------------------------------------------------
 --- Filters
 ------------------------------------------------
+--local SORT_BY_FILTERTYPE =          { ["filterType"]    = {} }
+local SORT_BY_FILTERTYPE_NUMERIC =  { ["filterType"]    = { isNumeric = true } }
+local SORT_BY_NAMECLEAN =           { ["nameClean"]     = {} }
+local function sortFilterComboBox(setTypeDropdown, sortType)
+    --Sort the entries of setTypeDropdown by their entry.filterType?
+    if sortType == "filterType" then
+        table.sort(setTypeDropdown.m_sortedItems, function(item1, item2)
+            return ZO_TableOrderingFunction(item1, item2, "filterType", SORT_BY_FILTERTYPE_NUMERIC, setTypeDropdown.m_sortOrder)
+        end)
+    elseif sortType == "nameClean" then
+        table.sort(setTypeDropdown.m_sortedItems, function(item1, item2)
+            return ZO_TableOrderingFunction(item1, item2, "nameClean", SORT_BY_NAMECLEAN, setTypeDropdown.m_sortOrder)
+        end)
+    end
+end
+
 function LibSets_SearchUI_Keyboard:InitializeFilters()
     local function OnFilterChanged()
         self:OnFilterChanged()
@@ -303,15 +324,22 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     local filterTypeText = getLocalizedText("setType")
     self.setTypeFiltersControl.tooltipText = filterTypeText
     setTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
-    setTypeDropdown:SetSortsItems(true)
+    setTypeDropdown:SetSortsItems(false)
 
     for setType, isValid in pairs(lib.allowedSetTypes) do
         if isValid == true then
-            local entry = setTypeDropdown:CreateItemEntry(lib.GetSetTypeName(setType, nil))
+            local setTypeName, setTypeTexture = buildSetTypeInfo({setType = setType}, true)
+            local setTypeNameStr = setTypeName
+            if setTypeTexture ~= nil then
+                setTypeNameStr = zoitf(setTypeTexture, 24, 24, setTypeName, nil)
+            end
+            local entry = setTypeDropdown:CreateItemEntry(setTypeNameStr)
             entry.filterType = setType
+            entry.nameClean = setTypeName
             setTypeDropdown:AddItem(entry)
         end
     end
+    sortFilterComboBox(setTypeDropdown, "nameClean")
 
     -- Initialize the armor Types multiselect combobox.
     local armorTypeDropdown     = ZO_ComboBox_ObjectFromContainer(self.armorTypeFiltersControl)
@@ -322,13 +350,42 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     local filterTypeText = getLocalizedText("armorType")
     self.armorTypeFiltersControl.tooltipText = filterTypeText
     armorTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_APPAREL_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
-    armorTypeDropdown:SetSortsItems(true)
+    armorTypeDropdown:SetSortsItems(false)
+
+    local equipmentTypes     = {
+        EQUIPMENT_FILTER_TYPE_LIGHT,
+        EQUIPMENT_FILTER_TYPE_MEDIUM,
+        EQUIPMENT_FILTER_TYPE_HEAVY,
+        EQUIPMENT_FILTER_TYPE_NECK,
+        EQUIPMENT_FILTER_TYPE_ONE_HANDED,
+        EQUIPMENT_FILTER_TYPE_RING,
+        EQUIPMENT_FILTER_TYPE_SHIELD,
+        EQUIPMENT_FILTER_TYPE_TWO_HANDED,
+        EQUIPMENT_FILTER_TYPE_DESTRO_STAFF,
+        EQUIPMENT_FILTER_TYPE_RESTO_STAFF,
+        EQUIPMENT_FILTER_TYPE_BOW,
+    }
+    local equipmentTypeIcons = {}
+    for _, armorEquipmentType in pairs(equipmentTypes) do
+        local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(armorEquipmentType)
+        if equipmentTypeData.icons and equipmentTypeData.icons.up then
+            equipmentTypeIcons[armorEquipmentType] = equipmentTypeData.icons.up
+        end
+    end
 
     for armorType, _ in pairs(lib.armorTypesSets) do
-        local entry = armorTypeDropdown:CreateItemEntry(GetString("SI_ARMORTYPE", armorType))
+        local armorTypeName = GetString("SI_ARMORTYPE", armorType)
+        local armorTypeNameStr = armorTypeName
+        local armorTypeTexture = equipmentTypeIcons[armorType]
+        if armorTypeTexture ~= nil then
+            armorTypeNameStr = zoitf(armorTypeTexture, 24, 24, armorTypeName, nil)
+        end
+        local entry = armorTypeDropdown:CreateItemEntry(armorTypeNameStr)
         entry.filterType = armorType
+        entry.nameClean = armorTypeName
         armorTypeDropdown:AddItem(entry)
     end
+    sortFilterComboBox(armorTypeDropdown, "nameClean")
 
     -- Initialize the weapon Types multiselect combobox.
     local weaponTypeDropdown    = ZO_ComboBox_ObjectFromContainer(self.weaponTypeFiltersControl)
@@ -339,13 +396,61 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     local filterTypeText = getLocalizedText("weaponType")
     self.weaponTypeFiltersControl.tooltipText = filterTypeText
     weaponTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_WEAPON_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
-    weaponTypeDropdown:SetSortsItems(true)
+    weaponTypeDropdown:SetSortsItems(false)
+
+    local weaponTypes = {
+        WEAPONTYPE_AXE,
+        WEAPONTYPE_HAMMER,
+        WEAPONTYPE_SWORD,
+        WEAPONTYPE_TWO_HANDED_SWORD,
+        WEAPONTYPE_TWO_HANDED_AXE,
+        WEAPONTYPE_TWO_HANDED_HAMMER,
+        WEAPONTYPE_BOW,
+        WEAPONTYPE_HEALING_STAFF,
+        WEAPONTYPE_RUNE,
+        WEAPONTYPE_DAGGER,
+        WEAPONTYPE_FIRE_STAFF,
+        WEAPONTYPE_FROST_STAFF,
+        WEAPONTYPE_LIGHTNING_STAFF,
+        WEAPONTYPE_SHIELD,
+    }
+    local weaponTypeIcons = {}
+    for _, weaponType in pairs(weaponTypes) do
+        local weaponTypeIcon = ITEM_FILTER_UTILS.GetWeaponTypeFilterIcons(weaponType)
+        if weaponTypeIcon and weaponTypeIcon.up then
+            weaponTypeIcons[weaponType] = weaponTypeIcon.up
+        else
+            --Bow e.g. does not provide an icon there, but only at the equipment filetr type EQUIPMENT_FILTER_TYPE_BOW
+            -->Use ZOs way to determine the icon then
+            --How do we determine this by the weapon type? Table EQUIPMENT_FILTER_TYPE_WEAPONTYPES in itemfilters is not global...
+            --So hardcode the mapping here...
+            local equipmentTypeToWeaponTypesMissingIcons = {
+                [WEAPONTYPE_BOW] = EQUIPMENT_FILTER_TYPE_BOW,
+                [WEAPONTYPE_HEALING_STAFF] = EQUIPMENT_FILTER_TYPE_RESTO_STAFF,
+            }
+            local equipmentFilterType = equipmentTypeToWeaponTypesMissingIcons[weaponType]
+            if equipmentFilterType ~= nil then
+                local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(equipmentFilterType)
+                if equipmentTypeData and equipmentTypeData.icons and equipmentTypeData.icons.up then
+                    weaponTypeIcons[weaponType] = equipmentTypeData.icons.up
+                end
+            end
+        end
+    end
 
     for weaponType, _ in pairs(lib.weaponTypesSets) do
-        local entry = weaponTypeDropdown:CreateItemEntry(self:ModifyWeaponType2hd(weaponType))
+        local weaponTypeName = self:ModifyWeaponType2hd(weaponType)
+        local weaponTypeNameStr = weaponTypeName
+        local weaponTypeTexture = weaponTypeIcons[weaponType]
+        if weaponTypeTexture ~= nil then
+            weaponTypeNameStr = zoitf(weaponTypeTexture, 24, 24, weaponTypeName, nil)
+        end
+        local entry = weaponTypeDropdown:CreateItemEntry(weaponTypeNameStr)
         entry.filterType = weaponType
+        entry.nameClean = weaponTypeName
         weaponTypeDropdown:AddItem(entry)
     end
+    sortFilterComboBox(weaponTypeDropdown, "nameClean")
 
     -- Initialize the equipment Types multiselect combobox.
     local equipmentTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.equipmentTypeFiltersControl)
@@ -356,7 +461,50 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     local filterTypeText = getLocalizedText("equipmentType")
     self.equipmentTypeFiltersControl.tooltipText = filterTypeText
     equipmentTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
-    equipmentTypeDropdown:SetSortsItems(true)
+    equipmentTypeDropdown:SetSortsItems(false)
+
+    local equipTypes = {
+        EQUIP_TYPE_HEAD,
+        EQUIP_TYPE_NECK,
+        EQUIP_TYPE_CHEST,
+        EQUIP_TYPE_SHOULDERS,
+        EQUIP_TYPE_ONE_HAND,
+        EQUIP_TYPE_TWO_HAND,
+        EQUIP_TYPE_OFF_HAND,
+        EQUIP_TYPE_WAIST,
+        EQUIP_TYPE_LEGS,
+        EQUIP_TYPE_FEET,
+        EQUIP_TYPE_COSTUME,
+        EQUIP_TYPE_RING,
+        EQUIP_TYPE_HAND,
+        EQUIP_TYPE_MAIN_HAND,
+        EQUIP_TYPE_POISON,
+    }
+    local equipTypeIcons = {}
+    for _, equipType in pairs(equipTypes) do
+        local equipTypeIcon = ITEM_FILTER_UTILS.GetEquipTypeFilterIcons(equipType)
+        if equipTypeIcon and equipTypeIcon.up then
+            equipTypeIcons[equipType] = equipTypeIcon.up
+        else
+            --1hd, 2hd, main and off hand e.g. does not provide an icon there, but only at the equipment filter type EQUIPMENT_FILTER_TYPE_BOW
+            -->Use ZOs way to determine the icon then
+            --How do we determine this by the weapon type? Table EQUIPMENT_FILTER_TYPE_WEAPONTYPES in itemfilters is not global...
+            --So hardcode the mapping here...
+            local equipmentTypeToEquipmentFilterTypesMissingIcons = {
+                [EQUIP_TYPE_ONE_HAND] = EQUIPMENT_FILTER_TYPE_ONE_HANDED,
+                --[EQUIP_TYPE_MAIN_HAND] = EQUIPMENT_FILTER_TYPE_, --???
+                --[EQUIP_TYPE_OFF_HAND] = EQUIPMENT_FILTER_TYPE_, --???
+                [EQUIP_TYPE_TWO_HAND] = EQUIPMENT_FILTER_TYPE_TWO_HANDED,
+            }
+            local equipmentFilterType = equipmentTypeToEquipmentFilterTypesMissingIcons[equipType]
+            if equipmentFilterType ~= nil then
+                local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(equipmentFilterType)
+                if equipmentTypeData and equipmentTypeData.icons and equipmentTypeData.icons.up then
+                    equipTypeIcons[equipType] = equipmentTypeData.icons.up
+                end
+            end
+        end
+    end
 
     --local alreadyCheckedEquipTypes = {}
     --for equipSlot, equipTypes in ZO_Character_EnumerateEquipSlotToEquipTypes() do
@@ -365,14 +513,23 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             --if not alreadyCheckedEquipTypes[equipType] and lib.equipTypesSets[equipType] ~= nil then
                 --alreadyCheckedEquipTypes[equipType] = true
         if isValid == true then
-                local entry = equipmentTypeDropdown:CreateItemEntry(GetString("SI_EQUIPTYPE", equipType))
-                entry.filterType = equipType
-                equipmentTypeDropdown:AddItem(entry)
+            local equipTypeName = GetString("SI_EQUIPTYPE", equipType)
+            local equipTypeNameStr = equipTypeName
+            local equipTypeTexture = equipTypeIcons[equipType]
+            if equipTypeTexture ~= nil then
+                equipTypeNameStr = zoitf(equipTypeTexture, 24, 24, equipTypeName, nil)
+            end
+            local entry = equipmentTypeDropdown:CreateItemEntry(equipTypeNameStr)
+            entry.filterType = equipType
+            entry.nameClean = equipTypeName
+            equipmentTypeDropdown:AddItem(entry)
         end
             --end
         --end
     --end
     end
+    sortFilterComboBox(equipmentTypeDropdown, "nameClean")
+
 
     -- Initialize the DLC Types multiselect combobox.
     local DLCIdDropdown       = ZO_ComboBox_ObjectFromContainer(self.DCLIdFiltersControl)
@@ -431,6 +588,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Drop zones multiselect combobox.
     local dropZoneDropdown      = ZO_ComboBox_ObjectFromContainer(self.dropZoneFiltersControl)
+    dropZoneDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
     self.dropZoneFiltersDropdown = dropZoneDropdown
     dropZoneDropdown:ClearItems()
     dropZoneDropdown:SetHideDropdownCallback(OnFilterChanged)
@@ -443,10 +601,28 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if dropZoneIds ~= nil then
         for dropZoneId, isValid in pairs(dropZoneIds) do
             if isValid == true then
-                local dropZoneName = dropZoneId ~= nil and zo_strformat(SI_UNIT_NAME, GetZoneNameById(dropZoneId))
-                dropZoneName = dropZoneName or "!Unknown"
+                local dropZoneName, zoneDesc, filterType
+                if dropZoneId <= 0 then
+                    dropZoneName = libSets_GetSpecialZoneNameById(dropZoneId)
+                    filterType = dropZoneId
+                else
+                    --[[
+                    local mapId = GetMapIdByZoneId(dropZoneId)
+                    if mapId ~= nil then
+                        dropZoneName = zo_strformat(SI_UNIT_NAME, GetMapInfoById(mapId))
+                    end
+                    if dropZoneName == "" then
+                    ]]
+                        dropZoneName = zo_strformat(SI_UNIT_NAME, GetZoneNameById(dropZoneId))
+                    --end
+                    zoneDesc = GetZoneDescriptionById(dropZoneId)
+                    filterType = dropZoneId
+                end
                 local entry = dropZoneDropdown:CreateItemEntry(dropZoneName)
-                entry.filterType = dropZoneId or -1
+                if zoneDesc ~= nil and zoneDesc ~= "" then
+                    entry.tooltipText = zoneDesc
+                end
+                entry.filterType = filterType
                 dropZoneDropdown:AddItem(entry)
             end
         end
@@ -462,19 +638,27 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     local filterTypeText = getLocalizedText("dropMechanic")
     self.dropMechanicsFiltersControl.tooltipText = filterTypeText
     dropMechanicsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
-    dropMechanicsDropdown:SetSortsItems(true)
+    dropMechanicsDropdown:SetSortsItems(false)
 
     for dropMechanicId, isValid in pairs(lib.allowedDropMechanics) do
         if isValid == true then
+            local dropMechnicNameStr
             local dropMechanicName, dropMechanicTooltip = lib.GetDropMechanicName(dropMechanicId)
-            local entry = dropMechanicsDropdown:CreateItemEntry(dropMechanicName)
+            dropMechnicNameStr = dropMechanicName
+            local dropMechnicTexture = getDropMechanicTexture(dropMechanicId)
+            if dropMechnicTexture ~= nil then
+                dropMechnicNameStr = zoitf(dropMechnicTexture, 24, 24, dropMechanicName, nil)
+            end
+            local entry = dropMechanicsDropdown:CreateItemEntry(dropMechnicNameStr)
             if dropMechanicTooltip ~= nil and dropMechanicTooltip ~= "" then
                 entry.tooltipText = dropMechanicTooltip
             end
             entry.filterType = dropMechanicId
+            entry.nameClean = dropMechanicName
             dropMechanicsDropdown:AddItem(entry)
         end
     end
+    sortFilterComboBox(dropMechanicsDropdown, "nameClean")
 
     -- Initialize the Drop locations multiselect combobox.
     local dropLocationsDropdown  = ZO_ComboBox_ObjectFromContainer(self.dropLocationsFiltersControl)

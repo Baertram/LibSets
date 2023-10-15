@@ -5,7 +5,20 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = "["..MAJOR.."]"
 
+local clientLang = lib.clientLang
+
 local libSets_GetSetInfo = lib.GetSetInfo
+local libSets_GetDropLocationNamesBySetId = lib.GetDropLocationNamesBySetId
+local libSets_GetDropMechanic = lib.GetDropMechanic
+local libSets_GetDropZonesBySetId = lib.GetDropZonesBySetId
+local libSets_buildItemLink = lib.buildItemLink
+local libSets_GetSetFirstItemId = lib.GetSetFirstItemId
+local libSets_IsEquipTypeSet = lib.IsEquipTypeSet
+local libSets_IsWeaponTypeSet = lib.IsWeaponTypeSet
+local libSets_IsArmorTypeSet = lib.IsArmorTypeSet
+
+local gilsi = GetItemLinkSetInfo
+
 
 --The search UI table
 LibSets.SearchUI = {}
@@ -399,7 +412,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 if searchParamsArmorType ~= nil then
                     isAllowed = false
                     for armorType, isFiltered in pairs(searchParamsArmorType) do
-                        if isFiltered == true and lib.armorTypesSets[armorType][setId] then
+                        if isFiltered == true and libSets_IsArmorTypeSet(setId, armorType) then
                             isAllowed = true
                             break
                         end
@@ -411,7 +424,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 if searchParamsWeaponType ~= nil then
                     isAllowed = false
                     for weaponType, isFiltered in pairs(searchParamsWeaponType) do
-                        if isFiltered == true and lib.weaponTypesSets[weaponType][setId] then
+                        if isFiltered == true and libSets_IsWeaponTypeSet(setId, weaponType) then
                             isAllowed = true
                             break
                         end
@@ -423,7 +436,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 if searchParamsEquipmentType ~= nil then
                     isAllowed = false
                     for equipType, isFiltered in pairs(searchParamsEquipmentType) do
-                        if isFiltered == true and lib.equipTypesSets[equipType][setId] then
+                        if isFiltered == true and libSets_IsEquipTypeSet(setId, equipType) then
                             isAllowed = true
                             break
                         end
@@ -443,10 +456,10 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     isAllowed = false
                     local numBonuses
                     if setData.numBonuses == nil then
-                        local itemId = lib.GetSetFirstItemId(setId, nil)
+                        local itemId = libSets_GetSetFirstItemId(setId, nil)
                         if itemId ~= nil then
-                            local itemLink = lib.buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
-                            local _, _, numBonuses_l = GetItemLinkSetInfo(itemLink, false)
+                            local itemLink = libSets_buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
+                            local _, _, numBonuses_l = gilsi(itemLink, false)
                             setData.numBonuses = numBonuses_l
                             numBonuses = numBonuses_l
                         end
@@ -467,7 +480,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsDropZone ~= nil then
                     isAllowed = false
-                    local dropZones = setData.dropZones or lib.GetDropZonesBySetId(setId)
+                    local dropZones = setData.dropZones or libSets_GetDropZonesBySetId(setId)
                     if dropZones ~= nil then
                         setData.dropZones = dropZones
                         for dropZoneId, isFiltered in pairs(searchParamsDropZone) do
@@ -488,11 +501,21 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsDropMechanic ~= nil then
                     isAllowed = false
-                    local dropMechanics = setData[LIBSETS_TABLEKEY_DROPMECHANIC] or lib.GetDropMechanic(setId, nil, nil)
+local doDebug = false
+if setId == 686 then
+    doDebug = true
+end
+                    local dropMechanics = setData[LIBSETS_TABLEKEY_DROPMECHANIC] or libSets_GetDropMechanic(setId, nil, nil)
+if doDebug then
+d(">dropMechnics found: " ..tostring(dropMechanics))
+end
                     if dropMechanics ~= nil then
                         setData[LIBSETS_TABLEKEY_DROPMECHANIC] = dropMechanics
                         for dropMechanicId, isFiltered in pairs(searchParamsDropMechanic) do
-                            if isFiltered == true and dropMechanics[dropMechanicId] then
+if doDebug then
+    d(">dropMechanicId: " ..tostring(dropMechanicId) .. ", isFiltered: " ..tostring(isFiltered))
+end
+                            if isFiltered == true and ZO_IsElementInNumericallyIndexedTable(dropMechanics, dropMechanicId) then
                                 isAllowed = true
                                 break
                             end
@@ -504,13 +527,16 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsDropLocation ~= nil then
                     isAllowed = false
-                    local dropLocationNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] or lib.GetDropLocationNamesBySetId(setId, nil)
+                    local dropLocationNames = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] or libSets_GetDropLocationNamesBySetId(setId, nil)
                     if dropLocationNames ~= nil then
                         setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropLocationNames
                         for dropLocationName, isFiltered in pairs(searchParamsDropLocation) do
-                            if isFiltered == true and dropLocationNames[dropLocationName] then
-                                isAllowed = true
-                                break
+                            if isFiltered == true then
+                                local dropLocationSearchTab = { [clientLang] = dropLocationName }
+                                if ZO_IsElementInNumericallyIndexedTable(dropLocationNames, dropLocationSearchTab) then
+                                    isAllowed = true
+                                    break
+                                end
                             end
                         end
                     end
@@ -598,6 +624,7 @@ end
 
 --[[ XML Handlers ]]--
 function LibSets_SearchUI_Shared_ControlTooltip(control, myAnchorPoint, anchorTo, toAnchorPoint, offsetX, offsetY)
+    if not lib.svData or not lib.svData.setSearchTooltipsAtFilters then return end
     if control == nil or control.tooltipText == nil or control.tooltipText == "" then return end
     myAnchorPoint = myAnchorPoint or BOTTOM
     anchorTo = anchorTo or control

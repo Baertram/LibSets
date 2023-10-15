@@ -8,11 +8,12 @@ local searchUI = LibSets.SearchUI
 local searchUIName = searchUI.name
 
 --Library's local helpers
+local buildSetTypeInfo = lib.buildSetTypeInfo
 local buildSetDataText = lib.BuildSetDataText
 local libSets_GetSetInfo = lib.GetSetInfo
 
 
-local wasSetsDataDropLocationDataAdded = true
+local wasSetsDataDropLocationDataAdded = false
 local function addDropLocationDataToSetsMasterListBase(defaultMasterListBase, p_setId, p_setData)
     if p_setId ~= nil and p_setData ~= nil then
         p_setData.setId = p_setData.setId or p_setId
@@ -147,10 +148,9 @@ function LibSets_SearchUI_List:BuildMasterList()
     local setsData = lib.setInfo
     self.masterList = {}
 
-    --Add dropLocation data and texts to the lbib.setInfo data once
+    --Add dropLocation data and texts to the lib.setInfo data once
     if not wasSetsDataDropLocationDataAdded then
         setsData = addDropLocationDataToSetsMasterListBase(setsData, nil, nil)
-        wasSetsDataDropLocationDataAdded = true
     end
 
     --Pr-Filter the masterlist and hide any sets that do not match e.g. the setType, DLCId etc.

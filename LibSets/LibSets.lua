@@ -551,6 +551,9 @@ local function LoadSavedVariables()
             addNeededTraits = true,
             addReconstructionCost = true, --shares the same LAM checkbox as addNeededTraits
             addDLC          = true,
+
+            setSearchTooltipsAtFilters = true,
+            setSearchTooltipsAtFilterEntries = true,
         },
         useCustomTooltipPattern = "",
 
@@ -858,12 +861,10 @@ local function LoadSets()
                     if setInfo[setId].zoneIds ~= nil then
                         setId2ZoneIds[setId] = {}
                         for _, zoneId in ipairs(setInfo[setId].zoneIds) do
-                            if zoneId > 0 then
-                                dropZones[zoneId] = true
-                                setId2ZoneIds[setId][zoneId] = true
-                                zoneId2SetIds[zoneId] = zoneId2SetIds[zoneId] or {}
-                                zoneId2SetIds[zoneId][setId] = true
-                            end
+                            dropZones[zoneId] = true
+                            setId2ZoneIds[setId][zoneId] = true
+                            zoneId2SetIds[zoneId] = zoneId2SetIds[zoneId] or {}
+                            zoneId2SetIds[zoneId][setId] = true
                         end
                     end
                     if setInfo[setId].dropMechanicDropLocationNames ~= nil then
@@ -1651,6 +1652,7 @@ end
 function lib.IsArmorTypeSet(setId, armorType)
     if not checkIfSetsAreLoadedProperly() then return false end
     if not setId or not armorType then return end
+    if not lib.armorTypesSets[armorType] then return end
     return lib.armorTypesSets[armorType][setId] or false
 end
 
@@ -1715,6 +1717,7 @@ end
 function lib.IsWeaponTypeSet(setId, weaponType)
     if not checkIfSetsAreLoadedProperly() then return false end
     if not setId or not weaponType then return end
+    if not lib.weaponTypesSets[weaponType] then return end
     return lib.weaponTypesSets[weaponType][setId] or false
 end
 
@@ -1725,6 +1728,7 @@ end
 function lib.IsEquipTypeSet(setId, equipType)
     if not checkIfSetsAreLoadedProperly() then return false end
     if not setId or not equipType then return end
+    if not lib.equipTypesSets[equipType] then return end
     return lib.equipTypesSets[equipType][setId] or false
 end
 
@@ -2731,6 +2735,20 @@ function lib.GetUndauntedChestName(undauntedChestId, lang)
     return undauntedChestNameLang[undauntedChestId]
 end
 
+
+--Returns the name of the zone by help of the zoneId, if the zoneId is 0 or below
+--> Parameters: zoneIdEqualsOrBelowZero number: The zone id given in a set's info
+-->             lang String the language for the zone name. Can be left nil -> The client language will be used then
+--> Returns:    name zoneNameSpecial
+function lib.GetSpecialZoneNameById(zoneIdEqualsOrBelowZero, lang)
+    if zoneIdEqualsOrBelowZero == nil then return end
+    lang = langAllowedCheck(lang)
+    local specialZoneNames = lib.specialZoneNames[lang]
+    if specialZoneNames == nil then return end
+    return specialZoneNames[zoneIdEqualsOrBelowZero]
+end
+local libSets_GetSpecialZoneNameById =  lib.GetSpecialZoneNameById
+
 --Returns the name of the zone by help of the zoneId
 --> Parameters: zoneId number: The zone id given in a set's info
 -->             language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated
@@ -2739,13 +2757,19 @@ function lib.GetZoneName(zoneId, lang)
     if not zoneId then return end
     lang = langAllowedCheck(lang)
     local zoneName = ""
-    if libZone ~= nil then
-        zoneName = libZone:GetZoneName(zoneId, lang)
+    if zoneId > 0 then
+        if libZone ~= nil then
+            zoneName = libZone:GetZoneName(zoneId, lang)
+        else
+            zoneName = zocstrfor("<<C:1>>", gznbid(zoneId) )
+        end
     else
-        zoneName = zocstrfor("<<C:1>>", gznbid(zoneId) )
+        libSets_GetSpecialZoneNameById(zoneId)
     end
     return zoneName
 end
+
+
 
 --Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
 --Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_ConstantsLibraryInternal.lua,

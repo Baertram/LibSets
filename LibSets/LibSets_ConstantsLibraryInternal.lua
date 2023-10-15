@@ -311,6 +311,47 @@ if checkIfPTSAPIVersionIsLive() then
     }
     ]]
 end
+
+
+------------------------------------------------------------------------------------------------------------------------
+--Special zone IDS
+LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD = -99
+LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS = -98
+--Special zone names
+local specialZoneNames = {
+    ["de"] = {
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Levelaufstieg",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Schlachtfelder",
+    },
+    ["en"] = {
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Level-Up",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Battlegrounds",
+    },
+    ["es"] = {
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Elevar a mismo nivel",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Campos de batalla",
+    },
+    ["fr"] = {
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Niveau supérieur",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Champs de bataille",
+    },
+    ["ru"] = {
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Уровень повышен",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Поля боя",
+    },
+    ["zh"] = {
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "升级",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "战场",
+    },
+    ["jp"] = {
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "レベルアップ",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "戦場",
+    },
+}
+lib.specialZoneNames = specialZoneNames
+
+local specialZoneNamesEn        = specialZoneNames[fallbackLang]  --fallback value English
+
 ------------------------------------------------------------------------------------------------------------------------
 --The suffix for the counter variables of the setType tables. e.g. setType LIBSETS_SETTYPE_OVERLAND table is called overlandSets.
 --The suffix is "Counter" so the variable for the counter is "overlandSetsCounter"
@@ -327,7 +368,7 @@ local setTypesToName = {
         ["fr"] = "Arène",
         ["jp"] = "アリーナ",
         ["ru"] = "Aрена",
-        ["zh"] = "Arena",
+        ["zh"] = "竞技场",
     },
     [LIBSETS_SETTYPE_BATTLEGROUND]                  = {
         ["de"] = "Schlachtfeld", --SI_LEADERBOARDTYPE4,
@@ -335,8 +376,8 @@ local setTypesToName = {
         ["es"] = "Campo de batalla",
         ["fr"] = "Champ de bataille",
         ["jp"] = "バトルグラウンド",
-        ["ru"] = "Поле сражений",
-        ["zh"] = "Battleground",
+        ["ru"] = "Поле боя",
+        ["zh"] = "战场",
     },
     [LIBSETS_SETTYPE_CRAFTED]                       = {
         ["de"] = "Handwerklich hergestellt", --SI_ITEM_FORMAT_STR_CRAFTED
@@ -345,7 +386,7 @@ local setTypesToName = {
         ["fr"] = "Fabriqué",
         ["jp"] = "クラフトセット",
         ["ru"] = "Созданный",
-        ["zh"] = "Crafted",
+        ["zh"] = "精雕细琢",
     },
     [LIBSETS_SETTYPE_CYRODIIL]                      = {
         ["de"] = "Cyrodiil", --SI_CAMPAIGNRULESETTYPE1,
@@ -372,7 +413,7 @@ local setTypesToName = {
         ["fr"] = "Donjon",
         ["jp"] = "ダンジョン",
         ["ru"] = "Подземелье",
-        ["zh"] = "Dungeon",
+        ["zh"] = "地下城",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY]                  = {
         ["de"] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
@@ -390,7 +431,7 @@ local setTypesToName = {
         ["fr"] = "Monstre",
         ["jp"] = "モンスター",
         ["ru"] = "Монстр",
-        ["zh"] = "Monster",
+        ["zh"] = "怪物",
     },
     [LIBSETS_SETTYPE_OVERLAND]                      = {
         ["de"] = "Überland",
@@ -399,7 +440,7 @@ local setTypesToName = {
         ["fr"] = "Zone ouverte",
         ["jp"] = "陸上",
         ["ru"] = "Поверхности",
-        ["zh"] = "Overland",
+        ["zh"] = "陆上",
     },
     [LIBSETS_SETTYPE_SPECIAL]                       = {
         ["de"] = "Besonders", --SI_HOTBARCATEGORY9
@@ -408,7 +449,7 @@ local setTypesToName = {
         ["fr"] = "Spécial",
         ["jp"] = "スペシャル",
         ["ru"] = "Специальный",
-        ["zh"] = "Special",
+        ["zh"] = "特别的",
     },
     [LIBSETS_SETTYPE_TRIAL]                         = {
         ["de"] = "Prüfungen", --SI_LFGACTIVITY4
@@ -417,7 +458,7 @@ local setTypesToName = {
         ["fr"] = "Épreuves",
         ["jp"] = "試練",
         ["ru"] = "Испытание",
-        ["zh"] = "Trial",
+        ["zh"] = "审判",
     },
     [LIBSETS_SETTYPE_MYTHIC]                        = {
         ["de"] = "Mythisch",
@@ -426,7 +467,7 @@ local setTypesToName = {
         ["fr"] = "Mythique",
         ["jp"] = "神話上の",
         ["ru"] = "мифический",
-        ["zh"] = "Mythic",
+        ["zh"] = "神话",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = {
         ["de"] = "Kaiserstadt Monster",
@@ -435,7 +476,7 @@ local setTypesToName = {
         ["fr"] = "Cité impériale monstre",
         ["jp"] = "帝都 モンスター",
         ["ru"] = "Имперский город Монстр",
-        ["zh"] = "Imperial city monster",
+        ["zh"] = "Imperial city 怪物",
     },
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]          = {
         ["de"] = "Cyrodiil Monster",
@@ -444,7 +485,7 @@ local setTypesToName = {
         ["fr"] = "Cyrodiil monstre",
         ["jp"] = "シロディール モンスター",
         ["ru"] = "Сиродил Монстр",
-        ["zh"] = "Cyrodiil monster",
+        ["zh"] = "Cyrodiil 怪物",
     },
     [LIBSETS_SETTYPE_CLASS] = {
         ["de"] = "Klassen spezifisch",
@@ -1326,6 +1367,9 @@ local localizationEn             = lib.localization[fallbackLang] --fallback val
 
 for supportedLanguage, isSupported in pairs(supportedLanguages) do
     if isSupported == true and supportedLanguage ~= fallbackLang then
+        if specialZoneNames[supportedLanguage] ~= nil then
+            setmetatable(specialZoneNames[supportedLanguage],          { __index = specialZoneNamesEn })
+        end
         if dropMechanicNames[supportedLanguage] ~= nil then
             setmetatable(dropMechanicNames[supportedLanguage],          { __index = dropMechanicNamesEn })
         end

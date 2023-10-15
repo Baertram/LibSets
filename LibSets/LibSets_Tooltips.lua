@@ -218,6 +218,11 @@ local function getLibSetsTooltipSavedVariables()
     return lib.svData.tooltipModifications
 end
 
+local function getDropMechanicTexture(dropMechnicId)
+    return dropMechanicIdToTexture[dropMechnicId]
+end
+lib.GetDropMechanicTexture = getDropMechanicTexture
+
 --[[
 --Custom tooltip placeholders
     <<1>>   Set type
@@ -654,11 +659,11 @@ local function getSetDropMechanicInfo(setData)
 
     local function l_addDropMechnicInfo(p_idx, p_dropMechanicIdOfZone)
         --Add the drop mechanic name
-        local dropMechanicNameOfZone = l_getDropMechanicName(idx, p_dropMechanicIdOfZone)
+        local dropMechanicNameOfZone = l_getDropMechanicName(p_idx, p_dropMechanicIdOfZone)
         if dropMechanicNameOfZone ~= nil then
 --d(">dropMechanicNameOfZone: " ..tos(dropMechanicNameOfZone))
             if tooltipTextures == true then
-            local dropMechanicTexture = dropMechanicIdToTexture[p_dropMechanicIdOfZone]
+                local dropMechanicTexture = getDropMechanicTexture(p_dropMechanicIdOfZone)
                 if dropMechanicTexture then
                     local dropMechanicNameIconStr = zoitfns(dropMechanicTexture, 24, 24, dropMechanicNameOfZone, nil)
                     dropMechanicNameOfZone = dropMechanicNameIconStr
@@ -956,12 +961,13 @@ local function buildReconstructionCostInfo(setData, itemLink)
     return lreconstructionCostsText
 end
 
-local function buildSetTypeInfo(setData)
+local function buildSetTypeInfo(setData, buildTextures)
+    buildTextures = buildTextures or false
     local setType = setData.setType
     if not setType then return end
     local setTypeName = libSets_GetSetTypeName(setType)
     local setTypeTexture
-    if tooltipTextures == true then
+    if tooltipTextures == true or buildTextures == true then
         if setData.isVeteran ~= nil then
             setTypeTexture = vetDungTexture
         else
@@ -974,6 +980,7 @@ local function buildSetTypeInfo(setData)
     end
     return setTypeName, setTypeTexture
 end
+lib.buildSetTypeInfo = buildSetTypeInfo
 
 local function buildSetDataText(setData, itemLink, forTooltip)
     if not setData then return end
