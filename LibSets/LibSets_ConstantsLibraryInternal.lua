@@ -315,35 +315,43 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 --Special zone IDS
+LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL = 0
 LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD = -99
 LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS = -98
 --Special zone names
 local specialZoneNames = {
     ["de"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Alle Zonen (in Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Levelaufstieg",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Schlachtfelder",
     },
     ["en"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "All Zones (in Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Level-Up",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Battlegrounds",
     },
     ["es"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Todas las zonas (en Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Elevar a mismo nivel",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Campos de batalla",
     },
     ["fr"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Toutes les zones (en Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Niveau supérieur",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Champs de bataille",
     },
     ["ru"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Все зоны (в Тамриэле)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Уровень повышен",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Поля боя",
     },
     ["zh"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "所有区域（泰姆瑞尔）",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "升级",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "战场",
     },
     ["jp"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "すべてのゾーン (タムリエル)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "レベルアップ",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "戦場",
     },

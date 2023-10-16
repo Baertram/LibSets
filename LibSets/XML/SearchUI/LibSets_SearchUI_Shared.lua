@@ -35,12 +35,6 @@ searchUI.searchTypeDefault = 1
 --Scroll list datatype - Default text
 searchUI.scrollListDataTypeDefault = 1
 
---Weapon types with 2hd weapons
-local twoHandWeaponTypes = {
-    [WEAPONTYPE_TWO_HANDED_AXE] = true,
-    [WEAPONTYPE_TWO_HANDED_HAMMER] = true,
-    [WEAPONTYPE_TWO_HANDED_SWORD] = true,
-}
 
 --Helper functions
 local function string_split (inputstr, sep)
@@ -105,6 +99,17 @@ end
 
 
 ------------------------------------------------
+--- Callbacks
+------------------------------------------------
+function LibSets_SearchUI_Shared:SetSearchCallbacks(searchDoneCallback, searchErrorCallback, searchCanceledCallback)
+	--Callbacks
+    self.searchDoneCallback =       searchDoneCallback
+    self.searchErrorCallback =      searchErrorCallback
+    self.searchCanceledCallback =   searchCanceledCallback
+end
+
+
+------------------------------------------------
 --- Reset
 ------------------------------------------------
 function LibSets_SearchUI_Shared:ResetInternal()
@@ -112,10 +117,9 @@ function LibSets_SearchUI_Shared:ResetInternal()
     self.searchParams = nil
     self.searchResults = nil
 
-    --Reset callbacks
-    self.searchDoneCallback = nil
-    self.searchErrorCallback = nil
-    self.searchCanceledCallback = nil
+    --Reset callbacks (but they won't get applied then anymore as this only happens at te self:Show(...) function,
+    --or if manually added via LibSets_SearchUI_Shared:SetSearchCallbacks(searchDoneCallback, searchErrorCallback, searchCanceledCallback)
+    --self:SetSearchCallbacks(nil, nil, nil)
 end
 
 function LibSets_SearchUI_Shared:ResetUI()
@@ -170,7 +174,7 @@ end
 -->See format of searchParams at the Initialize function of this class, above!
 function LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchErrorCallback, searchCanceledCallback)
 
-    if searchParams ~= nil then
+    if searchParams ~= nil and not ZO_IsTableEmpty(searchParams) then
         --Search parameters, passed in (preset UI elements with them, if provided)
         self.searchParams = searchParams
 
@@ -178,9 +182,7 @@ function LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchEr
     end
 
 	--Callbacks
-    self.searchDoneCallback =       searchDoneCallback
-    self.searchErrorCallback =      searchErrorCallback
-    self.searchCanceledCallback =   searchCanceledCallback
+    self:SetSearchCallbacks(searchDoneCallback, searchErrorCallback, searchCanceledCallback)
 
     --Show the UI now
     self:ShowUI()
@@ -363,11 +365,11 @@ end
 
 --Pre-Filter the masterlist table of e.g. a ZO_SortFilterScrollList
 function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
-    if defaultMasterListBase == nil or NonContiguousCount(defaultMasterListBase) == 0 then return end
+    if defaultMasterListBase == nil or ZO_IsTableEmpty(defaultMasterListBase) then return end
     --The search parameters of the filters (multiselect dropdowns) were provided?
     -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
     local searchParams = self.searchParams
-    if searchParams ~= nil and NonContiguousCount(searchParams) > 0 then
+    if searchParams ~= nil and not ZO_IsTableEmpty(searchParams) then
         local setsBaseList = {}
 
         local multiSelectFilterDropdownToSearchParamName = self.multiSelectFilterDropdownToSearchParamName
@@ -576,14 +578,8 @@ function LibSets_SearchUI_Shared:ThrottledCall(callbackName, timer, callback, ..
 end
 
 function LibSets_SearchUI_Shared:ModifyWeaponType2hd(weaponType)
-    local weaponTypeText = GetString("SI_WEAPONTYPE", weaponType)
-    if not twoHandWeaponTypes[weaponType] then
-        return weaponTypeText
-    else
-       return "2HD " .. weaponTypeText
-    end
+    return lib.GetWeaponTypeText(weaponType)
 end
-
 
 
 ------------------------------------------------

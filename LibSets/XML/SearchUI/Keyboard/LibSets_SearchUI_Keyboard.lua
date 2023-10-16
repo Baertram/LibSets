@@ -7,6 +7,9 @@ local getLocalizedText = lib.GetLocalizedText
 local buildSetTypeInfo = lib.buildSetTypeInfo
 local getDropMechanicTexture = lib.GetDropMechanicTexture
 local libSets_GetSpecialZoneNameById = lib.GetSpecialZoneNameById
+local getEquipSlotTexture = lib.GetEquipSlotTexture
+local getArmorTypeTexture = lib.GetArmorTypeTexture
+local getWeaponTypeTexture = lib.GetWeaponTypeTexture
 
 --The search UI table
 local searchUI = LibSets.SearchUI
@@ -23,7 +26,7 @@ local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
 
 --Local helper functions
 local function addToIndexTable(t)
-    if NonContiguousCount(t) == 0 then return end
+    if ZO_IsTableEmpty(t) then return end
     local retTab = {}
     for k,_ in pairs(t) do
         retTab[#retTab + 1] = k
@@ -202,7 +205,7 @@ end
 ------------------------------------------------
 
 function LibSets_SearchUI_Keyboard:UpdateSearchParamsFromSlashcommand(slashOptions)
-    if slashOptions ~= nil then
+    if slashOptions ~= nil and not ZO_IsTableEmpty(slashOptions) then
         --Reset all current search parameters
         self:ResetUI()
 
@@ -220,7 +223,7 @@ end
 
 function LibSets_SearchUI_Keyboard:ShowUI(slashOptions)
     if not self.tooltipKeyboardHookWasDone then
-        --Activate the LibSets toolip hooks at the LibSets set search preview tooltip
+        --Activate the LibSets toolip hooks at the LibSets set search preview tooltip so that the drop info is shown at the tooltip
         if lib.RegisterCustomTooltipHook("LibSets_SearchUI_Tooltip", searchUIName) == true then
             self.tooltipKeyboardHookWasDone = true
         end
@@ -249,13 +252,13 @@ function LibSets_SearchUI_Keyboard:ApplySearchParamsToUI()
     if not self:IsShown() then return end
 
     local searchParams = self.searchParams
-    if searchParams == nil then return end
+    if searchParams == nil or ZO_IsTableEmpty(searchParams) then return end
 
     --Apply each searchParam entry to the UI's multiselect dropdown box, editfields, etc.
     --Multi select dropdown boxes
     for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
         local entriesToSelect = searchParams[self.multiSelectFilterDropdownToSearchParamName[dropdownControl]]
-        if entriesToSelect ~= nil and NonContiguousCount(entriesToSelect) > 0 then
+        if entriesToSelect ~= nil and not ZO_IsTableEmpty(entriesToSelect) then
             self:SetMultiSelectDropdownFilters(dropdownControl, entriesToSelect)
         end
     end
@@ -352,34 +355,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     armorTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_APPAREL_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     armorTypeDropdown:SetSortsItems(false)
 
-    local equipmentTypes     = {
-        EQUIPMENT_FILTER_TYPE_LIGHT,
-        EQUIPMENT_FILTER_TYPE_MEDIUM,
-        EQUIPMENT_FILTER_TYPE_HEAVY,
-        EQUIPMENT_FILTER_TYPE_NECK,
-        EQUIPMENT_FILTER_TYPE_ONE_HANDED,
-        EQUIPMENT_FILTER_TYPE_RING,
-        EQUIPMENT_FILTER_TYPE_SHIELD,
-        EQUIPMENT_FILTER_TYPE_TWO_HANDED,
-        EQUIPMENT_FILTER_TYPE_DESTRO_STAFF,
-        EQUIPMENT_FILTER_TYPE_RESTO_STAFF,
-        EQUIPMENT_FILTER_TYPE_BOW,
-    }
-    local equipmentTypeIcons = {}
-    for _, armorEquipmentType in pairs(equipmentTypes) do
-        local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(armorEquipmentType)
-        if equipmentTypeData.icons and equipmentTypeData.icons.up then
-            equipmentTypeIcons[armorEquipmentType] = equipmentTypeData.icons.up
-        end
-    end
-
     for armorType, _ in pairs(lib.armorTypesSets) do
-        local armorTypeName = GetString("SI_ARMORTYPE", armorType)
-        local armorTypeNameStr = armorTypeName
-        local armorTypeTexture = equipmentTypeIcons[armorType]
-        if armorTypeTexture ~= nil then
-            armorTypeNameStr = zoitf(armorTypeTexture, 24, 24, armorTypeName, nil)
-        end
+        local armorTypeNameStr, armorTypeName = getArmorTypeTexture(armorType)
         local entry = armorTypeDropdown:CreateItemEntry(armorTypeNameStr)
         entry.filterType = armorType
         entry.nameClean = armorTypeName
@@ -398,53 +375,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     weaponTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_WEAPON_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     weaponTypeDropdown:SetSortsItems(false)
 
-    local weaponTypes = {
-        WEAPONTYPE_AXE,
-        WEAPONTYPE_HAMMER,
-        WEAPONTYPE_SWORD,
-        WEAPONTYPE_TWO_HANDED_SWORD,
-        WEAPONTYPE_TWO_HANDED_AXE,
-        WEAPONTYPE_TWO_HANDED_HAMMER,
-        WEAPONTYPE_BOW,
-        WEAPONTYPE_HEALING_STAFF,
-        WEAPONTYPE_RUNE,
-        WEAPONTYPE_DAGGER,
-        WEAPONTYPE_FIRE_STAFF,
-        WEAPONTYPE_FROST_STAFF,
-        WEAPONTYPE_LIGHTNING_STAFF,
-        WEAPONTYPE_SHIELD,
-    }
-    local weaponTypeIcons = {}
-    for _, weaponType in pairs(weaponTypes) do
-        local weaponTypeIcon = ITEM_FILTER_UTILS.GetWeaponTypeFilterIcons(weaponType)
-        if weaponTypeIcon and weaponTypeIcon.up then
-            weaponTypeIcons[weaponType] = weaponTypeIcon.up
-        else
-            --Bow e.g. does not provide an icon there, but only at the equipment filetr type EQUIPMENT_FILTER_TYPE_BOW
-            -->Use ZOs way to determine the icon then
-            --How do we determine this by the weapon type? Table EQUIPMENT_FILTER_TYPE_WEAPONTYPES in itemfilters is not global...
-            --So hardcode the mapping here...
-            local equipmentTypeToWeaponTypesMissingIcons = {
-                [WEAPONTYPE_BOW] = EQUIPMENT_FILTER_TYPE_BOW,
-                [WEAPONTYPE_HEALING_STAFF] = EQUIPMENT_FILTER_TYPE_RESTO_STAFF,
-            }
-            local equipmentFilterType = equipmentTypeToWeaponTypesMissingIcons[weaponType]
-            if equipmentFilterType ~= nil then
-                local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(equipmentFilterType)
-                if equipmentTypeData and equipmentTypeData.icons and equipmentTypeData.icons.up then
-                    weaponTypeIcons[weaponType] = equipmentTypeData.icons.up
-                end
-            end
-        end
-    end
-
     for weaponType, _ in pairs(lib.weaponTypesSets) do
-        local weaponTypeName = self:ModifyWeaponType2hd(weaponType)
-        local weaponTypeNameStr = weaponTypeName
-        local weaponTypeTexture = weaponTypeIcons[weaponType]
-        if weaponTypeTexture ~= nil then
-            weaponTypeNameStr = zoitf(weaponTypeTexture, 24, 24, weaponTypeName, nil)
-        end
+        local weaponTypeNameStr, weaponTypeName = getWeaponTypeTexture(weaponType)
         local entry = weaponTypeDropdown:CreateItemEntry(weaponTypeNameStr)
         entry.filterType = weaponType
         entry.nameClean = weaponTypeName
@@ -463,49 +395,6 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     equipmentTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     equipmentTypeDropdown:SetSortsItems(false)
 
-    local equipTypes = {
-        EQUIP_TYPE_HEAD,
-        EQUIP_TYPE_NECK,
-        EQUIP_TYPE_CHEST,
-        EQUIP_TYPE_SHOULDERS,
-        EQUIP_TYPE_ONE_HAND,
-        EQUIP_TYPE_TWO_HAND,
-        EQUIP_TYPE_OFF_HAND,
-        EQUIP_TYPE_WAIST,
-        EQUIP_TYPE_LEGS,
-        EQUIP_TYPE_FEET,
-        EQUIP_TYPE_COSTUME,
-        EQUIP_TYPE_RING,
-        EQUIP_TYPE_HAND,
-        EQUIP_TYPE_MAIN_HAND,
-        EQUIP_TYPE_POISON,
-    }
-    local equipTypeIcons = {}
-    for _, equipType in pairs(equipTypes) do
-        local equipTypeIcon = ITEM_FILTER_UTILS.GetEquipTypeFilterIcons(equipType)
-        if equipTypeIcon and equipTypeIcon.up then
-            equipTypeIcons[equipType] = equipTypeIcon.up
-        else
-            --1hd, 2hd, main and off hand e.g. does not provide an icon there, but only at the equipment filter type EQUIPMENT_FILTER_TYPE_BOW
-            -->Use ZOs way to determine the icon then
-            --How do we determine this by the weapon type? Table EQUIPMENT_FILTER_TYPE_WEAPONTYPES in itemfilters is not global...
-            --So hardcode the mapping here...
-            local equipmentTypeToEquipmentFilterTypesMissingIcons = {
-                [EQUIP_TYPE_ONE_HAND] = EQUIPMENT_FILTER_TYPE_ONE_HANDED,
-                --[EQUIP_TYPE_MAIN_HAND] = EQUIPMENT_FILTER_TYPE_, --???
-                --[EQUIP_TYPE_OFF_HAND] = EQUIPMENT_FILTER_TYPE_, --???
-                [EQUIP_TYPE_TWO_HAND] = EQUIPMENT_FILTER_TYPE_TWO_HANDED,
-            }
-            local equipmentFilterType = equipmentTypeToEquipmentFilterTypesMissingIcons[equipType]
-            if equipmentFilterType ~= nil then
-                local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(equipmentFilterType)
-                if equipmentTypeData and equipmentTypeData.icons and equipmentTypeData.icons.up then
-                    equipTypeIcons[equipType] = equipmentTypeData.icons.up
-                end
-            end
-        end
-    end
-
     --local alreadyCheckedEquipTypes = {}
     --for equipSlot, equipTypes in ZO_Character_EnumerateEquipSlotToEquipTypes() do
         --for _, equipType in ipairs(equipTypes) do
@@ -513,12 +402,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             --if not alreadyCheckedEquipTypes[equipType] and lib.equipTypesSets[equipType] ~= nil then
                 --alreadyCheckedEquipTypes[equipType] = true
         if isValid == true then
-            local equipTypeName = GetString("SI_EQUIPTYPE", equipType)
-            local equipTypeNameStr = equipTypeName
-            local equipTypeTexture = equipTypeIcons[equipType]
-            if equipTypeTexture ~= nil then
-                equipTypeNameStr = zoitf(equipTypeTexture, 24, 24, equipTypeName, nil)
-            end
+            local equipTypeNameStr, equipTypeName = getEquipSlotTexture(equipType)
             local entry = equipmentTypeDropdown:CreateItemEntry(equipTypeNameStr)
             entry.filterType = equipType
             entry.nameClean = equipTypeName
@@ -716,14 +600,14 @@ end
 function LibSets_SearchUI_Keyboard:IsAnyItemIdRelevantFilterActive()
 --d("LibSets_SearchUI_Keyboard:IsAnyItemIdRelevantFilterActive")
     local searchParams = self.searchParams
-    if searchParams == nil or NonContiguousCount(searchParams) == 0 then return false end
+    if searchParams == nil or ZO_IsTableEmpty(searchParams) then return false end
 
     --Multiselect dropdown boxes
     for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
         if self.isItemIdRelevantMultiSelectFilterDropdown[dropdownControl] then
             local searchParamEntryKey = self.multiSelectFilterDropdownToSearchParamName[dropdownControl]
             local searchParamEntry = searchParams[searchParamEntryKey]
-            if searchParamEntry ~= nil and NonContiguousCount(searchParamEntry) > 0 then
+            if searchParamEntry ~= nil and not ZO_IsTableEmpty(searchParamEntry) then
 --d(">found filtered data in: " .. tostring(searchParamEntryKey))
                 return true
             end
@@ -744,14 +628,14 @@ function LibSets_SearchUI_Keyboard:GetItemIdRelevantFilterKeys()
     --d("LibSets_SearchUI_Keyboard:GetItemIdRelevantFilterKeys")
     local searchParamKeysOfItemIdAffectingFilters = {}
     local searchParams = self.searchParams
-    if searchParams == nil or NonContiguousCount(searchParams) == 0 then return false end
+    if searchParams == nil or ZO_IsTableEmpty(searchParams) then return false end
 
     --Multiselect dropdown boxes
     for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
         if self.isItemIdRelevantMultiSelectFilterDropdown[dropdownControl] then
             local searchParamKey = self.multiSelectFilterDropdownToSearchParamName[dropdownControl]
             local searchParamEntry = searchParams[searchParamKey]
-            if searchParamEntry ~= nil and NonContiguousCount(searchParamEntry) > 0 then
+            if searchParamEntry ~= nil and not ZO_IsTableEmpty(searchParamEntry) then
                 searchParamKeysOfItemIdAffectingFilters[searchParamKey] = true
             end
         end
@@ -842,7 +726,7 @@ function LibSets_SearchUI_Keyboard:OnFilterChanged()
     --Multiselect dropdown boxes
     for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
         local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(dropdownControl)
-        if NonContiguousCount(selectedEntries) > 0 then
+        if not ZO_IsTableEmpty(selectedEntries) then
             searchParams[self.multiSelectFilterDropdownToSearchParamName[dropdownControl]] = selectedEntries
         end
     end

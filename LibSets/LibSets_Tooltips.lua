@@ -54,6 +54,7 @@ local customAddonTooltipControlHooksCount = 0
 
 
 local getLibSetsSetPreviewTooltipSavedVariables = lib.getLibSetsSetPreviewTooltipSavedVariables
+local langAllowedCheck = lib.LangAllowedCheck
 
 ------------------------------------------------------------------------------------------------------------------------
 --SetIds which are blacklisted for zone related tooltip text (as they got no zoneId where they drop)
@@ -78,7 +79,8 @@ local blacklistedSetIdsForZoneTooltips = {
     [512] = true, --Template_Drop_Magi P
 }
 ------------------------------------------------------------------------------------------------------------------------
-
+local zoneNamesProcessed = {}
+local dropMechanicNamesProcessed = {}
 
 local dropZoneNames = {}
 local dropMechanicNames = {}
@@ -100,7 +102,9 @@ local lib_getAllSetNames = lib.GetAllSetNames
 local clientLang =      lib.clientLang
 local fallbackLang =    lib.fallbackLang
 local doesClientLangEqualFallbackLang = (clientLang == fallbackLang and true) or false
-local localization         =    lib.localization[clientLang]
+local langToUse = langAllowedCheck(clientLang)
+
+local localization         =    lib.localization[langToUse]
 local dropLocationZonesStr =    localization.dropZones
 --local dlcStr =                  localization.dlc
 local droppedByStr =            localization.droppedBy
@@ -118,7 +122,7 @@ local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
 local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 local undauntedChestStr =       localization.undauntedChest
-local undauntedChestIdNames =   lib.undauntedChestIds[clientLang]
+local undauntedChestIdNames =   lib.undauntedChestIds[langToUse]
 
 local isJewelryEquipType =      lib.isJewelryEquipType
 local isWeaponEquipType =       lib.isWeaponEquipType
@@ -520,7 +524,7 @@ local function checkTraitsNeededGiven(setData)
 end
 
 local function tableContentsAreAllTheSame(tabToCheck)
-    if tabToCheck == nil or NonContiguousCount(tabToCheck) == 0 then return false end
+    if tabToCheck == nil or ZO_IsTableEmpty(tabToCheck) then return false end
     local entriesChecked = {}
     for _, entry in pairs(tabToCheck) do
         entriesChecked[entry] = true
@@ -638,7 +642,7 @@ local function getSetDropMechanicInfo(setData)
 
     local dropMechanicTab = setData.dropMechanic
     if not dropMechanicTab then return end
-    local setType = setData.setType
+    --local setType = setData.setType
 
     local dropMechanicNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
     local dropMechanicDropLocationNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES]
@@ -647,17 +651,19 @@ local function getSetDropMechanicInfo(setData)
     ---------------------------------------------------------------------------------------------------
     local function l_getDropMechanicName(p_idx, p_dropMechanicIdOfZone)
         local l_dropMechanicName
-        if dropMechanicNamesOfSet == nil or dropMechanicNamesOfSet[p_idx] == nil or dropMechanicNamesOfSet[p_idx][clientLang] == nil then
-            l_dropMechanicName = getDropMechanicName(p_dropMechanicIdOfZone, clientLang)
+        if dropMechanicNamesOfSet == nil or dropMechanicNamesOfSet[p_idx] == nil or dropMechanicNamesOfSet[p_idx][langToUse] == nil then
+            l_dropMechanicName = dropMechanicNamesProcessed[p_dropMechanicIdOfZone] or getDropMechanicName(p_dropMechanicIdOfZone, langToUse)
     --d(">1")
         else
-            l_dropMechanicName = dropMechanicNamesOfSet[p_idx][clientLang]
+            l_dropMechanicName = dropMechanicNamesOfSet[p_idx][langToUse]
     --d(">2")
         end
+        dropMechanicNamesProcessed[p_dropMechanicIdOfZone] = l_dropMechanicName
+lib._debugDropMechanicNamesProcessed = dropMechanicNamesProcessed
         return l_dropMechanicName
     end
 
-    local function l_addDropMechnicInfo(p_idx, p_dropMechanicIdOfZone)
+    local function l_addDropMechanicInfo(p_idx, p_dropMechanicIdOfZone)
         --Add the drop mechanic name
         local dropMechanicNameOfZone = l_getDropMechanicName(p_idx, p_dropMechanicIdOfZone)
         if dropMechanicNameOfZone ~= nil then
@@ -674,15 +680,28 @@ local function getSetDropMechanicInfo(setData)
 
         --Add the drop mechanic drop location text (if given)
         if dropMechanicDropLocationNamesOfSet ~= nil and dropMechanicDropLocationNamesOfSet[p_idx] then
-            local dropMechanicDropLocationNameOfZone = dropMechanicDropLocationNamesOfSet[p_idx][clientLang]
+            local dropMechanicDropLocationNameOfZone = dropMechanicDropLocationNamesOfSet[p_idx][langToUse]
             if (dropMechanicDropLocationNameOfZone == nil or dropMechanicDropLocationNameOfZone == "") and not doesClientLangEqualFallbackLang then
                 dropMechanicDropLocationNameOfZone = dropMechanicDropLocationNamesOfSet[p_idx][fallbackLang]
             end
             if dropMechanicDropLocationNameOfZone ~= nil then
                 dropLocationNames[p_idx] = dropMechanicDropLocationNameOfZone
+            else
+d("[LibSets - ERROR]DropMechanicLocationName missing. SetId: " ..tos(setData.setId) .. ", idx: " ..tos(p_idx) .. ", zone: " .. tos(dropZoneNames[p_idx]) .. ", dropMechanicId: " ..tos(p_dropMechanicIdOfZone))
             end
         end
     end
+    ---------------------------------------------------------------------------------------------------
+
+    --Check if any zoneId is the same as another in the table. If so: Check if each zoneId got a dropMechanic index (and dropLocationName index) too
+    --and then resort the indices so that same drop zones will be combined at the output as "<Zone Name> (<drop mechanic type name> <: drop mechnic location name> / ... )
+    --todo 2023-10-15
+    --[[
+    if not useCustomTooltip then
+
+    end
+    ]]
+
     ---------------------------------------------------------------------------------------------------
 
     --No drop zoneIds provided? Only use the drop mechnic data, no zone data
@@ -697,7 +716,7 @@ local function getSetDropMechanicInfo(setData)
                 local dropMechanicId = dropMechanicTab[idx]
                 if dropMechanicId ~= nil then
                     --Add the drop mechanics without zone now
-                    l_addDropMechnicInfo(idx, dropMechanicId)
+                    l_addDropMechanicInfo(idx, dropMechanicId)
                 end
             end
 
@@ -710,24 +729,20 @@ local function getSetDropMechanicInfo(setData)
         --Loop the drop zones
         for idx, zoneId in ipairs(dropZoneIds) do
             --Get the zone names
-            local zoneName
-            if zoneId >= 0 then
-                zoneName = libSets_GetZoneName(zoneId)
-                if zoneName == nil then
-                    if setType == LIBSETS_SETTYPE_BATTLEGROUND then
-                        zoneName = battlegroundStr
-                    end
-                end
-                dropZoneNames[idx] = zoneName
-            end
+            local zoneName = zoneNamesProcessed[zoneId] or libSets_GetZoneName(zoneId)
+            dropZoneNames[idx] = zoneName
+            zoneNamesProcessed[zoneId] = zoneName
 
             --Get the drop mechanics at the zoneId
             local dropMechanicIdOfZone = dropMechanicTab[idx]
             if dropMechanicIdOfZone then
-                --Add the drop mechanics now
-                l_addDropMechnicInfo(idx, dropMechanicIdOfZone)
+                --Add the drop mechanics for the current zone now
+                l_addDropMechanicInfo(idx, dropMechanicIdOfZone)
             end
         end
+lib._debugZoneNamesProcessed = zoneNamesProcessed
+
+
     end
 end
 
@@ -1171,25 +1186,25 @@ d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
         --d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
     end
     setInfoParts["dropMechanics"] = {
-        enabled = dropMechanicNames ~= nil and NonContiguousCount(dropMechanicNames) > 0,
+        enabled = dropMechanicNames ~= nil and not ZO_IsTableEmpty(dropMechanicNames),
         data = dropMechanicNames,
         text = setDropMechanicText,
         --icon = ,
     }
     setInfoParts["dropZones"] = {
-        enabled = dropZoneNames ~= nil and NonContiguousCount(dropZoneNames) > 0,
+        enabled = dropZoneNames ~= nil and not ZO_IsTableEmpty(dropZoneNames),
         data = dropZoneNames,
         text = setDropZoneStr,
         --icon = ,
     }
     setInfoParts["dropLocations"] = {
-        enabled = dropLocationNames ~= nil and NonContiguousCount(dropLocationNames) > 0,
+        enabled = dropLocationNames ~= nil and not ZO_IsTableEmpty(dropLocationNames),
         data = dropLocationNames,
         text = setDropLocationsText,
         --icon = ,
     }
     setInfoParts["overallTextsPerZone"] = {
-        enabled = setDropOverallTextsPerZone ~= nil and NonContiguousCount(setDropOverallTextsPerZone) > 0,
+        enabled = setDropOverallTextsPerZone ~= nil and not ZO_IsTableEmpty(setDropOverallTextsPerZone),
         data = setDropOverallTextsPerZone,
         --text =
         --icon = ,
@@ -1636,7 +1651,7 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
         if not isSet then return end
-        local setData = libSets_GetSetInfo(setId, true, clientLang) --without itemIds, and names only in client laguage
+        local setData = libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
 
         addTooltipLine(tooltipControl, setData, itemLink)
     end
@@ -1722,11 +1737,11 @@ local function previewSetTooltipBySlashCommand(args)
         allSetNamesCached = allSetNamesCached or lib_getAllSetNames()
         --Search the set's ID by it's provided criteria "name", first start with the client language
         for setIdOfSearchedData, setNameOfEachLanguage in pairs(allSetNamesCached) do
-            local setNameInClientLang = strlower(setNameOfEachLanguage[clientLang])
-            local setNameNoSpaces = strgsub(setNameInClientLang, "%s+", "·") --replace spaces by .
-            if setNameNoSpaces == "" then setNameNoSpaces = setNameInClientLang end
-            if setNameInClientLang ~= nil and setNameInClientLang ~= "" and setNameNoSpaces ~= "" and (
-                    setNameInClientLang == setNameToSearch or strfind(setNameInClientLang, setNameToSearch, 1, true) ~= nil
+            local setNameInlangToUse = strlower(setNameOfEachLanguage[langToUse])
+            local setNameNoSpaces = strgsub(setNameInlangToUse, "%s+", "·") --replace spaces by .
+            if setNameNoSpaces == "" then setNameNoSpaces = setNameInlangToUse end
+            if setNameInlangToUse ~= nil and setNameInlangToUse ~= "" and setNameNoSpaces ~= "" and (
+                    setNameInlangToUse == setNameToSearch or strfind(setNameInlangToUse, setNameToSearch, 1, true) ~= nil
             ) then
                 setId = setIdOfSearchedData
                 break --end the loop
@@ -1877,8 +1892,8 @@ local function onPlayerActivatedTooltips()
     EM:UnregisterForEvent(MAJOR .. "_Tooltips", EVENT_PLAYER_ACTIVATED) --only load once
     if not lam then return end
 
-    clientLang = clientLang or lib.clientLang
-    localization = localization or lib.localization[clientLang]
+    langToUse = langToUse or langAllowedCheck(clientLang)
+    localization = localization or lib.localization[langToUse]
 
     --Get the settings for the set preview tooltip
     --Create the slash command

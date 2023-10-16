@@ -354,6 +354,7 @@ local trem = table.remove
 local tsort = table.sort
 local unp = unpack
 local zocstrfor = ZO_CachedStrFormat
+local zoitf = zo_iconTextFormat
 
 local gzidx = GetZoneIndex
 local gzid = GetZoneId
@@ -429,6 +430,52 @@ local classData =                       lib.classData
 local allClassSets =                    lib.classSets
 
 
+
+--Possible SlashCommand parameters
+-->help
+local callHelpParams = {
+    ["list"]    = true, --English
+    ["help"]    = true, --English
+    ["hilfe"]   = true, --German
+    ["aide"]    = true, --French
+    ["ヘルプ"]   = true, --Japanese
+    ["ayuda"]   = true, --Spanish
+    ["помощь"]  = true, --Russian
+    ["帮助"]    = true, --Chinese
+}
+-->search
+local callSearchParams = {
+    ["search"]  = true, --Englisch
+    ["suche"]   = true,  --German
+    ["cherche"] = true, --French
+    ["検索"]    = true, --Japanese
+    ["buscar"]  = true, --Spanish
+    ["поиск"]   = true, --Russian
+    ["搜索"]    = true, --Chinese
+}
+-->debug functions
+local callDebugParams = {
+    resetsv             = "DebugResetSavedVariables",
+    scanitemids         = "DebugScanAllSetData",
+
+    getall              = "DebugGetAllData",
+    getallnames         = "DebugGetAllNames",
+
+    getzones            = "DebugGetAllZoneInfo",
+    getmapnamess        = "DebugGetAllMapNames",
+
+    getwayshrines       = "DebugGetAllWayshrineInfo",
+    getwayshrinenames   = "DebugGetAllWayshrineNames",
+
+    getsetnames         = "DebugGetAllSetNames",
+    shownewsets         = "DebugShowNewSetIds",
+
+    getdungeons         = "DebugGetDungeonFinderData",
+    getcollectiblenames = "DebugGetAllCollectibleNames",
+    getdlcnames         = "DebugGetAllCollectibleDLCNames",
+}
+
+
 --local lib functions
 local checkIfSetsAreLoadedProperly
 local buildItemLink
@@ -478,6 +525,7 @@ local function langAllowedCheck(lang)
     end
     return lang
 end
+lib.LangAllowedCheck = langAllowedCheck
 
 local function getLocalizedText(textName, lang, ...)
     localizationData = localizationData or lib.localization
@@ -491,6 +539,166 @@ local function getLocalizedText(textName, lang, ...)
     return localizedText or ""
 end
 lib.GetLocalizedText = getLocalizedText
+
+local equipTypes = {
+    EQUIP_TYPE_HEAD,
+    EQUIP_TYPE_NECK,
+    EQUIP_TYPE_CHEST,
+    EQUIP_TYPE_SHOULDERS,
+    EQUIP_TYPE_ONE_HAND,
+    EQUIP_TYPE_TWO_HAND,
+    EQUIP_TYPE_OFF_HAND,
+    EQUIP_TYPE_WAIST,
+    EQUIP_TYPE_LEGS,
+    EQUIP_TYPE_FEET,
+    EQUIP_TYPE_COSTUME,
+    EQUIP_TYPE_RING,
+    EQUIP_TYPE_HAND,
+    EQUIP_TYPE_MAIN_HAND,
+    EQUIP_TYPE_POISON,
+}
+local equipTypeIcons = {}
+local function getEquipSlotTexture(equipSlot)
+    if ZO_IsTableEmpty(equipTypeIcons) then
+        for _, equipType in pairs(equipTypes) do
+            local equipTypeIcon = ITEM_FILTER_UTILS.GetEquipTypeFilterIcons(equipType)
+            if equipTypeIcon and equipTypeIcon.up then
+                equipTypeIcons[equipType] = equipTypeIcon.up
+            else
+                --1hd, 2hd, main and off hand e.g. does not provide an icon there, but only at the equipment filter type EQUIPMENT_FILTER_TYPE_BOW
+                -->Use ZOs way to determine the icon then
+                --How do we determine this by the weapon type? Table EQUIPMENT_FILTER_TYPE_WEAPONTYPES in itemfilters is not global...
+                --So hardcode the mapping here...
+                local equipmentTypeToEquipmentFilterTypesMissingIcons = {
+                    [EQUIP_TYPE_ONE_HAND] = EQUIPMENT_FILTER_TYPE_ONE_HANDED,
+                    --[EQUIP_TYPE_MAIN_HAND] = EQUIPMENT_FILTER_TYPE_, --???
+                    --[EQUIP_TYPE_OFF_HAND] = EQUIPMENT_FILTER_TYPE_, --???
+                    [EQUIP_TYPE_TWO_HAND] = EQUIPMENT_FILTER_TYPE_TWO_HANDED,
+                }
+                local equipmentFilterType = equipmentTypeToEquipmentFilterTypesMissingIcons[equipType]
+                if equipmentFilterType ~= nil then
+                    local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(equipmentFilterType)
+                    if equipmentTypeData and equipmentTypeData.icons and equipmentTypeData.icons.up then
+                        equipTypeIcons[equipType] = equipmentTypeData.icons.up
+                    end
+                end
+            end
+        end
+    end
+    local equipTypeName = GetString("SI_EQUIPTYPE", equipSlot)
+    local equipTypeNameStr = equipTypeName
+    local equipTypeTexture = equipTypeIcons[equipSlot]
+    if equipTypeTexture ~= nil then
+        equipTypeNameStr = zoitf(equipTypeTexture, 24, 24, equipTypeName, nil)
+    end
+    return equipTypeNameStr, equipTypeName
+end
+lib.GetEquipSlotTexture = getEquipSlotTexture
+
+
+--Weapon types with 2hd weapons
+local twoHandWeaponTypes = {
+    [WEAPONTYPE_TWO_HANDED_AXE] =       true,
+    [WEAPONTYPE_TWO_HANDED_HAMMER] =    true,
+    [WEAPONTYPE_TWO_HANDED_SWORD] =     true,
+}
+
+function lib.GetWeaponTypeText(weaponType)
+    if weaponType == nil then return end
+    local weaponTypeText = GetString("SI_WEAPONTYPE", weaponType)
+    if not twoHandWeaponTypes[weaponType] then
+        return weaponTypeText
+    else
+        return "2HD " .. weaponTypeText
+    end
+end
+local libSets_GetWeaponTypeText = lib.GetWeaponTypeText
+
+local weaponTypes = {
+    WEAPONTYPE_AXE,
+    WEAPONTYPE_HAMMER,
+    WEAPONTYPE_SWORD,
+    WEAPONTYPE_TWO_HANDED_SWORD,
+    WEAPONTYPE_TWO_HANDED_AXE,
+    WEAPONTYPE_TWO_HANDED_HAMMER,
+    WEAPONTYPE_BOW,
+    WEAPONTYPE_HEALING_STAFF,
+    WEAPONTYPE_RUNE,
+    WEAPONTYPE_DAGGER,
+    WEAPONTYPE_FIRE_STAFF,
+    WEAPONTYPE_FROST_STAFF,
+    WEAPONTYPE_LIGHTNING_STAFF,
+    WEAPONTYPE_SHIELD,
+}
+local weaponTypeIcons = {}
+local function getWeaponTypeTexture(p_weaponType)
+    if ZO_IsTableEmpty(weaponTypeIcons) then
+        for _, weaponType in pairs(weaponTypes) do
+            local weaponTypeIcon = ITEM_FILTER_UTILS.GetWeaponTypeFilterIcons(weaponType)
+            if weaponTypeIcon and weaponTypeIcon.up then
+                weaponTypeIcons[weaponType] = weaponTypeIcon.up
+            else
+                --Bow e.g. does not provide an icon there, but only at the equipment filetr type EQUIPMENT_FILTER_TYPE_BOW
+                -->Use ZOs way to determine the icon then
+                --How do we determine this by the weapon type? Table EQUIPMENT_FILTER_TYPE_WEAPONTYPES in itemfilters is not global...
+                --So hardcode the mapping here...
+                local equipmentTypeToWeaponTypesMissingIcons = {
+                    [WEAPONTYPE_BOW] = EQUIPMENT_FILTER_TYPE_BOW,
+                    [WEAPONTYPE_HEALING_STAFF] = EQUIPMENT_FILTER_TYPE_RESTO_STAFF,
+                }
+                local equipmentFilterType = equipmentTypeToWeaponTypesMissingIcons[weaponType]
+                if equipmentFilterType ~= nil then
+                    local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(equipmentFilterType)
+                    if equipmentTypeData and equipmentTypeData.icons and equipmentTypeData.icons.up then
+                        weaponTypeIcons[weaponType] = equipmentTypeData.icons.up
+                    end
+                end
+            end
+        end
+    end
+    local weaponTypeName = libSets_GetWeaponTypeText(p_weaponType)
+    local weaponTypeNameStr = weaponTypeName
+    local weaponTypeTexture = weaponTypeIcons[p_weaponType]
+    if weaponTypeTexture ~= nil then
+        weaponTypeNameStr = zoitf(weaponTypeTexture, 24, 24, weaponTypeTexture, nil)
+    end
+    return weaponTypeNameStr, weaponTypeName
+end
+lib.GetWeaponTypeTexture = getWeaponTypeTexture
+
+local armorEquipmentTypes = {
+    EQUIPMENT_FILTER_TYPE_LIGHT,
+    EQUIPMENT_FILTER_TYPE_MEDIUM,
+    EQUIPMENT_FILTER_TYPE_HEAVY,
+    EQUIPMENT_FILTER_TYPE_NECK,
+    EQUIPMENT_FILTER_TYPE_ONE_HANDED,
+    EQUIPMENT_FILTER_TYPE_RING,
+    EQUIPMENT_FILTER_TYPE_SHIELD,
+    EQUIPMENT_FILTER_TYPE_TWO_HANDED,
+    EQUIPMENT_FILTER_TYPE_DESTRO_STAFF,
+    EQUIPMENT_FILTER_TYPE_RESTO_STAFF,
+    EQUIPMENT_FILTER_TYPE_BOW,
+}
+local armorTypeIcons = {}
+local function getArmorTypeTexture(p_armorType)
+    if ZO_IsTableEmpty(armorTypeIcons) then
+        for _, armorEquipmentType in pairs(armorEquipmentTypes) do
+            local equipmentTypeData = ITEM_FILTER_UTILS.GetEquipmentFilterTypeFilterDisplayInfo(armorEquipmentType)
+            if equipmentTypeData.icons and equipmentTypeData.icons.up then
+                armorTypeIcons[armorEquipmentType] = equipmentTypeData.icons.up
+            end
+        end
+    end
+    local armorTypeName = GetString("SI_ARMORTYPE", p_armorType)
+    local armorTypeNameStr = armorTypeName
+    local armorTypeTexture = armorTypeIcons[p_armorType]
+    if armorTypeTexture ~= nil then
+        armorTypeNameStr = zoitf(armorTypeTexture, 24, 24, armorTypeTexture, nil)
+    end
+    return armorTypeNameStr, armorTypeName
+
+end
+lib.GetArmorTypeTexture = getArmorTypeTexture
 
 local function validateValueAgainstCheckTable(numberOrTable, checkTable, isAnyInCheckTable, doLocalDebug)
     isAnyInCheckTable = isAnyInCheckTable or false
@@ -744,7 +952,7 @@ local function getSetsOfClassId(classId)
             newSetsList[setId] = getSetInfo(setId)
         end
     end
-    if NonContiguousCount(newSetsList) > 0 then
+    if not ZO_IsTableEmpty(newSetsList) then
         classData.setsList[classId] = newSetsList
         return newSetsList
     end
@@ -892,7 +1100,7 @@ local function LoadSets()
                     end
                 else
                     setId2ZoneIds[setId] = nil
-                    if NonContiguousCount(zoneId2SetIds) > 0 then
+                    if not ZO_IsTableEmpty(zoneId2SetIds) then
                         for zoneId, setIdsInZone in pairs(zoneId2SetIds) do
                             for setIdInZone, isActive in pairs(setIdsInZone) do
                                 if setIdInZone == setId and isActive == true then
@@ -902,7 +1110,7 @@ local function LoadSets()
                         end
                     end
                     setId2DropLocations[setId] = nil
-                    if NonContiguousCount(dropLocation2SetIds) > 0 then
+                    if not ZO_IsTableEmpty(dropLocation2SetIds) then
                         for languageOfDropLocationName, dropLocationNamesInLang in pairs(dropLocation2SetIds) do
                             for dropLocationNamesInLang, setIdsOfDropLocationInLang in pairs(dropLocationNamesInLang) do
                                 for setIdForDropLocation, isActive in pairs(setIdsOfDropLocationInLang) do
@@ -925,7 +1133,7 @@ local function LoadSets()
                 preloadedSetsWithProcsAllowedInPvP[setId] = nil
 
                 setId2ZoneIds[setId] = nil
-                if NonContiguousCount(zoneId2SetIds) > 0 then
+                if not ZO_IsTableEmpty(zoneId2SetIds) then
                     for zoneId, setIdsInZone in pairs(zoneId2SetIds) do
                         for setIdInZone, isActive in pairs(setIdsInZone) do
                             if setIdInZone == setId and isActive == true then
@@ -935,7 +1143,7 @@ local function LoadSets()
                     end
                 end
                 setId2DropLocations[setId] = nil
-                if NonContiguousCount(dropLocation2SetIds) > 0 then
+                if not ZO_IsTableEmpty(dropLocation2SetIds) then
                     for languageOfDropLocationName, dropLocationNamesInLang in pairs(dropLocation2SetIds) do
                         for dropLocationNamesInLang, setIdsOfDropLocationInLang in pairs(dropLocationNamesInLang) do
                             for setIdForDropLocation, isActive in pairs(setIdsOfDropLocationInLang) do
@@ -2189,7 +2397,7 @@ end
 function lib.GetSetFirstItemId(setId, isNoESOSetId)
     if not checkIfSetsAreLoadedProperly() then return end
     local setItemIds = lib_GetSetItemIds(setId, isNoESOSetId)
-    if setItemIds == nil or NonContiguousCount(setItemIds) == 0 then return end
+    if setItemIds == nil or ZO_IsTableEmpty(setItemIds) then return end
     return next(setItemIds)
 end
 
@@ -2757,14 +2965,14 @@ function lib.GetZoneName(zoneId, lang)
     if not zoneId then return end
     lang = langAllowedCheck(lang)
     local zoneName = ""
-    if zoneId > 0 then
+    if zoneId > LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL then
         if libZone ~= nil then
             zoneName = libZone:GetZoneName(zoneId, lang)
         else
             zoneName = zocstrfor("<<C:1>>", gznbid(zoneId) )
         end
     else
-        libSets_GetSpecialZoneNameById(zoneId)
+        zoneName = libSets_GetSpecialZoneNameById(zoneId, lang)
     end
     return zoneName
 end
@@ -3841,53 +4049,6 @@ end
 
 local function command_handler(args)
     local options = getOptionsFromSlashCommandString(args)
-
-    --Possible parameters
-    -->help
-    local callHelpParams = {
-        ["list"]    = true, --English
-        ["help"]    = true, --English
-        ["hilfe"]   = true, --German
-        ["aide"]    = true, --French
-        ["ヘルプ"]   = true, --Japanese
-        ["ayuda"]   = true, --Spanish
-        ["помощь"]  = true, --Russian
-        ["帮助"]    = true, --Chinese
-    }
-
-    -->search
-    local callSearchParams = {
-        ["search"]  = true, --Englisch
-        ["suche"]   = true,  --German
-        ["cherche"] = true, --French
-        ["検索"]    = true, --Japanese
-        ["buscar"]  = true, --Spanish
-        ["поиск"]   = true, --Russian
-        ["搜索"]    = true, --Chinese
-    }
-
-    -->debug functions
-    local callDebugParams = {
-        resetsv             = "DebugResetSavedVariables",
-        scanitemids         = "DebugScanAllSetData",
-
-        getall              = "DebugGetAllData",
-        getallnames         = "DebugGetAllNames",
-
-        getzones            = "DebugGetAllZoneInfo",
-        getmapnamess        = "DebugGetAllMapNames",
-
-        getwayshrines       = "DebugGetAllWayshrineInfo",
-        getwayshrinenames   = "DebugGetAllWayshrineNames",
-
-        getsetnames         = "DebugGetAllSetNames",
-        shownewsets         = "DebugShowNewSetIds",
-
-        getdungeons         = "DebugGetDungeonFinderData",
-        getcollectiblenames = "DebugGetAllCollectibleNames",
-        getdlcnames         = "DebugGetAllCollectibleDLCNames",
-    }
-
 
     --Help / status
     local firstParam = options and options[1]
