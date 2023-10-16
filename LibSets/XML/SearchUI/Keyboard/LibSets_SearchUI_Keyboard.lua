@@ -320,13 +320,17 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Set Types multiselect combobox.
     local setTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.setTypeFiltersControl)
-    setTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        setTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.setTypeFiltersDropdown = setTypeDropdown
     setTypeDropdown:ClearItems()
     setTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("setType")
     self.setTypeFiltersControl.tooltipText = filterTypeText
-    setTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        setTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     setTypeDropdown:SetSortsItems(false)
 
     for setType, isValid in pairs(lib.allowedSetTypes) do
@@ -346,17 +350,21 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the armor Types multiselect combobox.
     local armorTypeDropdown     = ZO_ComboBox_ObjectFromContainer(self.armorTypeFiltersControl)
-    armorTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        armorTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.armorTypeFiltersDropdown = armorTypeDropdown
     armorTypeDropdown:ClearItems()
     armorTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("armorType")
     self.armorTypeFiltersControl.tooltipText = filterTypeText
-    armorTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_APPAREL_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        armorTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_APPAREL_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     armorTypeDropdown:SetSortsItems(false)
 
     for armorType, _ in pairs(lib.armorTypesSets) do
-        local armorTypeNameStr, armorTypeName = getArmorTypeTexture(armorType)
+        local _, armorTypeNameStr, armorTypeName = getArmorTypeTexture(armorType)
         local entry = armorTypeDropdown:CreateItemEntry(armorTypeNameStr)
         entry.filterType = armorType
         entry.nameClean = armorTypeName
@@ -366,17 +374,21 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the weapon Types multiselect combobox.
     local weaponTypeDropdown    = ZO_ComboBox_ObjectFromContainer(self.weaponTypeFiltersControl)
-    weaponTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        weaponTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.weaponTypeFiltersDropdown = weaponTypeDropdown
     weaponTypeDropdown:ClearItems()
     weaponTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("weaponType")
     self.weaponTypeFiltersControl.tooltipText = filterTypeText
-    weaponTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_WEAPON_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        weaponTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_WEAPON_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     weaponTypeDropdown:SetSortsItems(false)
 
     for weaponType, _ in pairs(lib.weaponTypesSets) do
-        local weaponTypeNameStr, weaponTypeName = getWeaponTypeTexture(weaponType)
+        local _, weaponTypeNameStr, weaponTypeName = getWeaponTypeTexture(weaponType)
         local entry = weaponTypeDropdown:CreateItemEntry(weaponTypeNameStr)
         entry.filterType = weaponType
         entry.nameClean = weaponTypeName
@@ -386,44 +398,45 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the equipment Types multiselect combobox.
     local equipmentTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.equipmentTypeFiltersControl)
-    equipmentTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        equipmentTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.equipmentTypeFiltersDropdown = equipmentTypeDropdown
     equipmentTypeDropdown:ClearItems()
     equipmentTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("equipmentType")
     self.equipmentTypeFiltersControl.tooltipText = filterTypeText
-    equipmentTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        equipmentTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     equipmentTypeDropdown:SetSortsItems(false)
 
     --local alreadyCheckedEquipTypes = {}
-    --for equipSlot, equipTypes in ZO_Character_EnumerateEquipSlotToEquipTypes() do
-        --for _, equipType in ipairs(equipTypes) do
     for equipType, isValid in pairs(lib.equipTypesValid) do
-            --if not alreadyCheckedEquipTypes[equipType] and lib.equipTypesSets[equipType] ~= nil then
-                --alreadyCheckedEquipTypes[equipType] = true
         if isValid == true then
-            local equipTypeNameStr, equipTypeName = getEquipSlotTexture(equipType)
+            local _, equipTypeNameStr, equipTypeName = getEquipSlotTexture(equipType)
             local entry = equipmentTypeDropdown:CreateItemEntry(equipTypeNameStr)
             entry.filterType = equipType
             entry.nameClean = equipTypeName
             equipmentTypeDropdown:AddItem(entry)
         end
-            --end
-        --end
-    --end
     end
     sortFilterComboBox(equipmentTypeDropdown, "nameClean")
 
 
     -- Initialize the DLC Types multiselect combobox.
     local DLCIdDropdown       = ZO_ComboBox_ObjectFromContainer(self.DCLIdFiltersControl)
-    DLCIdDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        DLCIdDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.DLCIdFiltersDropdown = DLCIdDropdown
     DLCIdDropdown:ClearItems()
     DLCIdDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("dlc")
     self.DCLIdFiltersControl.tooltipText = filterTypeText
-    DLCIdDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        DLCIdDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     DLCIdDropdown:SetSortsItems(true)
 
     for DLCId, isValid in pairs(lib.allowedDLCIds) do
@@ -436,13 +449,15 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the enchantment search category Types multiselect combobox.
     local enchantmentSearchCategoryTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.enchantSearchCategoryTypeFiltersControl)
-    enchantmentSearchCategoryTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        enchantmentSearchCategoryTypeDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.enchantSearchCategoryTypeFiltersDropdown = enchantmentSearchCategoryTypeDropdown
     enchantmentSearchCategoryTypeDropdown:ClearItems()
     enchantmentSearchCategoryTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("enchantmentSearchCategory")
     self.enchantSearchCategoryTypeFiltersControl.tooltipText = filterTypeText
-    enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    --enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     enchantmentSearchCategoryTypeDropdown:SetSortsItems(true)
 
     for enchantSearchCategoryType, isValid in pairs(lib.enchantSearchCategoryTypesValid) do
@@ -455,13 +470,17 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Number of bonuses multiselect combobox.
     local numBonusDropdown = ZO_ComboBox_ObjectFromContainer(self.numBonusFiltersControl)
-    numBonusDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        numBonusDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.numBonusFiltersDropdown = numBonusDropdown
     numBonusDropdown:ClearItems()
     numBonusDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("numBonuses")
     self.numBonusFiltersControl.tooltipText = filterTypeText
-    numBonusDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        numBonusDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     numBonusDropdown:SetSortsItems(true)
 
     for numBonus=1, MAX_NUM_SET_BONUS, 1 do
@@ -472,13 +491,17 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Drop zones multiselect combobox.
     local dropZoneDropdown      = ZO_ComboBox_ObjectFromContainer(self.dropZoneFiltersControl)
-    dropZoneDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        dropZoneDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.dropZoneFiltersDropdown = dropZoneDropdown
     dropZoneDropdown:ClearItems()
     dropZoneDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("dropZones")
     self.dropZoneFiltersControl.tooltipText = filterTypeText
-    dropZoneDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        dropZoneDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     dropZoneDropdown:SetSortsItems(true)
 
     local dropZoneIds = lib.GetAllDropZones()
@@ -514,14 +537,18 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Drop mechanics multiselect combobox.
     local dropMechanicsDropdown  = ZO_ComboBox_ObjectFromContainer(self.dropMechanicsFiltersControl)
-    dropMechanicsDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        dropMechanicsDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.dropMechanicsFiltersDropdown = dropMechanicsDropdown
 
     dropMechanicsDropdown:ClearItems()
     dropMechanicsDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("dropMechanic")
     self.dropMechanicsFiltersControl.tooltipText = filterTypeText
-    dropMechanicsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        dropMechanicsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     dropMechanicsDropdown:SetSortsItems(false)
 
     for dropMechanicId, isValid in pairs(lib.allowedDropMechanics) do
@@ -546,13 +573,17 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     -- Initialize the Drop locations multiselect combobox.
     local dropLocationsDropdown  = ZO_ComboBox_ObjectFromContainer(self.dropLocationsFiltersControl)
-    dropLocationsDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        dropLocationsDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
     self.dropLocationsFiltersDropdown = dropLocationsDropdown
     dropLocationsDropdown:ClearItems()
     dropLocationsDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("droppedBy")
     self.dropLocationsFiltersControl.tooltipText = filterTypeText
-    dropLocationsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        dropLocationsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     dropLocationsDropdown:SetSortsItems(true)
 
     local dropLocationNamesInClientLang = lib.GetAllDropLocationNames()

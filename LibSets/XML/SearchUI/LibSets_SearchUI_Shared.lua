@@ -8,6 +8,7 @@ local libPrefix = "["..MAJOR.."]"
 local clientLang = lib.clientLang
 
 local libSets_GetSetInfo = lib.GetSetInfo
+local libSets_getDropMechanicAndDropLocationNames = lib.GetDropMechanicAndDropLocationNames
 local libSets_GetDropLocationNamesBySetId = lib.GetDropLocationNamesBySetId
 local libSets_GetDropMechanic = lib.GetDropMechanic
 local libSets_GetDropZonesBySetId = lib.GetDropZonesBySetId
@@ -45,6 +46,49 @@ local function string_split (inputstr, sep)
     end
     return t
 end
+
+local wasSetsDataDropLocationDataAdded = false
+local function addDropLocationDataToSetsMasterListBase(defaultMasterListBase, p_setId, p_setData)
+--d("[LibSets]addDropLocationDataToSetsMasterListBase")
+    if p_setId ~= nil and p_setData ~= nil then
+        p_setData.setId = p_setData.setId or p_setId
+        --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
+        if p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
+            p_setData = libSets_GetSetInfo(p_setId, true, nil) --without itemIds, and names only in client laguage
+        end
+        return p_setData
+    else
+        for setId, setData in pairs(defaultMasterListBase) do
+            setData.setId = setData.setId or setId
+            --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
+            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
+                setData = libSets_GetSetInfo(setId, true, nil) --without itemIds, and names only in client laguage
+                --[[
+                    local dropMechanicNamesTable, dropMechanicDropLocationNamesTable = libSets_getDropMechanicAndDropLocationNames(setId, nil, setData)
+                    setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
+                    setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
+                ]]
+                defaultMasterListBase[setId] = setData
+            end
+        end
+        wasSetsDataDropLocationDataAdded = true
+        return defaultMasterListBase
+    end
+end
+
+local function updateSetsInfoWithDropLocationsAndNames(selfVar)
+    --Add dropLocation data and texts to the lib.setInfo data once
+    -->!!!This might lag the client for 5 seconds on first open!!!
+    if not wasSetsDataDropLocationDataAdded then
+        local setsData = lib.setInfo
+        local setsDataNew = addDropLocationDataToSetsMasterListBase(setsData, nil, nil)
+        lib.setInfo = setsDataNew
+
+        selfVar.resultsList:RefreshData()
+    end
+end
+
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
@@ -155,6 +199,9 @@ end
 function LibSets_SearchUI_Shared:ShowUI()
 --d("LibSets_SearchUI_Shared:ShowUI")
     if self:IsShown() then return end
+    --Run once at first UI open, so it does not run on each reloadUI!
+    updateSetsInfoWithDropLocationsAndNames(self)
+
     self.control:SetHidden(false)
 
     --Fire callback for "UI is shown"

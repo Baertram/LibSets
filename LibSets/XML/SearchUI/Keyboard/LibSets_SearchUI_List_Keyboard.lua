@@ -4,8 +4,10 @@ local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = "["..MAJOR.."]"
 
 --The search UI table
-local searchUI = LibSets.SearchUI
+local searchUI = lib.SearchUI
 local searchUIName = searchUI.name
+
+local zif = zo_iconFormat
 
 --Library's local helpers
 local buildSetTypeInfo = lib.buildSetTypeInfo
@@ -16,29 +18,6 @@ local libSets_GetSpecialZoneNameById = lib.GetSpecialZoneNameById
 local getArmorTypeTexture = lib.GetArmorTypeTexture
 local getWeaponTypeTexture = lib.GetWeaponTypeTexture
 local getEquipSlotTexture = lib.GetEquipSlotTexture
-
-local wasSetsDataDropLocationDataAdded = false
-local function addDropLocationDataToSetsMasterListBase(defaultMasterListBase, p_setId, p_setData)
-    if p_setId ~= nil and p_setData ~= nil then
-        p_setData.setId = p_setData.setId or p_setId
-        --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
-        if p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
-            p_setData = libSets_GetSetInfo(p_setId, true, nil) --without itemIds, and names only in client laguage
-        end
-        return p_setData
-    else
-        for setId, setData in pairs(defaultMasterListBase) do
-            setData.setId = setData.setId or setId
-            --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
-            if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
-                setData = libSets_GetSetInfo(setId, true, nil) --without itemIds, and names only in client laguage
-                defaultMasterListBase[setId] = setData
-            end
-        end
-        wasSetsDataDropLocationDataAdded = true
-        return defaultMasterListBase
-    end
-end
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -94,8 +73,8 @@ function LibSets_SearchUI_List:Setup( )
 	self.headerDropLocations =      self.headers:GetNamedChild("DropLocations")
 	self.headerSetId =              self.headers:GetNamedChild("SetId")
 
-    --Build initial masterlist via self:BuildMasterList()
-    self:RefreshData()
+    --Build initial masterlist via self:BuildMasterList() --> Do not automatically here but only as the LibSets search UI opens first time!
+    --self:RefreshData()
 end
 
 --Get the data of the masterlist entries and add it to the list columns
@@ -116,13 +95,13 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     local armorOrWeaponTypeColumn = control:GetNamedChild("ArmorOrWeaponType")
     armorOrWeaponTypeColumn:ClearAnchors()
     armorOrWeaponTypeColumn:SetAnchor(LEFT, nameColumn, RIGHT, 0, 0)
-    armorOrWeaponTypeColumn:SetText(data.armorOrWeaponType or "")
+    armorOrWeaponTypeColumn:SetText(data.armorOrWeaponTypeTexture or "")
     armorOrWeaponTypeColumn:SetHidden(false)
 
     local slotColumn = control:GetNamedChild("EquipSlot")
     slotColumn:ClearAnchors()
     slotColumn:SetAnchor(LEFT, armorOrWeaponTypeColumn, RIGHT, 0, 0)
-    slotColumn:SetText(data.equipSlot or "")
+    slotColumn:SetText(data.equipSlotTexture or data.equipSlotText or "")
     slotColumn:SetHidden(false)
 
     local dropLocationsColumn = control:GetNamedChild("DropLocations")
@@ -193,17 +172,31 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local traitsNeeded = lib.GetTraitsNeeded(setId)
     ]]
 
-    local armorOrWeaponTypeText, equipSlotText --todo: fill with textures of the armorType, weaponType, equipSlot
+    local armorOrWeaponTypeTexture, armorOrWeaponTypeTextWithTexture, armorOrWeaponTypeText, equipSlotTexture, equipSlotTextWithTexture, equipSlotText
     local equipType = GetItemLinkEquipType(itemLink)
-    equipSlotText = getEquipSlotTexture(equipType, equipTypeName) --todo
+    equipSlotTexture, equipSlotTextWithTexture, equipSlotText = getEquipSlotTexture(equipType)
     local itemType = GetItemLinkItemType(itemLink)
     local armorOrWeaponType
-    if itemType == ITEMTYPE_ARMOR then
-        armorOrWeaponType = GetItemLinkArmorType(itemLink)
-        armorOrWeaponTypeText = getArmorTypeTexture(armorOrWeaponType, armorTypeName) --todo
-    elseif itemType == ITEMTYPE_WEAPON then
-        armorOrWeaponType = GetItemLinkWeaponType(itemLink)
-        armorOrWeaponTypeText = getWeaponTypeTexture(armorOrWeaponType, weaponTypeName) --todo
+    --Jewelry got no armor or weaapon type -> And thus no texture there
+    if equipType == EQUIP_TYPE_NECK or equipType == EQUIP_TYPE_RING then
+        armorOrWeaponType = ITEMTYPE_NONE
+        armorOrWeaponTypeTexture, armorOrWeaponTypeTextWithTexture, armorOrWeaponTypeText = getEquipSlotTexture(equipType)
+    else
+        if itemType == ITEMTYPE_ARMOR then
+            armorOrWeaponType = GetItemLinkArmorType(itemLink)
+            armorOrWeaponTypeTexture, armorOrWeaponTypeTextWithTexture, armorOrWeaponTypeText = getArmorTypeTexture(armorOrWeaponType)
+        elseif itemType == ITEMTYPE_WEAPON then
+            armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+            --Shield?
+            if armorOrWeaponType == WEAPONTYPE_SHIELD and equipType == EQUIP_TYPE_OFF_HAND then
+                armorOrWeaponTypeTexture, armorOrWeaponTypeTextWithTexture, armorOrWeaponTypeText = getWeaponTypeTexture(armorOrWeaponType)
+                equipSlotTexture = armorOrWeaponTypeTexture
+                equipSlotTextWithTexture = armorOrWeaponTypeTextWithTexture
+                equipSlotText = armorOrWeaponTypeText
+            else
+                armorOrWeaponTypeTexture, armorOrWeaponTypeTextWithTexture, armorOrWeaponTypeText = getWeaponTypeTexture(armorOrWeaponType)
+            end
+        end
     end
 
     local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
@@ -261,10 +254,14 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     itemData.name                = nameColumnValue --todo Maybe show multi language en/de e.g.?
 
     --Set item related
-    itemData.armorOrWeaponType   = armorOrWeaponType
-    itemData.armorOrWeaponTypeText = armorOrWeaponTypeText
-    itemData.equipSlot           = equipType
-    itemData.equipSlotText       = equipSlotText
+    itemData.armorOrWeaponType   =              armorOrWeaponType
+    itemData.armorOrWeaponTypeText =            armorOrWeaponTypeText
+    itemData.armorOrWeaponTypeTextWithTexture = armorOrWeaponTypeTextWithTexture
+    itemData.armorOrWeaponTypeTexture =         armorOrWeaponTypeTexture ~= nil and zif(armorOrWeaponTypeTexture, 24, 24)
+    itemData.equipSlot           =              equipType
+    itemData.equipSlotText       =              equipSlotText
+    itemData.equipSlotTextWithTexture =         equipSlotTextWithTexture
+    itemData.equipSlotTexture =                 equipSlotTexture ~= nil and zif(equipSlotTexture, 24, 24)
 
     --Set bonuses
     itemData.numBonuses          = numBonuses
@@ -285,14 +282,9 @@ end
 --Build the masterlist based of the sets searched/filtered
 -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
 function LibSets_SearchUI_List:BuildMasterList()
-    --d("[LibSets_SearchUI_List:BuildMasterList]")
+--d("[LibSets_SearchUI_List:BuildMasterList]")
     local setsData = lib.setInfo
     self.masterList = {}
-
-    --Add dropLocation data and texts to the lib.setInfo data once
-    if not wasSetsDataDropLocationDataAdded then
-        setsData = addDropLocationDataToSetsMasterListBase(setsData, nil, nil)
-    end
 
     --Pr-Filter the masterlist and hide any sets that do not match e.g. the setType, DLCId etc.
     local setsBaseList = self._parentObject:PreFilterMasterList(setsData)

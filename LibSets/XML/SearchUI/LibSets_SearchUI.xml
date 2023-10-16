@@ -44,8 +44,8 @@
         </Backdrop>
 
 
-        <!--Virtual Multiselect ComboBoxes - Was ZO_MultiselectComboBox before! -->
-		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
+        <!--Virtual Multiselect ComboBoxes - Was ZO_ComboBox before! -->
+		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_MultiselectComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
             <OnMouseEnter>
                 LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
             </OnMouseEnter>
@@ -89,13 +89,13 @@
 				<Label name="$(parent)DropLocations" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)EquipSlot" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="200" />
+                    <DimensionConstraints minX="300" />
 				</Label>
 				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DropLocations" />
 					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="20" />
+                    <DimensionConstraints minX="25" />
 				</Label>
 			</Controls>
 		</Control>
@@ -205,7 +205,7 @@
                             <Controls>
                                 <Control name="$(parent)Name" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, "Set name", "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                        ZO_SortHeader_Initialize(self, GetString(SI_ITEMLISTSORTTYPE2), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DateTime" />
                                     <Dimensions y="30" />
@@ -213,7 +213,7 @@
                                 </Control>
                                 <Control name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, "Armor/Weapon type", "armorOrWeaponType", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("armorOrWeaponType"), "armorOrWeaponType", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
                                     <Dimensions y="30" />
@@ -221,7 +221,7 @@
                                 </Control>
                                 <Control name="$(parent)EquipSlot" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, "Equip slot", "equipSlot", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("equipSlot"), "equipSlot", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
                                     <Dimensions y="30" />
@@ -229,20 +229,20 @@
                                 </Control>
                                 <Control name="$(parent)DropLocations" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, "Drop locations", "dropLocationSort", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("droppedBy"), "dropLocationSort", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)EquipSlot" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="200" />
+                                    <DimensionConstraints minX="300" />
                                 </Control>
                                 <Control name="$(parent)SetId" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, "ID", "setId", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("setId"), "setId", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DropLocations" />
                                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="20" />
+                                    <DimensionConstraints minX="25" />
                                 </Control>
                             </Controls>
                         </Control>

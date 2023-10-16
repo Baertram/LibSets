@@ -640,13 +640,15 @@ local function getSetDropMechanicInfo(setData)
     dropMechanicNames = {}
     dropLocationNames = {}
 
+--lib._debugSetData = ZO_ShallowTableCopy(setData)
+
     local dropMechanicTab = setData.dropMechanic
     if not dropMechanicTab then return end
     --local setType = setData.setType
 
+    local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
     local dropMechanicNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
     local dropMechanicDropLocationNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES]
-    local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
 
     ---------------------------------------------------------------------------------------------------
     local function l_getDropMechanicName(p_idx, p_dropMechanicIdOfZone)
@@ -659,7 +661,7 @@ local function getSetDropMechanicInfo(setData)
     --d(">2")
         end
         dropMechanicNamesProcessed[p_dropMechanicIdOfZone] = l_dropMechanicName
-lib._debugDropMechanicNamesProcessed = dropMechanicNamesProcessed
+--lib._debugDropMechanicNamesProcessed = dropMechanicNamesProcessed
         return l_dropMechanicName
     end
 
@@ -667,10 +669,11 @@ lib._debugDropMechanicNamesProcessed = dropMechanicNamesProcessed
         --Add the drop mechanic name
         local dropMechanicNameOfZone = l_getDropMechanicName(p_idx, p_dropMechanicIdOfZone)
         if dropMechanicNameOfZone ~= nil then
---d(">dropMechanicNameOfZone: " ..tos(dropMechanicNameOfZone))
+--d(">>dropMechanicNameOfZone: " ..tos(dropMechanicNameOfZone))
             if tooltipTextures == true then
                 local dropMechanicTexture = getDropMechanicTexture(p_dropMechanicIdOfZone)
-                if dropMechanicTexture then
+                if dropMechanicTexture ~= nil then
+--d(">>>texture: " ..tos(dropMechanicTexture))
                     local dropMechanicNameIconStr = zoitfns(dropMechanicTexture, 24, 24, dropMechanicNameOfZone, nil)
                     dropMechanicNameOfZone = dropMechanicNameIconStr
                 end
@@ -684,10 +687,11 @@ lib._debugDropMechanicNamesProcessed = dropMechanicNamesProcessed
             if (dropMechanicDropLocationNameOfZone == nil or dropMechanicDropLocationNameOfZone == "") and not doesClientLangEqualFallbackLang then
                 dropMechanicDropLocationNameOfZone = dropMechanicDropLocationNamesOfSet[p_idx][fallbackLang]
             end
+--d(">>found dropMechLoc: " ..tos(dropMechanicDropLocationNameOfZone))
             if dropMechanicDropLocationNameOfZone ~= nil then
                 dropLocationNames[p_idx] = dropMechanicDropLocationNameOfZone
             else
-d("[LibSets - ERROR]DropMechanicLocationName missing. SetId: " ..tos(setData.setId) .. ", idx: " ..tos(p_idx) .. ", zone: " .. tos(dropZoneNames[p_idx]) .. ", dropMechanicId: " ..tos(p_dropMechanicIdOfZone))
+--d("[LibSets - ERROR]DropMechanicLocationName missing. SetId: " ..tos(setData.setId) .. ", idx: " ..tos(p_idx) .. ", zone: " .. tos(dropZoneNames[p_idx]) .. ", dropMechanicId: " ..tos(p_dropMechanicIdOfZone))
             end
         end
     end
@@ -706,6 +710,7 @@ d("[LibSets - ERROR]DropMechanicLocationName missing. SetId: " ..tos(setData.set
 
     --No drop zoneIds provided? Only use the drop mechnic data, no zone data
     if not dropZoneIds then
+--d(">No dropZoneIds")
         local setId = setData.setId
         if not blacklistedSetIdsForZoneTooltips[setId] then
             d("[LibSets]ERROR getSetDropMechanicInfo - dropZoneIds MISSING! setId: " ..tos(setId))
@@ -726,10 +731,12 @@ d("[LibSets - ERROR]DropMechanicLocationName missing. SetId: " ..tos(setData.set
     ---------------------------------------------
     --Use the dropZoneIds
     else
+--d(">dropZoneIds: " ..tos(#dropZoneIds))
         --Loop the drop zones
         for idx, zoneId in ipairs(dropZoneIds) do
             --Get the zone names
             local zoneName = zoneNamesProcessed[zoneId] or libSets_GetZoneName(zoneId)
+--d(">["..tos(idx).."]name: " ..tos(zoneName) .. ", mechanic: " ..tos(dropMechanicTab[idx]))
             dropZoneNames[idx] = zoneName
             zoneNamesProcessed[zoneId] = zoneName
 
@@ -740,10 +747,13 @@ d("[LibSets - ERROR]DropMechanicLocationName missing. SetId: " ..tos(setData.set
                 l_addDropMechanicInfo(idx, dropMechanicIdOfZone)
             end
         end
-lib._debugZoneNamesProcessed = zoneNamesProcessed
-
-
+--lib._debugZoneNamesProcessed = zoneNamesProcessed
     end
+
+    --lib._debugDropZonesNames = ZO_ShallowTableCopy(dropZoneNames)
+    --lib._debugDropMechanicNames = ZO_ShallowTableCopy(dropMechanicNames)
+    --lib._debugdropLocationNames = ZO_ShallowTableCopy(dropLocationNames)
+
 end
 
 local function buildSetDropMechanicInfo(setData, itemLink)

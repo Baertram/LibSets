@@ -591,7 +591,7 @@ local function getEquipSlotTexture(equipSlot)
     if equipTypeTexture ~= nil then
         equipTypeNameStr = zoitf(equipTypeTexture, 24, 24, equipTypeName, nil)
     end
-    return equipTypeNameStr, equipTypeName
+    return equipTypeTexture, equipTypeNameStr, equipTypeName
 end
 lib.GetEquipSlotTexture = getEquipSlotTexture
 
@@ -660,9 +660,9 @@ local function getWeaponTypeTexture(p_weaponType)
     local weaponTypeNameStr = weaponTypeName
     local weaponTypeTexture = weaponTypeIcons[p_weaponType]
     if weaponTypeTexture ~= nil then
-        weaponTypeNameStr = zoitf(weaponTypeTexture, 24, 24, weaponTypeTexture, nil)
+        weaponTypeNameStr = zoitf(weaponTypeTexture, 24, 24, weaponTypeName, nil)
     end
-    return weaponTypeNameStr, weaponTypeName
+    return weaponTypeTexture, weaponTypeNameStr, weaponTypeName
 end
 lib.GetWeaponTypeTexture = getWeaponTypeTexture
 
@@ -693,10 +693,9 @@ local function getArmorTypeTexture(p_armorType)
     local armorTypeNameStr = armorTypeName
     local armorTypeTexture = armorTypeIcons[p_armorType]
     if armorTypeTexture ~= nil then
-        armorTypeNameStr = zoitf(armorTypeTexture, 24, 24, armorTypeTexture, nil)
+        armorTypeNameStr = zoitf(armorTypeTexture, 24, 24, armorTypeName, nil)
     end
-    return armorTypeNameStr, armorTypeName
-
+    return armorTypeTexture, armorTypeNameStr, armorTypeName
 end
 lib.GetArmorTypeTexture = getArmorTypeTexture
 
@@ -1579,6 +1578,7 @@ local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
     end
     return dropMechanicNamesTable, dropMechanicDropLocationNamesTable, dropMechanicTooltipsTable, setData
 end
+lib.GetDropMechanicAndDropLocationNames = getDropMechanicAndDropLocationNames
 
 ------------------------------------------------------------------------
 -- 	Global helper functions
@@ -2160,12 +2160,12 @@ end
 -->             language will be used.
 --> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc, String dropMechanicNameTooltipLocalized: The tooltip of the dropMechanic
 function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
-    if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return end
-    if not allowedDropMechanics[libSetsDropMechanicId] then return end
+    if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return nil, nil end
+    if not allowedDropMechanics[libSetsDropMechanicId] then return nil, nil end
     lang = langAllowedCheck(lang)
     local dropMechanicNames = dropMechanicIdToName[lang]
     local dropMechanicTooltipNames = dropMechanicIdToNameTooltip[lang]
-    if dropMechanicNames == nil or dropMechanicTooltipNames == nil then return false end
+    if dropMechanicNames == nil or dropMechanicTooltipNames == nil then return nil, nil end
     local dropMechanicName = dropMechanicNames[libSetsDropMechanicId]
     local dropMechanicTooltip = dropMechanicTooltipNames[libSetsDropMechanicId]
     if not dropMechanicName or dropMechanicName == "" then return nil, nil end
@@ -2476,6 +2476,7 @@ end
 --> Parameters: setId number: The set's setId,
 -->             noItemIds boolean optional: Set this to true if you do not need the itemIds subtable LIBSETS_TABLEKEY_SETITEMIDS in the return table. Dafault will be false
 -->             lang String optional: The 2char language String to use for language dependent info. If left nil all supported languages will be returned.
+-->             keepItemIds boolean optional: Set this to false to really delete an already existing setItemIds subtable. If this wil be nil or true the already existing table will not be removed from the return data! Default will be nil -> true
 --> Returns:    table setInfo
 ----> Contains:
 ----> number setId
@@ -2546,10 +2547,11 @@ end
 --      [2] = nil, --as it got no monster or other dropMechanicLocation name,
 --  },
 --}
-function lib.GetSetInfo(setId, noItemIds, lang)
+function lib.GetSetInfo(setId, noItemIds, lang, keepItemIds)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly() then return end
     noItemIds = noItemIds or false
+    if keepItemIds == nil then keepItemIds = true end
     local isNonEsoSetId = isNoESOSet(setId)
     local setInfoTable
     local setInfoTableCopy
@@ -2585,10 +2587,13 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     local dropMechanicNamesTable, dropMechanicDropLocationNamesTable = getDropMechanicAndDropLocationNames(setId, langToUse, setInfoTable)
 
     if onlyOneLanguage or noItemIds then
-        setInfoTableCopy = ZO_ShallowTableCopy(setInfoTable)
-        setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
-        setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
-        returnTableRef = setInfoTableCopy
+        --setInfoTableCopy = ZO_ShallowTableCopy(setInfoTable)
+        --setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
+        --setInfoTableCopy[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
+        --returnTableRef = setInfoTableCopy
+        setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
+        setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
+        returnTableRef = setInfoTable
     else
         setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
         setInfoTable[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
@@ -2603,7 +2608,9 @@ function lib.GetSetInfo(setId, noItemIds, lang)
         end
         if itemIds then returnTableRef[LIBSETS_TABLEKEY_SETITEMIDS] = itemIds end
     else
-        returnTableRef[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+        if keepItemIds == false then
+            returnTableRef[LIBSETS_TABLEKEY_SETITEMIDS] = nil
+        end
     end
     if onlyOneLanguage then
         local setNameInLang = preloaded[preloadedSetNamesTableKey][setId][langToUse]
@@ -2619,15 +2626,15 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     local isCurrentDLC = (DLC_ITERATION_END and returnTableRef["dlcId"] and returnTableRef["dlcId"] >= DLC_ITERATION_END) or false
     returnTableRef.isCurrentDLC = isCurrentDLC
 
---[[
-lib._setInfo = {
-    setId = setId,
-    setInfoTable = setInfoTable,
-    dropMechanicNamesTable = dropMechanicNamesTable,
-    dropMechanicDropLocationNamesTable = dropMechanicDropLocationNamesTable,
-    returnTableRef = returnTableRef,
-}
-]]
+    --[[
+    lib._setInfo = {
+        setId = setId,
+        setInfoTable = setInfoTable,
+        dropMechanicNamesTable = dropMechanicNamesTable,
+        dropMechanicDropLocationNamesTable = dropMechanicDropLocationNamesTable,
+        returnTableRef = returnTableRef,
+    }
+    ]]
     return returnTableRef
 end
 getSetInfo = lib.GetSetInfo
