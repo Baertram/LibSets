@@ -45,7 +45,7 @@
 
 
         <!--Virtual Multiselect ComboBoxes - live API 101039: ZO_MultiselectComboBox, PTS API 101040: ZO_ComboBox -->
-		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
+		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_MultiselectComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
             <OnMouseEnter>
                 LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
             </OnMouseEnter>

@@ -245,7 +245,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     if dropMechanicTab ~= nil and not ZO_IsTableEmpty(dropMechanicTab) then
         local overallTextsPerZone = setInfoParts["overallTextsPerZone"]
         if overallTextsPerZone ~= nil and overallTextsPerZone.enabled == true then
-            dropLocationText = overallTextsPerZone.data
+            dropLocationText = overallTextsPerZone.data[1]
         end
 
         local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
@@ -303,7 +303,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
 
     --Set info
     itemData.setTypeName         =              setTypeName
-    itemData.setTypeTexture      =              setTypeTexture
+    itemData.setTypeTexture      =              setTypeTexture ~= nil and zif(setTypeTexture, 24, 24)
 
     itemData.name                =              nameColumnValue --todo Maybe show multi language en/de e.g.?
     itemData.nameLower           =              nameColumnValue:lower() --Always add that for the string text search!!!

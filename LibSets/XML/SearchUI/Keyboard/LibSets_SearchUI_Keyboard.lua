@@ -139,7 +139,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.DCLIdFiltersControl =                     filters:GetNamedChild("DLCIdFilter")
     self.enchantSearchCategoryTypeFiltersControl = filters:GetNamedChild("EnchantSearchCategoryTypeFilter")
     --todo Disabled for the moment as it does not work! Maybe the self created itemLink does not contain the proper enchanting info?
-    self.enchantSearchCategoryTypeFiltersControl:SetHidden(true)
+    --self.enchantSearchCategoryTypeFiltersControl:SetHidden(true)
     self.dropZoneFiltersControl =                  filters:GetNamedChild("DropZoneFilter")
     self.dropMechanicsFiltersControl =             filters:GetNamedChild("DropMechanicsFilter")
     self.dropLocationsFiltersControl =             filters:GetNamedChild("DropLocationsFilter")
