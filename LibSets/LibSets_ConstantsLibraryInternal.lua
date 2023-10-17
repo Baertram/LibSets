@@ -34,6 +34,12 @@ lib.setsScanning                     = false
 ------------------------------------------------------------------------------------------------------------------------
 lib.fullyLoaded                      = false
 lib.startedLoading                   = true
+
+--The table with all relevant setIds
+lib.setIds = {}
+--SetIds which do not exist at the curren API version and thus get filtered automatically
+lib.nonExistingSetIdsAtCurrentApiVersion = {}
+
 ------------------------------------------------------------------------------------------------------------------------
 --Custom tooltip hooks to add the LibSets data, via function LibSets.RegisterCustomTooltipHook(tooltipCtrlName)
 lib.customTooltipHooks = {
@@ -194,6 +200,7 @@ LIBSETS_TABLEKEY_MIXED_SETNAMES                        = "MixedSetNamesForDataAl
 --LIBSETS_TABLEKEY_SET_PROCS                             = "setProcs" --2022-04-20 Disabled
 LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP              = "setProcsAllowedInPvP"
 LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING     = "setItemCollectionsZoneMapping"
+LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES          = "enchantSearchCategories"
 
 
 
@@ -672,6 +679,7 @@ lib.isArmorTraitType               = {
 lib.enchantSearchCategoryTypesValid = {
     --Not allowed
     --Allowed
+    ["all"]                                                     = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_HEALTH]                 = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_MAGICKA]                = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_STAMINA]                = true,
@@ -1503,4 +1511,3 @@ local setTypeToDropZoneLocalizationStr = {
     ["vet_dung"]                                    = clientLocalization.dropZoneDungeon,
 }
 lib.setTypeToDropZoneLocalizationStr   = setTypeToDropZoneLocalizationStr
-

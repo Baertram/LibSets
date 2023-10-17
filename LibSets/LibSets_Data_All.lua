@@ -1326,6 +1326,7 @@ lib.setDataPreloaded = {
 ------------------------------------------------------------------------------------------------------------------------
 }--lib.setDataPreloaded
 --**********************************************************************************************************************
+local setDataPreloaded = lib.setDataPreloaded
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
@@ -1350,88 +1351,75 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- Remove set data from the preloaded tables which is not given at the current API version (live server)
 ------------------------------------------------------------------------------------------------------------------------
+--The setIds which do not exist at the current API versin (determined at LoadSets() -> CheckSetExists(setId))
+local nonExistingSetIdsAtCurrentApiVersion = lib.nonExistingSetIdsAtCurrentApiVersion
+
 local function removeFutureSetData()
     if not isPTSAPIVersionLive then
-        if setsOfNewerAPIVersion ~= nil then
+        if setsOfNewerAPIVersion ~= nil and not ZO_IsTableEmpty(setsOfNewerAPIVersion) then
             ------------------------------------------------------------------------------------------------------------------------
             --Check all setIds of the new APIversion
-            local setInfo = lib.setInfo
-            local setIdsToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
-            local setIdsNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
-            local setNamesNoSetToSetItemIds = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
-            local preloadedEquipTypeData    = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]
-            local preloadedArmorTypeData    = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]
-            local preloadedWeaponTypeData   = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES]
-            local preloadedIsJewelryData    = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_JEWELRY]
             local nonSetIds = lib.noSetIdSets
-            local setIdsToSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
+            local setInfo = lib.setInfo
+            local setIdsToSetItemIds =          setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+            local setIdsNoSetToSetItemIds =     setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID]
+            local setNamesNoSetToSetItemIds =   setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID]
+            local preloadedEquipTypeData =      setDataPreloaded[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES]
+            local preloadedArmorTypeData =      setDataPreloaded[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES]
+            local preloadedWeaponTypeData =     setDataPreloaded[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES]
+            local preloadedIsJewelryData =      setDataPreloaded[LIBSETS_TABLEKEY_SETS_JEWELRY]
+            local setIdsToSetNames =            setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
             for _, setIdOfNewAPIVersion in ipairs(setsOfNewerAPIVersion) do
                 if setIdOfNewAPIVersion ~= nil then
+                    --Remove the setIds of non-sets from the table
+                    if nonSetIds[setIdOfNewAPIVersion] ~= nil then
+                        lib.noSetIdSets[setIdOfNewAPIVersion] = nil
+                        --Add to currently not available setIds
+                        nonExistingSetIdsAtCurrentApiVersion[setIdOfNewAPIVersion] = true
+                    end
                     --Remove setIds from the setInfo
-                    for setId, _ in pairs(setInfo) do
-                        if setId == setIdOfNewAPIVersion then
-                            lib.setInfo[setId] = nil
-                        end
+                    if setInfo[setIdOfNewAPIVersion] ~= nil then
+                        lib.setInfo[setIdOfNewAPIVersion] = nil
+                        --Add to currently not available setIds
+                        nonExistingSetIdsAtCurrentApiVersion[setIdOfNewAPIVersion] = true
                     end
                     --Remove itemIds from the list where setIds are only available in newer APIversions
-                    for setId, _  in pairs(setIdsToSetItemIds) do
-                        if setId == setIdOfNewAPIVersion then
-                            lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS][setId] = nil
-                        end
+                    if setIdsToSetItemIds[setIdOfNewAPIVersion] ~= nil then
+                        setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS][setIdOfNewAPIVersion] = nil
                     end
                     --Remove itemIds of non-sets from the list where setIds are only available in newer APIversions
-                    for setId, _  in pairs(setIdsNoSetToSetItemIds) do
-                        if setId == setIdOfNewAPIVersion then
-                            lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setId] = nil
-                        end
+                    if setIdsNoSetToSetItemIds[setIdOfNewAPIVersion] ~= nil then
+                        setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID][setIdOfNewAPIVersion] = nil
                     end
                     --Remove names from the list where setIds are only available in newer APIversions
-                    for setId, _  in pairs(setIdsToSetNames) do
-                        if setId == setIdOfNewAPIVersion then
-                            lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
-                        end
+                    if setIdsToSetNames[setIdOfNewAPIVersion] ~= nil then
+                        setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
                     end
                     --Remove names of non-sets from the list where setIds are only available in newer APIversions
-                    for setId, _  in pairs(setNamesNoSetToSetItemIds) do
-                        if setId == setIdOfNewAPIVersion then
-                            lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID][setId] = nil
-                        end
-                    end
-                    --Remove the setIds of non-sets from the table
-                    for setId, _  in pairs(nonSetIds) do
-                        if setId == setIdOfNewAPIVersion then
-                            lib.noSetIdSets[setId] = nil
-                        end
+                    if setNamesNoSetToSetItemIds[setIdOfNewAPIVersion] ~= nil then
+                        setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES_NO_SETID][setIdOfNewAPIVersion] = nil
                     end
                     --Remove the equipTypes
                     for _, equipTypeData in pairs(preloadedEquipTypeData) do
-                        for setId, _ in pairs(equipTypeData) do
-                            if setId == setIdOfNewAPIVersion then
-                                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES][setId] = nil
-                            end
+                        if equipTypeData[setIdOfNewAPIVersion] ~= nil then
+                            setDataPreloaded[LIBSETS_TABLEKEY_SETS_EQUIP_TYPES][setIdOfNewAPIVersion] = nil
                         end
                     end
                     --Remove the armorTypes
                     for _, armorTypeData in pairs(preloadedArmorTypeData) do
-                        for setId, _ in pairs(armorTypeData) do
-                            if setId == setIdOfNewAPIVersion then
-                                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES][setId] = nil
-                            end
+                        if armorTypeData[setIdOfNewAPIVersion] ~= nil then
+                            setDataPreloaded[LIBSETS_TABLEKEY_SETS_ARMOR_TYPES][setIdOfNewAPIVersion] = nil
                         end
                     end
                     --Remove the weaponTypes
                     for _, weaponTypeData in pairs(preloadedWeaponTypeData) do
-                        for setId, _ in pairs(weaponTypeData) do
-                            if setId == setIdOfNewAPIVersion then
-                                lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES][setId] = nil
-                            end
+                        if weaponTypeData[setIdOfNewAPIVersion] ~= nil then
+                            setDataPreloaded[LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES][setIdOfNewAPIVersion] = nil
                         end
                     end
                     --Remove the isJewelrySet
-                    for setId, _ in pairs(preloadedIsJewelryData) do
-                        if setId == setIdOfNewAPIVersion then
-                            lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_JEWELRY][setId] = nil
-                        end
+                    if preloadedIsJewelryData[setIdOfNewAPIVersion] ~= nil then
+                        lib.setDataPreloaded[LIBSETS_TABLEKEY_SETS_JEWELRY][setIdOfNewAPIVersion] = nil
                     end
                 end
             end

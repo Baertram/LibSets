@@ -12,7 +12,7 @@ local getArmorTypeTexture = lib.GetArmorTypeTexture
 local getWeaponTypeTexture = lib.GetWeaponTypeTexture
 
 --The search UI table
-local searchUI = LibSets.SearchUI
+local searchUI = lib.SearchUI
 local searchUIName = searchUI.name
 
 local searchUIThrottledSearchHandlerName = searchUIName .. "_ThrottledSearch"
@@ -461,7 +461,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     enchantmentSearchCategoryTypeDropdown:SetSortsItems(true)
 
     for enchantSearchCategoryType, isValid in pairs(lib.enchantSearchCategoryTypesValid) do
-        if isValid == true then
+        if isValid == true and enchantSearchCategoryType ~= "all" then
             local entry = enchantmentSearchCategoryTypeDropdown:CreateItemEntry(GetString("SI_ENCHANTMENTSEARCHCATEGORYTYPE", enchantSearchCategoryType))
             entry.filterType = enchantSearchCategoryType
             enchantmentSearchCategoryTypeDropdown:AddItem(entry)

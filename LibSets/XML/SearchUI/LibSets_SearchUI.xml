@@ -44,8 +44,8 @@
         </Backdrop>
 
 
-        <!--Virtual Multiselect ComboBoxes - Was ZO_ComboBox before! -->
-		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_MultiselectComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
+        <!--Virtual Multiselect ComboBoxes - live API 101039: ZO_MultiselectComboBox, PTS API 101040: ZO_ComboBox -->
+		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
             <OnMouseEnter>
                 LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
             </OnMouseEnter>
@@ -76,15 +76,20 @@
 					<Dimensions y="30" />
                     <DimensionConstraints minX="350" />
 				</Label>
-				<Label name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUIRowLabel">
+				<Label name="$(parent)SetType" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="40" />
+                    <DimensionConstraints minX="30" />
+				</Label>
+				<Label name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)SetType" />
+					<Dimensions y="30" />
+                    <DimensionConstraints minX="30" />
 				</Label>
 				<Label name="$(parent)EquipSlot" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="40" />
+                    <DimensionConstraints minX="30" />
 				</Label>
 				<Label name="$(parent)DropLocations" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)EquipSlot" />
@@ -95,7 +100,7 @@
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DropLocations" />
 					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="25" />
+                    <DimensionConstraints minX="30" />
 				</Label>
 			</Controls>
 		</Control>
@@ -207,17 +212,25 @@
                                     <OnInitialized>
                                         ZO_SortHeader_Initialize(self, GetString(SI_ITEMLISTSORTTYPE2), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DateTime" />
+                                    <Anchor point="TOPLEFT" />
                                     <Dimensions y="30" />
                                     <DimensionConstraints minX="350" />
+                                </Control>
+                                <Control name="$(parent)SetType" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("setType"), "setType", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="30" />
                                 </Control>
                                 <Control name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
                                         ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("armorOrWeaponType"), "armorOrWeaponType", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SetType" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="40" />
+                                    <DimensionConstraints minX="30" />
                                 </Control>
                                 <Control name="$(parent)EquipSlot" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -225,7 +238,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="40" />
+                                    <DimensionConstraints minX="30" />
                                 </Control>
                                 <Control name="$(parent)DropLocations" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -242,7 +255,7 @@
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DropLocations" />
                                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="25" />
+                                    <DimensionConstraints minX="30" />
                                 </Control>
                             </Controls>
                         </Control>

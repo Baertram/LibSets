@@ -1010,13 +1010,15 @@ lib.buildSetTypeInfo = buildSetTypeInfo
 local function buildSetDataText(setData, itemLink, forTooltip)
     if not setData then return end
     if not setData.setId then
-d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
+        d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
         return
     end
     forTooltip = forTooltip or false
 
     local setInfoText
     local setInfoParts = {}
+    if forTooltip == true then setInfoParts = nil end
+
     local setInfoTextWasCreated = false
     local function addSetInfoText(textToAdd)
         setInfoTextWasCreated = (setInfoText ~= nil and setInfoText ~= "") or false
@@ -1122,48 +1124,24 @@ d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
     if isReconstructableSet == true and ((useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost)) then
         reconstructionCostText = buildReconstructionCostInfo(setData, itemLink)
     end
-    setInfoParts["reconstruction"] = {
-        enabled = isReconstructableSet,
-        --data = ,
-        text = reconstructionCostText,
-        --icon = "",
-    }
 
     --Set Type
     if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
         --d(">setTypeText: " ..tos(setTypeText))
     end
-    setInfoParts["setType"] = {
-        enabled = setTypeText ~= nil,
-        data = setData.setType,
-        text = setTypeText,
-        icon = setTypeTexture,
-    }
 
     --Craftable
     if not isReconstructableSet and ((useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits)) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
         --d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
     end
-    setInfoParts["crafted"] = {
-        enabled = not isReconstructableSet and checkTraitsNeededGiven(setData),
-        data = setData.traitsNeeded,
-        text = setNeededTraitsText,
-        --icon = ,
-    }
 
     --DLC
     if (useCustomTooltip and dlcNamePlaceHolder) or (not useCustomTooltip and addDLC) then
         setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
         --d(">setDLCText: " ..tos(setDLCText))
     end
-    setInfoParts["DLC"] = {
-        enabled = setDLCText ~= nil,
-        data = setData.dlcid,
-        text = setDLCText,
-        --icon = ,
-    }
 
 
     --Drop mechanics
@@ -1195,32 +1173,6 @@ d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
         end
         --d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
     end
-    setInfoParts["dropMechanics"] = {
-        enabled = dropMechanicNames ~= nil and not ZO_IsTableEmpty(dropMechanicNames),
-        data = dropMechanicNames,
-        text = setDropMechanicText,
-        --icon = ,
-    }
-    setInfoParts["dropZones"] = {
-        enabled = dropZoneNames ~= nil and not ZO_IsTableEmpty(dropZoneNames),
-        data = dropZoneNames,
-        text = setDropZoneStr,
-        --icon = ,
-    }
-    setInfoParts["dropLocations"] = {
-        enabled = dropLocationNames ~= nil and not ZO_IsTableEmpty(dropLocationNames),
-        data = dropLocationNames,
-        text = setDropLocationsText,
-        --icon = ,
-    }
-    setInfoParts["overallTextsPerZone"] = {
-        enabled = setDropOverallTextsPerZone ~= nil and not ZO_IsTableEmpty(setDropOverallTextsPerZone),
-        data = setDropOverallTextsPerZone,
-        --text =
-        --icon = ,
-    }
-
-
 
     --Remove duplicate SetType and SetDropLocation texts (e.g. "Dungeon")
     if setDropLocationsText ~= nil and setDropLocationsText ~= "" then
@@ -1332,10 +1284,10 @@ d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
             end
         end
         if runDropMechanic then
---d(">runDropMechanic - addBossName: " ..tos(addBossName) .. ", addDropLocation: " .. tos(addDropLocation) .. ", addDropMechanic: " ..tos(addDropMechanic))
---lib._debugSetDropOverallTextsPerZone = ZO_ShallowTableCopy(setDropOverallTextsPerZone)
+            --d(">runDropMechanic - addBossName: " ..tos(addBossName) .. ", addDropLocation: " .. tos(addDropLocation) .. ", addDropMechanic: " ..tos(addDropMechanic))
+            --lib._debugSetDropOverallTextsPerZone = ZO_ShallowTableCopy(setDropOverallTextsPerZone)
             local setDropMechanicDropLocationsText = buildTextLinesFromTable(setDropOverallTextsPerZone, nil, true, false)
---lib._debugSetDropMechanicDropLocationsText = setDropMechanicDropLocationsText
+            --lib._debugSetDropMechanicDropLocationsText = setDropMechanicDropLocationsText
             if setDropMechanicDropLocationsText ~= nil and setDropMechanicDropLocationsText ~= "" then
                 local prefix = ""
                 if addBossName and not addDropLocation and not addDropMechanic then
@@ -1353,8 +1305,8 @@ d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
         end
     end
 
---lib._debugSetDropOverallTextsPerZoneAtEnd = setDropOverallTextsPerZone
---lib._debugsetInfoText = setInfoText
+    --lib._debugSetDropOverallTextsPerZoneAtEnd = setDropOverallTextsPerZone
+    --lib._debugsetInfoText = setInfoText
     --d(">>setInfoText: " ..tos(setInfoText))
 
     --[[
@@ -1376,7 +1328,57 @@ d("[ERROR - LibSets]buildSetDataText - setId missing: " ..itemLink)
      }
      ]]
 
-
+    --Add the setInfoParts table for the set search UI texts?
+    if not forTooltip then
+        setInfoParts["reconstruction"] = {
+            enabled = isReconstructableSet,
+            --data = ,
+            text = reconstructionCostText,
+            --icon = "",
+        }
+        setInfoParts["setType"] = {
+            enabled = setTypeText ~= nil,
+            data = setData.setType,
+            text = setTypeText,
+            icon = setTypeTexture,
+        }
+        setInfoParts["crafted"] = {
+            enabled = not isReconstructableSet and checkTraitsNeededGiven(setData),
+            data = setData.traitsNeeded,
+            text = setNeededTraitsText,
+            --icon = ,
+        }
+        setInfoParts["DLC"] = {
+            enabled = setDLCText ~= nil,
+            data = setData.dlcid,
+            text = setDLCText,
+            --icon = ,
+        }
+        setInfoParts["dropMechanics"] = {
+            enabled = dropMechanicNames ~= nil and not ZO_IsTableEmpty(dropMechanicNames),
+            data = dropMechanicNames,
+            text = setDropMechanicText,
+            --icon = ,
+        }
+        setInfoParts["dropZones"] = {
+            enabled = dropZoneNames ~= nil and not ZO_IsTableEmpty(dropZoneNames),
+            data = dropZoneNames,
+            text = setDropZoneStr,
+            --icon = ,
+        }
+        setInfoParts["dropLocations"] = {
+            enabled = dropLocationNames ~= nil and not ZO_IsTableEmpty(dropLocationNames),
+            data = dropLocationNames,
+            text = setDropLocationsText,
+            --icon = ,
+        }
+        setInfoParts["overallTextsPerZone"] = {
+            enabled = setDropOverallTextsPerZone ~= nil and not ZO_IsTableEmpty(setDropOverallTextsPerZone),
+            data = setDropOverallTextsPerZone,
+            --text =
+            --icon = ,
+        }
+    end
 
     return setInfoText, setInfoParts
 end
@@ -1652,6 +1654,8 @@ local function tooltipOnHide(tooltipControl, tooltipData)
 end
 ]]
 
+local tooltipSetDataWithoutItemIdsCached = lib.tooltipSetDataWithoutItemIdsCached
+
 local function tooltipOnAddGameData(tooltipControl, tooltipData)
 --d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
     --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
@@ -1661,7 +1665,8 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
         if not isSet then return end
-        local setData = libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
+
+        local setData = tooltipSetDataWithoutItemIdsCached[setId] or libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
 
         addTooltipLine(tooltipControl, setData, itemLink)
     end

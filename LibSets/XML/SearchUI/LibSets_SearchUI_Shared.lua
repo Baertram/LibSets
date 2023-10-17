@@ -8,12 +8,13 @@ local libPrefix = "["..MAJOR.."]"
 local clientLang = lib.clientLang
 
 local libSets_GetSetInfo = lib.GetSetInfo
-local libSets_getDropMechanicAndDropLocationNames = lib.GetDropMechanicAndDropLocationNames
+--local libSets_getDropMechanicAndDropLocationNames = lib.GetDropMechanicAndDropLocationNames
 local libSets_GetDropLocationNamesBySetId = lib.GetDropLocationNamesBySetId
 local libSets_GetDropMechanic = lib.GetDropMechanic
 local libSets_GetDropZonesBySetId = lib.GetDropZonesBySetId
 local libSets_buildItemLink = lib.buildItemLink
 local libSets_GetSetFirstItemId = lib.GetSetFirstItemId
+local libSets_GetSetEnchantSearchCategories = lib.GetSetEnchantSearchCategories
 local libSets_IsEquipTypeSet = lib.IsEquipTypeSet
 local libSets_IsWeaponTypeSet = lib.IsWeaponTypeSet
 local libSets_IsArmorTypeSet = lib.IsArmorTypeSet
@@ -22,8 +23,8 @@ local gilsi = GetItemLinkSetInfo
 
 
 --The search UI table
-LibSets.SearchUI = {}
-local searchUI = LibSets.SearchUI
+lib.SearchUI = {}
+local searchUI = lib.SearchUI
 searchUI.name = MAJOR .. "_SearchUI"
 local searchUIName = searchUI.name
 
@@ -47,14 +48,14 @@ local function string_split (inputstr, sep)
     return t
 end
 
-local wasSetsDataDropLocationDataAdded = false
-local function addDropLocationDataToSetsMasterListBase(defaultMasterListBase, p_setId, p_setData)
+local wasSetsDataScannedAndAdded = false
+local function scanAndAddDataToSetsMasterListBase(defaultMasterListBase, p_setId, p_setData)
 --d("[LibSets]addDropLocationDataToSetsMasterListBase")
     if p_setId ~= nil and p_setData ~= nil then
         p_setData.setId = p_setData.setId or p_setId
         --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
         if p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or p_setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
-            p_setData = libSets_GetSetInfo(p_setId, true, nil) --without itemIds, and names only in client laguage
+            p_setData = libSets_GetSetInfo(p_setId, false, nil)
         end
         return p_setData
     else
@@ -62,28 +63,24 @@ local function addDropLocationDataToSetsMasterListBase(defaultMasterListBase, p_
             setData.setId = setData.setId or setId
             --setData might be missing dropMechanicLocations and other data needed! So we will create it once per setId
             if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] == nil or setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] == nil then
-                setData = libSets_GetSetInfo(setId, true, nil) --without itemIds, and names only in client laguage
-                --[[
-                    local dropMechanicNamesTable, dropMechanicDropLocationNamesTable = libSets_getDropMechanicAndDropLocationNames(setId, nil, setData)
-                    setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] = dropMechanicNamesTable
-                    setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropMechanicDropLocationNamesTable
-                ]]
+                setData = libSets_GetSetInfo(setId, false, nil)
                 defaultMasterListBase[setId] = setData
             end
         end
-        wasSetsDataDropLocationDataAdded = true
+        wasSetsDataScannedAndAdded = true
         return defaultMasterListBase
     end
 end
 
-local function updateSetsInfoWithDropLocationsAndNames(selfVar)
-    --Add dropLocation data and texts to the lib.setInfo data once
-    -->!!!This might lag the client for 5 seconds on first open!!!
-    if not wasSetsDataDropLocationDataAdded then
+--Add the drop locations, zoneIds, dropLocationNames, enchantSearchCategories per setId -> if missing
+local function updateSetsInfoWithDataAndNames(selfVar)
+    -->!!!This might lag the client for a few seconds on first open of the search UI!!!
+    if not wasSetsDataScannedAndAdded then
         local setsData = lib.setInfo
-        local setsDataNew = addDropLocationDataToSetsMasterListBase(setsData, nil, nil)
+        local setsDataNew = scanAndAddDataToSetsMasterListBase(setsData, nil, nil)
         lib.setInfo = setsDataNew
 
+        --Now refresh the ZO_SortFilterList -> Call BuildMasterList etc.
         selfVar.resultsList:RefreshData()
     end
 end
@@ -200,7 +197,7 @@ function LibSets_SearchUI_Shared:ShowUI()
 --d("LibSets_SearchUI_Shared:ShowUI")
     if self:IsShown() then return end
     --Run once at first UI open, so it does not run on each reloadUI!
-    updateSetsInfoWithDropLocationsAndNames(self)
+    updateSetsInfoWithDataAndNames(self)
 
     self.control:SetHidden(false)
 
@@ -390,8 +387,8 @@ end
 
 
 function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm)
---d("[LibSets_SearchUI_Keyboard.ProcessItemEntry] stringSearch: " ..tostring(stringSearch) .. ", setName: " .. tostring(data.name:lower()) .. ", searchTerm: " .. tostring(searchTerm))
-	if zo_plainstrfind(data.name:lower(), searchTerm) then
+--d("[LibSets_SearchUI_Keyboard.ProcessItemEntry] stringSearch: " ..tostring(stringSearch) .. ", setName: " .. tostring(data.nameLower) .. ", searchTerm: " .. tostring(searchTerm))
+	if zo_plainstrfind(data.nameLower, searchTerm) then
 		return true
 	end
 	return false
@@ -496,7 +493,16 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsEnchantSearchCategory ~= nil then
                     isAllowed = false
-                    --todo 2023-10-14
+                    local enchantSearchCategories = setData[LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] or libSets_GetSetEnchantSearchCategories(setId, nil, nil, nil, nil)
+                    if enchantSearchCategories ~= nil then
+                        setData[LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] = enchantSearchCategories
+                        for enchantSearchCategory, isFiltered in pairs(searchParamsEnchantSearchCategory) do
+                            if isFiltered == true and enchantSearchCategories[enchantSearchCategory] then
+                                isAllowed = true
+                                break
+                            end
+                        end
+                    end
                 end
             end
             --numBonuses
@@ -550,20 +556,10 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             if isAllowed == true then
                 if searchParamsDropMechanic ~= nil then
                     isAllowed = false
-local doDebug = false
-if setId == 686 then
-    doDebug = true
-end
                     local dropMechanics = setData[LIBSETS_TABLEKEY_DROPMECHANIC] or libSets_GetDropMechanic(setId, nil, nil)
-if doDebug then
-d(">dropMechnics found: " ..tostring(dropMechanics))
-end
                     if dropMechanics ~= nil then
                         setData[LIBSETS_TABLEKEY_DROPMECHANIC] = dropMechanics
                         for dropMechanicId, isFiltered in pairs(searchParamsDropMechanic) do
-if doDebug then
-    d(">dropMechanicId: " ..tostring(dropMechanicId) .. ", isFiltered: " ..tostring(isFiltered))
-end
                             if isFiltered == true and ZO_IsElementInNumericallyIndexedTable(dropMechanics, dropMechanicId) then
                                 isAllowed = true
                                 break

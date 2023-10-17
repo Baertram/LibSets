@@ -7,18 +7,23 @@ local libPrefix = "["..MAJOR.."]"
 local searchUI = lib.SearchUI
 local searchUIName = searchUI.name
 
+local tos = tostring
+local tins = table.insert
+local tcon = table.concat
 local zif = zo_iconFormat
 
 --Library's local helpers
+--local libSets_IsNoESOSet = lib.IsNoESOSet
+local libSets_GetSetBonuses = lib.GetSetBonuses
 local buildSetTypeInfo = lib.buildSetTypeInfo
 local buildSetDataText = lib.BuildSetDataText
-local libSets_GetSetInfo = lib.GetSetInfo
-local getDropMechanicTexture = lib.GetDropMechanicTexture
-local libSets_GetSpecialZoneNameById = lib.GetSpecialZoneNameById
+--local libSets_GetSetInfo = lib.GetSetInfo
+local libSets_GetSetFirstItemId = lib.GetSetFirstItemId
+--local getDropMechanicTexture = lib.GetDropMechanicTexture
+--local libSets_GetSpecialZoneNameById = lib.GetSpecialZoneNameById
 local getArmorTypeTexture = lib.GetArmorTypeTexture
 local getWeaponTypeTexture = lib.GetWeaponTypeTexture
 local getEquipSlotTexture = lib.GetEquipSlotTexture
-
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search results list for keyboard mode
@@ -68,8 +73,9 @@ function LibSets_SearchUI_List:Setup( )
     --Sort headers
 	self.headers =                  self.control:GetNamedChild("Headers")
     self.headerName =               self.headers:GetNamedChild("Name")
+    self.headerSetType =            self.headers:GetNamedChild("SetType")
 	self.headerArmorOrWeaponType =  self.headers:GetNamedChild("ArmorOrWeaponType")
-	self.headerEquipSlot =               self.headers:GetNamedChild("EquipSlot")
+	self.headerEquipSlot =          self.headers:GetNamedChild("EquipSlot")
 	self.headerDropLocations =      self.headers:GetNamedChild("DropLocations")
 	self.headerSetId =              self.headers:GetNamedChild("SetId")
 
@@ -80,7 +86,7 @@ end
 --Get the data of the masterlist entries and add it to the list columns
 function LibSets_SearchUI_List:SetupItemRow(control, data)
     --local clientLang = WL.clientLang or WL.fallbackSetLang
-    --d(">>>      [LibSets_SearchUI_List:SetupItemRow] " ..tostring(data.names[clientLang]))
+    --d(">>>      [LibSets_SearchUI_List:SetupItemRow] " ..tos(data.names[clientLang]))
     control.data = data
 
     local lastColumn
@@ -92,9 +98,15 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     nameColumn:SetText(data.name or "test name")
     nameColumn:SetHidden(false)
 
+    local setTypeColumn = control:GetNamedChild("SetType")
+    setTypeColumn:ClearAnchors()
+    setTypeColumn:SetAnchor(LEFT, nameColumn, RIGHT, 0, 0)
+    setTypeColumn:SetText(data.setTypeTexture or data.setType or "")
+    setTypeColumn:SetHidden(false)
+
     local armorOrWeaponTypeColumn = control:GetNamedChild("ArmorOrWeaponType")
     armorOrWeaponTypeColumn:ClearAnchors()
-    armorOrWeaponTypeColumn:SetAnchor(LEFT, nameColumn, RIGHT, 0, 0)
+    armorOrWeaponTypeColumn:SetAnchor(LEFT, setTypeColumn, RIGHT, 0, 0)
     armorOrWeaponTypeColumn:SetText(data.armorOrWeaponTypeTexture or "")
     armorOrWeaponTypeColumn:SetHidden(false)
 
@@ -107,7 +119,7 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     local dropLocationsColumn = control:GetNamedChild("DropLocations")
     dropLocationsColumn:ClearAnchors()
     dropLocationsColumn:SetAnchor(LEFT, slotColumn, RIGHT, 0, 0)
-    dropLocationsColumn:SetText(data.dropLocationsText or "")
+    dropLocationsColumn:SetText(data.dropLocationText or "")
     dropLocationsColumn:SetHidden(false)
 
     local setIdColumn = control:GetNamedChild("SetId")
@@ -135,10 +147,17 @@ end
 --Create a row at the resultslist, and respect the search filters (multiselect dropdowns of armor, weapon, equipment type,
 --enchantment, etc.)
 function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
-    local nameColumnValue = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
+    local parentObject = self._parentObject -- Get the SearchUI object
+
     local itemId
 
-    local parentObject = self._parentObject
+    --The name column
+    local nameColumnValue = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
+
+    --The set type
+    local setTypeName, setTypeTexture = buildSetTypeInfo(setData, true)
+
+    --Get an itemId for the itemLink
     if self.isAnyItemIdRelevantFilterActive == true then
         --Get a matching (to the multiselect dropdown filters) itemId
         local itemIds = parentObject:GetItemIdsForSetIdRespectingFilters(setId, true) --only 1 itemId
@@ -147,31 +166,13 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
         itemId = itemIds[1]
     else
         --Get "any" itemId (the first found of the setId)
-        itemId = lib.GetSetFirstItemId(setId, nil)
+        itemId = libSets_GetSetFirstItemId(setId, nil)
     end
 
-    --LibSets._debug.setToItemIds = LibSets._debug.setToItemIds or {}
-    --LibSets._debug.setToItemIds[setId] = itemId
-
     if itemId == nil then return nil end
-
-
     local itemLink = lib.buildItemLink(itemId, 370) -- Always use the legendary quality for the sets list
-    --[[
-    --Get the drop location(s) of the set via LibSets
-    local dropLocationsText = ""
-    local dropLocationsZoneIds = setData.zoneIds
-    --Get the drop location wayshrines
-    local setWayshrines = setData.wayshrines
-    --Get the DLC id
-    local dlcName = lib.GetDLCName(setData.dlcId)
-    --Get set type
-    local setType = setData.setType
-    local setTypeName = lib.GetSetTypeName(setType)
-    --Get traits needed for craftable sets
-    local traitsNeeded = lib.GetTraitsNeeded(setId)
-    ]]
 
+    --Prepare the itemtypes, and their textures
     local armorOrWeaponTypeTexture, armorOrWeaponTypeTextWithTexture, armorOrWeaponTypeText, equipSlotTexture, equipSlotTextWithTexture, equipSlotText
     local equipType = GetItemLinkEquipType(itemLink)
     equipSlotTexture, equipSlotTextWithTexture, equipSlotText = getEquipSlotTexture(equipType)
@@ -199,59 +200,113 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
         end
     end
 
+    --Get the bonuses info
     local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
     local bonuses = (numBonuses == 0 and {}) or setData.bonuses
+    setData.numBonuses = numBonuses
     if numBonuses > 0 and (bonuses == nil or type(bonuses) == "number") then
         -- Lazy initialization of set bonus data
-        setData.bonuses = lib.GetSetBonuses(itemLink, numBonuses)
+        setData.bonuses = libSets_GetSetBonuses(itemLink, numBonuses)
         bonuses = setData.bonuses
     end
 
-    local dropLocationText --a string containing the zone names and their drop locations and boss names etc. just like in the tooltips (including icons if enabled at settings)
-    local dropLocationSort --a string containing the zoneId of a drop location first, and then the dropLocationIds at that zone?
-
-    local setDataText, setInfoParts = buildSetDataText(setData, itemLink, false)
-    --todo add the setInfoParts tables to the data table -> For search comparison
     --[[
-    Table setInfoParts contains subtables with keys
-    "setType"
-    "DLC" -- OPTIONAL
-    "crafted" -- OPTIONAL
-    "reconstruction" -- OPTIONAL
-    "dropMechanics" -- OPTIONAL
-    "dropZones" -- OPTIONAL
-    "dropLocations" -- OPTIONAL
-    "overallTextsPerZone" -- OPTIONAL
+        --Get the drop location(s) of the set via LibSets
+        -->The base info for that: DropZones, mechanics and location names are already loaded into setData once -> See function updateSetsInfoWithDropLocationsAndNames in LibSets_SearchUI_Shared.lua -> ShowUI()
+    ]]
+    local setDataText, setInfoParts = buildSetDataText(setData, itemLink, false)
+    --[[
+        Table setInfoParts contains subtables with keys
+        "setType"
+        "DLC" -- OPTIONAL
+        "crafted" -- OPTIONAL
+        "reconstruction" -- OPTIONAL
+        "dropMechanics" -- OPTIONAL
+        "dropZones" -- OPTIONAL
+        "dropLocations" -- OPTIONAL
+        "overallTextsPerZone" -- OPTIONAL
 
-    Each providing a table with:
-        {
-            enabled = boolean,
-            data = value or table, --OPTIONAL
-            text = string, --OPTIONAL
-            icon = string, --OPTIONAL
-        }
+        Each providing a table with:
+            {
+                enabled = boolean,
+                data = value or table, --OPTIONAL
+                text = string, --OPTIONAL
+                icon = string, --OPTIONAL
+            }
 
-    If enabled == true then the optional data can be parsed, and/or the optional text and/or the optional icon can be used
-    to provide additional output info at the columns
+        If enabled == true then the optional data can be parsed, and/or the optional text and/or the optional icon can be used
+        to provide additional output info at the columns
     ]]
 
-    local itemData = {}
-    --Internal for text search etc.
-    itemData.type                = searchUI.searchTypeDefault     -- for the search function -> Processor. !!!Needs to match!!!
-    --Pass in whole table of set's info
+    local dropLocationText --a string containing the zone names and their drop locations and boss names etc. just like in the tooltips (including icons if enabled at settings)
+    local dropLocationSort --A string containing the zoneId of a drop location first, and then the dropLocationIds at that zone? Used to sort the drop location column properly
+
+    local dropMechanicTab = setData.dropMechanic
+    if dropMechanicTab ~= nil and not ZO_IsTableEmpty(dropMechanicTab) then
+        local overallTextsPerZone = setInfoParts["overallTextsPerZone"]
+        if overallTextsPerZone ~= nil and overallTextsPerZone.enabled == true then
+            dropLocationText = overallTextsPerZone.data
+        end
+
+        local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
+        if dropZoneIds ~= nil and not ZO_IsTableEmpty(dropZoneIds) then
+            dropLocationSort = ""
+
+            --Remove duplicate dropZone Ids
+            local dropZonesNonDuplicateKey = {}
+            local dropZonesNonDuplicate = {}
+            for dropMechanicIdx, dropZoneId in ipairs(dropZoneIds) do
+                if not dropZonesNonDuplicateKey[dropZoneId] then
+                    dropZonesNonDuplicateKey[dropZoneId] = true
+                    tins(dropZonesNonDuplicate, dropZoneId)
+                end
+            end
+            --Now concatenate the non-dupplicate zoneIds as ; separated string
+            dropLocationSort = dropLocationSort .. "Z" .. tcon(dropZonesNonDuplicate, ";")
+
+            --Remove duplicate dropMechnic Ids
+            local dropMechnicsNonDuplicateKey = {}
+            local dropMechnicsNonDuplicate = {}
+            for dropMechanicIdx, dropMechanicId in ipairs(dropMechanicTab) do
+                if not dropMechnicsNonDuplicateKey[dropMechanicId] then
+                    dropMechnicsNonDuplicateKey[dropMechanicId] = true
+                    tins(dropMechnicsNonDuplicate, dropMechanicId)
+                end
+            end
+            --Now concatenate the non-dupplicate dropMechnicId as , separated string
+            dropLocationSort = dropLocationSort .. "M" .. tcon(dropMechnicsNonDuplicate, ",")
+        end
+        --[[
+        local dropZoneNames = setInfoParts["dropZones"]
+        if dropZoneNames ~= nil and dropZoneNames.enabled == true then
+            local dropZoneNames = dropZoneNames.data
+        end
+        ]]
+    end
+
+
+    --The row's data table of each item/entry in the ZO_ScrollFilterList
+    local itemData = {
+        type = searchUI.searchTypeDefault     -- for the search function -> Processor. !!!Needs to match -> See LibSets_SearchUI_Shared.lua, function self.stringSearch:AddProcessor(searchUI.searchTypeDefault...)
+    }
+
+    --todo: Pass in whole table of set's info (for debugging!)
     itemData._LibSets_setData    = setData
-    --Mix in the missing setData (setId, ...) directly to the itemData
+
+    --Mix in the missing setData (setId, setType, bonuses, numBonuses, zoneIds, ...) directly to the itemData
     zo_mixin(itemData, setData)
 
     --And now add additional itemData
     --Itemlink
-    itemData.itemLink            = itemLink
-    itemData.itemId              = itemId
+    itemData.itemLink            =              itemLink
+    itemData.itemId              =              itemId
 
     --Set info
-    --itemData.setId               = setId
-    --itemData.setType             = setData.setType
-    itemData.name                = nameColumnValue --todo Maybe show multi language en/de e.g.?
+    itemData.setTypeName         =              setTypeName
+    itemData.setTypeTexture      =              setTypeTexture
+
+    itemData.name                =              nameColumnValue --todo Maybe show multi language en/de e.g.?
+    itemData.nameLower           =              nameColumnValue:lower() --Always add that for the string text search!!!
 
     --Set item related
     itemData.armorOrWeaponType   =              armorOrWeaponType
@@ -263,17 +318,14 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     itemData.equipSlotTextWithTexture =         equipSlotTextWithTexture
     itemData.equipSlotTexture =                 equipSlotTexture ~= nil and zif(equipSlotTexture, 24, 24)
 
-    --Set bonuses
-    itemData.numBonuses          = numBonuses
-
     --Drop zones and locations (and boss names)
-    itemData.dropLocationText    = dropLocationText
-    itemData.dropLocationSort    = dropLocationSort
+    itemData.dropLocationText    =              dropLocationText
+    itemData.dropLocationSort    =              dropLocationSort
 
     --Pass in generated tooltip text
-    itemData.setDataText         = setDataText
-    --Pass in generated tooltip parts
-    itemData.setInfoParts        = setInfoParts
+    itemData.setDataText         =              setDataText
+    --Pass in generated tooltip parts table
+    itemData.setInfoParts        =              setInfoParts
 
     --Table entry for the ZO_ScrollList data
 	return itemData
@@ -355,7 +407,7 @@ function LibSets_SearchUI_List:SortScrollList( )
     --Get the current sort header's key and direction
     self.currentSortKey = self.sortHeaderGroup:GetCurrentSortKey()
     self.currentSortOrder = self.sortHeaderGroup:GetSortDirection()
---d("[LibSets_SearchUI_List:SortScrollList] sortKey: " .. tostring(self.currentSortKey) .. ", sortOrder: " ..tostring(self.currentSortOrder))
+--d("[LibSets_SearchUI_List:SortScrollList] sortKey: " .. tos(self.currentSortKey) .. ", sortOrder: " ..tos(self.currentSortOrder))
 	if (self.currentSortKey ~= nil and self.currentSortOrder ~= nil) then
         --Update the scroll list and re-sort it -> Calls "SetupItemRow" internally!
 		local scrollData = ZO_ScrollList_GetDataList(self.list)
@@ -375,11 +427,11 @@ function LibSets_SearchUI_List:BuildSortKeys()
         --["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         --["gearId"]                  = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         ["name"]                    = { caseInsensitive = true },
+        ["setType"]                 = { isId64 = true,              tiebreaker = "name" },
         ["armorOrWeaponType"]       = { isId64 = true,              tiebreaker = "name" },
         ["equipSlot"]               = { isId64 = true,              tiebreaker = "name" },
         ["dropLocationSort"]        = { caseInsensitive = true,     tiebreaker = "name" },
         ["setId"]                   = { isId64 = true,              tiebreaker = "name" },
-        ["setType"]                 = { isId64 = true,              tiebreaker = "name" },
         ["DLCID"]                   = { isId64 = true,              tiebreaker = "name" },
     }
 end

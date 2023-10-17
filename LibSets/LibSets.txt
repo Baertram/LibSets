@@ -11,7 +11,7 @@
 ## Author: Baertram
 ## APIVersion: 101040 101041
 ## Version: 0.6.2
-## AddOnVersion: 000601
+## AddOnVersion: 000602
 ## IsLibrary: true
 ## SavedVariables: LibSets_SV_Data LibSets_SV_DEBUG_Data
 ## OptionalDependsOn: LibZone>=084 LibAddonMenu>=34 LibCustomMenu>=721
