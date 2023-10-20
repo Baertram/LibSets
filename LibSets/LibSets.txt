@@ -52,11 +52,11 @@ LibSets_AutoCompletion.lua
 LibSets_Debug.lua
 
 ##XML - Search
-XML/SearchUI/LibSets_SearchUI_Shared.lua
-XML/SearchUI/LibSets_SearchUI.xml
+SearchUI/LibSets_SearchUI_Shared.lua
+SearchUI/LibSets_SearchUI.xml
 ## Keyboard
-XML/SearchUI/Keyboard/LibSets_SearchUI_List_Keyboard.lua
-XML/SearchUI/Keyboard/LibSets_SearchUI_Keyboard.lua
+SearchUI/Keyboard/LibSets_SearchUI_List_Keyboard.lua
+SearchUI/Keyboard/LibSets_SearchUI_Keyboard.lua
 ## Gamepad
-## XML/SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua Non functional/supported as of 20231011
+## SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua Non functional/supported as of 20231011
 
