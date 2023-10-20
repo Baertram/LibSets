@@ -319,8 +319,8 @@ local function sortFilterComboBox(setTypeDropdown, sortType)
 end
 
 function LibSets_SearchUI_Keyboard:InitializeFilters()
-    local function OnFilterChanged()
-        self:OnFilterChanged()
+    local function OnFilterChanged(dropdownControl)
+        self:OnFilterChanged(dropdownControl)
     end
 
     -- Initialize the Set Types multiselect combobox.
@@ -330,7 +330,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.setTypeFiltersDropdown = setTypeDropdown
     setTypeDropdown:ClearItems()
-    setTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
+    setTypeDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.setTypeFiltersControl) end)
     local filterTypeText = getLocalizedText("setType")
     self.setTypeFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -360,7 +360,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.armorTypeFiltersDropdown = armorTypeDropdown
     armorTypeDropdown:ClearItems()
-    armorTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
+    armorTypeDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.armorTypeFiltersControl) end)
     local filterTypeText = getLocalizedText("armorType")
     self.armorTypeFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -384,7 +384,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.weaponTypeFiltersDropdown = weaponTypeDropdown
     weaponTypeDropdown:ClearItems()
-    weaponTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
+    weaponTypeDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.weaponTypeFiltersControl) end)
     local filterTypeText = getLocalizedText("weaponType")
     self.weaponTypeFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -408,7 +408,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.equipmentTypeFiltersDropdown = equipmentTypeDropdown
     equipmentTypeDropdown:ClearItems()
-    equipmentTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
+    equipmentTypeDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.equipmentTypeFiltersControl) end)
     local filterTypeText = getLocalizedText("equipmentType")
     self.equipmentTypeFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -436,7 +436,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.DLCIdFiltersDropdown = DLCIdDropdown
     DLCIdDropdown:ClearItems()
-    DLCIdDropdown:SetHideDropdownCallback(OnFilterChanged)
+    DLCIdDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.DCLIdFiltersControl) end)
     local filterTypeText = getLocalizedText("dlc")
     self.DCLIdFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -459,7 +459,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.enchantSearchCategoryTypeFiltersDropdown = enchantmentSearchCategoryTypeDropdown
     enchantmentSearchCategoryTypeDropdown:ClearItems()
-    enchantmentSearchCategoryTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
+    enchantmentSearchCategoryTypeDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.enchantSearchCategoryTypeFiltersControl) end)
     local filterTypeText = getLocalizedText("enchantmentSearchCategory")
     self.enchantSearchCategoryTypeFiltersControl.tooltipText = filterTypeText
     enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
@@ -483,7 +483,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.favoritesDropdown = favoritesDropdown
     favoritesDropdown:ClearItems()
-    favoritesDropdown:SetHideDropdownCallback(OnFilterChanged)
+    favoritesDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.favoritesFiltersControl) end)
     local filterTypeText = GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
     self.favoritesFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -507,7 +507,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.numBonusFiltersDropdown = numBonusDropdown
     numBonusDropdown:ClearItems()
-    numBonusDropdown:SetHideDropdownCallback(OnFilterChanged)
+    numBonusDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.numBonusFiltersControl) end)
     local filterTypeText = getLocalizedText("numBonuses")
     self.numBonusFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -528,7 +528,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.dropZoneFiltersDropdown = dropZoneDropdown
     dropZoneDropdown:ClearItems()
-    dropZoneDropdown:SetHideDropdownCallback(OnFilterChanged)
+    dropZoneDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.dropZoneFiltersControl) end)
     local filterTypeText = getLocalizedText("dropZones")
     self.dropZoneFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -552,7 +552,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
                     end
                     if dropZoneName == "" then
                     ]]
-                        dropZoneName = zo_strformat(SI_UNIT_NAME, GetZoneNameById(dropZoneId))
+                    dropZoneName = zo_strformat(SI_UNIT_NAME, GetZoneNameById(dropZoneId))
                     --end
                     zoneDesc = GetZoneDescriptionById(dropZoneId)
                     filterType = dropZoneId
@@ -575,7 +575,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     self.dropMechanicsFiltersDropdown = dropMechanicsDropdown
 
     dropMechanicsDropdown:ClearItems()
-    dropMechanicsDropdown:SetHideDropdownCallback(OnFilterChanged)
+    dropMechanicsDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.dropMechanicsFiltersControl) end)
     local filterTypeText = getLocalizedText("dropMechanic")
     self.dropMechanicsFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -610,7 +610,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     self.dropLocationsFiltersDropdown = dropLocationsDropdown
     dropLocationsDropdown:ClearItems()
-    dropLocationsDropdown:SetHideDropdownCallback(OnFilterChanged)
+    dropLocationsDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.dropLocationsFiltersControl) end)
     local filterTypeText = getLocalizedText("droppedBy")
     self.dropLocationsFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
@@ -775,24 +775,31 @@ end
 
 
 --Will be called as the multiselect dropdown boxes got closed again (and entries might have changed)
-function LibSets_SearchUI_Keyboard:OnFilterChanged()
---d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
-    LibSets_SearchUI_Shared.OnFilterChanged(self)
+function LibSets_SearchUI_Keyboard:OnFilterChanged(dropdownControl)
+d("[LibSets_SearchUI_Keyboard]OnFilterChanged - MultiSelect dropdown - hidden")
+    LibSets_SearchUI_Shared.OnFilterChanged(self, dropdownControl)
 
-    local searchParams = {}
+    if dropdownControl == nil then
+        local searchParams = {}
 
-    --Multiselect dropdown boxes
-    for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
-        local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(dropdownControl)
-        if not ZO_IsTableEmpty(selectedEntries) then
-            searchParams[self.multiSelectFilterDropdownToSearchParamName[dropdownControl]] = selectedEntries
+        --Multiselect dropdown boxes
+        for _, lDropdownControl in ipairs(self.multiSelectFilterDropdowns) do
+            local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(lDropdownControl)
+            if not ZO_IsTableEmpty(selectedEntries) then
+                searchParams[self.multiSelectFilterDropdownToSearchParamName[lDropdownControl]] = selectedEntries
+            end
         end
+
+        --Editboxes
+        -->Will be handled at OnTextChanged handler directly at the editboxes
+
+        self.searchParams = searchParams
+    else
+        --Single dropdown filters did change
+        local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(dropdownControl)
+        local searchParamKeyByDropdownCtrl = self.multiSelectFilterDropdownToSearchParamName[dropdownControl]
+        self.searchParams[searchParamKeyByDropdownCtrl] = selectedEntries
     end
-
-    --Editboxes
-    -->Will be handled at OnTextChanged handler directly at the editboxes
-
-    self.searchParams = searchParams
 end
 
 

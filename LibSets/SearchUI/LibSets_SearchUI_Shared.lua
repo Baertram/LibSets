@@ -5,7 +5,6 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = "["..MAJOR.."]"
 
-local zoitfns = zo_iconTextFormatNoSpace
 local zif = zo_iconFormat
 
 
@@ -212,6 +211,31 @@ function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
     end
 end
 
+local function isItemFilterTypeMatching(item, filterType)
+    return item.filterType ~= nil and item.filterType == filterType
+end
+
+function LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, refreshResultsListAfterwards)
+d("LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries")
+lib._debugDropDownControl = dropdownControl
+    refreshResultsListAfterwards = refreshResultsListAfterwards or false
+    if entriesToSelect == nil or ZO_IsTableEmpty(entriesToSelect) then return end
+    local comboBox = dropdownControl.m_comboBox
+    if comboBox ~= nil then
+        comboBox:ClearAllSelections()
+        for _, filterType in ipairs(entriesToSelect) do
+            local index = comboBox:GetIndexByEval(function(item) return isItemFilterTypeMatching(item, filterType) end )
+            if index ~= nil then
+                dropdownControl.m_comboBox:SetSelected(index, true)
+            end
+        end
+
+        if refreshResultsListAfterwards == true then
+            self:OnFilterChanged(dropdownControl)
+            self:StartSearch()
+        end
+    end
+end
 
 ------------------------------------------------
 --- UI
@@ -429,9 +453,9 @@ end
 ------------------------------------------------
 --- Filters
 ------------------------------------------------
-function LibSets_SearchUI_Shared:OnFilterChanged() --Override!
-    --d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
-    self.searchParams = nil
+function LibSets_SearchUI_Shared:OnFilterChanged(dropdownControl)
+--d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
+    self.searchParams = self.searchParams or {}
 end
 
 --Pre-Filter the masterlist table of e.g. a ZO_SortFilterScrollList
@@ -696,19 +720,20 @@ function LibSets_SearchUI_Shared:ShowItemLinkTooltip(parent, data, anchor1, offs
 
     --Get the current position of the UI. If  the UI is moved to the left, show the tooltip right, and vice versa
     --local screenWidth, screenHeight = GuiRoot:GetDimensions()
-    local currentLeft = self.control:GetLeft()
-    if currentLeft < TT_control:GetWidth() then
-        anchor1 = anchor1 or LEFT
-        anchor2 = anchor2 or RIGHT
-        offsetX = offsetX or 25
-        offsetY = offsetY or 0
-    else
-        anchor1 = anchor1 or RIGHT
-        anchor2 = anchor2 or LEFT
-        offsetX = offsetX or -25
-        offsetY = offsetY or 0
+    if anchor1 == nil then
+        local currentLeft = self.control:GetLeft()
+        if currentLeft < TT_control:GetWidth() then
+            anchor1 = anchor1 or LEFT
+            anchor2 = anchor2 or RIGHT
+            offsetX = offsetX or 25
+            offsetY = offsetY or 0
+        else
+            anchor1 = anchor1 or RIGHT
+            anchor2 = anchor2 or LEFT
+            offsetX = offsetX or -25
+            offsetY = offsetY or 0
+        end
     end
-
     --Show the tooltip
     InitializeTooltip(TT_control, parent, anchor1, offsetX, offsetY, anchor2)
     TT_control:SetLink(data.itemLink)
@@ -727,19 +752,20 @@ function LibSets_SearchUI_Shared:ShowItemLinkPopupTooltip(parent, data, anchor1,
 
     --Get the current position of the UI. If  the UI is moved to the left, show the tooltip right, and vice versa
     --local screenWidth, screenHeight = GuiRoot:GetDimensions()
-    local currentLeft = self.control:GetLeft()
-    if currentLeft < TT_control:GetWidth() then
-        anchor1 = anchor1 or LEFT
-        anchor2 = anchor2 or RIGHT
-        offsetX = offsetX or 25
-        offsetY = offsetY or 0
-    else
-        anchor1 = anchor1 or RIGHT
-        anchor2 = anchor2 or LEFT
-        offsetX = offsetX or -25
-        offsetY = offsetY or 0
+    if anchor1 == nil then
+        local currentLeft = self.control:GetLeft()
+        if currentLeft < TT_control:GetWidth() then
+            anchor1 = anchor1 or LEFT
+            anchor2 = anchor2 or RIGHT
+            offsetX = offsetX or 25
+            offsetY = offsetY or 0
+        else
+            anchor1 = anchor1 or RIGHT
+            anchor2 = anchor2 or LEFT
+            offsetX = offsetX or -25
+            offsetY = offsetY or 0
+        end
     end
-
     --Show the tooltip
     InitializeTooltip(TT_control, parent, anchor1, offsetX, offsetY, anchor2)
     TT_control:SetLink(data.itemLink)
@@ -792,13 +818,36 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     local data = rowControl.data
     if data == nil then return end
     local setId = rowControl.data.setId
+    local owningWindow = rowControl:GetOwningWindow()
     ClearMenu()
     AddCustomMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function()
         self:ItemLinkToChat(rowControl.data)
     end)
-    AddCustomMenuItem("Popup toooltip", function()
-        self:ShowItemLinkPopupTooltip(rowControl, rowControl.data, nil, nil, nil ,nil)
-    end)
+    local popupTooltipSubmenu = {
+        {
+            label = GetString(SI_KEYBINDDISPLAYMODE2),
+            callback =function()
+                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, nil, nil, nil, nil)
+            end
+        },
+        {
+            label = "-", --Left
+            callback = function() end,
+        },
+        {
+            label = GetString(SI_KEYCODE_NARRATIONTEXTPS4125), --Left
+            callback = function()
+                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, RIGHT, -10, nil, LEFT)
+            end
+        },
+        {
+            label = GetString(SI_KEYCODE_NARRATIONTEXTPS4126), --Right
+            callback =function()
+                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, LEFT, 10, nil, RIGHT)
+            end
+        },
+    }
+    AddCustomSubMenuItem("Popup toooltip", popupTooltipSubmenu)
 
     if setId ~= nil then
         AddCustomMenuItem(favoriteIconText .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER), function() end, MENU_ADD_OPTION_HEADER)
@@ -848,6 +897,14 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
     if selfVar.multiSelectFilterDropdowns ~= nil and ZO_IsElementInNumericallyIndexedTable(selfVar.multiSelectFilterDropdowns, dropdownControl) then
         ClearMenu()
         AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function() selfVar:ResetMultiSelectDropdown(dropdownControl) end)
+
+        --Favorite filter muliselect dropdown?
+        if dropdownControl == self.favoritesFiltersControl then
+            AddCustomMenuItem("-")
+            local entriesToSelect = { [1] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK }
+            AddCustomMenuItem(favoriteIconText, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
+        end
+
         ShowMenu(dropdownControl)
     end
 end
