@@ -10,6 +10,7 @@ local zif = zo_iconFormat
 
 
 local clientLang = lib.clientLang
+local langAllowedCheck = lib.LangAllowedCheck
 
 local libSets_GetSetInfo = lib.GetSetInfo
 --local libSets_getDropMechanicAndDropLocationNames = lib.GetDropMechanicAndDropLocationNames
@@ -441,6 +442,8 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
     local searchParams = self.searchParams
     if searchParams ~= nil and not ZO_IsTableEmpty(searchParams) then
         local setsBaseList = {}
+        --Language of client, or of not supported: fallbackLang
+        local langTouse = langAllowedCheck(clientLang)
 
         local multiSelectFilterDropdownToSearchParamName = self.multiSelectFilterDropdownToSearchParamName
 
@@ -544,10 +547,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 if searchParamsEnchantSearchCategory ~= nil then
                     isAllowed = false
                     local enchantSearchCategories = setData[LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] or libSets_GetSetEnchantSearchCategories(setId, nil, nil, nil, nil)
---lib._debugEnchantSearchCategories = lib._debugEnchantSearchCategories or {}
---lib._debugEnchantSearchCategories[setId] = {}
                     if enchantSearchCategories ~= nil then
---lib._debugEnchantSearchCategories[setId] = enchantSearchCategories
                         --Update the base setInfo table with the enchantment search category infos determined -> Already done internally in libSets_GetSetEnchantSearchCategories(...)
                         --lib.setInfo[setId][LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] = enchantSearchCategories
                         for enchantSearchCategory, isFiltered in pairs(searchParamsEnchantSearchCategory) do
@@ -630,12 +630,17 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     if dropLocationNames ~= nil then
                         setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] = dropLocationNames
                         for dropLocationName, isFiltered in pairs(searchParamsDropLocation) do
-                            if isFiltered == true then
-                                local dropLocationSearchTab = { [clientLang] = dropLocationName }
-                                if ZO_IsElementInNumericallyIndexedTable(dropLocationNames, dropLocationSearchTab) then
-                                    isAllowed = true
-                                    break
+                            if isFiltered == true and not isAllowed then
+                                for _, dropLocationNameLanguages in pairs(dropLocationNames) do
+                                    local dropLocationNameInLangToUse = dropLocationNameLanguages[langTouse]
+                                    if dropLocationNameInLangToUse ~= nil and dropLocationNameInLangToUse == dropLocationName then
+                                        isAllowed = true
+                                        break
+                                    end
                                 end
+                            end
+                            if isAllowed == true then
+                                break
                             end
                         end
                     end
