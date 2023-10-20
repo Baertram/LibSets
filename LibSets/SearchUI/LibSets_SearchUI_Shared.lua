@@ -5,6 +5,10 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = "["..MAJOR.."]"
 
+local zoitfns = zo_iconTextFormatNoSpace
+local zif = zo_iconFormat
+
+
 local clientLang = lib.clientLang
 
 local libSets_GetSetInfo = lib.GetSetInfo
@@ -21,12 +25,18 @@ local libSets_IsArmorTypeSet = lib.IsArmorTypeSet
 
 local gilsi = GetItemLinkSetInfo
 
+--Textures
+local favoriteIcon = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
 
 --The search UI table
 lib.SearchUI = {}
 local searchUI = lib.SearchUI
 searchUI.name = MAJOR .. "_SearchUI"
 local searchUIName = searchUI.name
+searchUI.favoriteIcon = favoriteIcon
+searchUI.favoriteIconText = zif(favoriteIcon, 24, 24)
+local favoriteIconText = searchUI.favoriteIconText
+
 
 --Maximum number of set bonuses
 searchUI.MAX_NUM_SET_BONUS = 6 --2023-09-09
@@ -283,7 +293,7 @@ function LibSets_SearchUI_Shared:ValidateSearchParams()
     return true --all search parameters are valid
 end
 
-function LibSets_SearchUI_Shared:StartSearch(doNotShowUI)
+function LibSets_SearchUI_Shared:StartSearch()
 --d("[LibSets]LibSets_SearchUI_Shared:StartSearch-doNotShowUI: " ..tostring(doNotShowUI))
     --Fire callback for "Search was started"
     CM:FireCallbacks(searchUIName .. "_SearchBegin", self)
@@ -421,15 +431,19 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
         --searchParams is a table with the following possible entries
         -->See format of searchParams at the Initialize function of this class, above!
         local searchParamsSetType = searchParams[multiSelectFilterDropdownToSearchParamName[self.setTypeFiltersControl]]
-        local searchParamsDLCId = searchParams[multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]]
         local searchParamsArmorType = searchParams[multiSelectFilterDropdownToSearchParamName[self.armorTypeFiltersControl]]
         local searchParamsWeaponType = searchParams[multiSelectFilterDropdownToSearchParamName[self.weaponTypeFiltersControl]]
         local searchParamsEquipmentType = searchParams[multiSelectFilterDropdownToSearchParamName[self.equipmentTypeFiltersControl]]
+        local searchParamsDLCId = searchParams[multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]]
+        local searchParamsFavorites = searchParams[multiSelectFilterDropdownToSearchParamName[self.favoritesFiltersControl]]
+        local searchParamsEnchantSearchCategory = searchParams[multiSelectFilterDropdownToSearchParamName[self.enchantSearchCategoryTypeFiltersControl]]
         local searchParamsNumBonus = searchParams[multiSelectFilterDropdownToSearchParamName[self.numBonusFiltersControl]]
         local searchParamsDropZone = searchParams[multiSelectFilterDropdownToSearchParamName[self.dropZoneFiltersControl]]
         local searchParamsDropMechanic = searchParams[multiSelectFilterDropdownToSearchParamName[self.dropMechanicsFiltersControl]]
         local searchParamsDropLocation = searchParams[multiSelectFilterDropdownToSearchParamName[self.dropLocationsFiltersControl]]
-        local searchParamsEnchantSearchCategory = searchParams[multiSelectFilterDropdownToSearchParamName[self.enchantSearchCategoryTypeFiltersControl]]
+
+        --SavedVariables dependent entries
+        local setSearchFavoritesSV = lib.svData.setSearchFavorites
 
         --Pre-Filter the master list now, based on the Multiselect dropdowns
         for setId, setData in pairs(defaultMasterListBase) do
@@ -437,11 +451,31 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
 
 
             --[Multiselect dropdown box filters]
-            --SetTypes
-            if searchParamsSetType ~= nil then
+
+            --First filter by SavedVariables dependent filters
+            --set favorites
+            if searchParamsFavorites ~= nil and setSearchFavoritesSV ~= nil then
                 isAllowed = false
-                if setData.setType ~= nil and searchParamsSetType[setData.setType] then
-                    isAllowed = true
+                for isFavorite, isFiltered in pairs(searchParamsFavorites) do
+                    if isFiltered == true then
+                        local setDataFavoriteValue = (isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK and true) or nil
+                        if setDataFavoriteValue == setSearchFavoritesSV[setId] then
+    --d(">setId is favorite: " ..tostring(setId) .. ", name: " ..tostring(setData.nameClean))
+                            isAllowed = true
+                            break
+                        end
+                    end
+                end
+            end
+
+            --Other search UI filters
+            --SetTypes
+            if isAllowed == true then
+                if searchParamsSetType ~= nil then
+                    isAllowed = false
+                    if setData.setType ~= nil and searchParamsSetType[setData.setType] then
+                        isAllowed = true
+                    end
                 end
             end
             --DLC IDs
@@ -494,12 +528,12 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 if searchParamsEnchantSearchCategory ~= nil then
                     isAllowed = false
                     local enchantSearchCategories = setData[LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] or libSets_GetSetEnchantSearchCategories(setId, nil, nil, nil, nil)
-lib._debugEnchantSearchCategories = lib._debugEnchantSearchCategories or {}
-lib._debugEnchantSearchCategories[setId] = {}
+--lib._debugEnchantSearchCategories = lib._debugEnchantSearchCategories or {}
+--lib._debugEnchantSearchCategories[setId] = {}
                     if enchantSearchCategories ~= nil then
-lib._debugEnchantSearchCategories[setId] = enchantSearchCategories
-                        --Update the base setInfo table with the enchantment search category infos determined
-                        lib.setInfo[setId][LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] = enchantSearchCategories
+--lib._debugEnchantSearchCategories[setId] = enchantSearchCategories
+                        --Update the base setInfo table with the enchantment search category infos determined -> Already done internally in libSets_GetSetEnchantSearchCategories(...)
+                        --lib.setInfo[setId][LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] = enchantSearchCategories
                         for enchantSearchCategory, isFiltered in pairs(searchParamsEnchantSearchCategory) do
                             if isFiltered == true and enchantSearchCategories[enchantSearchCategory] then
                                 isAllowed = true
@@ -601,7 +635,7 @@ lib._debugEnchantSearchCategories[setId] = enchantSearchCategories
             if isAllowed == true then
                 setsBaseList[setId] = setData
             end
-        end
+        end -- for setId, setData in pairs(defaultMasterListBase) do
         return setsBaseList
     end
     return defaultMasterListBase
@@ -661,6 +695,91 @@ end
 
 function LibSets_SearchUI_Shared:HideItemLinkTooltip()
     ClearTooltip(self.tooltipControl)
+end
+
+
+function LibSets_SearchUI_Shared:ShowItemLinkPopupTooltip(parent, data, anchor1, offsetX, offsetY, anchor2)
+    self:HideItemLinkPopupTooltip()
+
+    local TT_control = PopupTooltip
+    if data == nil or data.itemLink == nil then return end
+
+    --Get the current position of the UI. If  the UI is moved to the left, show the tooltip right, and vice versa
+    --local screenWidth, screenHeight = GuiRoot:GetDimensions()
+    local currentLeft = self.control:GetLeft()
+    if currentLeft < TT_control:GetWidth() then
+        anchor1 = anchor1 or LEFT
+        anchor2 = anchor2 or RIGHT
+        offsetX = offsetX or 25
+        offsetY = offsetY or 0
+    else
+        anchor1 = anchor1 or RIGHT
+        anchor2 = anchor2 or LEFT
+        offsetX = offsetX or -25
+        offsetY = offsetY or 0
+    end
+
+    --Show the tooltip
+    InitializeTooltip(TT_control, parent, anchor1, offsetX, offsetY, anchor2)
+    TT_control:SetLink(data.itemLink)
+end
+
+function LibSets_SearchUI_Shared:HideItemLinkPopupTooltip()
+    ClearTooltip(PopupTooltip)
+end
+
+function LibSets_SearchUI_Shared:ItemLinkToChat(data)
+    if data and data.itemLink ~= nil then
+        d(libPrefix .."SetId \'".. tostring(data.setId) .."\': " ..data.itemLink)
+        StartChatInput(data.itemLink)
+    end
+end
+
+function LibSets_SearchUI_Shared:IsSetIdInFavorites(setId)
+    return lib.svData.setSearchFavorites[setId] or false
+end
+
+function LibSets_SearchUI_Shared:AddSetIdToFavorites(rowControl, setId)
+    if self:IsSetIdInFavorites(setId) then return end
+    lib.svData.setSearchFavorites[setId] = true
+
+    self.resultsList:AddFavorite(rowControl)
+end
+
+function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId)
+    if not self:IsSetIdInFavorites(setId) then return end
+    lib.svData.setSearchFavorites[setId] = nil
+
+    self.resultsList:RemoveFavorite(rowControl)
+end
+
+
+function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
+    if not LibCustomMenu then return end
+    local data = rowControl.data
+    if data == nil then return end
+    local setId = rowControl.data.setId
+    ClearMenu()
+    AddCustomMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function()
+        self:ItemLinkToChat(rowControl.data)
+    end)
+    AddCustomMenuItem("Popup toooltip", function()
+        self:ShowItemLinkPopupTooltip(rowControl, rowControl.data, nil, nil, nil ,nil)
+    end)
+
+    if setId ~= nil then
+        AddCustomMenuItem(favoriteIconText .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER), function() end, MENU_ADD_OPTION_HEADER)
+        if self:IsSetIdInFavorites(setId) then
+            AddCustomMenuItem(GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE), function()
+                self:RemoveSetIdFromFavorites(rowControl, setId)
+            end)
+        else
+            AddCustomMenuItem(GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE), function()
+                self:AddSetIdToFavorites(rowControl, setId)
+            end)
+        end
+    end
+    ShowMenu(rowControl)
 end
 
 

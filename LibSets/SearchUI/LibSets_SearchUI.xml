@@ -71,36 +71,41 @@
 			</OnMouseUp>
 			<Controls>
 				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
-				<Label name="$(parent)Name" inherits="LibSetsSearchUIRowLabel">
+				<Label name="$(parent)Favorite" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="350" />
+                    <DimensionConstraints minX="24" maxX="24" />
+				</Label>
+				<Label name="$(parent)Name" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Favorite" />
+					<Dimensions y="30" />
+                    <DimensionConstraints minX="350" maxX="350" />
 				</Label>
 				<Label name="$(parent)SetType" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" />
+                    <DimensionConstraints minX="30" maxX="30" />
 				</Label>
 				<Label name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)SetType" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" />
+                    <DimensionConstraints minX="30" maxX="30" />
 				</Label>
 				<Label name="$(parent)EquipSlot" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" />
+                    <DimensionConstraints minX="30" maxX="30" />
 				</Label>
 				<Label name="$(parent)DropLocations" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)EquipSlot" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="300" />
+                    <DimensionConstraints minX="300" maxX="300" />
 				</Label>
 				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DropLocations" />
 					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" />
+                    <DimensionConstraints minX="30" maxX="30" />
 				</Label>
 			</Controls>
 		</Control>
@@ -163,6 +168,10 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)DLCIdFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                             <Dimensions x="200" />
                         </Control>
+                        <Control name="$(parent)FavoritesFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)EnchantSearchCategoryTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                            <Dimensions x="200" />
+                        </Control>
 
                         <!-- Filter edit box - Bonus text search -->
                         <Backdrop name="$(parent)BonusTextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" tier="LOW" layer="CONTROLS" level="1">
@@ -208,13 +217,21 @@
                             <Dimensions y="30" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
                             <Controls>
+                                <Control name="$(parent)Favorite" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, zo_iconTextFormatNoSpace(LibSets.SearchUI.favoriteIcon, 24, 24, nameColumnValue), "isFavorite", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGame")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="24" maxX="24" />
+                                </Control>
                                 <Control name="$(parent)Name" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
                                         ZO_SortHeader_Initialize(self, GetString(SI_ITEMLISTSORTTYPE2), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                                     </OnInitialized>
-                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Favorite" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="350" />
+                                    <DimensionConstraints minX="350" maxX="350" />
                                 </Control>
                                 <Control name="$(parent)SetType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -222,7 +239,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" />
+                                    <DimensionConstraints minX="30" maxX="30" />
                                 </Control>
                                 <Control name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -230,7 +247,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SetType" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" />
+                                    <DimensionConstraints minX="30" maxX="30" />
                                 </Control>
                                 <Control name="$(parent)EquipSlot" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -238,7 +255,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" />
+                                    <DimensionConstraints minX="30" maxX="30" />
                                 </Control>
                                 <Control name="$(parent)DropLocations" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -246,7 +263,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)EquipSlot" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="300" />
+                                    <DimensionConstraints minX="300" maxX="300" />
                                 </Control>
                                 <Control name="$(parent)SetId" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -255,7 +272,7 @@
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DropLocations" />
                                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" />
+                                    <DimensionConstraints minX="30" maxX="30" />
                                 </Control>
                             </Controls>
                         </Control>

@@ -10,6 +10,8 @@ local libSets_GetSpecialZoneNameById = lib.GetSpecialZoneNameById
 local getEquipSlotTexture = lib.GetEquipSlotTexture
 local getArmorTypeTexture = lib.GetArmorTypeTexture
 local getWeaponTypeTexture = lib.GetWeaponTypeTexture
+local libSets_GetSetItemId = lib.GetSetItemId
+local libSets_GetSetItemIds = lib.GetSetItemIds
 
 --The search UI table
 local searchUI = lib.SearchUI
@@ -19,6 +21,9 @@ local searchUIThrottledSearchHandlerName = searchUIName .. "_ThrottledSearch"
 local searchUIThrottledDelay = 500
 
 local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
+
+
+local favoriteIconText = searchUI.favoriteIconText
 
 
 --Debugging - TODO: Disable again
@@ -138,12 +143,10 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.equipmentTypeFiltersControl =             filters:GetNamedChild("EquipmentTypeFilter")
     self.DCLIdFiltersControl =                     filters:GetNamedChild("DLCIdFilter")
     self.enchantSearchCategoryTypeFiltersControl = filters:GetNamedChild("EnchantSearchCategoryTypeFilter")
-    --todo Disabled for the moment as it does not work! Maybe the self created itemLink does not contain the proper enchanting info?
-    --self.enchantSearchCategoryTypeFiltersControl:SetHidden(true)
+    self.favoritesFiltersControl =                 filters:GetNamedChild("FavoritesFilter")
     self.dropZoneFiltersControl =                  filters:GetNamedChild("DropZoneFilter")
     self.dropMechanicsFiltersControl =             filters:GetNamedChild("DropMechanicsFilter")
     self.dropLocationsFiltersControl =             filters:GetNamedChild("DropLocationsFilter")
-
     self.numBonusFiltersControl =                  filters:GetNamedChild("NumBonusFilter")
 
     --The multiselect dropdown box filters
@@ -154,6 +157,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         self.equipmentTypeFiltersControl,
         self.DCLIdFiltersControl,
         self.enchantSearchCategoryTypeFiltersControl,
+        self.favoritesFiltersControl,
         self.dropZoneFiltersControl,
         self.dropMechanicsFiltersControl,
         self.dropLocationsFiltersControl,
@@ -167,6 +171,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         [self.equipmentTypeFiltersControl] =                "equipmentTypes",
         [self.DCLIdFiltersControl] =                        "DLCIds",
         [self.enchantSearchCategoryTypeFiltersControl] =    "enchantSearchCategoryTypes",
+        [self.favoritesFiltersControl] =                    "favorites",
         [self.dropZoneFiltersControl] =                     "dropZones",
         [self.dropMechanicsFiltersControl] =                "dropMechanics",
         [self.dropLocationsFiltersControl] =                "dropLocations",
@@ -471,6 +476,30 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
         end
     end
 
+    -- Initialize the Favorite sets multiselect combobox.
+    local favoritesDropdown = ZO_ComboBox_ObjectFromContainer(self.favoritesFiltersControl)
+    if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
+        favoritesDropdown:SetEntryMouseOverCallbacks(onFilterDropdownEntryMouseEnterCallback, onFilterDropdownEntryMouseExitCallback)
+    end
+    self.favoritesDropdown = favoritesDropdown
+    favoritesDropdown:ClearItems()
+    favoritesDropdown:SetHideDropdownCallback(OnFilterChanged)
+    local filterTypeText = GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
+    self.favoritesFiltersControl.tooltipText = filterTypeText
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        favoritesDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
+    favoritesDropdown:SetSortsItems(false)
+
+    local entry = favoritesDropdown:CreateItemEntry(GetString(SI_ARMORTYPE0))
+    entry.filterType = 0
+    entry.nameClean = "No favorite"
+    favoritesDropdown:AddItem(entry)
+    entry = favoritesDropdown:CreateItemEntry(favoriteIconText .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
+    entry.filterType = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+    entry.nameClean = "Favorite"
+    favoritesDropdown:AddItem(entry)
+
     -- Initialize the Number of bonuses multiselect combobox.
     local numBonusDropdown = ZO_ComboBox_ObjectFromContainer(self.numBonusFiltersControl)
     if ZO_ComboBox.SetEntryMouseOverCallbacks ~= nil then
@@ -681,7 +710,7 @@ function LibSets_SearchUI_Keyboard:GetItemIdRelevantFilterKeys()
     return searchParamKeysOfItemIdAffectingFilters
 end
 
--->Get the itemIds mathcing to the searchParam entries of the multiselect dropdown boxes, and other filter controls, which change the
+-->Get the itemIds matching the searchParam entries of the multiselect dropdown boxes, and other filter controls, which change the
 -->possible itemIds of an itemLink at the resultsList row
 --Returns a table with key = counter and value = itemId
 function LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters(setId, onlyOneItemId)
@@ -711,15 +740,10 @@ function LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters(setId, on
         end
     end
 
-    --LibSets._debug.armorTypes = armorTypes
-    --LibSets._debug.weaponTypes = weaponTypes
-    --LibSets._debug.equipmentTypes = equipmentTypes
-    --LibSets._debug.enchantSearchCategoryTypes = enchantSearchCategoryTypes
-
     --Only 1 itemId:
     local itemIdsMatchingFilters
     if onlyOneItemId == true then
-        local itemIdMatchingFilters = lib.GetSetItemId(setId, equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes)
+        local itemIdMatchingFilters = libSets_GetSetItemId(setId, nil, equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes)
         --LibSets._debug.itemIdMatchingFilters = itemIdMatchingFilters
         if itemIdMatchingFilters ~= nil then
             itemIdsMatchingFilters = {}
@@ -727,7 +751,7 @@ function LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters(setId, on
         end
     else
         --All itemIds:
-        itemIdsMatchingFilters = lib.GetSetItemIds(setId, nil, equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes)
+        itemIdsMatchingFilters = libSets_GetSetItemIds(setId, nil, equipmentTypes, traitTypes, enchantSearchCategoryTypes, armorTypes, weaponTypes)
     end
 
     --LibSets._debug.itemIdsMatchingFilters = itemIdsMatchingFilters
@@ -752,7 +776,7 @@ end
 
 --Will be called as the multiselect dropdown boxes got closed again (and entries might have changed)
 function LibSets_SearchUI_Keyboard:OnFilterChanged()
-    --d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
+--d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     LibSets_SearchUI_Shared.OnFilterChanged(self)
 
     local searchParams = {}
@@ -792,11 +816,9 @@ end
 function LibSets_SearchUI_Keyboard:OnRowMouseUp(rowControl, mouseButton, upInside, shift, alt, ctrl, command)
     if upInside then
         if mouseButton == MOUSE_BUTTON_INDEX_LEFT then
-            local data = rowControl.data
-            if data.itemLink ~= nil then
-                d(libPrefix .."SetId \'".. tostring(data.setId) .."\': " ..data.itemLink)
-                StartChatInput(data.itemLink)
-            end
+            self:ItemLinkToChat(rowControl.data)
+        elseif mouseButton == MOUSE_BUTTON_INDEX_RIGHT then
+            self:ShowRowContextMenu(rowControl)
         end
     end
 end

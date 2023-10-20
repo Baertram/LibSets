@@ -3,14 +3,17 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = "["..MAJOR.."]"
 
---The search UI table
-local searchUI = lib.SearchUI
-local searchUIName = searchUI.name
-
 local tos = tostring
 local tins = table.insert
 local tcon = table.concat
 local zif = zo_iconFormat
+
+--The search UI table
+local searchUI = lib.SearchUI
+local searchUIName = searchUI.name
+local favoriteIconText = searchUI.favoriteIconText
+
+
 
 --Library's local helpers
 --local libSets_IsNoESOSet = lib.IsNoESOSet
@@ -24,6 +27,30 @@ local libSets_GetSetFirstItemId = lib.GetSetFirstItemId
 local getArmorTypeTexture = lib.GetArmorTypeTexture
 local getWeaponTypeTexture = lib.GetWeaponTypeTexture
 local getEquipSlotTexture = lib.GetEquipSlotTexture
+
+
+------------------------------------------------------------------------------------------------------------------------
+--Local helper functions
+------------------------------------------------------------------------------------------------------------------------
+local function updateFavoriteColumn(rowControl, isFavorite)
+    if not rowControl or isFavorite == nil then return end
+    local data = rowControl.data
+    if not data then return end
+
+    if isFavorite == true then
+        if data.isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then return end
+        rowControl.data.isFavorite = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+    else
+        if data.isFavorite ~= LIBSETS_SET_ITEMID_TABLE_VALUE_OK then return end
+        rowControl.data.isFavorite = 0
+    end
+    data = rowControl.data
+
+    local favoriteColumn = rowControl:GetNamedChild("Favorite")
+    if favoriteColumn == nil then return end
+    favoriteColumn:SetText((isFavorite == true and favoriteIconText) or "")
+end
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search results list for keyboard mode
@@ -83,6 +110,14 @@ function LibSets_SearchUI_List:Setup( )
     --self:RefreshData()
 end
 
+--[[
+-- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+-- ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+-- ZO_SortFilterList:RefreshSort()                                                      =>  SortScrollList()    =>  CommitScrollList()
+function LibSets_SearchUI_List:CommitScrollList( )
+end
+]]
+
 --Get the data of the masterlist entries and add it to the list columns
 function LibSets_SearchUI_List:SetupItemRow(control, data)
     --local clientLang = WL.clientLang or WL.fallbackSetLang
@@ -91,11 +126,23 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
 
     local lastColumn
 
+    local favoriteColumn = control:GetNamedChild("Favorite")
+    favoriteColumn.normalColor = ZO_DEFAULT_TEXT
+    favoriteColumn:ClearAnchors()
+    favoriteColumn:SetAnchor(LEFT, control, nil, 0, 0)
+    local favoriteIconColumnText = ""
+    if data.isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+        favoriteIconColumnText = favoriteIconText
+    end
+    favoriteColumn:SetText(favoriteIconColumnText)
+    favoriteColumn:SetHidden(false)
+
+
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
     nameColumn:ClearAnchors()
-    nameColumn:SetAnchor(LEFT, control, nil, 0, 0)
-    nameColumn:SetText(data.name or "test name")
+    nameColumn:SetAnchor(LEFT, favoriteColumn, RIGHT, 0, 0)
+    nameColumn:SetText(data.name)
     nameColumn:SetHidden(false)
 
     local setTypeColumn = control:GetNamedChild("SetType")
@@ -136,13 +183,6 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     ZO_SortFilterList.SetupRow(self, control, data)
 end
 
---[[
--- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
--- ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
--- ZO_SortFilterList:RefreshSort()                                                      =>  SortScrollList()    =>  CommitScrollList()
-function LibSets_SearchUI_List:CommitScrollList( )
-end
-]]
 
 --Create a row at the resultslist, and respect the search filters (multiselect dropdowns of armor, weapon, equipment type,
 --enchantment, etc.)
@@ -152,7 +192,12 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local itemId
 
     --The name column
-    local nameColumnValue = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
+    local nameColumnValueClean = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
+    local nameColumnValue = nameColumnValueClean
+
+    --Favorite
+    local isFavorite = parentObject:IsSetIdInFavorites(setId)
+    local isFavoriteColumnText = (isFavorite == true and LIBSETS_SET_ITEMID_TABLE_VALUE_OK) or 0
 
     --The set type
     local setTypeName, setTypeTexture = buildSetTypeInfo(setData, true)
@@ -306,7 +351,11 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     itemData.setTypeTexture      =              setTypeTexture ~= nil and zif(setTypeTexture, 24, 24)
 
     itemData.name                =              nameColumnValue --todo Maybe show multi language en/de e.g.?
-    itemData.nameLower           =              nameColumnValue:lower() --Always add that for the string text search!!!
+    itemData.nameLower           =              nameColumnValueClean:lower() --Always add that for the string text search!!!
+    itemData.nameClean           =              nameColumnValueClean
+
+    --Favorite
+    itemData.isFavorite          =              isFavoriteColumnText
 
     --Set item related
     itemData.armorOrWeaponType   =              armorOrWeaponType
@@ -343,10 +392,11 @@ function LibSets_SearchUI_List:BuildMasterList()
 --lib._debugSetsBaseList = setsBaseList
     if setsBaseList == nil or ZO_IsTableEmpty(setsBaseList) then return end
 
-    --Check if any other filters which need the set itemIds are active (multiselect dropdown boxes for armor/weapon/equipment type etc.)
+    --Check if any other filters which need the set itemIds are active (multiselect dropdown boxes for armor/weapon/equipment type/enchantment search category/ etc.)
     local isAnyItemIdRelevantFilterActive = self._parentObject:IsAnyItemIdRelevantFilterActive()
     self.isAnyItemIdRelevantFilterActive = isAnyItemIdRelevantFilterActive
     if isAnyItemIdRelevantFilterActive == true then
+        --Will be used at function LibSets_SearchUI_Keyboard:GetItemIdsForSetIdRespectingFilters(setId, onlyOneItemId) -> Called at self:CreateEntryForSet(setId, setData)
         self._parentObject.itemIdRelevantFilterKeys = self._parentObject:GetItemIdRelevantFilterKeys()
     end
 
@@ -426,13 +476,14 @@ function LibSets_SearchUI_List:BuildSortKeys()
         --["timestamp"]               = { isId64          = true, tiebreaker = "name"  }, --isNumeric = true
         --["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         --["gearId"]                  = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
+        ["isFavorite"]              = { isNumeric = true,               tiebreaker = "name" },
         ["name"]                    = { caseInsensitive = true },
-        ["setType"]                 = { isId64 = true,              tiebreaker = "name" },
-        ["armorOrWeaponType"]       = { isId64 = true,              tiebreaker = "name" },
-        ["equipSlot"]               = { isId64 = true,              tiebreaker = "name" },
-        ["dropLocationSort"]        = { caseInsensitive = true,     tiebreaker = "name" },
-        ["setId"]                   = { isId64 = true,              tiebreaker = "name" },
-        ["DLCID"]                   = { isId64 = true,              tiebreaker = "name" },
+        ["setType"]                 = { isNumeric = true,               tiebreaker = "name" },
+        ["armorOrWeaponType"]       = { isNumeric = true,               tiebreaker = "name" },
+        ["equipSlot"]               = { isNumeric = true,               tiebreaker = "name" },
+        ["dropLocationSort"]        = { caseInsensitive = true,         tiebreaker = "name" },
+        ["setId"]                   = { isNumeric = true,               tiebreaker = "name" },
+        ["DLCID"]                   = { isNumeric = true,               tiebreaker = "name" },
     }
 end
 
@@ -445,4 +496,12 @@ function LibSets_SearchUI_List:UpdateCounter(scrollData)
         listCountAndTotal = string.format("%d / %d", #scrollData, #self.masterList)
     end
     self._parentObject.counterControl:SetText(listCountAndTotal)
+end
+
+function LibSets_SearchUI_List:AddFavorite(rowControl)
+    updateFavoriteColumn(rowControl, true)
+end
+
+function LibSets_SearchUI_List:RemoveFavorite(rowControl)
+    updateFavoriteColumn(rowControl, false)
 end

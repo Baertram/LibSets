@@ -1007,6 +1007,7 @@ local function buildSetTypeInfo(setData, buildTextures)
 end
 lib.buildSetTypeInfo = buildSetTypeInfo
 
+--If forTooltip == false: Provide ALL information, not based on the settings chosen -> Will be used for the search UI then
 local function buildSetDataText(setData, itemLink, forTooltip)
     if not setData then return end
     if not setData.setId then
@@ -1121,32 +1122,32 @@ local function buildSetDataText(setData, itemLink, forTooltip)
 
     --Reconstruction
     local isReconstructableSet = isilscp(itemLink)
-    if isReconstructableSet == true and ((useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost)) then
+    if isReconstructableSet == true and (not forTooltip or ((useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost))) then
         reconstructionCostText = buildReconstructionCostInfo(setData, itemLink)
     end
 
     --Set Type
-    if (useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType) then
+    if not forTooltip or ((useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType)) then
         setTypeText, setTypeTexture = buildSetTypeInfo(setData)
         --d(">setTypeText: " ..tos(setTypeText))
     end
 
     --Craftable
-    if not isReconstructableSet and ((useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits)) then
+    if not isReconstructableSet and (not forTooltip or ((useCustomTooltip and neededTraitsPlaceholder) or (not useCustomTooltip and addNeededTraits))) then
         setNeededTraitsText = buildSetNeededTraitsInfo(setData)
         --d(">setNeededTraitsText: " ..tos(setNeededTraitsText))
     end
 
     --DLC
-    if (useCustomTooltip and dlcNamePlaceHolder) or (not useCustomTooltip and addDLC) then
+    if not forTooltip or ((useCustomTooltip and dlcNamePlaceHolder) or (not useCustomTooltip and addDLC)) then
         setDLCText = buildSetDLCInfo(setData, useCustomTooltip)
         --d(">setDLCText: " ..tos(setDLCText))
     end
 
 
     --Drop mechanics
-    local runDropMechanic = (useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
-            or (not useCustomTooltip and (addDropMechanic or addBossName or addDropLocation))
+    local runDropMechanic = not forTooltip or ((useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
+            or (not useCustomTooltip and (addDropMechanic or addBossName or addDropLocation)))
     if runDropMechanic then
         --dropZoneNames, dropMechanicNames, dropLocationNames
         getSetDropMechanicInfo(setData)
@@ -1243,7 +1244,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
 
     else
         --Use default output tooltip:
-        if addSetType then
+        if not forTooltip or addSetType then
             if tooltipTextures == true then
                 setInfoText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
             else
@@ -1257,8 +1258,8 @@ local function buildSetDataText(setData, itemLink, forTooltip)
                 setInfoText = setDropLocationsText
             end
         end
-        if not isReconstructableSet and addNeededTraits and setType ~= nil and setType == LIBSETS_SETTYPE_CRAFTED then
-            if addSetType then
+        if not isReconstructableSet and (not forTooltip or addNeededTraits) and setType ~= nil and setType == LIBSETS_SETTYPE_CRAFTED then
+            if not forTooltip or addSetType then
                 if setInfoText ~= nil then
                     setInfoText = setInfoText .. " (" .. setNeededTraitsText .. ")"
                 end
@@ -1270,7 +1271,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
                 end
             end
         end
-        if isReconstructableSet and addReconstructionCost and reconstructionCostText ~= nil and reconstructionCostText ~= "" then
+        if isReconstructableSet and (not forTooltip or addReconstructionCost) and reconstructionCostText ~= nil and reconstructionCostText ~= "" then
             if addSetType then
                 if setInfoText ~= nil then
                     setInfoText = setInfoText .. " (" .. reconstructionCostText .. ")"
@@ -1290,17 +1291,21 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             --lib._debugSetDropMechanicDropLocationsText = setDropMechanicDropLocationsText
             if setDropMechanicDropLocationsText ~= nil and setDropMechanicDropLocationsText ~= "" then
                 local prefix = ""
-                if addBossName and not addDropLocation and not addDropMechanic then
+                if forTooltip then
+                    if addBossName and not addDropLocation and not addDropMechanic then
+                        prefix = droppedByStr .. ": "
+                    elseif not addBossName and not addDropLocation and addDropMechanic then
+                        prefix = dropMechanicStr .. ": "
+                    elseif not addBossName and addDropLocation and not addDropMechanic then
+                        prefix = dropLocationZonesStr .. ": "
+                    end
+                else
                     prefix = droppedByStr .. ": "
-                elseif not addBossName and not addDropLocation and addDropMechanic then
-                    prefix = dropMechanicStr .. ": "
-                elseif not addBossName and addDropLocation and not addDropMechanic then
-                    prefix = dropLocationZonesStr .. ": "
                 end
                 addSetInfoText(prefix .. setDropMechanicDropLocationsText)
             end
         end
-        if addDLC then
+        if not forTooltip or addDLC then
             addSetInfoText(setDLCText)
         end
     end
