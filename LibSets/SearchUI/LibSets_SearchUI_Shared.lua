@@ -36,7 +36,7 @@ local searchUIName = searchUI.name
 searchUI.favoriteIcon = favoriteIcon
 searchUI.favoriteIconText = zif(favoriteIcon, 24, 24)
 local favoriteIconText = searchUI.favoriteIconText
-
+local settingsIconText = zif("esoui/art/chatwindow/chat_options_up.dds", 32, 32)
 
 --Maximum number of set bonuses
 searchUI.MAX_NUM_SET_BONUS = 6 --2023-09-09
@@ -95,6 +95,22 @@ local function updateSetsInfoWithDataAndNames(selfVar)
     end
 end
 
+local function setMenuItemCheckboxState(checkboxIndex, newState)
+    newState = newState or false
+    if newState == true then
+        ZO_CheckButton_SetChecked(ZO_Menu.items[checkboxIndex].checkbox)
+    else
+        ZO_CheckButton_SetUnchecked(ZO_Menu.items[checkboxIndex].checkbox)
+    end
+end
+
+-- called from clicking the "Auto reload" label
+local function OnClick_CheckBoxLabel(self, currentStateVar)
+    if lib.svData[currentStateVar] == nil then return end
+    local currentState = lib.svData[currentStateVar]
+    local newState = not currentState
+    lib.svData[currentStateVar] = newState
+end
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -728,6 +744,11 @@ function LibSets_SearchUI_Shared:HideItemLinkPopupTooltip()
     ClearTooltip(PopupTooltip)
 end
 
+
+------------------------------------------------
+--- Context menu
+------------------------------------------------
+
 function LibSets_SearchUI_Shared:ItemLinkToChat(data)
     if data and data.itemLink ~= nil then
         d(libPrefix .."SetId \'".. tostring(data.setId) .."\': " ..data.itemLink)
@@ -751,6 +772,13 @@ function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId)
     lib.svData.setSearchFavorites[setId] = nil
 
     self.resultsList:RemoveFavorite(rowControl)
+end
+
+function LibSets_SearchUI_Shared:RemoveAllSetFavorites()
+    local setFavorites = lib.svData.setSearchFavorites
+    if ZO_IsTableEmpty(setFavorites) then return end
+    lib.svData.setSearchFavorites = {}
+    self.resultsList:RefreshData() --To remove the Favorite markers
 end
 
 
@@ -782,6 +810,42 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     ShowMenu(rowControl)
 end
 
+function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
+    if not LibCustomMenu then return end
+    ClearMenu()
+    AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
+    local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem("Dropdown filter tooltips",
+            function(cboxCtrl)
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters")
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
+    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomMenuItem("Dropdown filter entry tooltips",
+            function(cboxCtrl)
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilterEntries")
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
+
+    if not ZO_IsTableEmpty(lib.svData.setSearchFavorites) then
+        AddCustomMenuItem(favoriteIconText .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER), function() end, MENU_ADD_OPTION_HEADER)
+        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
+            self:RemoveAllSetFavorites()
+        end)
+    end
+    ShowMenu(anchorControl)
+end
+
+function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
+    if LibCustomMenu == nil then return end
+    --Multiselect filter dropdown context menu?
+    local selfVar = self
+    if selfVar.multiSelectFilterDropdowns ~= nil and ZO_IsElementInNumericallyIndexedTable(selfVar.multiSelectFilterDropdowns, dropdownControl) then
+        ClearMenu()
+        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function() selfVar:ResetMultiSelectDropdown(dropdownControl) end)
+        ShowMenu(dropdownControl)
+    end
+end
 
 
 --[[ XML Handlers ]]--
@@ -805,6 +869,55 @@ function LibSets_SearchUI_Shared_SortHeaderTooltip(sortHeaderColumn)
         SetTooltipText(InformationTooltip, sortHeaderColumn.name)
     end
 end
+
+function LibSets_SearchUI_Shared_Dropdown_OnMouseUp(dropdownControl, mouseButton, upInside, shift, alt, ctrl, command)
+    if IsInGamepadPreferredMode() then
+        if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
+            LIBSETS_SEARCH_UI_GAMEPAD:OnDropdownMouseUp(dropdownControl, mouseButton, upInside, shift, alt, ctrl, command)
+        end
+    else
+        if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
+            LIBSETS_SEARCH_UI_KEYBOARD:OnDropdownMouseUp(dropdownControl, mouseButton, upInside, shift, alt, ctrl, command)
+        end
+    end
+end
+
+function LibSets_SearchUI_Shared_Row_OnMouseUp(rowControl, mouseButton, upInside, shift, alt, ctrl, command)
+    if IsInGamepadPreferredMode() then
+        if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
+            LIBSETS_SEARCH_UI_GAMEPAD:OnRowMouseUp(rowControl, mouseButton, upInside, shift, alt, ctrl, command)
+        end
+    else
+        if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
+            LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseUp(rowControl, mouseButton, upInside, shift, alt, ctrl, command)
+        end
+    end
+end
+
+function LibSets_SearchUI_Shared_Row_OnMouseEnter(rowControl)
+    if IsInGamepadPreferredMode() then
+        if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
+            LIBSETS_SEARCH_UI_GAMEPAD:OnRowMouseEnter(rowControl)
+        end
+    else
+        if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
+            LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseEnter(rowControl)
+        end
+    end
+end
+
+function LibSets_SearchUI_Shared_Row_OnMouseExit(rowControl)
+    if IsInGamepadPreferredMode() then
+        if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
+            LIBSETS_SEARCH_UI_GAMEPAD:OnRowMouseExit(rowControl)
+        end
+    else
+        if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
+            LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseExit(rowControl)
+        end
+    end
+end
+
 
 function LibSets_SearchUI_Shared_ToggleUI(slashOptions)
     if IsInGamepadPreferredMode() then

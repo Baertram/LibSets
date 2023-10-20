@@ -823,6 +823,14 @@ function LibSets_SearchUI_Keyboard:OnRowMouseUp(rowControl, mouseButton, upInsid
     end
 end
 
+function LibSets_SearchUI_Keyboard:OnDropdownMouseUp(dropdownControl, mouseButton, upInside, shift, alt, ctrl, command)
+    if upInside then
+        if mouseButton == MOUSE_BUTTON_INDEX_RIGHT then
+            self:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
+        end
+    end
+end
+
 
 --[[ XML Handlers ]]--
 function LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(self)

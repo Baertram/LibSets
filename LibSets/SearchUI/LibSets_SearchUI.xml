@@ -52,6 +52,13 @@
             <OnMouseExit>
                 ClearTooltip(InformationTooltip)
             </OnMouseExit>
+            <OnMouseUp>
+                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                    ZO_ComboBox_DropdownClicked(self)
+                else
+                    LibSets_SearchUI_Shared_Dropdown_OnMouseUp(self, button, upInside, shift, alt, ctrl, command)
+                end
+            </OnMouseUp>
         </Control>
 
 		<!-- Virtual labels -->
@@ -61,13 +68,13 @@
 		<Control name="LibSetsSearchUIRow" mouseEnabled="true" virtual="true" hidden="false">
 			<Dimensions y="30" />
 			<OnMouseEnter>
-				LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseEnter(self)
+                LibSets_SearchUI_Shared_Row_OnMouseEnter(self)
 			</OnMouseEnter>
 			<OnMouseExit>
-				LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseExit(self)
+                LibSets_SearchUI_Shared_Row_OnMouseExit(self)
 			</OnMouseExit>
             <OnMouseUp>
-                LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseUp(self, button, upInside)
+                LibSets_SearchUI_Shared_Row_OnMouseUp(self, button, upInside, shift, alt, ctrl, command)
 			</OnMouseUp>
 			<Controls>
 				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
@@ -310,6 +317,25 @@
                         ClearTooltip(InformationTooltip)
                     </OnMouseExit>
                 </Button>
+                <Button name="$(parent)ButtonSettings" tier="LOW" layer="CONTROLS" level="1">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ButtonClose" relativePoint="LEFT" offsetX="-10" offsetY="-2" />
+                    <Dimensions x="30" y="30" />
+                    <Textures normal="esoui/art/chatwindow/chat_options_up.dds"
+                              pressed="esoui/art/chatwindow/chat_options_down.dds"
+                              mouseOver="esoui/art/chatwindow/chat_options_over.dds"/>
+                    <OnClicked>
+                        self:GetParent()._object:ShowSettingsMenu(self)
+                    </OnClicked>
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                        SetTooltipText(InformationTooltip, GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Button>
+
+
 
                 <Button name="$(parent)ButtonSearch" tier="LOW" layer="CONTROLS" level="2">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="7" />
