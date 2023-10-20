@@ -680,6 +680,8 @@ lib.enchantSearchCategoryTypesValid = {
     --Not allowed
     --Allowed
     ["all"]                                                     = true,
+    --[ENCHANTMENT_SEARCH_CATEGORY_INVALID]                       = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_NONE]                          = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_HEALTH]                 = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_MAGICKA]                = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_STAMINA]                = true,
@@ -701,10 +703,8 @@ lib.enchantSearchCategoryTypesValid = {
     [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_PHYSICAL_DAMAGE]      = true,
     [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_POTION_EFFECTIVENESS] = true,
     [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_SPELL_DAMAGE]         = true,
-    [ENCHANTMENT_SEARCH_CATEGORY_INVALID]                       = true,
     [ENCHANTMENT_SEARCH_CATEGORY_MAGICKA]                       = true,
     [ENCHANTMENT_SEARCH_CATEGORY_MAGICKA_REGEN]                 = true,
-    [ENCHANTMENT_SEARCH_CATEGORY_NONE]                          = true,
     [ENCHANTMENT_SEARCH_CATEGORY_POISONED_WEAPON]               = true,
     [ENCHANTMENT_SEARCH_CATEGORY_POISON_RESISTANT]              = true,
     [ENCHANTMENT_SEARCH_CATEGORY_PRISMATIC_DEFENSE]             = true,

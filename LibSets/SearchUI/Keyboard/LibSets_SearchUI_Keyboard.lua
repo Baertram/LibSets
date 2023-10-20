@@ -457,14 +457,17 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     enchantmentSearchCategoryTypeDropdown:SetHideDropdownCallback(OnFilterChanged)
     local filterTypeText = getLocalizedText("enchantmentSearchCategory")
     self.enchantSearchCategoryTypeFiltersControl.tooltipText = filterTypeText
-    --enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     enchantmentSearchCategoryTypeDropdown:SetSortsItems(true)
 
     for enchantSearchCategoryType, isValid in pairs(lib.enchantSearchCategoryTypesValid) do
         if isValid == true and enchantSearchCategoryType ~= "all" then
-            local entry = enchantmentSearchCategoryTypeDropdown:CreateItemEntry(GetString("SI_ENCHANTMENTSEARCHCATEGORYTYPE", enchantSearchCategoryType))
-            entry.filterType = enchantSearchCategoryType
-            enchantmentSearchCategoryTypeDropdown:AddItem(entry)
+            local enchantmentSearchCategoryName = GetString("SI_ENCHANTMENTSEARCHCATEGORYTYPE", enchantSearchCategoryType)
+            if enchantmentSearchCategoryName ~= nil and enchantmentSearchCategoryName ~= "" then
+                local entry = enchantmentSearchCategoryTypeDropdown:CreateItemEntry(enchantmentSearchCategoryName)
+                entry.filterType = enchantSearchCategoryType
+                enchantmentSearchCategoryTypeDropdown:AddItem(entry)
+            end
         end
     end
 

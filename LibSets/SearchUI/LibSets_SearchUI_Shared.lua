@@ -494,8 +494,12 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                 if searchParamsEnchantSearchCategory ~= nil then
                     isAllowed = false
                     local enchantSearchCategories = setData[LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] or libSets_GetSetEnchantSearchCategories(setId, nil, nil, nil, nil)
+lib._debugEnchantSearchCategories = lib._debugEnchantSearchCategories or {}
+lib._debugEnchantSearchCategories[setId] = {}
                     if enchantSearchCategories ~= nil then
-                        setData[LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] = enchantSearchCategories
+lib._debugEnchantSearchCategories[setId] = enchantSearchCategories
+                        --Update the base setInfo table with the enchantment search category infos determined
+                        lib.setInfo[setId][LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] = enchantSearchCategories
                         for enchantSearchCategory, isFiltered in pairs(searchParamsEnchantSearchCategory) do
                             if isFiltered == true and enchantSearchCategories[enchantSearchCategory] then
                                 isAllowed = true

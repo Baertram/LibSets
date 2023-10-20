@@ -33,11 +33,11 @@ LibSets_Constants_All.lua
 
 ##Data file with the data for ALL Api versions
 ##!!!!!!!!!!!! Update the data from the API version dependent files to this file, if the API version increases, or the old APIversion data will not be loaded anymore !!!!!!!!!!
-LibSets_Data_All.lua
+Data/LibSets_Data_All.lua
 
 ##Data file dependent on the current API version(s): If the file exists, it will be loaded
 ##-->Currently disabled!
-##LibSets_Data_$(APIVersion).lua
+##Data/LibSets_Data_$(APIVersion).lua
 
 ##Functions and base library code
 LibSets.lua
