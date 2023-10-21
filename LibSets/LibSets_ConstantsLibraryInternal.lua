@@ -1220,6 +1220,9 @@ lib.localization                 = {
         bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.",
         showAsText =        "Zeige als Text",
         showAsTextWithIcons = "Zeige als Text (mit Symbolen)",
+        dropdownFilterTooltips = "Dropdown Filter: Tooltips",
+        dropdownFilterEntryTooltips = "Dropdown Filter: Einträge Tooltips",
+        searchUIShowSetNameInEnglishToo = "Set Namen ebenfalls Englisch anzeigen/suchen",
     },
     ["en"] = {
         de  = "German",
@@ -1294,6 +1297,9 @@ lib.localization                 = {
         bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.",
         showAsText =        "Show as text",
         showAsTextWithIcons = "Show as text (with icons)",
+        dropdownFilterTooltips = "Dropdown filter: Tooltips",
+        dropdownFilterEntryTooltips = "Dropdown filter: Entry tooltips",
+        searchUIShowSetNameInEnglishToo = "Show/Search Set names in English too",
     },
     ["es"] = {
         de  = "Alemán",

@@ -709,12 +709,18 @@ local function LoadSavedVariables()
         --Search UI
         setSearchTooltipsAtFilters = true,
         setSearchTooltipsAtFilterEntries = true,
+        setSearchShowSetNamesInEnglishToo = false,
         setSearchFavorites = {},
 
     }
     lib.defaultSV = defaults
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, worldName, "$AllAccounts")
+
+    --Disable settings which should only be on if your clientLanguage is not "en"
+    if clientLang == fallbackLang then
+        lib.svData.setSearchShowSetNamesInEnglishToo = false
+    end
     --------------------------------------------------------------------------------------------------------------------
 
     --For debugging and preloaded data

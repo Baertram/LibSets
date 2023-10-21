@@ -319,12 +319,13 @@ local function isTooltipOfSetItem(itemLink, tooltipData)
     return isSet, setId
 end
 
-local function getSetReconstructionCost(itemLink, setId)
+local function getSetReconstructionCost(itemLink, setId, buildTextures)
     if not itemLink or not setId then return end
     if isilscp(itemLink) == true then
+        buildTextures = buildTextures or false
         local currencyCosts = gircoc(setId, 5)
         if currencyCosts ~= nil then
-            if tooltipTextures == true then
+            if tooltipTextures == true or buildTextures == true then
                 local currencyType = CURT_CHAOTIC_CREATIA
                 local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
                 local extraOptions =
@@ -555,12 +556,13 @@ local function buildSetNeededTraitsInfo(setData)
     return tos(traitsNeeded)
 end
 
-local function addNonVeteranUndauntedChestName(setType, undauntedChestId)
+local function addNonVeteranUndauntedChestName(setType, undauntedChestId, buildTextures)
     if not setType or not undauntedChestId or undauntedChestId == "" or undauntedChestId <= 0 then return "" end
+    buildTextures = buildTextures or false
     if setType == LIBSETS_SETTYPE_MONSTER then
         local undauntedChestName = undauntedChestIdNames[undauntedChestId]
         local undauntedChestTextureAndName
-        if tooltipTextures == true then
+        if tooltipTextures == true or buildTextures == true then
             undauntedChestTextureAndName = zoitfns(undauntedChestTexture, 24, 24, undauntedChestName, nil)
         else
             undauntedChestTextureAndName = undauntedChestName
@@ -571,7 +573,8 @@ local function addNonVeteranUndauntedChestName(setType, undauntedChestId)
     return ""
 end
 
-local function getDungeonDifficultyStr(setData, itemLink)
+local function getDungeonDifficultyStr(setData, itemLink, buildTextures)
+    buildTextures = buildTextures or false
     local veteranData = setData.veteran
     local setType = setData.setType
     if veteranData ~= nil then
@@ -585,7 +588,7 @@ local function getDungeonDifficultyStr(setData, itemLink)
                 else
                     local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
                     if setData.undauntedChestId ~= nil then
-                        nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
+                        nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId, buildTextures)
                     end
                     return nonVeteranStr, false
                 end
@@ -594,7 +597,7 @@ local function getDungeonDifficultyStr(setData, itemLink)
             if not veteranData then
                 local nonVeteranStr = monsterSetTypeToNoVeteranStr[setType] or setTypeToDropZoneLocalizationStr[setType]
                 if setData.undauntedChestId ~= nil then
-                    nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId)
+                    nonVeteranStr = nonVeteranStr .. addNonVeteranUndauntedChestName(setType, setData.undauntedChestId, buildTextures)
                 end
                 return nonVeteranStr, false
             else
@@ -635,7 +638,8 @@ local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSor
 end
 
 
-local function getSetDropMechanicInfo(setData)
+local function getSetDropMechanicInfo(setData, buildTextures)
+    buildTextures = buildTextures or false
     dropZoneNames = {}
     dropMechanicNames = {}
     dropMechanicNamesClean = {}
@@ -672,7 +676,7 @@ local function getSetDropMechanicInfo(setData)
         local dropMechanicNameOfZone = l_getDropMechanicName(p_idx, p_dropMechanicIdOfZone)
         if dropMechanicNameOfZone ~= nil then
 --d(">>dropMechanicNameOfZone: " ..tos(dropMechanicNameOfZone))
-            if tooltipTextures == true then
+            if tooltipTextures == true or buildTextures == true then
                 local dropMechanicTexture = getDropMechanicTexture(p_dropMechanicIdOfZone)
                 if dropMechanicTexture ~= nil then
 --d(">>>texture: " ..tos(dropMechanicTexture))
@@ -767,7 +771,7 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
     local setDropMechanicText  =      buildTextLinesFromTable(dropMechanicNames, nil, false, false)
     local setDropMechanicTextClean =  buildTextLinesFromTable(dropMechanicNamesClean, nil, false, false)
 
-    local setDropLocationsText, isVeteranMonsterSet = getDungeonDifficultyStr(setData, itemLink)
+    local setDropLocationsText, isVeteranMonsterSet = getDungeonDifficultyStr(setData, itemLink, not forTooltip)
     local setDropLocationsTextClean = setDropLocationsText
     local setDropOverallTextsPerZone = {}
     local setDropOverallTextsPerZoneClean = {}
@@ -1018,11 +1022,10 @@ local function buildSetDLCInfo(setData)
     return dlcName
 end
 
-local function buildReconstructionCostInfo(setData, itemLink)
-    local lreconstructionCostsText
+local function buildReconstructionCostInfo(setData, itemLink, buildTextures)
     local setId = setData.setId
     if not setId or not itemLink then return end
-    local lreconstructionCost, lreconstructionCostClean = getSetReconstructionCost(itemLink, setId)
+    local lreconstructionCost, lreconstructionCostClean = getSetReconstructionCost(itemLink, setId, buildTextures)
     return lreconstructionCost, lreconstructionCostClean
 end
 
@@ -1172,12 +1175,12 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     --Reconstruction
     local isReconstructableSet = isilscp(itemLink)
     if isReconstructableSet == true and (not forTooltip or ((useCustomTooltip and setReconstructionCostPlaceholder) or (not useCustomTooltip and addReconstructionCost))) then
-        reconstructionCostText, reconstructionCostTextClean = buildReconstructionCostInfo(setData, itemLink)
+        reconstructionCostText, reconstructionCostTextClean = buildReconstructionCostInfo(setData, itemLink, not forTooltip)
     end
 
     --Set Type
     if not forTooltip or ((useCustomTooltip and setTypePlaceholder) or (not useCustomTooltip and addSetType)) then
-        setTypeText, setTypeTexture = buildSetTypeInfo(setData)
+        setTypeText, setTypeTexture = buildSetTypeInfo(setData, not forTooltip)
         setTypeTextClean = setTypeText
         --d(">setTypeText: " ..tos(setTypeText))
     end
@@ -1200,11 +1203,11 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     --Drop mechanics
     local runDropMechanic = not forTooltip or ((useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
             or (not useCustomTooltip and (addDropMechanic or addBossName or addDropLocation)))
-    if runDropMechanic then
+    if runDropMechanic == true then
         --dropZoneNames, dropMechanicNames, dropLocationNames
-        getSetDropMechanicInfo(setData)
+        getSetDropMechanicInfo(setData, not forTooltip)
 
-        if useCustomTooltip then
+        if useCustomTooltip == true then
             --All zoneNames are the same = Condense them to 1, else keep them as same dropZones could have diffeferent dropMechanics and dropLocations and the order needs to be kept!
             local dropZoneNamesNew = condenseTable(dropZoneNames)
             dropZoneNames = dropZoneNamesNew
@@ -1258,7 +1261,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             --d(">1")
         else
             setTypeTextClean = setTypeText
-            if tooltipTextures == true and setTypeTexture ~= nil and setTypeTexture ~= "" then
+            if (tooltipTextures == true or not forTooltip) and setTypeTexture ~= nil and setTypeTexture ~= "" then
                 setTypeText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
             end
         end
@@ -1323,7 +1326,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     else
         --Use default output tooltip:
         if not forTooltip or addSetType then
-            if tooltipTextures == true then
+            if tooltipTextures == true or not forTooltip then
                 setInfoText = zoitf(setTypeTexture, 24, 24, setTypeText, nil)
                 setInfoTextNoTextures = setTypeText
             else

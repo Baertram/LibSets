@@ -115,11 +115,18 @@ local function setMenuItemCheckboxState(checkboxIndex, newState)
 end
 
 -- called from clicking the "Auto reload" label
-local function OnClick_CheckBoxLabel(self, currentStateVar)
+local function OnClick_CheckBoxLabel(cbControl, currentStateVar, selfVar)
     if lib.svData[currentStateVar] == nil then return end
     local currentState = lib.svData[currentStateVar]
     local newState = not currentState
     lib.svData[currentStateVar] = newState
+
+    --Shall the setNames be shown with/without english names? Update the list now by refreshing it and building the master list etc. new
+    if selfVar ~= nil then
+        if currentStateVar == "setSearchShowSetNamesInEnglishToo" then
+            selfVar.resultsList:RefreshData()
+        end
+    end
 end
 
 local function isItemFilterTypeMatching(item, filterType)
@@ -980,7 +987,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 local textParams = {
                     titleParams = { [1] = setName }
                 }
-                copyDialog:Show({ text=withTextures and data.setDataText or data.setDataTextClean, setData=data }, textParams)
+                copyDialog:Show({ text=(withTextures == true and data.setDataText) or data.setDataTextClean, setData=data }, textParams)
             end
 
             AddCustomMenuItem(getLocalizedText("droppedBy"), function() end, MENU_ADD_OPTION_HEADER)
@@ -997,20 +1004,31 @@ end
 
 function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     if not LibCustomMenu then return end
+    local selfVar = self
     ClearMenu()
     AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
-    local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem("Dropdown filter tooltips",
+    local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterTooltips"),
             function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters")
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters", selfVar)
             end,
             MENU_ADD_OPTION_CHECKBOX)
     setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
-    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomMenuItem("Dropdown filter entry tooltips",
+    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterEntryTooltips"),
             function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilterEntries")
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilterEntries", selfVar)
             end,
             MENU_ADD_OPTION_CHECKBOX)
     setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
+
+    if clientLang ~= "en" then
+        AddCustomMenuItem("-", function() end)
+        local cbShowSetNamesInEnglishTooIndex = AddCustomMenuItem(getLocalizedText("searchUIShowSetNameInEnglishToo"),
+                function(cboxCtrl)
+                    OnClick_CheckBoxLabel(cboxCtrl, "setSearchShowSetNamesInEnglishToo", selfVar)
+                end,
+                MENU_ADD_OPTION_CHECKBOX)
+        setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
+    end
 
     if not ZO_IsTableEmpty(lib.svData.setSearchFavorites) then
         AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)

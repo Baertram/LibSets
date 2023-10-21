@@ -8,11 +8,14 @@ local tins = table.insert
 local tcon = table.concat
 local zif = zo_iconFormat
 
+local clientLang = lib.clientLang
+local fallbackLang = lib.fallbackLang
+local isClientLangEqualToFallbackLang = clientLang == fallbackLang
+
 --The search UI table
 local searchUI = lib.SearchUI
 local searchUIName = searchUI.name
 local favoriteIconText = searchUI.favoriteIconText
-
 
 
 --Library's local helpers
@@ -183,17 +186,27 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     ZO_SortFilterList.SetupRow(self, control, data)
 end
 
-
 --Create a row at the resultslist, and respect the search filters (multiselect dropdowns of armor, weapon, equipment type,
 --enchantment, etc.)
 function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local parentObject = self._parentObject -- Get the SearchUI object
+    --SavedVariables check
+    local sv = lib.svData
+    local setSearchShowSetNamesInEnglishToo = sv.setSearchShowSetNamesInEnglishToo
 
     local itemId
 
     --The name column
-    local nameColumnValueClean = setData.setNames[lib.clientLang] or setData.setNames[lib.fallbackLang]
-    local nameColumnValue = nameColumnValueClean
+    local nameColumnValue, nameColumnValueClean
+    if not isClientLangEqualToFallbackLang then
+        nameColumnValueClean = setData.setNames[clientLang] or setData.setNames[fallbackLang]
+    else
+        nameColumnValueClean = setData.setNames[clientLang]
+    end
+    if setSearchShowSetNamesInEnglishToo == true and clientLang ~= "en" then
+        nameColumnValueClean = nameColumnValueClean .. " / " .. setData.setNames["en"]
+    end
+    nameColumnValue = nameColumnValueClean
 
     --Favorite
     local isFavorite = parentObject:IsSetIdInFavorites(setId)
