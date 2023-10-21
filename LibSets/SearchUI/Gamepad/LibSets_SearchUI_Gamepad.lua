@@ -1,6 +1,6 @@
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
---local libPrefix = "["..MAJOR.."]"
+local libPrefix = lib.prefix
 
 --The search UI table
 local searchUI = LibSets.SearchUI

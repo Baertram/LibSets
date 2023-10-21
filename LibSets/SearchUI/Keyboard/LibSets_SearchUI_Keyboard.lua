@@ -1,6 +1,6 @@
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
-local libPrefix = "["..MAJOR.."]"
+local libPrefix = lib.prefix
 
 local zoitf = zo_iconTextFormat
 local getLocalizedText = lib.GetLocalizedText
@@ -39,8 +39,15 @@ local function addToIndexTable(t)
     return retTab
 end
 
-local function refreshSearchFilters(selfVar)
-    selfVar.resultsList:RefreshFilters()
+--Called from editbox filters -> OnTextChanged
+local function refreshSearchFilters(selfVar, editBoxControl)
+    --This would only refresh the currently prefiltered MasterList. But what if we changed any dropdown filter too?
+    -->So changed to the StartSearch() function here now to properly update the last searchParams etc.
+    --selfVar.resultsList:RefreshFilters()
+    --Update the searchParams with the editbox text
+    selfVar:OnFilterChanged(nil, editBoxControl)
+    --Start the search now
+    selfVar:StartSearch(nil, false)
 end
 
 local function onFilterDropdownEntryMouseEnterCallback(comboBox, entry)
@@ -97,7 +104,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.searchEditBoxControl:SetHandler("OnMouseExit", function() ClearTooltip(InformationTooltip)  end)
     --ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
     self.searchEditBoxControl:SetHandler("OnTextChanged", function()
-        selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar)
+        selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar, selfVar.searchEditBoxControl)
     end)
     self.searchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
         --d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp")
@@ -115,7 +122,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.bonusSearchEditBoxControl:SetHandler("OnMouseExit", function() ClearTooltip(InformationTooltip)  end)
     --ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
     self.bonusSearchEditBoxControl:SetHandler("OnTextChanged", function()
-        selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar)
+        selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar, selfVar.bonusSearchEditBoxControl)
     end)
     self.bonusSearchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
         --d("[LibSets]LibSets_SearchUI_Keyboard - bonusSearchEditBoxControl - OnMouseUp")
@@ -244,13 +251,17 @@ function LibSets_SearchUI_Keyboard:ResetUI()
     LibSets_SearchUI_Shared.ResetUI()
 
     --Reset all UI elements to the default values
+    --EditBoxes
     for _, editBoxControl in ipairs(self.editBoxFilters) do
         editBoxControl:SetText("")
     end
-
+    --Multiselect dropdowns
     for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do
         self:ResetMultiSelectDropdown(dropdownControl)
     end
+
+    --Reset the buttons
+    self:UpdateSearchButtonEnabledState(false)
 end
 
 function LibSets_SearchUI_Keyboard:ApplySearchParamsToUI()
@@ -272,10 +283,9 @@ function LibSets_SearchUI_Keyboard:ApplySearchParamsToUI()
     for _, editBoxControl in ipairs(self.editBoxFilters) do
         local entryToSetText = searchParams[self.editBoxFilterToSearchParamName[editBoxControl]]
         if entryToSetText ~= nil then
-            editBoxControl:SetText(entryToSetText)
+            editBoxControl:SetText(entryToSetText) --this will start the search as OnTextChanged of the editBox will be called!
         end
     end
-
 end
 
 ------------------------------------------------
@@ -287,13 +297,20 @@ function LibSets_SearchUI_Keyboard:GetSetNameSearchString(tableOrString)
 end
 ]]
 
-function LibSets_SearchUI_Keyboard:StartSearch(doNotShowUI)
-    local searchWasValid = LibSets_SearchUI_Shared.StartSearch(self, doNotShowUI)
+function LibSets_SearchUI_Keyboard:ValidateSearchParams()
+    local searchWasValid = LibSets_SearchUI_Shared.ValidateSearchParams(self)
+    if searchWasValid == nil then
+        searchWasValid = true
+    end
+    return searchWasValid
+end
 
+function LibSets_SearchUI_Keyboard:StartSearch(doNotShowUI, wasReset)
+    local searchWasValid = LibSets_SearchUI_Shared.StartSearch(self, doNotShowUI, wasReset)
     --Show error?
     if not searchWasValid then
-        --todo Show error message
-        d(libPrefix .. "Search parameters were not valid!")
+        --Show error message
+        d(libPrefix .. "-StartSearch: Search parameters were not valid!")
     end
     return searchWasValid
 end
@@ -302,7 +319,6 @@ end
 ------------------------------------------------
 --- Filters
 ------------------------------------------------
---local SORT_BY_FILTERTYPE =          { ["filterType"]    = {} }
 local SORT_BY_FILTERTYPE_NUMERIC =  { ["filterType"]    = { isNumeric = true } }
 local SORT_BY_NAMECLEAN =           { ["nameClean"]     = {} }
 local function sortFilterComboBox(setTypeDropdown, sortType)
@@ -322,6 +338,9 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     local function OnFilterChanged(dropdownControl)
         self:OnFilterChanged(dropdownControl)
     end
+
+    --Initialize the search button: Disabled (until any filter get's changed)
+    self:UpdateSearchButtonEnabledState(false)
 
     -- Initialize the Set Types multiselect combobox.
     local setTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.setTypeFiltersControl)
@@ -775,30 +794,68 @@ end
 
 
 --Will be called as the multiselect dropdown boxes got closed again (and entries might have changed)
-function LibSets_SearchUI_Keyboard:OnFilterChanged(dropdownControl)
-d("[LibSets_SearchUI_Keyboard]OnFilterChanged - MultiSelect dropdown - hidden")
+function LibSets_SearchUI_Keyboard:OnFilterChanged(dropdownControl, editControl)
+    d("[LibSets_SearchUI_Keyboard]OnFilterChanged - MultiSelect dropdown - hidden")
     LibSets_SearchUI_Shared.OnFilterChanged(self, dropdownControl)
+    local didAnyFilterChange = false
 
-    if dropdownControl == nil then
-        local searchParams = {}
+    local searchParams = {}
+    if editControl == nil then
+        if dropdownControl == nil then
+            --Multiselect dropdown boxes
+            for _, lDropdownControl in ipairs(self.multiSelectFilterDropdowns) do
+                local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(lDropdownControl)
+                if selectedEntries ~= nil then
+                    if ZO_IsTableEmpty(selectedEntries) then
+                        selectedEntries = nil --make it nil so the searchParams can be totally empty -> For self:DidAnyFilterChange() check
+                    end
+                    searchParams[self.multiSelectFilterDropdownToSearchParamName[lDropdownControl]] = selectedEntries
 
-        --Multiselect dropdown boxes
-        for _, lDropdownControl in ipairs(self.multiSelectFilterDropdowns) do
-            local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(lDropdownControl)
-            if not ZO_IsTableEmpty(selectedEntries) then
-                searchParams[self.multiSelectFilterDropdownToSearchParamName[lDropdownControl]] = selectedEntries
+                    didAnyFilterChange = true
+                end
+            end
+        else
+            --Single dropdown filters did change
+            local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(dropdownControl)
+            if selectedEntries ~= nil then
+                if ZO_IsTableEmpty(selectedEntries) then
+                    selectedEntries = nil --make it nil so the searchParams can be totally empty -> For self:DidAnyFilterChange() check
+                end
+                self.searchParams[self.multiSelectFilterDropdownToSearchParamName[dropdownControl]] = selectedEntries
+
+                didAnyFilterChange = true
             end
         end
+    end
 
-        --Editboxes
-        -->Will be handled at OnTextChanged handler directly at the editboxes
+    --Editboxes
+    if dropdownControl == nil then
+        if editControl == nil then
+            for _, editBoxControl in ipairs(self.editBoxFilters) do
+                searchParams[self.editBoxFilterToSearchParamName[editBoxControl]] = editBoxControl:GetText()
 
-        self.searchParams = searchParams
-    else
-        --Single dropdown filters did change
-        local selectedEntries = self:GetSelectedMultiSelectDropdownFilters(dropdownControl)
-        local searchParamKeyByDropdownCtrl = self.multiSelectFilterDropdownToSearchParamName[dropdownControl]
-        self.searchParams[searchParamKeyByDropdownCtrl] = selectedEntries
+                didAnyFilterChange = true
+            end
+
+        else
+            self.searchParams[self.editBoxFilterToSearchParamName[editControl]] = editControl:GetText()
+
+            didAnyFilterChange = true
+        end
+    end
+
+
+    lib._debugSearchUIKeyboardSelf = self
+
+    --Enable the search button again now?
+    if didAnyFilterChange == true then
+        if dropdownControl == nil and editControl == nil then
+            self.searchParams = searchParams
+        end
+
+        --Check if the search params changed compared to last search params
+        local isSearchButtonEnabled = self:DidAnyFilterChange()
+        self:UpdateSearchButtonEnabledState(isSearchButtonEnabled)
     end
 end
 

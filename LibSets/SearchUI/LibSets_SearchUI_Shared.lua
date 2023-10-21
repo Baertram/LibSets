@@ -3,9 +3,14 @@ local EM = EVENT_MANAGER
 
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
-local libPrefix = "["..MAJOR.."]"
+local libPrefix = lib.prefix
 
 local zif = zo_iconFormat
+local zoitfns = zo_iconTextFormatNoSpace
+local tos = tostring
+local sgmatch = string.gmatch
+local tins = table.insert
+local tcon = table.concat
 
 
 local clientLang = lib.clientLang
@@ -36,6 +41,7 @@ local searchUIName = searchUI.name
 searchUI.favoriteIcon = favoriteIcon
 searchUI.favoriteIconText = zif(favoriteIcon, 24, 24)
 local favoriteIconText = searchUI.favoriteIconText
+local favoriteIconWithNameText = zoitfns(favoriteIcon, 24, 24, GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
 local settingsIconText = zif("esoui/art/chatwindow/chat_options_up.dds", 32, 32)
 
 --Maximum number of set bonuses
@@ -47,13 +53,16 @@ searchUI.searchTypeDefault = 1
 --Scroll list datatype - Default text
 searchUI.scrollListDataTypeDefault = 1
 
+--The copy text dialog
+local copyDialog
+
 
 --Helper functions
 local function string_split (inputstr, sep)
     sep = sep or "%s"
     local t={}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-        table.insert(t, str)
+    for str in sgmatch(inputstr, "([^"..sep.."]+)") do
+        tins(t, str)
     end
     return t
 end
@@ -112,6 +121,10 @@ local function OnClick_CheckBoxLabel(self, currentStateVar)
     lib.svData[currentStateVar] = newState
 end
 
+local function isItemFilterTypeMatching(item, filterType)
+    return item.filterType ~= nil and item.filterType == filterType
+end
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
@@ -130,6 +143,7 @@ function LibSets_SearchUI_Shared:Initialize(control)
     local content = self.control:GetNamedChild("Content")
     self.contentControl = content
 
+    self.lastSearchParams = nil --the last used searchParams
     self.searchParams = nil
     --searchParams is a table with the following possible entries
     -->See function LibSets_SearchUI_Shared:OnFilterChanged()
@@ -149,8 +163,6 @@ function LibSets_SearchUI_Shared:Initialize(control)
         numBonuses = { {[1]=true, [2]=true, [3]=true}                   --The number of bonuses selected at the multiselect dropdown box
     }
     ]]
-
-    self.searchResults = nil --table with found setIds, and below the data table with the names and itemIds etc. (from table LibSets.setInfo). Basically this is the masterList of the ZO_SortFilterScollList
 
     --self.searchDoneCallback = nil --callback function called as a search was done
     --self.searchErrorCallback = nil --callback function called as a search was not done due to any error
@@ -180,16 +192,15 @@ end
 --- Reset
 ------------------------------------------------
 function LibSets_SearchUI_Shared:ResetInternal()
-    --Reset internal data like the search results
+    --Reset internal data like the search parameters
     self.searchParams = nil
-    self.searchResults = nil
 
-    --Reset callbacks (but they won't get applied then anymore as this only happens at te self:Show(...) function,
+    --Reset callbacks (but they won't get applied then anymore as this only happens at the self:Show(...) function,
     --or if manually added via LibSets_SearchUI_Shared:SetSearchCallbacks(searchDoneCallback, searchErrorCallback, searchCanceledCallback)
     --self:SetSearchCallbacks(nil, nil, nil)
 end
 
-function LibSets_SearchUI_Shared:ResetUI()
+function LibSets_SearchUI_Shared:ResetUI() --override
     --Reset all UI elements to the default values
 end
 
@@ -198,7 +209,7 @@ function LibSets_SearchUI_Shared:Reset()
     self:ResetInternal()
     self:ResetUI()
     --Apply the search without any criteria now
-    self:StartSearch()
+    self:StartSearch(nil, true)
 end
 
 function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
@@ -209,10 +220,6 @@ function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
         --Gamepad
         dropdownControl:ClearAllSelections()
     end
-end
-
-local function isItemFilterTypeMatching(item, filterType)
-    return item.filterType ~= nil and item.filterType == filterType
 end
 
 function LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, refreshResultsListAfterwards)
@@ -232,7 +239,7 @@ lib._debugDropDownControl = dropdownControl
 
         if refreshResultsListAfterwards == true then
             self:OnFilterChanged(dropdownControl)
-            self:StartSearch()
+            self:StartSearch(nil, false)
         end
     end
 end
@@ -248,6 +255,7 @@ function LibSets_SearchUI_Shared:ShowUI()
 --d("LibSets_SearchUI_Shared:ShowUI")
     if self:IsShown() then return end
     --Run once at first UI open, so it does not run on each reloadUI!
+    -->Could lag the client for ~2 seconds on initial show of UI
     updateSetsInfoWithDataAndNames(self)
 
     self.control:SetHidden(false)
@@ -288,6 +296,15 @@ function LibSets_SearchUI_Shared:ToggleUI(slashOptions)
 end
 
 
+function LibSets_SearchUI_Shared:UpdateSearchButtonEnabledState(isEnabled)
+d("LibSets_SearchUI_Shared:UpdateSearchButtonEnabledState-isEnabled: " ..tos(isEnabled))
+    if isEnabled == nil then return end
+    local searchButton = self.searchButton
+    if searchButton == nil then return end
+    searchButton:SetEnabled(isEnabled)
+    searchButton:SetMouseEnabled(isEnabled)
+end
+
 
 ------------------------------------------------
 --- Search
@@ -297,12 +314,12 @@ function LibSets_SearchUI_Shared:GetSetNameSearchString(tableOrString)
     local setNameStr
     if type(tableOrString) == "table" then
         if #tableOrString > 0 then
-            setNameStr = table.concat(tableOrString, " ")
+            setNameStr = tcon(tableOrString, " ")
         else
             return
         end
     else
-        setNameStr = tostring(tableOrString)
+        setNameStr = tos(tableOrString)
     end
     return setNameStr
 end
@@ -325,40 +342,52 @@ function LibSets_SearchUI_Shared:Cancel()
     self:HideUI()
 end
 
-function LibSets_SearchUI_Shared:ValidateSearchParams()
---d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
+function LibSets_SearchUI_Shared:ValidateSearchParams()  --override
+d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
     --Validate the search parameters and raise an error message if something does not match
-
-    --todo Other validation needed?
-
-    return true --all search parameters are valid
 end
 
-function LibSets_SearchUI_Shared:StartSearch()
---d("[LibSets]LibSets_SearchUI_Shared:StartSearch-doNotShowUI: " ..tostring(doNotShowUI))
+function LibSets_SearchUI_Shared:StartSearch(doNotShowUI, wasReset)
+d("[LibSets]LibSets_SearchUI_Shared:StartSearch-doNotShowUI: " ..tos(doNotShowUI) .. ", wasReset: " ..tos(wasReset))
+    wasReset = wasReset or false
     --Fire callback for "Search was started"
-    CM:FireCallbacks(searchUIName .. "_SearchBegin", self)
+    CM:FireCallbacks(searchUIName .. "_SearchBegin", self, doNotShowUI, wasReset)
 
+    --Validate the search parameters
     if self:ValidateSearchParams() == true then
+        --Save the last used search params for later comparison/same search
+        -->If we did not reset the search
+        if not wasReset then
+            self.lastSearchParams = ZO_ShallowTableCopy(self.searchParams)
+        else
+            --Nil the last search params so next changes at any filter cannot "accidently get the same" and disable the search button later
+            self.lastSearchParams = nil
+        end
+
+        --Set the search button's enabled state to false so no "same" search can be done
+        self:UpdateSearchButtonEnabledState(false)
+
+        --Update the results list now
         if self.resultsList ~= nil then
             --At "BuildMasterList" the self.searchParams will be pre-filtered, and at FilterScrollList the text search filters will be added
             self.resultsList:RefreshData() --> -- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+            return true
         end
-        return true
     end
     return false
 end
 
---Start the search now. The search results will be accessible in self.searchResults
+--Start the search now
 --If parameter doNotShowUI is true the search will be done without opening the UI
 --You can optionally pass in searchParams which will be used to do the search. If none are specified the UI's searchParams will be used (multiselect dropdowns, editboxes, ...)
 -->See format of searchParams at the Initialize function of this class, above!
 function LibSets_SearchUI_Shared:Search(doNotShowUI, searchParams)
---d("[LibSets]LibSets_SearchUI_Shared:Search")
+d("[LibSets]LibSets_SearchUI_Shared:Search")
     doNotShowUI = doNotShowUI or false
 
     if not doNotShowUI and not self:IsShown() then return end
 
+    --Search parameters were passed in? Take them then
     if searchParams ~= nil then
         self.searchParams = searchParams
     end
@@ -368,14 +397,16 @@ function LibSets_SearchUI_Shared:Search(doNotShowUI, searchParams)
 
     --Start the search now, based on input parameters
     if self:StartSearch(doNotShowUI) == true then
+d(">Search was started")
         --Is a "search was done" callback function registered?
         if self.searchDoneCallback then
-            self.searchDoneCallback(self) --passes in the object so that the callback function got access to self.searchResults table
+            self.searchDoneCallback(self)
         end
     else
+d("<Search NOT started")
         --Is a "search was not done due to any error" callback function registered?
         if self.searchErrorCallback then
-            self.searchErrorCallback(self) --passes in the object so that the callback function got access to self.searchResults table
+            self.searchErrorCallback(self)
         end
     end
 end
@@ -428,17 +459,17 @@ local function searchFilterPrefix(searchInput, searchTab)
 end
 
 function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
---d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tostring(searchInput))
+--d("[LibSets_SearchUI_Shared:CheckForMatch]searchInput: " .. tos(searchInput))
     --Search by name or setId
     local namesOrIdsTab = {}
-    table.insert(namesOrIdsTab, data.name)
-    table.insert(namesOrIdsTab, tostring(data.setId))
+    tins(namesOrIdsTab, data.name)
+    tins(namesOrIdsTab, tos(data.setId))
     return searchFilterPrefix(searchInput, namesOrIdsTab)
 end
 
 
 function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm)
---d("[LibSets_SearchUI_Keyboard.ProcessItemEntry] stringSearch: " ..tostring(stringSearch) .. ", setName: " .. tostring(data.nameLower) .. ", searchTerm: " .. tostring(searchTerm))
+--d("[LibSets_SearchUI_Keyboard.ProcessItemEntry] stringSearch: " ..tos(stringSearch) .. ", setName: " .. tos(data.nameLower) .. ", searchTerm: " .. tos(searchTerm))
 	if zo_plainstrfind(data.nameLower, searchTerm) then
 		return true
 	end
@@ -454,12 +485,89 @@ end
 --- Filters
 ------------------------------------------------
 function LibSets_SearchUI_Shared:OnFilterChanged(dropdownControl)
---d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
+d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     self.searchParams = self.searchParams or {}
+end
+
+function LibSets_SearchUI_Shared:DidAnyFilterChange()
+d("[LibSets_SearchUI_Shared]DidAnyFilterChange")
+    local searchParams = self.searchParams
+    local lastSearchParams = self.lastSearchParams
+    --No search was done yet?
+    if lastSearchParams == nil then
+--d(">no lastSearchParams")
+        if searchParams ~= nil then
+            if ZO_IsTableEmpty(searchParams) then
+--d(">searchParams is empty")
+                return false
+            else
+--d(">searchParams NOT empty")
+                return true
+            end
+        else
+--d(">searchParams NIL")
+            return false
+        end
+    end
+    if lastSearchParams == searchParams then
+--d(">lastSearchParams == searchParams")
+        return false
+    end
+
+    local countLastSearchParams = NonContiguousCount(lastSearchParams)
+    local countSearchParams = NonContiguousCount(searchParams)
+--d(">Compare lastSearchParams ".. tos(countLastSearchParams) .. " & searchParams " .. tos(countSearchParams))
+
+    --Any entry in the current search params does not match the lastSearchParams
+    --or any key table is missing?
+    local baseTabToSearch = (countSearchParams > countLastSearchParams and searchParams) or lastSearchParams
+    local alternativeTabToSearch = (countSearchParams > countLastSearchParams and lastSearchParams) or searchParams
+
+    for k, v in pairs(baseTabToSearch) do
+        local searchParamEntry = alternativeTabToSearch[k]
+        if searchParamEntry ~= nil then
+            if type(v) == "table" then --and type(lastSearchParamEntry) == "table" then no need to check if lastSearchParams enty is a table too as they got copied from searchParams, so type must be same
+                --The table was emptied: Changed
+                if ZO_IsTableEmpty(v) then
+--d(">table is empty")
+                    return true
+                else
+                    --Table still contains entries, compare them
+                    if NonContiguousCount(v) ~= NonContiguousCount(searchParamEntry) then
+                        --Count of entries changed
+--d(">table count differs")
+                        return true
+                    else
+                        --Count is same, single comparison
+                        for k2, v2 in pairs(v) do
+                            local lastSearchParamEntry2 = searchParamEntry[k2]
+                            --Subtable entry is missing, or differs from current searchParams
+                            if lastSearchParamEntry2 == nil or lastSearchParamEntry2 ~= v2 then
+--d(">2value is nil, or differs: " ..tos(lastSearchParamEntry2))
+                                return true
+                            end
+                        end
+                    end
+                end
+            else
+                --Single value comparison
+                if v ~= searchParamEntry then
+--d(">value differs: " ..tos(v))
+                    return true
+                end
+            end
+        else
+            --Table key was removed: Changed
+--d(">table key was added/removed: " ..tos(k))
+            return true
+        end
+    end
+    return false
 end
 
 --Pre-Filter the masterlist table of e.g. a ZO_SortFilterScrollList
 function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
+d("[LibSets_SearchUI_Shared]PreFilterMasterList")
     if defaultMasterListBase == nil or ZO_IsTableEmpty(defaultMasterListBase) then return end
     --The search parameters of the filters (multiselect dropdowns) were provided?
     -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
@@ -503,7 +611,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     if isFiltered == true then
                         local setDataFavoriteValue = (isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK and true) or nil
                         if setDataFavoriteValue == setSearchFavoritesSV[setId] then
-    --d(">setId is favorite: " ..tostring(setId) .. ", name: " ..tostring(setData.nameClean))
+    --d(">setId is favorite: " ..tos(setId) .. ", name: " ..tos(setData.nameClean))
                             isAllowed = true
                             break
                         end
@@ -782,7 +890,7 @@ end
 
 function LibSets_SearchUI_Shared:ItemLinkToChat(data)
     if data and data.itemLink ~= nil then
-        d(libPrefix .."SetId \'".. tostring(data.setId) .."\': " ..data.itemLink)
+        d(libPrefix .."SetId \'".. tos(data.setId) .."\': " ..data.itemLink)
         StartChatInput(data.itemLink)
     end
 end
@@ -850,7 +958,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     AddCustomSubMenuItem("Popup toooltip", popupTooltipSubmenu)
 
     if setId ~= nil then
-        AddCustomMenuItem(favoriteIconText .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER), function() end, MENU_ADD_OPTION_HEADER)
+        AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
         if self:IsSetIdInFavorites(setId) then
             AddCustomMenuItem(GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE), function()
                 self:RemoveSetIdFromFavorites(rowControl, setId)
@@ -858,6 +966,21 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         else
             AddCustomMenuItem(GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE), function()
                 self:AddSetIdToFavorites(rowControl, setId)
+            end)
+        end
+
+        if data.setDataText ~= nil then
+            AddCustomMenuItem("Drop locations", function() end, MENU_ADD_OPTION_HEADER)
+            AddCustomMenuItem("Show copy text dialog", function()
+                copyDialog = copyDialog or lib.CopyDialog
+                local setName = data.name
+                if data.setTypeTexture ~= nil then
+                    setName = data.setTypeTexture .. " " .. setName
+                end
+                local textParams = {
+                    titleParams = { [1] = setName }
+                }
+                copyDialog:Show({ text=data.setDataText, setData=data }, textParams)
             end)
         end
     end
@@ -882,7 +1005,7 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
 
     if not ZO_IsTableEmpty(lib.svData.setSearchFavorites) then
-        AddCustomMenuItem(favoriteIconText .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER), function() end, MENU_ADD_OPTION_HEADER)
+        AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
         AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
             self:RemoveAllSetFavorites()
         end)
@@ -896,13 +1019,16 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
     local selfVar = self
     if selfVar.multiSelectFilterDropdowns ~= nil and ZO_IsElementInNumericallyIndexedTable(selfVar.multiSelectFilterDropdowns, dropdownControl) then
         ClearMenu()
-        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function() selfVar:ResetMultiSelectDropdown(dropdownControl) end)
+        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
+            selfVar:ResetMultiSelectDropdown(dropdownControl)
+            selfVar:OnFilterChanged(dropdownControl)
+        end)
 
         --Favorite filter muliselect dropdown?
         if dropdownControl == self.favoritesFiltersControl then
             AddCustomMenuItem("-")
             local entriesToSelect = { [1] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK }
-            AddCustomMenuItem(favoriteIconText, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
+            AddCustomMenuItem(favoriteIconWithNameText, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
         end
 
         ShowMenu(dropdownControl)

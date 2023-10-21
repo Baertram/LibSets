@@ -335,8 +335,6 @@
                     </OnMouseExit>
                 </Button>
 
-
-
                 <Button name="$(parent)ButtonSearch" tier="LOW" layer="CONTROLS" level="2">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="7" />
                     <Dimensions x="26" y="26" />

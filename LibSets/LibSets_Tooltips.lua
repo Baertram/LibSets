@@ -5,10 +5,9 @@ if IsLibSetsAlreadyLoaded(false) then return end
 --It should be updated each time the APIversion increases to contain the new/changed data
 local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
+local libPrefix = lib.prefix
 
 local lam
-
-local libPrefix = "["..MAJOR.."]"
 local placeHolder = ": "
 
 --local ZOs variables

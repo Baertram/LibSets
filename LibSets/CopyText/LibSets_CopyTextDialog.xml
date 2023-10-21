@@ -1,0 +1,49 @@
+<GuiXml>
+    <Controls>
+		<TopLevelControl name="LibSetsCopyTextDialog" inherits="ZO_CustomDialogBase">
+			<OnInitialized>
+				LibSets_CopyDialog_OnInitialized(self)
+			</OnInitialized>
+			<OnHide>
+				LibSets.CopyDialog:OnHide()
+			</OnHide>
+			<ResizeToFitPadding width="25" height="25" />
+			<DimensionConstraints minX="800" minY="480" maxX="800" maxY="600" />
+			<Controls>
+				<Button name="$(parent)Close" inherits="ZO_DialogButton">
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)" offsetX="30" offsetY="-20"/>
+					<OnMouseUp>
+						if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
+							LibSets.CopyDialog:Hide()
+						end
+					</OnMouseUp>
+				</Button>
+				<Backdrop name="$(parent)Note" inherits="ZO_EditBackdrop">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-65"/>
+					<Controls>
+						<EditBox name="$(parent)Edit" maxInputCharacters="20000" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
+							<OnEffectivelyShown>
+								self:TakeFocus()
+							</OnEffectivelyShown>
+						</EditBox>
+					</Controls>
+				</Backdrop>
+				<Button name="$(parent)Next" inherits="ZO_DefaultButton" text="SI_LORE_READER_NEXT_PAGE">
+					<DimensionConstraints minX="250" minY="30" maxX="250" maxY="30" />
+					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)" offsetX="-30" offsetY="-20"/>
+					<OnClicked>
+						LibSets.CopyDialog:NextPage()
+					</OnClicked>
+				</Button>
+				<Button name="$(parent)Prev" inherits="ZO_DefaultButton" text="SI_LORE_READER_PREVIOUS_PAGE">
+					<DimensionConstraints minX="250" minY="30" maxX="250" maxY="30" />
+					<Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Next" offsetX="-30" offsetY="0"/>
+					<OnClicked>
+						LibSets.CopyDialog:PreviousPage()
+					</OnClicked>
+				</Button>
+			</Controls>
+		</TopLevelControl>
+    </Controls>
+</GuiXml>

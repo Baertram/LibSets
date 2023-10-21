@@ -1,4 +1,3 @@
-
 --[[
    [LibSets - Debug functions]
 
@@ -86,6 +85,7 @@ if IsLibSetsAlreadyLoaded(false) then return end
 local lib = LibSets
 local MAJOR = lib.name
 local MINOR = lib.version
+
 local LoadSavedVariables = lib.LoadSavedVariables
 
 local EM = EVENT_MANAGER
@@ -138,6 +138,12 @@ local decompressSetIdItemIds = lib.DecompressSetIdItemIds
 local buildItemLink = lib.buildItemLink
 local isSetByItemId = lib.IsSetByItemId
 
+--Reused strings
+local libPrefix = lib.prefix
+local libPrefixWithVersion = "[".. MAJOR .. " v" .. tos(MINOR).."]"
+local storedInSVFileLibSetsInTable = "->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table "
+local pleaseReloadUI = ">Please do a /reloadui to update the file properly!"
+
 -------------------------------------------------------------------------------------------------------------------------------
 -- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
 -- e.g. to get the new wayshrines names and zoneNames
@@ -176,7 +182,7 @@ local function MyCombineNonContiguousTables(dest, ...)
 end
 
 local function GetAllZoneInfo()
-    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetAllZoneInfo, language: " ..tos(clientLang))
+    d(debugOutputStartLine..libPrefixWithVersion .. "GetAllZoneInfo, language: " ..tos(clientLang))
     local maxZoneId = 2000
     local zoneData = {}
     zoneData[clientLang] = {}
@@ -201,7 +207,7 @@ end
 
 --Execute in each map to get wayshrine data
 local function GetWayshrineInfo()
-    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetWayshrineInfo")
+    d(debugOutputStartLine..libPrefixWithVersion .. "GetWayshrineInfo")
     local errorMapNavigateText = " Please open the map and navigate to a zone map first before running this function!"
     local wayshrines = {}
     local currentMapIndex = GetCurrentMapIndex()
@@ -233,7 +239,7 @@ end
 lib.DebugGetWayshrineInfo = GetWayshrineInfo
 
 local function GetWayshrineNames()
-    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetWayshrineNames, language: " ..tos(clientLang))
+    d(debugOutputStartLine..libPrefixWithVersion .. "GetWayshrineNames, language: " ..tos(clientLang))
     local wsNames = {}
     wsNames[clientLang] = {}
     for wsNodeId=1, gnftn(), 1 do
@@ -249,11 +255,11 @@ end
 
 local function GetMapNames(lang)
     lang = lang or clientLang
-    d(debugOutputStartLine.."[".. MAJOR .. " v" .. tos(MINOR).."]GetMapNames, language: " ..tos(lang))
+    d(debugOutputStartLine..libPrefixWithVersion .. "GetMapNames, language: " ..tos(lang))
     local lz = lib.libZone
     if not lz then
         if lang ~= clientLang then
-            d("ERROR: Library LibZone must be loaded to get a zoneName in another language!") return
+            d("ERROR: Library \'LibZone\' must be loaded to get a zoneName in another language!") return
         end
     end
     local zoneIds
@@ -265,9 +271,9 @@ local function GetMapNames(lang)
         elseif lz.givenZoneData then
             zoneIds = lz.givenZoneData
         end
-        if not zoneIds then d("ERROR: Library LibZone givenZoneData is missing!") return end
+        if not zoneIds then d("ERROR: Library \'LibZone\' givenZoneData is missing!") return end
         zoneIdsLocalized = zoneIds[lang]
-        if not zoneIdsLocalized then d("ERROR: Language \"" .. tos(lang) .."\" is not scanned yet in library LibZone") return end
+        if not zoneIdsLocalized then d("ERROR: Language \"" .. tos(lang) .."\" is not scanned yet in library \'LibZone\'") return end
     else
         zoneIdsLocalized = {}
     end
@@ -443,7 +449,7 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
     end
-    d("[" .. MAJOR .. "]Cleared all SavedVariables".. onlyNamesText .." in file \'" .. MAJOR .. ".lua\'.")
+    d(libPrefix .. "Cleared all SavedVariables".. onlyNamesText .." in file \'" .. MAJOR .. ".lua\'.")
     if noReloadInfo == true then return end
     d(">Please do a /reloadui or logout to update the SavedVariables data now!")
 end
@@ -463,7 +469,7 @@ function lib.DebugGetAllZoneInfo()
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] or {}
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA][clientLang] = {}
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA][clientLang] = zoneData[clientLang]
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'".. LIBSETS_TABLEKEY_ZONE_DATA .. "\', language: \'" ..tos(clientLang).."\'")
+        d(storedInSVFileLibSetsInTable .. "\'".. LIBSETS_TABLEKEY_ZONE_DATA .. "\', language: \'" ..tos(clientLang).."\'")
     end
 end
 local debugGetAllZoneInfo = lib.DebugGetAllZoneInfo
@@ -483,7 +489,7 @@ function lib.DebugGetAllMapNames()
         lib.svDebugData[LIBSETS_TABLEKEY_MAPS] = lib.svDebugData[LIBSETS_TABLEKEY_MAPS] or {}
         lib.svDebugData[LIBSETS_TABLEKEY_MAPS][clientLang] = {}
         lib.svDebugData[LIBSETS_TABLEKEY_MAPS][clientLang] = maps
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MAPS.."\', language: \'" ..tos(clientLang).."\'")
+        d(storedInSVFileLibSetsInTable .. "\'"..LIBSETS_TABLEKEY_MAPS.."\', language: \'" ..tos(clientLang).."\'")
     end
 end
 local debugGetAllMapNames = lib.DebugGetAllMapNames
@@ -532,7 +538,7 @@ function lib.DebugGetAllWayshrineInfoOfCurrentMap()
                 for wsNodeId, wsData in pairs(ws) do
                     lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINES][wsNodeId] = wsData
                 end
-                d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINES.."\'")
+                d(storedInSVFileLibSetsInTable .. "\'"..LIBSETS_TABLEKEY_WAYSHRINES.."\'")
             end
         end, delay)
     end
@@ -550,7 +556,7 @@ function lib.DebugGetAllWayshrineNames()
         lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] or {}
         lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][clientLang] = {}
         lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES][clientLang] = wsNames[clientLang]
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_WAYSHRINE_NAMES.."\', language: \'" ..tos(clientLang).."\'")
+        d(storedInSVFileLibSetsInTable .. "\'"..LIBSETS_TABLEKEY_WAYSHRINE_NAMES.."\', language: \'" ..tos(clientLang).."\'")
     end
 end
 local debugGetAllWayshrineNames = lib.DebugGetAllWayshrineNames
@@ -593,7 +599,7 @@ end
 --Compress the itemIds of a set to lower the filesize of LibSets_Data_All.lua, table LIBSETS_TABLEKEY_SETITEMIDS.
 local function compressSetItemIdsNow(setsDataTable, noReloadInfo)
     noReloadInfo = noReloadInfo or false
-    d("[".. MAJOR .. "] Compressing the set itemIds now...")
+    d(libPrefix .. " Compressing the set itemIds now...")
     LoadSavedVariables()
     if setsDataTable == nil then setsDataTable = lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] end
     if not setsDataTable then
@@ -612,9 +618,9 @@ local function compressSetItemIdsNow(setsDataTable, noReloadInfo)
         lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = {}
         lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId] = compressSetItemIdTable(helperTabNoGapIndex)
     end
-    d(">>> [" .. MAJOR .. "] Compression of set itemIds has finished and saved to SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED .. "\'")
+    d(">>> " .. libPrefix .. " Compression of set itemIds has finished and was saved to SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED .. "\'")
     if noReloadInfo == true then return end
-    d(">Please do a /reloadui to update the file properly!")
+    d(pleaseReloadUI)
 end
 lib.DebugCompressSetItemIdsNow = compressSetItemIdsNow
 
@@ -628,7 +634,7 @@ lib.DebugCompressSetItemIdsNow = compressSetItemIdsNow
 --(and there were found new sets which are not already in the table LibSets_Data.lua->LibSets.setItemIds), then the new setIds
 --will be added here and dumped to the SavedVariables as well!
 function lib.DebugGetAllSetNames(noReloadInfo)
-    d(debugOutputStartLine.."[".. MAJOR .. "]GetAllSetNames, language: " .. tos(clientLang))
+    d(debugOutputStartLine..libPrefix .. "GetAllSetNames, language: " .. tos(clientLang))
     noReloadInfo = noReloadInfo or false
     --Use the SavedVariables to get the setNames of the current client language
     local svLoadedAlready = false
@@ -728,9 +734,9 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                 d("--->new setId: " ..tos(setIdNewFound) .. ", name: " .. tos(setNameOfNewSet))
             end
         end
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tos(clientLang).."\'")
+        d(storedInSVFileLibSetsInTable .. "\'" .. LIBSETS_TABLEKEY_SETNAMES .. "\', language: \'" ..tos(clientLang).."\'")
         if noReloadInfo == true then return end
-        d(">Please do a /reloadui to update the file properly!")
+        d(pleaseReloadUI)
     end
 end
 local debugGetAllSetNames = lib.DebugGetAllSetNames
@@ -764,7 +770,7 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
     --No more itemIds to scan as we did not find any new setIds since 5 packages? Finish then!
     if not finished and noFurtherItemsFound == true then finished = true end
 
-    d(debugOutputStartLine .."[" .. MAJOR .."]Scanned package \'" .. tos(packageNr) .."\' - itemIds: " .. tos(itemIdsScanned))
+    d(debugOutputStartLine ..libPrefix .. "Scanned package \'" .. tos(packageNr) .."\' - itemIds: " .. tos(itemIdsScanned))
     d("-> Sets found: "..tos(setCount))
     d("-> Set items found: "..tos(itemCount))
     df("-->Armor: %s / Jewelry: %s / Weapons: %s", tos(itemArmorCount), tos(itemJewelryCount), tos(itemWeaponsCount))
@@ -777,7 +783,7 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
         if not keepUncompressedetItemIds then
             temporarilyText = " temporarily"
         end
-        d(">>> [" .. MAJOR .. "] Scanning of sets has finished! SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS .. "\' was"..temporarilyText.." written! <<<")
+        d(">>> " .. libPrefix .. " Scanning of sets has finished! SavedVariables file \'" .. MAJOR .. ".lua\' table \'" .. LIBSETS_TABLEKEY_SETITEMIDS .. "\' was"..temporarilyText.." written! <<<")
         --Save the data to the SavedVariables now
         if setCount > 0 then
             --Check how many new setId were found
@@ -975,7 +981,7 @@ local function scanAllSetData(keepUncompressedetItemIds, noReloadInfo)
     if not numItemIdPackages or numItemIdPackages == 0 or not numItemIdPackageSize or numItemIdPackageSize == 0 then return end
     local itemIdsToScanTotal = numItemIdPackages * numItemIdPackageSize
     d(debugOutputStartLine)
-    d("[" .. MAJOR .."]Start to load all set data. This could take a few minutes to finish!\nWatch the chat output for further information.")
+    d(libPrefix .. "Start to load all set data. This could take a few minutes to finish!\nWatch the chat output for further information.")
     d(">Scanning " ..tos(numItemIdPackages) .. " packages with each " .. tos(numItemIdPackageSize) .. " itemIds (total: " .. tos(itemIdsToScanTotal) ..") now...")
 
     --Clear all set data
@@ -1111,7 +1117,7 @@ end
 local preventEndlessCallDungeonFinderData = false
 function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
     noReloadInfo = noReloadInfo or false
-    d("[" .. MAJOR .."]Start to load all dungeon data from the keyboard dungeon finder...")
+    d(libPrefix .. "Start to load all dungeon data from the keyboard dungeon finder...")
     dungeonFinderIndex = dungeonFinderIndex or 3
     local dungeonFinder = DUNGEON_FINDER_KEYBOARD
     retTableDungeons = nil
@@ -1155,7 +1161,7 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
         lib.svDebugData[LIBSETS_TABLEKEY_DUNGEONFINDER_DATA] = retTableDungeons
         d("->Stored " .. tos(dungeonsAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_DUNGEONFINDER_DATA .. "\', language: \'" ..tos(clientLang).."\'")
         if noReloadInfo == true then return end
-        d(">Please do a /reloadui to update the file properly!")
+        d(pleaseReloadUI)
     else
         local noDataFoundText = "<No dungeon data was found!"
         if preventEndlessCallDungeonFinderData == true and openDungeonFinderNow == true then
@@ -1199,7 +1205,7 @@ function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId, n
     collectibleEndId = collectibleEndId or 10000
     noReloadInfo = noReloadInfo or false
     if collectibleEndId < collectibleStartId then collectibleEndId = collectibleStartId end
-    d("[" .. MAJOR .."]Start to load all collectibles with start ID ".. collectibleStartId .. " to end ID " .. collectibleEndId .. "...")
+    d(libPrefix .. "Start to load all collectibles with start ID ".. collectibleStartId .. " to end ID " .. collectibleEndId .. "...")
     local collectiblesAdded = 0
     local collectibleDataScanned
     for i=collectibleStartId, collectibleEndId, 1 do
@@ -1230,7 +1236,7 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     noReloadInfo = noReloadInfo or false
     local dlcNames = {}
     local collectiblesAdded = 0
-    d("[" .. MAJOR .."]Start to load all DLC collectibles")
+    d(libPrefix .. "Start to load all DLC collectibles")
     --DLCs
     --[[
     WRONG as of ZOs_DanBatson because GetCollectibleCategoryInfo needs a opLevelIndex and not a collectible category type id!)
@@ -1293,7 +1299,7 @@ local debugGetAllCollectibleDLCNames = lib.DebugGetAllCollectibleDLCNames
 --->Or there are no new setIds since the last time you updated this table.
 function lib.DebugShowNewSetIds(noChatOutput)
     noChatOutput = noChatOutput or false
-    if not noChatOutput then d("[" .. MAJOR .."]DebugShowNewSetIds - Checking for new setIds...") end
+    if not noChatOutput then d(libPrefix .. "DebugShowNewSetIds - Checking for new setIds...") end
 
     --Is the local table still filled? Else: Fill it up again, either from SavedVariables of the current server and API version,
     --or by comparing setItemIds etc.
@@ -1406,7 +1412,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
     end
 
     d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    d("[" .. MAJOR .. "]>>>DebugGetAllData START for API \'" ..  tos(apiVersion) .. "\' - newRun: " .. tos(newRun) .. ", resetApiData: " ..tos(resetApiData) .. ", noItemIds: " ..tos(noItemIds))
+    d(libPrefix .. ">>>DebugGetAllData START for API \'" ..  tos(apiVersion) .. "\' - newRun: " .. tos(newRun) .. ", resetApiData: " ..tos(resetApiData) .. ", noItemIds: " ..tos(noItemIds))
     if not alreadyFinished then
         if newRun == true then
             debugResetSavedVariables(true, onlyNames)
@@ -1457,7 +1463,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
             --Call the language check and switch via reloadui delayed by 500ms
             delay = delay + 500
             zo_callLater(function()
-                d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
+                d(libPrefix .. "<<<DebugGetAllData END - lang: " .. tos(clientLang))
                 d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
                 --Get the language to scan as next one, if not all were scanned already
@@ -1492,7 +1498,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
                 else
                     local origClientLang = lib.svDebugData.DebugGetAllData[apiVersion].clientLang
                     origClientLang = origClientLang or "en"
-                    d("[" .. MAJOR .. "]DebugGetAllData was finished! Resetting to your original language again: " .. tos(origClientLang))
+                    d(libPrefix .. "DebugGetAllData was finished! Resetting to your original language again: " .. tos(origClientLang))
                     --All languages were scanned already. Switch back to original client language, or "en" as fallback
                     lib.svDebugData.DebugGetAllData[apiVersion].running = false
                     lib.svDebugData.DebugGetAllData[apiVersion].finished = true
@@ -1508,7 +1514,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
         lib.svDebugData.DebugGetAllData[apiVersion].LastErrorDateTime = os.date("%c")
         lib.svDebugData.DebugGetAllData[apiVersion].LastError = errorText
         d(errorText)
-        d("[" .. MAJOR .. "]<<<DebugGetAllData END - lang: " .. tos(clientLang))
+        d(libPrefix .. "<<<DebugGetAllData END - lang: " .. tos(clientLang))
         d("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     end
 end
@@ -1543,7 +1549,7 @@ local otherLangSetNames={
 --   Now all new/ changed entries should be in there, old ones + the ones from table "otherLangSetNames" above!
 --11. Delete the contents of table "otherLangSetNames" above in this file "LibSets_Debug.lua" again
 function lib.debugBuildMixedSetNames()
-    d("[" .. MAJOR .."]Start to combine entries from table \'otherLangSetNames\' in file \'LibSets_Debug.lua\' into table \'LibSets.setDataPreloaded["..LIBSETS_TABLEKEY_SETNAMES.."]\'")
+    d(libPrefix .. "Start to combine entries from table \'otherLangSetNames\' in file \'LibSets_Debug.lua\' into table \'LibSets.setDataPreloaded["..LIBSETS_TABLEKEY_SETNAMES.."]\'")
     --SavedVariables table key: LIBSETS_TABLEKEY_MIXED_SETNAMES
     if not otherLangSetNames then return end
     if not lib.setDataPreloaded then return end
@@ -1591,7 +1597,7 @@ function lib.debugBuildMixedSetNames()
         --Reset the combined setNames table in the SavedVariables
         lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = {}
         lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = copyOfPreloadedSetNames
-        d("->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'"..LIBSETS_TABLEKEY_MIXED_SETNAMES.."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
+        d(storedInSVFileLibSetsInTable .. "\'"..LIBSETS_TABLEKEY_MIXED_SETNAMES.."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
     else
         d("<No setIds were updated!")
     end

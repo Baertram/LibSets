@@ -25,6 +25,8 @@ local lib                            = LibSets
 
 ------------------------------------------------------------------------------------------------------------------------
 lib.name                             = MAJOR
+local libPrefix                      = "["..MAJOR.."]"
+lib.prefix = libPrefix
 lib.version                          = MINOR
 lib.svName                           = "LibSets_SV_Data"
 lib.svDebugName                      = "LibSets_SV_DEBUG_Data"
