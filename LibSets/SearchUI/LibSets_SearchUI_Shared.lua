@@ -16,6 +16,7 @@ local tcon = table.concat
 local clientLang = lib.clientLang
 local langAllowedCheck = lib.LangAllowedCheck
 
+local getLocalizedText = lib.GetLocalizedText
 local libSets_GetSetInfo = lib.GetSetInfo
 --local libSets_getDropMechanicAndDropLocationNames = lib.GetDropMechanicAndDropLocationNames
 local libSets_GetDropLocationNamesBySetId = lib.GetDropLocationNamesBySetId
@@ -970,8 +971,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         end
 
         if data.setDataText ~= nil then
-            AddCustomMenuItem("Drop locations", function() end, MENU_ADD_OPTION_HEADER)
-            AddCustomMenuItem("Show copy text dialog", function()
+            local function getSetTextForCopyDialog(withTextures)
                 copyDialog = copyDialog or lib.CopyDialog
                 local setName = data.name
                 if data.setTypeTexture ~= nil then
@@ -980,7 +980,15 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 local textParams = {
                     titleParams = { [1] = setName }
                 }
-                copyDialog:Show({ text=data.setDataText, setData=data }, textParams)
+                copyDialog:Show({ text=withTextures and data.setDataText or data.setDataTextClean, setData=data }, textParams)
+            end
+
+            AddCustomMenuItem(getLocalizedText("droppedBy"), function() end, MENU_ADD_OPTION_HEADER)
+            AddCustomMenuItem(getLocalizedText("showAsText"), function()
+                getSetTextForCopyDialog(false)
+            end)
+            AddCustomMenuItem(getLocalizedText("showAsTextWithIcons"), function()
+                getSetTextForCopyDialog(true)
             end)
         end
     end

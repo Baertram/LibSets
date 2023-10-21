@@ -185,6 +185,18 @@ function LibSets_CopyTextDialog:SetupDialog(control, dialog, data)
     if dialog == nil or data == nil then return end
     local textForEdit = data.text
     if textForEdit ~= nil then
+        --Prefix the editbox text with the set name and ID, as this is missing in the passed in drop locations text
+        local setData = data.setData
+        if setData ~= nil then
+            if setData.nameClean ~= nil then
+                textForEdit = setData.nameClean .. "\n".. textForEdit
+            elseif setData.name ~= nil then
+                textForEdit = setData.name .. "\n".. textForEdit
+            end
+            if setData.setId ~= nil then
+                textForEdit = "[" .. setData.setId .. "]".. textForEdit
+            end
+        end
         self.textContent = textForEdit
     end
 end

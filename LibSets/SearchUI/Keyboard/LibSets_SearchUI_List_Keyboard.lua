@@ -259,7 +259,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
         --Get the drop location(s) of the set via LibSets
         -->The base info for that: DropZones, mechanics and location names are already loaded into setData once -> See function updateSetsInfoWithDropLocationsAndNames in LibSets_SearchUI_Shared.lua -> ShowUI()
     ]]
-    local setDataText, setInfoParts = buildSetDataText(setData, itemLink, false)
+    local setDataText, setInfoParts, setDataTextClean = buildSetDataText(setData, itemLink, false)
     --[[
         Table setInfoParts contains subtables with keys
         "setType"
@@ -373,6 +373,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
 
     --Pass in generated tooltip text
     itemData.setDataText         =              setDataText
+    itemData.setDataTextClean    =              setDataTextClean
     --Pass in generated tooltip parts table
     itemData.setInfoParts        =              setInfoParts
 

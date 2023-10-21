@@ -1218,6 +1218,8 @@ lib.localization                 = {
         nameTextSearchTT = "Gib mehrere Namen/IDs durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Namen/die ID in der Textsuche ein- bzw. auszuschließen.",
         bonusTextSearch = "(+/-)Bonus , getrennt",
         bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.",
+        showAsText =        "Zeige als Text",
+        showAsTextWithIcons = "Zeige als Text (mit Symbolen)",
     },
     ["en"] = {
         de  = "German",
@@ -1290,6 +1292,8 @@ lib.localization                 = {
         nameTextSearchTT = "Enter multiple names/IDs separated by a comma (,).\nUse the + or - prefix to include or exclude a name/ID from the search results.",
         bonusTextSearch = "(+/-)Bonus , separated",
         bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.",
+        showAsText =        "Show as text",
+        showAsTextWithIcons = "Show as text (with icons)",
     },
     ["es"] = {
         de  = "Alemán",
