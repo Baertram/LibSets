@@ -43,23 +43,8 @@
 			<!--<Center file="/esoui/art/upsell/upsell_greymoor_bg.dds" /> -->
         </Backdrop>
 
-
         <!--Virtual Multiselect ComboBoxes - live API 101039: ZO_MultiselectComboBox, PTS API 101040: ZO_ComboBox -->
-		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
-            <OnMouseEnter>
-                LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
-            </OnMouseEnter>
-            <OnMouseExit>
-                ClearTooltip(InformationTooltip)
-            </OnMouseExit>
-            <OnMouseUp>
-                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                    ZO_ComboBox_DropdownClicked(self)
-                else
-                    LibSets_SearchUI_Shared_Dropdown_OnMouseUp(self, button, upInside, shift, alt, ctrl, command)
-                end
-            </OnMouseUp>
-        </Control>
+        <!--   See file LibSets_SearchUI_DropdownTemplate_APIxxxxxx.xml   -->
 
 		<!-- Virtual labels -->
         <Label name="LibSetsSearchUIRowLabel" font="MyFontGame16" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER" virtual="true" />

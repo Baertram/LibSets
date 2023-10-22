@@ -481,7 +481,9 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     enchantmentSearchCategoryTypeDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.enchantSearchCategoryTypeFiltersControl) end)
     local filterTypeText = getLocalizedText("enchantmentSearchCategory")
     self.enchantSearchCategoryTypeFiltersControl.tooltipText = filterTypeText
-    enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    if ZO_ComboBox.EnableMultiSelect ~= nil then
+        enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
+    end
     enchantmentSearchCategoryTypeDropdown:SetSortsItems(true)
 
     for enchantSearchCategoryType, isValid in pairs(lib.enchantSearchCategoryTypesValid) do

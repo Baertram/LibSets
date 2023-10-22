@@ -3105,6 +3105,46 @@ end
 
 
 
+--[[
+[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] = {
+        [638]={parentZoneId=888,isVeteran=false,isTrial=true},   --Aetherian Archive
+        [638]={parentZoneId=888,isVeteran=true,isTrial=true},   --Aetherian Archive, Veteran
+]]
+--Returns a boolean isZoneIdADungeon by the help of a zoneId
+--> Parameters: zoneId number: The zone id given
+--> Returns:    boolean isZoneIdADungeon
+function lib.IsDungeonZoneId(zoneId)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil then return false end
+    if not checkIfSetsAreLoadedProperly() then return end
+    return (preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] ~= nil and true) or false
+end
+
+--Returns a table dungeonZoneData by the help of a zoneId
+--> Parameters: zoneId number: The zone id given
+--> Returns:    table:nilable dungeonZoneData = { parentZoneId=number,isTrial=boolean }
+function lib.GetDungeonZoneData(zoneId)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil then return end
+    if not checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId]
+end
+
+--Returns boolean isZoneIdATrialDungeon. If the zoneId is no dungeon the return value will be nil
+--> Parameters: zoneId number: The zone id given
+--> Returns:    boolean:nilable isZoneIdATrialDungeon
+function lib.IsDungeonZoneIdTrial(zoneId)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
+    if not checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId]["isTrial"]
+end
+
+--Returns a table of zoneIds which are a dungeon
+--> Returns:    dungeonZoneIdData table = { [zoneIdOfDungeon] = parentZoneId=number, isTrial=boolean }
+function lib.GetAllADungeonZoneIdData()
+    if not checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING]
+end
+
+
 --Returns the set data (setType number, setIds table, itemIds table, setNames table) for the specified LibSets setType
 --Parameters: setType number. Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_ConstantsLibraryInternal.lua,
 --            e.g. LIBSETS_SETTYPE_MONSTER

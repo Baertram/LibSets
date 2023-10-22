@@ -203,8 +203,8 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     else
         nameColumnValueClean = setData.setNames[clientLang]
     end
-    if setSearchShowSetNamesInEnglishToo == true and clientLang ~= "en" then
-        nameColumnValueClean = nameColumnValueClean .. " / " .. setData.setNames["en"]
+    if setSearchShowSetNamesInEnglishToo == true and not isClientLangEqualToFallbackLang and setData.setNames[fallbackLang] ~= nil then
+        nameColumnValueClean = nameColumnValueClean .. " / " .. setData.setNames[fallbackLang]
     end
     nameColumnValue = nameColumnValueClean
 
