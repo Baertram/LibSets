@@ -944,7 +944,7 @@ lib.setDataPreloaded = {
         [843]={parentZoneId=117,isTrial=false},   --Ruins of Mazzatun
         [639]={parentZoneId=888,isTrial=true},   --Sanctum Ophidia
         [1010]={parentZoneId=19,isTrial=false},   --Scalecaller Peak
-        [1390]={parentZoneId=103,isTrial=true},   --Scrivener's Hall
+        [1390]={parentZoneId=103,isTrial=false},   --Scrivener's Hall
         [31]={parentZoneId=382,isTrial=false},   --Selene's Web
         [1302]={parentZoneId=20,isTrial=false},   --Shipwright's Regret
         [144]={parentZoneId=3,isTrial=false},   --Spindleclutch I
@@ -965,7 +965,7 @@ lib.setDataPreloaded = {
 
 ------------------------------------------------------------------------------------------------------------------------
     --The preloaded zoneIds of public dungeons, and their parent zoneIds
-    [LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] = {
+    [LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] = {
         [308]={parentZoneId=104, DLCID=DLC_BASE_GAME},   --Lost City of the Na-Totambu
         [486]={parentZoneId=381, DLCID=DLC_BASE_GAME},   --Toothmaul Gully
         [169]={parentZoneId=92, DLCID=DLC_BASE_GAME},   --Razak's Wheel
