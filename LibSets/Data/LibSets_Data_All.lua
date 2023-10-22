@@ -897,7 +897,7 @@ lib.setDataPreloaded = {
 
 
 ------------------------------------------------------------------------------------------------------------------------
-    --The preloaded zoneIds of dungeons, and their parent zoneIds, isVeteran and isTrial booleans
+    --The preloaded zoneIds of dungeons, and their parent zoneIds and isTrial booleans
     [LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] = {
         [638]={parentZoneId=888,isTrial=true},   --Aetherian Archive
         [148]={parentZoneId=117,isTrial=false},   --Arx Corinium
@@ -961,6 +961,43 @@ lib.setDataPreloaded = {
         [146]={parentZoneId=19,isTrial=false},   --Wayrest Sewers I
         [933]={parentZoneId=19,isTrial=false},   --Wayrest Sewers II
         [688]={parentZoneId=584,isTrial=false},   --White-Gold Tower
+    },
+
+------------------------------------------------------------------------------------------------------------------------
+    --The preloaded zoneIds of public dungeons, and their parent zoneIds
+    [LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] = {
+        [308]={parentZoneId=104, DLCID=DLC_BASE_GAME},   --Lost City of the Na-Totambu
+        [486]={parentZoneId=381, DLCID=DLC_BASE_GAME},   --Toothmaul Gully
+        [169]={parentZoneId=92, DLCID=DLC_BASE_GAME},   --Razak's Wheel
+        [557]={parentZoneId=347, DLCID=DLC_BASE_GAME},   --Village of the Lost
+        [306]={parentZoneId=57, DLCID=DLC_BASE_GAME},   --Forgotten Crypts
+        [339]={parentZoneId=101, DLCID=DLC_BASE_GAME},   --Hall of the Dead
+        [284]={parentZoneId=3, DLCID=DLC_BASE_GAME},   --Bad Man's Hallows
+        [124]={parentZoneId=383, DLCID=DLC_BASE_GAME},   --Root Sunder Ruins
+        [137]={parentZoneId=108, DLCID=DLC_BASE_GAME},   --Rulanyil's Fall
+        [138]={parentZoneId=58, DLCID=DLC_BASE_GAME},   --Crimson Cove
+        [487]={parentZoneId=382, DLCID=DLC_BASE_GAME},   --The Vile Manse
+        [162]={parentZoneId=20, DLCID=DLC_BASE_GAME},   --Obsidian Scar
+        [134]={parentZoneId=117, DLCID=DLC_BASE_GAME},   --Sanguine's Demesne
+        [216]={parentZoneId=41, DLCID=DLC_BASE_GAME},   --Crow's Wood
+        [142]={parentZoneId=19, DLCID=DLC_BASE_GAME},   --Bonesnap Ruins
+        [341]={parentZoneId=103, DLCID=DLC_BASE_GAME},   --The Lion's Den
+        [706]={parentZoneId=684, DLCID=DLC_ORSINIUM},   --Old Orsinium
+        [705]={parentZoneId=684, DLCID=DLC_ORSINIUM},   --Rkindaleft
+        [919]={parentZoneId=849, DLCID=DLC_MORROWIND},   --Forgotten Wastes
+        [918]={parentZoneId=849, DLCID=DLC_MORROWIND},   --Nchuleftingth
+        [1090]={parentZoneId=1086, DLCID=DLC_ELSWEYR},   --Orcrest
+        [1089]={parentZoneId=1086, DLCID=DLC_ELSWEYR},   --Rimmen Necropolis
+        [1020]={parentZoneId=1011, DLCID=DLC_SUMMERSET},   --Karnwasten
+        [1021]={parentZoneId=1011, DLCID=DLC_SUMMERSET},   --Sunhold
+        [1186]={parentZoneId=1160, DLCID=DLC_GREYMOOR},   --Labyrinthian
+        [1187]={parentZoneId=1161, DLCID=DLC_GREYMOOR},   --Nchuthnkarst
+        [1260]={parentZoneId=1261, DLCID=DLC_BLACKWOOD},   --The Silent Halls
+        [1259]={parentZoneId=1261, DLCID=DLC_BLACKWOOD},   --Zenithar's Abbey
+        [1338]={parentZoneId=1318, DLCID=DLC_HIGH_ISLE},   --Ghost Haven Bay
+        [1337]={parentZoneId=1318, DLCID=DLC_HIGH_ISLE},   --Spire of the Crimson Coin
+        [1415]={parentZoneId=1414, DLCID=DLC_NECROM},   --Gorne
+        [1416]={parentZoneId=1413, DLCID=DLC_NECROM},   --The Underweave
     },
 
 ------------------------------------------------------------------------------------------------------------------------

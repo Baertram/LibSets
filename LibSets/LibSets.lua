@@ -3138,10 +3138,61 @@ function lib.IsDungeonZoneIdTrial(zoneId)
 end
 
 --Returns a table of zoneIds which are a dungeon
---> Returns:    dungeonZoneIdData table = { [zoneIdOfDungeon] = parentZoneId=number, isTrial=boolean }
-function lib.GetAllADungeonZoneIdData()
+--> Returns:    dungeonZoneIdData table = { [zoneIdOfDungeon] = { parentZoneId=number, isTrial=boolean }, ... }
+function lib.GetAllDungeonZoneIdData()
     if not checkIfSetsAreLoadedProperly() then return end
     return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING]
+end
+
+
+--[[
+[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] = {
+        [638]={parentZoneId=xxx, DLCID=DLC_xxx},   --Public dungeon name
+]]
+--Returns a boolean isZoneIdAPublicDungeon by the help of a zoneId
+--> Parameters: zoneId number: The zone id given
+--> Returns:    boolean isZoneIdAPublicDungeon
+function lib.IsPublicDungeonZoneId(zoneId)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil then return false end
+    if not checkIfSetsAreLoadedProperly() then return end
+    return (preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId] ~= nil and true) or false
+end
+
+--Returns a table publicDungeonZoneData by the help of a zoneId
+--> Parameters: zoneId number: The zone id given
+--> Returns:    table:nilable publicDungeonZoneData = { parentZoneId=number, DLCID=DLC_xxx constant number }
+function lib.GetPublicDungeonZoneData(zoneId)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil then return end
+    if not checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]
+end
+
+--Returns boolean isZoneIdAPublicDungeonOfDLCId. If the zoneId is no public dungeon the return value will be nil
+--> Parameters: zoneId number: The zone id given
+-->             DLCId number constant DLC_xxx
+--> Returns:    boolean:nilable isZoneIdAPublicDungeonOfDLCId
+function lib.IsPublicDungeonZoneIdDLCId(zoneId, DLCId)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
+    if not checkIfSetsAreLoadedProperly() then return end
+    local DLCIdOfZoneId = preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["DLCId"]
+    return (DLCIdOfZoneId ~= nil and DLCIdOfZoneId == DLCId and true) or false
+end
+
+--Returns number constant DLC_xxx DLCId of zoneId. If the zoneId is no public dungeon the return value will be nil
+--> Parameters: zoneId number: The zone id given
+--> Returns:    DLC_xxx:nilable DLCIdOfPublicDungeonZoneId
+function lib.GetPublicDungeonZoneIdDLCId(zoneId)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
+    if not checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["DLCId"]
+end
+
+
+--Returns a table of zoneIds which are a dungeon
+--> Returns:    publicDungeonZoneIdData table = { [zoneIdOfPublicDungeon] = { parentZoneId=number, DLCID=DLC_xxx constant number }, ... }
+function lib.GetAllPublicDungeonZoneIdData()
+    if not checkIfSetsAreLoadedProperly() then return end
+    return preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING]
 end
 
 

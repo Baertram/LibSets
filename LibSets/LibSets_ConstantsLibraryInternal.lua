@@ -204,6 +204,7 @@ LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP              = "setProcsAllowedInPvP"
 LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING     = "setItemCollectionsZoneMapping"
 LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES          = "enchantSearchCategories"
 LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                  = "dungeonZoneMapping"
+LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING            = "publicDungeonZoneMapping"
 
 
 

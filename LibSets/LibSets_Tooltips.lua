@@ -25,7 +25,7 @@ local strgsub = string.gsub
 --local trem = table.remove
 local tsort = table.sort
 local tins = table.insert
-local tconcat = table.concat
+--local tconcat = table.concat
 --local unp = unpack
 local zostrfor = zo_strformat
 --local zocstrfor = ZO_CachedStrFormat
@@ -83,6 +83,7 @@ local zoneNamesProcessed = {}
 local dropMechanicNamesProcessed = {}
 
 local dropZoneNames = {}
+local parentDropZoneNames = {}
 local dropMechanicNames = {}
 local dropMechanicNamesClean = {}
 local dropLocationNames = {}
@@ -99,6 +100,8 @@ local getDropMechanicName =                 lib.GetDropMechanicName
 local lib_buildItemLink = lib.buildItemLink
 local lib_getSetItemId = lib.GetSetItemId
 local lib_getAllSetNames = lib.GetAllSetNames
+local lib_isDungeonZoneId = lib.IsDungeonZoneId
+local lib_isPublicDungeonZoneId = lib.IsPublicDungeonZoneId
 
 local clientLang =      lib.clientLang
 local fallbackLang =    lib.fallbackLang
@@ -641,6 +644,7 @@ end
 local function getSetDropMechanicInfo(setData, buildTextures)
     buildTextures = buildTextures or false
     dropZoneNames = {}
+    parentDropZoneNames = {}
     dropMechanicNames = {}
     dropMechanicNamesClean = {}
     dropLocationNames = {}
@@ -740,6 +744,19 @@ local function getSetDropMechanicInfo(setData, buildTextures)
 --d(">dropZoneIds: " ..tos(#dropZoneIds))
         --Loop the drop zones
         for idx, zoneId in ipairs(dropZoneIds) do
+            --Is the zoneId a dungeon's zoneID? Or is the zoneId a public dungeon zoneID?
+            local isDungeon = lib_isDungeonZoneId(zoneId)
+            local isPublicDungeon = lib_isPublicDungeonZoneId(zoneId)
+            local parentZoneId, parentZoneName
+            if isDungeon == true or isPublicDungeon == true then
+                --todo Get parent zoneId
+                parentZoneId = GetParentZoneId(zoneId)
+                if parentZoneId ~= nil then
+                    parentZoneName = zoneNamesProcessed[parentZoneId] or libSets_GetZoneName(parentZoneId)
+                    parentDropZoneNames[idx] = parentZoneName
+                end
+            end
+
             --Get the zone names
             local zoneName = zoneNamesProcessed[zoneId] or libSets_GetZoneName(zoneId)
 --d(">["..tos(idx).."]name: " ..tos(zoneName) .. ", mechanic: " ..tos(dropMechanicTab[idx]))
@@ -766,7 +783,20 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
     if not dropZoneNames or not dropMechanicNames then return end
     forTooltip = forTooltip or false
     local numDropZoneNames = #dropZoneNames
-    local setDropZoneStr = (numDropZoneNames > 0 and buildTextLinesFromTable(dropZoneNames, nil, false, false)) or ""
+    --Add the parentZoneName (e.g. Glenumbra) to the zoneName (e.g. dungeon name or public dungeon name)
+    local dropZoneNamesAndParentNames = dropZoneNames
+    if parentDropZoneNames ~= nil and not ZO_IsTableEmpty(parentDropZoneNames) then
+        dropZoneNamesAndParentNames = {}
+        for idx, dropZoneName in ipairs(dropZoneNames) do
+            local parentZoneName = parentDropZoneNames[idx]
+            if parentZoneName ~= nil then
+                dropZoneNamesAndParentNames[idx] = parentDropZoneNames .. "[" .. dropZoneName .."]"
+            else
+                dropZoneNamesAndParentNames[idx] = dropZoneName
+            end
+        end
+    end
+    local setDropZoneStr = (numDropZoneNames > 0 and buildTextLinesFromTable(dropZoneNamesAndParentNames, nil, false, false)) or ""
     local setDropZoneStrClean = setDropZoneStr
     local setDropMechanicText  =      buildTextLinesFromTable(dropMechanicNames, nil, false, false)
     local setDropMechanicTextClean =  buildTextLinesFromTable(dropMechanicNamesClean, nil, false, false)
@@ -793,6 +823,7 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
 
     if numDropZoneNames > 0 then
         for idx, dropZoneName in ipairs(dropZoneNames) do
+            local parentZoneName = parentDropZoneNames[idx]
             if not allZonesTheSame then
                 setDropOverallTextPerZone = nil
                 setDropOverallTextPerZoneClean = nil
@@ -806,12 +837,22 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
                 if allZonesTheSame == true then
                     --Only add the zoneName once if all zones are the same
                     if idx == 1 then
+                        if parentZoneName ~= nil then
+                            setDropOverallTextPerZone  = parentZoneName .. "["..dropZoneName.."]"
+                            setDropOverallTextPerZoneClean = parentZoneName .. "["..dropZoneName.."]"
+                        else
+                            setDropOverallTextPerZone  = dropZoneName
+                            setDropOverallTextPerZoneClean = dropZoneName
+                        end
+                    end
+                else
+                    if parentZoneName ~= nil then
+                        setDropOverallTextPerZone  = parentZoneName .. "["..dropZoneName.."]"
+                        setDropOverallTextPerZoneClean = parentZoneName .. "["..dropZoneName.."]"
+                    else
                         setDropOverallTextPerZone  = dropZoneName
                         setDropOverallTextPerZoneClean = dropZoneName
                     end
-                else
-                    setDropOverallTextPerZone  = dropZoneName
-                    setDropOverallTextPerZoneClean = dropZoneName
                 end
             end
             if addDropMechanic or not forTooltip then
