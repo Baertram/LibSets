@@ -9,7 +9,7 @@
 ## Title: LibSets
 ## Description: List of all ingame sets and functions to check what set type they are, set names, itemIds, drop locations, etc.
 ## Author: Baertram
-## APIVersion: 101039 101040
+## APIVersion: 101040 101041
 ## Version: 0.6.2
 ## AddOnVersion: 000602
 ## IsLibrary: true
@@ -35,21 +35,17 @@ LibSets_Constants_All.lua
 ##!!!!!!!!!!!! Update the data from the API version dependent files to this file, if the API version increases, or the old APIversion data will not be loaded anymore !!!!!!!!!!
 Data/LibSets_Data_All.lua
 
-##Data file dependent on the current API version(s): If the file exists, it will be loaded
-##-->Currently disabled!
-##Data/LibSets_Data_$(APIVersion).lua
-
 ##Functions and base library code
 LibSets.lua
 
 ##Tooltip functions
-LibSets_Tooltips.lua
+Tooltips/LibSets_Tooltips.lua
 
 ##Optional: If library LibSlashCommander is loaded: Chat auto completion for set names
-LibSets_AutoCompletion.lua
+AutoComplete/LibSets_AutoCompletion.lua
 
 ##Debug functions
-LibSets_Debug.lua
+Debug/LibSets_Debug.lua
 
 ##XML - Copy text dialog
 CopyText/LibSets_CopyTextDialog.lua
@@ -57,13 +53,11 @@ CopyText/LibSets_CopyTextDialog.xml
 
 ##XML - Search
 SearchUI/LibSets_SearchUI_Shared.lua
-SearchUI/LibSets_SearchUI_DropdownTemplate.xml
-SearchUI/LibSets_SearchUI_DropdownTemplate_API$(APIVersion).xml
-
 SearchUI/LibSets_SearchUI.xml
 ## Keyboard
 SearchUI/Keyboard/LibSets_SearchUI_List_Keyboard.lua
 SearchUI/Keyboard/LibSets_SearchUI_Keyboard.lua
-## Gamepad
-## SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua Non functional/supported as of 20231011
+## Gamepad - Non functional/supported as of 20231011
+## SearchUI/Gamepad/LibSets_SearchUI_List_Gamepad.lua
+## SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua
 
