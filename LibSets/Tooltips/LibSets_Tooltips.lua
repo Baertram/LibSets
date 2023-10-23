@@ -897,11 +897,13 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
                 end
             end
             if addBossName or not forTooltip then
-                if dropMechanicDropLocationName == nil then
-                    --We got a parentZoneName e.g. at a dungeon or public dungeon? We changed the dropZoneName to the parentZoneName above,
-                    --so show the dropZoneName as dropMechanicDropLocationName now
-                    if parentZoneName ~= nil then
+                --We got a parentZoneName e.g. at a dungeon or public dungeon? We changed the dropZoneName to the parentZoneName above,
+                --so show the dropZoneName as dropMechanicDropLocationName now, or add the dropZoneName to the dropMechanicDropLocationName
+                if parentZoneName ~= nil then
+                    if dropMechanicDropLocationName == nil then
                         dropMechanicDropLocationName = dropZoneName
+                    else
+                        dropMechanicDropLocationName = dropZoneName .. ": " .. dropMechanicDropLocationName
                     end
                 end
 
