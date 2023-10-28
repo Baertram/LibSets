@@ -87,7 +87,8 @@ local parentDropZoneNames = {}
 local dropMechanicNames = {}
 local dropMechanicNamesClean = {}
 local dropLocationNames = {}
-
+local dropZoneIdsTheSame = nil
+local dropMechanicTabTheSame = nil
 
 local dropMechanicIdToTexture =             lib.dropMechanicIdToTexture
 local setTypeToTexture =                    lib.setTypeToTexture
@@ -642,7 +643,7 @@ local function buildTextLinesFromTable(tableVar, prefixStr, alwaysNewLine, doSor
     return (prefixStr ~= nil and prefixStr ~= "" and prefixStr .. retStrVar) or retStrVar
 end
 
-
+--Fill the basic data for the tooltip like zones, dropMechanics, zones and mechanic names etc.
 local function getSetDropMechanicInfo(setData, buildTextures)
     buildTextures = buildTextures or false
     dropZoneNames = {}
@@ -651,15 +652,23 @@ local function getSetDropMechanicInfo(setData, buildTextures)
     dropMechanicNamesClean = {}
     dropLocationNames = {}
 
+    dropZoneIdsTheSame = nil
+    dropMechanicTabTheSame = nil
+
+
 --lib._debugSetData = ZO_ShallowTableCopy(setData)
 
-    local dropMechanicTab = setData.dropMechanic
+    local dropMechanicTab = setData[LIBSETS_TABLEKEY_DROPMECHANIC]
     if not dropMechanicTab then return end
     --local setType = setData.setType
 
     local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
     local dropMechanicNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES]
     local dropMechanicDropLocationNamesOfSet = setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES]
+
+    --Were these tables build and added before alraedy? Reuse them
+    dropZoneIdsTheSame = setData[LIBSETS_TABLEKEY_ZONEIDS_SORTED]
+    dropMechanicTabTheSame = setData[LIBSETS_TABLEKEY_DROPMECHANIC_SORTED]
 
     ---------------------------------------------------------------------------------------------------
     local function l_getDropMechanicName(p_idx, p_dropMechanicIdOfZone)
@@ -709,17 +718,9 @@ local function getSetDropMechanicInfo(setData, buildTextures)
     end
     ---------------------------------------------------------------------------------------------------
 
-    --Check if any zoneId is the same as another in the table. If so: Check if each zoneId got a dropMechanic index (and dropLocationName index) too
-    --and then resort the indices so that same drop zones will be combined at the output as "<Zone Name> (<drop mechanic type name> <: drop mechnic location name> / ... )
-    --todo 2023-10-15
-    --[[
-    if not useCustomTooltip then
-
-    end
-    ]]
 
     ---------------------------------------------------------------------------------------------------
-
+    ---------------------------------------------------------------------------------------------------
     --No drop zoneIds provided? Only use the drop mechnic data, no zone data
     if not dropZoneIds then
         local setId = setData.setId
@@ -739,11 +740,86 @@ local function getSetDropMechanicInfo(setData, buildTextures)
         end
 
         return
-    ---------------------------------------------
+    ---------------------------------------------------------------------------------------------------
     --Use the dropZoneIds
     else
 --d(">dropZoneIds: " ..tos(#dropZoneIds))
-        --Loop the drop zones
+        --Check if any zoneId is the same as another in the table. If so: Check if each zoneId got a dropMechanic index (and dropLocationName index) too
+        --and then resort the indices so that same drop zones will be combined at the output as "<Zone Name> (<drop mechanic type name> <: drop mechnic location name> / ... )
+        if not useCustomTooltip then
+            --Are all zoneIds the same? Then do nothing as this is handled later at buildSetDropMechanicInfo()
+            local numDropZones = #dropZoneIds
+            if numDropZones > 1 then
+                local allZonesTheSame = tableContentsAreAllTheSame(dropZoneIds) or false
+                --If not all zoneIds are the same: Find the same ones and sort the zoneId table by them, but also keep the correct matching entries of the dropMechanicTab
+                if not allZonesTheSame then
+                    if dropZoneIdsTheSame == nil then
+
+                        --If more than 1 dropZone: Check which dropzones are the same and save the indices of them in table dropZoneIdsTheSame
+                        --with key = [zoneId] and vaue = table {[1]=index, [2]=index, ....}
+                        --d(">numDropZones: " ..tos(numDropZones))
+                        local zoneIdsChecked = {}
+                        dropZoneIdsTheSame = {}
+                        for idx, zoneId in ipairs(dropZoneIds) do
+                            if not zoneIdsChecked[zoneId] then
+                                for compareIdx, compareZoneId in ipairs(dropZoneIds) do
+                                    if idx ~= compareIdx then
+                                        if dropZoneIdsTheSame[zoneId] == nil then
+                                            dropZoneIdsTheSame[zoneId] = { [1] = idx }
+                                        end
+                                        if zoneId == compareZoneId then
+                                            --d(">idx: " ..tos(idx) ..", zoneId: " ..tos(zoneId) .. ", compareZoneId: " ..tos(compareZoneId))
+                                            tins(dropZoneIdsTheSame[zoneId], compareIdx)
+                                        end
+                                    end
+                                end
+                                zoneIdsChecked[zoneId] = true
+                            end
+                        end
+                    end
+lib._debugDropZoneIdsTheSame = dropZoneIdsTheSame
+
+                    --Same dropZoneIds were found?
+                    if not ZO_IsTableEmpty(dropZoneIdsTheSame) then
+                        setData[LIBSETS_TABLEKEY_ZONEIDS_SORTED] = dropZoneIdsTheSame
+
+                        if dropMechanicTabTheSame == nil then
+                            --Sort by the zoneIds now --> Uselass as pairs() is used, which does not follow sorted order
+                            --tsort(dropZoneIdsTheSame)
+                            --Loop over the table and find the relating dropMechanicTab at the same indices etc.
+                            --and build new tables with the sorted data
+                            -->Update it to the setData again so the next call won't need to check and resort it?
+                            dropMechanicTabTheSame = {}
+
+                            for zoneId, dropIndices in pairs(dropZoneIdsTheSame) do
+                                for _, dropIndex in ipairs(dropIndices) do
+                                    local dropMechanicIdOfZone = dropMechanicTab[dropIndex]
+                                    if dropMechanicIdOfZone ~= nil then
+                                        dropMechanicTabTheSame[zoneId] = dropMechanicTabTheSame[zoneId] or {}
+                                        dropMechanicTabTheSame[zoneId][dropIndex] = dropMechanicIdOfZone
+                                    end
+                                end
+                            end
+
+                            if ZO_IsTableEmpty(dropMechanicTabTheSame) then
+                                dropMechanicTabTheSame = nil
+                                dropZoneIdsTheSame = nil
+                            else
+                                setData[LIBSETS_TABLEKEY_DROPMECHANIC_SORTED] = dropMechanicTabTheSame
+                            end
+                        end
+                    else
+                        dropZoneIdsTheSame = nil
+                        dropMechanicTabTheSame = nil
+                    end
+lib._debugDropMechanicTabTheSame = dropMechanicTabTheSame
+                end
+            end
+        end
+
+
+        ---------------------------------------------------------------------------------------------------
+        --Loop the drop zones, and build the zoneNames, check for dungeon/public dungeon, and build the dropMechanicNames for these zoneIds
         for idx, zoneId in ipairs(dropZoneIds) do
             --Is the zoneId a dungeon's zoneID? Or is the zoneId a public dungeon zoneID?
             local isDungeon = lib_isDungeonZoneId(zoneId)
@@ -769,18 +845,19 @@ local function getSetDropMechanicInfo(setData, buildTextures)
 
             --Get the drop mechanics at the zoneId
             local dropMechanicIdOfZone = dropMechanicTab[idx]
-            if dropMechanicIdOfZone then
+            if dropMechanicIdOfZone ~= nil then
                 --Add the drop mechanics for the current zone now
                 l_addDropMechanicInfo(idx, dropMechanicIdOfZone)
             end
         end
 --lib._debugZoneNamesProcessed = zoneNamesProcessed
     end
+    ---------------------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------
 
     --lib._debugDropZonesNames = ZO_ShallowTableCopy(dropZoneNames)
     --lib._debugDropMechanicNames = ZO_ShallowTableCopy(dropMechanicNames)
     --lib._debugdropLocationNames = ZO_ShallowTableCopy(dropLocationNames)
-
 end
 
 local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
@@ -826,47 +903,107 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
     local dropMechanicDropLocationNamesAdded = {}
 
     if numDropZoneNames > 0 then
-        for idx, dropZoneName in ipairs(dropZoneNames) do
-            local parentZoneName = parentDropZoneNames[idx]
-            if not allZonesTheSame then
-                setDropOverallTextPerZone = nil
-                setDropOverallTextPerZoneClean = nil
-                bracketOpened = false
-            end
-            local dropMechanicName = dropMechanicNames[idx]
-            local dropMechanicNameClean = dropMechanicNamesClean[idx]
-            local dropMechanicDropLocationName = dropLocationNames[idx]
-            --d(">>>Zone: " ..tos(dropZoneName) .. ", dropMechanicName: " ..tos(dropMechanicName) .. ", dropMechanicDropLocationName: " ..tos(dropMechanicDropLocationName))
-            if addDropLocation or not forTooltip then
-                if allZonesTheSame == true then
-                    --Only add the zoneName once if all zones are the same
-                    if idx == 1 then
-                        if parentZoneName ~= nil then
-                            setDropOverallTextPerZone  = parentZoneName
-                            setDropOverallTextPerZoneClean = parentZoneName
-                        else
-                            setDropOverallTextPerZone  = dropZoneName
-                            setDropOverallTextPerZoneClean = dropZoneName
-                        end
+
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+    local function buildSetDropMechanicPart(idx, dropZoneName, dropMechanicDataOfZoneId)
+        local listAllDropMechanicsOfSameZone = (dropMechanicDataOfZoneId ~= nil and true) or false
+        local parentZoneName = parentDropZoneNames[idx]
+        if not allZonesTheSame then
+            setDropOverallTextPerZone = nil
+            setDropOverallTextPerZoneClean = nil
+            bracketOpened = false
+        end
+        local dropMechanicName = dropMechanicNames[idx]
+        local dropMechanicNameClean = dropMechanicNamesClean[idx]
+        local dropMechanicDropLocationName = dropLocationNames[idx]
+        --d(">>>Zone: " ..tos(dropZoneName) .. ", dropMechanicName: " ..tos(dropMechanicName) .. ", dropMechanicDropLocationName: " ..tos(dropMechanicDropLocationName))
+        if addDropLocation or not forTooltip then
+            if allZonesTheSame == true then
+                --Only add the zoneName once if all zones are the same
+                if idx == 1 then
+                    if parentZoneName ~= nil then
+                        setDropOverallTextPerZone  = parentZoneName
+                        setDropOverallTextPerZoneClean = parentZoneName
+                    else
+                        setDropOverallTextPerZone  = dropZoneName
+                        setDropOverallTextPerZoneClean = dropZoneName
                     end
-                else
-                    --Only show the zoneName if there also was a dropMechanic defined
-                    -->Prevent shwiwng a zone name e.g. where only a wayshrineId was defined in the excel, which then sets a zoneId of that wayshrine. If no dropMechanic was entered
-                    -->as zoneId1 or zoneId2 are the same (or all 3 wayshrines are the same) we do not need to a a blank zoneName to the output!
-                    if dropMechanicName ~= nil then
-                        if parentZoneName ~= nil then
-                            setDropOverallTextPerZone  = parentZoneName
-                            setDropOverallTextPerZoneClean = parentZoneName
-                        else
-                            setDropOverallTextPerZone  = dropZoneName
-                            setDropOverallTextPerZoneClean = dropZoneName
-                        end
+                end
+            else
+                --Only show the zoneName if there also was a dropMechanic defined
+                -->Prevent shwiwng a zone name e.g. where only a wayshrineId was defined in the excel, which then sets a zoneId of that wayshrine. If no dropMechanic was entered
+                -->as zoneId1 or zoneId2 are the same (or all 3 wayshrines are the same) we do not need to a a blank zoneName to the output!
+                if dropMechanicName ~= nil or listAllDropMechanicsOfSameZone then
+                    if parentZoneName ~= nil then
+                        setDropOverallTextPerZone  = parentZoneName
+                        setDropOverallTextPerZoneClean = parentZoneName
+                    else
+                        setDropOverallTextPerZone  = dropZoneName
+                        setDropOverallTextPerZoneClean = dropZoneName
                     end
                 end
             end
-            if addDropMechanic or not forTooltip then
-                if dropMechanicName and dropMechanicName ~= "" then
-                    if allZonesTheSame == true then
+        end
+        if addDropMechanic or not forTooltip then
+            if dropMechanicName and dropMechanicName ~= "" then
+                if allZonesTheSame == true or listAllDropMechanicsOfSameZone then
+
+                    --loop at dropMechanicDataOfZoneId and list all dropMechanics after another at the same zone
+                    if listAllDropMechanicsOfSameZone then
+                        local loopCount = 0
+                        for loopIndex, mechanicId in pairs(dropMechanicDataOfZoneId) do
+                            --DropMechanicNames
+                            local loopDropMechanicName = dropMechanicNames[loopIndex]
+                            local loopDropMechanicNameClean = dropMechanicNamesClean[loopIndex]
+                            dropMechanicNamesAdded[loopDropMechanicName] = true
+                            if setDropOverallTextPerZone == nil then
+                                setDropOverallTextPerZone = "(" .. loopDropMechanicName
+                                setDropOverallTextPerZoneClean = "(" .. loopDropMechanicNameClean
+                                bracketOpened = true
+                            else
+                                if loopCount == 0 then
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. " (" .. loopDropMechanicName
+                                    setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. " (" .. loopDropMechanicNameClean
+                                    bracketOpened = true
+                                else
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. "; " .. loopDropMechanicName
+                                    setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. "; " .. loopDropMechanicNameClean
+                                end
+                            end
+
+                            --DropLocatioNames
+                            if addBossName or not forTooltip then
+                                local loopDropMechanicDropLocationName = dropLocationNames[loopIndex]
+                                if parentZoneName ~= nil then
+                                    if loopDropMechanicDropLocationName == nil then
+                                        loopDropMechanicDropLocationName = dropZoneName
+                                    else
+                                        loopDropMechanicDropLocationName = dropZoneName .. ": " .. loopDropMechanicDropLocationName
+                                    end
+                                end
+
+                                if loopDropMechanicDropLocationName ~= nil and loopDropMechanicDropLocationName ~= "" then
+                                    if setDropOverallTextPerZone == nil then
+                                        setDropOverallTextPerZone = "\'" .. loopDropMechanicDropLocationName .. "\'"
+                                        setDropOverallTextPerZoneClean = "\'" .. loopDropMechanicDropLocationName .. "\'"
+                                    else
+                                        if addDropMechanic or not forTooltip then
+                                            setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. loopDropMechanicDropLocationName .. "\'"
+                                            setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ": \'" .. loopDropMechanicDropLocationName .. "\'"
+                                        else
+                                            setDropOverallTextPerZone = setDropOverallTextPerZone .. " (\'" .. loopDropMechanicDropLocationName .. "\'"
+                                            setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. " (\'" .. loopDropMechanicDropLocationName .. "\'"
+                                            bracketOpened = true
+                                        end
+                                    end
+                                end
+
+                            end
+
+                            loopCount = loopCount + 1
+                        end
+                    else
                         if not dropMechanicNamesAdded[dropMechanicName] then
                             dropMechanicNamesAdded[dropMechanicName] = true
                             if setDropOverallTextPerZone == nil then
@@ -884,112 +1021,146 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
                                 end
                             end
                         end
+                    end
+                else
+                    if setDropOverallTextPerZone == nil then
+                        setDropOverallTextPerZone = dropMechanicName
+                        setDropOverallTextPerZoneClean = dropMechanicNameClean
                     else
-                        if setDropOverallTextPerZone == nil then
-                            setDropOverallTextPerZone = dropMechanicName
-                            setDropOverallTextPerZoneClean = dropMechanicNameClean
-                        else
-                            setDropOverallTextPerZone = setDropOverallTextPerZone .. " (" .. dropMechanicName
-                            setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. " (" .. dropMechanicNameClean
-                            bracketOpened = true
-                        end
+                        setDropOverallTextPerZone = setDropOverallTextPerZone .. " (" .. dropMechanicName
+                        setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. " (" .. dropMechanicNameClean
+                        bracketOpened = true
                     end
                 end
             end
-            if addBossName or not forTooltip then
-                --We got a parentZoneName e.g. at a dungeon or public dungeon? We changed the dropZoneName to the parentZoneName above,
-                --so show the dropZoneName as dropMechanicDropLocationName now, or add the dropZoneName to the dropMechanicDropLocationName
-                if parentZoneName ~= nil then
-                    if dropMechanicDropLocationName == nil then
-                        dropMechanicDropLocationName = dropZoneName
-                    else
-                        dropMechanicDropLocationName = dropZoneName .. ": " .. dropMechanicDropLocationName
-                    end
-                end
-
-                if allZonesTheSame == true then
-                    if dropMechanicDropLocationName ~= nil and dropMechanicDropLocationName ~= "" then
-                        if not dropMechanicDropLocationNamesAdded[dropMechanicDropLocationName] then
-                            dropMechanicDropLocationNamesAdded[dropMechanicDropLocationName] = true
-                            if setDropOverallTextPerZone == nil then
-                                setDropOverallTextPerZone = "\'" .. dropMechanicDropLocationName .. "\'"
-                                setDropOverallTextPerZoneClean = "\'" .. dropMechanicDropLocationName .. "\'"
-                            else
-                                if addDropMechanic or not forTooltip then
-                                    if not dropMechanicNamesAdded[dropMechanicName] then
-                                        dropMechanicNamesAdded[dropMechanicName] = true
-                                    end
-                                    if idx == 1 then
-                                        setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
-                                        setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ": \'" .. dropMechanicDropLocationName .. "\'"
-                                    else
-                                        setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
-                                        setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ": \'" .. dropMechanicDropLocationName .. "\'"
-                                    end
-                                else
-                                    if idx == 1 then
-                                        setDropOverallTextPerZone = setDropOverallTextPerZone .. "(\'" .. dropMechanicDropLocationName .. "\'"
-                                        setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. "(\'" .. dropMechanicDropLocationName .. "\'"
-                                        bracketOpened = true
-                                    else
-                                        setDropOverallTextPerZone = setDropOverallTextPerZone .. "; \'" .. dropMechanicDropLocationName .. "\'"
-                                        setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. "; \'" .. dropMechanicDropLocationName .. "\'"
-                                    end
-                                end
-                            end
-                        end
-                    end
+        end
+        if (addBossName or not forTooltip) and not listAllDropMechanicsOfSameZone then
+            --We got a parentZoneName e.g. at a dungeon or public dungeon? We changed the dropZoneName to the parentZoneName above,
+            --so show the dropZoneName as dropMechanicDropLocationName now, or add the dropZoneName to the dropMechanicDropLocationName
+            if parentZoneName ~= nil then
+                if dropMechanicDropLocationName == nil then
+                    dropMechanicDropLocationName = dropZoneName
                 else
-                    if dropMechanicDropLocationName ~= nil and dropMechanicDropLocationName ~= "" then
+                    dropMechanicDropLocationName = dropZoneName .. ": " .. dropMechanicDropLocationName
+                end
+            end
+
+            if allZonesTheSame == true then
+                if dropMechanicDropLocationName ~= nil and dropMechanicDropLocationName ~= "" then
+                    if not dropMechanicDropLocationNamesAdded[dropMechanicDropLocationName] then
+                        dropMechanicDropLocationNamesAdded[dropMechanicDropLocationName] = true
                         if setDropOverallTextPerZone == nil then
                             setDropOverallTextPerZone = "\'" .. dropMechanicDropLocationName .. "\'"
                             setDropOverallTextPerZoneClean = "\'" .. dropMechanicDropLocationName .. "\'"
                         else
                             if addDropMechanic or not forTooltip then
-                                setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
-                                setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                                if not dropMechanicNamesAdded[dropMechanicName] then
+                                    dropMechanicNamesAdded[dropMechanicName] = true
+                                end
+                                if idx == 1 then
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                                    setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                                else
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                                    setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                                end
                             else
-                                setDropOverallTextPerZone = setDropOverallTextPerZone .. " (\'" .. dropMechanicDropLocationName .. "\'"
-                                setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. " (\'" .. dropMechanicDropLocationName .. "\'"
-                                bracketOpened = true
+                                if idx == 1 then
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. "(\'" .. dropMechanicDropLocationName .. "\'"
+                                    setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. "(\'" .. dropMechanicDropLocationName .. "\'"
+                                    bracketOpened = true
+                                else
+                                    setDropOverallTextPerZone = setDropOverallTextPerZone .. "; \'" .. dropMechanicDropLocationName .. "\'"
+                                    setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. "; \'" .. dropMechanicDropLocationName .. "\'"
+                                end
                             end
                         end
                     end
                 end
-            end
-            --d(">idx: " ..tos(idx) ..", bracketOpened: " ..tos(bracketOpened) .. ", setDropOverallTextPerZone: " ..tos(setDropOverallTextPerZone))
-            if bracketOpened and setDropOverallTextPerZone ~= nil then
-                if allZonesTheSame == true then
-                    if idx == numDropZoneNames then
-                        setDropOverallTextPerZone = setDropOverallTextPerZone .. ")"
-                        setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ")"
-                        --else
-                        --setDropOverallTextPerZone = setDropOverallTextPerZone .. ", "
-                    end
-                else
-                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ")"
-                    setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ")"
-                end
-            end
-
-            if not allZonesTheSame then
-                --Do not add the same line again
-                if not ZO_IsElementInNumericallyIndexedTable(setDropOverallTextsPerZone, setDropOverallTextPerZone) then
-                    --setDropOverallTextPerZone = ""
-                    tins(setDropOverallTextsPerZone, setDropOverallTextPerZone)
-                end
-                if not ZO_IsElementInNumericallyIndexedTable(setDropOverallTextsPerZoneClean, setDropOverallTextPerZoneClean) then
-                    tins(setDropOverallTextsPerZoneClean, setDropOverallTextPerZoneClean)
-                end
             else
-                --Only add 1 line
-                if idx == numDropZoneNames then
-                    --d(">>>adding 1 output line")
-                    tins(setDropOverallTextsPerZone, setDropOverallTextPerZone)
-                    tins(setDropOverallTextsPerZoneClean, setDropOverallTextPerZoneClean)
+                if dropMechanicDropLocationName ~= nil and dropMechanicDropLocationName ~= "" then
+                    if setDropOverallTextPerZone == nil then
+                        setDropOverallTextPerZone = "\'" .. dropMechanicDropLocationName .. "\'"
+                        setDropOverallTextPerZoneClean = "\'" .. dropMechanicDropLocationName .. "\'"
+                    else
+                        if addDropMechanic or not forTooltip then
+                            setDropOverallTextPerZone = setDropOverallTextPerZone .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                            setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ": \'" .. dropMechanicDropLocationName .. "\'"
+                        else
+                            setDropOverallTextPerZone = setDropOverallTextPerZone .. " (\'" .. dropMechanicDropLocationName .. "\'"
+                            setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. " (\'" .. dropMechanicDropLocationName .. "\'"
+                            bracketOpened = true
+                        end
+                    end
                 end
             end
         end
+        --d(">idx: " ..tos(idx) ..", bracketOpened: " ..tos(bracketOpened) .. ", setDropOverallTextPerZone: " ..tos(setDropOverallTextPerZone))
+        if bracketOpened and setDropOverallTextPerZone ~= nil then
+            if allZonesTheSame == true then
+                if idx == numDropZoneNames then
+                    setDropOverallTextPerZone = setDropOverallTextPerZone .. ")"
+                    setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ")"
+                    --else
+                    --setDropOverallTextPerZone = setDropOverallTextPerZone .. ", "
+                end
+            else
+                setDropOverallTextPerZone = setDropOverallTextPerZone .. ")"
+                setDropOverallTextPerZoneClean = setDropOverallTextPerZoneClean .. ")"
+            end
+        end
+
+        if not allZonesTheSame then
+            --Do not add the same line again
+            if not ZO_IsElementInNumericallyIndexedTable(setDropOverallTextsPerZone, setDropOverallTextPerZone) then
+                --setDropOverallTextPerZone = ""
+                tins(setDropOverallTextsPerZone, setDropOverallTextPerZone)
+            end
+            if not ZO_IsElementInNumericallyIndexedTable(setDropOverallTextsPerZoneClean, setDropOverallTextPerZoneClean) then
+                tins(setDropOverallTextsPerZoneClean, setDropOverallTextPerZoneClean)
+            end
+        else
+            --Only add 1 line
+            if idx == numDropZoneNames then
+                --d(">>>adding 1 output line")
+                tins(setDropOverallTextsPerZone, setDropOverallTextPerZone)
+                tins(setDropOverallTextsPerZoneClean, setDropOverallTextPerZoneClean)
+            end
+        end
+    end --buildSetDropMechanicPart(idx)
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+
+        --New code, based on dropZoneIds sorted and the dropMechnicIds per zoneId -> If not all zones are the same
+        if not allZonesTheSame and dropZoneIdsTheSame ~= nil and dropMechanicTabTheSame ~= nil then
+            --Sort the dropZones
+            local sortedZoneIds = {}
+            for dropZone, _ in pairs(dropZoneIdsTheSame) do
+                sortedZoneIds[#sortedZoneIds + 1] = dropZone
+            end
+            tsort(sortedZoneIds)
+
+            for _, dropZoneId in ipairs(sortedZoneIds) do
+                if dropZoneIdsTheSame[dropZoneId] ~= nil then
+                    --for _, idx in ipairs(dropZoneIdsTheSame[dropZoneId]) do
+                        local idx = dropZoneIdsTheSame[dropZoneId][1]
+                        local dropZoneName = dropZoneNames[idx]
+                        if dropMechanicTabTheSame[dropZoneId] ~= nil then
+                            buildSetDropMechanicPart(idx, dropZoneName, dropMechanicTabTheSame[dropZoneId])
+                        end
+                    --end
+                end
+            end
+        else
+        ----------------------------------------------------------------------------------------------------------------
+            --Old code, based on drop zone names
+            for idx, dropZoneName in ipairs(dropZoneNames) do
+                buildSetDropMechanicPart(idx, dropZoneName, nil)
+            end --for idx, dropZoneName in ipairs(dropZoneNames) do
+            ----------------------------------------------------------------------------------------------------------------
+            ----------------------------------------------------------------------------------------------------------------
+        end
+
 
     ---------------------------------------------------------------------------------------------------------------
     --Without the zoneNames as no zoneData is given, only dropMechanics are given
@@ -1264,9 +1435,13 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     local runDropMechanic = not forTooltip or ((useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
             or (not useCustomTooltip and (addDropMechanic or addBossName or addDropLocation)))
     if runDropMechanic == true then
-        --dropZoneNames, dropMechanicNames, dropLocationNames, dropMechanicNamesClean, parentDropZoneNames
+        --dropZoneNames, dropMechanicNames, dropLocationNames, dropMechanicNamesClean, parentDropZoneNames, dropZoneIdsTheSame, dropMechanicTabTheSame
+        ----------------------------------------------------------------------------------------------------------------
         getSetDropMechanicInfo(setData, not forTooltip)
+        ----------------------------------------------------------------------------------------------------------------
 
+        ----------------------------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
         if useCustomTooltip == true then
             --All zoneNames are the same = Condense them to 1, else keep them as same dropZones could have diffeferent dropMechanics and dropLocations and the order needs to be kept!
             local dropZoneNamesNew = condenseTable(dropZoneNames)
@@ -1301,10 +1476,13 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             setDropMechanicTextClean =  buildTextLinesFromTable(dropMechanicNamesClean, nil, false, false)
             setDropLocationsText =      buildTextLinesFromTable(dropLocationNames, nil, false, false)
             setDropLocationsTextClean = setDropLocationsText
+        ----------------------------------------------------------------------------------------------------------------
         else
             setDropZoneStr, setDropMechanicText, setDropLocationsText, setDropOverallTextsPerZone,
             setDropZoneStrClean, setDropMechanicTextClean, setDropLocationsTextClean, setDropOverallTextsPerZoneClean = buildSetDropMechanicInfo(setData, itemLink, forTooltip)
         end
+        ----------------------------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
         --d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
     end
 
