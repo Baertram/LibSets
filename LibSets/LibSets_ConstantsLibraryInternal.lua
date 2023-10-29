@@ -1227,6 +1227,9 @@ lib.localization                 = {
         dropdownFilterTooltips = "Dropdown Filter: Tooltips",
         dropdownFilterEntryTooltips = "Dropdown Filter: Einträge Tooltips",
         searchUIShowSetNameInEnglishToo = "Set Namen ebenfalls Englisch anzeigen/suchen",
+        popupTooltip                = "Angehefteter Tooltip",
+        setInfos                    = "Set Infos",
+        showAsTooltip               = "Zeige als Tooltip",
     },
     ["en"] = {
         de  = "German",
@@ -1304,6 +1307,9 @@ lib.localization                 = {
         dropdownFilterTooltips = "Dropdown filter: Tooltips",
         dropdownFilterEntryTooltips = "Dropdown filter: Entry tooltips",
         searchUIShowSetNameInEnglishToo = "Show/Search Set names in English too",
+        popupTooltip                = "Popup tooltip",
+        setInfos                    = "Set infos",
+        showAsTooltip               = "Show as tooltip",
     },
     ["es"] = {
         de  = "Alemán",

@@ -224,8 +224,8 @@ local setPreviewTooltipSV
 
 
 --Functions
-local function addColor(str)
-    return "|c333333" .. str .. "|r"
+local function addZoneColor(str)
+    return "|cA9A9A9" .. str .. "|r"
 end
 
 local function getLibSetsTooltipSavedVariables()
@@ -927,10 +927,10 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
                 --Only add the zoneName once if all zones are the same
                 if idx == 1 then
                     if parentZoneName ~= nil then
-                        setDropOverallTextPerZone  = addColor(parentZoneName)
+                        setDropOverallTextPerZone  = addZoneColor(parentZoneName)
                         setDropOverallTextPerZoneClean = parentZoneName
                     else
-                        setDropOverallTextPerZone  = addColor(dropZoneName)
+                        setDropOverallTextPerZone  = addZoneColor(dropZoneName)
                         setDropOverallTextPerZoneClean = dropZoneName
                     end
                 end
@@ -940,10 +940,10 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
                 -->as zoneId1 or zoneId2 are the same (or all 3 wayshrines are the same) we do not need to a a blank zoneName to the output!
                 if dropMechanicName ~= nil or listAllDropMechanicsOfSameZone then
                     if parentZoneName ~= nil then
-                        setDropOverallTextPerZone  = addColor(parentZoneName)
+                        setDropOverallTextPerZone  = addZoneColor(parentZoneName)
                         setDropOverallTextPerZoneClean = parentZoneName
                     else
-                        setDropOverallTextPerZone  = addColor(dropZoneName)
+                        setDropOverallTextPerZone  = addZoneColor(dropZoneName)
                         setDropOverallTextPerZoneClean = dropZoneName
                     end
                 end

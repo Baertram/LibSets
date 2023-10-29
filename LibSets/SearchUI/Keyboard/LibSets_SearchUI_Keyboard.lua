@@ -861,7 +861,6 @@ function LibSets_SearchUI_Keyboard:OnFilterChanged(dropdownControl, editControl)
     end
 end
 
-
 ------------------------------------------------
 --- Handlers
 ------------------------------------------------
@@ -870,6 +869,8 @@ function LibSets_SearchUI_Keyboard:OnRowMouseEnter(rowControl)
 
     self.tooltipControl.data = rowControl.data
     self:ShowItemLinkTooltip(self.control, rowControl.data, nil, nil, nil, nil)
+
+    self:ShowSetDropLocationTooltip(rowControl, rowControl.data)
 end
 
 function LibSets_SearchUI_Keyboard:OnRowMouseExit(rowControl)

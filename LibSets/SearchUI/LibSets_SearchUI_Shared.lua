@@ -891,6 +891,16 @@ function LibSets_SearchUI_Shared:HideItemLinkPopupTooltip()
     ClearTooltip(PopupTooltip)
 end
 
+function LibSets_SearchUI_Keyboard:ShowSetDropLocationTooltip(rowControl, data)
+    if lib.showSetSearchDropLocationTooltip then
+        if data.setDataText == nil then return end
+        local dropLocationText = "|cFFFFFF" .. data.name .. "|r\n\n" .. data.setDataText
+        ZO_Tooltips_ShowTextTooltip(rowControl:GetOwningWindow(), RIGHT, dropLocationText)
+    else
+        ZO_Tooltips_HideTextTooltip()
+    end
+end
+
 
 ------------------------------------------------
 --- Context menu
@@ -963,7 +973,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end
         },
     }
-    AddCustomSubMenuItem("Popup toooltip", popupTooltipSubmenu)
+    AddCustomSubMenuItem(getLocalizedText("popupTooltip"), popupTooltipSubmenu)
 
     if setId ~= nil then
         AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
@@ -977,7 +987,21 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end)
         end
 
+        --SetData text
         if data.setDataText ~= nil then
+            --Tooltip enhancements are enabled
+            local function toggleSetDropLocationTooltip()
+                lib.showSetSearchDropLocationTooltip = not lib.showSetSearchDropLocationTooltip
+            end
+
+            AddCustomMenuItem(getLocalizedText("droppedBy"), function() end, MENU_ADD_OPTION_HEADER)
+            AddCustomMenuItem(getLocalizedText("showAsTooltip"), function()
+                ZO_Tooltips_HideTextTooltip()
+                toggleSetDropLocationTooltip()
+                self:ShowSetDropLocationTooltip(rowControl, data)
+            end)
+
+
             local function getSetTextForCopyDialog(withTextures)
                 copyDialog = copyDialog or lib.CopyDialog
                 local setName = data.name
@@ -990,7 +1014,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 copyDialog:Show({ text=(withTextures == true and data.setDataText) or data.setDataTextClean, setData=data }, textParams)
             end
 
-            AddCustomMenuItem(getLocalizedText("droppedBy"), function() end, MENU_ADD_OPTION_HEADER)
+            AddCustomMenuItem(getLocalizedText("setInfos"), function() end, MENU_ADD_OPTION_HEADER)
             AddCustomMenuItem(getLocalizedText("showAsText"), function()
                 getSetTextForCopyDialog(false)
             end)
