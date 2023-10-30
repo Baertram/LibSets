@@ -14,7 +14,13 @@ local tcon = table.concat
 
 
 local clientLang = lib.clientLang
+local fallbackLang = lib.fallbackLang
 local langAllowedCheck = lib.LangAllowedCheck
+
+local localization = lib.localization
+local booleanToOnOff = localization[fallbackLang].booleanToOnOff
+
+local getIndexTableFromNonNumberKeyTable = lib.GetIndexTableFromNonNumberKeyTable
 
 local getLocalizedText = lib.GetLocalizedText
 local libSets_GetSetInfo = lib.GetSetInfo
@@ -27,9 +33,14 @@ local libSets_GetSetFirstItemId = lib.GetSetFirstItemId
 local libSets_GetSetEnchantSearchCategories = lib.GetSetEnchantSearchCategories
 local libSets_IsEquipTypeSet = lib.IsEquipTypeSet
 local libSets_IsWeaponTypeSet = lib.IsWeaponTypeSet
-local libSets_IsArmorTypeSet = lib.IsArmorTypeSet
+local libSets_IsArmorTypeSet         = lib.IsArmorTypeSet
+local libSets_getCurrentZoneName = lib.GetCurrentZoneName
+local libSets_getsetIdsOfCurrentZone = lib.GetSetIdsOfCurrentZone
 
 local gilsi = GetItemLinkSetInfo
+
+--Strings
+local droppedByStr = getLocalizedText("droppedBy")
 
 --Textures
 local favoriteIcon = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
@@ -234,7 +245,7 @@ function LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries(dropdownContro
 d("LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries")
 lib._debugDropDownControl = dropdownControl
     refreshResultsListAfterwards = refreshResultsListAfterwards or false
-    if entriesToSelect == nil or ZO_IsTableEmpty(entriesToSelect) then return end
+    if ZO_IsTableEmpty(entriesToSelect) then return end
     local comboBox = dropdownControl.m_comboBox
     if comboBox ~= nil then
         comboBox:ClearAllSelections()
@@ -891,10 +902,10 @@ function LibSets_SearchUI_Shared:HideItemLinkPopupTooltip()
     ClearTooltip(PopupTooltip)
 end
 
-function LibSets_SearchUI_Keyboard:ShowSetDropLocationTooltip(rowControl, data)
+function LibSets_SearchUI_Shared:ShowSetDropLocationTooltip(rowControl, data)
     if lib.showSetSearchDropLocationTooltip then
         if data.setDataText == nil then return end
-        local dropLocationText = "|cFFFFFF" .. data.name .. "|r\n\n" .. data.setDataText
+        local dropLocationText = "|cF0F0F0" .. data.name .. "|r\n\n" .. data.setDataText
         ZO_Tooltips_ShowTextTooltip(rowControl:GetOwningWindow(), RIGHT, dropLocationText)
     else
         ZO_Tooltips_HideTextTooltip()
@@ -995,7 +1006,8 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end
 
             AddCustomMenuItem(getLocalizedText("droppedBy"), function() end, MENU_ADD_OPTION_HEADER)
-            AddCustomMenuItem(getLocalizedText("showAsTooltip"), function()
+            local showAsTooltipEnabledState = getLocalizedText("showAsTooltip") .. ": " .. tos(booleanToOnOff[not lib.showSetSearchDropLocationTooltip])
+            AddCustomMenuItem(showAsTooltipEnabledState, function()
                 ZO_Tooltips_HideTextTooltip()
                 toggleSetDropLocationTooltip()
                 self:ShowSetDropLocationTooltip(rowControl, data)
@@ -1079,6 +1091,15 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
             AddCustomMenuItem("-")
             local entriesToSelect = { [1] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK }
             AddCustomMenuItem(favoriteIconWithNameText, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
+        --Zones filter muliselect dropdown?
+        elseif dropdownControl == self.dropZoneFiltersControl then
+            AddCustomMenuItem("-")
+            local setIdsOfCurrentZone, currentZoneId = libSets_getsetIdsOfCurrentZone()
+            if not ZO_IsTableEmpty(setIdsOfCurrentZone) and currentZoneId ~= nil then
+                local currentZoneSetStr = getLocalizedText("showCurrentZoneSets") .. " \'" .. libSets_getCurrentZoneName() .. "\' (" ..tos(currentZoneId) .. ")"
+                local entriesZoneIdsIndexTableOfCurrentZone = getIndexTableFromNonNumberKeyTable(setIdsOfCurrentZone[currentZoneId], true)
+                AddCustomMenuItem(currentZoneSetStr, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesZoneIdsIndexTableOfCurrentZone, true) end)
+            end
         end
 
         ShowMenu(dropdownControl)

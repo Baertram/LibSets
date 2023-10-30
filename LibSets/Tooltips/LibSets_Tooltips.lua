@@ -1653,14 +1653,14 @@ local function buildSetDataText(setData, itemLink, forTooltip)
                 local prefix = ""
                 if forTooltip then
                     if addBossName and not addDropLocation and not addDropMechanic then
-                        prefix = droppedByStr .. ": "
+                        prefix = "|c7ABDE6" .. droppedByStr .. "|r: "
                     elseif not addBossName and not addDropLocation and addDropMechanic then
-                        prefix = dropMechanicStr .. ": "
+                        prefix = "|c7ABDE6" .. dropMechanicStr .. "|r: "
                     elseif not addBossName and addDropLocation and not addDropMechanic then
-                        prefix = dropLocationZonesStr .. ": "
+                        prefix = "|c7ABDE6" .. dropLocationZonesStr .. "|r: "
                     end
                 else
-                    prefix = droppedByStr .. ": "
+                    prefix = "|c7ABDE6" .. droppedByStr .. "|r: "
                 end
                 addSetInfoText(prefix .. setDropMechanicDropLocationsText)
                 addSetInfoTextClean(prefix .. setDropMechanicDropLocationsTextClean)

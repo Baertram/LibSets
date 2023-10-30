@@ -415,6 +415,7 @@ local buildItemLink
 local isNoESOSet
 local getDropMechanicName
 local getSetInfo
+local getCurrentZoneIds
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -472,6 +473,22 @@ local function getLocalizedText(textName, lang, ...)
     return localizedText or ""
 end
 lib.GetLocalizedText = getLocalizedText
+
+
+local getIndexTableFromNonNumberKeyTable = function(sourceTable, useKey)
+    if useKey == nil then return end
+    local targetTable = {}
+    for k, v in pairs(sourceTable) do
+        if useKey == true then
+            targetTable[#targetTable + 1] = k
+        else
+            targetTable[#targetTable + 1] = v
+        end
+    end
+    return targetTable
+end
+lib.GetIndexTableFromNonNumberKeyTable = getIndexTableFromNonNumberKeyTable
+
 
 local equipTypes = {
     EQUIP_TYPE_HEAD,
@@ -2307,6 +2324,33 @@ function lib.GetSetIdsByDropZone(zoneId)
     if zoneId == nil or zoneId2SetIds[zoneId] == nil then return end
     return zoneId2SetIds[zoneId]
 end
+local getSetIdsByDropZone = lib.GetSetIdsByDropZone
+
+--Returns table:nilable setIdsOfCurrentZone
+--with key = [zoneId] and value = table { [setId] = boolean, ... }
+function lib.GetSetIdsOfCurrentZone()
+    getCurrentZoneIds = getCurrentZoneIds or lib.GetCurrentZoneIds
+    local setIdsOfCurrentZone
+
+    --Get current zoneId
+    local currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex = getCurrentZoneIds()
+    if currentZoneId == nil and currentZoneParentId == nil then return end
+
+d(">currentZoneId: " ..tos(currentZoneId))
+
+    --Get setIds of current zone
+    if currentZoneId ~= nil then
+        setIdsOfCurrentZone = getSetIdsByDropZone(currentZoneId)
+    end
+    --ParentZone is different and maybe provide sets? Use this zoneId then
+    if setIdsOfCurrentZone == nil and currentZoneParentId ~= nil and currentZoneParentId ~= currentZoneId then
+d(">>parentZoneId: " ..tos(currentZoneParentId))
+        currentZoneId = currentZoneParentId
+        setIdsOfCurrentZone = getSetIdsByDropZone(currentZoneId)
+    end
+lib._debugSetIdsOfCurrentZone = setIdsOfCurrentZone
+    return setIdsOfCurrentZone, currentZoneId
+end
 
 --Returns the table of dropLocationNames of LibSets: All sets data was scanned for dropLocation names, and a complete list
 --of lib.dropLocationNames = {["de"] = { "Name1", "Name2", ... }, ["en"] = { "Name1", "Name2", ...} } was created
@@ -3102,6 +3146,20 @@ function lib.GetZoneName(zoneId, lang)
     end
     return zoneName
 end
+local getZoneName = lib.GetZoneName
+
+--Returns the name of the current zone's zoneId
+--> Parameters: zoneId number: The zone id given in a set's info
+-->             language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated
+--> Returns:    name zoneName
+function lib.GetCurrentZoneName(lang)
+    getCurrentZoneIds = getCurrentZoneIds or lib.GetCurrentZoneIds
+    local currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex = getCurrentZoneIds()
+    if currentZoneId == nil and currentZoneParentId ~= nil then
+        currentZoneId = currentZoneParentId
+    end
+    return getZoneName(currentZoneId, lang)
+end
 
 
 
@@ -3254,7 +3312,6 @@ end
 ------------------------------------------------------------------------
 -- 	Item set collections functions
 ------------------------------------------------------------------------
-
 --Returns string itemSetCollectionKey "setId:itemSetCollectionSlotId" of the itemLink
 --identifying a set item by setId and the equipment slot (e.g. hands, chest, ...) which potentially could have different
 --itemIds
@@ -3280,7 +3337,7 @@ function lib.GetCurrentZoneIds()
     local currentZoneParentIndex = gzidx(currentZoneParentId)
     return currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex
 end
-local getCurrentZoneIds = lib.GetCurrentZoneIds
+getCurrentZoneIds = lib.GetCurrentZoneIds
 
 
 --Returns the complete mapping table between set item collections parentCategory, category and zoneIds
