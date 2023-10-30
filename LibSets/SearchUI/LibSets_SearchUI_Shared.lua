@@ -158,7 +158,7 @@ local function clearSearchHistory(searchType)
     local settings = lib.svData
     local searchHistory = settings.setSearchHistory
     if ZO_IsTableEmpty(searchHistory[searchType]) then return end
-    lib.svData.searchHistory[searchType] = {}
+    lib.svData.setSearchHistory[searchType] = {}
 end
 
 local function updateSearchHistory(searchType, searchValue)
