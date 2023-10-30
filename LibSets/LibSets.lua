@@ -1541,11 +1541,11 @@ local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
     if setData == nil then
         local isNonEsoSetId = isNoESOSet(setId)
         local preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS
-        local preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES
+        --local preloadedSetNamesTableKey = LIBSETS_TABLEKEY_SETNAMES
         if isNonEsoSetId == true then
             setData                     = noSetIdSets[setId]
             preloadedSetItemIdsTableKey = LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID
-            preloadedSetNamesTableKey   = LIBSETS_TABLEKEY_SETNAMES_NO_SETID
+            --preloadedSetNamesTableKey   = LIBSETS_TABLEKEY_SETNAMES_NO_SETID
         else
             if setInfo[setId] == nil then return nil, nil, nil, nil end
             setData = setInfo[setId]
@@ -2679,6 +2679,7 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     local itemIds
     local setNames
     local langToUse
+    local setNamesEmpty = true
     local gotSetItemIds =           false
     local gotSetNames =             false
     local gotSetDropMechanicNames = false
@@ -2774,9 +2775,11 @@ function lib.GetSetInfo(setId, noItemIds, lang)
         else
             setNames = preloaded[preloadedSetNamesTableKey][setId]
         end
-        if not ZO_IsTableEmpty(setNames) then
-            setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames
+
+        setNamesEmpty = ZO_IsTableEmpty(setNames)
+        if not setNamesEmpty then
             if not onlyOneLanguage then
+                setInfoTable[LIBSETS_TABLEKEY_SETNAMES] = setNames
                 gotSetNames = true
             end
         end
@@ -2796,15 +2799,24 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     end
 
     --Copy the return table so that we cannot accidently directly change LibSets.setInfo[setId] by changing the return table!!!
+    --Also: lib.setInfo[setId]["setNames"]["en"] will be overwritten as function lib.GetSetInfo is called and passing in ONLY 1 language!
+    --So we need to assure that original setInfoTable[LIBSETS_TABLEKEY_SETNAMES] is not manipulated!
     returnTab = ZO_ShallowTableCopy(setInfoTable)
+
     --Only now check if itemIds are needed "in the copied return table" (but kep them in the original LibSets.setInfo[setId] !!!
     if noItemIds == true then
         returnTab[LIBSETS_TABLEKEY_SETITEMIDS] = nil
-        if onlyOneLanguage == true then
+    end
+
+    --SetNames
+    if not setNamesEmpty and onlyOneLanguage == true then
+        returnTab[LIBSETS_TABLEKEY_SETNAMES] = setNames
+        if noItemIds == true then
             --Cache the setsData (without itemIds and only 1 language) at the tooltipsCache
             tooltipSetDataWithoutItemIdsCached[setId] = returnTab
         end
     end
+
     return returnTab
 end
 getSetInfo = lib.GetSetInfo
@@ -3342,6 +3354,11 @@ end
 --+ the current zone's index and parent zone index
 --> Returns: number currentZoneId, number currentZoneParentId, number currentZoneIndex, number currentZoneParentIndex
 function lib.GetCurrentZoneIds()
+    --If we are in a Battleground: Return the custom zoneId of LibSets
+    if IsActiveWorldBattleground() then
+        return LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS, LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS, LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS, LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS
+    end
+    --All other zones
     local currentZoneIndex = gcmzidx()
     local currentZoneId = gzid(currentZoneIndex)
     local currentZoneParentId = gpzid(currentZoneId)

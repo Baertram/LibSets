@@ -286,8 +286,8 @@ function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
 end
 
 function LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, refreshResultsListAfterwards)
-d("LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries")
-lib._debugDropDownControl = dropdownControl
+--d("LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries")
+--lib._debugDropDownControl = dropdownControl
     refreshResultsListAfterwards = refreshResultsListAfterwards or false
     if ZO_IsTableEmpty(entriesToSelect) then return end
     local comboBox = dropdownControl.m_comboBox
@@ -360,7 +360,7 @@ end
 
 
 function LibSets_SearchUI_Shared:UpdateSearchButtonEnabledState(isEnabled)
-d("LibSets_SearchUI_Shared:UpdateSearchButtonEnabledState-isEnabled: " ..tos(isEnabled))
+--d("LibSets_SearchUI_Shared:UpdateSearchButtonEnabledState-isEnabled: " ..tos(isEnabled))
     if isEnabled == nil then return end
     local searchButton = self.searchButton
     if searchButton == nil then return end
@@ -423,12 +423,12 @@ function LibSets_SearchUI_Shared:Cancel()
 end
 
 function LibSets_SearchUI_Shared:ValidateSearchParams()  --override
-d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
+--d("[LibSets]LibSets_SearchUI_Shared:ValidateSearchParams")
     --Validate the search parameters and raise an error message if something does not match
 end
 
 function LibSets_SearchUI_Shared:StartSearch(doNotShowUI, wasReset)
-d("[LibSets]LibSets_SearchUI_Shared:StartSearch-doNotShowUI: " ..tos(doNotShowUI) .. ", wasReset: " ..tos(wasReset))
+--d("[LibSets]LibSets_SearchUI_Shared:StartSearch-doNotShowUI: " ..tos(doNotShowUI) .. ", wasReset: " ..tos(wasReset))
     wasReset = wasReset or false
     --Fire callback for "Search was started"
     CM:FireCallbacks(searchUIName .. "_SearchBegin", self, doNotShowUI, wasReset)
@@ -462,7 +462,7 @@ end
 --You can optionally pass in searchParams which will be used to do the search. If none are specified the UI's searchParams will be used (multiselect dropdowns, editboxes, ...)
 -->See format of searchParams at the Initialize function of this class, above!
 function LibSets_SearchUI_Shared:Search(doNotShowUI, searchParams)
-d("[LibSets]LibSets_SearchUI_Shared:Search")
+--d("[LibSets]LibSets_SearchUI_Shared:Search")
     doNotShowUI = doNotShowUI or false
 
     if not doNotShowUI and not self:IsShown() then return end
@@ -477,13 +477,13 @@ d("[LibSets]LibSets_SearchUI_Shared:Search")
 
     --Start the search now, based on input parameters
     if self:StartSearch(doNotShowUI) == true then
-d(">Search was started")
+--d(">Search was started")
         --Is a "search was done" callback function registered?
         if self.searchDoneCallback then
             self.searchDoneCallback(self)
         end
     else
-d("<Search NOT started")
+--d("<Search NOT started")
         --Is a "search was not done due to any error" callback function registered?
         if self.searchErrorCallback then
             self.searchErrorCallback(self)
@@ -565,12 +565,12 @@ end
 --- Filters
 ------------------------------------------------
 function LibSets_SearchUI_Shared:OnFilterChanged(dropdownControl)
-d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
+--d("[LibSets_SearchUI_Shared]OnFilterChanged - MultiSelect dropdown - hidden")
     self.searchParams = self.searchParams or {}
 end
 
 function LibSets_SearchUI_Shared:DidAnyFilterChange()
-d("[LibSets_SearchUI_Shared]DidAnyFilterChange")
+--d("[LibSets_SearchUI_Shared]DidAnyFilterChange")
     local searchParams = self.searchParams
     local lastSearchParams = self.lastSearchParams
     --No search was done yet?
@@ -647,7 +647,9 @@ end
 
 --Pre-Filter the masterlist table of e.g. a ZO_SortFilterScrollList
 function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
-d("[LibSets_SearchUI_Shared]PreFilterMasterList")
+--d("[LibSets_SearchUI_Shared]PreFilterMasterList")
+--lib._debugDefaultMasterListBase = ZO_ShallowTableCopy(defaultMasterListBase)
+
     if defaultMasterListBase == nil or ZO_IsTableEmpty(defaultMasterListBase) then return end
     --The search parameters of the filters (multiselect dropdowns) were provided?
     -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
@@ -656,6 +658,8 @@ d("[LibSets_SearchUI_Shared]PreFilterMasterList")
         local setsBaseList = {}
         --Language of client, or of not supported: fallbackLang
         local langTouse = langAllowedCheck(clientLang)
+        local settings = lib.svData
+        local setSearchShowSetNamesInEnglishToo = settings.setSearchShowSetNamesInEnglishToo
 
         local multiSelectFilterDropdownToSearchParamName = self.multiSelectFilterDropdownToSearchParamName
 
@@ -864,11 +868,14 @@ d("[LibSets_SearchUI_Shared]PreFilterMasterList")
             -->Are handled at the OnTextChanged directly at the editboxes
 
             ------------------------------------------------------------------------------------------------------------
-            --Add to masterList?
+            --Add to preFiltered masterList as it matches the search criteria?
             if isAllowed == true then
                 setsBaseList[setId] = setData
             end
         end -- for setId, setData in pairs(defaultMasterListBase) do
+
+--lib._debugSetsBaseList = ZO_ShallowTableCopy(setsBaseList)
+
         return setsBaseList
     end
     return defaultMasterListBase

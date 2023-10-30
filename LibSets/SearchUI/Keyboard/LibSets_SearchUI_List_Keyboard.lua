@@ -19,6 +19,8 @@ local favoriteIconText = searchUI.favoriteIconText
 
 
 --Library's local helpers
+local preloadedSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
+
 --local libSets_IsNoESOSet = lib.IsNoESOSet
 local libSets_GetSetBonuses = lib.GetSetBonuses
 local buildSetTypeInfo = lib.buildSetTypeInfo
@@ -191,20 +193,28 @@ end
 function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local parentObject = self._parentObject -- Get the SearchUI object
     --SavedVariables check
-    local sv = lib.svData
-    local setSearchShowSetNamesInEnglishToo = sv.setSearchShowSetNamesInEnglishToo
+    local settings = lib.svData
+    local setSearchShowSetNamesInEnglishToo = settings.setSearchShowSetNamesInEnglishToo
 
     local itemId
-
     --The name column
     local nameColumnValue, nameColumnValueClean
     if not isClientLangEqualToFallbackLang then
+--[[
+    if setData.setNames[fallbackLang] == nil then
+    d(">setName['en'] is missing-setId: " .. tos(setData.setId) .. " - "..tos(setData.setNames[clientLang]))
+    end
+]]
         nameColumnValueClean = setData.setNames[clientLang] or setData.setNames[fallbackLang]
     else
         nameColumnValueClean = setData.setNames[clientLang]
     end
-    if setSearchShowSetNamesInEnglishToo == true and not isClientLangEqualToFallbackLang and setData.setNames[fallbackLang] ~= nil then
-        nameColumnValueClean = nameColumnValueClean .. " / " .. setData.setNames[fallbackLang]
+    --Show English set names too?
+    if setSearchShowSetNamesInEnglishToo == true and not isClientLangEqualToFallbackLang then
+        local setNameFallback = setData.setNames[fallbackLang] or preloadedSetNames[fallbackLang]
+        if setNameFallback ~= nil then
+            nameColumnValueClean = nameColumnValueClean .. " / " .. setNameFallback
+        end
     end
     nameColumnValue = nameColumnValueClean
 
@@ -363,7 +373,7 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     itemData.setTypeName         =              setTypeName
     itemData.setTypeTexture      =              setTypeTexture ~= nil and zif(setTypeTexture, 24, 24)
 
-    itemData.name                =              nameColumnValue --todo Maybe show multi language en/de e.g.?
+    itemData.name                =              nameColumnValue --Shows multi language xx / en (if enabled at the searchUI settings context menu)
     itemData.nameLower           =              nameColumnValueClean:lower() --Always add that for the string text search!!!
     itemData.nameClean           =              nameColumnValueClean
 
