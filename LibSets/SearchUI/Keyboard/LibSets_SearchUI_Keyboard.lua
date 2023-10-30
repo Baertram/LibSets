@@ -799,7 +799,7 @@ end
 
 --Will be called as the multiselect dropdown boxes got closed again (and entries might have changed)
 function LibSets_SearchUI_Keyboard:OnFilterChanged(dropdownControl, editControl)
-    d("[LibSets_SearchUI_Keyboard]OnFilterChanged - MultiSelect dropdown - hidden")
+    --d("[LibSets_SearchUI_Keyboard]OnFilterChanged - MultiSelect dropdown - hidden")
     LibSets_SearchUI_Shared.OnFilterChanged(self, dropdownControl)
     local didAnyFilterChange = false
 
