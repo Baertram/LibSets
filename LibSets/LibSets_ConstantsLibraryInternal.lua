@@ -1236,7 +1236,8 @@ lib.localization                 = {
         popupTooltip                = "Angehefteter Tooltip",
         setInfos                    = "Set Infos",
         showAsTooltip               = "Zeige als Tooltip",
-        showCurrentZoneSets         = "Zeige Sets der aktuellen Zone"
+        showCurrentZoneSets         = "Zeige Sets der aktuellen Zone",
+        clearHistory                = "Historie leeren",
     },
     ["en"] = {
         de  = "German",
@@ -1317,7 +1318,8 @@ lib.localization                 = {
         popupTooltip                = "Popup tooltip",
         setInfos                    = "Set infos",
         showAsTooltip               = "Show as tooltip",
-        showCurrentZoneSets         = "Show current zone\'s sets"
+        showCurrentZoneSets         = "Show current zone\'s sets",
+        clearHistory                = "Clear history",
     },
     ["es"] = {
         de  = "Alemán",

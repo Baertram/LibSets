@@ -9,6 +9,7 @@ local zif = zo_iconFormat
 local zoitfns = zo_iconTextFormatNoSpace
 local tos = tostring
 local sgmatch = string.gmatch
+local strlow = string.lower
 local tins = table.insert
 local tcon = table.concat
 
@@ -39,8 +40,12 @@ local libSets_getsetIdsOfCurrentZone = lib.GetSetIdsOfCurrentZone
 
 local gilsi = GetItemLinkSetInfo
 
+--Event upater names
+local searchHistoryEventUpdaterName = MAJOR .. "_SearchHistory_Update"
+
 --Strings
 local droppedByStr = getLocalizedText("droppedBy")
+local clearSearchHistoryStr = getLocalizedText("clearHistory")
 
 --Textures
 local favoriteIcon = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
@@ -64,6 +69,10 @@ searchUI.searchTypeDefault = 1
 
 --Scroll list datatype - Default text
 searchUI.scrollListDataTypeDefault = 1
+
+--The text search types
+local SEARCH_TYPE_NAME = "name"
+local SEARCH_TYPE_BONUS = "bonus"
 
 --The copy text dialog
 local copyDialog
@@ -142,6 +151,41 @@ end
 
 local function isItemFilterTypeMatching(item, filterType)
     return item.filterType ~= nil and item.filterType == filterType
+end
+
+local function clearSearchHistory(searchType)
+    --d("Clear search history, type: " ..tos(searchType))
+    local settings = lib.svData
+    local searchHistory = settings.setSearchHistory
+    if ZO_IsTableEmpty(searchHistory[searchType]) then return end
+    lib.svData.searchHistory[searchType] = {}
+end
+
+local function updateSearchHistory(searchType, searchValue)
+    local settings = lib.svData
+    local maxSearchHistoryEntries = settings.setSearchHistoryMaxEntries
+    local searchHistory = settings.setSearchHistory
+    searchHistory[searchType] = searchHistory[searchType] or {}
+    local searchHistoryOfSearchType = searchHistory[searchType]
+    local toSearch = strlow(searchValue)
+    if not ZO_IsElementInNumericallyIndexedTable(searchHistoryOfSearchType, toSearch) then
+        --Only keep the last 10 search entries
+        tins(searchHistory[searchType], 1, searchValue)
+        local countEntries = #searchHistory[searchType]
+        if countEntries > maxSearchHistoryEntries then
+            for i=maxSearchHistoryEntries+1, countEntries, 1 do
+                searchHistory[searchType][i] = nil
+            end
+        end
+    end
+end
+
+local function updateSearchHistoryDelayed(searchType, searchValue)
+    EM:UnregisterForUpdate(searchHistoryEventUpdaterName)
+    EM:RegisterForUpdate(searchHistoryEventUpdaterName, 1500, function()
+        EM:UnregisterForUpdate(searchHistoryEventUpdaterName)
+        updateSearchHistory(searchType, searchValue)
+    end)
 end
 
 
@@ -328,6 +372,23 @@ end
 ------------------------------------------------
 --- Search
 ------------------------------------------------
+
+function LibSets_SearchUI_Shared:UpdateSearchHistory(editBoxCtrl)
+    --Get the editbox text and the searchType
+    local searchValue = editBoxCtrl:GetText()
+    local isEmptySearch = (searchValue == nil or searchValue == "" and true) or false
+    if isEmptySearch then return end
+
+    local searchType = (editBoxCtrl == self.searchEditBoxControl and SEARCH_TYPE_NAME) or SEARCH_TYPE_BONUS
+    local settings = lib.svData
+    local searchSaveHistory = (searchType == SEARCH_TYPE_NAME and settings.setSearchSaveNameHistory) or settings.setSearchSaveBonusHistory
+
+    --Check if saving the search history is enabled for that box
+    if searchSaveHistory == true then
+        updateSearchHistoryDelayed(searchType, searchValue)
+    end
+end
+
 function LibSets_SearchUI_Shared:GetSetNameSearchString(tableOrString)
     --Build the search string from the slashOptions
     local setNameStr
@@ -834,6 +895,11 @@ function LibSets_SearchUI_Shared:ModifyWeaponType2hd(weaponType)
     return lib.GetWeaponTypeText(weaponType)
 end
 
+function LibSets_SearchUI_Shared:SetSearchEditBoxValue(editBoxControl, searchTerm)
+    if editBoxControl and editBoxControl.SetText then
+        editBoxControl:SetText(searchTerm)
+    end
+end
 
 ------------------------------------------------
 --- Tooltip
@@ -1077,8 +1143,8 @@ end
 
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
     if LibCustomMenu == nil then return end
-    --Multiselect filter dropdown context menu?
     local selfVar = self
+    --Multiselect filter dropdown context menu?
     if selfVar.multiSelectFilterDropdowns ~= nil and ZO_IsElementInNumericallyIndexedTable(selfVar.multiSelectFilterDropdowns, dropdownControl) then
         ClearMenu()
         AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
@@ -1094,15 +1160,82 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
         --Zones filter muliselect dropdown?
         elseif dropdownControl == self.dropZoneFiltersControl then
             AddCustomMenuItem("-")
-            local setIdsOfCurrentZone, currentZoneId = libSets_getsetIdsOfCurrentZone()
-            if not ZO_IsTableEmpty(setIdsOfCurrentZone) and currentZoneId ~= nil then
-                local currentZoneSetStr = getLocalizedText("showCurrentZoneSets") .. " \'" .. libSets_getCurrentZoneName() .. "\' (" ..tos(currentZoneId) .. ")"
-                local entriesZoneIdsIndexTableOfCurrentZone = getIndexTableFromNonNumberKeyTable(setIdsOfCurrentZone[currentZoneId], true)
-                AddCustomMenuItem(currentZoneSetStr, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesZoneIdsIndexTableOfCurrentZone, true) end)
+            local setIdsOfCurrentZone, currentZoneId, currentParentZoneId = libSets_getsetIdsOfCurrentZone()
+            if not ZO_IsTableEmpty(setIdsOfCurrentZone) then
+                local currentZoneName, currentParentZoneName = libSets_getCurrentZoneName()
+                local currentZoneSetStr = getLocalizedText("showCurrentZoneSets") .. " \'" .. currentZoneName .. "\' (" ..tos(currentZoneId) .. ")"
+
+                local entriesToSelect = { [1] = currentZoneId }
+                AddCustomMenuItem(currentZoneSetStr, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
+                if currentParentZoneId ~= nil and currentParentZoneId ~= currentZoneId then
+                    local currentParentZoneSetStr = getLocalizedText("showCurrentZoneSets") .. " \'" .. currentParentZoneName .. "\' (" ..tos(currentParentZoneId) .. ")"
+                    local entriesForParentZoneToSelect = { [1] = currentParentZoneId }
+                    AddCustomMenuItem(currentParentZoneSetStr, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesForParentZoneToSelect, true) end)
+                end
             end
         end
 
         ShowMenu(dropdownControl)
+    end
+end
+
+function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shift, alt, ctrl, command)
+d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
+    if LibCustomMenu == nil then return end
+    local selfVar = self
+    local settings = lib.svData
+    local doShowMenu = false
+
+    --Search set name/id text field
+    if editBoxControl == selfVar.searchEditBoxControl then
+        --Add search history entries
+        if settings.setSearchSaveNameHistory then
+            local searchHistory = settings.setSearchHistory
+            local searchType = SEARCH_TYPE_NAME
+            local searchHistoryOfSearchMode = searchHistory[searchType]
+            if searchHistoryOfSearchMode ~= nil and #searchHistoryOfSearchMode > 0 then
+                ClearMenu()
+                for _, searchTerm in ipairs(searchHistoryOfSearchMode) do
+                    AddCustomMenuItem(searchTerm, function()
+                        selfVar:SetSearchEditBoxValue(editBoxControl, searchTerm)
+                        ClearMenu()
+                    end)
+                end
+                AddCustomMenuItem("-", function() end)
+                AddCustomMenuItem(clearSearchHistoryStr, function()
+                    clearSearchHistory(searchType)
+                    ClearMenu()
+                end)
+                doShowMenu = true
+            end
+        end
+    --Bonus text field
+    elseif editBoxControl == selfVar.bonusSearchEditBoxControl then
+        ClearMenu()
+        if settings.setSearchSaveBonusHistory then
+            local searchHistory = settings.setSearchHistory
+            local searchType = SEARCH_TYPE_BONUS
+            local searchHistoryOfSearchMode = searchHistory[searchType]
+            if searchHistoryOfSearchMode ~= nil and #searchHistoryOfSearchMode > 0 then
+                ClearMenu()
+                for _, searchTerm in ipairs(searchHistoryOfSearchMode) do
+                    AddCustomMenuItem(searchTerm, function()
+                        selfVar:SetSearchEditBoxValue(editBoxControl, searchTerm)
+                        ClearMenu()
+                    end)
+                end
+                AddCustomMenuItem("-", function() end)
+                AddCustomMenuItem(clearSearchHistoryStr, function()
+                    clearSearchHistory(searchType)
+                    ClearMenu()
+                end)
+                doShowMenu = true
+            end
+        end
+    end
+    --Show the context menu now?
+    if doShowMenu == true then
+        ShowMenu(editBoxControl)
     end
 end
 

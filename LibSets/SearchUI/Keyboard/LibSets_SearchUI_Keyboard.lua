@@ -103,13 +103,14 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     end)
     self.searchEditBoxControl:SetHandler("OnMouseExit", function() ClearTooltip(InformationTooltip)  end)
     --ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
-    self.searchEditBoxControl:SetHandler("OnTextChanged", function()
+    self.searchEditBoxControl:SetHandler("OnTextChanged", function(editBoxCtrl)
         selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar, selfVar.searchEditBoxControl)
+        selfVar:UpdateSearchHistory(editBoxCtrl)
     end)
-    self.searchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
-        --d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp")
+    self.searchEditBoxControl:SetHandler("OnMouseUp", function(editBoxCtrl, mouseButton, upInside, shift, ctrl, alt, command)
+        --d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp - upInside: " ..tostring(upInside))
         if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
-            --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
+            selfVar:OnSearchEditBoxContextMenu(editBoxCtrl, shift, ctrl, alt, command)
         end
     end)
 
@@ -121,13 +122,14 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     end)
     self.bonusSearchEditBoxControl:SetHandler("OnMouseExit", function() ClearTooltip(InformationTooltip)  end)
     --ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
-    self.bonusSearchEditBoxControl:SetHandler("OnTextChanged", function()
+    self.bonusSearchEditBoxControl:SetHandler("OnTextChanged", function(editBoxCtrl)
         selfVar:ThrottledCall(searchUIThrottledSearchHandlerName, searchUIThrottledDelay, refreshSearchFilters, selfVar, selfVar.bonusSearchEditBoxControl)
+        selfVar:UpdateSearchHistory(editBoxCtrl)
     end)
-    self.bonusSearchEditBoxControl:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
-        --d("[LibSets]LibSets_SearchUI_Keyboard - bonusSearchEditBoxControl - OnMouseUp")
+    self.bonusSearchEditBoxControl:SetHandler("OnMouseUp", function(editBoxCtrl, mouseButton, upInside, shift, ctrl, alt, command)
+        --d("[LibSets]LibSets_SearchUI_Keyboard - searchEditBox - OnMouseUp - upInside: " ..tostring(upInside))
         if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
-            --self:OnSearchEditBoxContextMenu(self.searchEditBoxControl)
+            selfVar:OnSearchEditBoxContextMenu(editBoxCtrl, shift, ctrl, alt, command)
         end
     end)
 
@@ -253,7 +255,7 @@ function LibSets_SearchUI_Keyboard:ResetUI()
     --Reset all UI elements to the default values
     --EditBoxes
     for _, editBoxControl in ipairs(self.editBoxFilters) do
-        editBoxControl:SetText("")
+        self:SetSearchEditBoxValue(editBoxControl, "")
     end
     --Multiselect dropdowns
     for _, dropdownControl in ipairs(self.multiSelectFilterDropdowns) do

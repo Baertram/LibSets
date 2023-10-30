@@ -728,7 +728,13 @@ local function LoadSavedVariables()
         setSearchTooltipsAtFilterEntries = true,
         setSearchShowSetNamesInEnglishToo = false,
         setSearchFavorites = {},
-
+        setSearchSaveNameHistory = true,
+        setSearchSaveBonusHistory = true,
+        setSearchHistoryMaxEntries = 10,
+        setSearchHistory = {
+            ["name"] = {},
+            ["bonus"] = {},
+        },
     }
     lib.defaultSV = defaults
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
@@ -2328,6 +2334,7 @@ local getSetIdsByDropZone = lib.GetSetIdsByDropZone
 
 --Returns table:nilable setIdsOfCurrentZone
 --with key = [zoneId] and value = table { [setId] = boolean, ... }
+--number currentZoneId, number currentZoneParentId
 function lib.GetSetIdsOfCurrentZone()
     getCurrentZoneIds = getCurrentZoneIds or lib.GetCurrentZoneIds
     local setIdsOfCurrentZone
@@ -2336,7 +2343,7 @@ function lib.GetSetIdsOfCurrentZone()
     local currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex = getCurrentZoneIds()
     if currentZoneId == nil and currentZoneParentId == nil then return end
 
-d(">currentZoneId: " ..tos(currentZoneId))
+--d(">currentZoneId: " ..tos(currentZoneId))
 
     --Get setIds of current zone
     if currentZoneId ~= nil then
@@ -2344,12 +2351,12 @@ d(">currentZoneId: " ..tos(currentZoneId))
     end
     --ParentZone is different and maybe provide sets? Use this zoneId then
     if setIdsOfCurrentZone == nil and currentZoneParentId ~= nil and currentZoneParentId ~= currentZoneId then
-d(">>parentZoneId: " ..tos(currentZoneParentId))
+--d(">>parentZoneId: " ..tos(currentZoneParentId))
         currentZoneId = currentZoneParentId
         setIdsOfCurrentZone = getSetIdsByDropZone(currentZoneId)
     end
-lib._debugSetIdsOfCurrentZone = setIdsOfCurrentZone
-    return setIdsOfCurrentZone, currentZoneId
+--lib._debugSetIdsOfCurrentZone = setIdsOfCurrentZone
+    return setIdsOfCurrentZone, currentZoneId, currentZoneParentId
 end
 
 --Returns the table of dropLocationNames of LibSets: All sets data was scanned for dropLocation names, and a complete list
@@ -3148,17 +3155,21 @@ function lib.GetZoneName(zoneId, lang)
 end
 local getZoneName = lib.GetZoneName
 
---Returns the name of the current zone's zoneId
---> Parameters: zoneId number: The zone id given in a set's info
--->             language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated
---> Returns:    name zoneName
+--Returns the name of the current zone's zoneId, and the parentZone's name
+--> Parameters: language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated
+--> Returns:    name zoneName, name parentZoneName
 function lib.GetCurrentZoneName(lang)
     getCurrentZoneIds = getCurrentZoneIds or lib.GetCurrentZoneIds
     local currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex = getCurrentZoneIds()
     if currentZoneId == nil and currentZoneParentId ~= nil then
         currentZoneId = currentZoneParentId
     end
-    return getZoneName(currentZoneId, lang)
+    local currentZoneName = getZoneName(currentZoneId, lang)
+    local currentParentZoneName = currentZoneName
+    if currentZoneId ~= currentZoneParentId then
+        currentParentZoneName = getZoneName(currentZoneParentId, lang)
+    end
+    return currentZoneName, currentParentZoneName
 end
 
 
