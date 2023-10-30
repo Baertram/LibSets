@@ -1,0 +1,26 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+
+    <Controls>
+        <!--Virtual Multiselect ComboBoxes - live API 101039: ZO_MultiselectComboBox, PTS API 101040: ZO_ComboBox. But at API101040 ZO_MultiselectComboBox == ZO_ComboBox -->
+		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_MultiselectComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
+            <OnMouseEnter>
+                LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+            <OnMouseUp>
+                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                    ZO_ComboBox_DropdownClicked(self)
+                else
+                    LibSets_SearchUI_Shared_Dropdown_OnMouseUp(self, button, upInside, shift, alt, ctrl, command)
+                end
+            </OnMouseUp>
+        </Control>
+
+    </Controls>
+</GuiXml>
+
+
+
+

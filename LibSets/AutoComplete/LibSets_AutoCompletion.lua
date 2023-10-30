@@ -6,7 +6,7 @@ if IsLibSetsAlreadyLoaded(false) then return end
 local lib = LibSets
 
 local MAJOR, MINOR = lib.name, lib.version
-local libPrefix = "["..MAJOR.."]"
+local libPrefix = lib.prefix
 
 local tos = tostring
 local strgsub = string.gsub

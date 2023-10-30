@@ -72,14 +72,15 @@ local possibleDlcIds = {
     [27] = "DLC_LOST_DEPTHS",
     [28] = "DLC_FIRESONG",
     [29] = "DLC_SCRIBES_OF_FATE",
-    [30] = "NO_DLC_UPDATE39",
+    [30] = "DLC_NECROM",
+    [31] = "NO_DLC_UPDATE39",
+    [32] = "NO_DLC_SECRET_OF_THE_TELVANNI"
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_xxx"
-    possibleDlcIds[#possibleDlcIds + 1] = "DLC_NECROM" --DLC 30
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -160,7 +161,9 @@ lib.dlcAndChapterCollectibleIds = {
     --Necrom
     [DLC_NECROM] =                  {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000}, --June 5th 2023
     --Update 38 QOL patch
-    [NO_DLC_UPDATE39] =             {collectibleId=nil, achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1692604800}, --August 21st 2023
+    [NO_DLC_UPDATE39] =             {name="Update 39", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1692604800}, --August 21st 2023
+    --Update 40
+    [NO_DLC_SECRET_OF_THE_TELVANNI] = {name="Update 40: Secret of the Telvanni", achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1698663600}, --Ocotber 30th 2023
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
@@ -172,8 +175,12 @@ local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds
 --For each entry in the list of example achievements above get the name of it's parent category (DLC, chapter)
 lib.DLCAndCHAPTERData = {}
 lib.DLCandCHAPTERLookupdata = {}
+lib.NONDLCData = {}
+lib.NONDLCLookupdata = {}
 local DLCandCHAPTERdata =   lib.DLCAndCHAPTERData
 local DLCandCHAPTERLookupdata = lib.DLCandCHAPTERLookupdata
+local NONDLCData = lib.NONDLCData
+local NONDLCLookupdata = lib.NONDLCLookupdata
 DLCandCHAPTERdata[DLC_BASE_GAME] = "Elder Scrolls Online"
 DLCandCHAPTERLookupdata[DLC_TYPE_BASE_GAME] = {
     [DLC_BASE_GAME] = DLCandCHAPTERdata[DLC_BASE_GAME]
@@ -184,7 +191,7 @@ for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
     local collectibleId = dlcAndChapterData.collectibleId
     local achievementCategoryId = dlcAndChapterData.achievementCategoryId
     local dlcType = dlcAndChapterData.type
-    if dlcType ~= nil then
+    if dlcType ~= nil and dlcType ~= DLC_TYPE_NORMAL_PATCH then
         DLCandCHAPTERLookupdata[dlcType] = DLCandCHAPTERLookupdata[dlcType] or {}
         if collectibleId ~= nil and collectibleId ~= -1 then
             local name = zocstrfor(dlcStrFormatPattern, gci(collectibleId))
@@ -194,9 +201,37 @@ for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
             local name = zocstrfor(dlcStrFormatPattern, gaci(gcifa(achievementCategoryId)))
             DLCandCHAPTERdata[dlcId] = name
             DLCandCHAPTERLookupdata[dlcType][dlcId] = name
-        --else
+            --else
             --no collectibleId and no achievementCategoryId provided? -> Normal patch with QOL features then
         end
+    elseif dlcType == DLC_TYPE_NORMAL_PATCH then
+        NONDLCLookupdata[dlcType] = NONDLCLookupdata[dlcType] or {}
+        local name = dlcAndChapterData["name"] or "n/a"
+        NONDLCLookupdata[dlcType][dlcId] = name
+        NONDLCData[dlcId] = name
     end
 end
 
+
+--Class specific data
+local classData = {
+    index2Id = {},
+    id2Index = {},
+    names = {},
+    icons = {},
+    colors = {},
+    --
+    setsList = {}, --Will be dynamically filled upon need, by API function lib.GetClassSets(classId)
+}
+for i = 1, GetNumClasses(), 1 do
+    local classId, _, _, _, _, _, keyboardIcon, gamepadIcon = GetClassInfo(i)
+    if classId ~= nil then
+        local classIndex = GetClassIndexById(classId)
+        classData.index2Id[classIndex] = classId
+        classData.id2Index[classId] = classIndex
+        classData.names[classId] = zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))
+        classData.icons[classId] = ZO_GetClassIcon(classId)
+        classData.colors[classId] = GetClassColor(classId)
+    end
+end
+lib.classData = classData

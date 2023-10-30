@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.61
+local MAJOR, MINOR = "LibSets", 0.62
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -25,6 +25,8 @@ local lib                            = LibSets
 
 ------------------------------------------------------------------------------------------------------------------------
 lib.name                             = MAJOR
+local libPrefix                      = "["..MAJOR.."]"
+lib.prefix = libPrefix
 lib.version                          = MINOR
 lib.svName                           = "LibSets_SV_Data"
 lib.svDebugName                      = "LibSets_SV_DEBUG_Data"
@@ -34,6 +36,12 @@ lib.setsScanning                     = false
 ------------------------------------------------------------------------------------------------------------------------
 lib.fullyLoaded                      = false
 lib.startedLoading                   = true
+
+--The table with all relevant setIds
+lib.setIds = {}
+--SetIds which do not exist at the curren API version and thus get filtered automatically
+lib.nonExistingSetIdsAtCurrentApiVersion = {}
+
 ------------------------------------------------------------------------------------------------------------------------
 --Custom tooltip hooks to add the LibSets data, via function LibSets.RegisterCustomTooltipHook(tooltipCtrlName)
 lib.customTooltipHooks = {
@@ -54,7 +62,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101039 -- Necrom (2023-04-18, PTS, API 101038)
+lib.lastSetsPreloadedCheckAPIVersion = 101040 -- Secret of the Telvanni, Patch U40 (2023-10-08, PTS, API 101040)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -73,7 +81,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101039 -- Necrom (2023-04-18, PTS, API 10
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101039 -- QOL patches version 39 (2023-07-10, PTS, API 101039)
+APIVersions["PTS"]                   = 101040 -- Secret of the Telvanni, Patch U40 (2023-10-08, PTS, API 101040)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -181,12 +189,14 @@ LIBSETS_TABLEKEY_MAPS                                  = "maps"
 LIBSETS_TABLEKEY_WAYSHRINES                            = "wayshrines"
 LIBSETS_TABLEKEY_WAYSHRINE_NAMES                       = "wayshrine" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_ZONEIDS                               = "zoneIds"
+LIBSETS_TABLEKEY_ZONEIDS_SORTED                        = "zoneIdsSorted"
 LIBSETS_TABLEKEY_ZONE_DATA                             = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                    = "dungeonFinderData"
 LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     = "collectible" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                 = "collectible_DLC" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_DROPMECHANIC                          = "dropMechanic"
+LIBSETS_TABLEKEY_DROPMECHANIC_SORTED                   = "dropMechanicSorted"
 LIBSETS_TABLEKEY_DROPMECHANIC_NAMES                    = LIBSETS_TABLEKEY_DROPMECHANIC .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES            = LIBSETS_TABLEKEY_DROPMECHANIC .. "Tooltip" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES           = LIBSETS_TABLEKEY_DROPMECHANIC .. "DropLocation" .. LIBSETS_TABLEKEY_NAMES
@@ -194,6 +204,9 @@ LIBSETS_TABLEKEY_MIXED_SETNAMES                        = "MixedSetNamesForDataAl
 --LIBSETS_TABLEKEY_SET_PROCS                             = "setProcs" --2022-04-20 Disabled
 LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP              = "setProcsAllowedInPvP"
 LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING     = "setItemCollectionsZoneMapping"
+LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES          = "enchantSearchCategories"
+LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                  = "dungeonZoneMapping"
+LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING            = "publicDungeonZoneMapping"
 
 
 
@@ -233,6 +246,7 @@ local possibleSetTypes                                 = {
     [12] = "LIBSETS_SETTYPE_MYTHIC", --"Mythic"
     [13] = "LIBSETS_SETTYPE_IMPERIALCITY_MONSTER", --"Imperial City Monster"
     [14] = "LIBSETS_SETTYPE_CYRODIIL_MONSTER", --"Cyrodiil Monster"
+    [15] = "LIBSETS_SETTYPE_CLASS",  --Class specific
 }
 --SetTypes only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -298,6 +312,9 @@ lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = {
         ["tableName"] = "monsterSets",
     },
+    [LIBSETS_SETTYPE_CLASS]                         = {
+        ["tableName"] = "classSets",
+    },
 }
 --setTypeToLibraryInternalVariableNames only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -307,6 +324,55 @@ if checkIfPTSAPIVersionIsLive() then
     }
     ]]
 end
+
+
+------------------------------------------------------------------------------------------------------------------------
+--Special zone IDS
+LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL = 0
+LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD = -99
+LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS = -98
+--Special zone names
+local specialZoneNames = {
+    ["de"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Alle Zonen (in Tamriel)",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Levelaufstieg",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Schlachtfelder",
+    },
+    ["en"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "All Zones (in Tamriel)",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Level-Up",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Battlegrounds",
+    },
+    ["es"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Todas las zonas (en Tamriel)",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Elevar a mismo nivel",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Campos de batalla",
+    },
+    ["fr"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Toutes les zones (en Tamriel)",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Niveau supérieur",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Champs de bataille",
+    },
+    ["ru"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Все зоны (в Тамриэле)",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Уровень повышен",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Поля боя",
+    },
+    ["zh"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "所有区域（泰姆瑞尔）",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "升级",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "战场",
+    },
+    ["jp"] = {
+        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "すべてのゾーン (タムリエル)",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "レベルアップ",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "戦場",
+    },
+}
+lib.specialZoneNames = specialZoneNames
+
+local specialZoneNamesEn        = specialZoneNames[fallbackLang]  --fallback value English
+
 ------------------------------------------------------------------------------------------------------------------------
 --The suffix for the counter variables of the setType tables. e.g. setType LIBSETS_SETTYPE_OVERLAND table is called overlandSets.
 --The suffix is "Counter" so the variable for the counter is "overlandSetsCounter"
@@ -323,7 +389,7 @@ local setTypesToName = {
         ["fr"] = "Arène",
         ["jp"] = "アリーナ",
         ["ru"] = "Aрена",
-        ["zh"] = "Arena",
+        ["zh"] = "竞技场",
     },
     [LIBSETS_SETTYPE_BATTLEGROUND]                  = {
         ["de"] = "Schlachtfeld", --SI_LEADERBOARDTYPE4,
@@ -331,8 +397,8 @@ local setTypesToName = {
         ["es"] = "Campo de batalla",
         ["fr"] = "Champ de bataille",
         ["jp"] = "バトルグラウンド",
-        ["ru"] = "Поле сражений",
-        ["zh"] = "Battleground",
+        ["ru"] = "Поле боя",
+        ["zh"] = "战场",
     },
     [LIBSETS_SETTYPE_CRAFTED]                       = {
         ["de"] = "Handwerklich hergestellt", --SI_ITEM_FORMAT_STR_CRAFTED
@@ -341,7 +407,7 @@ local setTypesToName = {
         ["fr"] = "Fabriqué",
         ["jp"] = "クラフトセット",
         ["ru"] = "Созданный",
-        ["zh"] = "Crafted",
+        ["zh"] = "精雕细琢",
     },
     [LIBSETS_SETTYPE_CYRODIIL]                      = {
         ["de"] = "Cyrodiil", --SI_CAMPAIGNRULESETTYPE1,
@@ -368,7 +434,7 @@ local setTypesToName = {
         ["fr"] = "Donjon",
         ["jp"] = "ダンジョン",
         ["ru"] = "Подземелье",
-        ["zh"] = "Dungeon",
+        ["zh"] = "地下城",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY]                  = {
         ["de"] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
@@ -386,7 +452,7 @@ local setTypesToName = {
         ["fr"] = "Monstre",
         ["jp"] = "モンスター",
         ["ru"] = "Монстр",
-        ["zh"] = "Monster",
+        ["zh"] = "怪物",
     },
     [LIBSETS_SETTYPE_OVERLAND]                      = {
         ["de"] = "Überland",
@@ -395,7 +461,7 @@ local setTypesToName = {
         ["fr"] = "Zone ouverte",
         ["jp"] = "陸上",
         ["ru"] = "Поверхности",
-        ["zh"] = "Overland",
+        ["zh"] = "陆上",
     },
     [LIBSETS_SETTYPE_SPECIAL]                       = {
         ["de"] = "Besonders", --SI_HOTBARCATEGORY9
@@ -404,7 +470,7 @@ local setTypesToName = {
         ["fr"] = "Spécial",
         ["jp"] = "スペシャル",
         ["ru"] = "Специальный",
-        ["zh"] = "Special",
+        ["zh"] = "特别的",
     },
     [LIBSETS_SETTYPE_TRIAL]                         = {
         ["de"] = "Prüfungen", --SI_LFGACTIVITY4
@@ -413,7 +479,7 @@ local setTypesToName = {
         ["fr"] = "Épreuves",
         ["jp"] = "試練",
         ["ru"] = "Испытание",
-        ["zh"] = "Trial",
+        ["zh"] = "审判",
     },
     [LIBSETS_SETTYPE_MYTHIC]                        = {
         ["de"] = "Mythisch",
@@ -422,7 +488,7 @@ local setTypesToName = {
         ["fr"] = "Mythique",
         ["jp"] = "神話上の",
         ["ru"] = "мифический",
-        ["zh"] = "Mythic",
+        ["zh"] = "神话",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = {
         ["de"] = "Kaiserstadt Monster",
@@ -431,7 +497,7 @@ local setTypesToName = {
         ["fr"] = "Cité impériale monstre",
         ["jp"] = "帝都 モンスター",
         ["ru"] = "Имперский город Монстр",
-        ["zh"] = "Imperial city monster",
+        ["zh"] = "Imperial city 怪物",
     },
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]          = {
         ["de"] = "Cyrodiil Monster",
@@ -440,7 +506,16 @@ local setTypesToName = {
         ["fr"] = "Cyrodiil monstre",
         ["jp"] = "シロディール モンスター",
         ["ru"] = "Сиродил Монстр",
-        ["zh"] = "Cyrodiil monster",
+        ["zh"] = "Cyrodiil 怪物",
+    },
+    [LIBSETS_SETTYPE_CLASS] = {
+        ["de"] = "Klassen spezifisch",
+        ["en"] = "Class specific",
+        ["es"] = "Específico de la clase",
+        ["fr"] = "Spécifique à la classe",
+        ["jp"] = "クラス固有の",
+        ["ru"] = "Зависит от класса",
+        ["zh"] = "特定类别",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
@@ -610,6 +685,9 @@ lib.isArmorTraitType               = {
 lib.enchantSearchCategoryTypesValid = {
     --Not allowed
     --Allowed
+    ["all"]                                                     = true,
+    --[ENCHANTMENT_SEARCH_CATEGORY_INVALID]                       = true,
+    [ENCHANTMENT_SEARCH_CATEGORY_NONE]                          = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_HEALTH]                 = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_MAGICKA]                = true,
     [ENCHANTMENT_SEARCH_CATEGORY_ABSORB_STAMINA]                = true,
@@ -631,10 +709,8 @@ lib.enchantSearchCategoryTypesValid = {
     [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_PHYSICAL_DAMAGE]      = true,
     [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_POTION_EFFECTIVENESS] = true,
     [ENCHANTMENT_SEARCH_CATEGORY_INCREASE_SPELL_DAMAGE]         = true,
-    [ENCHANTMENT_SEARCH_CATEGORY_INVALID]                       = true,
     [ENCHANTMENT_SEARCH_CATEGORY_MAGICKA]                       = true,
     [ENCHANTMENT_SEARCH_CATEGORY_MAGICKA_REGEN]                 = true,
-    [ENCHANTMENT_SEARCH_CATEGORY_NONE]                          = true,
     [ENCHANTMENT_SEARCH_CATEGORY_POISONED_WEAPON]               = true,
     [ENCHANTMENT_SEARCH_CATEGORY_POISON_RESISTANT]              = true,
     [ENCHANTMENT_SEARCH_CATEGORY_PRISMATIC_DEFENSE]             = true,
@@ -768,6 +844,7 @@ local possibleDropMechanics         = {
     [34] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY", -- Cyrodiil Weyon Priory, Chorrol
     [35] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
     [36] = "LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS", -- Cyrodiil board missions
+    [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless Archive dungeon
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -786,6 +863,16 @@ lib.allowedDropMechanics              = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
 end
+
+--For API usage
+lib.dropZones = {}
+lib.dropZone2SetIds = {}
+lib.setId2DropZones = {}
+lib.dropLocationNames = {}
+lib.dropLocationNames2SetIds = {}
+lib.setId2DropLocationNames = {}
+
+
 ------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets drop mechanics !!!
@@ -866,6 +953,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
         [LIBSETS_DROP_MECHANIC_CRAFTED]                              = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+        [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
     },
     ["es"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
@@ -1075,6 +1163,12 @@ if checkIfPTSAPIVersionIsLive() then
 end
 
 --Localized texts
+local booleanToOnOff = {
+    [false] = GetString(SI_CHECK_BUTTON_OFF):upper(),
+    [true]  = GetString(SI_CHECK_BUTTON_ON):upper(),
+}
+
+
 local undauntedStr               = GetString(SI_VISUALARMORTYPE4)
 local dungeonStr                 = GetString(SI_INSTANCEDISPLAYTYPE2)
 local setTypeArenaName           = setTypesToName[LIBSETS_SETTYPE_ARENA]
@@ -1088,12 +1182,20 @@ lib.localization                 = {
         pl                       = "Polnisch",
         es                       = "Spanisch",
         zh                       = "Chinesisch",
-        dlc                      = "Kapitel/DLC",
+        dlc                      = "Kapitel,DLC&Patch",
         dropZones                = "Drop Zonen",
         dropZoneArena            = setTypeArenaName["de"],
         dropZoneImperialSewers   = "Kanalisation der Kaiserstadt",
         droppedBy                = "Drop durch",
+        setId                    = "Set ID",
         setType                  = "Set Art",
+        armorType                = "Rüstungsart",
+        weaponType               = "Waffenart",
+        armorOrWeaponType        = "Rüstungs-/Waffenart",
+        equipmentType            = "Ausrüstungs Slot",
+        equipSlot                = "Slot",
+        enchantmentSearchCategory = "Verzaub. Kategorie",
+        numBonuses               = "# Bonus",
         reconstructionCosts      = "Rekonstruktions Kosten",
         neededTraits             = "Eigenschaften benötigt",
         neededTraitsOrReconstructionCost = "Eigenschaften (Analyse)/Rekonstruktion Kosten",
@@ -1109,7 +1211,7 @@ lib.localization                 = {
         slashCommandDescription         = "Suche übersetzte Set Namen",
         slashCommandDescriptionClient   = "Suche Set ID/Namen (Spiel Sprache)",
         previewTT                = "Set Vorschau",
-        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <set name> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.",
+        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.\n\n\nBenutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zuverstecken",
         previewTTToChatToo       = "Vorschauf ItemLink in den Chat",
         previewTTToChatToo_TT    = "Wenn diese Option aktiviert ist wird der ItemLink des Vorschau Set Gegenstandes auch in deine Chat Eingabebox gesendet, damit du diesen jemanden schicken/ihn mit der Maus und STRG+C in deine Zwischenablage kopieren kannst.",
         headerUIStuff            = "Benutzer Oberfläche",
@@ -1119,6 +1221,23 @@ lib.localization                 = {
         moreOptions =           "Zeige mehr Optionen",
         parentZone =            "Übergeordnete Zone",
         currentZone =           "Aktuelle Zone",
+        --Search UI
+        multiSelectFilterSelectedText = "<<1[$d %s/$d %s]>>",
+        noMultiSelectFiltered = "Keine %s gefiltert",
+        nameTextSearch = "(+/-)Name/ID , getrennt",
+        nameTextSearchTT = "Gib mehrere Namen/IDs durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Namen/die ID in der Textsuche ein- bzw. auszuschließen.",
+        bonusTextSearch = "(+/-)Bonus , getrennt",
+        bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.",
+        showAsText =        "Zeige als Text",
+        showAsTextWithIcons = "Zeige als Text (mit Symbolen)",
+        dropdownFilterTooltips = "Dropdown Filter: Tooltips",
+        dropdownFilterEntryTooltips = "Dropdown Filter: Einträge Tooltips",
+        searchUIShowSetNameInEnglishToo = "Set Namen ebenfalls Englisch anzeigen/suchen",
+        popupTooltip                = "Angehefteter Tooltip",
+        setInfos                    = "Set Infos",
+        showAsTooltip               = "Zeige als Tooltip",
+        showCurrentZoneSets         = "Zeige Sets der aktuellen Zone",
+        clearHistory                = "Historie leeren",
     },
     ["en"] = {
         de  = "German",
@@ -1129,7 +1248,7 @@ lib.localization                 = {
         pl  = "Polish",
         es  = "Spanish",
         zh  = "Chinese",
-        dlc                      = "Chapter/DLC",
+        dlc                      = "Chapter,DLC&Patch",
         dropZones                = "Drop zones",
         dropZoneDelve            = GetString(SI_INSTANCEDISPLAYTYPE7),
         dropZoneDungeon          = dungeonStr,
@@ -1144,12 +1263,21 @@ lib.localization                 = {
         dropZoneMonster          = dungeonStr,
         dropZoneImperialCity     = GetString(SI_CAMPAIGNRULESETTYPE4),
         dropZoneImperialSewers   = "Imperial City Sewers",
+        dropZoneEndlessArchive   = GetString(SI_ZONEDISPLAYTYPE12),
         --dropZoneOverland =          GetString(),
         dropZoneSpecial          = GetString(SI_HOTBARCATEGORY9),
         dropZoneMythic           = GetString(SI_ITEMDISPLAYQUALITY6),
         droppedBy                = "Dropped by",
         reconstructionCosts      = "Reconstruction cost",
+        setId                    = "Set ID",
         setType                  = "Set type",
+        armorType                = "Armor type",
+        weaponType               = "Weapon type",
+        armorOrWeaponType        = "Armor-/Weapon type",
+        equipmentType            = "Equipment slot",
+        equipSlot                = "Slot",
+        enchantmentSearchCategory = "Enchantment cat.",
+        numBonuses               = "# bonus",
         neededTraits             = "Traits needed (research)",
         neededTraitsOrReconstructionCost = "Traits (research)/Reconstruction costs",
         dropMechanic             = "Drop mechanics",
@@ -1165,7 +1293,7 @@ lib.localization                 = {
         slashCommandDescription         = "Search translations of set names",
         slashCommandDescriptionClient   = "Search set ID/names (game client language)",
         previewTT                = "Set preview",
-        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <set name> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is writtent to the chat entry editbox) you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.",
+        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is writtent to the chat entry editbox) you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
         previewTTToChatToo       = "Preview itemLink to chat",
         previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to yoru clipboard using CTRL+C.",
         headerUIStuff            = "UI",
@@ -1175,6 +1303,23 @@ lib.localization                 = {
         moreOptions = "More options",
         parentZone = "Parent zone",
         currentZone = "Current zone",
+        --Search UI
+        multiSelectFilterSelectedText = "<<1[$d %s/$d %s]>>",
+        noMultiSelectFiltered = "No %s filtered",
+        nameTextSearch = "(+/-)Name/ID , separated",
+        nameTextSearchTT = "Enter multiple names/IDs separated by a comma (,).\nUse the + or - prefix to include or exclude a name/ID from the search results.",
+        bonusTextSearch = "(+/-)Bonus , separated",
+        bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.",
+        showAsText =        "Show as text",
+        showAsTextWithIcons = "Show as text (with icons)",
+        dropdownFilterTooltips = "Dropdown filter: Tooltips",
+        dropdownFilterEntryTooltips = "Dropdown filter: Entry tooltips",
+        searchUIShowSetNameInEnglishToo = "Show/Search Set names in English too",
+        popupTooltip                = "Popup tooltip",
+        setInfos                    = "Set infos",
+        showAsTooltip               = "Show as tooltip",
+        showCurrentZoneSets         = "Show current zone\'s sets",
+        clearHistory                = "Clear history",
     },
     ["es"] = {
         de  = "Alemán",
@@ -1262,6 +1407,7 @@ lib.localization                 = {
         --todo 2023-08-24 Translate by native Chinese speaker
     },
 }
+lib.localization[fallbackLang].booleanToOnOff = booleanToOnOff
 
 
 --Set metatable to get EN entries for missing other languages (fallback values)
@@ -1276,6 +1422,9 @@ local localizationEn             = lib.localization[fallbackLang] --fallback val
 
 for supportedLanguage, isSupported in pairs(supportedLanguages) do
     if isSupported == true and supportedLanguage ~= fallbackLang then
+        if specialZoneNames[supportedLanguage] ~= nil then
+            setmetatable(specialZoneNames[supportedLanguage],          { __index = specialZoneNamesEn })
+        end
         if dropMechanicNames[supportedLanguage] ~= nil then
             setmetatable(dropMechanicNames[supportedLanguage],          { __index = dropMechanicNamesEn })
         end
@@ -1346,6 +1495,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "/esoui/art/icons/poi/poi_town_complete.dds",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
     [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]             = "/esoui/art/icons/housing_gen_lsb_announcementboard001.dds", -- Cyrodiil board missions
     [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "/esoui/art/icons/achievement_ic_treasurescamp.dds", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
+    [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                     = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds",
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
@@ -1369,6 +1519,7 @@ local setTypeToTexture                 = {
     [LIBSETS_SETTYPE_MYTHIC]                        = "/esoui/art/icons/antiquities_u30_mythic_ring02.dds", --"Mythic"
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster"
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = "/esoui/art/icons/quest_head_monster_011.dds", --"Cyrodiil monster"
+    [LIBSETS_SETTYPE_CLASS]                         = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds", --"Class specific -> Endless Archive" -> Will be using classIcon at tooltip!
     ["vet_dung"]                                    = "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds", --"Veteran Dungeon"
     ["undaunted chest"]                             = "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
 }
@@ -1389,6 +1540,7 @@ local setTypeToDropZoneLocalizationStr = {
     [LIBSETS_SETTYPE_MYTHIC]                        = clientLocalization.dropZoneMythic,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = clientLocalization.dropZoneImperialCity,
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = clientLocalization.dropZoneCyrodiil,
+    [LIBSETS_SETTYPE_CLASS]                         = clientLocalization.dropZoneEndlessArchive,
     ["vet_dung"]                                    = clientLocalization.dropZoneDungeon,
 }
 lib.setTypeToDropZoneLocalizationStr   = setTypeToDropZoneLocalizationStr
