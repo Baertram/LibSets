@@ -1035,7 +1035,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     end)
     local popupTooltipSubmenu = {
         {
-            label = GetString(SI_KEYBINDDISPLAYMODE2),
+            label = GetString(SI_KEYBINDDISPLAYMODE2), --Automatic
             callback =function()
                 self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, nil, nil, nil, nil)
             end
@@ -1045,13 +1045,13 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             callback = function() end,
         },
         {
-            label = GetString(SI_KEYCODE_NARRATIONTEXTPS4125), --Left
+            label = GetString(SI_NAMEPLATEDISPLAYCHOICE10), --Left (SI_KEYCODE_NARRATIONTEXTPS4125)
             callback = function()
                 self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, RIGHT, -10, nil, LEFT)
             end
         },
         {
-            label = GetString(SI_KEYCODE_NARRATIONTEXTPS4126), --Right
+            label = GetString(SI_BINDING_NAME_TURN_RIGHT), --Right (SI_KEYCODE_NARRATIONTEXTPS4126)
             callback =function()
                 self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, LEFT, 10, nil, RIGHT)
             end
@@ -1129,7 +1129,7 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
             MENU_ADD_OPTION_CHECKBOX)
     setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
 
-    if clientLang ~= "en" then
+    if clientLang ~= fallbackLang then
         AddCustomMenuItem("-", function() end)
         local cbShowSetNamesInEnglishTooIndex = AddCustomMenuItem(getLocalizedText("searchUIShowSetNameInEnglishToo"),
                 function(cboxCtrl)
