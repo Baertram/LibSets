@@ -4055,6 +4055,30 @@ end
 
 
 
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- 	API - Custom context menu entries at the set search UI results list
+------------------------------------------------------------------------
+local customContextMenuErrorPrefixStr = "[" .. MAJOR .. "]:RegisterCustomSetSearchResultsListContextMenu ERROR - addon: %q"
+local customContextMenuSetSearchParamErrorStr = customContextMenuErrorPrefixStr .. " - parameter \'headerName\' must be nil or a String. Parameter \'submenuName\' must be nil or a String. Parameter \'submenuEntries\' (%s) must be a table of submenu entries (See library \'LibCustomMenu\', and the addon name must be a string. Parameter visibleFunc must be nil or a function with 1st parameter \'rowControl\' of the menu parent and 2nd optinonal parameter \'setId\', returning a boolean."
+local customContextMenuSetSearchExistsAlreadyErrorStr = customContextMenuErrorPrefixStr .. " was already registered!"
+function lib.RegisterCustomSetSearchResultsListContextMenu(addonName, headerName, submenuName, submenuEntries, visibleFunc)
+    assert(type(addonName) == "string" and (headerName == nil or type(headerName) == "string") and (submenuName == nil or type(submenuName) == "string") and type(submenuEntries) == "table" and (visibleFunc == nil or type(visibleFunc) == "function"), strfor(customContextMenuSetSearchParamErrorStr, tos(addonName), tos(submenuName), tos(submenuEntries)))
+    local customContextMenuEntriesSetSearch = lib.customContextMenuEntries["setSearchUI"]
+    assert(customContextMenuEntriesSetSearch[addonName] == nil, strfor(customContextMenuSetSearchExistsAlreadyErrorStr, tos(addonName)))
+
+    customContextMenuEntriesSetSearch[addonName] = {
+        headerName  = headerName,
+        name        = submenuName or addonName,
+        entries     = submenuEntries,
+        visible     = visibleFunc,
+    }
+end
+
+
 
 ------------------------------------------------------------------------
 -- 	UI related stuff
@@ -4224,6 +4248,7 @@ function lib.checkIfSetsAreLoadedProperly(setId)
     return true
 end
 checkIfSetsAreLoadedProperly = checkIfSetsAreLoadedProperly or lib.checkIfSetsAreLoadedProperly
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -4526,6 +4551,21 @@ local function onLibraryLoaded(event, name)
             end
         end
         ]]
+
+        local submenuEntries = {}
+        local subMenuEntry = {
+            label 		    = "Test entry name",
+            callback 	    = function() d("Test entry name") end
+        }
+        table.insert(submenuEntries, subMenuEntry)
+
+        local visibleFunc = function(rowControl, setId)
+d("[LibSets]visibleFunc-setId: " ..tostring(setId))
+            if rowControl == nil then return false end
+            return true
+        end
+        lib.RegisterCustomSetSearchResultsListContextMenu("MyAddonTest", "Header test", "Submenu test", submenuEntries, visibleFunc)
+
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO

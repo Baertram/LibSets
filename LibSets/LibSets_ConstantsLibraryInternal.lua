@@ -50,6 +50,11 @@ lib.customTooltipHooks = {
     eventPlayerActivatedCalled = false,
 }
 
+--Custom context menu entries, added by other addons
+lib.customContextMenuEntries = {
+    ["setSearchUI"] = {},
+}
+
 ---------------------------------------------------------------------------------
 local APIVersions                    = {}
 --The actual API version on the live server we are logged in
@@ -1546,3 +1551,4 @@ local setTypeToDropZoneLocalizationStr = {
     ["vet_dung"]                                    = clientLocalization.dropZoneDungeon,
 }
 lib.setTypeToDropZoneLocalizationStr   = setTypeToDropZoneLocalizationStr
+

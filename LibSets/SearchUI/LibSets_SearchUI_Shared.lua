@@ -11,6 +11,7 @@ local tos = tostring
 local sgmatch = string.gmatch
 local strlow = string.lower
 local tins = table.insert
+local tsort = table.sort
 local tcon = table.concat
 
 
@@ -50,7 +51,9 @@ local searchHistoryEventUpdaterName = MAJOR .. "_SearchHistory_Update"
 --Strings
 local droppedByStr = getLocalizedText("droppedBy")
 local clearSearchHistoryStr = getLocalizedText("clearHistory")
+local dropZonesStr = getLocalizedText("dropZones")
 local wayshrinesStr = getLocalizedText("wayshrines")
+local dropZoneAndWayshrinesStr = dropZonesStr .. " / " .. wayshrinesStr
 
 --Textures
 local favoriteIcon = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
@@ -216,6 +219,56 @@ local function checkAndGetWayshrineName(p_wayShrines)
 end
 
 
+
+
+--Check for other addons which have added context menu entries here via API function
+--LibSets.RegisterCustomSetSearchResultsListContextMenu(addonName, submenuEntries)
+local function addOtherAddonsContextMenuEntries(rowControl, setId)
+    local customContextMenuEntriesSetSearch = lib.customContextMenuEntries["setSearchUI"]
+    --[[
+    customContextMenuEntriesSetSearch[addonName] = {
+        headerName  = headerName,
+        name        = submenuName or addonName,
+        entries     = submenuEntries,
+        visible     = visibleFunc,
+    }
+    ]]
+    local dividerWasAdded = false
+    local customAddonContextmenuEntries = {}
+    for addonName, _ in pairs(customContextMenuEntriesSetSearch) do
+        --Loop over all entries and sort by addonName (in case any addon added multiple submenus)
+        tins(customAddonContextmenuEntries, addonName)
+    end
+    tsort(customAddonContextmenuEntries)
+
+    for _, addonName in ipairs(customAddonContextmenuEntries) do
+        local customContextMenuEntriesData = customContextMenuEntriesSetSearch[addonName]
+        if customContextMenuEntriesData ~= nil then
+            local submenuName = customContextMenuEntriesData.name
+            local submenuEntries = customContextMenuEntriesData.entries
+            if submenuName ~= nil and submenuEntries ~= nil then
+                local isVisible = true
+                local isVisibleFunc = customContextMenuEntriesData.visibleFunc
+                if isVisibleFunc ~= nil then
+                    isVisible = isVisibleFunc(rowControl)
+                end
+                if isVisible == true then
+                    if not dividerWasAdded then
+                        AddCustomMenuItem("-", function() end)
+                        dividerWasAdded = true
+                    end
+                    --Custom addon's name header
+                    local headerName = customContextMenuEntriesData.headerName
+                    if headerName ~= nil then
+                        AddCustomMenuItem(headerName, function() end, MENU_ADD_OPTION_HEADER)
+                    end
+                    --Addon name submenu
+                    AddCustomSubMenuItem(submenuName, submenuEntries)
+                end
+            end
+        end
+    end
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
@@ -1137,9 +1190,9 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
 
         --Drop zones
         local setDropZones = libSets_GetDropZonesBySetId(setId)
+        local zoneIdSubmenuEntries = {}
         if not ZO_IsTableEmpty(setDropZones) then
             local alreadyAddedZoneIds = {}
-            local zoneIdSubmenuEntries = {}
             for _, zoneId in ipairs(data.zoneIds) do
                 if zoneId ~= -1 and not alreadyAddedZoneIds[zoneId] then
                     local zoneName = libSets_GetZoneName(zoneId)
@@ -1151,21 +1204,16 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                     alreadyAddedZoneIds[zoneId] = true
                 end
             end
-            if not ZO_IsTableEmpty(zoneIdSubmenuEntries) then
-                AddCustomMenuItem("DropZones", function() end, MENU_ADD_OPTION_HEADER)
-                AddCustomSubMenuItem("DropZones", zoneIdSubmenuEntries)
-            end
         end
-
 
         --Wayshrines
         --Get the drop location wayshrines
+        local wayshrinesSubmenuEntries = {}
         local setWayshrines = libSets_GetWayshrineIds(setId)
         if not ZO_IsTableEmpty(setWayshrines) then
             checkAndGetWayshrineName(setWayshrines)
 
             local alreadyAddedWayshrines = {}
-            local wayshrinesSubmenuEntries = {}
             for _, wayshrineNodeIndex in ipairs(setWayshrines) do
                 if wayshrineNodeIndex > 0 and not alreadyAddedWayshrines[wayshrineNodeIndex] then
                     --GetFastTravelNodeInfo(*luaindex* _nodeIndex_)
@@ -1184,8 +1232,16 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 end
             end
 
-            if not ZO_IsTableEmpty(wayshrinesSubmenuEntries) then
-                AddCustomMenuItem(wayshrinesStr, function() end, MENU_ADD_OPTION_HEADER)
+        end
+
+        local gotDropZones = not ZO_IsTableEmpty(zoneIdSubmenuEntries)
+        local gotWayshrines = not ZO_IsTableEmpty(wayshrinesSubmenuEntries)
+        if gotDropZones or gotWayshrines then
+            AddCustomMenuItem(dropZoneAndWayshrinesStr, function() end, MENU_ADD_OPTION_HEADER)
+            if gotDropZones then
+                AddCustomSubMenuItem(dropZonesStr, zoneIdSubmenuEntries)
+            end
+            if gotWayshrines then
                 AddCustomSubMenuItem(wayshrinesStr, wayshrinesSubmenuEntries)
             end
         end
@@ -1226,6 +1282,10 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 getSetTextForCopyDialog(true)
             end)
         end
+
+        --Check for other addons which have added context menu entries here via API function
+        --LibSets.AddSetSearchResultsListContextMenuEntries(addonName, submenuEntries)
+        addOtherAddonsContextMenuEntries(rowControl, setId)
     end
     ShowMenu(rowControl)
 end
