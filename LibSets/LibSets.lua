@@ -4551,21 +4551,6 @@ local function onLibraryLoaded(event, name)
             end
         end
         ]]
-
-        local submenuEntries = {}
-        local subMenuEntry = {
-            label 		    = "Test entry name",
-            callback 	    = function() d("Test entry name") end
-        }
-        table.insert(submenuEntries, subMenuEntry)
-
-        local visibleFunc = function(rowControl, setId)
-d("[LibSets]visibleFunc-setId: " ..tostring(setId))
-            if rowControl == nil then return false end
-            return true
-        end
-        lib.RegisterCustomSetSearchResultsListContextMenu("MyAddonTest", "Header test", "Submenu test", submenuEntries, visibleFunc)
-
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
