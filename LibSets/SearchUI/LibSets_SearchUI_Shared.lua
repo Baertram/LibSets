@@ -37,6 +37,10 @@ local libSets_IsWeaponTypeSet = lib.IsWeaponTypeSet
 local libSets_IsArmorTypeSet         = lib.IsArmorTypeSet
 local libSets_getCurrentZoneName = lib.GetCurrentZoneName
 local libSets_getsetIdsOfCurrentZone = lib.GetSetIdsOfCurrentZone
+local libSets_GetWayshrineIds = lib.GetWayshrineIds
+local libSets_GetZoneName = lib.GetZoneName
+local libSets_ShowWayshrineNodeIdOnMap = lib.showWayshrineNodeIdOnMap
+local libSets_OpenMapOfZoneId = lib.openMapOfZoneId
 
 local gilsi = GetItemLinkSetInfo
 
@@ -46,6 +50,7 @@ local searchHistoryEventUpdaterName = MAJOR .. "_SearchHistory_Update"
 --Strings
 local droppedByStr = getLocalizedText("droppedBy")
 local clearSearchHistoryStr = getLocalizedText("clearHistory")
+local wayshrinesStr = getLocalizedText("wayshrines")
 
 --Textures
 local favoriteIcon = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
@@ -187,6 +192,29 @@ local function updateSearchHistoryDelayed(searchType, searchValue)
         updateSearchHistory(searchType, searchValue)
     end)
 end
+
+local wayshrinesAdded = {}
+local wayshrineNames = {}
+local function checkAndGetWayshrineName(p_wayShrines)
+    if p_wayShrines and type(p_wayShrines) == "table" then
+        for _, wsIndex in ipairs(p_wayShrines) do
+            if wsIndex > 0 and not wayshrinesAdded[wsIndex] then
+                local wsNameLocalized = nil
+                --@return known bool,name string,normalizedX number,normalizedY number,icon textureName,glowIcon textureName:nilable,poiType [PointOfInterestType|#PointOfInterestType],isShownInCurrentMap bool,linkedCollectibleIsLocked bool
+                --function GetFastTravelNodeInfo(nodeIndex) end
+                local _, wsName = GetFastTravelNodeInfo(wsIndex)
+                if wsName and wsName ~= "" then
+                    wsNameLocalized = ZO_CachedStrFormat("<<C:1>>", wsName)
+                    if wsNameLocalized and wsNameLocalized ~= "" then
+                        wayshrinesAdded[wsIndex] = true
+                        wayshrineNames[wsIndex] = wsNameLocalized
+                    end
+                end
+            end
+        end
+    end
+end
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -1022,6 +1050,42 @@ function LibSets_SearchUI_Shared:RemoveAllSetFavorites()
     self.resultsList:RefreshData() --To remove the Favorite markers
 end
 
+function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
+    if not LibCustomMenu then return end
+    local selfVar = self
+    ClearMenu()
+    AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
+    local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterTooltips"),
+            function(cboxCtrl)
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters", selfVar)
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
+    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterEntryTooltips"),
+            function(cboxCtrl)
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilterEntries", selfVar)
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
+
+    if clientLang ~= fallbackLang then
+        AddCustomMenuItem("-", function() end)
+        local cbShowSetNamesInEnglishTooIndex = AddCustomMenuItem(getLocalizedText("searchUIShowSetNameInEnglishToo"),
+                function(cboxCtrl)
+                    OnClick_CheckBoxLabel(cboxCtrl, "setSearchShowSetNamesInEnglishToo", selfVar)
+                end,
+                MENU_ADD_OPTION_CHECKBOX)
+        setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
+    end
+
+    if not ZO_IsTableEmpty(lib.svData.setSearchFavorites) then
+        AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
+        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
+            self:RemoveAllSetFavorites()
+        end)
+    end
+    ShowMenu(anchorControl)
+end
 
 function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     if not LibCustomMenu then return end
@@ -1071,6 +1135,61 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end)
         end
 
+        --Drop zones
+        local setDropZones = libSets_GetDropZonesBySetId(setId)
+        if not ZO_IsTableEmpty(setDropZones) then
+            local alreadyAddedZoneIds = {}
+            local zoneIdSubmenuEntries = {}
+            for _, zoneId in ipairs(data.zoneIds) do
+                if zoneId ~= -1 and not alreadyAddedZoneIds[zoneId] then
+                    local zoneName = libSets_GetZoneName(zoneId)
+                    local subMenuEntry = {
+                        label 		    = zoneName,
+                        callback 	    = function() libSets_OpenMapOfZoneId(zoneId) end
+                    }
+                    table.insert(zoneIdSubmenuEntries, subMenuEntry)
+                    alreadyAddedZoneIds[zoneId] = true
+                end
+            end
+            if not ZO_IsTableEmpty(zoneIdSubmenuEntries) then
+                AddCustomMenuItem("DropZones", function() end, MENU_ADD_OPTION_HEADER)
+                AddCustomSubMenuItem("DropZones", zoneIdSubmenuEntries)
+            end
+        end
+
+
+        --Wayshrines
+        --Get the drop location wayshrines
+        local setWayshrines = libSets_GetWayshrineIds(setId)
+        if not ZO_IsTableEmpty(setWayshrines) then
+            checkAndGetWayshrineName(setWayshrines)
+
+            local alreadyAddedWayshrines = {}
+            local wayshrinesSubmenuEntries = {}
+            for _, wayshrineNodeIndex in ipairs(setWayshrines) do
+                if wayshrineNodeIndex > 0 and not alreadyAddedWayshrines[wayshrineNodeIndex] then
+                    --GetFastTravelNodeInfo(*luaindex* _nodeIndex_)
+                    --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
+                    local wsKnown, wsName = GetFastTravelNodeInfo(wayshrineNodeIndex)
+                    local wayshrineName = ZO_CachedStrFormat("<<C:1>>", wsName)
+                    if not wsKnown then
+                        wayshrineName = wayshrineName .. " <|cFF0000" .. GetString(SI_INPUT_LANGUAGE_UNKNOWN) .. "|r>"
+                    end
+                    local subMenuEntry = {
+                        label 		    = wayshrineName,
+                        callback 	    = function() libSets_ShowWayshrineNodeIdOnMap(wayshrineNodeIndex) end
+                    }
+                    table.insert(wayshrinesSubmenuEntries, subMenuEntry)
+                    alreadyAddedWayshrines[wayshrineNodeIndex] = true
+                end
+            end
+
+            if not ZO_IsTableEmpty(wayshrinesSubmenuEntries) then
+                AddCustomMenuItem(wayshrinesStr, function() end, MENU_ADD_OPTION_HEADER)
+                AddCustomSubMenuItem(wayshrinesStr, wayshrinesSubmenuEntries)
+            end
+        end
+
         --SetData text
         if data.setDataText ~= nil then
             --Tooltip enhancements are enabled
@@ -1109,43 +1228,6 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         end
     end
     ShowMenu(rowControl)
-end
-
-function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
-    if not LibCustomMenu then return end
-    local selfVar = self
-    ClearMenu()
-    AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
-    local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterTooltips"),
-            function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters", selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
-    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterEntryTooltips"),
-            function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilterEntries", selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
-
-    if clientLang ~= fallbackLang then
-        AddCustomMenuItem("-", function() end)
-        local cbShowSetNamesInEnglishTooIndex = AddCustomMenuItem(getLocalizedText("searchUIShowSetNameInEnglishToo"),
-                function(cboxCtrl)
-                    OnClick_CheckBoxLabel(cboxCtrl, "setSearchShowSetNamesInEnglishToo", selfVar)
-                end,
-                MENU_ADD_OPTION_CHECKBOX)
-        setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
-    end
-
-    if not ZO_IsTableEmpty(lib.svData.setSearchFavorites) then
-        AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
-        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
-            self:RemoveAllSetFavorites()
-        end)
-    end
-    ShowMenu(anchorControl)
 end
 
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
@@ -1187,7 +1269,7 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
 end
 
 function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shift, alt, ctrl, command)
-d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
+--d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
     if LibCustomMenu == nil then return end
     local selfVar = self
     local settings = lib.svData

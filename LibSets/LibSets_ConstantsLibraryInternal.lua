@@ -1238,6 +1238,7 @@ lib.localization                 = {
         showAsTooltip               = "Zeige als Tooltip",
         showCurrentZoneSets         = "Zeige Sets der aktuellen Zone",
         clearHistory                = "Historie leeren",
+        wayshrines                  = "Wegschreine",
     },
     ["en"] = {
         de  = "German",
@@ -1320,6 +1321,7 @@ lib.localization                 = {
         showAsTooltip               = "Show as tooltip",
         showCurrentZoneSets         = "Show current zone\'s sets",
         clearHistory                = "Clear history",
+        wayshrines                  = "Wayshrines",
     },
     ["es"] = {
         de  = "Alemán",

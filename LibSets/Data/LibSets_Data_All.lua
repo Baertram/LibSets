@@ -921,7 +921,7 @@ lib.setDataPreloaded = {
         [449]={parentZoneId=101,isTrial=false},   --Direfrost Keep
         [1268]={parentZoneId=1261,isTrial=false},   --The Dread Cellar
         [1344]={parentZoneId=1318,isTrial=true},   --Dreadsail Reef
-        [1360]={parentZoneId=0,isTrial=true},   --Earthen Root Enclave
+        [1360]={parentZoneId=1318,isTrial=false},   --Earthen Root Enclave
         [126]={parentZoneId=383,isTrial=false},   --Elden Hollow I
         [931]={parentZoneId=383,isTrial=false},   --Elden Hollow II
         [974]={parentZoneId=888,isTrial=false},   --Falkreath Hold
@@ -929,7 +929,7 @@ lib.setDataPreloaded = {
         [1080]={parentZoneId=101,isTrial=false},   --Frostvault
         [283]={parentZoneId=41,isTrial=false},   --Fungal Grotto I
         [934]={parentZoneId=41,isTrial=false},   --Fungal Grotto II
-        [1361]={parentZoneId=0,isTrial=true},   --Graven Deep
+        [1361]={parentZoneId=1318,isTrial=false},   --Graven Deep
         [975]={parentZoneId=849,isTrial=true},   --Halls of Fabrication
         [636]={parentZoneId=888,isTrial=true},   --Hel Ra Citadel
         [1152]={parentZoneId=684,isTrial=false},   --Icereach
@@ -943,6 +943,7 @@ lib.setDataPreloaded = {
         [1267]={parentZoneId=3,isTrial=false},   --Red Petal Bastion
         [843]={parentZoneId=117,isTrial=false},   --Ruins of Mazzatun
         [639]={parentZoneId=888,isTrial=true},   --Sanctum Ophidia
+        [1427]={parentZoneId=1414,isTrial=true},   --Sanity's Edge
         [1010]={parentZoneId=19,isTrial=false},   --Scalecaller Peak
         [1390]={parentZoneId=103,isTrial=false},   --Scrivener's Hall
         [31]={parentZoneId=382,isTrial=false},   --Selene's Web
@@ -961,6 +962,9 @@ lib.setDataPreloaded = {
         [146]={parentZoneId=19,isTrial=false},   --Wayrest Sewers I
         [933]={parentZoneId=19,isTrial=false},   --Wayrest Sewers II
         [688]={parentZoneId=584,isTrial=false},   --White-Gold Tower
+
+        --Special dungeons
+        [1436]={parentZoneId=1413,isTrial=false},   --Endless Archive
     },
 
 ------------------------------------------------------------------------------------------------------------------------
