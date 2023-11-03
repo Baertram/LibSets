@@ -1244,6 +1244,7 @@ lib.localization                 = {
         showCurrentZoneSets         = "Zeige Sets der aktuellen Zone",
         clearHistory                = "Historie leeren",
         wayshrines                  = "Wegschreine",
+        invertSelection             = "≠ Auswahl invertieren"
     },
     ["en"] = {
         de  = "German",
@@ -1327,6 +1328,7 @@ lib.localization                 = {
         showCurrentZoneSets         = "Show current zone\'s sets",
         clearHistory                = "Clear history",
         wayshrines                  = "Wayshrines",
+        invertSelection             = "≠ Invert selection"
     },
     ["es"] = {
         de  = "Alemán",

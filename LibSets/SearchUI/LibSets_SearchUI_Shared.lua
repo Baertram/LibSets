@@ -54,6 +54,7 @@ local clearSearchHistoryStr = getLocalizedText("clearHistory")
 local dropZonesStr = getLocalizedText("dropZones")
 local wayshrinesStr = getLocalizedText("wayshrines")
 local dropZoneAndWayshrinesStr = dropZonesStr .. " / " .. wayshrinesStr
+local invertSelectionStr = getLocalizedText("invertSelection")
 
 --Textures
 local favoriteIcon = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
@@ -357,21 +358,33 @@ function LibSets_SearchUI_Shared:Reset()
 end
 
 function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
-    if dropdownControl.m_comboBox ~= nil then
-        --Keyboard
-        dropdownControl.m_comboBox:ClearAllSelections()
-    else
-        --Gamepad
-        dropdownControl:ClearAllSelections()
+    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    if comboBox:GetNumSelectedEntries() == 0 then return end
+    comboBox:ClearAllSelections()
+end
+
+function LibSets_SearchUI_Shared:SelectAllAtMultiSelectDropdown(dropdownControl)
+    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    for index, _ in ipairs(comboBox:GetItems()) do
+        comboBox:SetSelected(index, true)
     end
 end
+
+function LibSets_SearchUI_Shared:SelectInvertMultiSelectDropdown(dropdownControl)
+    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    for index, item in ipairs(comboBox:GetItems()) do
+        local isCurrentlySelected = comboBox:IsItemSelected(item)
+        comboBox:SetSelected(index, not isCurrentlySelected)
+    end
+end
+
 
 function LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, refreshResultsListAfterwards)
 --d("LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries")
 --lib._debugDropDownControl = dropdownControl
     refreshResultsListAfterwards = refreshResultsListAfterwards or false
     if ZO_IsTableEmpty(entriesToSelect) then return end
-    local comboBox = dropdownControl.m_comboBox
+    local comboBox = dropdownControl.m_comboBox or dropdownControl
     if comboBox ~= nil then
         comboBox:ClearAllSelections()
         for _, filterType in ipairs(entriesToSelect) do
@@ -1296,6 +1309,18 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
     --Multiselect filter dropdown context menu?
     if selfVar.multiSelectFilterDropdowns ~= nil and ZO_IsElementInNumericallyIndexedTable(selfVar.multiSelectFilterDropdowns, dropdownControl) then
         ClearMenu()
+        --Select all
+        AddCustomMenuItem(GetString(SI_ACHIEVEMENT_FILTER_SHOW_ALL), function()
+            selfVar:SelectAllAtMultiSelectDropdown(dropdownControl)
+            selfVar:OnFilterChanged(dropdownControl)
+        end)
+        --Invert selection
+        AddCustomMenuItem(invertSelectionStr, function()
+            selfVar:SelectInvertMultiSelectDropdown(dropdownControl)
+            selfVar:OnFilterChanged(dropdownControl)
+        end)
+
+        --Clear all selections
         AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
             selfVar:ResetMultiSelectDropdown(dropdownControl)
             selfVar:OnFilterChanged(dropdownControl)
