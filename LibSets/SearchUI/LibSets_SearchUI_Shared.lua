@@ -11,6 +11,7 @@ local tos = tostring
 local sgmatch = string.gmatch
 local strlow = string.lower
 local tins = table.insert
+local tsort = table.sort
 local tcon = table.concat
 
 
@@ -37,6 +38,10 @@ local libSets_IsWeaponTypeSet = lib.IsWeaponTypeSet
 local libSets_IsArmorTypeSet         = lib.IsArmorTypeSet
 local libSets_getCurrentZoneName = lib.GetCurrentZoneName
 local libSets_getsetIdsOfCurrentZone = lib.GetSetIdsOfCurrentZone
+local libSets_GetWayshrineIds = lib.GetWayshrineIds
+local libSets_GetZoneName = lib.GetZoneName
+local libSets_ShowWayshrineNodeIdOnMap = lib.showWayshrineNodeIdOnMap
+local libSets_OpenMapOfZoneId = lib.openMapOfZoneId
 
 local gilsi = GetItemLinkSetInfo
 
@@ -46,6 +51,10 @@ local searchHistoryEventUpdaterName = MAJOR .. "_SearchHistory_Update"
 --Strings
 local droppedByStr = getLocalizedText("droppedBy")
 local clearSearchHistoryStr = getLocalizedText("clearHistory")
+local dropZonesStr = getLocalizedText("dropZones")
+local wayshrinesStr = getLocalizedText("wayshrines")
+local dropZoneAndWayshrinesStr = dropZonesStr .. " / " .. wayshrinesStr
+local invertSelectionStr = getLocalizedText("invertSelection")
 
 --Textures
 local favoriteIcon = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
@@ -188,6 +197,79 @@ local function updateSearchHistoryDelayed(searchType, searchValue)
     end)
 end
 
+local wayshrinesAdded = {}
+local wayshrineNames = {}
+local function checkAndGetWayshrineName(p_wayShrines)
+    if p_wayShrines and type(p_wayShrines) == "table" then
+        for _, wsIndex in ipairs(p_wayShrines) do
+            if wsIndex > 0 and not wayshrinesAdded[wsIndex] then
+                local wsNameLocalized = nil
+                --@return known bool,name string,normalizedX number,normalizedY number,icon textureName,glowIcon textureName:nilable,poiType [PointOfInterestType|#PointOfInterestType],isShownInCurrentMap bool,linkedCollectibleIsLocked bool
+                --function GetFastTravelNodeInfo(nodeIndex) end
+                local _, wsName = GetFastTravelNodeInfo(wsIndex)
+                if wsName and wsName ~= "" then
+                    wsNameLocalized = ZO_CachedStrFormat("<<C:1>>", wsName)
+                    if wsNameLocalized and wsNameLocalized ~= "" then
+                        wayshrinesAdded[wsIndex] = true
+                        wayshrineNames[wsIndex] = wsNameLocalized
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+
+
+--Check for other addons which have added context menu entries here via API function
+--LibSets.RegisterCustomSetSearchResultsListContextMenu(addonName, submenuEntries)
+local function addOtherAddonsContextMenuEntries(rowControl, setId)
+    local customContextMenuEntriesSetSearch = lib.customContextMenuEntries["setSearchUI"]
+    --[[
+    customContextMenuEntriesSetSearch[addonName] = {
+        headerName  = headerName,
+        name        = submenuName or addonName,
+        entries     = submenuEntries,
+        visible     = visibleFunc,
+    }
+    ]]
+    local dividerWasAdded = false
+    local customAddonContextmenuEntries = {}
+    for addonName, _ in pairs(customContextMenuEntriesSetSearch) do
+        --Loop over all entries and sort by addonName (in case any addon added multiple submenus)
+        tins(customAddonContextmenuEntries, addonName)
+    end
+    tsort(customAddonContextmenuEntries)
+
+    for _, addonName in ipairs(customAddonContextmenuEntries) do
+        local customContextMenuEntriesData = customContextMenuEntriesSetSearch[addonName]
+        if customContextMenuEntriesData ~= nil then
+            local submenuName = customContextMenuEntriesData.name
+            local submenuEntries = customContextMenuEntriesData.entries
+            if submenuName ~= nil and submenuEntries ~= nil then
+                local isVisible = true
+                local isVisibleFunc = customContextMenuEntriesData.visibleFunc
+                if isVisibleFunc ~= nil then
+                    isVisible = isVisibleFunc(rowControl)
+                end
+                if isVisible == true then
+                    if not dividerWasAdded then
+                        AddCustomMenuItem("-", function() end)
+                        dividerWasAdded = true
+                    end
+                    --Custom addon's name header
+                    local headerName = customContextMenuEntriesData.headerName
+                    if headerName ~= nil then
+                        AddCustomMenuItem(headerName, function() end, MENU_ADD_OPTION_HEADER)
+                    end
+                    --Addon name submenu
+                    AddCustomSubMenuItem(submenuName, submenuEntries)
+                end
+            end
+        end
+    end
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 --Search UI shared class for keyboard and gamepad mode
@@ -276,21 +358,33 @@ function LibSets_SearchUI_Shared:Reset()
 end
 
 function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
-    if dropdownControl.m_comboBox ~= nil then
-        --Keyboard
-        dropdownControl.m_comboBox:ClearAllSelections()
-    else
-        --Gamepad
-        dropdownControl:ClearAllSelections()
+    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    if comboBox:GetNumSelectedEntries() == 0 then return end
+    comboBox:ClearAllSelections()
+end
+
+function LibSets_SearchUI_Shared:SelectAllAtMultiSelectDropdown(dropdownControl)
+    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    for index, _ in ipairs(comboBox:GetItems()) do
+        comboBox:SetSelected(index, true)
     end
 end
+
+function LibSets_SearchUI_Shared:SelectInvertMultiSelectDropdown(dropdownControl)
+    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    for index, item in ipairs(comboBox:GetItems()) do
+        local isCurrentlySelected = comboBox:IsItemSelected(item)
+        comboBox:SetSelected(index, not isCurrentlySelected)
+    end
+end
+
 
 function LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, refreshResultsListAfterwards)
 --d("LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries")
 --lib._debugDropDownControl = dropdownControl
     refreshResultsListAfterwards = refreshResultsListAfterwards or false
     if ZO_IsTableEmpty(entriesToSelect) then return end
-    local comboBox = dropdownControl.m_comboBox
+    local comboBox = dropdownControl.m_comboBox or dropdownControl
     if comboBox ~= nil then
         comboBox:ClearAllSelections()
         for _, filterType in ipairs(entriesToSelect) do
@@ -1022,6 +1116,42 @@ function LibSets_SearchUI_Shared:RemoveAllSetFavorites()
     self.resultsList:RefreshData() --To remove the Favorite markers
 end
 
+function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
+    if not LibCustomMenu then return end
+    local selfVar = self
+    ClearMenu()
+    AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
+    local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterTooltips"),
+            function(cboxCtrl)
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters", selfVar)
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
+    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterEntryTooltips"),
+            function(cboxCtrl)
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilterEntries", selfVar)
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
+
+    if clientLang ~= fallbackLang then
+        AddCustomMenuItem("-", function() end)
+        local cbShowSetNamesInEnglishTooIndex = AddCustomMenuItem(getLocalizedText("searchUIShowSetNameInEnglishToo"),
+                function(cboxCtrl)
+                    OnClick_CheckBoxLabel(cboxCtrl, "setSearchShowSetNamesInEnglishToo", selfVar)
+                end,
+                MENU_ADD_OPTION_CHECKBOX)
+        setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
+    end
+
+    if not ZO_IsTableEmpty(lib.svData.setSearchFavorites) then
+        AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
+        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
+            self:RemoveAllSetFavorites()
+        end)
+    end
+    ShowMenu(anchorControl)
+end
 
 function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     if not LibCustomMenu then return end
@@ -1071,6 +1201,64 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end)
         end
 
+        --Drop zones
+        local setDropZones = libSets_GetDropZonesBySetId(setId)
+        local zoneIdSubmenuEntries = {}
+        if not ZO_IsTableEmpty(setDropZones) then
+            local alreadyAddedZoneIds = {}
+            for _, zoneId in ipairs(data.zoneIds) do
+                if zoneId ~= -1 and not alreadyAddedZoneIds[zoneId] then
+                    local zoneName = libSets_GetZoneName(zoneId)
+                    local subMenuEntry = {
+                        label 		    = zoneName,
+                        callback 	    = function() libSets_OpenMapOfZoneId(zoneId) end
+                    }
+                    table.insert(zoneIdSubmenuEntries, subMenuEntry)
+                    alreadyAddedZoneIds[zoneId] = true
+                end
+            end
+        end
+
+        --Wayshrines
+        --Get the drop location wayshrines
+        local wayshrinesSubmenuEntries = {}
+        local setWayshrines = libSets_GetWayshrineIds(setId)
+        if not ZO_IsTableEmpty(setWayshrines) then
+            checkAndGetWayshrineName(setWayshrines)
+
+            local alreadyAddedWayshrines = {}
+            for _, wayshrineNodeIndex in ipairs(setWayshrines) do
+                if wayshrineNodeIndex > 0 and not alreadyAddedWayshrines[wayshrineNodeIndex] then
+                    --GetFastTravelNodeInfo(*luaindex* _nodeIndex_)
+                    --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
+                    local wsKnown, wsName = GetFastTravelNodeInfo(wayshrineNodeIndex)
+                    local wayshrineName = ZO_CachedStrFormat("<<C:1>>", wsName)
+                    if not wsKnown then
+                        wayshrineName = wayshrineName .. " <|cFF0000" .. GetString(SI_INPUT_LANGUAGE_UNKNOWN) .. "|r>"
+                    end
+                    local subMenuEntry = {
+                        label 		    = wayshrineName,
+                        callback 	    = function() libSets_ShowWayshrineNodeIdOnMap(wayshrineNodeIndex) end
+                    }
+                    table.insert(wayshrinesSubmenuEntries, subMenuEntry)
+                    alreadyAddedWayshrines[wayshrineNodeIndex] = true
+                end
+            end
+
+        end
+
+        local gotDropZones = not ZO_IsTableEmpty(zoneIdSubmenuEntries)
+        local gotWayshrines = not ZO_IsTableEmpty(wayshrinesSubmenuEntries)
+        if gotDropZones or gotWayshrines then
+            AddCustomMenuItem(dropZoneAndWayshrinesStr, function() end, MENU_ADD_OPTION_HEADER)
+            if gotDropZones then
+                AddCustomSubMenuItem(dropZonesStr, zoneIdSubmenuEntries)
+            end
+            if gotWayshrines then
+                AddCustomSubMenuItem(wayshrinesStr, wayshrinesSubmenuEntries)
+            end
+        end
+
         --SetData text
         if data.setDataText ~= nil then
             --Tooltip enhancements are enabled
@@ -1107,45 +1295,12 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 getSetTextForCopyDialog(true)
             end)
         end
+
+        --Check for other addons which have added context menu entries here via API function
+        --LibSets.AddSetSearchResultsListContextMenuEntries(addonName, submenuEntries)
+        addOtherAddonsContextMenuEntries(rowControl, setId)
     end
     ShowMenu(rowControl)
-end
-
-function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
-    if not LibCustomMenu then return end
-    local selfVar = self
-    ClearMenu()
-    AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
-    local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterTooltips"),
-            function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters", selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
-    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterEntryTooltips"),
-            function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilterEntries", selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
-
-    if clientLang ~= fallbackLang then
-        AddCustomMenuItem("-", function() end)
-        local cbShowSetNamesInEnglishTooIndex = AddCustomMenuItem(getLocalizedText("searchUIShowSetNameInEnglishToo"),
-                function(cboxCtrl)
-                    OnClick_CheckBoxLabel(cboxCtrl, "setSearchShowSetNamesInEnglishToo", selfVar)
-                end,
-                MENU_ADD_OPTION_CHECKBOX)
-        setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
-    end
-
-    if not ZO_IsTableEmpty(lib.svData.setSearchFavorites) then
-        AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
-        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
-            self:RemoveAllSetFavorites()
-        end)
-    end
-    ShowMenu(anchorControl)
 end
 
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
@@ -1154,6 +1309,18 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
     --Multiselect filter dropdown context menu?
     if selfVar.multiSelectFilterDropdowns ~= nil and ZO_IsElementInNumericallyIndexedTable(selfVar.multiSelectFilterDropdowns, dropdownControl) then
         ClearMenu()
+        --Select all
+        AddCustomMenuItem(GetString(SI_ACHIEVEMENT_FILTER_SHOW_ALL), function()
+            selfVar:SelectAllAtMultiSelectDropdown(dropdownControl)
+            selfVar:OnFilterChanged(dropdownControl)
+        end)
+        --Invert selection
+        AddCustomMenuItem(invertSelectionStr, function()
+            selfVar:SelectInvertMultiSelectDropdown(dropdownControl)
+            selfVar:OnFilterChanged(dropdownControl)
+        end)
+
+        --Clear all selections
         AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
             selfVar:ResetMultiSelectDropdown(dropdownControl)
             selfVar:OnFilterChanged(dropdownControl)
@@ -1187,7 +1354,7 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
 end
 
 function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shift, alt, ctrl, command)
-d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
+--d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
     if LibCustomMenu == nil then return end
     local selfVar = self
     local settings = lib.svData

@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.62
+local MAJOR, MINOR = "LibSets", 0.63
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -48,6 +48,11 @@ lib.customTooltipHooks = {
     needed = {},
     hooked = {},
     eventPlayerActivatedCalled = false,
+}
+
+--Custom context menu entries, added by other addons
+lib.customContextMenuEntries = {
+    ["setSearchUI"] = {},
 }
 
 ---------------------------------------------------------------------------------
@@ -1238,6 +1243,8 @@ lib.localization                 = {
         showAsTooltip               = "Zeige als Tooltip",
         showCurrentZoneSets         = "Zeige Sets der aktuellen Zone",
         clearHistory                = "Historie leeren",
+        wayshrines                  = "Wegschreine",
+        invertSelection             = "≠ Auswahl invertieren"
     },
     ["en"] = {
         de  = "German",
@@ -1320,6 +1327,8 @@ lib.localization                 = {
         showAsTooltip               = "Show as tooltip",
         showCurrentZoneSets         = "Show current zone\'s sets",
         clearHistory                = "Clear history",
+        wayshrines                  = "Wayshrines",
+        invertSelection             = "≠ Invert selection"
     },
     ["es"] = {
         de  = "Alemán",
@@ -1544,3 +1553,4 @@ local setTypeToDropZoneLocalizationStr = {
     ["vet_dung"]                                    = clientLocalization.dropZoneDungeon,
 }
 lib.setTypeToDropZoneLocalizationStr   = setTypeToDropZoneLocalizationStr
+

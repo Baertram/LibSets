@@ -416,6 +416,9 @@ local isNoESOSet
 local getDropMechanicName
 local getSetInfo
 local getCurrentZoneIds
+local isDungeonZoneId
+local isDungeonZoneIdTrial
+local isPublicDungeonZoneId
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -1664,17 +1667,33 @@ buildItemLink = lib.buildItemLink
 
 --Open the worldmap and show the map of the zoneId
 --> Parameters: zoneId number: The zone's zoneId
-function lib.openMapOfZoneId(zoneId)
+local openMapOfZoneId
+function lib.openMapOfZoneId(zoneId, isParentZoneId)
     if not zoneId then return false end
+    isParentZoneId = isParentZoneId or false
     local mapIndex = gmidbzid(zoneId)
     if mapIndex then
         showWorldMap()
         zo_callLater(function()
             ZO_WorldMap_SetMapByIndex(mapIndex)
         end, 50)
+    else
+        if isParentZoneId then return end
+        --MapIndex was nil so maybe the zoneId was a dungeon/trial
+        isDungeonZoneId = isDungeonZoneId or lib.IsDungeonZoneId
+        isDungeonZoneIdTrial = isDungeonZoneIdTrial or lib.IsDungeonZoneIdTrial
+        isPublicDungeonZoneId = isPublicDungeonZoneId or lib.IsPublicDungeonZoneId
+        if isDungeonZoneId(zoneId) or isDungeonZoneIdTrial(zoneId) or isPublicDungeonZoneId(zoneId) then
+            --Show the parent zoneId on the map then
+            local parentZoneId = GetParentZoneId(zoneId)
+            if parentZoneId ~= nil and parentZoneId ~= zoneId then
+                openMapOfZoneId = openMapOfZoneId or lib.openMapOfZoneId
+                openMapOfZoneId(parentZoneId, true)
+            end
+        end
     end
 end
-local openMapOfZoneId = lib.openMapOfZoneId
+openMapOfZoneId = lib.openMapOfZoneId
 
 --Open the worldmap, get the zoneId of the wayshrine wayshrineNodeId and show the wayshrine wayshrineNodeId on the map
 --> Parameters: wayshrineNodeId number: The wayshrine's nodeIndex
@@ -3197,6 +3216,7 @@ function lib.IsDungeonZoneId(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil then return false end
     return (preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] ~= nil and true) or false
 end
+isDungeonZoneId = lib.IsDungeonZoneId
 
 --Returns a table dungeonZoneData by the help of a zoneId
 --> Parameters: zoneId number: The zone id given
@@ -3213,6 +3233,7 @@ function lib.IsDungeonZoneIdTrial(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
     return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId]["isTrial"]
 end
+isDungeonZoneIdTrial = lib.IsDungeonZoneIdTrial
 
 --Returns boolean isTrial of zoneId. If the zoneId is no dungeon the return value will be nil
 --> Parameters: zoneId number: The zone id given
@@ -3249,6 +3270,7 @@ function lib.IsPublicDungeonZoneId(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil then return false end
     return (preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId] ~= nil and true) or false
 end
+isPublicDungeonZoneId = lib.IsPublicDungeonZoneId
 
 --Returns a table publicDungeonZoneData by the help of a zoneId
 --> Parameters: zoneId number: The zone id given
@@ -4033,6 +4055,30 @@ end
 
 
 
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- 	API - Custom context menu entries at the set search UI results list
+------------------------------------------------------------------------
+local customContextMenuErrorPrefixStr = "[" .. MAJOR .. "]:RegisterCustomSetSearchResultsListContextMenu ERROR - addon: %q"
+local customContextMenuSetSearchParamErrorStr = customContextMenuErrorPrefixStr .. " - parameter \'headerName\' must be nil or a String. Parameter \'submenuName\' must be nil or a String. Parameter \'submenuEntries\' (%s) must be a table of submenu entries (See library \'LibCustomMenu\', and the addon name must be a string. Parameter visibleFunc must be nil or a function with 1st parameter \'rowControl\' of the menu parent and 2nd optinonal parameter \'setId\', returning a boolean."
+local customContextMenuSetSearchExistsAlreadyErrorStr = customContextMenuErrorPrefixStr .. " was already registered!"
+function lib.RegisterCustomSetSearchResultsListContextMenu(addonName, headerName, submenuName, submenuEntries, visibleFunc)
+    assert(type(addonName) == "string" and (headerName == nil or type(headerName) == "string") and (submenuName == nil or type(submenuName) == "string") and type(submenuEntries) == "table" and (visibleFunc == nil or type(visibleFunc) == "function"), strfor(customContextMenuSetSearchParamErrorStr, tos(addonName), tos(submenuName), tos(submenuEntries)))
+    local customContextMenuEntriesSetSearch = lib.customContextMenuEntries["setSearchUI"]
+    assert(customContextMenuEntriesSetSearch[addonName] == nil, strfor(customContextMenuSetSearchExistsAlreadyErrorStr, tos(addonName)))
+
+    customContextMenuEntriesSetSearch[addonName] = {
+        headerName  = headerName,
+        name        = submenuName or addonName,
+        entries     = submenuEntries,
+        visible     = visibleFunc,
+    }
+end
+
+
 
 ------------------------------------------------------------------------
 -- 	UI related stuff
@@ -4202,6 +4248,7 @@ function lib.checkIfSetsAreLoadedProperly(setId)
     return true
 end
 checkIfSetsAreLoadedProperly = checkIfSetsAreLoadedProperly or lib.checkIfSetsAreLoadedProperly
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
