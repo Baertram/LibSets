@@ -71,7 +71,8 @@ local favoriteIconWithNameText = zoitfns(favoriteIcon, 24, 24, GetString(SI_COLL
 local settingsIconText = zif("esoui/art/chatwindow/chat_options_up.dds", 32, 32)
 
 --Maximum number of set bonuses
-searchUI.MAX_NUM_SET_BONUS = 6 --2023-09-09
+searchUI.MAX_NUM_SET_BONUS = 12 --2023-11-05 Druids
+local specialBonusSets = lib.specialBonusSets
 
 --Search type - For the string comparison "processor". !!!Needs to match the SetupRow of the ZO_ScrollList!!!
 searchUI.searchTypeDefault = 1
@@ -635,8 +636,9 @@ local function searchFilterPrefix(searchInput, searchTab)
 end
 ]]
 
-local function searchFilterPrefix(searchInput, searchTab, isBonusearch)
+local function searchFilterPrefix(searchInput, searchTab, isBonusearch, setId)
     isBonusearch = isBonusearch or false
+    specialBonusSets = specialBonusSets or lib.specialBonusSets
 	local curpos = 1
 	local delim
 	local exclude = false
@@ -653,7 +655,7 @@ local function searchFilterPrefix(searchInput, searchTab, isBonusearch)
 --d(">>found no ,")
             --If bonuses are searched: searchInput could contain +crit or +crit:2 (means: +critical chance at bonus 2)
             -->So check the "current" searchInput part for a : delimiter
-            local bonusLineNr
+            local bonusLineNr, realBonusLineNr
             if isBonusearch == true then
                 local searchColonOffset
                 if delim == 0 then
@@ -667,12 +669,23 @@ local function searchFilterPrefix(searchInput, searchTab, isBonusearch)
                     bonusLineNr = searchQuery:sub(bonusLineNrOffsetEnd+1, -1)
                     --Clean the searchQuery end
                     searchQuery = searchQuery:sub(1, bonusLineNrOffset-1)
+                    --Check if this is a special set and get the "real" bonus line then, e.g. user enters 12 but the actual set got only 3 lines, then 12 -> 3
+                    if setId ~= nil then
+                        local specialBonusSetData = specialBonusSets[setId]
+                        if specialBonusSetData ~= nil then
+                            realBonusLineNr = specialBonusSetData[tonumber(bonusLineNr)]
+--d(">>>setId: " .. tos(setId) ..", realBonusLineNr: " .. tostring(realBonusLineNr) .. "; bonusLineNr: " ..tos(bonusLineNr))
+                            if realBonusLineNr ~= nil then
+                                bonusLineNr = realBonusLineNr
+                            end
+                        end
+                    end
                 end
 --d(">>>searchQuery: " .. tostring(searchQuery) .. ", searchColonOffset: " .. tostring(searchColonOffset) .. ", bonusLineNr: " .. tostring(bonusLineNr))
             end
             for i = 1, #searchTab do
                 --No bonus line to searc? Else: Only if the current line of the table is the bonus line nr. specified
-                if not isBonusearch or (bonusLineNr == nil or tonumber(bonusLineNr) == i) then
+                if not isBonusearch or (bonusLineNr == nil or tonumber(bonusLineNr) == i or (realBonusLineNr ~= nil and tonumber(realBonusLineNr) == i)) then
                     if orderedSearch(searchTab[i], searchQuery) then
 --d(">found string!!!")
                         found = true
@@ -700,7 +713,7 @@ function LibSets_SearchUI_Shared:CheckForMatch(data, searchInput)
     local namesOrIdsTab = {}
     tins(namesOrIdsTab, data.name)
     tins(namesOrIdsTab, tos(data.setId))
-    return searchFilterPrefix(searchInput, namesOrIdsTab)
+    return searchFilterPrefix(searchInput, namesOrIdsTab, nil, data.setId)
 end
 
 
@@ -712,8 +725,8 @@ function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm
 	return false
 end
 
-function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
-    return searchFilterPrefix(searchInput, bonuses, true)
+function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput, setId)
+    return searchFilterPrefix(searchInput, bonuses, true, setId)
 end
 
 

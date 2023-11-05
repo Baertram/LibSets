@@ -1441,6 +1441,20 @@ local setDataPreloaded = lib.setDataPreloaded
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 
+
+------------------------------------------------------------------------------------------------------------------------
+-- Special set bonus
+------------------------------------------------------------------------------------------------------------------------
+--Special setIds where the bonus is kind of different from other sets, e.g. 3 lines of bonus but line 1 and line 2 both reflect to setBonus 1,
+--or line1 is 5 set items, line2 is 10 set items and line3 is 12 set items
+lib.specialBonusSets = {
+    [695] = { [5]=1, [10]=2, [12]=3} --Shattered Fate: Bonus line 1 relates to 5 items bonus, line 2 to 10 and line 3 to 12
+}
+
+
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 --Entries to the setItemCollection mappings which are APIversion dependend
 local mappingForSetItemCollectionsNotYetLive = {
     --[[
@@ -1454,8 +1468,6 @@ if isPTSAPIVersionLive == true then
         tins(lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING], mappingData)
     end
 end
-
-
 
 
 ------------------------------------------------------------------------------------------------------------------------
