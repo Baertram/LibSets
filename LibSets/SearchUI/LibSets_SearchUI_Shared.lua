@@ -1183,6 +1183,12 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     local selfVar = self
     ClearMenu()
     AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
+    local cbShowTextFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("textBoxFilterTooltips"),
+            function(cboxCtrl)
+                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtTextFilters", selfVar)
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbShowTextFilterTooltipsIndex, lib.svData.setSearchTooltipsAtTextFilters)
     local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterTooltips"),
             function(cboxCtrl)
                 OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters", selfVar)

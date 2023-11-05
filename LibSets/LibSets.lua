@@ -727,6 +727,7 @@ local function LoadSavedVariables()
         addSetCollectionsCurrentZoneButton = true,
 
         --Search UI
+        setSearchTooltipsAtTextFilters = true,
         setSearchTooltipsAtFilters = true,
         setSearchTooltipsAtFilterEntries = true,
         setSearchShowSetNamesInEnglishToo = false,
