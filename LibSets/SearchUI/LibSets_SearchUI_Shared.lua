@@ -604,7 +604,9 @@ local function orderedSearch(haystack, needles)
 	return true
 end
 
+--[[ Old func before bonus:<number> change
 local function searchFilterPrefix(searchInput, searchTab)
+    isBonusearch = isBonusearch or false
 	local curpos = 1
 	local delim
 	local exclude = false
@@ -618,10 +620,10 @@ local function searchFilterPrefix(searchInput, searchTab)
 		--if searchQuery:find("%S+") then   --find no whitepaces
         if searchQuery:find("[^,]+") then      --find no ,
 			for i = 1, #searchTab do
-				if orderedSearch(searchTab[i], searchQuery) then
-					found = true
-					break
-				end
+                if orderedSearch(searchTab[i], searchQuery) then
+                    found = true
+                    break
+                end
 			end
 
 			if found == exclude then return false end
@@ -629,6 +631,66 @@ local function searchFilterPrefix(searchInput, searchTab)
 		curpos = delim + 1
 		if delim ~= 0 then exclude = searchInput:sub(delim, delim) == "-" end
 	until delim == 0
+	return true
+end
+]]
+
+local function searchFilterPrefix(searchInput, searchTab, isBonusearch)
+    isBonusearch = isBonusearch or false
+	local curpos = 1
+	local delim
+	local exclude = false
+    --Check the searchInput for prefix + (include) or - (exclude) and split at , to find all
+    --entries in the table searchTab (e.g. bonuses)
+	repeat
+		local found = false
+		delim = searchInput:find("[+,-]", curpos)
+		if not delim then delim = 0 end
+		local searchQuery = searchInput:sub(curpos, delim - 1)
+--d(">searchQuery: " .. tostring(searchQuery) .. ", delim: " ..tostring(delim) .. ", curpos: " ..tostring(curpos))
+		--if searchQuery:find("%S+") then   --find no whitepaces
+        if searchQuery:find("[^,]+") then      --find no ,
+--d(">>found no ,")
+            --If bonuses are searched: searchInput could contain +crit or +crit:2 (means: +critical chance at bonus 2)
+            -->So check the "current" searchInput part for a : delimiter
+            local bonusLineNr
+            if isBonusearch == true then
+                local searchColonOffset
+                if delim == 0 then
+                    searchColonOffset = 1 --Search from 1st char
+                else
+                    searchColonOffset = curpos --Search from cursor pos
+                end
+                local bonusLineNrOffset, bonusLineNrOffsetEnd = searchQuery:find("%:+", searchColonOffset) --check for :<1 digit number> in front of the , delimiter
+--d(">>>bonusLineNrOffset: " .. tostring(bonusLineNrOffset))
+                if bonusLineNrOffsetEnd ~= nil then
+                    bonusLineNr = searchQuery:sub(bonusLineNrOffsetEnd+1, -1)
+                    --Clean the searchQuery end
+                    searchQuery = searchQuery:sub(1, bonusLineNrOffset-1)
+                end
+--d(">>>searchQuery: " .. tostring(searchQuery) .. ", searchColonOffset: " .. tostring(searchColonOffset) .. ", bonusLineNr: " .. tostring(bonusLineNr))
+            end
+            for i = 1, #searchTab do
+                --No bonus line to searc? Else: Only if the current line of the table is the bonus line nr. specified
+                if not isBonusearch or (bonusLineNr == nil or tonumber(bonusLineNr) == i) then
+                    if orderedSearch(searchTab[i], searchQuery) then
+--d(">found string!!!")
+                        found = true
+                        break
+                    end
+                end
+			end
+
+			if found == exclude then
+--d("<excluded!")
+                return false
+            end
+		end
+		curpos = delim + 1
+		if delim ~= 0 then exclude = searchInput:sub(delim, delim) == "-" end
+--d(">>curpos: " ..tostring(curpos) .. ", delim: " .. tostring(delim) .. ", exclude: " .. tostring(exclude))
+
+    until delim == 0
 	return true
 end
 
@@ -651,7 +713,7 @@ function LibSets_SearchUI_Shared:ProcessItemEntry(stringSearch, data, searchTerm
 end
 
 function LibSets_SearchUI_Shared:SearchSetBonuses(bonuses, searchInput)
-    return searchFilterPrefix(searchInput, bonuses)
+    return searchFilterPrefix(searchInput, bonuses, true)
 end
 
 

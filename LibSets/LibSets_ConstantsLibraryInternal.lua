@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.63
+local MAJOR, MINOR = "LibSets", 0.64
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -1232,7 +1232,7 @@ lib.localization                 = {
         nameTextSearch = "(+/-)Name/ID , getrennt",
         nameTextSearchTT = "Gib mehrere Namen/IDs durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Namen/die ID in der Textsuche ein- bzw. auszuschließen.",
         bonusTextSearch = "(+/-)Bonus , getrennt",
-        bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.",
+        bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.\nFüge :<bonusZeile1-6> hinzu, um den Bonus explizit in einer der Bonuszeilen zu suchen\n\nBeispiele:\n+krit,-leben findet alle Sets mit Bonus Text Krit (z.B. Kritische Chance) aber ohne Text Leben\n+krit:2 Findet alle sets mit 2. Bonus Text krit",
         showAsText =        "Zeige als Text",
         showAsTextWithIcons = "Zeige als Text (mit Symbolen)",
         dropdownFilterTooltips = "Dropdown Filter: Tooltips",
@@ -1302,7 +1302,7 @@ lib.localization                 = {
         previewTT                = "Set preview",
         previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is writtent to the chat entry editbox) you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
         previewTTToChatToo       = "Preview itemLink to chat",
-        previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to yoru clipboard using CTRL+C.",
+        previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to your clipboard using CTRL+C.",
         headerUIStuff            = "UI",
         headerTooltips            = "Tooltips",
         addSetCollectionsCurrentZoneButton = "Set coll.: Current zone button",
@@ -1316,7 +1316,7 @@ lib.localization                 = {
         nameTextSearch = "(+/-)Name/ID , separated",
         nameTextSearchTT = "Enter multiple names/IDs separated by a comma (,).\nUse the + or - prefix to include or exclude a name/ID from the search results.",
         bonusTextSearch = "(+/-)Bonus , separated",
-        bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.",
+        bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.\nAdd :<bonusLine1-6> to explicitly search in that bonus line\n\nExamples:\n+crit,-life finds all sets with bonus text crit (e.g. criticial chance) but w/o text life\n+crit:2 Finds all sets with 2. bonus text crit",
         showAsText =        "Show as text",
         showAsTextWithIcons = "Show as text (with icons)",
         dropdownFilterTooltips = "Dropdown filter: Tooltips",
