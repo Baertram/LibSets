@@ -4206,6 +4206,16 @@ local function addUIButtons()
             lib.itemSetCollectionBookMoreOptionsButton:SetHidden(true)
         end
     end
+
+    --Register a fragment stateChange callback so the buttons get hidden at Transmute station -> Reconstruction tab
+    local function fragmentChange(oldState, newState)
+        if (newState == SCENE_FRAGMENT_SHOWN ) then
+            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(true)
+        elseif (newState == SCENE_FRAGMENT_HIDING ) then
+            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(false)
+        end
+    end
+    RETRAIT_STATION_RECONSTRUCT_FRAGMENT:RegisterCallback("StateChange", fragmentChange)
 end
 lib.addUIButtons = addUIButtons
 
