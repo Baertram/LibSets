@@ -1118,8 +1118,8 @@ lib.setDataPreloaded = {
         { parentCategory=6, category=103, zoneIds={1361}, isDungeon=true},--Graven Deep
         { parentCategory=6, category=105, zoneIds={1389}, isDungeon=true},--Bal Sunnar
         { parentCategory=6, category=106, zoneIds={1390}, isDungeon=true},--Scrivener's Hall
-        { parentCategory=6, category=109, zoneIds={1470}, isDungeon=true},--Oathsworn Pit
-        { parentCategory=6, category=110, zoneIds={1471}, isDungeon=true},--Bedlam Veil
+        { parentCategory=6, category=110, zoneIds={1470}, isDungeon=true},--Oathsworn Pit
+        { parentCategory=6, category=111, zoneIds={1471}, isDungeon=true},--Bedlam Veil
         --Trials
         { parentCategory=7, category=71, zoneIds={638}, isTrial=true},--Aetherian Archive
         { parentCategory=7, category=72, zoneIds={636}, isTrial=true},--Hel Ra Citadel
