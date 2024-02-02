@@ -33,7 +33,7 @@
                                                 |       and then scan the names again with the new client language!
                                                 |-> This function IS client language dependent!
 -------------------------------------------------------------------------------------------------------------------------------------------------
-    LibSets.DebugGetAllWayshrineInfo()          |   Get all the wayshrine info saved to the SavedVars key constant LIBSETS_TABLEKEY_WAYSHRINES
+    LibSets.DebugGetAllWayshrineInfoOfCurrentMap() |   Get all the wayshrine info saved to the SavedVars key constant LIBSETS_TABLEKEY_WAYSHRINES
                                                 |   --> You need to open a map (zone map, no city or sub-zone maps!) in order to let the function work properly
                                                 |   ---> The function will try to do this automatically for you at the current zone, if you have not opened the map for any zone
                                                 |-> This function is not client language dependent!
@@ -131,6 +131,7 @@ local worldName = GetWorldName()
 local apiVersion = GetAPIVersion()
 local isPTSAPIVersionLive = lib.checkIfPTSAPIVersionIsLive()
 local clientLang = lib.clientLang or GetCVar("language.2")
+local fallbackLang = lib.fallbackLang
 local supportedLanguages = lib.supportedLanguages
 local numSupportedLangs = lib.numSupportedLangs
 
@@ -794,8 +795,9 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
             if newSetsFound > 0 then
                 d(">> !!! Found " .. tos(newSetsFound) .. " new setIds !!!")
                 for idx, newSetId in pairs(newSetIdsFound) do
-                    local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] and
-                            (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId]["en"])) or unknownName
+                    local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] ~= nil and
+                            (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][fallbackLang]))
+                    if newSetName == nil then newSetName = unknownName end
                     if newSetName ~= unknownName then
                         newSetName = zocstrfor("<<C:1>>", newSetName)
                     else
@@ -1101,6 +1103,7 @@ local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenT
     return dungeonsAddedCounter
 end
 
+
 --Read all dungeons from the dungeon finder and save them to the SavedVariables key "dungeonFinderData" (LIBSETS_TABLEKEY_DUNGEONFINDER_DATA).
 --The format will be:
 --dungeonFinderData[integerIndexIncreasedBy1] = dungeonId .. "|" .. dungeonName .. "|" .. zoneId .. "|" .. isVeteranDungeon
@@ -1311,17 +1314,19 @@ function lib.DebugShowNewSetIds(noChatOutput)
     if newSetsFound > 0 then
         if not noChatOutput then d(">Found " .. tos(newSetsFound) .. " new setIds!") end
         for idx, newSetId in ipairs(newSetIdsFound) do
-            local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] and
-                    (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId]["en"]))
-            newSetName = newSetName or getNewSetName(newSetId)
+            local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] ~= nil and
+                    (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][fallbackLang]))
+            if newSetName == nil or newSetName == "" then
+                newSetName = getNewSetName(newSetId)
+            end
             newSetName = zocstrfor("<<C:1>>", newSetName)
             if not noChatOutput then d(strfor(">>New setId found: %s -> name: %s", tos(newSetId), tos(newSetName))) end
             if newSetName and newSetName ~= unknownName then
                 tempSetNamesOfClientLang = tempSetNamesOfClientLang or {}
                 tempSetNamesOfClientLang[newSetId] = newSetName
             end
-            --Update the value of the table entry with the setId|setNameClean
-            newSetIdsFound[idx] = newSetId
+            --Update the value of the table entry with the setId, --newSetName
+            newSetIdsFound[idx] = newSetId .. ", --" .. newSetName
         end
     end
     if newSetsFound == 0 then
@@ -1366,7 +1371,7 @@ function lib.DebugGetAllNames(noReloadInfo)
     d(">>>--------------->>>")
     debugGetAllZoneInfo(noReloadInfo)
     d(">>>--------------->>>")
-    -->Attention, you need to run LibSets.DebugScanAllSetData() first to scan for all setIds and setItemids AND update
+    -->Attention, you need to run LibSets.DebugScanAllSetData() first to scan for all setIds and setItemIds AND update
     -->the file LibSets_Data.lua, table LibSets.setItemIds, with them first, in order to let this function work properly
     -->and let it scan and get names of all current data! We need at least 1 itemId of the new setIds to build an itemlink
     -->to get the set name!
@@ -1497,7 +1502,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
                     end
                 else
                     local origClientLang = lib.svDebugData.DebugGetAllData[apiVersion].clientLang
-                    origClientLang = origClientLang or "en"
+                    origClientLang = origClientLang or fallbackLang
                     d(libPrefix .. "DebugGetAllData was finished! Resetting to your original language again: " .. tos(origClientLang))
                     --All languages were scanned already. Switch back to original client language, or "en" as fallback
                     lib.svDebugData.DebugGetAllData[apiVersion].running = false
