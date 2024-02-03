@@ -1094,6 +1094,8 @@ local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenT
             if substMadeCount > 0 then
                 isVeteranDungeon = true
             end
+            --zoneId can be determined via GetActivityZoneId(activityId) where activityId = data.id
+
             local dungeonData = data.id .. "|" .. nameClean .. "|" .. data.zoneId .. "|" .. tos(isVeteranDungeon)
             tins(retTableDungeons, dungeonData)
             dungeonsAddedCounter = dungeonsAddedCounter +1

@@ -849,7 +849,7 @@ local possibleDropMechanics         = {
     [34] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY", -- Cyrodiil Weyon Priory, Chorrol
     [35] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
     [36] = "LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS", -- Cyrodiil board missions
-    [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless Archive dungeon
+    [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless/Infinite Archive dungeon
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -1216,7 +1216,7 @@ lib.localization                 = {
         slashCommandDescription         = "Suche übersetzte Set Namen",
         slashCommandDescriptionClient   = "Suche Set ID/Namen (Spiel Sprache)",
         previewTT                = "Set Vorschau",
-        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.\n\n\nBenutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zuverstecken",
+        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set Namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste per TAB Taste/Maus ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.\n\n\nBenutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zuverstecken",
         previewTTToChatToo       = "Vorschauf ItemLink in den Chat",
         previewTTToChatToo_TT    = "Wenn diese Option aktiviert ist wird der ItemLink des Vorschau Set Gegenstandes auch in deine Chat Eingabebox gesendet, damit du diesen jemanden schicken/ihn mit der Maus und STRG+C in deine Zwischenablage kopieren kannst.",
         headerUIStuff            = "Benutzer Oberfläche",
@@ -1301,7 +1301,7 @@ lib.localization                 = {
         slashCommandDescription         = "Search translations of set names",
         slashCommandDescriptionClient   = "Search set ID/names (game client language)",
         previewTT                = "Set preview",
-        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is writtent to the chat entry editbox) you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
+        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is written to the chat entry editbox) via the TAB key/mouse you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
         previewTTToChatToo       = "Preview itemLink to chat",
         previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to your clipboard using CTRL+C.",
         headerUIStuff            = "UI",

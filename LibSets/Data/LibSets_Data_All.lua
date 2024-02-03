@@ -1541,7 +1541,7 @@ local function removeFutureSetData()
                     end
                     --Remove names from the list where setIds are only available in newer APIversions
                     if setIdsToSetNames[setIdOfNewAPIVersion] ~= nil then
-                        setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId] = nil
+                        setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setIdOfNewAPIVersion] = nil
                     end
                     --Remove names of non-sets from the list where setIds are only available in newer APIversions
                     if setNamesNoSetToSetItemIds[setIdOfNewAPIVersion] ~= nil then
