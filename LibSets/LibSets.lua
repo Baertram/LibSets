@@ -362,6 +362,9 @@ local customTooltipHooksNeeded =        lib.customTooltipHooks.needed
 local classData =                       lib.classData
 local allClassSets =                    lib.classSets
 
+local nonPerfectedSet2PerfectedSet = lib.nonPerfectedSet2PerfectedSet
+local perfectedSet2NonPerfectedSet = lib.perfectedSet2NonPerfectedSet
+local perfectedSetsInfo = lib.perfectedSetsInfo
 
 
 --Possible SlashCommand parameters
@@ -957,6 +960,149 @@ local function getSetsOfClassId(classId)
 end
 
 
+local function isAPerfectedOrNonPerfectedSetId(setId)
+    if perfectedSetsInfo[setId] ~= nil then
+        return true
+    end
+    if perfectedSet2NonPerfectedSet[setId] ~= nil then
+        return true
+    end
+    if nonPerfectedSet2PerfectedSet[setId] ~= nil then
+        return true
+    end
+
+    local setData = setInfo[setId]
+    if setData.isPerfectedSet ~= nil and setData.isPerfectedSet == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+        return true
+    end
+    if setData.perfectedSetId ~= nil then
+        return true
+    end
+    return false
+end
+
+local function fillPerfectedSetDataLookupTables(setId)
+    if nonPerfectedSet2PerfectedSet[setId] ~= nil or perfectedSet2NonPerfectedSet[setId] ~= nil then return end
+
+    local perfectedSetId, perfectedSetZoneId, nonPerfectedSetId, nonPerfectedSetZoneId
+    local setData = setInfo[setId]
+
+    if setData ~= nil then
+
+        if setData.isPerfectedSet ~= nil and setData.isPerfectedSet == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+            perfectedSetId = setId
+            perfectedSetZoneId = (setData.zoneIds ~= nil and setData.zoneIds[1]) or nil
+
+            --Search the setInfo for an entry where "perfectedSetId" = setId
+            for setIdOfNonPerfectedSet, setDataToSearch in pairs(setInfo) do
+                if nonPerfectedSetId == nil then
+                    if setId ~= setIdOfNonPerfectedSet then
+                        local perfectedSetIdData = setDataToSearch.perfectedSetId
+                        if perfectedSetIdData ~= nil and perfectedSetIdData == setId then
+                            nonPerfectedSetId = setIdOfNonPerfectedSet
+                            nonPerfectedSetZoneId = (setDataToSearch.zoneIds ~= nil and setDataToSearch.zoneIds[1]) or nil
+                            break
+                        end
+                    end
+                else
+                    break
+                end
+            end
+        end
+
+        if setData.perfectedSetId ~= nil and ( perfectedSetId == nil or perfectedSetZoneId == nil or nonPerfectedSetId == nil or nonPerfectedSetZoneId == nil) then
+            local setDataOfPerfectedSet = setInfo[setData.perfectedSetId]
+            if setDataOfPerfectedSet ~= nil then
+                perfectedSetId = perfectedSetId or setData.perfectedSetId
+                perfectedSetZoneId = (perfectedSetZoneId or (setDataOfPerfectedSet.zoneIds ~= nil and setDataOfPerfectedSet.zoneIds[1])) or nil
+
+                nonPerfectedSetId = nonPerfectedSetId or setId
+                nonPerfectedSetZoneId = (nonPerfectedSetZoneId or (setData.zoneIds ~= nil and setData.zoneIds[1])) or nil
+            end
+        end
+
+        if perfectedSetId ~= nil and perfectedSetZoneId ~= nil and nonPerfectedSetId ~= nil and nonPerfectedSetZoneId ~= nil then
+            perfectedSet2NonPerfectedSet[perfectedSetId] = {
+                setId = nonPerfectedSetId,
+                zoneId = nonPerfectedSetZoneId,
+            }
+            nonPerfectedSet2PerfectedSet[nonPerfectedSetId] = {
+                setId = perfectedSetId,
+                zoneId = perfectedSetZoneId,
+            }
+        end
+    end
+end
+
+--Read setInfo and get perfected/non-perfected set data, and build internal lookup tables
+-->fills tables lib.nonPerfectedSet2PerfectedSet and lib.perfectedSet2NonPerfectedSet "on demand" (as API functions for non-/perfected sets are used)
+local function getPerfectedSetData(setId)
+    if not checkIfSetsAreLoadedProperly(setId) then return end
+
+    if perfectedSetsInfo[setId] ~= nil then
+        return perfectedSetsInfo[setId]
+    end
+
+    local setData = setInfo[setId]
+    local isPerfectedSet, perfectedSetId, perfectedSetZoneId, nonPerfectedSetId, nonPerfectedSetZoneId
+
+    if setData.isPerfectedSet ~= nil then
+        if setData.isPerfectedSet == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
+            isPerfectedSet = true
+            perfectedSetId = setId
+        end
+
+    elseif setData.perfectedSetId ~= nil then
+        isPerfectedSet = false
+        nonPerfectedSetId = setId
+    else
+        return nil
+    end
+
+    fillPerfectedSetDataLookupTables(setId)
+
+    if isPerfectedSet ~= nil and (perfectedSetId ~= nil or nonPerfectedSetId ~= nil) then
+        if isPerfectedSet == true then
+            if perfectedSet2NonPerfectedSet[perfectedSetId] ~= nil then
+                local nonPerfectedSetLookupData = perfectedSet2NonPerfectedSet[perfectedSetId]
+                nonPerfectedSetId = nonPerfectedSetLookupData.setId
+                nonPerfectedSetZoneId = nonPerfectedSetLookupData.zoneId
+                if nonPerfectedSet2PerfectedSet[nonPerfectedSetId] ~= nil then
+                    local perfectedSetLookupData = nonPerfectedSet2PerfectedSet[nonPerfectedSetId]
+                    perfectedSetZoneId = perfectedSetLookupData.zoneId
+                end
+            end
+
+        else
+            if nonPerfectedSet2PerfectedSet[nonPerfectedSetId] ~= nil then
+                local perfectedSetLookupData = nonPerfectedSet2PerfectedSet[nonPerfectedSetId]
+                perfectedSetId = perfectedSetLookupData.setId
+                perfectedSetZoneId = perfectedSetLookupData.zoneId
+                if perfectedSet2NonPerfectedSet[perfectedSetId] ~= nil then
+                    local nonPerfectedSetLookupData = perfectedSet2NonPerfectedSet[perfectedSetId]
+                    nonPerfectedSetZoneId = nonPerfectedSetLookupData.zoneId
+                end
+            end
+        end
+
+        if perfectedSetId ~= nil and nonPerfectedSetId ~= nil and perfectedSetZoneId ~= nil and nonPerfectedSetZoneId ~= nil then
+            perfectedSetsInfo[setId] = {
+                isPerfectedSet = isPerfectedSet,
+
+                perfectedSetId = perfectedSetId,
+                perfectedSetZoneId = perfectedSetZoneId,
+
+                nonPerfectedSetId = nonPerfectedSetId,
+                nonPerfectedSetZoneId = nonPerfectedSetZoneId,
+            }
+        end
+    else
+        return nil
+    end
+    return perfectedSetsInfo[setId]
+end
+
+
 --Initialize the search UI now
 local function InitSearchUI()
     if not lib.fullyLoaded then return end
@@ -1189,7 +1335,7 @@ local function LoadSets()
                     end
                 end
             end
-        end
+        end --for setId, setData in pairs(setDataTable) do
     end
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -1825,7 +1971,6 @@ end
 --> Parameters: setId number: The set's setId
 --> Returns:    boolean isMythicSet
 function lib.IsMythicSet(setId)
-    if not checkIfPTSAPIVersionIsLive() then return false end
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly(setId) then return end
     return lib.mythicSets[setId] ~= nil or false
@@ -1837,7 +1982,6 @@ end
 --              if the classId is provided the set's data will be checked against compatibility with this class
 --> Returns:    boolean isClassSet
 function lib.IsClassSet(setId, classId)
-    if not checkIfPTSAPIVersionIsLive() then return false end
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly(setId) then return end
 
@@ -1853,6 +1997,59 @@ function lib.IsClassSet(setId, classId)
     else
         return true
     end
+end
+
+--Returns boolean if the setId provided is a perfected or non perfected set from e.g. an Arena, Trial, etc.
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isAPerfectedOrNonPerfectedSetId
+function lib.IsAPerfectedOrNonPerfectedSetId(setId)
+    return isAPerfectedOrNonPerfectedSetId(setId)
+end
+
+--Returns true if the setId provided is a perfected set from e.g. an Arena, Trial, etc.
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isPerfectedSet
+function lib.IsPerfectedSet(setId)
+    if setId == nil then return end
+    if not checkIfSetsAreLoadedProperly(setId) then return end
+    local perfectedSetData = getPerfectedSetData(setId)
+    local isPerfectedSet = (perfectedSetData ~= nil and perfectedSetData.isPerfectedSet == LIBSETS_SET_ITEMID_TABLE_VALUE_OK and true) or false
+    return isPerfectedSet
+end
+
+--Returns true if the setId provided is a non-perfected set from e.g. an Arena, Trial, etc.
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isNonPerfectedSet
+function lib.IsNonPerfectedSet(setId)
+    if setId == nil then return end
+    if not checkIfSetsAreLoadedProperly(setId) then return end
+    local perfectedSetData = getPerfectedSetData(setId)
+    local isNonPerfectedSet = (perfectedSetData ~= nil and (perfectedSetData.isPerfectedSet == nil or perfectedSetData.isPerfectedSet == LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK)
+                                and perfectedSetData.perfectedSetId ~= nil and true) or false
+    return isNonPerfectedSet
+end
+
+
+--Returns table perfectedSetInfo about the setId provided if it's a perfected set, or a non perfected set
+--> Parameters: setId number: The set's setId (non perfected or perfected)
+---> Attention: Table returned is nil if setId provided is neither a perfected nor a non perfected set
+--> Returns:    nilable:table perfectedSetInfo = {
+-->                 nilable:boolean isPerfectedSet,
+-->
+-->                 nilable:number  nonPerfectedSetId=<setIdOfNonPerfectedSet>,
+-->                 nilable:number  nonPerfectedSetZoneId=<zoneIdOfNonPerfectedSet>,
+-->
+-->                 nilable:number  perfectedSetId=<setIdOfPerfectedSet>,
+-->                 nilable:number  perfectedSetZoneId=<zoneIdOfPerfectedSet>,
+-->             }
+function lib.GetPerfectedSetInfo(setId)
+    if setId == nil then return end
+    if not checkIfSetsAreLoadedProperly(setId) then return end
+    if isAPerfectedOrNonPerfectedSetId(setId) == false then return end
+
+    local perfectedSetData = getPerfectedSetData(setId)
+    if perfectedSetData == nil then return nil end
+    return perfectedSetData
 end
 
 
@@ -2636,34 +2833,36 @@ end
 --->  table dropMechanicLocationNames: The key is the same index as used within table "dropMechanic". And the value is a subtable containing each (or the specified lang parameter) language as key.
 -----> dropMechanicLocationNames returns the names of the mob/boss/... that drops the setItem, e.g. "Velidreth", "Mob type Daedra", ...
 -----> !!!Attention: dropMechanicLocationNames can now apply to all setTypes, not only anymore to monster sets!!!
--------Example for setId 408
---- ["setId"] = 408,
---- ["dlcId"] = 12,    --DLC_MURKMIRE
---	["setType"] = LIBSETS_SETTYPE_CRAFTED,
---	[LIBSETS_TABLEKEY_SETITEMIDS] = {
+--->  number isPerfectedSet = LIBSETS_SET_ITEMID_TABLE_VALUE_OK or LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK,
+--->  number perfectedSetId = <setIdOfPerfectedSetBelongingToThisNonPerfectedSetId>
+-------Example:
+--- optional:["setId"] = 408,
+--- optional:["dlcId"] = 12,    --DLC_MURKMIRE
+--	optional:[LIBSETS_TABLEKEY_SETTYPE] = LIBSETS_SETTYPE_CRAFTED,
+--	optional:[LIBSETS_TABLEKEY_SETITEMIDS] = {
 --      table [#0,370]
 --  },
---	[LIBSETS_TABLEKEY_SETNAMES] = {
+--	optional:[LIBSETS_TABLEKEY_SETNAMES] = {
 --		["de"] = "Grabpflocksammler"
 --		["en"] = "Grave-Stake Collector"
 --		["fr"] = "Collectionneur de marqueurs funéraires"
 --  },
---	["traitsNeeded"] = 7,
---	["veteran"] = false,
---  ["classId"] = 1,
---	["wayshrines"] = {
+--	optional:["traitsNeeded"] = 7,
+--	optional:["veteran"] = false,
+--  optional:["classId"] = 1,
+--	optional:["wayshrines"] = {
 --		[1] = 375
 --		[2] = 375
 --		[3] = 375
 --  },
---	["zoneIds"] = {
+--	optional:["zoneIds"] = {
 --		[1] = 726,
 --  },
---  ["dropMechanic"] = {
+--  optional:["dropMechanic"] = {
 --      [1] = LIBSETS_DROP_MECHANIC_MONSTER_NAME,
 --      [2] = LIBSETS_DROP_MECHANIC_...,
 --  },
---  ["dropMechanicNames"] = {
+--  optional:["dropMechanicNames"] = {
 --      [1] = {
 --        ["en"] = "DropMechanicNameEN",
 --          ["de"] = "DropMechanicNameDE",
@@ -2677,7 +2876,7 @@ end
 --        [...] = "...",
 --      },
 --  },
---  ["dropMechanicLocationNames"] = {
+--  optional:["dropMechanicLocationNames"] = {
 --      [1] = {
 --        ["en"] = "DropMechanicMonsterNameEN",
 --          ["de"] = "DropMechanicMonsterNameDE",
@@ -2686,6 +2885,8 @@ end
 --      },
 --      [2] = nil, --as it got no monster or other dropMechanicLocation name,
 --  },
+--  optional:isPerfectedSet=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,
+--  optional:perfectedSetId=<setId>,
 --}
 
 --Table to store already processed setIds with boolean -> If true we can directly return setInfoTable without further trying to add data!
@@ -3083,7 +3284,6 @@ end
 --> Parameters: classId number:optional A class's Id
 --> Returns:    table setsInfo
 function lib.GetClassSets(classId)
-    if not checkIfPTSAPIVersionIsLive() then return false end
     if classId == nil then return end
     if not checkIfSetsAreLoadedProperly() then return end
     return getSetsOfClassId(classId)

@@ -739,6 +739,14 @@ lib.jewelrySets                     = {}
 lib.weaponSets                      = {}
 lib.weaponTypesSets                 = {}
 
+
+------------------------------------------------------------------------------------------------------------------------
+--Nn-/Perfected sets data
+lib.nonPerfectedSet2PerfectedSet = {}
+lib.perfectedSet2NonPerfectedSet = {}
+lib.perfectedSetsInfo = {}
+
+
 ------------------------------------------------------------------------------------------------------------------------
 --Number of currently available set bonus for a monster set piece (2: head, shoulder)
 lib.countMonsterSetBonus            = 2
