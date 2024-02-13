@@ -745,6 +745,8 @@ lib.weaponTypesSets                 = {}
 lib.nonPerfectedSet2PerfectedSet = {}
 lib.perfectedSet2NonPerfectedSet = {}
 lib.perfectedSetsInfo = {}
+lib.perfectedSets = {}
+lib.nonPerfectedSets = {}
 
 
 ------------------------------------------------------------------------------------------------------------------------

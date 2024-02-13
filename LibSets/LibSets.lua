@@ -362,9 +362,11 @@ local customTooltipHooksNeeded =        lib.customTooltipHooks.needed
 local classData =                       lib.classData
 local allClassSets =                    lib.classSets
 
-local nonPerfectedSet2PerfectedSet = lib.nonPerfectedSet2PerfectedSet
-local perfectedSet2NonPerfectedSet = lib.perfectedSet2NonPerfectedSet
-local perfectedSetsInfo = lib.perfectedSetsInfo
+local nonPerfectedSet2PerfectedSet =    lib.nonPerfectedSet2PerfectedSet
+local perfectedSet2NonPerfectedSet =    lib.perfectedSet2NonPerfectedSet
+local perfectedSetsInfo =               lib.perfectedSetsInfo
+local perfectedSets =                   lib.perfectedSets
+local nonPerfectedSets =                lib.nonPerfectedSets
 
 
 --Possible SlashCommand parameters
@@ -1030,6 +1032,32 @@ local function fillPerfectedSetDataLookupTables(setId)
                 setId = perfectedSetId,
                 zoneId = perfectedSetZoneId,
             }
+        end
+    end
+end
+
+local function addToPerfectedSetsTables(setId, isPerfected)
+    if setId == nil or isPerfected == nil then return false end
+    if isPerfected == true then
+        if perfectedSet2NonPerfectedSet[setId] ~= nil then
+            perfectedSets[#perfectedSets + 1] = setId
+            return true
+        end
+    else
+        if nonPerfectedSet2PerfectedSet[setId] ~= nil then
+            nonPerfectedSets[#nonPerfectedSets + 1] = setId
+            return true
+        end
+    end
+    return false
+end
+
+local function fillPerfectedSetsTables()
+    for setId, _ in pairs(setInfo) do
+        fillPerfectedSetDataLookupTables(setId)
+        local wasAdded = addToPerfectedSetsTables(setId, true)
+        if not wasAdded then
+            wasAdded = addToPerfectedSetsTables(setId, false)
         end
     end
 end
@@ -2080,6 +2108,24 @@ function lib.GetPerfectedSetInfo(setId)
     local perfectedSetData = getPerfectedSetData(setId)
     if perfectedSetData == nil then return nil end
     return perfectedSetData
+end
+
+--Returns table with key = index and value = setId of perfected sets
+function lib.GetAllPerfectedSetIds()
+    if not checkIfSetsAreLoadedProperly() then return end
+    if ZO_IsTableEmpty(perfectedSets) then
+        fillPerfectedSetsTables()
+    end
+    return perfectedSets
+end
+
+--Returns table with key = index and value = setId of nonPerfected sets
+function lib.GetAllNonPerfectedSetIds()
+    if not checkIfSetsAreLoadedProperly() then return end
+    if ZO_IsTableEmpty(nonPerfectedSets) then
+        fillPerfectedSetsTables()
+    end
+    return nonPerfectedSets
 end
 
 
