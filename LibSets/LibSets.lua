@@ -984,8 +984,6 @@ local function isAPerfectedOrNonPerfectedSetId(setId)
 end
 
 local function fillPerfectedSetDataLookupTables(setId)
-    if nonPerfectedSet2PerfectedSet[setId] ~= nil or perfectedSet2NonPerfectedSet[setId] ~= nil then return end
-
     local perfectedSetId, perfectedSetZoneId, nonPerfectedSetId, nonPerfectedSetZoneId
     local setData = setInfo[setId]
 
@@ -1065,8 +1063,6 @@ end
 --Read setInfo and get perfected/non-perfected set data, and build internal lookup tables
 -->fills tables lib.nonPerfectedSet2PerfectedSet and lib.perfectedSet2NonPerfectedSet "on demand" (as API functions for non-/perfected sets are used)
 local function getPerfectedSetData(setId)
-    if not checkIfSetsAreLoadedProperly(setId) then return end
-
     if perfectedSetsInfo[setId] ~= nil then
         return perfectedSetsInfo[setId]
     end
@@ -1153,6 +1149,12 @@ local function LoadSets()
     setId2DropLocations = {}
     dropLocation2SetIds = {}
     local dropLocationNamesAdded = {}
+
+    perfectedSet2NonPerfectedSet = {}
+    nonPerfectedSet2PerfectedSet = {}
+    perfectedSets = {}
+    nonPerfectedSets = {}
+    perfectedSetsInfo = {}
 
 ------------------------------------------------------------------------------------------------------------------------
     lib.setTypeToSetIdsForSetTypeTable = {}
@@ -1363,6 +1365,31 @@ local function LoadSets()
                     end
                 end
             end
+
+            --Check perfected and nonPerfected set's and update the internal lookup tables
+            local unPerfectedSetId = GetItemSetUnperfectedSetId(setId)
+            if unPerfectedSetId ~= nil and unPerfectedSetId > 0 then
+                local perfectedSetZoneId, nonPerfectedSetZoneId
+                if setId2ZoneIds[setId] ~= nil and #setId2ZoneIds[setId] >= 1 then
+                    perfectedSetZoneId = setId2ZoneIds[setId][1]
+                end
+                if setId2ZoneIds[unPerfectedSetId] ~= nil and #setId2ZoneIds[unPerfectedSetId] >= 1  then
+                    nonPerfectedSetZoneId = setId2ZoneIds[unPerfectedSetId][1]
+                end
+
+                perfectedSet2NonPerfectedSet[setId] = {
+                    setId = unPerfectedSetId,
+                    zoneId = nonPerfectedSetZoneId,
+                }
+                nonPerfectedSet2PerfectedSet[unPerfectedSetId] = {
+                    setId = setId,
+                    zoneId = perfectedSetZoneId,
+                }
+
+                perfectedSets[#perfectedSets + 1] = setId
+                nonPerfectedSets[#nonPerfectedSets + 1] = unPerfectedSetId
+            end
+
         end --for setId, setData in pairs(setDataTable) do
     end
 ------------------------------------------------------------------------------------------------------------------------
