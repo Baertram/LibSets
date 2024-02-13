@@ -2029,6 +2029,36 @@ function lib.IsNonPerfectedSet(setId)
     return isNonPerfectedSet
 end
 
+--Returns perfectedSetId and perfectedSetZoneId of the non perfected setId provided.
+--Returned value will be nil if nonPerfectedSetId is no set with a matching perfected setId
+--> Parameters: nonPerfectedSetId number: The set's setId
+--> Returns:    nilable:number perfectedSetId
+-->             nilable:number perfectedSetZoneId
+function lib.GetPerfectedSetId(nonPerfectedSetId)
+    if nonPerfectedSetId == nil then return nil, nil end
+    if not checkIfSetsAreLoadedProperly(nonPerfectedSetId) then return nil, nil end
+    local perfectedSetData = getPerfectedSetData(nonPerfectedSetId)
+    if perfectedSetData ~= nil and perfectedSetData.isPerfectedSet ~= nil and perfectedSetData.isPerfectedSet == true then
+        return perfectedSetData.perfectedSetId, perfectedSetData.perfectedSetZoneId
+    end
+    return nil, nil
+end
+
+
+--Returns nonPerfectedSetId and nonPerfectedSetZoneId of the non perfected setId provided.
+--Returned value will be nil if perfectedSetId is no set with a matching non perfected setId
+--> Parameters: perfectedSetId number: The set's setId
+--> Returns:    nilable:number nonPerfectedSetId
+-->             nilable:number nonPerfectedSetZoneId
+function lib.GetPerfectedSetId(perfectedSetId)
+    if perfectedSetId == nil then return nil, nil end
+    if not checkIfSetsAreLoadedProperly(perfectedSetId) then return nil, nil end
+    local perfectedSetData = getPerfectedSetData(perfectedSetId)
+    if perfectedSetData ~= nil and perfectedSetData.isPerfectedSet ~= nil and perfectedSetData.isPerfectedSet == false then
+        return perfectedSetData.nonPerfectedSetId, perfectedSetData.nonPerfectedSetZoneId
+    end
+    return nil, nil
+end
 
 --Returns table perfectedSetInfo about the setId provided if it's a perfected set, or a non perfected set
 --> Parameters: setId number: The set's setId (non perfected or perfected)
