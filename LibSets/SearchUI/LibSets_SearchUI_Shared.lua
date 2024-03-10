@@ -1106,6 +1106,8 @@ function LibSets_SearchUI_Shared:ShowItemLinkTooltip(parent, data, anchor1, offs
     --Show the tooltip
     InitializeTooltip(TT_control, parent, anchor1, offsetX, offsetY, anchor2)
     TT_control:SetLink(data.itemLink)
+
+    self.tooltipControlTLC:BringWindowToTop()
 end
 
 function LibSets_SearchUI_Shared:HideItemLinkTooltip()

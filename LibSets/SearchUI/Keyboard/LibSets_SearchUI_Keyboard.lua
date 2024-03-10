@@ -55,6 +55,8 @@ local function onFilterDropdownEntryMouseEnterCallback(comboBox, entry)
     if entry == nil or entry.m_data == nil or entry.m_data.tooltipText == nil then return end
     InitializeTooltip(InformationTooltip, entry, BOTTOM, 0, -10)
     SetTooltipText(InformationTooltip, entry.m_data.tooltipText)
+
+    InformationTooltipTopLevel:BringWindowToTop()
 end
 
 local function onFilterDropdownEntryMouseExitCallback(comboBox, entry)
@@ -209,6 +211,8 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
 
 
     --Tooltip
+    self.tooltipControlTLC = LibSets_SearchUI_TooltipTopLevel -- The tooltips TLC
+    self.tooltipControlTLC:AllowBringToTop(true)
     self.tooltipControl = LibSets_SearchUI_Tooltip -- The set item tooltip preview
     self.tooltipKeyboardHookWasDone = false
 
