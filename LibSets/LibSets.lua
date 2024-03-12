@@ -368,6 +368,8 @@ local perfectedSetsInfo =               lib.perfectedSetsInfo
 local perfectedSets =                   lib.perfectedSets
 local nonPerfectedSets =                lib.nonPerfectedSets
 
+--local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
+local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavoriteCategoriesUnsorted
 
 --Possible SlashCommand parameters
 -->help
@@ -698,6 +700,36 @@ end
 
 ------------------------------------------------------------------------
 --======= SavedVariables ===============================================================================================
+--Check SV data after they have been loaded
+local function runAfterSVLoadTasks()
+--d("[LibSets]runAfterSVLoadTasks")
+    local savedSetSearchFavorites = lib.svData.setSearchFavorites
+    if savedSetSearchFavorites == nil then return end
+    local savedSetSearchFavoritesStar = lib.svData.setSearchFavorites.star
+
+    if not ZO_IsTableEmpty(savedSetSearchFavorites) then
+        for setIdOrSetSearchFavoriteCategory, isSavedFavorite in pairs(savedSetSearchFavorites) do
+            if possibleSetSearchFavoriteCategoriesUnsorted[setIdOrSetSearchFavoriteCategory] == nil and isSavedFavorite == true then
+--d(">Migrating set search favorite setId " ..tos(setIdOrSetSearchFavoriteCategory) .. " to 'star' favorites")
+                savedSetSearchFavoritesStar[setIdOrSetSearchFavoriteCategory] = true
+                savedSetSearchFavorites[setIdOrSetSearchFavoriteCategory] = nil
+            end
+        end
+    end
+end
+
+local function updateDefaultsData(defaultsSV)
+    --Add the setSearchFavoriteCategories as subTables of the default SV setSearchFavorites
+    if defaultsSV.setSearchFavorites == nil then
+        defaultsSV.setSearchFavorites = {}
+    end
+    for setSearchFavoriteCategory, _ in pairs(possibleSetSearchFavoriteCategoriesUnsorted) do
+        defaultsSV.setSearchFavorites[setSearchFavoriteCategory] = {}
+    end
+
+    return defaultsSV
+end
+
 --Load the SavedVariables
 local function LoadSavedVariables()
     --SavedVars were loaded already before?
@@ -745,6 +777,8 @@ local function LoadSavedVariables()
             ["bonus"] = {},
         },
     }
+    defaults = updateDefaultsData(defaults)
+
     lib.defaultSV = defaults
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     lib.svData = ZO_SavedVars:NewAccountWide(lib.svName, lib.svVersion, nil, defaults, worldName, "$AllAccounts")
@@ -753,6 +787,9 @@ local function LoadSavedVariables()
     if clientLang == fallbackLang then
         lib.svData.setSearchShowSetNamesInEnglishToo = false
     end
+
+    runAfterSVLoadTasks()
+
     --------------------------------------------------------------------------------------------------------------------
 
     --For debugging and preloaded data

@@ -51,18 +51,6 @@ setsOfNewerAPIVersion = {
     --....
 
     --setIds of APIversion 101041 "Update 41 Scions of Ithelia", 2024-02-02
-    [1] =  693, --Torc of the Last Ayleid King",
-    [2] =  730, --Cinders of Anthelmir",
-    [3] =  731, --Sluthrug's Hunger",
-    [4] =  732, --Black-Glove Grounding",
-    [5] =  734, --Anthelmir's Construct",
-    [6] =  735, --Blind Path Induction",
-    [7] =  736, --Tarnished Nightmare",
-    [8] =  737, --Reflected Fury",
-    [9] =  738, --The Blind",
-    [10] = 754, --Oakfather's Retribution",
-    [11] = 755, --Blunted Blades",
-    [12] = 756, --Baan Dar's Blessing",
     --setIds not yet on live server - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion

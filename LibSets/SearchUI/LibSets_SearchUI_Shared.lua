@@ -57,18 +57,125 @@ local dropZoneAndWayshrinesStr = dropZonesStr .. " / " .. wayshrinesStr
 local invertSelectionStr = getLocalizedText("invertSelection")
 
 --Textures
-local favoriteIcon = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
+local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
+local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavoriteCategoriesUnsorted
+
+--Favorite textures
+local favoriteIconStar =        possibleSetSearchFavoriteCategoriesUnsorted.star
+local favoriteIconTank =        possibleSetSearchFavoriteCategoriesUnsorted.tank
+local favoriteIconStamDD =      possibleSetSearchFavoriteCategoriesUnsorted.stamDD
+local favoriteIconMagDD =       possibleSetSearchFavoriteCategoriesUnsorted.magDD
+local favoriteIconStamHeal =    possibleSetSearchFavoriteCategoriesUnsorted.stamHeal
+local favoriteIconMagHeal=      possibleSetSearchFavoriteCategoriesUnsorted.magHeal
+local favoriteIconHybrid =      possibleSetSearchFavoriteCategoriesUnsorted.hybrid
+local favoriteIconPVPTank =     possibleSetSearchFavoriteCategoriesUnsorted.PVPTank
+local favoriteIconPVPStamDD =   possibleSetSearchFavoriteCategoriesUnsorted.PVPStamDD
+local favoriteIconPVPMagDD =    possibleSetSearchFavoriteCategoriesUnsorted.PVPMagDD
+local favoriteIconPVPStamHeal = possibleSetSearchFavoriteCategoriesUnsorted.PVPStamHeal
+local favoriteIconPVPMagHeal=   possibleSetSearchFavoriteCategoriesUnsorted.PVPMagHeal
+local favoriteIconPVPHybrid =   possibleSetSearchFavoriteCategoriesUnsorted.PVPHybrid
+local favoriteIconFarm =        possibleSetSearchFavoriteCategoriesUnsorted.farm
+local favoriteIconSneak =       possibleSetSearchFavoriteCategoriesUnsorted.sneak
+local favoriteIconBow =         possibleSetSearchFavoriteCategoriesUnsorted.bow
+local favoriteIconDualWield =   possibleSetSearchFavoriteCategoriesUnsorted.dualWield
+local favoriteIcon2HD =         possibleSetSearchFavoriteCategoriesUnsorted.twoHand
+local favoriteIconFrostStaff =  possibleSetSearchFavoriteCategoriesUnsorted.frostStaff
+local favoriteIconFireStaff =   possibleSetSearchFavoriteCategoriesUnsorted.fireStaff
+local favoriteIconLightningStaff=possibleSetSearchFavoriteCategoriesUnsorted.lightningStaff
+
 
 --The search UI table
 lib.SearchUI = {}
 local searchUI = lib.SearchUI
 searchUI.name = MAJOR .. "_SearchUI"
 local searchUIName = searchUI.name
-searchUI.favoriteIcon = favoriteIcon
-searchUI.favoriteIconText = zif(favoriteIcon, 24, 24)
-local favoriteIconText = searchUI.favoriteIconText
-local favoriteIconWithNameText = zoitfns(favoriteIcon, 24, 24, GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
-local settingsIconText = zif("esoui/art/chatwindow/chat_options_up.dds", 32, 32)
+
+--For the XML sort header
+searchUI.favoriteIcon = favoriteIconStar
+
+--Favorite icons and texts - Add to SearchUI
+searchUI.favoriteIconStar = favoriteIconStar
+searchUI.favoriteIconTank = favoriteIconTank
+searchUI.favoriteIconStamDD = favoriteIconStamDD
+searchUI.favoriteIconMagDD = favoriteIconMagDD
+searchUI.favoriteIconStamHeal = favoriteIconStamHeal
+searchUI.favoriteIconMagHeal = favoriteIconMagHeal
+searchUI.favoriteIconHybrid = favoriteIconHybrid
+searchUI.favoriteIconPVPTank = favoriteIconPVPTank
+searchUI.favoriteIconPVPStamDD = favoriteIconPVPStamDD
+searchUI.favoriteIconPVPMagDD = favoriteIconPVPMagDD
+searchUI.favoriteIconPVPStamHeal = favoriteIconPVPStamHeal
+searchUI.favoriteIconPVPMagHeal = favoriteIconPVPMagHeal
+searchUI.favoriteIconPVPHybrid = favoriteIconPVPHybrid
+searchUI.favoriteIconFarm = favoriteIconFarm
+searchUI.favoriteIconSneak = favoriteIconSneak
+searchUI.favoriteIconBow = favoriteIconBow
+searchUI.favoriteIconDualWield = favoriteIconDualWield
+searchUI.favoriteIcon2HD = favoriteIcon2HD
+searchUI.favoriteIconFrostStaff = favoriteIconFrostStaff
+searchUI.favoriteIconFireStaff = favoriteIconFireStaff
+searchUI.favoriteIconLightningStaff = favoriteIconLightningStaff
+
+searchUI.favoriteIconTextStar = zif(favoriteIconStar, 24, 24)
+searchUI.favoriteIconTextTank = zif(favoriteIconTank, 24, 24)
+searchUI.favoriteIconTextStamDD = zif(favoriteIconStamDD, 24, 24)
+searchUI.favoriteIconTextMagDD = zif(favoriteIconMagDD, 24, 24)
+searchUI.favoriteIconTextStamHeal = zif(favoriteIconStamHeal, 24, 24)
+searchUI.favoriteIconTextMagHeal = zif(favoriteIconMagHeal, 24, 24)
+searchUI.favoriteIconTextHybrid = zif(favoriteIconHybrid, 24, 24)
+searchUI.favoriteIconTextPVPTank = zif(favoriteIconPVPTank, 24, 24)
+searchUI.favoriteIconTextPVPStamDD = zif(favoriteIconPVPStamDD, 24, 24)
+searchUI.favoriteIconTextPVPMagDD = zif(favoriteIconPVPMagDD, 24, 24)
+searchUI.favoriteIconTextPVPStamHeal = zif(favoriteIconPVPStamHeal, 24, 24)
+searchUI.favoriteIconTextPVPMagHeal = zif(favoriteIconPVPMagHeal, 24, 24)
+searchUI.favoriteIconTextPVPHybrid = zif(favoriteIconPVPHybrid, 24, 24)
+searchUI.favoriteIconTextFarm = zif(favoriteIconFarm, 24, 24)
+searchUI.favoriteIconTextSneak = zif(favoriteIconSneak, 24, 24)
+searchUI.favoriteIconTextBow = zif(favoriteIconBow, 24, 24)
+searchUI.favoriteIconTextDualWield = zif(favoriteIconDualWield, 24, 24)
+searchUI.favoriteIconText2HD = zif(favoriteIcon2HD, 24, 24)
+searchUI.favoriteIconTextFrostStaff = zif(favoriteIconFrostStaff, 24, 24)
+searchUI.favoriteIconTextFireStaff = zif(favoriteIconFireStaff, 24, 24)
+searchUI.favoriteIconTextLightningStaff = zif(favoriteIconLightningStaff, 24, 24)
+
+local favoriteIconTextStar = searchUI.favoriteIconTextStar
+
+searchUI.favoriteIconTexts = {
+    star = favoriteIconTextStar,
+    --PvE
+    tank = searchUI.favoriteIconTextTank,
+    stamDD = searchUI.favoriteIconTextStamDD,
+    magDD = searchUI.favoriteIconTextMagDD,
+    stamHeal = searchUI.favoriteIconTextStamHeal,
+    magHeal = searchUI.favoriteIconTextMagHeal,
+    hybrid = searchUI.favoriteIconTextHybrid,
+    --PvP
+    PVPTank = searchUI.favoriteIconTextPVPTank,
+    PVPStamDD = searchUI.favoriteIconTextPVPStamDD,
+    PVPMagDD = searchUI.favoriteIconTextPVPMagDD,
+    PVPStamHeal = searchUI.favoriteIconTextPVPStamHeal,
+    PVPMagHeal = searchUI.favoriteIconTextPVPMagHeal,
+    PVPHybrid = searchUI.favoriteIconTextPVPHybrid,
+    --Other
+    farm = searchUI.favoriteIconTextFarm,
+    sneak = searchUI.favoriteIconTextSneak,
+    --Weapon types
+    bow = searchUI.favoriteIconTextBow,
+    dualWield = searchUI.favoriteIconTextDualWield,
+    twoHand = searchUI.favoriteIconText2HD,
+    frostStaff = searchUI.favoriteIconTextFrostStaff,
+    fireStaff = searchUI.favoriteIconTextFireStaff,
+    lightningStaff = searchUI.favoriteIconTextLightningStaff,
+}
+local favoriteIconTexts    = searchUI.favoriteIconTexts
+
+local favoriteIconWithNameTexts = {}
+for favoriteIconCategory, favoriteIconTexture in pairs(lib.possibleSetSearchFavoriteCategoriesUnsorted) do
+    favoriteIconWithNameTexts[favoriteIconCategory] = zoitfns(favoriteIconTexture, 24, 24, GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
+end
+
+
+local settingsIconText             = zif("esoui/art/chatwindow/chat_options_up.dds", 32, 32)
 
 --Maximum number of set bonuses
 searchUI.MAX_NUM_SET_BONUS = 12 --2023-11-05 Druids
@@ -823,6 +930,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
     --The search parameters of the filters (multiselect dropdowns) were provided?
     -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
     local searchParams = self.searchParams
+LS_DEBUG = { searchParams = searchParams }
     if searchParams ~= nil and not ZO_IsTableEmpty(searchParams) then
         local setsBaseList = {}
         --Language of client, or of not supported: fallbackLang
@@ -857,13 +965,34 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
             --[Multiselect dropdown box filters]
 
             --First filter by SavedVariables dependent filters
-            --set favorites
-            if searchParamsFavorites ~= nil and setSearchFavoritesSV ~= nil then
+
+            --todo: 2024-03-10 Add the other categories of lib.excludeSetSearchFavoriteCategories  dynamically to the set search dropdown AND here to the preFilters!
+            --set favorites: All icons
+            for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
+                local favoriteCategory = favoriteCategoryData.category
+                if searchParamsFavorites ~= nil and setSearchFavoritesSV ~= nil and setSearchFavoritesSV[favoriteCategory] ~= nil then
+                    isAllowed = false
+                    for isFavorite, isFiltered in pairs(searchParamsFavorites) do
+                        if isFiltered == true then
+                            local setDataFavoriteValue = (isFavorite ~= nil and true) or nil
+                            if setDataFavoriteValue == setSearchFavoritesSV[favoriteCategory][setId] then
+        --d(">setId is favorite: " ..tos(setId) .. ", name: " ..tos(setData.nameClean))
+                                isAllowed = true
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+
+--[[
+            --set favorites: Star icon
+            if searchParamsFavorites ~= nil and setSearchFavoritesSV ~= nil and setSearchFavoritesStar ~= nil then
                 isAllowed = false
                 for isFavorite, isFiltered in pairs(searchParamsFavorites) do
                     if isFiltered == true then
                         local setDataFavoriteValue = (isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK and true) or nil
-                        if setDataFavoriteValue == setSearchFavoritesSV[setId] then
+                        if setDataFavoriteValue == setSearchFavoritesStar[setId] then
     --d(">setId is favorite: " ..tos(setId) .. ", name: " ..tos(setData.nameClean))
                             isAllowed = true
                             break
@@ -871,6 +1000,7 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
                     end
                 end
             end
+]]
 
             --Other search UI filters
             --SetTypes
@@ -1168,28 +1298,38 @@ function LibSets_SearchUI_Shared:ItemLinkToChat(data)
     end
 end
 
-function LibSets_SearchUI_Shared:IsSetIdInFavorites(setId)
-    return lib.svData.setSearchFavorites[setId] or false
+function LibSets_SearchUI_Shared:IsSetIdInFavorites(setId, favoriteCategory)
+    if favoriteCategory == nil then return false end
+    local setSearchFavorites = lib.svData.setSearchFavorites
+    return (setSearchFavorites[favoriteCategory] ~= nil and setSearchFavorites[favoriteCategory][setId]) or false
 end
 
-function LibSets_SearchUI_Shared:AddSetIdToFavorites(rowControl, setId)
-    if self:IsSetIdInFavorites(setId) then return end
-    lib.svData.setSearchFavorites[setId] = true
+function LibSets_SearchUI_Shared:AddSetIdToFavorites(rowControl, setId, favoriteCategory)
+    if self:IsSetIdInFavorites(setId, favoriteCategory) then return end
+    if favoriteCategory == nil then return end
+    if possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory] == nil then return end
 
-    self.resultsList:AddFavorite(rowControl)
+    lib.svData.setSearchFavorites[favoriteCategory] = lib.svData.setSearchFavorites[favoriteCategory] or {}
+    lib.svData.setSearchFavorites[favoriteCategory][setId] = true
+
+    self.resultsList:AddFavorite(rowControl, favoriteCategory)
 end
 
-function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId)
-    if not self:IsSetIdInFavorites(setId) then return end
-    lib.svData.setSearchFavorites[setId] = nil
+function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)
+    if not self:IsSetIdInFavorites(setId, favoriteCategory) then return end
+    if possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory] == nil then return end
+    if lib.svData.setSearchFavorites[favoriteCategory] ~= nil then
+        lib.svData.setSearchFavorites[favoriteCategory][setId] = nil
+    end
 
-    self.resultsList:RemoveFavorite(rowControl)
+    self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
 end
 
-function LibSets_SearchUI_Shared:RemoveAllSetFavorites()
-    local setFavorites = lib.svData.setSearchFavorites
+function LibSets_SearchUI_Shared:RemoveAllSetFavorites(favoriteCategory)
+    if possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory] == nil then return end
+    local setFavorites = lib.svData.setSearchFavorites[favoriteCategory]
     if ZO_IsTableEmpty(setFavorites) then return end
-    lib.svData.setSearchFavorites = {}
+    lib.svData.setSearchFavorites[favoriteCategory] = {}
     self.resultsList:RefreshData() --To remove the Favorite markers
 end
 
@@ -1227,11 +1367,19 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
         setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
     end
 
-    if not ZO_IsTableEmpty(lib.svData.setSearchFavorites) then
-        AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
-        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
-            self:RemoveAllSetFavorites()
-        end)
+    local setSearchFavorites = lib.svData.setSearchFavorites
+    local wasFavoriteHeaderAdded = false
+    for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
+        local favoriteCategory = favoriteCategoryData.category
+        if not ZO_IsTableEmpty(setSearchFavorites[favoriteCategory]) then
+            if not wasFavoriteHeaderAdded then
+                AddCustomMenuItem(GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER), function() end, MENU_ADD_OPTION_HEADER)
+                wasFavoriteHeaderAdded = true
+            end
+            AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory] .. " " .. GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
+                self:RemoveAllSetFavorites(favoriteCategory)
+            end)
+        end
     end
     ShowMenu(anchorControl)
 end
@@ -1273,15 +1421,39 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     AddCustomSubMenuItem(getLocalizedText("popupTooltip"), popupTooltipSubmenu)
 
     if setId ~= nil then
-        AddCustomMenuItem(favoriteIconWithNameText, function() end, MENU_ADD_OPTION_HEADER)
-        if self:IsSetIdInFavorites(setId) then
-            AddCustomMenuItem(GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE), function()
-                self:RemoveSetIdFromFavorites(rowControl, setId)
-            end)
-        else
-            AddCustomMenuItem(GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE), function()
-                self:AddSetIdToFavorites(rowControl, setId)
-            end)
+        --Set search favorites
+        local setSearchFavorites = lib.svData.setSearchFavorites
+        local wasFavoriteHeaderAdded = false
+        local favoriteCategoriesToAddSubmenuEntries = {}
+        for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
+            local favoriteCategory = favoriteCategoryData.category
+--d("[LibSets]LibSets_SearchUI_Shared:ShowRowContextMenu - favoriteCategory: " ..tos(favoriteCategory))
+            --if not ZO_IsTableEmpty(setSearchFavorites[favoriteCategory]) then
+                if not wasFavoriteHeaderAdded then
+                    AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory], function() end, MENU_ADD_OPTION_HEADER)
+                    wasFavoriteHeaderAdded = true
+                end
+                if self:IsSetIdInFavorites(setId, favoriteCategory) then
+                    AddCustomMenuItem(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
+                        self:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)
+                    end)
+                else
+                    --Add submenu with favorites that could be added
+                    --[[
+                    AddCustomMenuItem(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
+                        self:AddSetIdToFavorites(rowControl, setId, favoriteCategory)
+                    end)
+                    ]]
+                    local subMenuEntry = {
+                        label 		    = favoriteIconTexts[favoriteCategory] .. zo_strformat("<<C:1>>", favoriteCategory),
+                        callback 	    = function() self:AddSetIdToFavorites(rowControl, setId, favoriteCategory) end
+                    }
+                    table.insert(favoriteCategoriesToAddSubmenuEntries, subMenuEntry)
+                end
+            --end
+        end
+        if not ZO_IsTableEmpty(favoriteCategoriesToAddSubmenuEntries) then
+            AddCustomSubMenuItem(GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE), favoriteCategoriesToAddSubmenuEntries)
         end
 
         --Drop zones
@@ -1412,8 +1584,12 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
         --Favorite filter muliselect dropdown?
         if dropdownControl == self.favoritesFiltersControl then
             AddCustomMenuItem("-")
-            local entriesToSelect = { [1] = LIBSETS_SET_ITEMID_TABLE_VALUE_OK }
-            AddCustomMenuItem(favoriteIconWithNameText, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
+            for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
+                local favoriteCategory = favoriteCategoryData.category
+                local entriesToSelect = { [1] = favoriteCategory }
+                AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory] .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
+            end
+
         --Zones filter muliselect dropdown?
         elseif dropdownControl == self.dropZoneFiltersControl then
             AddCustomMenuItem("-")

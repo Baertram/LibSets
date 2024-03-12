@@ -23,8 +23,8 @@ local searchUIThrottledDelay = 500
 local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
 
 
-local favoriteIconText = searchUI.favoriteIconText
-
+local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
+local favoriteIconTexts = searchUI.favoriteIconTexts
 
 --Debugging - TODO: Disable again
 --LibSets._debug = {} --todo remove after debugging/testing
@@ -521,14 +521,28 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     favoritesDropdown:SetSortsItems(false)
 
-    local entry = favoritesDropdown:CreateItemEntry(GetString(SI_ARMORTYPE0))
+    local entry = favoritesDropdown:CreateItemEntry(GetString(SI_ARMORTYPE0)) -- None
     entry.filterType = 0
     entry.nameClean = "No favorite"
     favoritesDropdown:AddItem(entry)
-    entry = favoritesDropdown:CreateItemEntry(favoriteIconText .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
-    entry.filterType = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
-    entry.nameClean = "Favorite"
-    favoritesDropdown:AddItem(entry)
+
+    for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
+        local favoriteCategory = favoriteCategoryData.category
+        --[[
+        --For debugging
+        if favoriteIconTexts[favoriteCategory] == nil then
+            d("[LibSets]ERROR - favoriteIconTexts[favoriteCategory] is nil: " ..tostring(favoriteCategory))
+        end
+        ]]
+        local entry = favoritesDropdown:CreateItemEntry(favoriteIconTexts[favoriteCategory] .. " " .. zo_strformat("<<C:1>>" , favoriteCategory)) -- GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
+        entry.filterType = favoriteCategory
+        entry.nameClean = favoriteCategory
+        favoritesDropdown:AddItem(entry)
+    end
+    --entry = favoritesDropdown:CreateItemEntry(favoriteIconTextStar .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
+    --entry.filterType = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+    --entry.nameClean = "Favorite"
+    --favoritesDropdown:AddItem(entry)
 
     -- Initialize the Number of bonuses multiselect combobox.
     local numBonusDropdown = ZO_ComboBox_ObjectFromContainer(self.numBonusFiltersControl)

@@ -1765,3 +1765,68 @@ local setTypeToDropZoneLocalizationStr = {
 }
 lib.setTypeToDropZoneLocalizationStr   = setTypeToDropZoneLocalizationStr
 
+
+--Set search favorite categories and their icons *.dds files
+local possibleSetSearchFavoriteCategoriesUnsorted = {
+    star = "EsoUI/Art/Collections/Favorite_StarOnly.dds",
+    --PvE
+    tank = "/esoui/art/inventory/inventory_tabicon_1handed_up.dds",
+    stamDD = "/esoui/art/icons/store_staminapotion_001.dds",
+    magDD = "/esoui/art/icons/store_magickadrink_001.dds",
+    stamHeal = "/esoui/art/icons/alchemy/crafting_poison_trait_increasehealing.dds",
+    magHeal = "/esoui/art/icons/alchemy/crafting_alchemy_trait_restorehealth_match.dds",
+    hybrid = "/esoui/art/icons/crowncrate_staminahealth_drink.dds",
+    --PvP
+    PVPTank = "/esoui/art/progression/health_points_frame.dds",
+    PVPStamDD = "/esoui/art/progression/stamina_points_frame.dds",
+    PVPMagDD = "/esoui/art/progression/magicka_points_frame.dds",
+    PVPStamHeal = "/esoui/art/icons/ability_healer_035.dds",
+    PVPMagHeal = "/esoui/art/icons/ability_healer_024.dds",
+    PVPHybrid = "/esoui/art/icons/ability_healer_029.dds",
+    --Other
+    farm = "/esoui/art/inventory/inventory_tabicon_crafting_up.dds",
+    sneak = "/esoui/art/icons/ability_legerdemain_improvedsneak.dds",
+    --Weapon types
+    bow = "/esoui/art/progression/icon_bows.dds",
+    dualWield = "/esoui/art/progression/icon_dualwield.dds",
+    twoHand = "/esoui/art/progression/icon_2handed.dds",
+    frostStaff = "/esoui/art/progression/icon_icestaff.dds",
+    fireStaff = "/esoui/art/progression/icon_firestaff.dds",
+    lightningStaff = "/esoui/art/progression/icon_lightningstaff.dds",
+}
+lib.possibleSetSearchFavoriteCategoriesUnsorted = possibleSetSearchFavoriteCategoriesUnsorted
+local possibleSetSearchFavoriteCategoriesForSort = {
+    "star",
+    --PvE
+    "tank",
+    "stamDD",
+    "magDD",
+    "stamHeal",
+    "magHeal",
+    "hybrid",
+    --PvP
+    "PVPTank",
+    "PVPStamDD",
+    "PVPMagDD",
+    "PVPStamHeal",
+    "PVPMagHeal",
+    "PVPHybrid",
+    --Other
+    "farm",
+    "sneak",
+    --Weapon types
+    "bow",
+    "dualWield",
+    "twoHand",
+    "frostStaff",
+    "fireStaff",
+    "lightningStaff",
+}
+local possibleSetSearchFavoriteCategoriesSorted = {}
+for index, setSearchFavoriteCategory in ipairs(possibleSetSearchFavoriteCategoriesForSort) do
+    possibleSetSearchFavoriteCategoriesSorted[index] = {
+        category = setSearchFavoriteCategory,
+        texture = possibleSetSearchFavoriteCategoriesUnsorted[setSearchFavoriteCategory],
+    }
+end
+lib.possibleSetSearchFavoriteCategories = possibleSetSearchFavoriteCategoriesSorted
