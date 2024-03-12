@@ -930,7 +930,6 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
     --The search parameters of the filters (multiselect dropdowns) were provided?
     -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
     local searchParams = self.searchParams
-LS_DEBUG = { searchParams = searchParams }
     if searchParams ~= nil and not ZO_IsTableEmpty(searchParams) then
         local setsBaseList = {}
         --Language of client, or of not supported: fallbackLang
@@ -966,17 +965,17 @@ LS_DEBUG = { searchParams = searchParams }
 
             --First filter by SavedVariables dependent filters
 
-            --todo: 2024-03-10 Add the other categories of lib.excludeSetSearchFavoriteCategories  dynamically to the set search dropdown AND here to the preFilters!
             --set favorites: All icons
-            for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
-                local favoriteCategory = favoriteCategoryData.category
-                if searchParamsFavorites ~= nil and setSearchFavoritesSV ~= nil and setSearchFavoritesSV[favoriteCategory] ~= nil then
-                    isAllowed = false
-                    for isFavorite, isFiltered in pairs(searchParamsFavorites) do
-                        if isFiltered == true then
-                            local setDataFavoriteValue = (isFavorite ~= nil and true) or nil
-                            if setDataFavoriteValue == setSearchFavoritesSV[favoriteCategory][setId] then
-        --d(">setId is favorite: " ..tos(setId) .. ", name: " ..tos(setData.nameClean))
+
+            if setSearchFavoritesSV ~= nil then
+                for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
+                    local favoriteCategory = favoriteCategoryData.category
+                    if searchParamsFavorites ~= nil and setSearchFavoritesSV[favoriteCategory] ~= nil then
+                        isAllowed = false
+                        local searchParamsFavoritesOfCategoryIdIsFiltered = searchParamsFavorites[favoriteCategory]
+                        if searchParamsFavoritesOfCategoryIdIsFiltered ~= nil and searchParamsFavoritesOfCategoryIdIsFiltered == true then
+                            if setSearchFavoritesSV[favoriteCategory][setId] then
+--d(">setId is favorite: " ..tos(setId) .. ", name: " ..tos(setData.nameClean) .. ", category: " ..tos(favoriteCategory))
                                 isAllowed = true
                                 break
                             end
@@ -984,23 +983,6 @@ LS_DEBUG = { searchParams = searchParams }
                     end
                 end
             end
-
---[[
-            --set favorites: Star icon
-            if searchParamsFavorites ~= nil and setSearchFavoritesSV ~= nil and setSearchFavoritesStar ~= nil then
-                isAllowed = false
-                for isFavorite, isFiltered in pairs(searchParamsFavorites) do
-                    if isFiltered == true then
-                        local setDataFavoriteValue = (isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK and true) or nil
-                        if setDataFavoriteValue == setSearchFavoritesStar[setId] then
-    --d(">setId is favorite: " ..tos(setId) .. ", name: " ..tos(setData.nameClean))
-                            isAllowed = true
-                            break
-                        end
-                    end
-                end
-            end
-]]
 
             --Other search UI filters
             --SetTypes
