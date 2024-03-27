@@ -14,9 +14,9 @@ local isClientLangEqualToFallbackLang = clientLang == fallbackLang
 
 --The search UI table
 local searchUI = lib.SearchUI
-local searchUIName = searchUI.name
-local favoriteIconText = searchUI.favoriteIconText
-
+--local searchUIName         = searchUI.name
+local favoriteIconTextStar = searchUI.favoriteIconTextStar
+local favoriteIconTexts    = searchUI.favoriteIconTexts
 
 --Library's local helpers
 local preloadedSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
@@ -33,27 +33,30 @@ local getArmorTypeTexture = lib.GetArmorTypeTexture
 local getWeaponTypeTexture = lib.GetWeaponTypeTexture
 local getEquipSlotTexture = lib.GetEquipSlotTexture
 
+local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavoriteCategoriesUnsorted
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --Local helper functions
 ------------------------------------------------------------------------------------------------------------------------
-local function updateFavoriteColumn(rowControl, isFavorite)
-    if not rowControl or isFavorite == nil then return end
+local function updateFavoriteColumn(rowControl, isFavorite, favoriteCategory)
+    if not rowControl or isFavorite == nil or favoriteCategory == nil then return end
     local data = rowControl.data
     if not data then return end
 
     if isFavorite == true then
-        if data.isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then return end
-        rowControl.data.isFavorite = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+        if data.isFavorite ~= favoriteCategory then
+            rowControl.data.isFavorite = favoriteCategory
+        end
     else
-        if data.isFavorite ~= LIBSETS_SET_ITEMID_TABLE_VALUE_OK then return end
-        rowControl.data.isFavorite = 0
+        if data.isFavorite ~= favoriteCategory then return end
+        rowControl.data.isFavorite = nil
     end
     data = rowControl.data
 
     local favoriteColumn = rowControl:GetNamedChild("Favorite")
     if favoriteColumn == nil then return end
-    favoriteColumn:SetText((isFavorite == true and favoriteIconText) or "")
+    favoriteColumn:SetText((isFavorite == true and favoriteIconTexts[favoriteCategory]) or "")
 end
 
 
@@ -136,8 +139,18 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     favoriteColumn:ClearAnchors()
     favoriteColumn:SetAnchor(LEFT, control, nil, 0, 0)
     local favoriteIconColumnText = ""
-    if data.isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK then
-        favoriteIconColumnText = favoriteIconText
+    local isFavorite = data.isFavorite
+    if isFavorite ~= nil then
+        --todo check if data.isFavorite == true then show star, else if it's a String: show that category's icon
+        local favoriteType = type(isFavorite)
+--d("[LibSets]LibSets_SearchUI_List:SetupItemRow - favoriteType: " ..tos(favoriteType) .. ", isFavorite: " ..tos(isFavorite))
+        if favoriteType == "number" or favoriteType == "boolean" then
+            if isFavorite == LIBSETS_SET_ITEMID_TABLE_VALUE_OK or isFavorite == true then
+                favoriteIconColumnText = favoriteIconTextStar
+            end
+        elseif favoriteType == "string" then
+            favoriteIconColumnText = favoriteIconTexts[isFavorite]
+        end
     end
     favoriteColumn:SetText(favoriteIconColumnText)
     favoriteColumn:SetHidden(false)
@@ -218,9 +231,17 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     end
     nameColumnValue = nameColumnValueClean
 
-    --Favorite
-    local isFavorite = parentObject:IsSetIdInFavorites(setId)
-    local isFavoriteColumnText = (isFavorite == true and LIBSETS_SET_ITEMID_TABLE_VALUE_OK) or 0
+    --Favorites
+    local isFavoriteColumnText
+    for setSearchFavoriteCategory, _ in pairs(possibleSetSearchFavoriteCategoriesUnsorted) do
+        if isFavoriteColumnText == nil then
+            local isFavorite = parentObject:IsSetIdInFavorites(setId, setSearchFavoriteCategory)
+            if isFavorite == true then
+                isFavoriteColumnText = setSearchFavoriteCategory
+            end
+        end
+    end
+    isFavoriteColumnText = isFavoriteColumnText or ""
 
     --The set type
     local setTypeName, setTypeTexture = buildSetTypeInfo(setData, true)
@@ -457,7 +478,7 @@ function LibSets_SearchUI_List:FilterScrollList()
 
         --Search for name/ID text, set bonuses text
         if searchIsEmpty == true or self._parentObject:CheckForMatch(data, searchInput) then
-            if bonusSearchIsEmpty == true or self._parentObject:SearchSetBonuses(data.bonuses, bonusSearchInput) then
+            if bonusSearchIsEmpty == true or self._parentObject:SearchSetBonuses(data.bonuses, bonusSearchInput, data.setId) then
                 addItemToList = true
             end
         end
@@ -522,10 +543,10 @@ function LibSets_SearchUI_List:UpdateCounter(scrollData)
     self._parentObject.counterControl:SetText(listCountAndTotal)
 end
 
-function LibSets_SearchUI_List:AddFavorite(rowControl)
-    updateFavoriteColumn(rowControl, true)
+function LibSets_SearchUI_List:AddFavorite(rowControl, favoriteCategory)
+    updateFavoriteColumn(rowControl, true, favoriteCategory)
 end
 
-function LibSets_SearchUI_List:RemoveFavorite(rowControl)
-    updateFavoriteColumn(rowControl, false)
+function LibSets_SearchUI_List:RemoveFavorite(rowControl, favoriteCategory)
+    updateFavoriteColumn(rowControl, false, favoriteCategory)
 end

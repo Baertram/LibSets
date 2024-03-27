@@ -44,7 +44,7 @@
         </Backdrop>
 
          <!--Virtual Multiselect ComboBoxes - PTS API 101040: ZO_ComboBox is cappable to do multi selection & scroll -->
-		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="1">
+		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="0"> <!-- 20240310 level was 1 but that makes the inherited ZO_ComboBox OpenDropdown control draw at level 0 behind the LibSetsSearchUIMultiSelectComboBox ... -->
             <OnMouseEnter>
                 LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
             </OnMouseEnter>
@@ -53,7 +53,11 @@
             </OnMouseExit>
             <OnMouseUp>
                 if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                    ZO_ComboBox_DropdownClicked(self)
+                    --ZO_ComboBox_DropdownClicked(self)
+                    local comboBox = ZO_ComboBox_ObjectFromContainer(self)
+                    if comboBox and not comboBox:IsDropdownVisible() then
+                        comboBox:ShowDropdown()
+                    end
                 else
                     LibSets_SearchUI_Shared_Dropdown_OnMouseUp(self, button, upInside, shift, alt, ctrl, command)
                 end

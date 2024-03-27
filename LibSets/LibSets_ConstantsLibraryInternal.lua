@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.63
+local MAJOR, MINOR = "LibSets", 0.66
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -67,7 +67,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101040 -- Secret of the Telvanni, Patch U40 (2023-10-08, PTS, API 101040)
+lib.lastSetsPreloadedCheckAPIVersion = 101041 -- Scions of Ithelia, Patch U41 (2024-02-02, PTS, API 101041)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -86,7 +86,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101040 -- Secret of the Telvanni, Patch U
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101040 -- Secret of the Telvanni, Patch U40 (2023-10-08, PTS, API 101040)
+APIVersions["PTS"]                   = 101041 -- Scions of Ithelia, Patch U41 (2024-02-02, PTS, API 101041)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -355,7 +355,7 @@ local specialZoneNames = {
     },
     ["fr"] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Toutes les zones (en Tamriel)",
-        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Niveau supérieur",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Montée de niveau",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Champs de bataille",
     },
     ["ru"] = {
@@ -363,15 +363,15 @@ local specialZoneNames = {
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Уровень повышен",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Поля боя",
     },
-    ["zh"] = {
-        [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "所有区域（泰姆瑞尔）",
-        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "升级",
-        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "战场",
-    },
     ["jp"] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "すべてのゾーン (タムリエル)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "レベルアップ",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "戦場",
+    },
+    ["zh"] = { --by Lykeion, 2024029
+		[LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "所有地区 (于塔姆瑞尔)",
+        [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "升级",
+        [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "战场",
     },
 }
 lib.specialZoneNames = specialZoneNames
@@ -409,10 +409,10 @@ local setTypesToName = {
         ["de"] = "Handwerklich hergestellt", --SI_ITEM_FORMAT_STR_CRAFTED
         ["en"] = "Crafted",
         ["es"] = "Hecho a mano",
-        ["fr"] = "Fabriqué",
+        ["fr"] = "Artisanal",
         ["jp"] = "クラフトセット",
         ["ru"] = "Созданный",
-        ["zh"] = "精雕细琢",
+        ["zh"] = "制造",
     },
     [LIBSETS_SETTYPE_CYRODIIL]                      = {
         ["de"] = "Cyrodiil", --SI_CAMPAIGNRULESETTYPE1,
@@ -421,19 +421,19 @@ local setTypesToName = {
         ["fr"] = "Cyrodiil",
         ["jp"] = "シロディール",
         ["ru"] = "Сиродил",
-        ["zh"] = "Cyrodiil",
+        ["zh"] = "西罗帝尔",
     },
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = {
         ["de"] = "Zufälliges Verlies & Kaiserstadt Belohnung", --SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT & SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR
         ["en"] = "Random Dungeons & Imperial city " .. zocstrfor("<<c:1>>", "Reward"),
         ["es"] = "Mazmorras aleatorias y ciudad imperial " .. zocstrfor("<<c:1>>", "Recompensa"),
-        ["fr"] = "Donjons aléatoires & Cité impßériale " .. zocstrfor("<<c:1>>", "Récompense"),
+        ["fr"] = "Donjons aléatoires & Cité impériale " .. zocstrfor("<<c:1>>", "Récompense"),
         ["jp"] = "デイリー報酬",
         ["ru"] = "Случайное ежедневное подземелье и награда Имперского города",
-        ["zh"] = "Random Dungeons & Imperial city " .. zocstrfor("<<c:1>>", "Reward"),
+        ["zh"] = "随机地下城 & 帝都 " .. zocstrfor("<<c:1>>", "奖励"),
     },
     [LIBSETS_SETTYPE_DUNGEON]                       = {
-        ["de"] = "Verlies", --SI_INSTANCEDISPLAYTYPE2
+        ["de"] = "Verlies", --SI_ZONEDISPLAYTYPE2 SI_INSTANCEDISPLAYTYPE2
         ["en"] = "Dungeon",
         ["es"] = "Calabozo",
         ["fr"] = "Donjon",
@@ -448,7 +448,7 @@ local setTypesToName = {
         ["fr"] = "Cité impériale",
         ["jp"] = "帝都",
         ["ru"] = "Имперский город",
-        ["zh"] = "Imperial city",
+        ["zh"] = "帝都",
     },
     [LIBSETS_SETTYPE_MONSTER]                       = {
         ["de"] = "Monster",
@@ -463,7 +463,7 @@ local setTypesToName = {
         ["de"] = "Überland",
         ["en"] = "Overland",
         ["es"] = "Zone terrestre",
-        ["fr"] = "Zone ouverte",
+        ["fr"] = "Zone",
         ["jp"] = "陸上",
         ["ru"] = "Поверхности",
         ["zh"] = "陆上",
@@ -475,7 +475,7 @@ local setTypesToName = {
         ["fr"] = "Spécial",
         ["jp"] = "スペシャル",
         ["ru"] = "Специальный",
-        ["zh"] = "特别的",
+        ["zh"] = "特殊",
     },
     [LIBSETS_SETTYPE_TRIAL]                         = {
         ["de"] = "Prüfungen", --SI_LFGACTIVITY4
@@ -484,7 +484,7 @@ local setTypesToName = {
         ["fr"] = "Épreuves",
         ["jp"] = "試練",
         ["ru"] = "Испытание",
-        ["zh"] = "审判",
+        ["zh"] = "试炼",
     },
     [LIBSETS_SETTYPE_MYTHIC]                        = {
         ["de"] = "Mythisch",
@@ -499,19 +499,19 @@ local setTypesToName = {
         ["de"] = "Kaiserstadt Monster",
         ["en"] = "Imperial city monster",
         ["es"] = "Ciudad imperial monstruo",
-        ["fr"] = "Cité impériale monstre",
+        ["fr"] = "Monstre de la Cité impériale",
         ["jp"] = "帝都 モンスター",
         ["ru"] = "Имперский город Монстр",
-        ["zh"] = "Imperial city 怪物",
+        ["zh"] = "帝都怪物",
     },
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]          = {
         ["de"] = "Cyrodiil Monster",
         ["en"] = "Cyrodiil monster",
         ["es"] = "Cyrodiil monstruo",
-        ["fr"] = "Cyrodiil monstre",
+        ["fr"] = "Monstre de Cyrodiil",
         ["jp"] = "シロディール モンスター",
         ["ru"] = "Сиродил Монстр",
-        ["zh"] = "Cyrodiil 怪物",
+        ["zh"] = "西罗帝尔怪物",
     },
     [LIBSETS_SETTYPE_CLASS] = {
         ["de"] = "Klassen spezifisch",
@@ -520,7 +520,7 @@ local setTypesToName = {
         ["fr"] = "Spécifique à la classe",
         ["jp"] = "クラス固有の",
         ["ru"] = "Зависит от класса",
-        ["zh"] = "特定类别",
+        ["zh"] = "职业限定",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
@@ -739,6 +739,16 @@ lib.jewelrySets                     = {}
 lib.weaponSets                      = {}
 lib.weaponTypesSets                 = {}
 
+
+------------------------------------------------------------------------------------------------------------------------
+--Nn-/Perfected sets data
+lib.nonPerfectedSet2PerfectedSet = {}
+lib.perfectedSet2NonPerfectedSet = {}
+lib.perfectedSetsInfo = {}
+lib.perfectedSets = {}
+lib.nonPerfectedSets = {}
+
+
 ------------------------------------------------------------------------------------------------------------------------
 --Number of currently available set bonus for a monster set piece (2: head, shoulder)
 lib.countMonsterSetBonus            = 2
@@ -849,7 +859,7 @@ local possibleDropMechanics         = {
     [34] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY", -- Cyrodiil Weyon Priory, Chorrol
     [35] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
     [36] = "LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS", -- Cyrodiil board missions
-    [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless Archive dungeon
+    [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless/Infinite Archive dungeon
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -995,38 +1005,44 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
     ["fr"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "La récompense des braves",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil Ville: Bruma (maître de manœuvre/quête quotidienne)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil Ville: Gué-les-Champs (maître de manœuvre/quête quotidienne)",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cyrodiil Ville: Vlastrus (maître de manœuvre/quête quotidienne)",
-        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "Coffre d'étape Arena",
+	    [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Récompenses des dignes",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cité de Cyrodiil : Bruma (intendant/quête quotidienne)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cité de Cyrodiil : Cropsford (intendant/quête quotidienne)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "Cité de Cyrodiil : Vlastarus (intendant/quête quotidienne)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "Coffre de scène d'arène",
         [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                         = "Nom du monstre",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "Les boss de petit donjon",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                   = "Les boss de zone ouvertes",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]         = "Les boss de donjon public",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                       = "Les coffres de zone/donjon ouvertes",
-        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]                  = "Récompense de Champ de bataille",
-        [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]     = "Courrier de récompense de donjon journalière",
-        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                 = "Cité impériale voûte",
-        [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                      = "Récompense de niveau supérieur",
-        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "Marchand de coffres-forts d'équipement Tel Var, base d'égout IC",
-        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "Marchand de coffres-forts d'équipement d'élite de points d'alliance, Cyrodiil/Vvardenfell",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "Boss de delves",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                   = "Boss de groupe en zone",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]         = "Boss de donjons publics",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                       = "Coffres de zone/souterrains",
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]                  = "Récompenses des champs de bataille",
+        [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]     = "Récompense quotidienne de donjon aléatoire par courrier",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                 = "Chambres fortes de la Cité impériale",
+        [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                      = "Récompense de montée de niveau",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "Marchand de coffres verrouillés d'équipement Tel Var, base des égouts de la Cité impériale",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "Marchand de coffres verrouillés d'équipement élite contre des points d'alliance, Cyrodiil/Vvardenfell",
         [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                        = "Un PNJ nommé récompense avec cet objet",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Coffre du boss final du portail Oblivion",
-        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Dolmen, Harrowstorms, récompense des anomalies magiques",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "Coffre du boss final des portails d'Oblivion",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "Récompense des dolmens, tempêtes ravageuses, anomalies magiques",
         [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                        = "Coffres dans un donjon",
         [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]            = "Coffre de récompense de quête quotidienne",
-        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "Trou de pêche",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "Butin d'objets terrestres",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Bosses in trial dungeons",
-        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Type de créature/mob",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "Point de pêche",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "Butin des objets de zone",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "Boss de Raid",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "Type de monstre",
         [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "Boss dans les donjons de groupe",
-        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Les coffres des donjons public",
-        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "Imperial city treasure Trove scamp",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Cyrodiil City: Cheydinhal",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
-        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
-        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "Coffres dans les donjons publics",
+        [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "Récolte des ressources d'artisanat",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "Galopin  de la Cité impériale",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "Ville de Cyrodiil : Cheydinhal",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil : Prieuré de Weynon, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Ville de Cyrodiil : Cheydinhal / Weynon Priory, Chorrol",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Missions du tableau de Cyrodiil",
+        --Will be used in other languages via setmetatable below!
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), -- Battleground vendors
+        [LIBSETS_DROP_MECHANIC_CRAFTED]                              = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
+        [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Награда достойным",
@@ -1096,7 +1112,43 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
+    ["zh"] = { --by Lykeion, 2024029
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "给有价值的人的奖励",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "西罗帝尔城镇: 布鲁玛 (军需官/日常任务)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "西罗帝尔城镇: 克罗普斯福特 (军需官/日常任务)",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS]              = "西罗帝尔城镇: 瓦拉斯塔努斯 (军需官/日常任务)",
+        [LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST]                    = "竞技场关卡宝箱",
+        [LIBSETS_DROP_MECHANIC_MONSTER_NAME]                         = "怪物名",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]                  = "洞穴Boss",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                   = "世界Boss",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]         = "公共地下城Boss",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                       = "世界/洞穴宝箱",
+        [LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD]                  = "战场奖励",
+        [LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD]     = "每日随机地下城奖励邮件",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS]                 = "帝都宝库",
+        [LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD]                      = "升级奖励",
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT]    = "生命石装备箱商人, 位于帝都下水道基地",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]       = "联盟点数装备箱商人, 位于西罗帝尔/瓦登费尔",
+        [LIBSETS_DROP_MECHANIC_REWARD_BY_NPC]                        = "来自一位具名的NPC的奖励",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST] = "湮灭传送门最终Boss奖励",
+        [LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES] = "暗锚, 苦痛风暴, 魔力异常点奖励",
+        [LIBSETS_DROP_MECHANIC_DUNGEON_CHEST]                        = "地下城宝箱",
+        [LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER]            = "日常任务奖励箱",
+        [LIBSETS_DROP_MECHANIC_FISHING_HOLE]                         = "渔获",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_LOOT]                        = "从陆上节点捡拾获得",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                           = "试炼Boss",
+        [LIBSETS_DROP_MECHANIC_MOB_TYPE]                             = "普通怪物",
+        [LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS]                   = "组队地下城Boss",
+        [LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST]                 = "公共地下城宝箱",
+        [LIBSETS_DROP_MECHANIC_HARVEST_NODES]                        = "采集制造节点",
+        [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]   = "帝都宝藏魔",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL]             = "西罗帝尔城镇: 香丁赫尔",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "西罗帝尔城镇: 文扬修道院, 科洛尔",
+        [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "西罗帝尔城镇: 香丁赫尔 / 文扬修道院, 科洛尔",
+        [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "西罗帝尔公告板任务",
+    },
 }
+
 lib.dropMechanicIdToNameTooltip   = {
     ["de"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = cyrodiilAndBattlegroundText .. " mail - Enthält nur die neuesten Gegenstandssets!\nDa weiterhin neue Sets hinzugefügt werden, werden ältere Sets hier entfernt und anderen Cyrodiil-Quellen hinzugefügt:\nAlle PvP-Gegenstandssets werden jetzt in Cyrodiil-Dungeons, Dolmen und Missionen gefunden.\nTägliche Quests und Händler in der Stadt werden nach Leicht, Mittel und Schwer aufgeteilt. Ausnahme: Cheydinhal und Chorrol/Weynon Priory droppen jedes Set.\nAlle PvP-Sets sind als Einzelcontainer sowohl bei Stadthändlern als auch bei Elite-Ausrüstungshändlern erhältlich.\nDungeons lassen Taillen- und Fuß-Gegenstandssets fallen.\nDolmen lassen Schmuck fallen.\nBoard-Missionen lassen alle anderen Rüstungsteile fallen.\nBei Kopfgeld- und Scout-Missionen erhältst du Rüstungsteile.\nKampf- und Kriegsfront-Missionen geben Waffenslot-Items.",
@@ -1129,13 +1181,15 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Todos los jefes: manos, cintura, pies, pecho, hombros, cabeza, piernas\Jefes finales: arma, escudo\Contenedores de recompensa de misión: joyas, arma, escudo (se vincula al recogerlo))",
     },
     ["fr"] = {
-        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "La récompense des braves (" .. cyrodiilAndBattlegroundText .. " email) - Contient uniquement les ensembles d'objets les plus récents!\nÀ mesure que de nouveaux ensembles continuent d'être ajoutés, les anciens ensembles seront supprimés ici et ajoutés à d'autres sources de Cyrodiil :\nTous les ensembles d'objets PvP seront désormais récupérés dans les fouilles, les dolmens et les missions du plateau de Cyrodiil.\nLes quêtes quotidiennes de la ville et les marchands seront divisés par Lumière. , Moyen et Lourd. Exception : le Prieuré de Cheydinhal et Chorrol/Weynon récompense n'importe quel ensemble.\nTous les ensembles PvP sont disponibles sous forme de conteneurs individuels chez les marchands de la ville et les vendeurs d'équipement d'élite.\nLes fouilles laisseront tomber les ensembles d'objets de taille et de pieds\nLes dolmens donneront des bijoux\nLes missions de plateau donneront tous d'autres pièces d'armure.\nLes missions Bounty et Scout attribueront des pièces d'armure.\nLes missions de combat et de front de guerre récompenseront des pièces d'emplacement d'armes.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Les boss de petit donjon ont une chance de laisser tomber une taille ou des pieds.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Les boss de zone ouvertes ont 100% de chances de laisser tomber la tête, la poitrine, les jambes ou l'arme.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Les boss de donjon public ont une chance de laisser tomber une épaule, une main ou une arme.",
-        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "Les coffres obtenus en battant une ancre noire ont 100% de chances de laisser tomber un anneau ou une amulette.\nLes coffres au trésor trouvés dans le monde ont une chance d'accorder n'importe quelle pièce fixe qui peut tomber dans cette zone:\n-les coffres simples ont une légère chance \n-Les coffres intermédiaires ont de bonnes chances\n-Les coffres avancés et les maîtres ont une chance garantie\n-Les coffres au trésor trouvés sur une carte au trésor ont une chance garantie",
-        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Coffre qui peut être échangé contre des pierres TelVar auprès d'un vendeur d'équipement TelVar dans votre base de faction, dans les égouts de la cité impériale.",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Tous les boss: mains, taille, pieds, poitrine, épaules, tête, jambes\Boss finaux: arme, bouclier\Conteneurs de récompense de quête: bijoux, arme, bouclier (liés lors du ramassage))",
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Récompenses des dignes (" .. cyrodiilAndBattlegroundText .. " par courrier) - Ne contient que les ensembles d'objets les plus récents !\nÀ mesure que de nouveaux ensembles sont ajoutés, les anciens seront retirés d'ici et ajoutés à d'autres sources en Cyrodiil :\nTous les ensembles d'objets JcJ seront désormais obtenus à partir des antres, dolmens et missions du tableau de Cyrodiil.\nLes quêtes quotidiennes de la ville et les marchands seront divisés par Léger, Moyen et Lourd. Exception : Cheydinhal et Chorrol/Weynon Priory récompensent n'importe quel ensemble.\nTous les ensembles JcJ sont disponibles en tant que conteneurs individuels chez les marchands de la ville et les vendeurs d'équipement d'élite.\nLes antres feront tomber les ensembles de taille et de pieds.\nLes dolmens feront tomber des bijoux.\nLes missions du tableau feront tomber toutes les autres pièces d'armure.\nLes missions de prime et d'éclaireur récompenseront des pièces d'armure.\nLes missions de bataille et de front de guerre récompenseront des pièces d'arme.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Les boss des antres ont une chance de faire tomber une taille ou des pieds.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Les boss de groupe en zone ont 100% de chances de faire tomber une tête, une poitrine, des jambes ou une arme.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Les boss des donjons publics ont une chance de faire tomber une épaule, une main ou une arme.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "Les coffres obtenus en vainquant une ancre noire ont 100% de chances de faire tomber une bague ou un amulette.\nLes coffres au trésor trouvés dans le monde ont une chance de donner n'importe quelle pièce d'ensemble qui peut tomber dans cette zone :\n-Les coffres simples ont une légère chance\n-Les coffres intermédiaires ont une bonne chance\n-Les coffres avancés et maîtres ont une chance garantie\n-Les coffres au trésor trouvés grâce à une carte au trésor ont une chance garantie",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                       = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Coffre échangeable contre des Pierres de TelVar chez un marchand d'équipement TelVar dans la base de votre faction, dans les égouts de la Cité impériale.",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Coffre échangeable contre des Points d'Alliance chez un marchand de coffres d'équipement élite à Cyrodiil (Porte orientale d'Elsweyr, Porte méridionale de Haute-Roche, Porte septentrionale de Morrowind) ou chez un marchand de champs de bataille à Vvardenfell (Ald Carac, Foyada Quarry, Ularra)",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Tous les boss : Mains, Taille, Pieds, Poitrine, Épaule, Tête, Jambes\nBoss final : Arme, Bouclier\nConteneurs de récompenses de quête : Bijoux, Arme, Bouclier (Liés quand ramassés)",
     },
     ["ru"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " почта) - Содержит только новейшие наборы предметов!\nПо мере добавления новых наборов старые наборы будут удалены отсюда и добавлены в другие источники Сиродила:\nВсе наборы PvP-предметов теперь будут выпадать из подземелий, дольменов и миссий на доске Сиродила.\nГородские ежедневные задания и торговцы будут разделены по Свету. , средний и тяжелый. Исключение: Чейдинхол и Приорат Коррола/Вейнона дают награду за любой набор.\nВсе PvP-наборы доступны в виде отдельных контейнеров как у городских торговцев, так и у продавцов элитного снаряжения.\nВ Дельвах из комплектов предметов для талии и ног выпадут все.\nИз дольменов выпадут драгоценности.\nИз настольных миссий выпадут все. другие части доспехов.\nЗа миссии Bounty и Scout будут выдаваться части доспехов.\nЗа миссии Battle and Warfront будут выдаваться части слотов для оружия.",
@@ -1155,8 +1209,16 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "「インペリアルシティ下水道の派閥基地にあるTelVar機器ベンダーでTelVarストーンと交換できるチェスト。」",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "すべてのボス: 手、腰、足、胸、肩、頭、脚\最終ボス: 武器、盾\クエスト報酬コンテナ: ジュエリー、武器、盾 (ピックアップ時にバインド))",
     },
-    ["zh"] = {
-        --todo 2023-08-24 Translate by native Chinese speaker
+    ["zh"] = { --by Lykeion, 2024029
+        [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "给有价值的人的奖励 (" .. cyrodiilAndBattlegroundText .. " 邮件) - 只包含最新的套装!\n随着新套装的不断加入, 就套装将被从此获取途径中移除并被加入到西罗帝尔的其他获取途径中:\n所有Pvp套装现将从西罗帝尔洞穴, 暗锚和任务中掉落.\n城镇日常任务和商人将会以轻, 中, 重区分. 特例: 香丁赫尔和克洛文/文扬修道院将会奖励任意套装.\n所有PvP套装都可以宝箱形式从城镇商人或精选装备商人处获取.\n洞穴会掉落腰部和足部装备\n暗锚会掉落珠宝\n公告板任务会掉落其他身体部位装备.\n赏金和侦查任务奖励服装.\n战斗和前线作战任务奖励武器.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "洞穴Boss有几率掉落腰部或足部装备.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "陆上组队Boss必定掉落头, 胸, 腿或武器.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "公共地下城Boss有几率掉落肩, 手或武器.",
+        [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "粉碎暗锚所获的宝箱必定掉落首饰.\n陆上宝箱有几率掉落当前区域套装的任何部位部件:\n-简单箱子有微小概率\n-中等箱子有良好概率\n-进阶和大师箱子必定掉落\n-藏宝图挖出的宝箱必定掉落",
+        [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                       = GetString(SI_ANTIQUITY_TOOLTIP_TAG), --Will be used in other languages via setmetatable below!
+        [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "可在帝都下水道用生命石从基地的生命石商人处兑换的宝箱.",
+        [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "可在西罗帝尔用联盟点数从精选装备商人, 或瓦登费尔的战场商人处兑换的宝箱",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "所有Boss: 手, 腰, 足, 胸, 肩, 头, 腿\n尾王: 武器, 盾牌\n任务奖励箱: 首饰, 武器, 盾 (拾取时绑定))",
     },
 }
 --DropMechanic translations only available on current PTS, or automatically available if PTS->live
@@ -1175,7 +1237,7 @@ local booleanToOnOff = {
 
 
 local undauntedStr               = GetString(SI_VISUALARMORTYPE4)
-local dungeonStr                 = GetString(SI_INSTANCEDISPLAYTYPE2)
+local dungeonStr                 = GetString(SI_ZONEDISPLAYTYPE2) -- SI_INSTANCEDISPLAYTYPE2
 local setTypeArenaName           = setTypesToName[LIBSETS_SETTYPE_ARENA]
 lib.localization                 = {
     ["de"] = {
@@ -1216,7 +1278,7 @@ lib.localization                 = {
         slashCommandDescription         = "Suche übersetzte Set Namen",
         slashCommandDescriptionClient   = "Suche Set ID/Namen (Spiel Sprache)",
         previewTT                = "Set Vorschau",
-        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.\n\n\nBenutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zuverstecken",
+        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set Namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste per TAB Taste/Maus ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.\n\n\nBenutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zuverstecken",
         previewTTToChatToo       = "Vorschauf ItemLink in den Chat",
         previewTTToChatToo_TT    = "Wenn diese Option aktiviert ist wird der ItemLink des Vorschau Set Gegenstandes auch in deine Chat Eingabebox gesendet, damit du diesen jemanden schicken/ihn mit der Maus und STRG+C in deine Zwischenablage kopieren kannst.",
         headerUIStuff            = "Benutzer Oberfläche",
@@ -1232,9 +1294,10 @@ lib.localization                 = {
         nameTextSearch = "(+/-)Name/ID , getrennt",
         nameTextSearchTT = "Gib mehrere Namen/IDs durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Namen/die ID in der Textsuche ein- bzw. auszuschließen.",
         bonusTextSearch = "(+/-)Bonus , getrennt",
-        bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.",
+        bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.\nFüge :<bonusZeilen#> hinzu, um den Bonus explizit in einer der Bonuszeilen zu suchen\n\nBeispiele:\n+krit,-leben findet alle Sets mit Bonus Text Krit (z.B. Kritische Chance) aber ohne Text Leben\n+krit:2 Findet alle sets mit 2. Bonuszeile Text krit",
         showAsText =        "Zeige als Text",
         showAsTextWithIcons = "Zeige als Text (mit Symbolen)",
+        textBoxFilterTooltips = "Text Filter: Tooltips",
         dropdownFilterTooltips = "Dropdown Filter: Tooltips",
         dropdownFilterEntryTooltips = "Dropdown Filter: Einträge Tooltips",
         searchUIShowSetNameInEnglishToo = "Set Namen ebenfalls Englisch anzeigen/suchen",
@@ -1257,11 +1320,11 @@ lib.localization                 = {
         zh  = "Chinese",
         dlc                      = "Chapter,DLC&Patch",
         dropZones                = "Drop zones",
-        dropZoneDelve            = GetString(SI_INSTANCEDISPLAYTYPE7),
+        dropZoneDelve            = GetString(SI_ZONEDISPLAYTYPE7), --SI_INSTANCEDISPLAYTYPE7
         dropZoneDungeon          = dungeonStr,
         dropZoneVeteranDungeon   = GetString(SI_DUNGEONDIFFICULTY2) .. " " .. dungeonStr,
-        dropZonePublicDungeon    = GetString(SI_INSTANCEDISPLAYTYPE6),
-        dropZoneBattleground     = GetString(SI_INSTANCEDISPLAYTYPE9),
+        dropZonePublicDungeon    = GetString(SI_ZONEDISPLAYTYPE6), -- SI_INSTANCEDISPLAYTYPE6
+        dropZoneBattleground     = GetString(SI_ZONEDISPLAYTYPE9), -- SI_INSTANCEDISPLAYTYPE9
         dropZoneTrial            = GetString(SI_LFGACTIVITY4),
         dropZoneArena            = setTypeArenaName["en"],
         dropZoneMail             = GetString(SI_WINDOW_TITLE_MAIL),
@@ -1300,9 +1363,9 @@ lib.localization                 = {
         slashCommandDescription         = "Search translations of set names",
         slashCommandDescriptionClient   = "Search set ID/names (game client language)",
         previewTT                = "Set preview",
-        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is writtent to the chat entry editbox) you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
+        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is written to the chat entry editbox) via the TAB key/mouse you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
         previewTTToChatToo       = "Preview itemLink to chat",
-        previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to yoru clipboard using CTRL+C.",
+        previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to your clipboard using CTRL+C.",
         headerUIStuff            = "UI",
         headerTooltips            = "Tooltips",
         addSetCollectionsCurrentZoneButton = "Set coll.: Current zone button",
@@ -1316,9 +1379,10 @@ lib.localization                 = {
         nameTextSearch = "(+/-)Name/ID , separated",
         nameTextSearchTT = "Enter multiple names/IDs separated by a comma (,).\nUse the + or - prefix to include or exclude a name/ID from the search results.",
         bonusTextSearch = "(+/-)Bonus , separated",
-        bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.",
+        bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.\nAdd :<bonusLine#> to explicitly search in that bonus line\n\nExamples:\n+crit,-life finds all sets with bonus text crit (e.g. criticial chance) but w/o text life\n+crit:2 Finds all sets with 2. bonus line's text crit",
         showAsText =        "Show as text",
         showAsTextWithIcons = "Show as text (with icons)",
+        textBoxFilterTooltips = "Text filter: Tooltips",
         dropdownFilterTooltips = "Dropdown filter: Tooltips",
         dropdownFilterEntryTooltips = "Dropdown filter: Entry tooltips",
         searchUIShowSetNameInEnglishToo = "Show/Search Set names in English too",
@@ -1358,17 +1422,81 @@ lib.localization                 = {
         pl  = "Polonais",
         es  = "Espagnol",
         zh  = "Chinois",
-        dlc                    = "Chapitre/DLC",
-        dropZones              = "Zones de largage",
-        dropZoneArena          = setTypeArenaName["fr"],
-        dropZoneImperialSewers = "Égouts de la cité impériale",
-        droppedBy              = "Dépouillé par",
-        setType                = "Type de set",
-        dropMechanic           = "Mécanique de largage",
-        undauntedChest         = "Poitrine de " .. undauntedStr,
-        modifyTooltip          = "Améliorer l'info-bulle par les informations sur l'ensemble",
-        slashCommandDescription = "Rechercher des traductions de noms de sets",
-        slashCommandDescriptionClient = "Rechercher des IDs/noms de sets (langue du jeu)",
+        dlc                      = "Chapitre,DLC et Correctif",
+        dropZones                = "Zones de drop",
+        dropZoneDelve            = GetString(SI_ZONEDISPLAYTYPE7),
+        dropZoneDungeon          = dungeonStr,
+        dropZoneVeteranDungeon   = GetString(SI_DUNGEONDIFFICULTY2) .. " " .. dungeonStr,
+        dropZonePublicDungeon    = GetString(SI_ZONEDISPLAYTYPE6),
+        dropZoneBattleground     = GetString(SI_ZONEDISPLAYTYPE9),
+        dropZoneTrial            = GetString(SI_LFGACTIVITY4),
+        dropZoneArena            = setTypeArenaName["fr"],
+        dropZoneMail             = GetString(SI_WINDOW_TITLE_MAIL),
+        dropZoneCrafted          = GetString(SI_SPECIALIZEDITEMTYPE213),
+        dropZoneCyrodiil         = GetString(SI_CAMPAIGNRULESETTYPE1),
+        dropZoneMonster          = dungeonStr,
+        dropZoneImperialCity     = GetString(SI_CAMPAIGNRULESETTYPE4),
+        dropZoneImperialSewers   = "Égouts de la cité impériale",
+        dropZoneEndlessArchive   = GetString(SI_ZONEDISPLAYTYPE12),
+        --dropZoneOverland =          GetString(),
+        dropZoneSpecial          = GetString(SI_HOTBARCATEGORY9),
+        dropZoneMythic           = GetString(SI_ITEMDISPLAYQUALITY6),
+        droppedBy                = "Obtenu par",
+        reconstructionCosts      = "Coût de reconstruction",
+        setId                    = "ID de l'ensemble",
+        setType                  = "Type d'ensemble",
+        armorType                = "Type d'armure",
+        weaponType               = "Type d'arme",
+        armorOrWeaponType        = "Type d'armure/arme",
+        equipmentType            = "Emplacement de l'équipement",
+        equipSlot                = "Emplacement",
+        enchantmentSearchCategory = "Catégorie d'enchantement",
+        numBonuses               = "# bonus",
+        neededTraits             = "Traits nécessaires (recherche)",
+        neededTraitsOrReconstructionCost = "Traits (recherche)/Coûts de reconstruction",
+        dropMechanic             = "Mécanique de drop",
+        undauntedChest           = undauntedStr .. " coffre",
+        boss                     = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501),
+        modifyTooltip            = "Améliorer l'info-bulle avec les infos de l'ensemble",
+        tooltipTextures          = "Afficher les textures dans l'info-bulle",
+        tooltipTextures_T        = "Afficher les textures du type d'ensemble, de la mécanique de drop et des noms de lieu/boss ... dans l'info-bulle",
+        defaultTooltipPattern    = "Info-bulle par défaut",
+        defaultTooltipPattern_TT = "Utilisez les cases à cocher pour ajouter ces informations sur les objets de l'ensemble dans l'info-bulle.\nLe format de sortie par défaut est :\n\n<texture><nom du type d'ensemble> <si l'ensemble est fabriquable: (traits nécessaires)/sinon: (coûts de reconstruction)>\n<Info de la zone de drop> [contenant <NomZone> (<mécanique de drop>: dropMechanicDropLocation>)]\n<Nom du DLC>\nSi toutes les zones sont identiques, la mécanique de drop et les noms de lieu/boss seront ajoutés sur une seule ligne, séparés par ';'.",
+        customTooltipPattern     = "Texte personnalisé pour l'info-bulle",
+        customTooltipPattern_TT  = "Définissez votre propre texte personnalisé pour l'info-bulle, en utilisant des espaces réservés prédéfinis dans votre texte. Exemple : 'Taper <<1>>/Drops <<2>> <<3>> <<4>>'.\nLaissez le champ de texte vide pour désactiver cette info-bulle personnalisée!\nLes espaces réservés doivent commencer par le préfixe << suivi d'un chiffre à un seul chiffre et d'un suffixe >>, par exemple <<1>> ou <<5>>.\nIl ne peut y avoir qu'un maximum de 6 espaces réservés dans le texte. Saut de ligne : <br>\n\nCi-dessous, vous trouverez les espaces réservés possibles :\n<<1>>   Type d'ensemble\n<<2>>   Mécanique de drop [peut être multiple, pour chaque zone, séparées par \',\']\n<<3>>   Zones de drop [multiple, pour chaque zone, séparées par \',\'] Si toutes les zones sont identiques, elles seront condensées\n<<4>>   Boss/Obtenu par nom [multiple, pour chaque zone, séparés par \',\']\n<<5>>   Nombre de traits nécessaires recherchés, ou coûts de reconstruction\n<<6>>   Nom du chapitre/DLC avec lequel l'ensemble a été introduit.\n\n|cFF0000Attention|r: Si vous entrez un texte d'info-bulle invalide, sans aucun espace réservé <<numéro>>, le champ de texte sera automatiquement effacé !",
+        slashCommandDescription         = "Rechercher des traductions de noms d'ensembles",
+        slashCommandDescriptionClient   = "Rechercher des ID/noms d'ensembles (langue du client de jeu)",
+        previewTT                = "Aperçu de l'ensemble",
+        previewTT_TT             = "Utilisez la commande /lsp <setId> ou /lsp <Nom ou setId de l'ensemble> pour obtenir un aperçu de l'ensemble dans une info-bulle.\n\nSi vous avez activé LibSlashCommander, les noms d'ensembles afficheront déjà une liste d'entrées possibles lorsque vous tapez le nom/id.\nSi un ensemble est sélectionné (le nom est écrit dans la boîte d'édition de texte du chat) via la touche TAB/souris, vous pouvez afficher les noms d'ensembles traduits dans d'autres langues via la touche \'espace\'. Appuyer sur la touche de retour sur ce nom d'ensemble dans une autre langue (ou le cliquer) affichera le nom d'ensemble actuel dans la langue du client et l'autre nom d'ensemble choisi dans la boîte d'édition du chat afin que vous puissiez le sélectionner et le copier.\n\n\nUtilisez la commande /lss <nom ou setId de l'ensemble> pour afficher/masquer l'interface de recherche d'ensembles.",
+        previewTTToChatToo       = "Aperçu de l'objet vers le chat",
+        previewTTToChatToo_TT    = "Avec ce paramètre activé, l'aperçu de l'objet de l'ensemble sera également envoyé dans votre boîte d'édition du chat, afin que vous puissiez le poster/sélectionner avec la souris et le copier dans votre presse-papiers en utilisant CTRL+C.",
+        headerUIStuff            = "Interface utilisateur",
+        headerTooltips            = "Info-bulles",
+        addSetCollectionsCurrentZoneButton = "Bouton de collections d'ensemble : Zone actuelle",
+        addSetCollectionsCurrentZoneButton_TT = "Ajouter un bouton de zone actuelle/zone parente à l'interface des collections d'ensembles",
+        moreOptions = "Plus d'options",
+        parentZone = "Zone parente",
+        currentZone = "Zone actuelle",
+        --Search UI
+        multiSelectFilterSelectedText = "<<1[$d %s/$d %s]>>",
+        noMultiSelectFiltered = "Aucun %s filtré",
+        nameTextSearch = "(+/-)Nom/ID , séparés",
+        nameTextSearchTT = "Entrez plusieurs noms/IDs séparés par une virgule (,).\nUtilisez le préfixe + ou - pour inclure ou exclure un nom/ID des résultats de la recherche.",
+        bonusTextSearch = "(+/-)Bonus , séparés",
+        bonusTextSearchTT = "Entrez plusieurs bonus séparés par une virgule (,).\nUtilisez le préfixe + ou - pour inclure ou exclure un bonus des résultats de la recherche.\nAjoutez :<numéro de ligne de bonus> pour rechercher explicitement dans cette ligne de bonus\n\nExemples :\n+crit,-life trouve tous les ensembles avec le texte de bonus 'crit' (par exemple chance critique) mais sans le texte 'life'\n+crit:2 Trouve tous les ensembles avec le texte de la 2e ligne de bonus 'crit'",
+        showAsText =        "Afficher en texte",
+        showAsTextWithIcons = "Afficher en texte (avec icônes)",
+        textBoxFilterTooltips = "Filtre de texte : Info-bulles",
+        dropdownFilterTooltips = "Filtre déroulant : Info-bulles",
+        dropdownFilterEntryTooltips = "Filtre déroulant : Info-bulles d'entrée",
+        searchUIShowSetNameInEnglishToo = "Afficher/Rechercher les noms d'ensemble en anglais aussi",
+        popupTooltip                = "Info-bulle contextuelle",
+        setInfos                    = "Infos de l'ensemble",
+        showAsTooltip               = "Afficher dans l'info-bulle",
+        showCurrentZoneSets         = "Afficher les ensembles de la zone actuelle",
+        clearHistory                = "Effacer l'historique",
+        wayshrines                  = "Autels",
+        invertSelection             = "≠ Inverser la sélection",
     },
     ["ru"] = {
         de  = "Нeмeцкий",
@@ -1413,7 +1541,90 @@ lib.localization                 = {
         slashCommandDescriptionClient = "セット名の検索 (ゲーム言語)",
     },
     ["zh"] = {
-        --todo 2023-08-24 Translate by native Chinese speaker
+        --By Lykeion - 20240229
+        de  = "德文",
+        en  = "英文",
+        fr  = "法文",
+        jp  = "日文",
+        ru  = "俄文",
+        pl  = "波兰文",
+        es  = "西班牙文",
+        zh  = "中文",
+        dlc                      = "章节, DLC & 补丁",
+        dropZones                = "掉落区域",
+        dropZoneDelve            = GetString(SI_ZONEDISPLAYTYPE7),
+        dropZoneDungeon          = dungeonStr,
+        dropZoneVeteranDungeon   = GetString(SI_DUNGEONDIFFICULTY2) .. " " .. dungeonStr,
+        dropZonePublicDungeon    = GetString(SI_ZONEDISPLAYTYPE6),
+        dropZoneBattleground     = GetString(SI_ZONEDISPLAYTYPE9),
+        dropZoneTrial            = GetString(SI_LFGACTIVITY4),
+        dropZoneArena            = setTypeArenaName["zh"],
+        dropZoneMail             = GetString(SI_WINDOW_TITLE_MAIL),
+        dropZoneCrafted          = GetString(SI_SPECIALIZEDITEMTYPE213),
+        dropZoneCyrodiil         = GetString(SI_CAMPAIGNRULESETTYPE1),
+        dropZoneMonster          = dungeonStr,
+        dropZoneImperialCity     = GetString(SI_CAMPAIGNRULESETTYPE4),
+        dropZoneImperialSewers   = "帝都下水道",
+        dropZoneEndlessArchive   = GetString(SI_ZONEDISPLAYTYPE12),
+        --dropZoneOverland =          GetString(),
+        dropZoneSpecial          = GetString(SI_HOTBARCATEGORY9),
+        dropZoneMythic           = GetString(SI_ITEMDISPLAYQUALITY6),
+        droppedBy                = "掉落于",
+        reconstructionCosts      = "重铸消耗",
+        setId                    = "套装 ID",
+        setType                  = "套装类型",
+        armorType                = "护甲类型",
+        weaponType               = "武器类型",
+        armorOrWeaponType        = "护甲/武器类型",
+        equipmentType            = "装备栏位",
+        equipSlot                = "栏位",
+        enchantmentSearchCategory = "附魔目录.",
+        numBonuses               = "# 加成",
+        neededTraits             = "需要特质 (研究)",
+        neededTraitsOrReconstructionCost = "特质 (研究)/重铸消耗",
+        dropMechanic             = "掉落机制",
+        undauntedChest           = undauntedStr .. " 宝箱",
+        boss                     = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501),
+        modifyTooltip            = "根据套装信息改进提示",
+        tooltipTextures          = "在提示中显示材质",
+        tooltipTextures_T        = "在提示中显示为套装类型, 掉落机制以及地点/Boss名等显示材质",
+        defaultTooltipPattern    = "默认提示",
+        defaultTooltipPattern_TT = "使用复选框在物品工具提示中添加有关套装物品的信息\n默认输出格式为：\n\n<材质><套装类型名> <如果是制造套: (所需特质)/如果不是制造套: (重铸消耗)>\n<掉落区域信息> [包含 <地区名> (<掉落机制>: 掉落机制掉落地区>)]\n<DLC 名>\n如果掉落地区一致, 掉落机制和地区/Boss名将会在一行中列出, 以;分割",
+        customTooltipPattern     = "自定义提示文本",
+        customTooltipPattern_TT  = "自定义你的提示文本, 可以在其中使用一些预定义的占位符. 例如: \'类型 <<1>>/掉落于 <<2>> <<3>> <<4>>\'.\n将文本留空会让提示无效!\n占位符必须以 << 作为前缀, 然后是一位数字, 然后以 >> 作为后缀, e.g. <<1>> 或 <<5>>.\n在文本中最多包含6个占位符. 换行: <br>\n\n以下是一个可能的占位符:\n<<1>>   套装类型\n<<2>>   掉落机制 [可能有好几种, 对于不同者, 以 \',\'分割]\n<<3>>   掉落区域 [可能有好几种, 对于不同者, 以 \',\'分割] 如果所有地区都在一起它们将被汇总\n<<4>>   Boss/署名掉落 [可能有好几种, 对于不同者, 以 \',\'分割]\n<<5>>   所需特质研究的数量, 或重铸消耗\n<<6>>   套装登场的章节/DLC 名.\n\n|cFF0000注意|r: 如果你输入了不包含任何占位符<<数字>>的无效提示文本, 输入框将会自行清空!",
+        slashCommandDescription         = "查找套装名的翻译",
+        slashCommandDescriptionClient   = "查找套装ID/名称 (根据客户端语言)",
+        previewTT                = "套装预览",
+        previewTT_TT             = "使用斜杠指令 /lsp <套装ID> or /lsp <套装名 或 套装ID> 来获取套装的预览提示.\n\n如果你拥有并启用了LibSlashCommander, 套装ID/套装名会自动在列表中补全.\n你可以通过空格键来显示在聊天输入框中通过TAB/鼠标选中的套装的翻译后名称. 在其他语言的套装名上按回退键(或点击它)会显示对应当前客户端语言的套装名并在聊天输入框中显示其他语言的名称以便你复制使用.\n\n\n使用斜杠命令 /lss <套装名 或 套装ID> 来展示/隐藏 查找界面.",
+        previewTTToChatToo       = "发送物品预览链接到聊天栏",
+        previewTTToChatToo_TT    = "当此选项启用时, 预览的物品链接也会被发送到聊天输入框, 以便你发送/复制它.",
+        headerUIStuff            = "UI",
+        headerTooltips            = "提示",
+        addSetCollectionsCurrentZoneButton = "套装收集: 当前区域按键",
+        addSetCollectionsCurrentZoneButton_TT = "在套装收集界面增加一个当前区域/父级区域按键",
+        moreOptions = "更多选项",
+        parentZone = "父级区域",
+        currentZone = "当前区域",
+        --Search UI
+        multiSelectFilterSelectedText = "<<1[$d %s/$d %s]>>",
+        noMultiSelectFiltered = "无 %s 被筛选",
+        nameTextSearch = "(+/-)名称/ID , 单独",
+        nameTextSearchTT = "在输入多个名称/ID时用逗号(,)分割.\n用+或-前缀来从搜索结果中包含或排除某个名称/ID.",
+        bonusTextSearch = "(+/-)加成 , 单独",
+        bonusTextSearchTT = "在输入多个加成用逗号(,)分割.\n用+或-前缀来从搜索结果中包含或排除某个加成.\n添加 :<加成条数#> 来特定搜索复数条的加成\n\n示例:\n+暴击t,-生命 搜索所有有暴击 (e.g. 暴击率) 加成但没有生命加成的套装\n+暴击:2 搜索所有有两条暴击词条的套装",
+        showAsText =        "以文本展示",
+        showAsTextWithIcons = "以文本展示 (和图标一起)",
+        textBoxFilterTooltips = "文本过滤: 提示",
+        dropdownFilterTooltips = "下拉过滤: 提示",
+        dropdownFilterEntryTooltips = "下拉过滤: 入口提示",
+        searchUIShowSetNameInEnglishToo = "也使用英语展示/搜索套装名",
+        popupTooltip                = "弹出提示",
+        setInfos                    = "套装信息",
+        showAsTooltip               = "以提示形式展示",
+        showCurrentZoneSets         = "显示当前地区的套装",
+        clearHistory                = "清除历史",
+        wayshrines                  = "传送祭坛",
+        invertSelection             = "≠ 反选"
     },
 }
 lib.localization[fallbackLang].booleanToOnOff = booleanToOnOff
@@ -1554,3 +1765,68 @@ local setTypeToDropZoneLocalizationStr = {
 }
 lib.setTypeToDropZoneLocalizationStr   = setTypeToDropZoneLocalizationStr
 
+
+--Set search favorite categories and their icons *.dds files
+local possibleSetSearchFavoriteCategoriesUnsorted = {
+    star = "EsoUI/Art/Collections/Favorite_StarOnly.dds",
+    --PvE
+    tank = "/esoui/art/inventory/inventory_tabicon_1handed_up.dds",
+    stamDD = "/esoui/art/icons/store_staminapotion_001.dds",
+    magDD = "/esoui/art/icons/store_magickadrink_001.dds",
+    stamHeal = "/esoui/art/icons/alchemy/crafting_poison_trait_increasehealing.dds",
+    magHeal = "/esoui/art/icons/alchemy/crafting_alchemy_trait_restorehealth_match.dds",
+    hybrid = "/esoui/art/icons/crowncrate_staminahealth_drink.dds",
+    --PvP
+    PVPTank = "/esoui/art/progression/health_points_frame.dds",
+    PVPStamDD = "/esoui/art/progression/stamina_points_frame.dds",
+    PVPMagDD = "/esoui/art/progression/magicka_points_frame.dds",
+    PVPStamHeal = "/esoui/art/icons/ability_healer_035.dds",
+    PVPMagHeal = "/esoui/art/icons/ability_healer_024.dds",
+    PVPHybrid = "/esoui/art/icons/ability_healer_029.dds",
+    --Other
+    farm = "/esoui/art/inventory/inventory_tabicon_crafting_up.dds",
+    sneak = "/esoui/art/icons/ability_legerdemain_improvedsneak.dds",
+    --Weapon types
+    bow = "/esoui/art/progression/icon_bows.dds",
+    dualWield = "/esoui/art/progression/icon_dualwield.dds",
+    twoHand = "/esoui/art/progression/icon_2handed.dds",
+    frostStaff = "/esoui/art/progression/icon_icestaff.dds",
+    fireStaff = "/esoui/art/progression/icon_firestaff.dds",
+    lightningStaff = "/esoui/art/progression/icon_lightningstaff.dds",
+}
+lib.possibleSetSearchFavoriteCategoriesUnsorted = possibleSetSearchFavoriteCategoriesUnsorted
+local possibleSetSearchFavoriteCategoriesForSort = {
+    "star",
+    --PvE
+    "tank",
+    "stamDD",
+    "magDD",
+    "stamHeal",
+    "magHeal",
+    "hybrid",
+    --PvP
+    "PVPTank",
+    "PVPStamDD",
+    "PVPMagDD",
+    "PVPStamHeal",
+    "PVPMagHeal",
+    "PVPHybrid",
+    --Other
+    "farm",
+    "sneak",
+    --Weapon types
+    "bow",
+    "dualWield",
+    "twoHand",
+    "frostStaff",
+    "fireStaff",
+    "lightningStaff",
+}
+local possibleSetSearchFavoriteCategoriesSorted = {}
+for index, setSearchFavoriteCategory in ipairs(possibleSetSearchFavoriteCategoriesForSort) do
+    possibleSetSearchFavoriteCategoriesSorted[index] = {
+        category = setSearchFavoriteCategory,
+        texture = possibleSetSearchFavoriteCategoriesUnsorted[setSearchFavoriteCategory],
+    }
+end
+lib.possibleSetSearchFavoriteCategories = possibleSetSearchFavoriteCategoriesSorted

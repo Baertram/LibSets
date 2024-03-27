@@ -74,7 +74,8 @@ local possibleDlcIds = {
     [29] = "DLC_SCRIBES_OF_FATE",
     [30] = "DLC_NECROM",
     [31] = "NO_DLC_UPDATE39",
-    [32] = "NO_DLC_SECRET_OF_THE_TELVANNI"
+    [32] = "NO_DLC_SECRET_OF_THE_TELVANNI",
+    [33] = "DLC_SCIONS_OF_ITHELIA",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -160,14 +161,19 @@ lib.dlcAndChapterCollectibleIds = {
     [DLC_SCRIBES_OF_FATE] =         {collectibleId=nil, achievementCategoryId=3466, type=DLC_TYPE_DUNGEONS, releaseDate=1678662000},
     --Necrom
     [DLC_NECROM] =                  {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000}, --June 5th 2023
-    --Update 38 QOL patch
+    --Update 39 QOL patch
     [NO_DLC_UPDATE39] =             {name="Update 39", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1692604800}, --August 21st 2023
     --Update 40
     [NO_DLC_SECRET_OF_THE_TELVANNI] = {name="Update 40: Secret of the Telvanni", achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1698663600}, --Ocotber 30th 2023
+    --Update 41
+    --[DLC_SCIONS_OF_ITHELIA] = ...
+
+    --Update 42
+    --[DLC_GOLD_ROAD] = --11871|CHAPTER|Gold Road
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
-    --lib.dlcAndChapterCollectibleIds[DLC_NECROM] = {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000} --June 5th 2023
+    lib.dlcAndChapterCollectibleIds[DLC_SCIONS_OF_ITHELIA] = {collectibleId=nil, achievementCategoryId=3808, type=DLC_SCIONS_OF_ITHELIA, releaseDate=1709294400} --March 11th 2024
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters

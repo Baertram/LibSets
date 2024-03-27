@@ -23,8 +23,8 @@ local searchUIThrottledDelay = 500
 local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
 
 
-local favoriteIconText = searchUI.favoriteIconText
-
+local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
+local favoriteIconTexts = searchUI.favoriteIconTexts
 
 --Debugging - TODO: Disable again
 --LibSets._debug = {} --todo remove after debugging/testing
@@ -55,11 +55,14 @@ local function onFilterDropdownEntryMouseEnterCallback(comboBox, entry)
     if entry == nil or entry.m_data == nil or entry.m_data.tooltipText == nil then return end
     InitializeTooltip(InformationTooltip, entry, BOTTOM, 0, -10)
     SetTooltipText(InformationTooltip, entry.m_data.tooltipText)
+
+    InformationTooltipTopLevel:BringWindowToTop()
 end
 
 local function onFilterDropdownEntryMouseExitCallback(comboBox, entry)
     ClearTooltip(InformationTooltip)
 end
+
 
 --======================================================================================================================
 --======================================================================================================================
@@ -98,6 +101,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.searchEditBoxControl = filters:GetNamedChild("TextSearchBox")
     self.searchEditBoxControl:SetDefaultText(getLocalizedText("nameTextSearch"))
     self.searchEditBoxControl:SetHandler("OnMouseEnter", function()
+        if not lib.svData or not lib.svData.setSearchTooltipsAtTextFilters then return end
         InitializeTooltip(InformationTooltip, self.searchEditBoxControl, BOTTOM, 0, -10)
         SetTooltipText(InformationTooltip, getLocalizedText("nameTextSearchTT"))
     end)
@@ -117,6 +121,7 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.bonusSearchEditBoxControl = filters:GetNamedChild("BonusTextSearchBox")
     self.bonusSearchEditBoxControl:SetDefaultText(getLocalizedText("bonusTextSearch"))
     self.bonusSearchEditBoxControl:SetHandler("OnMouseEnter", function()
+        if not lib.svData or not lib.svData.setSearchTooltipsAtTextFilters then return end
         InitializeTooltip(InformationTooltip, self.bonusSearchEditBoxControl, BOTTOM, 0, -10)
         SetTooltipText(InformationTooltip, getLocalizedText("bonusTextSearchTT"))
     end)
@@ -206,6 +211,8 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
 
 
     --Tooltip
+    self.tooltipControlTLC = LibSets_SearchUI_TooltipTopLevel -- The tooltips TLC
+    self.tooltipControlTLC:AllowBringToTop(true)
     self.tooltipControl = LibSets_SearchUI_Tooltip -- The set item tooltip preview
     self.tooltipKeyboardHookWasDone = false
 
@@ -514,14 +521,28 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
     favoritesDropdown:SetSortsItems(false)
 
-    local entry = favoritesDropdown:CreateItemEntry(GetString(SI_ARMORTYPE0))
+    local entry = favoritesDropdown:CreateItemEntry(GetString(SI_ARMORTYPE0)) -- None
     entry.filterType = 0
     entry.nameClean = "No favorite"
     favoritesDropdown:AddItem(entry)
-    entry = favoritesDropdown:CreateItemEntry(favoriteIconText .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
-    entry.filterType = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
-    entry.nameClean = "Favorite"
-    favoritesDropdown:AddItem(entry)
+
+    for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
+        local favoriteCategory = favoriteCategoryData.category
+        --[[
+        --For debugging
+        if favoriteIconTexts[favoriteCategory] == nil then
+            d("[LibSets]ERROR - favoriteIconTexts[favoriteCategory] is nil: " ..tostring(favoriteCategory))
+        end
+        ]]
+        local entry = favoritesDropdown:CreateItemEntry(favoriteIconTexts[favoriteCategory] .. " " .. zo_strformat("<<C:1>>" , favoriteCategory)) -- GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
+        entry.filterType = favoriteCategory
+        entry.nameClean = favoriteCategory
+        favoritesDropdown:AddItem(entry)
+    end
+    --entry = favoritesDropdown:CreateItemEntry(favoriteIconTextStar .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
+    --entry.filterType = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
+    --entry.nameClean = "Favorite"
+    --favoritesDropdown:AddItem(entry)
 
     -- Initialize the Number of bonuses multiselect combobox.
     local numBonusDropdown = ZO_ComboBox_ObjectFromContainer(self.numBonusFiltersControl)

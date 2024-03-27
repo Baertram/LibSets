@@ -2008,7 +2008,7 @@ local function loadLAMSettingsMenu()
             tooltip =   localization.previewTTToChatToo_TT,
             getFunc =   function() return settings.setPreviewTooltips.sendToChatToo end,
             setFunc =   function(value)
-                lib.svData.settings.setPreviewTooltips.sendToChatToo = value
+                lib.svData.setPreviewTooltips.sendToChatToo = value
             end,
             default =   defaultSettings.setPreviewTooltips.sendToChatToo,
             disabled =  function() return false end,
@@ -2097,6 +2097,7 @@ lib.CreatePreviewTooltipAndShow = createPreviewTooltipAndShow
 
 local allSetNamesCached
 local function previewSetTooltipBySlashCommand(args)
+    --Abort if LibSlashCommander was loaded -> Will be handled via LibSets_AutoCompletion.lua then
     if lib.libSlashCommander ~= nil then return end
     if args == nil or args == "" then return end
 
@@ -2153,7 +2154,11 @@ local function previewSetTooltipBySlashCommand(args)
         end
     end
     if setId == nil then return end
-    createPreviewTooltipAndShow(setId)
+
+    local itemLink = createPreviewTooltipAndShow(setId)
+    if itemLink ~= nil and setPreviewTooltipSV.sendToChatToo == true then
+        StartChatInput(itemLink)
+    end
 end
 
 
