@@ -1060,6 +1060,8 @@ lib.setDataPreloaded = {
     --mapped to zoneIds so they will miss that sub-table!
     [LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING] =
     {
+       --Special Category at the top
+        { parentCategory=124, category=126, zoneIds={1443}},--West Weald
         --Aldmeri-Dominion
         { parentCategory=1, category=11, zoneIds={381}},--Auridon
         { parentCategory=1, category=12, zoneIds={383}},--Grahtwood
@@ -1078,6 +1080,8 @@ lib.setDataPreloaded = {
         { parentCategory=3, category=23, zoneIds={103}},--The Rift
         { parentCategory=3, category=24, zoneIds={117}},--Shadowfen
         { parentCategory=3, category=25, zoneIds={41}},--Stonefalls
+        --Infinite Archive
+        { parentCategory=109, category=117, zoneIds={1436}},--All classes
         --DLC-Regions
         { parentCategory=4, category=29, zoneIds={684}},--Wrothgar
         { parentCategory=4, category=30, zoneIds={816}},--Hew's Bane
@@ -1092,9 +1096,9 @@ lib.setDataPreloaded = {
         { parentCategory=4, category=89, zoneIds={1207,1208}},--The Reach/Blackreach: Arkthzand Cavern
         { parentCategory=4, category=93, zoneIds={1261}},--Blackwood
         { parentCategory=4, category=97, zoneIds={1286,1282,1283}},--The Deadlands/Fargrave/The Shambles
-        { parentCategory=4, category=100, zoneIds={1318}},--High isle
+        { parentCategory=4, category=100, zoneIds={1318}},--High Isle
         { parentCategory=4, category=104, zoneIds={1383}},--Galen
-        { parentCategory=124, category=107, zoneIds={1413,1414}},--Apocrypha/Telvanni Peninsula TODO: Attention: This DLC uses it's own category...
+        { parentCategory=4, category=107, zoneIds={1413,1414}},--Apocrypha/Telvanni Peninsula
         --Dungeons
         { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
         { parentCategory=5, category=40, zoneIds={380,935}, isDungeon=true},--The Banished Cells I
@@ -1155,7 +1159,7 @@ lib.setDataPreloaded = {
         { parentCategory=7, category=79, zoneIds={1196}, isTrial=true},--Kyne's Aegis
         { parentCategory=7, category=101, zoneIds={1344}, isTrial=true},--Dreadsail Reef
         { parentCategory=7, category=108, zoneIds={1427}, isTrial=true},--Sanity's Edge
-        { parentCategory=7, category=112, zoneIds={1478}, isTrial=true},--Lucent Citadel
+        { parentCategory=7, category=125, zoneIds={1478}, isTrial=true},--Lucent Citadel
         --Arenas
         { parentCategory=8, category=80, zoneIds={635}, isArena=true},--Dragonstar Arena
         { parentCategory=8, category=81, zoneIds={677}, isArena=true},--Maelstrom Arena
@@ -1166,7 +1170,7 @@ lib.setDataPreloaded = {
         { parentCategory=9, category=84, zoneIds={584}},--Imperial City
         { parentCategory=9, category=85},--Battlegrounds
         --Miscellaneous
-        { parentCategory=10, category=26, zoneIds={280,281,534,535,537}},   --Beginner zones
+        { parentCategory=10, category=26, zoneIds={280,281,534,535,537}},--Beginner zones
         { parentCategory=10, category=27, zoneIds={347}},--Coldharbour
         { parentCategory=10, category=28, zoneIds={888}},--Craglorn
         { parentCategory=10, category=86},--Antiquities
