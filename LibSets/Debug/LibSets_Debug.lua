@@ -310,7 +310,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
     combineFromSV = combineFromSV or false
     forceShowOtherApiVersionSets = forceShowOtherApiVersionSets or false
     local runFuncForEachSetId = (funcToCallForEachSetId ~= nil and type(funcToCallForEachSetId) == "function") or false
---d(strfor(">checkForNewSetIds - funcToCallForEachSetId given: %s, combineFromSavedVariables: %s", tos(runFuncForEachSetId), tos(combineFromSV)))
+d(strfor(">checkForNewSetIds - funcToCallForEachSetId given: %s, combineFromSavedVariables: %s", tos(runFuncForEachSetId), tos(combineFromSV)))
     newSetIdsFound = {}
     local setsOfNewerAPIVersion = lib.setsOfNewerAPIVersion
     local blacklistedSetIds = lib.blacklistedSetIds
@@ -328,12 +328,12 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
         --The compressed itemIds of new scanned set itemIds are found here:
         --SV table of all new itemIds scanned AND compressed lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
         local loadedCompressedSetItemIdsFromSV = lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
---lib._loadedCompressedSetItemIdsFromSV = loadedCompressedSetItemIdsFromSV
+lib._loadedCompressedSetItemIdsFromSV = loadedCompressedSetItemIdsFromSV
         MyCombineNonContiguousTables(tableToProcess, setIdTable, loadedCompressedSetItemIdsFromSV)
     else
         tableToProcess = setIdTable
     end
---lib._tableToProcess = tableToProcess
+lib._tableToProcess = tableToProcess
 
     for setId, setItemIds in pairs(tableToProcess) do
         local doAddAsNew = false
@@ -357,6 +357,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
                     end
                 end
                 if doAddAsNew == true then
+d(">checkForNewSetIds-Add setId to new: " ..tos(setId))
                     tins(newSetIdsFound, setId)
                 end
                 if runFuncForEachSetId == true then
@@ -374,38 +375,45 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
         end
         local newSetIdsFromSV = lib.svDebugData and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS]
                                     and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersion]
+lib._newSetIdsFromSV = newSetIdsFromSV
         if newSetIdsFromSV ~= nil and #newSetIdsFromSV > 0 then
             d(strfor(">>found newSetData in the SavedVariables - WorldName: %s, APIVersion: %s", tos(worldName), tos(apiVersion)))
             for idx, newSetIdToCheck in ipairs(newSetIdsFromSV) do
-                local addNow = true
-                --local newSetIdToCheck
-                --A line [idx] = newSetData looks like this: [1] = "209|Rüstung des Kodex|N/a",
-                --local newSetIdToCheckStr = strsub(newSetData, 1, strfind(newSetData, "|"))
-                --if newSetIdToCheckStr ~= nil and newSetIdToCheckStr ~= "" then
-                --    newSetIdToCheck = ton(newSetIdToCheckStr)
-                if newSetIdToCheck ~= nil then
-                    --Is the setId of a scaned newSetId (from debug SavedVariables NewSetIDs) already the same as an entry in the above scanned
-                    --newSetIdsFound table (from debug SavedVariables setItemIds_Compressed): Then skip it
-                    for _, newSetIdLoadedBefore in ipairs(newSetIdsFound) do
---d(">>>newSetIdToCheck: " ..tos(newSetIdToCheck) .. ", newSetIdLoadedBefore: " ..tos(newSetIdLoadedBefore))
-                        if newSetIdToCheck == newSetIdLoadedBefore then
-                            addNow = false
-                            break
+                --Prevent any string variables accidently created as setId
+                if type(newSetIdToCheck) == "number" then
+                    local addNow = true
+                    --local newSetIdToCheck
+                    --A line [idx] = newSetData looks like this: [1] = "209|Rüstung des Kodex|N/a",
+                    --local newSetIdToCheckStr = strsub(newSetData, 1, strfind(newSetData, "|"))
+                    --if newSetIdToCheckStr ~= nil and newSetIdToCheckStr ~= "" then
+                    --    newSetIdToCheck = ton(newSetIdToCheckStr)
+                    if newSetIdToCheck ~= nil then
+                        --Is the setId of a scaned newSetId (from debug SavedVariables NewSetIDs) already the same as an entry in the above scanned
+                        --newSetIdsFound table (from debug SavedVariables setItemIds_Compressed): Then skip it
+                        for _, newSetIdLoadedBefore in ipairs(newSetIdsFound) do
+                            --d(">>>newSetIdToCheck: " ..tos(newSetIdToCheck) .. ", newSetIdLoadedBefore: " ..tos(newSetIdLoadedBefore))
+                            if newSetIdToCheck == newSetIdLoadedBefore then
+                                addNow = false
+                                break
+                            end
                         end
                     end
-                end
-                --end
-                if addNow == true and newSetIdToCheck ~= nil then
---d(">>added new setId now: " ..tos(newSetIdToCheck))
-                    newSetIdsFound[idx] = newSetIdToCheck
-                    if runFuncForEachSetId == true then
-                        funcToCallForEachSetId(newSetIdToCheck)
+                    --end
+                    if addNow == true and newSetIdToCheck ~= nil then
+d(">checkForNewSetIds-added new setId now: " ..tos(newSetIdToCheck))
+                        newSetIdsFound[idx] = newSetIdToCheck
+                        if runFuncForEachSetId == true then
+                            funcToCallForEachSetId(newSetIdToCheck)
+                        end
                     end
+                else
+d("<checkForNewSetIds-newSetIdsFromSV new setId is not a number: " ..tos(newSetIdToCheck))
                 end
             end
         end
     end
     tsort(newSetIdsFound)
+lib._newSetIdsFound_checkForNewSetIds = newSetIdsFound
 end
 
 --Return all the setId's itemIds as table, from file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
@@ -731,7 +739,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
         d("-->Maximum setId found: " ..tos(maxSetIdChecked) .. " / Added set names: " ..tos(setNamesAdded) .. " / New setIds found: " .. tos(foundNewSetsCount))
         if foundNewSetsCount > 0 then
             for _, setIdNewFound in ipairs(newSetIdsFound) do
-                local setNameOfNewSet = lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound] and lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound][clientLang] or unknownName
+                local setNameOfNewSet = (lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound] and lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES][setIdNewFound][clientLang]) or unknownName
                 d("--->new setId: " ..tos(setIdNewFound) .. ", name: " .. tos(setNameOfNewSet))
             end
         end
@@ -795,8 +803,10 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
             if newSetsFound > 0 then
                 d(">> !!! Found " .. tos(newSetsFound) .. " new setIds !!!")
                 for idx, newSetId in pairs(newSetIdsFound) do
-                    local newSetName = (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] ~= nil and
-                            (lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][fallbackLang]))
+                    local newSetName = nil
+                    if lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId] ~= nil then
+                        newSetName = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][newSetId][fallbackLang]
+                    end
                     if newSetName == nil then newSetName = unknownName end
                     if newSetName ~= unknownName then
                         newSetName = zocstrfor("<<C:1>>", newSetName)
@@ -1298,9 +1308,9 @@ local debugGetAllCollectibleDLCNames = lib.DebugGetAllCollectibleDLCNames
 
 --Only show the setIds that were added with the latest "Set itemId scan" via function "LibSets.DebugScanAllSetData()".
 -->The function will compare the setIds of this table with the setIds in the file LibSets_Data_All.lua table lib.setInfo!
---->If there are no new setIds you either did NOT use this function before, did a reloadui, copied the contents from the
---->SavedVariables table to the lua minifier AND have transfered the scanned itemIds to the file LibSets_Data_All.lua
---->table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS].
+--->If there are no new setIds you either did NOT use the function "LibSets.DebugScanAllSetData()" before, did a reloadui,
+--->copied the contents from the SavedVariables table to the lua minifier AND have transfered the scanned itemIds to the
+---<file LibSets_Data_All.lua table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS].
 --->Or there are no new setIds since the last time you updated this table.
 function lib.DebugShowNewSetIds(noChatOutput)
     noChatOutput = noChatOutput or false
@@ -1328,7 +1338,8 @@ function lib.DebugShowNewSetIds(noChatOutput)
                 tempSetNamesOfClientLang[newSetId] = newSetName
             end
             --Update the value of the table entry with the setId, --newSetName
-            newSetIdsFound[idx] = newSetId .. ", --" .. newSetName
+            -->!!!This will make ALL access to the table go mad as the value is no the setId anymore and thus SavedVars save wrong setNames!!!
+            --> DO NOT DO THIS!!! newSetIdsFound[idx] = newSetId .. ", --" .. newSetName
         end
     end
     if newSetsFound == 0 then
@@ -1359,6 +1370,7 @@ function lib.DebugShowNewSetIds(noChatOutput)
     end
 end
 local debugShowNewSetIds = lib.DebugShowNewSetIds
+
 
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames(noReloadInfo)

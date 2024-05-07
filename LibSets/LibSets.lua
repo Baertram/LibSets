@@ -4492,12 +4492,29 @@ local function addButton(myAnchorPoint, relativeTo, relativePoint, offsetX, offs
         return button
     end
 end
----
+
+
+local function checkAndChangeActualZoneButtonVisibleState(fragmentStateNew)
+    local itemSetCollectionBookMoreOptionsButton = lib.itemSetCollectionBookMoreOptionsButton
+    if itemSetCollectionBookMoreOptionsButton == nil then return end
+
+    local doHide = not lib.svData.addSetCollectionsCurrentZoneButton
+    if doHide == false and fragmentStateNew ~= nil then
+        if fragmentStateNew == SCENE_FRAGMENT_HIDING then
+            doHide = false
+        elseif fragmentStateNew == SCENE_FRAGMENT_SHOWN then
+            doHide = true
+        end
+    end
+    itemSetCollectionBookMoreOptionsButton:SetHidden(doHide)
+end
+
 local function addUIButtons()
+--d("[LibSets]addUIButtons")
     local addSetCollectionsCurrentZoneButton = lib.svData.addSetCollectionsCurrentZoneButton
     if addSetCollectionsCurrentZoneButton == true then
-
         if lib.itemSetCollectionBookMoreOptionsButton == nil then
+--d("[LibSets]lib.itemSetCollectionBookMoreOptionsButton = nil - parent: " .. tos(ZO_ItemSetsBook_Keyboard_TopLevelFilters))
             local localization = lib.localization[clientLang]
 
             --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_MORE_OPTIONS,            localization.moreOptions)   --"More Options")
@@ -4536,28 +4553,24 @@ local function addUIButtons()
                 highlight       = "/esoui/art/buttons/dropbox_arrow_mouseover.dds",
                 disabled        = "/esoui/art/buttons/dropbox_arrow_disabled.dds",
             }
-            lib.itemSetCollectionBookMoreOptionsButton = addButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFilters, RIGHT, (buttonDataOpenCurrentParentZone.width+4)*-1, 10, buttonDataOpenCurrentParentZone)
-            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(false)
-        else
-            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(false)
-        end
-    elseif not addSetCollectionsCurrentZoneButton then
-        if lib.itemSetCollectionBookMoreOptionsButton ~= nil then
-            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(true)
-        end
-    end
+            lib.itemSetCollectionBookMoreOptionsButton = addButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFilters, RIGHT,
+                                                                    (buttonDataOpenCurrentParentZone.width+4)*-1, 10, buttonDataOpenCurrentParentZone)
 
-    --Register a fragment stateChange callback so the buttons get hidden at Transmute station -> Reconstruction tab
-    local function fragmentChange(oldState, newState)
-        if (newState == SCENE_FRAGMENT_SHOWN ) then
-            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(true)
-        elseif (newState == SCENE_FRAGMENT_HIDING ) then
-            lib.itemSetCollectionBookMoreOptionsButton:SetHidden(false)
+            --Register a fragment stateChange callback so the buttons get hidden at Transmute station -> Reconstruction tab
+            local function reconstructFragmentChange(oldState, newState)
+                if newState == SCENE_FRAGMENT_SHOWN or newState == SCENE_FRAGMENT_HIDING then
+        --d("[LibSets]RETRAIT fragmentChange " .. tos(newState) .. " - button: " .. tos(lib.itemSetCollectionBookMoreOptionsButton))
+                    checkAndChangeActualZoneButtonVisibleState(newState)
+                end
+            end
+            RETRAIT_STATION_RECONSTRUCT_FRAGMENT:RegisterCallback("StateChange", reconstructFragmentChange)
         end
     end
-    RETRAIT_STATION_RECONSTRUCT_FRAGMENT:RegisterCallback("StateChange", fragmentChange)
+    checkAndChangeActualZoneButtonVisibleState()
 end
 lib.addUIButtons = addUIButtons
+
+
 
 local function createUIStuff()
     --Add buttons to jump to current zon at the set collections

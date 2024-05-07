@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.65
+local MAJOR, MINOR = "LibSets", 0.68
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -67,7 +67,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101041 -- Scions of Ithelia, Patch U41 (2024-02-02, PTS, API 101041)
+lib.lastSetsPreloadedCheckAPIVersion = 101042 -- Gold Road, Patch U42 (2024-05-06, PTS, API 101042)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -86,7 +86,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101041 -- Scions of Ithelia, Patch U41 (2
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101041 -- Scions of Ithelia, Patch U41 (2024-02-02, PTS, API 101041)
+APIVersions["PTS"]                   = 101042 -- Gold Road, Patch U42 (2024-05-06, PTS, API 101042)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -102,7 +102,7 @@ lib.APIVersions                = APIVersions
 ------------------------------------------------------------------------------------------------------------------------
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds
-lib.debugNumItemIdPackages     = 50         -- Increase this to find new added set itemIds after an update. It will be
+lib.debugNumItemIdPackages     = 55         -- Increase this to find new added set itemIds after an update. It will be
 --multiplied by lib.debugNumItemIdPackageSize to build the itemIds of the
 --items to scan inagme for sets -> build an itemLink->uses GetItemLinkSetInfo()
 lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the client may crash!
@@ -1178,7 +1178,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Los jefes de mazmorras públicas pueden soltar hombreras, guantes, o armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "Los cofres de áncoras oscuras sueltan siempre anillos o amuletos.\nLos cofres encontrados por el mundo pueden soltar cualquier pieza de armadura de un conjunto propio de la zona:\n-Los cofres sencillos tienen una ligera probabilidad\n-Los cofres intermedios tienen una buena probabilidad\n-Los cofres avanzados o de maestro tienen 100% de probabilidad\n-Los cofres encontrados con un mapa del tesoro tienen 100% de probabilidad",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Cofre que se puede canjear por Piedras TelVar en un vendedor de equipos TelVar en la base de tu facción, en las alcantarillas de la Ciudad Imperial.",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Todos los jefes: manos, cintura, pies, pecho, hombros, cabeza, piernas\Jefes finales: arma, escudo\Contenedores de recompensa de misión: joyas, arma, escudo (se vincula al recogerlo))",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Todos los jefes: manos, cintura, pies, pecho, hombros, cabeza, piernas\nJefes finales: arma, escudo\nContenedores de recompensa de misión: joyas, arma, escudo (se vincula al recogerlo))",
     },
     ["fr"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Récompenses des dignes (" .. cyrodiilAndBattlegroundText .. " par courrier) - Ne contient que les ensembles d'objets les plus récents !\nÀ mesure que de nouveaux ensembles sont ajoutés, les anciens seront retirés d'ici et ajoutés à d'autres sources en Cyrodiil :\nTous les ensembles d'objets JcJ seront désormais obtenus à partir des antres, dolmens et missions du tableau de Cyrodiil.\nLes quêtes quotidiennes de la ville et les marchands seront divisés par Léger, Moyen et Lourd. Exception : Cheydinhal et Chorrol/Weynon Priory récompensent n'importe quel ensemble.\nTous les ensembles JcJ sont disponibles en tant que conteneurs individuels chez les marchands de la ville et les vendeurs d'équipement d'élite.\nLes antres feront tomber les ensembles de taille et de pieds.\nLes dolmens feront tomber des bijoux.\nLes missions du tableau feront tomber toutes les autres pièces d'armure.\nLes missions de prime et d'éclaireur récompenseront des pièces d'armure.\nLes missions de bataille et de front de guerre récompenseront des pièces d'arme.",
@@ -1198,7 +1198,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "Боссы открытых подземелий дают шанс выпадания плечей, рук или оружия.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "Сундуки, полученные после побед над Тёмными якорями, имеют 100% шанс выпадания кольца или амулета.\nСундуки сокровищ, найденные в мире, дают шанс получить любую часть комплекта, выпадающую в этой зоне:\n- простые сундуки дают незначительный шанс\n- средние сундуки дают хороший шанс\n- продвинутые и мастерские сундуки дают гарантированный шанс\n- сундуки сокровищ, найденные по Карте сокровищ, дают гарантированный шанс",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Сундук, который можно обменять на камни ТелВар у продавца оборудования ТелВар на базе вашей фракции в канализации Имперского города",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Все боссы: Руки, Поясница, Ноги, Грудь, Плечо, Голова, Ноги\Финальные боссы: Оружие, Щит\Контейнеры с наградами за квест: Ювелирные изделия, Оружие, Щит (привязывается при получении))",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Все боссы: Руки, Поясница, Ноги, Грудь, Плечо, Голова, Ноги\Финальные боссы: Оружие, Щит\nКонтейнеры с наградами за квест: Ювелирные изделия, Оружие, Щит (привязывается при получении))",
     },
     ["jp"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール) - 最新アイテムセットのみを収録！\n新しいセットが追加され続けるため、古いセットはここで削除され、シロディールの他のソースに追加されます:\nすべての PvP アイテム セットはシロディールの洞窟、ドルメン、ボード ミッションからドロップされます。\nタウンのデイリー クエストと商人は光によって分割されます。 、ミディアムとヘビー。 例外: シェイディンハルとチョロル/ウェイノン修道院はどのセットでも報酬を獲得します。\nすべての PvP セットは、町の商人およびエリート装備ベンダーの両方で個別のコンテナとして入手できます。\nデルブは腰と足のアイテム セットをドロップします\nドルメンはジュエリーをドロップします\nボード ミッションはすべてをドロップします 他のアーマー ピース。\n賞金稼ぎミッションとスカウト ミッションではアーマー ピースが獲得できます。\nバトル ミッションとウォーフロント ミッションでは武器スロット ピースが獲得できます。",
@@ -1207,7 +1207,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON]      = "パブリックダンジョンのボスは、肩、手の各防具、または武器をドロップすることがあります。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_CHEST]                    = "ダークアンカー撃破報酬の宝箱からは、指輪かアミュレットが必ずドロップします。\n地上エリアで見つけた宝箱からは、そのゾーンでドロップするセット装備を入手できます。:\n-簡単な宝箱からは低確率で入手できます。\n-中級の宝箱からは高確率で入手できます。\n-上級やマスターの宝箱からは100%入手できます。\n-「宝の地図」で見つけた宝箱からは100%入手できます。",
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "「インペリアルシティ下水道の派閥基地にあるTelVar機器ベンダーでTelVarストーンと交換できるチェスト。」",
-        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "すべてのボス: 手、腰、足、胸、肩、頭、脚\最終ボス: 武器、盾\クエスト報酬コンテナ: ジュエリー、武器、盾 (ピックアップ時にバインド))",
+        [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "すべてのボス: 手、腰、足、胸、肩、頭、脚\n最終ボス: 武器、盾\nクエスト報酬コンテナ: ジュエリー、武器、盾 (ピックアップ時にバインド))",
     },
     ["zh"] = { --by Lykeion, 2024029
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "给有价值的人的奖励 (" .. cyrodiilAndBattlegroundText .. " 邮件) - 只包含最新的套装!\n随着新套装的不断加入, 就套装将被从此获取途径中移除并被加入到西罗帝尔的其他获取途径中:\n所有Pvp套装现将从西罗帝尔洞穴, 暗锚和任务中掉落.\n城镇日常任务和商人将会以轻, 中, 重区分. 特例: 香丁赫尔和克洛文/文扬修道院将会奖励任意套装.\n所有PvP套装都可以宝箱形式从城镇商人或精选装备商人处获取.\n洞穴会掉落腰部和足部装备\n暗锚会掉落珠宝\n公告板任务会掉落其他身体部位装备.\n赏金和侦查任务奖励服装.\n战斗和前线作战任务奖励武器.",
@@ -1272,7 +1272,7 @@ lib.localization                 = {
         tooltipTextures          = "Zeige Tooltip Symbole",
         tooltipTextures_T        = "Zeige Symbole für Set Art, Drop Mechanik, Location/Boss Name, ... im Tooltip",
         defaultTooltipPattern    = "Voreingestellter Tooltip",
-        defaultTooltipPattern_TT = "Nutze die Auswahlfelder um die entsprechende Information über die Set Gegenstände im Gegenstandstooltip anzuzeigen.\nDas standard Ausgabeformat ist:\n\n\<Symbol><Set Art Name> <wenn handwerklich herstellbar: (Eigenschaften benötigt)/wenn nicht Handwerklich herstellbar: (Rekonstruktionskosten)>\n<Drop Zonen Info> [bestehend aus <ZonenName> (<DropMechanik>: <DropMechanikDropName>)]\<DLC Name>\nWenn alle Zonen identisch sind werden DropMechanic und Ort/Boss Namen ; getrennt als 1 Zeile ausgegeben.",
+        defaultTooltipPattern_TT = "Nutze die Auswahlfelder um die entsprechende Information über die Set Gegenstände im Gegenstandstooltip anzuzeigen.\nDas standard Ausgabeformat ist:\n\n<Symbol><Set Art Name> <wenn handwerklich herstellbar: (Eigenschaften benötigt)/wenn nicht Handwerklich herstellbar: (Rekonstruktionskosten)>\n<Drop Zonen Info> [bestehend aus <ZonenName> (<DropMechanik>: <DropMechanikDropName>)]\<DLC Name>\nWenn alle Zonen identisch sind werden DropMechanic und Ort/Boss Namen ; getrennt als 1 Zeile ausgegeben.",
         customTooltipPattern     = "Selbst definierter Tooltip Text",
         customTooltipPattern_TT  = "Definiere deinen eigenen Tooltip Text, inklusive vor-definierter Platzhalter. Beispiel: \'Art <<1>>/Drop <<2>> <<3>> <<4>>\'.\nLasse dieses Textfeld leer, um den eigenen Tooltip Text zu deaktivieren!\nPlatzhalter müssen mit << beginnen, danach folt eine 1stellige Nummer, und beendet werden diese mit >>, z.B. <<1>> oder <<5>>. Es gibt maximal 6 Platzhalter in einem Text. Zeilenumbruch: <br>\n\nMögliche Platzhalter sind:\n<<1>>   Set Art\n<<2>>   Drop Mechaniken [können mehrere \',\' getrennte sein, je Zone 1]\n<<3>>   Drop Zonen [können mehrere \',\' getrennte sein, je Zone 1] Sind alle Zonen identisch wird nur 1 ausgegeben\n<<4>>   Boss/Drop durch Namen [können mehrere \',\' getrennte sein, je Zone 1]\n<<5>>   Benötigte Anzahl analysierter Eigenschaten, oder Rekonstruktionskosten\n<<6>>   Kapitel/DLC Name mit dem das Set eingeführt wurde.\n\n|cFF0000Achtung|r: Wenn du einen ungültigen Tooltip Text, ohne irgendeinen <<Nummer>> Platzhalter, eingibst wird sich das Textfeld automatisch selber leeren!",
         slashCommandDescription         = "Suche übersetzte Set Namen",

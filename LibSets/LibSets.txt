@@ -10,11 +10,11 @@
 ## Description: List of all ingame sets and functions to check what set type they are, set names, itemIds, drop locations, etc.
 ## Author: Baertram
 ## APIVersion: 101041 101042
-## Version: 0.6.5
-## AddOnVersion: 000605
+## Version: 0.6.8
+## AddOnVersion: 000608
 ## IsLibrary: true
 ## SavedVariables: LibSets_SV_Data LibSets_SV_DEBUG_Data
-## OptionalDependsOn: LibZone>=084 LibAddonMenu-2.0>=35 LibCustomMenu>=721 LibSlashCommander>=36
+## OptionalDependsOn: LibZone>=084 LibAddonMenu-2.0>=36 LibCustomMenu>=721 LibSlashCommander>=36
 
 ## This Add-On is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries. All rights reserved.
 
