@@ -310,7 +310,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
     combineFromSV = combineFromSV or false
     forceShowOtherApiVersionSets = forceShowOtherApiVersionSets or false
     local runFuncForEachSetId = (funcToCallForEachSetId ~= nil and type(funcToCallForEachSetId) == "function") or false
-d(strfor(">checkForNewSetIds - funcToCallForEachSetId given: %s, combineFromSavedVariables: %s", tos(runFuncForEachSetId), tos(combineFromSV)))
+--d(strfor(">checkForNewSetIds - funcToCallForEachSetId given: %s, combineFromSavedVariables: %s", tos(runFuncForEachSetId), tos(combineFromSV)))
     newSetIdsFound = {}
     local setsOfNewerAPIVersion = lib.setsOfNewerAPIVersion
     local blacklistedSetIds = lib.blacklistedSetIds
@@ -328,12 +328,12 @@ d(strfor(">checkForNewSetIds - funcToCallForEachSetId given: %s, combineFromSave
         --The compressed itemIds of new scanned set itemIds are found here:
         --SV table of all new itemIds scanned AND compressed lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
         local loadedCompressedSetItemIdsFromSV = lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED]
-lib._loadedCompressedSetItemIdsFromSV = loadedCompressedSetItemIdsFromSV
+--lib._loadedCompressedSetItemIdsFromSV = loadedCompressedSetItemIdsFromSV
         MyCombineNonContiguousTables(tableToProcess, setIdTable, loadedCompressedSetItemIdsFromSV)
     else
         tableToProcess = setIdTable
     end
-lib._tableToProcess = tableToProcess
+--lib._tableToProcess = tableToProcess
 
     for setId, setItemIds in pairs(tableToProcess) do
         local doAddAsNew = false
@@ -357,7 +357,7 @@ lib._tableToProcess = tableToProcess
                     end
                 end
                 if doAddAsNew == true then
-d(">checkForNewSetIds-Add setId to new: " ..tos(setId))
+--d(">checkForNewSetIds-Add setId to new: " ..tos(setId))
                     tins(newSetIdsFound, setId)
                 end
                 if runFuncForEachSetId == true then
@@ -375,7 +375,7 @@ d(">checkForNewSetIds-Add setId to new: " ..tos(setId))
         end
         local newSetIdsFromSV = lib.svDebugData and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS]
                                     and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName] and lib.svDebugData[LIBSETS_TABLEKEY_NEWSETIDS][worldName][apiVersion]
-lib._newSetIdsFromSV = newSetIdsFromSV
+--lib._newSetIdsFromSV = newSetIdsFromSV
         if newSetIdsFromSV ~= nil and #newSetIdsFromSV > 0 then
             d(strfor(">>found newSetData in the SavedVariables - WorldName: %s, APIVersion: %s", tos(worldName), tos(apiVersion)))
             for idx, newSetIdToCheck in ipairs(newSetIdsFromSV) do
@@ -400,14 +400,14 @@ lib._newSetIdsFromSV = newSetIdsFromSV
                     end
                     --end
                     if addNow == true and newSetIdToCheck ~= nil then
-d(">checkForNewSetIds-added new setId now: " ..tos(newSetIdToCheck))
+--d(">checkForNewSetIds-added new setId now: " ..tos(newSetIdToCheck))
                         newSetIdsFound[idx] = newSetIdToCheck
                         if runFuncForEachSetId == true then
                             funcToCallForEachSetId(newSetIdToCheck)
                         end
                     end
-                else
-d("<checkForNewSetIds-newSetIdsFromSV new setId is not a number: " ..tos(newSetIdToCheck))
+                --else
+--d("<checkForNewSetIds-newSetIdsFromSV new setId is not a number: " ..tos(newSetIdToCheck))
                 end
             end
         end
