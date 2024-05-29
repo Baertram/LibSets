@@ -330,16 +330,21 @@ end
 ------------------------------------------------
 local SORT_BY_FILTERTYPE_NUMERIC =  { ["filterType"]    = { isNumeric = true } }
 local SORT_BY_NAMECLEAN =           { ["nameClean"]     = {} }
-local function sortFilterComboBox(setTypeDropdown, sortType)
+local function sortFilterComboBox(comboBox, sortType, suppressRebuild)
     --Sort the entries of setTypeDropdown by their entry.filterType?
     if sortType == "filterType" then
-        table.sort(setTypeDropdown.m_sortedItems, function(item1, item2)
-            return ZO_TableOrderingFunction(item1, item2, "filterType", SORT_BY_FILTERTYPE_NUMERIC, setTypeDropdown.m_sortOrder)
+        table.sort(comboBox.m_sortedItems, function(item1, item2)
+            return ZO_TableOrderingFunction(item1, item2, "filterType", SORT_BY_FILTERTYPE_NUMERIC, comboBox.m_sortOrder)
         end)
     elseif sortType == "nameClean" then
-        table.sort(setTypeDropdown.m_sortedItems, function(item1, item2)
-            return ZO_TableOrderingFunction(item1, item2, "nameClean", SORT_BY_NAMECLEAN, setTypeDropdown.m_sortOrder)
+        table.sort(comboBox.m_sortedItems, function(item1, item2)
+            return ZO_TableOrderingFunction(item1, item2, "nameClean", SORT_BY_NAMECLEAN, comboBox.m_sortOrder)
         end)
+    end
+    if not suppressRebuild then
+        if comboBox:IsDropdownVisible() then
+            comboBox:ShowDropdown()
+        end
     end
 end
 
@@ -376,7 +381,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             local entry = setTypeDropdown:CreateItemEntry(setTypeNameStr)
             entry.filterType = setType
             entry.nameClean = setTypeName
-            setTypeDropdown:AddItem(entry)
+            setTypeDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
     end
     sortFilterComboBox(setTypeDropdown, "nameClean")
@@ -401,7 +406,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
         local entry = armorTypeDropdown:CreateItemEntry(armorTypeNameStr)
         entry.filterType = armorType
         entry.nameClean = armorTypeName
-        armorTypeDropdown:AddItem(entry)
+        armorTypeDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
     sortFilterComboBox(armorTypeDropdown, "nameClean")
 
@@ -425,7 +430,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
         local entry = weaponTypeDropdown:CreateItemEntry(weaponTypeNameStr)
         entry.filterType = weaponType
         entry.nameClean = weaponTypeName
-        weaponTypeDropdown:AddItem(entry)
+        weaponTypeDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
     sortFilterComboBox(weaponTypeDropdown, "nameClean")
 
@@ -451,7 +456,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             local entry = equipmentTypeDropdown:CreateItemEntry(equipTypeNameStr)
             entry.filterType = equipType
             entry.nameClean = equipTypeName
-            equipmentTypeDropdown:AddItem(entry)
+            equipmentTypeDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
     end
     sortFilterComboBox(equipmentTypeDropdown, "nameClean")
@@ -474,11 +479,14 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     for DLCId, isValid in pairs(lib.allowedDLCIds) do
         if isValid == true then
-            local entry = DLCIdDropdown:CreateItemEntry(lib.GetDLCName(DLCId))
+            local dlcName = lib.GetDLCName(DLCId)
+            local entry = DLCIdDropdown:CreateItemEntry(dlcName)
             entry.filterType = DLCId
-            DLCIdDropdown:AddItem(entry)
+            entry.nameClean = dlcName
+            DLCIdDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
     end
+    sortFilterComboBox(DLCIdDropdown, "nameClean")
 
     -- Initialize the enchantment search category Types multiselect combobox.
     local enchantmentSearchCategoryTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.enchantSearchCategoryTypeFiltersControl)
@@ -501,10 +509,13 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             if enchantmentSearchCategoryName ~= nil and enchantmentSearchCategoryName ~= "" then
                 local entry = enchantmentSearchCategoryTypeDropdown:CreateItemEntry(enchantmentSearchCategoryName)
                 entry.filterType = enchantSearchCategoryType
-                enchantmentSearchCategoryTypeDropdown:AddItem(entry)
+                entry.nameClean = enchantmentSearchCategoryName
+                enchantmentSearchCategoryTypeDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             end
         end
     end
+    sortFilterComboBox(enchantmentSearchCategoryTypeDropdown, "nameClean")
+
 
     -- Initialize the Favorite sets multiselect combobox.
     local favoritesDropdown = ZO_ComboBox_ObjectFromContainer(self.favoritesFiltersControl)
@@ -537,12 +548,13 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
         local entry = favoritesDropdown:CreateItemEntry(favoriteIconTexts[favoriteCategory] .. " " .. zo_strformat("<<C:1>>" , favoriteCategory)) -- GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
         entry.filterType = favoriteCategory
         entry.nameClean = favoriteCategory
-        favoritesDropdown:AddItem(entry)
+        favoritesDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
     --entry = favoritesDropdown:CreateItemEntry(favoriteIconTextStar .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
     --entry.filterType = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
     --entry.nameClean = "Favorite"
     --favoritesDropdown:AddItem(entry)
+    favoritesDropdown:UpdateItems()
 
     -- Initialize the Number of bonuses multiselect combobox.
     local numBonusDropdown = ZO_ComboBox_ObjectFromContainer(self.numBonusFiltersControl)
@@ -562,8 +574,9 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     for numBonus=1, MAX_NUM_SET_BONUS, 1 do
         local entry = numBonusDropdown:CreateItemEntry(tostring(numBonus))
         entry.filterType = numBonus
-        numBonusDropdown:AddItem(entry)
+        numBonusDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
+    numBonusDropdown:UpdateItems()
 
     -- Initialize the Drop zones multiselect combobox.
     local dropZoneDropdown      = ZO_ComboBox_ObjectFromContainer(self.dropZoneFiltersControl)
@@ -606,9 +619,10 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
                     entry.tooltipText = zoneDesc
                 end
                 entry.filterType = filterType
-                dropZoneDropdown:AddItem(entry)
+                dropZoneDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             end
         end
+        dropZoneDropdown:UpdateItems()
     end
 
     -- Initialize the Drop mechanics multiselect combobox.
@@ -642,7 +656,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             end
             entry.filterType = dropMechanicId
             entry.nameClean = dropMechanicName
-            dropMechanicsDropdown:AddItem(entry)
+            dropMechanicsDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
     end
     sortFilterComboBox(dropMechanicsDropdown, "nameClean")
@@ -664,13 +678,20 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
 
     local dropLocationNamesInClientLang = lib.GetAllDropLocationNames()
     if dropLocationNamesInClientLang ~= nil then
-        for _, dropLocationName in pairs(dropLocationNamesInClientLang) do
-            local entry = dropLocationsDropdown:CreateItemEntry(dropLocationName)
-            entry.filterType = dropLocationName
-            dropLocationsDropdown:AddItem(entry)
+        for idx, dropLocationName in pairs(dropLocationNamesInClientLang) do
+            if dropLocationName ~= nil and dropLocationName ~= "" then
+                local entry = dropLocationsDropdown:CreateItemEntry(dropLocationName)
+                entry.filterType = dropLocationName
+                entry.nameClean = dropLocationName
+                dropLocationsDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+            end
         end
+        sortFilterComboBox(dropLocationsDropdown, "nameClean")
     end
+
+
 end
+
 
 function LibSets_SearchUI_Keyboard:GetSelectedMultiSelectDropdownFilters(multiSelectDropdown)
     local selectedFilterTypes = {}
