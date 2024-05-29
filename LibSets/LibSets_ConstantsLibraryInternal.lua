@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.67
+local MAJOR, MINOR = "LibSets", 0.68
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -67,7 +67,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101041 -- Scions of Ithelia, Patch U41 (2024-02-02, PTS, API 101041)
+lib.lastSetsPreloadedCheckAPIVersion = 101042 -- Gold Road, Patch U42 (2024-05-06, PTS, API 101042)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -86,7 +86,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101041 -- Scions of Ithelia, Patch U41 (2
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101041 -- Scions of Ithelia, Patch U41 (2024-02-02, PTS, API 101041)
+APIVersions["PTS"]                   = 101042 -- Gold Road, Patch U42 (2024-05-06, PTS, API 101042)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -102,7 +102,7 @@ lib.APIVersions                = APIVersions
 ------------------------------------------------------------------------------------------------------------------------
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds
-lib.debugNumItemIdPackages     = 50         -- Increase this to find new added set itemIds after an update. It will be
+lib.debugNumItemIdPackages     = 55         -- Increase this to find new added set itemIds after an update. It will be
 --multiplied by lib.debugNumItemIdPackageSize to build the itemIds of the
 --items to scan inagme for sets -> build an itemLink->uses GetItemLinkSetInfo()
 lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the client may crash!
