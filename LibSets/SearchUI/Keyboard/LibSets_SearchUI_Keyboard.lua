@@ -525,7 +525,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     self.favoritesDropdown = favoritesDropdown
     favoritesDropdown:ClearItems()
     favoritesDropdown:SetHideDropdownCallback(function() OnFilterChanged(self.favoritesFiltersControl) end)
-    local filterTypeText = GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
+    local filterTypeText = getLocalizedText("favorites")
     self.favoritesFiltersControl.tooltipText = filterTypeText
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         favoritesDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
@@ -545,12 +545,12 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             d("[LibSets]ERROR - favoriteIconTexts[favoriteCategory] is nil: " ..tostring(favoriteCategory))
         end
         ]]
-        local entry = favoritesDropdown:CreateItemEntry(favoriteIconTexts[favoriteCategory] .. " " .. zo_strformat("<<C:1>>" , favoriteCategory)) -- GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
+        local entry = favoritesDropdown:CreateItemEntry(favoriteIconTexts[favoriteCategory] .. " " .. zo_strformat("<<C:1>>" , favoriteCategory)) -- getLocalizedText("favorites")
         entry.filterType = favoriteCategory
         entry.nameClean = favoriteCategory
         favoritesDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
-    --entry = favoritesDropdown:CreateItemEntry(favoriteIconTextStar .. " " .. GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
+    --entry = favoritesDropdown:CreateItemEntry(favoriteIconTextStar .. " " .. getLocalizedText("favorites"))
     --entry.filterType = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
     --entry.nameClean = "Favorite"
     --favoritesDropdown:AddItem(entry)
@@ -912,9 +912,10 @@ function LibSets_SearchUI_Keyboard:OnRowMouseEnter(rowControl)
     self.resultsList:Row_OnMouseEnter(rowControl)
 
     self.tooltipControl.data = rowControl.data
-    self:ShowItemLinkTooltip(self.control, rowControl.data, nil, nil, nil, nil)
-
-    self:ShowSetDropLocationTooltip(rowControl, rowControl.data)
+    local shownLeftOfControl = self:ShowItemLinkTooltip(rowControl, rowControl.data)
+    --Depending on position of the itemLinkTooltip -> show the setDropLocation on the other side of the set search UI
+    -->If there is the space. Else show it centered below the set search UI
+    self:ShowSetDropLocationTooltip(rowControl, rowControl.data, shownLeftOfControl)
 end
 
 function LibSets_SearchUI_Keyboard:OnRowMouseExit(rowControl)
@@ -927,7 +928,12 @@ end
 function LibSets_SearchUI_Keyboard:OnRowMouseUp(rowControl, mouseButton, upInside, shift, alt, ctrl, command)
     if upInside then
         if mouseButton == MOUSE_BUTTON_INDEX_LEFT then
-            self:ItemLinkToChat(rowControl.data)
+            local defaultLeftClickAction = lib.svData.setSearchUIRowLeftClickDefaultAction
+            if defaultLeftClickAction == "linkToChat" then
+                self:ItemLinkToChat(rowControl.data)
+            elseif defaultLeftClickAction == "popupTooltip" then
+                self:ShowItemLinkPopupTooltip(rowControl:GetOwningWindow(), rowControl.data)
+            end
         elseif mouseButton == MOUSE_BUTTON_INDEX_RIGHT then
             self:ShowRowContextMenu(rowControl)
         end

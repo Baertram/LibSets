@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.68
+local MAJOR, MINOR = "LibSets", 0.69
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -1307,7 +1307,9 @@ lib.localization                 = {
         showCurrentZoneSets         = "Zeige Sets der aktuellen Zone",
         clearHistory                = "Historie leeren",
         wayshrines                  = "Wegschreine",
-        invertSelection             = "≠ Auswahl invertieren"
+        invertSelection             = "≠ Auswahl invertieren",
+        defaultActionLeftClick      = "Aktion beim",
+        popupTooltipPosition        = "Angehefteter Tooltip Position",
     },
     ["en"] = {
         de  = "German",
@@ -1379,7 +1381,7 @@ lib.localization                 = {
         nameTextSearch = "(+/-)Name/ID , separated",
         nameTextSearchTT = "Enter multiple names/IDs separated by a comma (,).\nUse the + or - prefix to include or exclude a name/ID from the search results.",
         bonusTextSearch = "(+/-)Bonus , separated",
-        bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.\nAdd :<bonusLine#> to explicitly search in that bonus line\n\nExamples:\n+crit,-life finds all sets with bonus text crit (e.g. criticial chance) but w/o text life\n+crit:2 Finds all sets with 2. bonus line's text crit",
+        bonusTextSearchTT = "Enter multiple bonus separated by a comma (,).\nUse the + or - prefix to include or exclude a bonus from the search results.\nAdd :<bonusLine#> to explicitly search in that bonus line\n\nExamples:\n+crit,-life finds all sets with bonus text crit (e.g. criticial chance) but w/o text life\n+crit:2 Finds all sets with 2nd bonus line's text crit",
         showAsText =        "Show as text",
         showAsTextWithIcons = "Show as text (with icons)",
         textBoxFilterTooltips = "Text filter: Tooltips",
@@ -1392,7 +1394,13 @@ lib.localization                 = {
         showCurrentZoneSets         = "Show current zone\'s sets",
         clearHistory                = "Clear history",
         wayshrines                  = "Wayshrines",
-        invertSelection             = "≠ Invert selection"
+        invertSelection             = "≠ Invert selection",
+        setNames                    = GetString(SI_INVENTORY_SORT_TYPE_NAME),
+        favorites                   = GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER),
+        tooltips                    = GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1306),
+        defaultActionLeftClick      = "Default action at",
+        popupTooltipPosition        = "Popup tooltip position",
+        linkToChat                  = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
     },
     ["es"] = {
         de  = "Alemán",
