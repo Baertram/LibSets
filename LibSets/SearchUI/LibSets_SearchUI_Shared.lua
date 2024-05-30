@@ -45,6 +45,12 @@ local libSets_OpenMapOfZoneId = lib.openMapOfZoneId
 
 local gilsi = GetItemLinkSetInfo
 
+--ZOs references
+---Tooltips
+local TT_Popup = PopupTooltip
+local TT_Text = InformationTooltip
+
+
 --Event upater names
 local searchHistoryEventUpdaterName = MAJOR .. "_SearchHistory_Update"
 
@@ -55,6 +61,14 @@ local dropZonesStr = getLocalizedText("dropZones")
 local wayshrinesStr = getLocalizedText("wayshrines")
 local dropZoneAndWayshrinesStr = dropZonesStr .. " / " .. wayshrinesStr
 local invertSelectionStr = getLocalizedText("invertSelection")
+local defaultActionLeftClickStr = getLocalizedText("defaultActionLeftClick")
+local linkToChatStr = getLocalizedText("linkToChat")
+local popupTooltipStr = getLocalizedText("popupTooltip")
+local tooltipsStr = getLocalizedText("tooltips")
+local showAsTooltipStr = getLocalizedText("showAsTooltip")
+local setNamesStr = getLocalizedText("setNames")
+local favoritesStr = getLocalizedText("favorites")
+
 
 --Textures
 local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
@@ -171,9 +185,8 @@ local favoriteIconTexts    = searchUI.favoriteIconTexts
 
 local favoriteIconWithNameTexts = {}
 for favoriteIconCategory, favoriteIconTexture in pairs(lib.possibleSetSearchFavoriteCategoriesUnsorted) do
-    favoriteIconWithNameTexts[favoriteIconCategory] = zoitfns(favoriteIconTexture, 24, 24, GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
+    favoriteIconWithNameTexts[favoriteIconCategory] = zoitfns(favoriteIconTexture, 24, 24, getLocalizedText("favorites"))
 end
-
 
 local settingsIconText             = zif("esoui/art/chatwindow/chat_options_up.dds", 32, 32)
 
@@ -194,8 +207,16 @@ local SEARCH_TYPE_BONUS = "bonus"
 --The copy text dialog
 local copyDialog
 
+--Settings radio button groups (multiple checkboxes that update their checked state to false if any other of them is checked)
+local radioButtonGroupsSettings = {}
+
 
 --Helper functions
+local function getComboBoxFromDropdownControl(dropdownControl)
+    return dropdownControl.m_comboBox or dropdownControl
+end
+
+
 local function string_split (inputstr, sep)
     sep = sep or "%s"
     local t={}
@@ -242,29 +263,63 @@ local function updateSetsInfoWithDataAndNames(selfVar)
     end
 end
 
-local function setMenuItemCheckboxState(checkboxIndex, newState)
-    newState = newState or false
-    if newState == true then
-        ZO_CheckButton_SetChecked(ZO_Menu.items[checkboxIndex].checkbox)
+local function setMenuItemCheckboxState(checkboxIndex, newState, ifMatchesValue)
+    if ifMatchesValue ~= nil then
+        if newState == ifMatchesValue then
+            ZO_CheckButton_SetChecked(ZO_Menu.items[checkboxIndex].checkbox)
+        else
+            ZO_CheckButton_SetUnchecked(ZO_Menu.items[checkboxIndex].checkbox)
+        end
     else
-        ZO_CheckButton_SetUnchecked(ZO_Menu.items[checkboxIndex].checkbox)
+        newState = newState or false
+        if newState == true then
+            ZO_CheckButton_SetChecked(ZO_Menu.items[checkboxIndex].checkbox)
+        else
+            ZO_CheckButton_SetUnchecked(ZO_Menu.items[checkboxIndex].checkbox)
+        end
     end
 end
 
 -- called from clicking the "Auto reload" label
-local function OnClick_CheckBoxLabel(cbControl, currentStateVar, selfVar)
-    if lib.svData[currentStateVar] == nil then return end
-    local currentState = lib.svData[currentStateVar]
-    local newState = not currentState
-    lib.svData[currentStateVar] = newState
+local function OnClick_CheckBoxLabel(cbControl, svEntryName, selfVar, svValueName)
+    local currentState = lib.svData[svEntryName]
+    if currentState == nil then return end
+
+    --Update a SV key with a real value (not only toggling a boolean!) -> for radio groups (by checkboxes)
+    if svValueName ~= nil and currentState ~= svValueName then
+        lib.svData[svEntryName] = svValueName
+    else
+        --Only toggle a boolean
+        local newState = not currentState
+        lib.svData[svEntryName] = newState
+    end
 
     --Shall the setNames be shown with/without english names? Update the list now by refreshing it and building the master list etc. new
     if selfVar ~= nil then
-        if currentStateVar == "setSearchShowSetNamesInEnglishToo" then
+        if svEntryName == "setSearchShowSetNamesInEnglishToo" then
             selfVar.resultsList:RefreshData()
         end
     end
 end
+
+local function updateSettingsRadioButtonGroup(radioButtonGroupName, svEntryName, svEntryToSkip, cboxCtrl, selfVar)
+    if radioButtonGroupName == nil or radioButtonGroupName == "" or ZO_IsTableEmpty(radioButtonGroupsSettings[radioButtonGroupName])
+            or svEntryName == nil or lib.svData[svEntryName] == nil or svEntryToSkip == nil then return end
+
+    for key, ZO_MenuCboxIndex in pairs(radioButtonGroupsSettings[radioButtonGroupName]) do
+        --Set all checkboxes in the radio group to unchecked, except the "svEntryToSkip" one
+        if key ~= svEntryToSkip then
+            --Uncheck the checkbox
+            setMenuItemCheckboxState(ZO_MenuCboxIndex, false)
+        else
+            if cboxCtrl ~= nil and selfVar ~= nil then
+                --Checkbox was clicked: Set it's state = checked and update the SavedVars
+                OnClick_CheckBoxLabel(cboxCtrl, svEntryName, selfVar, svEntryToSkip)
+            end
+        end
+    end
+end
+
 
 local function isItemFilterTypeMatching(item, filterType)
     return item.filterType ~= nil and item.filterType == filterType
@@ -466,20 +521,21 @@ function LibSets_SearchUI_Shared:Reset()
 end
 
 function LibSets_SearchUI_Shared:ResetMultiSelectDropdown(dropdownControl)
-    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    local comboBox = getComboBoxFromDropdownControl(dropdownControl)
     if comboBox:GetNumSelectedEntries() == 0 then return end
     comboBox:ClearAllSelections()
 end
 
 function LibSets_SearchUI_Shared:SelectAllAtMultiSelectDropdown(dropdownControl)
-    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    local comboBox = getComboBoxFromDropdownControl(dropdownControl)
+    comboBox:ClearAllSelections()
     for index, _ in ipairs(comboBox:GetItems()) do
         comboBox:SetSelected(index, true)
     end
 end
 
 function LibSets_SearchUI_Shared:SelectInvertMultiSelectDropdown(dropdownControl)
-    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    local comboBox = getComboBoxFromDropdownControl(dropdownControl)
     for index, item in ipairs(comboBox:GetItems()) do
         local isCurrentlySelected = comboBox:IsItemSelected(item)
         comboBox:SetSelected(index, not isCurrentlySelected)
@@ -492,7 +548,7 @@ function LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries(dropdownContro
 --lib._debugDropDownControl = dropdownControl
     refreshResultsListAfterwards = refreshResultsListAfterwards or false
     if ZO_IsTableEmpty(entriesToSelect) then return end
-    local comboBox = dropdownControl.m_comboBox or dropdownControl
+    local comboBox = getComboBoxFromDropdownControl(dropdownControl)
     if comboBox ~= nil then
         comboBox:ClearAllSelections()
         for _, filterType in ipairs(entriesToSelect) do
@@ -1192,34 +1248,109 @@ end
 ------------------------------------------------
 --- Tooltip
 ------------------------------------------------
-function LibSets_SearchUI_Shared:ShowItemLinkTooltip(parent, data, anchor1, offsetX, offsetY, anchor2)
+local function getTooltipsPositionBasedOnSpaceLeft(control, TT_control)
+    --control = search UI, or ther tooltip already shown (e.g. PopupTooltip) / TT_control = tooltip's controls to add new
+    if control == nil or TT_control == nil then return end
+    local anchor1, offsetX, offsetY, anchor2, shownLeftOfControl
+
+    --Get the current position of the UI. If  the UI is moved to the left, show the tooltip right, and vice versa
+    --local screenWidth, screenHeight = GuiRoot:GetDimensions()
+    local currentLeft = control:GetLeft()
+    if currentLeft < TT_control:GetWidth() then
+        --Show right of control
+        anchor1 = LEFT
+        anchor2 = RIGHT
+        offsetX = 25
+        offsetY = 0
+    else
+        --Show left of control
+        anchor1 = RIGHT
+        anchor2 = LEFT
+        offsetX = -25
+        offsetY = 0
+    end
+    shownLeftOfControl = anchor2 == LEFT
+    return anchor1, offsetX, offsetY, anchor2, shownLeftOfControl
+end
+
+local function anchorAllTooltipsAutomatically(selfVar, rowControl, tooltipCtrl, anchorCtrl, itemLinkTooltipShownLeftOfControl)
+    local isPopupTooltipCurrentlyShown = not TT_Popup:IsHidden()
+    local anchor1, offsetX, offsetY, anchor2, showLeft = getTooltipsPositionBasedOnSpaceLeft(selfVar.control, tooltipCtrl)
+    local anchorTo = showLeft == true and LEFT or RIGHT
+
+    local itemLinkTooltipCtrl = selfVar.tooltipControl
+    if tooltipCtrl == itemLinkTooltipCtrl and itemLinkTooltipShownLeftOfControl == nil then
+        itemLinkTooltipShownLeftOfControl = showLeft
+    end
+
+    --Is the itemLinkTooltip shown too?
+    if itemLinkTooltipShownLeftOfControl ~= nil then
+        --Position the text tooltip on the same side of self.tooltipControlTLC (see LibSets_SearchUI_Shared:ShowItemLinkTooltip)
+        --or at the other side of the setsSearchUI?
+        --ItemLinkTooltip is shown left of the setSearchUI
+        if itemLinkTooltipShownLeftOfControl == true then
+            --[[
+            if isPopupTooltipCurrentlyShown then
+                if tooltipCtrl ~= TT_Popup then
+                    local anchor_1, offset_X, offset_Y, anchor_2, showLeftOfItemlinkTooltip = getTooltipsPositionBasedOnSpaceLeft(TT_Popup, tooltipCtrl)
+                    anchorTo = showLeftOfItemlinkTooltip == true and LEFT or RIGHT
+                    if anchorTo == LEFT then
+                        anchorCtrl = TT_Popup
+                    end
+                end
+            else
+            ]]
+                if tooltipCtrl ~= itemLinkTooltipCtrl then
+                    local anchor_1, offset_X, offset_Y, anchor_2, showLeftOfItemlinkTooltip = getTooltipsPositionBasedOnSpaceLeft(itemLinkTooltipCtrl, tooltipCtrl)
+                    anchorTo = showLeftOfItemlinkTooltip == true and LEFT or RIGHT
+                    if anchorTo == LEFT then
+                        anchorCtrl = itemLinkTooltipCtrl
+                    end
+                end
+            --end
+        else
+            --ItemLinkTooltip is shown right of the setSearchUI
+            --textTooltip should be shown on right too?
+            --[[
+            if isPopupTooltipCurrentlyShown then
+                if tooltipCtrl ~= TT_Popup then
+                    local anchor_1, offset_X, offset_Y, anchor_2, showLeftOfItemlinkTooltip = getTooltipsPositionBasedOnSpaceLeft(TT_Popup, tooltipCtrl)
+                    if not showLeftOfItemlinkTooltip then
+                        anchorTo = RIGHT
+                        anchorCtrl = TT_Popup
+                    end
+                end
+            else
+            ]]
+                if not showLeft then
+                    anchorTo = RIGHT
+                    if tooltipCtrl ~= itemLinkTooltipCtrl then
+                        anchorCtrl = itemLinkTooltipCtrl
+                    end
+                end
+            --end
+        end
+    end
+    return anchorCtrl, anchorTo, anchor1, offsetX, offsetY, anchor2, showLeft
+end
+
+
+function LibSets_SearchUI_Shared:ShowItemLinkTooltip(rowControl, data)
     self:HideItemLinkTooltip()
 
     local TT_control = self.tooltipControl
     data = data or (TT_control and TT_control.data)
     if data == nil or data.itemLink == nil then return end
+    --local anchor1, offsetX, offsetY, anchor2, shownLeftOfControl = getTooltipsPositionBasedOnSpaceLeft(self.control, TT_control)
+    local anchorCtrl, anchorTo, anchor1, offsetX, offsetY, anchor2, shownLeftOfControl = anchorAllTooltipsAutomatically(self, rowControl, TT_control, self.control, nil)
 
-    --Get the current position of the UI. If  the UI is moved to the left, show the tooltip right, and vice versa
-    --local screenWidth, screenHeight = GuiRoot:GetDimensions()
-    if anchor1 == nil then
-        local currentLeft = self.control:GetLeft()
-        if currentLeft < TT_control:GetWidth() then
-            anchor1 = anchor1 or LEFT
-            anchor2 = anchor2 or RIGHT
-            offsetX = offsetX or 25
-            offsetY = offsetY or 0
-        else
-            anchor1 = anchor1 or RIGHT
-            anchor2 = anchor2 or LEFT
-            offsetX = offsetX or -25
-            offsetY = offsetY or 0
-        end
-    end
     --Show the tooltip
-    InitializeTooltip(TT_control, parent, anchor1, offsetX, offsetY, anchor2)
+    InitializeTooltip(TT_control, anchorCtrl, anchor1, offsetX, offsetY, anchor2)
     TT_control:SetLink(data.itemLink)
 
     self.tooltipControlTLC:BringWindowToTop()
+
+    return shownLeftOfControl
 end
 
 function LibSets_SearchUI_Shared:HideItemLinkTooltip()
@@ -1227,27 +1358,32 @@ function LibSets_SearchUI_Shared:HideItemLinkTooltip()
 end
 
 
-function LibSets_SearchUI_Shared:ShowItemLinkPopupTooltip(parent, data, anchor1, offsetX, offsetY, anchor2)
+function LibSets_SearchUI_Shared:ShowItemLinkPopupTooltip(parent, data, auto)
     self:HideItemLinkPopupTooltip()
+    auto = auto or false
 
-    local TT_control = PopupTooltip
     if data == nil or data.itemLink == nil then return end
 
-    --Get the current position of the UI. If  the UI is moved to the left, show the tooltip right, and vice versa
-    --local screenWidth, screenHeight = GuiRoot:GetDimensions()
-    if anchor1 == nil then
-        local currentLeft = self.control:GetLeft()
-        if currentLeft < TT_control:GetWidth() then
-            anchor1 = anchor1 or LEFT
-            anchor2 = anchor2 or RIGHT
-            offsetX = offsetX or 25
-            offsetY = offsetY or 0
+    local TT_control = TT_Popup
+    local anchor1, offsetX, offsetY, anchor2
+
+    if not auto then
+        local setSearchPopupTooltipPosition = lib.svData.setSearchPopupTooltipPosition
+        if setSearchPopupTooltipPosition == LEFT then
+            anchor1 = RIGHT
+            anchor2 = LEFT
+            offsetX = -10
+            offsetY = 0
+        elseif setSearchPopupTooltipPosition == RIGHT then
+            anchor1 = LEFT
+            anchor2 = RIGHT
+            offsetX = 10
+            offsetY = 0
         else
-            anchor1 = anchor1 or RIGHT
-            anchor2 = anchor2 or LEFT
-            offsetX = offsetX or -25
-            offsetY = offsetY or 0
+            return
         end
+    else
+        anchor1, offsetX, offsetY, anchor2 = getTooltipsPositionBasedOnSpaceLeft(self.control, TT_control)
     end
     --Show the tooltip
     InitializeTooltip(TT_control, parent, anchor1, offsetX, offsetY, anchor2)
@@ -1255,17 +1391,21 @@ function LibSets_SearchUI_Shared:ShowItemLinkPopupTooltip(parent, data, anchor1,
 end
 
 function LibSets_SearchUI_Shared:HideItemLinkPopupTooltip()
-    ClearTooltip(PopupTooltip)
+    ClearTooltip(TT_Popup)
 end
 
-function LibSets_SearchUI_Shared:ShowSetDropLocationTooltip(rowControl, data)
-    if lib.showSetSearchDropLocationTooltip then
-        if data.setDataText == nil then return end
-        local dropLocationText = "|cF0F0F0" .. data.name .. "|r\n\n" .. data.setDataText
-        ZO_Tooltips_ShowTextTooltip(rowControl:GetOwningWindow(), RIGHT, dropLocationText)
-    else
-        ZO_Tooltips_HideTextTooltip()
-    end
+function LibSets_SearchUI_Shared:ShowSetDropLocationTooltip(rowControl, data, itemLinkTooltipShownLeftOfControl)
+    ZO_Tooltips_HideTextTooltip()
+    if not lib.svData.showSetSearchDropLocationTooltip then return end
+    if data.setDataText == nil then return end
+
+    local owningCtrl = rowControl:GetOwningWindow()
+    local anchorCtrl = owningCtrl
+    local anchorTo = RIGHT
+    anchorCtrl, anchorTo = anchorAllTooltipsAutomatically(self, rowControl, TT_Text, anchorCtrl, itemLinkTooltipShownLeftOfControl)
+
+    local dropLocationText = "|cF0F0F0" .. data.name .. "|r\n\n" .. data.setDataText
+    ZO_Tooltips_ShowTextTooltip(anchorCtrl, anchorTo, dropLocationText)
 end
 
 
@@ -1278,6 +1418,16 @@ function LibSets_SearchUI_Shared:ItemLinkToChat(data)
         d(libPrefix .."SetId \'".. tos(data.setId) .."\': " ..data.itemLink)
         StartChatInput(data.itemLink)
     end
+end
+
+function LibSets_SearchUI_Shared:GetNextFavoritesCategory(setId)
+    local setSearchFavorites = lib.svData.setSearchFavorites
+    for favoriteCategory, data in pairs(setSearchFavorites) do
+        if data ~= nil and data[setId] then
+            return favoriteCategory
+        end
+    end
+    return
 end
 
 function LibSets_SearchUI_Shared:IsSetIdInFavorites(setId, favoriteCategory)
@@ -1305,6 +1455,7 @@ function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId, fav
     end
 
     self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
+    self.resultsList:RefreshData() --To update filtered rows
 end
 
 function LibSets_SearchUI_Shared:RemoveAllSetFavorites(favoriteCategory)
@@ -1319,7 +1470,39 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     if not LibCustomMenu then return end
     local selfVar = self
     ClearMenu()
+    --Settings headline
     AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
+
+
+    --What should happen by default if we left click a row?
+    -->Multiple checkboxes here, just auto uncheck others via the table radioButtonGroupRowLeftLickDefaultAction
+    radioButtonGroupsSettings["rowLeftLickDefaultAction"] = {}
+
+    --Default left click action = link to chat
+    AddCustomMenuItem(defaultActionLeftClickStr .." |t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_LMB.dds|t", function() end, MENU_ADD_OPTION_HEADER)
+    local cbDefaultActionLeftClickOnRowLinkToChatIndex = AddCustomMenuItem(linkToChatStr,
+            function(cboxCtrl)
+                --OnClick_CheckBoxLabel(cboxCtrl, "setSearchUIRowLeftClickDefaultAction", selfVar, "linkToChat")
+                updateSettingsRadioButtonGroup("rowLeftLickDefaultAction", "setSearchUIRowLeftClickDefaultAction", "linkToChat", cboxCtrl, selfVar)
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbDefaultActionLeftClickOnRowLinkToChatIndex, lib.svData.setSearchUIRowLeftClickDefaultAction, "linkToChat")
+    radioButtonGroupsSettings["rowLeftLickDefaultAction"]["linkToChat"] = cbDefaultActionLeftClickOnRowLinkToChatIndex
+
+    --Default left click action = Popup tooltip
+    local cbDefaultActionLeftClickOnRowPopupTooltipIndex = AddCustomMenuItem(popupTooltipStr,
+            function(cboxCtrl)
+                --OnClick_CheckBoxLabel(cboxCtrl, "setSearchUIRowLeftClickDefaultAction", selfVar, "popupTooltip")
+                updateSettingsRadioButtonGroup("rowLeftLickDefaultAction", "setSearchUIRowLeftClickDefaultAction", "popupTooltip", cboxCtrl, selfVar)
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbDefaultActionLeftClickOnRowPopupTooltipIndex, lib.svData.setSearchUIRowLeftClickDefaultAction, "popupTooltip")
+    radioButtonGroupsSettings["rowLeftLickDefaultAction"]["popupTooltip"] = cbDefaultActionLeftClickOnRowPopupTooltipIndex
+
+
+
+    --Tooltips
+    AddCustomMenuItem(tooltipsStr, function() end, MENU_ADD_OPTION_HEADER)
     local cbShowTextFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("textBoxFilterTooltips"),
             function(cboxCtrl)
                 OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtTextFilters", selfVar)
@@ -1339,8 +1522,20 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
             MENU_ADD_OPTION_CHECKBOX)
     setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
 
+
+    --Dropped by
+    AddCustomMenuItem(getLocalizedText("droppedBy"), function() end, MENU_ADD_OPTION_HEADER)
+    local cbShowSetDroppedByExtraTooltipIndex = AddCustomMenuItem(showAsTooltipStr,
+            function(cboxCtrl)
+                OnClick_CheckBoxLabel(cboxCtrl, "showSetSearchDropLocationTooltip", selfVar)
+            end,
+            MENU_ADD_OPTION_CHECKBOX)
+    setMenuItemCheckboxState(cbShowSetDroppedByExtraTooltipIndex, lib.svData.showSetSearchDropLocationTooltip)
+
+    --Set names
     if clientLang ~= fallbackLang then
-        AddCustomMenuItem("-", function() end)
+        AddCustomMenuItem(setNamesStr, function() end, MENU_ADD_OPTION_HEADER)
+        --AddCustomMenuItem("-", function() end)
         local cbShowSetNamesInEnglishTooIndex = AddCustomMenuItem(getLocalizedText("searchUIShowSetNameInEnglishToo"),
                 function(cboxCtrl)
                     OnClick_CheckBoxLabel(cboxCtrl, "setSearchShowSetNamesInEnglishToo", selfVar)
@@ -1349,13 +1544,14 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
         setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
     end
 
+    --Favorites
     local setSearchFavorites = lib.svData.setSearchFavorites
     local wasFavoriteHeaderAdded = false
     for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
         local favoriteCategory = favoriteCategoryData.category
         if not ZO_IsTableEmpty(setSearchFavorites[favoriteCategory]) then
             if not wasFavoriteHeaderAdded then
-                AddCustomMenuItem(GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER), function() end, MENU_ADD_OPTION_HEADER)
+                AddCustomMenuItem(favoritesStr, function() end, MENU_ADD_OPTION_HEADER)
                 wasFavoriteHeaderAdded = true
             end
             AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory] .. " " .. GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
@@ -1363,6 +1559,7 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
             end)
         end
     end
+
     ShowMenu(anchorControl)
 end
 
@@ -1372,36 +1569,50 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     if data == nil then return end
     local setId = rowControl.data.setId
     local owningWindow = rowControl:GetOwningWindow()
+
     ClearMenu()
-    AddCustomMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function()
+
+    --Link to chat
+    AddCustomMenuItem(getLocalizedText("linkToChat"), function()
         self:ItemLinkToChat(rowControl.data)
     end)
+
+    --Tooltips
+    AddCustomMenuItem(getLocalizedText("tooltips"), function() end, MENU_ADD_OPTION_HEADER)
+
+    --Popup tooltip
     local popupTooltipSubmenu = {
         {
             label = GetString(SI_KEYBINDDISPLAYMODE2), --Automatic
             callback =function()
-                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, nil, nil, nil, nil)
+                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, true)
             end
         },
         {
-            label = "-", --Left
+            label = "-",
             callback = function() end,
         },
         {
             label = GetString(SI_NAMEPLATEDISPLAYCHOICE10), --Left (SI_KEYCODE_NARRATIONTEXTPS4125)
             callback = function()
-                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, RIGHT, -10, nil, LEFT)
+                lib.svData.setSearchPopupTooltipPosition = LEFT
+                --self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, RIGHT, -10, nil, LEFT)
+                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data)
             end
         },
         {
             label = GetString(SI_BINDING_NAME_TURN_RIGHT), --Right (SI_KEYCODE_NARRATIONTEXTPS4126)
             callback =function()
-                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, LEFT, 10, nil, RIGHT)
+                lib.svData.setSearchPopupTooltipPosition = RIGHT
+                --self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, RIGHT, -10, nil, LEFT)
+                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data)
             end
         },
     }
-    AddCustomSubMenuItem(getLocalizedText("popupTooltip"), popupTooltipSubmenu)
+    AddCustomMenuItem(getLocalizedText("popupTooltip"), function() self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data) end)
+    AddCustomSubMenuItem(getLocalizedText("popupTooltipPosition"), popupTooltipSubmenu)
 
+    --Set favorites
     if setId ~= nil then
         --Set search favorites
         local setSearchFavorites = lib.svData.setSearchFavorites
@@ -1499,6 +1710,10 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         --SetData text
         if data.setDataText ~= nil then
             --Tooltip enhancements are enabled
+
+            --Show a special tooltip with the set drop location text only
+            -->Moved to SavedVariables as general setting
+            --[[
             local function toggleSetDropLocationTooltip()
                 lib.showSetSearchDropLocationTooltip = not lib.showSetSearchDropLocationTooltip
             end
@@ -1510,6 +1725,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 toggleSetDropLocationTooltip()
                 self:ShowSetDropLocationTooltip(rowControl, data)
             end)
+            ]]
 
 
             local function getSetTextForCopyDialog(withTextures)
@@ -1543,25 +1759,38 @@ end
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
     if LibCustomMenu == nil then return end
     local selfVar = self
+    local comboBox = getComboBoxFromDropdownControl(dropdownControl)
+
     --Multiselect filter dropdown context menu?
     if selfVar.multiSelectFilterDropdowns ~= nil and ZO_IsElementInNumericallyIndexedTable(selfVar.multiSelectFilterDropdowns, dropdownControl) then
         ClearMenu()
-        --Select all
-        AddCustomMenuItem(GetString(SI_ACHIEVEMENT_FILTER_SHOW_ALL), function()
-            selfVar:SelectAllAtMultiSelectDropdown(dropdownControl)
-            selfVar:OnFilterChanged(dropdownControl)
-        end)
-        --Invert selection
-        AddCustomMenuItem(invertSelectionStr, function()
-            selfVar:SelectInvertMultiSelectDropdown(dropdownControl)
-            selfVar:OnFilterChanged(dropdownControl)
-        end)
+        local numEntries = comboBox:GetNumItems()
+        local numSelectedEntries = comboBox:GetNumSelectedEntries()
+        local notAllSelected = numSelectedEntries < numEntries
 
-        --Clear all selections
-        AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
-            selfVar:ResetMultiSelectDropdown(dropdownControl)
-            selfVar:OnFilterChanged(dropdownControl)
-        end)
+        if notAllSelected then
+            --Select all
+            AddCustomMenuItem(GetString(SI_ITEMFILTERTYPE0), function()
+                selfVar:SelectAllAtMultiSelectDropdown(dropdownControl)
+                selfVar:OnFilterChanged(dropdownControl)
+            end)
+        end
+
+        if numSelectedEntries > 0 then
+            if notAllSelected then
+                --Invert selection
+                AddCustomMenuItem(invertSelectionStr, function()
+                    selfVar:SelectInvertMultiSelectDropdown(dropdownControl)
+                    selfVar:OnFilterChanged(dropdownControl)
+                end)
+            end
+
+            --Clear all selections
+            AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
+                selfVar:ResetMultiSelectDropdown(dropdownControl)
+                selfVar:OnFilterChanged(dropdownControl)
+            end)
+        end
 
         --Favorite filter muliselect dropdown?
         if dropdownControl == self.favoritesFiltersControl then
@@ -1572,7 +1801,7 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
                 AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory] .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
             end
 
-        --Zones filter muliselect dropdown?
+            --Zones filter muliselect dropdown?
         elseif dropdownControl == self.dropZoneFiltersControl then
             AddCustomMenuItem("-")
             local setIdsOfCurrentZone, currentZoneId, currentParentZoneId = libSets_getsetIdsOfCurrentZone()
@@ -1664,16 +1893,16 @@ function LibSets_SearchUI_Shared_ControlTooltip(control, myAnchorPoint, anchorTo
     toAnchorPoint = toAnchorPoint or TOP
     offsetX = offsetX or 0
     offsetY = offsetY or 0
-    InitializeTooltip(InformationTooltip, anchorTo, myAnchorPoint, offsetX, offsetY, toAnchorPoint)
-    SetTooltipText(InformationTooltip, control.tooltipText)
+    InitializeTooltip(TT_Text, anchorTo, myAnchorPoint, offsetX, offsetY, toAnchorPoint)
+    SetTooltipText(TT_Text, control.tooltipText)
 end
 
 function LibSets_SearchUI_Shared_SortHeaderTooltip(sortHeaderColumn)
     if sortHeaderColumn == nil or sortHeaderColumn.name == nil or sortHeaderColumn.name == "" then return end
     local nameLabel = sortHeaderColumn:GetNamedChild("Name")
     if nameLabel ~= nil and nameLabel:WasTruncated() then
-        InitializeTooltip(InformationTooltip, sortHeaderColumn, BOTTOM, 0, -10, TOP)
-        SetTooltipText(InformationTooltip, sortHeaderColumn.name)
+        InitializeTooltip(TT_Text, sortHeaderColumn, BOTTOM, 0, -10, TOP)
+        SetTooltipText(TT_Text, sortHeaderColumn.name)
     end
 end
 
@@ -1702,6 +1931,7 @@ function LibSets_SearchUI_Shared_Row_OnMouseUp(rowControl, mouseButton, upInside
 end
 
 function LibSets_SearchUI_Shared_Row_OnMouseEnter(rowControl)
+    ZO_Tooltips_HideTextTooltip()
     if IsInGamepadPreferredMode() then
         if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
             LIBSETS_SEARCH_UI_GAMEPAD:OnRowMouseEnter(rowControl)
@@ -1714,6 +1944,7 @@ function LibSets_SearchUI_Shared_Row_OnMouseEnter(rowControl)
 end
 
 function LibSets_SearchUI_Shared_Row_OnMouseExit(rowControl)
+    ZO_Tooltips_HideTextTooltip()
     if IsInGamepadPreferredMode() then
         if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
             LIBSETS_SEARCH_UI_GAMEPAD:OnRowMouseExit(rowControl)

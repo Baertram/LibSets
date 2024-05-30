@@ -39,7 +39,7 @@ local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavorit
 ------------------------------------------------------------------------------------------------------------------------
 --Local helper functions
 ------------------------------------------------------------------------------------------------------------------------
-local function updateFavoriteColumn(rowControl, isFavorite, favoriteCategory)
+local function updateFavoriteColumn(selfVar, rowControl, isFavorite, favoriteCategory)
     if not rowControl or isFavorite == nil or favoriteCategory == nil then return end
     local data = rowControl.data
     if not data then return end
@@ -57,6 +57,20 @@ local function updateFavoriteColumn(rowControl, isFavorite, favoriteCategory)
     local favoriteColumn = rowControl:GetNamedChild("Favorite")
     if favoriteColumn == nil then return end
     favoriteColumn:SetText((isFavorite == true and favoriteIconTexts[favoriteCategory]) or "")
+
+    --FavoriteCategory was removed, but is any other favoriteCategory still applied to the item?
+    --Then show the next favoriteCategory icon at the row now!
+    if not isFavorite then
+        local setId = data.setId
+        local nextFavoriteCategory = selfVar._parentObject:GetNextFavoritesCategory(setId)
+        if nextFavoriteCategory ~= nil then
+            local nextFavCatIcon = favoriteIconTexts[nextFavoriteCategory]
+            if nextFavCatIcon ~= nil then
+                favoriteColumn:SetText(nextFavCatIcon)
+                rowControl.data.isFavorite = nextFavoriteCategory
+            end
+        end
+    end
 end
 
 
@@ -544,9 +558,9 @@ function LibSets_SearchUI_List:UpdateCounter(scrollData)
 end
 
 function LibSets_SearchUI_List:AddFavorite(rowControl, favoriteCategory)
-    updateFavoriteColumn(rowControl, true, favoriteCategory)
+    updateFavoriteColumn(self, rowControl, true, favoriteCategory)
 end
 
 function LibSets_SearchUI_List:RemoveFavorite(rowControl, favoriteCategory)
-    updateFavoriteColumn(rowControl, false, favoriteCategory)
+    updateFavoriteColumn(self, rowControl, false, favoriteCategory)
 end

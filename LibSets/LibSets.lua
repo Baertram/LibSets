@@ -776,6 +776,9 @@ local function LoadSavedVariables()
             ["name"] = {},
             ["bonus"] = {},
         },
+        setSearchPopupTooltipPosition = RIGHT,
+        showSetSearchDropLocationTooltip = false,
+        setSearchUIRowLeftClickDefaultAction = "linkToChat"
     }
     defaults = updateDefaultsData(defaults)
 
