@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.69
+local MAJOR, MINOR = "LibSets", 0.70
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -67,7 +67,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101042 -- Gold Road, Patch U42 (2024-05-06, PTS, API 101042)
+lib.lastSetsPreloadedCheckAPIVersion = 101042 -- Patch U43 (2024-07-13)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -86,8 +86,22 @@ lib.lastSetsPreloadedCheckAPIVersion = 101042 -- Gold Road, Patch U42 (2024-05-0
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101042 -- Gold Road, Patch U42 (2024-05-06, PTS, API 101042)
+APIVersions["PTS"]                   = 101043 -- Patch U43 (2024-07-13)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
+
+
+
+--TODO Uncomment to return the proper value if current PTS "once again" returns the old live value...
+--> Change currentSimulatedPTSAPIversion to the proper current PTS APIversion in that case
+----[[
+local getAPIVersionOrig = GetAPIVersion
+local currentSimulatedPTSAPIversion = 101043
+function GetAPIVersion()
+    if GetWorldName() ~= "PTS" then return getAPIVersionOrig() end
+    return currentSimulatedPTSAPIversion
+end
+--]]
+
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
