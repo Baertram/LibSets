@@ -1324,6 +1324,7 @@ lib.localization                 = {
         invertSelection             = "≠ Auswahl invertieren",
         defaultActionLeftClick      = "Aktion beim",
         popupTooltipPosition        = "Angehefteter Tooltip Position",
+        showLibSetsSettingsMenu     = "LibSets Einstellungen anzeigen",
     },
     ["en"] = {
         de  = "German",
@@ -1415,6 +1416,7 @@ lib.localization                 = {
         defaultActionLeftClick      = "Default action at",
         popupTooltipPosition        = "Popup tooltip position",
         linkToChat                  = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
+        showLibSetsSettingsMenu     = "Show LibSets settings",
     },
     ["es"] = {
         de  = "Alemán",

@@ -3694,7 +3694,6 @@ function lib.GetSupportedLanguageChoices()
     return supportedLanguageChoices, supportedLanguageChoicesValues, supportedLanguageChoicesTooltips
 end
 
-
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------

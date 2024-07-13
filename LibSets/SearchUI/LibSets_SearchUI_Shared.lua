@@ -43,6 +43,9 @@ local libSets_GetZoneName = lib.GetZoneName
 local libSets_ShowWayshrineNodeIdOnMap = lib.showWayshrineNodeIdOnMap
 local libSets_OpenMapOfZoneId = lib.openMapOfZoneId
 
+local libSets_showSettingsMenu = lib.ShowSettingsMenu
+
+
 local gilsi = GetItemLinkSetInfo
 
 --ZOs references
@@ -68,6 +71,7 @@ local tooltipsStr = getLocalizedText("tooltips")
 local showAsTooltipStr = getLocalizedText("showAsTooltip")
 local setNamesStr = getLocalizedText("setNames")
 local favoritesStr = getLocalizedText("favorites")
+local showLibSetsSettingsStr = getLocalizedText("showLibSetsSettingsMenu")
 
 
 --Textures
@@ -1472,6 +1476,9 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     ClearMenu()
     --Settings headline
     AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
+
+    --Show LibSets settings
+    AddCustomMenuItem(showLibSetsSettingsStr, function() libSets_showSettingsMenu() end)
 
 
     --What should happen by default if we left click a row?

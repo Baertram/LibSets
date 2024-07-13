@@ -1792,8 +1792,13 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- SETTINGS MENU
 ------------------------------------------------------------------------------------------------------------------------
+function lib.ShowSettingsMenu()
+    if lam == nil or lib.LAMsettingsPanel == nil then return end
+    lam:OpenToPanel(lib.LAMsettingsPanel)
+end
+
 local function loadLAMSettingsMenu()
-    if not lam then return end
+    if lam == nil then return end
 
     local panelData = {
         type 				= 'panel',
