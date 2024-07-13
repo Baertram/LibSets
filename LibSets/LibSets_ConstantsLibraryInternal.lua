@@ -67,7 +67,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101042 -- Patch U43 (2024-07-13)
+lib.lastSetsPreloadedCheckAPIVersion = 101043 -- Patch U43 (2024-07-13)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -88,8 +88,6 @@ lib.lastSetsPreloadedCheckAPIVersion = 101042 -- Patch U43 (2024-07-13)
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
 APIVersions["PTS"]                   = 101043 -- Patch U43 (2024-07-13)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
-
-
 
 --TODO Uncomment to return the proper value if current PTS "once again" returns the old live value...
 --> Change currentSimulatedPTSAPIversion to the proper current PTS APIversion in that case
