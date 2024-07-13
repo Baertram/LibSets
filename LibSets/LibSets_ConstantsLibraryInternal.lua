@@ -57,9 +57,6 @@ lib.customContextMenuEntries = {
 
 ---------------------------------------------------------------------------------
 local APIVersions                    = {}
---The actual API version on the live server we are logged in
-APIVersions["live"]                  = GetAPIVersion()
-local APIVersionLive                 = tonumber(APIVersions["live"])
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -99,6 +96,11 @@ function GetAPIVersion()
     return currentSimulatedPTSAPIversion
 end
 --]]
+
+
+--The actual API version on the live server we are logged in
+APIVersions["live"]                  = GetAPIVersion()
+local APIVersionLive                 = tonumber(APIVersions["live"])
 
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
