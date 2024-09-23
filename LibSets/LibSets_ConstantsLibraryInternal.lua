@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.70
+local MAJOR, MINOR = "LibSets", 0.71
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -64,7 +64,7 @@ local APIVersions                    = {}
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101043 -- Patch U43 (2024-07-13)
+lib.lastSetsPreloadedCheckAPIVersion = 101044 -- Patch U44 (2024-09-24)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,17 +83,20 @@ lib.lastSetsPreloadedCheckAPIVersion = 101043 -- Patch U43 (2024-07-13)
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101043 -- Patch U43 (2024-07-13)
+APIVersions["PTS"]                   = 101044 -- Patch U44 (2024-09-24)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
---TODO Uncomment to return the proper value if current PTS "once again" returns the old live value...
+-- Uncomment to return the proper value if current PTS "once again" returns the old live value...
 --> Change currentSimulatedPTSAPIversion to the proper current PTS APIversion in that case
 ----[[
+local currentSimulatedPTSAPIversion = nil --1010xx
+
 local getAPIVersionOrig = GetAPIVersion
-local currentSimulatedPTSAPIversion = 101043
-function GetAPIVersion()
-    if GetWorldName() ~= "PTS" then return getAPIVersionOrig() end
-    return currentSimulatedPTSAPIversion
+if currentSimulatedPTSAPIversion ~= nil then
+    function GetAPIVersion()
+        if GetWorldName() ~= "PTS" then return getAPIVersionOrig() end
+        return currentSimulatedPTSAPIversion
+    end
 end
 --]]
 
@@ -874,6 +877,7 @@ local possibleDropMechanics         = {
     [35] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
     [36] = "LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS", -- Cyrodiil board missions
     [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless/Infinite Archive dungeon
+    [38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT", -- Golden Pursuit/Goldene Vorhaben
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -983,6 +987,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
         [LIBSETS_DROP_MECHANIC_CRAFTED]                              = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
+        [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                       = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
     },
     ["es"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
