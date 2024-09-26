@@ -1906,6 +1906,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]             = "/esoui/art/icons/housing_gen_lsb_announcementboard001.dds", -- Cyrodiil board missions
     [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "/esoui/art/icons/achievement_ic_treasurescamp.dds", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
     [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                     = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds",
+    [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                      = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds",
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
