@@ -1010,7 +1010,6 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
         [LIBSETS_DROP_MECHANIC_CRAFTED]                              = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
-        [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                       = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
     },
     ["es"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
@@ -1226,6 +1225,12 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "西罗帝尔公告板任务",
     },
 }
+
+--Enable Drop Mechanic translations that are not live yet e.g. only on PTS
+if checkIfPTSAPIVersionIsLive() then
+    --lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*) --new dropmechanic name in English
+    lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT] = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS)
+end
 
 lib.dropMechanicIdToNameTooltip   = {
     ["de"] = {
@@ -1907,13 +1912,19 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]             = "/esoui/art/icons/housing_gen_lsb_announcementboard001.dds", -- Cyrodiil board missions
     [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "/esoui/art/icons/achievement_ic_treasurescamp.dds", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
     [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                     = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds",
-    [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                      = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds",
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
     --["golden chest"] =        "/esoui/art/icons/undaunted_dungeoncoffer.dds",
 }
 lib.dropMechanicIdToTexture            = dropMechanicIdToTexture
+
+--Enable Drop Mechanic textures that are not live yet e.g. only on PTS
+if checkIfPTSAPIVersionIsLive() then
+    --lib.dropMechanicIdToTexture[LIBSETS_DROP_MECHANIC_*] = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds" --new dropmechanic texture
+    lib.dropMechanicIdToTexture[LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT] = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds"
+end
+
 
 --Textures for the set type tooltips
 local setTypeToTexture                 = {
