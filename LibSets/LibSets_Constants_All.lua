@@ -76,13 +76,15 @@ local possibleDlcIds = {
     [31] = "NO_DLC_UPDATE39",
     [32] = "NO_DLC_SECRET_OF_THE_TELVANNI",
     [33] = "DLC_SCIONS_OF_ITHELIA",
+    [34] = "DLC_GOLD_ROAD",
+    [35] = "NO_DLC_UPDATE43",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_xxx"
-    possibleDlcIds[#possibleDlcIds + 1] = "DLC_GOLD_ROAD"
+    possibleDlcIds[#possibleDlcIds + 1] = "NO_DLC_UPDATE44"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -167,14 +169,16 @@ lib.dlcAndChapterCollectibleIds = {
     --Update 40
     [NO_DLC_SECRET_OF_THE_TELVANNI] = {name="Update 40: Secret of the Telvanni", achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1698663600}, --Ocotber 30th 2023
     --Update 41
-    [DLC_SCIONS_OF_ITHELIA] =       {collectibleId=nil, achievementCategoryId=3808, type=DLC_TYPE_DUNGEONS, releaseDate=1709294400} --March 11th 2024
-
+    [DLC_SCIONS_OF_ITHELIA] =       {collectibleId=nil, achievementCategoryId=3808, type=DLC_TYPE_DUNGEONS, releaseDate=1709294400}, --March 11th 2024
     --Update 42
-    --[DLC_GOLD_ROAD] = --11871|CHAPTER|Gold Road
+    [DLC_GOLD_ROAD] =               {collectibleId=11871, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1717365600}, --June 3rd 2024
+    --Update 43 House tours and QOL patch
+    [NO_DLC_UPDATE43] =             {name="Update 43", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1724068800}, --August 19th 2024
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
-    lib.dlcAndChapterCollectibleIds[DLC_GOLD_ROAD] = {collectibleId=11871, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1717365600} --June 3rd 2024
+    --Update 44 new Battleground types and QOL patch
+    lib.dlcAndChapterCollectibleIds[NO_DLC_UPDATE44] =  {name="Update 44", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1730116800} --October 28th 2024
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
