@@ -894,6 +894,7 @@ local function loadSetsByIds(packageNr, from, to, noReloadInfo)
             --Generate link for item
             local itemLink = buildItemLink(setItemId)
             if itemLink and itemLink ~= "" then
+                --No crafted sets
                 if not isilc(itemLink) then
                     -- hasSet bool, setName string, numBonuses integer, numEquipped integer, maxEquipped integer, setId integer
                     local isSet, setName, _, _, _, setId = gilsetinf(itemLink, false)
@@ -1046,7 +1047,7 @@ d(">loadSetsByIds, packageNr: " ..tos(packageNr))
             end
             --Last loop or no further setIds were found during the last 5 loops
             if (noFurtherItemsFound == true or isLastLoop == true) and not summaryMet then
-d(">lastLoop or noFurtherItemsFound!")
+d(">lastLoop, or noFurtherItemsFound!")
                 summaryMet = true
                 --No further sets found. Abort here and show the results now. Decrease the delay again by 1000 for each
                 --missing call in the loop, so that results are shown "now" (+2 seconds)

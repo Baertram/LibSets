@@ -29,8 +29,12 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2024-08-06, Baertram, PTS AP101043
+ Last updated: 2024-10-22, Baertram, PTS AP101043 & AP101043
 ------------------------------------------------------------------------------------------------------------------------
+--Fixed wrong ZOs data for sets like Motjers sorrow. This item shows as set on PTS:
+"|H1:item:4316:366:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h"
+bot not on live! So the total set was removed due to that.
+Had to add extra code to not remove the total set because of single items not shown as set.
 
  --Known bugs--
 
@@ -414,6 +418,8 @@ local callDebugParams = {
     getcollectiblenames = "DebugGetAllCollectibleNames",
     getdlcnames         = "DebugGetAllCollectibleDLCNames",
 }
+
+local cachedNonActiveSetIds = {}
 
 
 --local lib functions
@@ -890,64 +896,91 @@ end
 
 --Function to check if the setId is currently active with the APIversion (was determined at LoadSets() -> checkIfSetExists(setId))
 local function isSetCurrentlyActiveWithAPIVersion(setId)
-    if  setId == nil or nonExistingSetIdsAtCurrentApiVersion[setId] == true or setIds[setId] == nil then return false end
+    if setId == nil or ( setId ~= nil and (cachedNonActiveSetIds[setId] == true or nonExistingSetIdsAtCurrentApiVersion[setId] == true or setIds[setId] == nil) ) then
+        cachedNonActiveSetIds[setId] = true
+        return false
+    end
     return true
 end
 lib.IsSetCurrentlyActiveWithAPIVersion = isSetCurrentlyActiveWithAPIVersion
 
---Function to check if a setId is given for the current APIVersion
-local function checkIfSetExists(setId)
-    buildItemLink = buildItemLink or lib.buildItemLink
-    if not setId or setId <= 0 then return false end
-    local preloadedSetInfo      = lib.setInfo
-    local preloadedSetItemIds   = preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
-    --SetId is not known in preloaded data?
-    if not preloadedSetInfo or not preloadedSetInfo[setId] or not preloadedSetItemIds or not preloadedSetItemIds[setId] then
-        nonExistingSetIdsAtCurrentApiVersion[setId] = true
-        return false
-    end
-    --SetId is known in preloaded data: get the first itemId of this setId, build an itemLink, and check if the setId for this itemId exists
-    --by the help of the API function GetItemLinkSetInfo(itemLink).
-    --Therefor we need to decompress the itemIds of the preloaded data first in order to get the real first itemId,
-    --if the first entry of the itemIs table is "not" a number
-    local compressedSetItemIdsOfSetId = preloadedSetItemIds[setId]
-    local firstItemIdFound
-    for _, itemId in pairs(compressedSetItemIdsOfSetId) do
-        if itemId and type(itemId) == "number" and itemId > 0 then
-            firstItemIdFound = itemId
-            break -- exit the for loop
-        end
-    end
-    if firstItemIdFound == nil then
-        --No number itemId was found for the set, so decompress the whole setId, if not already done before
-        local decompressedSetItemIdsOfSetId = decompressSetIdItemIds(setId)
-        if decompressedSetItemIdsOfSetId ~= nil and not ZO_IsTableEmpty(decompressedSetItemIdsOfSetId) then
-            preloadedSetInfo[setId][LIBSETS_TABLEKEY_SETITEMIDS] = decompressedSetItemIdsOfSetId
-
-            --Update the decompressed itemIds to the setData, if no already given
-            for itemId, _ in pairs(decompressedSetItemIdsOfSetId) do
-                if itemId and itemId > 0 then
-                    firstItemIdFound = itemId
-                    break -- exit the for loop
-                end
-            end
-        end
-    end
-    if firstItemIdFound ~= nil then
+local function checkItemIdMatchesSetId(setId, itemId)
+    if itemId and type(itemId) == "number" and itemId > 0 then
         --Build an itemLink of the set item and check if the set currently exists, with the same setId
-        local itemLink = buildItemLink(firstItemIdFound)
+        local itemLink = buildItemLink(itemId)
         if itemLink and itemLink ~= "" then
             local isSet, _, setIdOfItemLink, _, _, _ = checkSet(itemLink)
             isSet = isSet or false
             local setExists = (isSet == true and setIdOfItemLink == setId and true) or false
-            if not setExists then
-                nonExistingSetIdsAtCurrentApiVersion[setId] = true
+            if setExists == true then
+                return true
             end
-            return setExists
         end
     end
-    nonExistingSetIdsAtCurrentApiVersion[setId] = true
     return false
+end
+
+local function loopSetItemIdsAndCheckForMatchingSetItem(setId, loopTable, keyOrValue)
+    if setId == nil or keyOrValue == nil or ZO_IsTableEmpty(loopTable) then return false end
+
+    if keyOrValue == false then
+        for _, itemId in pairs(loopTable) do
+            if itemId and type(itemId) == "number" and itemId > 0 then
+                if checkItemIdMatchesSetId(setId, itemId) == true then
+                    return true
+                end
+            end
+        end
+    else
+        for itemId, _ in pairs(loopTable) do
+            if checkItemIdMatchesSetId(setId, itemId) == true then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function validateAnyItemIdBelongsToThisSetId(setId)
+    buildItemLink = buildItemLink or lib.buildItemLink
+    local preloadedSetInfo      = lib.setInfo
+    local preloadedSetItemIds   = preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+    --SetId is not known in preloaded itemId data so it got no data at all?
+    if not preloadedSetInfo or not preloadedSetInfo[setId] or not preloadedSetItemIds or not preloadedSetItemIds[setId] then
+        return false
+    end
+
+    --Got any compressed itemIds? Scan them for first number itemId (might contain string item id range!) that matches the setId
+    local compressedSetItemIdsOfSetId = preloadedSetItemIds[setId]
+    local setExists = loopSetItemIdsAndCheckForMatchingSetItem(setId, compressedSetItemIdsOfSetId, false)
+
+    if not setExists then
+        --No number itemId was found for the set, so decompress the whole setId now (if not already done before)
+        local decompressedSetItemIdsOfSetId = decompressSetIdItemIds(setId)
+        if decompressedSetItemIdsOfSetId ~= nil and not ZO_IsTableEmpty(decompressedSetItemIdsOfSetId) then
+            --Update the decompressed itemIds to the setData
+            preloadedSetInfo[setId][LIBSETS_TABLEKEY_SETITEMIDS] = decompressedSetItemIdsOfSetId
+
+            --Do the check validateAnyItemIdIsThisSetItem(setId) again now, but this time with the decompressed items
+           setExists = loopSetItemIdsAndCheckForMatchingSetItem(setId, decompressedSetItemIdsOfSetId, true)
+        end
+    end
+end
+
+--Function to check if a setId is given for the current APIVersion
+local function checkIfSetExists(setId)
+    if not setId or setId <= 0 then return false end
+    --SetId is known in preloaded data: get the first itemId of this setId, build an itemLink, and check if the setId for this itemId exists
+    --by the help of the API function GetItemLinkSetInfo(itemLink).
+    --Therefor we need to decompress the itemIds of the preloaded data first in order to get the real first itemId,
+    --if the first entry of the itemIs table is "not" a number
+    -->If the item found is not that setId and then go on with the next and if all itemIds are not a set then add this set to the exclusion list.
+    -->But if any itemId matches the set then keep it included
+    if validateAnyItemIdBelongsToThisSetId(setId) == false then
+        nonExistingSetIdsAtCurrentApiVersion[setId] = true
+        return false
+    end
+    return true
 end
 
 --Check if an itemId belongs to a special set and return the set's data from LibSets data tables
@@ -4609,7 +4642,10 @@ local isSetsScanning = lib.IsSetsScanning
 --This functions combines the result values of the functions LibSets.AreSetsLoaded() and LibSets.IsSetsScanning()
 function lib.checkIfSetsAreLoadedProperly(setId)
     checkIfSetsAreLoadedProperly = checkIfSetsAreLoadedProperly or lib.checkIfSetsAreLoadedProperly
-    if isSetsScanning() or not areSetsLoaded() then return false end
+    if isSetsScanning() or not areSetsLoaded() then
+        cachedNonActiveSetIds = {}
+        return false
+    end
     if setId ~= nil then return isSetCurrentlyActiveWithAPIVersion(setId) end
     return true
 end
