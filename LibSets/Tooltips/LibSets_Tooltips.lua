@@ -8,7 +8,7 @@ local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = lib.prefix
 
 local lam
-local placeHolder = ": "
+--local placeHolder = ": "
 
 --local ZOs variables
 local EM = EVENT_MANAGER
@@ -2100,6 +2100,8 @@ local function createPreviewTooltipAndShow(setId)
 end
 lib.CreatePreviewTooltipAndShow = createPreviewTooltipAndShow
 
+
+
 local allSetNamesCached
 local function previewSetTooltipBySlashCommand(args)
     --Abort if LibSlashCommander was loaded -> Will be handled via LibSets_AutoCompletion.lua then
@@ -2130,8 +2132,8 @@ local function previewSetTooltipBySlashCommand(args)
         if setNameToSearch == "" then setNameToSearch = setNameToSearch end
 
         --Get the set names of all sets, in all languages
-
         allSetNamesCached = allSetNamesCached or lib_getAllSetNames()
+
         --Search the set's ID by it's provided criteria "name", first start with the client language
         for setIdOfSearchedData, setNameOfEachLanguage in pairs(allSetNamesCached) do
             local setNameInlangToUse = strlower(setNameOfEachLanguage[langToUse])

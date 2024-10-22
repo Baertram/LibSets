@@ -803,6 +803,7 @@ local function searchFilterPrefix(searchInput, searchTab)
 end
 ]]
 
+--SearchTab = bonuses e.g.
 local function searchFilterPrefix(searchInput, searchTab, isBonusearch, setId)
     isBonusearch = isBonusearch or false
     specialBonusSets = specialBonusSets or lib.specialBonusSets
@@ -819,7 +820,7 @@ local function searchFilterPrefix(searchInput, searchTab, isBonusearch, setId)
 --d(">searchQuery: " .. tostring(searchQuery) .. ", delim: " ..tostring(delim) .. ", curpos: " ..tostring(curpos))
 		--if searchQuery:find("%S+") then   --find no whitepaces
         if searchQuery:find("[^,]+") then      --find no ,
---d(">>found no ,")
+            --d(">>found no ,")
             --If bonuses are searched: searchInput could contain +crit or +crit:2 (means: +critical chance at bonus 2)
             -->So check the "current" searchInput part for a : delimiter
             local bonusLineNr, realBonusLineNr
@@ -831,7 +832,7 @@ local function searchFilterPrefix(searchInput, searchTab, isBonusearch, setId)
                     searchColonOffset = curpos --Search from cursor pos
                 end
                 local bonusLineNrOffset, bonusLineNrOffsetEnd = searchQuery:find("%:+", searchColonOffset) --check for :<1 digit number> in front of the , delimiter
---d(">>>bonusLineNrOffset: " .. tostring(bonusLineNrOffset))
+                --d(">>>bonusLineNrOffset: " .. tostring(bonusLineNrOffset))
                 if bonusLineNrOffsetEnd ~= nil then
                     bonusLineNr = searchQuery:sub(bonusLineNrOffsetEnd+1, -1)
                     --Clean the searchQuery end
@@ -841,31 +842,33 @@ local function searchFilterPrefix(searchInput, searchTab, isBonusearch, setId)
                         local specialBonusSetData = specialBonusSets[setId]
                         if specialBonusSetData ~= nil then
                             realBonusLineNr = specialBonusSetData[tonumber(bonusLineNr)]
---d(">>>setId: " .. tos(setId) ..", realBonusLineNr: " .. tostring(realBonusLineNr) .. "; bonusLineNr: " ..tos(bonusLineNr))
+                            --d(">>>setId: " .. tos(setId) ..", realBonusLineNr: " .. tostring(realBonusLineNr) .. "; bonusLineNr: " ..tos(bonusLineNr))
                             if realBonusLineNr ~= nil then
                                 bonusLineNr = realBonusLineNr
                             end
                         end
                     end
                 end
---d(">>>searchQuery: " .. tostring(searchQuery) .. ", searchColonOffset: " .. tostring(searchColonOffset) .. ", bonusLineNr: " .. tostring(bonusLineNr))
+                --d(">>>searchQuery: " .. tostring(searchQuery) .. ", searchColonOffset: " .. tostring(searchColonOffset) .. ", bonusLineNr: " .. tostring(bonusLineNr))
             end
-            for i = 1, #searchTab do
-                --No bonus line to searc? Else: Only if the current line of the table is the bonus line nr. specified
-                if not isBonusearch or (bonusLineNr == nil or tonumber(bonusLineNr) == i or (realBonusLineNr ~= nil and tonumber(realBonusLineNr) == i)) then
-                    if orderedSearch(searchTab[i], searchQuery) then
---d(">found string!!!")
-                        found = true
-                        break
+            if not ZO_IsTableEmpty(searchTab) then
+                for i = 1, #searchTab do
+                    --No bonus line to search? Else: Only if the current line of the table is the bonus line nr. specified
+                    if not isBonusearch or (bonusLineNr == nil or tonumber(bonusLineNr) == i or (realBonusLineNr ~= nil and tonumber(realBonusLineNr) == i)) then
+                        if orderedSearch(searchTab[i], searchQuery) then
+                            --d(">found string!!!")
+                            found = true
+                            break
+                        end
                     end
                 end
-			end
+            end
 
-			if found == exclude then
---d("<excluded!")
+            if found == exclude then
+                --d("<excluded!")
                 return false
             end
-		end
+        end
 		curpos = delim + 1
 		if delim ~= 0 then exclude = searchInput:sub(delim, delim) == "-" end
 --d(">>curpos: " ..tostring(curpos) .. ", delim: " .. tostring(delim) .. ", exclude: " .. tostring(exclude))
