@@ -2100,6 +2100,8 @@ local function createPreviewTooltipAndShow(setId)
 end
 lib.CreatePreviewTooltipAndShow = createPreviewTooltipAndShow
 
+
+
 local allSetNamesCached
 local function previewSetTooltipBySlashCommand(args)
     --Abort if LibSlashCommander was loaded -> Will be handled via LibSets_AutoCompletion.lua then

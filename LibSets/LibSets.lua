@@ -420,6 +420,11 @@ local callDebugParams = {
 }
 
 local cachedNonActiveSetIds = {}
+--Some itemIds like 212193 for Mother's Sorrow set works on PTS API101044 but does raise an error on live server (for toolltip preview)
+-->We try to detect those in the getItemIds* functions by creating an itemLink and using GetItemLinkSetInfo(itemLink) on them first
+-->and if that do not work they will be added to this table here (upon usage) for the setId and the found "non valid" itemIds will be removed in
+-->CachedSetItemIdsTable[setId] too
+local itemIdsBlacklistedForCurrentAPIVersion = {}
 
 
 --local lib functions
@@ -2805,6 +2810,33 @@ function lib.GetAllSetItemIds()
 end
 
 
+--Check if the itemIds of the set are exisitng by creating an itemLink of them and getting the item's name.
+--If that returns nil or "" it's non valid and will be marked as that
+-->As the whole setId is checked we only do this once
+local function checkSetItemIdsAreValidOnThisAPIVersion(setId, setItemIds)
+    if setId == nil or setId == 0 or ZO_IsTableEmpty(setItemIds) then return end
+    if itemIdsBlacklistedForCurrentAPIVersion[setId] == nil then
+        itemIdsBlacklistedForCurrentAPIVersion[setId] = {}
+        for itemId, _ in pairs(setItemIds) do
+            if itemIdsBlacklistedForCurrentAPIVersion[setId][itemId] == nil then
+                local itemLink = buildItemLink(itemId)
+                if itemLink ~= nil and itemLink ~= "" then
+                    local itemName = GetItemLinkName(itemLink)
+                    if itemName == nil or itemName == "" then
+                        itemIdsBlacklistedForCurrentAPIVersion[setId][itemId] = true
+
+                        --Remove that itemId from the cached setId data so it won't be used anymore for now
+                        if CachedSetItemIdsTable ~= nil and CachedSetItemIdsTable[setId] ~= nil then
+                            CachedSetItemIdsTable[setId][itemId] = nil
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+
 --Returns a table containing all itemIds of the setId provided. The setItemIds contents are non-sorted.
 --The key is the itemId and the value is the value LIBSETS_SET_ITEMID_TABLE_VALUE_OK
 --If the 2nd to ... parameter *Type is not specified: All  itemIds found for the setId will be returned
@@ -2830,6 +2862,9 @@ function lib.GetSetItemIds(setId, isNoESOSetId, equipType, traitType, enchantSea
     local setItemIds = decompressSetIdItemIds(setId, isNoESOSetId)
     if setItemIds == nil then return end
 --d("[LibSets]GetSetItemIds-setId: " ..tos(setId) .. " -> found itemIds!")
+
+    --Check if the itemIds exist here on the server API, and remove those which don't (from CachedSetItemIdsTable[setId])
+    checkSetItemIdsAreValidOnThisAPIVersion(setId, setItemIds)
 
     --Anything to filter?
     if equipType ~= nil or traitType ~= nil or enchantSearchCategoryType ~= nil or armorType ~= nil or weaponType ~= nil then
