@@ -50,13 +50,6 @@ setsOfNewerAPIVersion = {
     --yyy,
     --....
 
-    --setIds of APIversion 101044 "Update 44", 2024-09-24
-    782,
-    783,
-    784,
-    791,
-    792,
-    793,
     --setIds not yet on live server - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion

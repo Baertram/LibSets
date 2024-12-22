@@ -1452,16 +1452,22 @@ function LibSets_SearchUI_Shared:AddSetIdToFavorites(rowControl, setId, favorite
     lib.svData.setSearchFavorites[favoriteCategory][setId] = true
 
     self.resultsList:AddFavorite(rowControl, favoriteCategory)
+    CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryAdded", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
+
+    self.resultsList:RefreshData() --To update filtered rows
 end
 
 function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)
     if not self:IsSetIdInFavorites(setId, favoriteCategory) then return end
     if possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory] == nil then return end
+
     if lib.svData.setSearchFavorites[favoriteCategory] ~= nil then
         lib.svData.setSearchFavorites[favoriteCategory][setId] = nil
     end
 
     self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
+    CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoved", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
+
     self.resultsList:RefreshData() --To update filtered rows
 end
 
@@ -1469,7 +1475,10 @@ function LibSets_SearchUI_Shared:RemoveAllSetFavorites(favoriteCategory)
     if possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory] == nil then return end
     local setFavorites = lib.svData.setSearchFavorites[favoriteCategory]
     if ZO_IsTableEmpty(setFavorites) then return end
+
     lib.svData.setSearchFavorites[favoriteCategory] = {}
+    CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoveAll", favoriteCategory, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
+
     self.resultsList:RefreshData() --To remove the Favorite markers
 end
 

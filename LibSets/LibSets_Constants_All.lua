@@ -78,13 +78,13 @@ local possibleDlcIds = {
     [33] = "DLC_SCIONS_OF_ITHELIA",
     [34] = "DLC_GOLD_ROAD",
     [35] = "NO_DLC_UPDATE43",
+    [36] = "NO_DLC_UPDATE44",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_xxx"
-    possibleDlcIds[#possibleDlcIds + 1] = "NO_DLC_UPDATE44"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -174,21 +174,23 @@ lib.dlcAndChapterCollectibleIds = {
     [DLC_GOLD_ROAD] =               {collectibleId=11871, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1717365600}, --June 3rd 2024
     --Update 43 House tours and QOL patch
     [NO_DLC_UPDATE43] =             {name="Update 43", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1724068800}, --August 19th 2024
+    --Update 44 new Battleground types and QOL patch
+    [NO_DLC_UPDATE44] =             {name="Update 44", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1730116800} --October 28th 2024
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
-    --Update 44 new Battleground types and QOL patch
-    lib.dlcAndChapterCollectibleIds[NO_DLC_UPDATE44] =  {name="Update 44", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1730116800} --October 28th 2024
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
 local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds
 --For each entry in the list of example achievements above get the name of it's parent category (DLC, chapter)
 lib.DLCAndCHAPTERData = {}
+lib.DLCAndCHAPTERDataOrdered = {}
 lib.DLCandCHAPTERLookupdata = {}
 lib.NONDLCData = {}
 lib.NONDLCLookupdata = {}
 local DLCandCHAPTERdata =   lib.DLCAndCHAPTERData
+local DLCAndCHAPTERDataOrdered = lib.DLCAndCHAPTERDataOrdered
 local DLCandCHAPTERLookupdata = lib.DLCandCHAPTERLookupdata
 local NONDLCData = lib.NONDLCData
 local NONDLCLookupdata = lib.NONDLCLookupdata
@@ -196,6 +198,8 @@ DLCandCHAPTERdata[DLC_BASE_GAME] = "Elder Scrolls Online"
 DLCandCHAPTERLookupdata[DLC_TYPE_BASE_GAME] = {
     [DLC_BASE_GAME] = DLCandCHAPTERdata[DLC_BASE_GAME]
 }
+DLCAndCHAPTERDataOrdered[1] = DLC_BASE_GAME
+
 --CHAPTERdata[DLC_BASE_GAME] = "Elder Scrolls Online"
 local dlcStrFormatPattern = "<<C:1>>"
 for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
@@ -208,10 +212,12 @@ for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
             local name = zocstrfor(dlcStrFormatPattern, gci(collectibleId))
             DLCandCHAPTERdata[dlcId] = name
             DLCandCHAPTERLookupdata[dlcType][dlcId] = name
+            DLCAndCHAPTERDataOrdered[#DLCAndCHAPTERDataOrdered + 1] = dlcId
         elseif achievementCategoryId ~= nil and achievementCategoryId ~= -1 then
             local name = zocstrfor(dlcStrFormatPattern, gaci(gcifa(achievementCategoryId)))
             DLCandCHAPTERdata[dlcId] = name
             DLCandCHAPTERLookupdata[dlcType][dlcId] = name
+            DLCAndCHAPTERDataOrdered[#DLCAndCHAPTERDataOrdered + 1] = dlcId
             --else
             --no collectibleId and no achievementCategoryId provided? -> Normal patch with QOL features then
         end

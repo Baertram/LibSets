@@ -29,7 +29,7 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2024-10-22, Baertram, PTS AP101043 & AP101043
+ Last updated: 2024-12-03, Baertram, AP101044
 ------------------------------------------------------------------------------------------------------------------------
 --Fixed wrong ZOs data for sets like Motjers sorrow. This item shows as set on PTS:
 "|H1:item:4316:366:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h"
@@ -40,10 +40,11 @@ Had to add extra code to not remove the total set because of single items not sh
 
  --Todo list--
 
-    --Unique item detection, sirinsidiator 2022-03-07 e.g. "Pulsing Dremora Ring" and "Leviathan Rings", different itemIds
+    1) Unique item detection, sirinsidiator 2022-03-07 e.g. "Pulsing Dremora Ring" and "Leviathan Rings", different itemIds
     so basically convert itemId to setId+slotId back to itemId and then compare input itemId to output itemId and if it's the same you got the non-unique version, otherwise it's the unique one
     you could actually do that in LibSets while scanning sets and then mark your data accordingly
 
+    2) Integrate FCOItemSaver's marker icon mapping to LibSets set search favorite icons in FCOIS settings -> LibSets needs API to return the set search favorite icons for that to work7
 
 
  --Currently working on--
@@ -270,6 +271,7 @@ local clientLang = lib.clientLang
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
+local CM = CALLBACK_MANAGER
 local EM = EVENT_MANAGER
 local WM = WINDOW_MANAGER
 local ISCDM = ITEM_SET_COLLECTIONS_DATA_MANAGER
@@ -352,6 +354,7 @@ local undauntedChestIds =               lib.undauntedChestIds
 local possibleDlcTypes =                lib.possibleDlcTypes
 --local possibleDlcIds =                  lib.possibleDlcIds
 local DLCandCHAPTERdata =               lib.DLCAndCHAPTERData
+local DLCAndCHAPTERDataOrdered =        lib.DLCAndCHAPTERDataOrdered
 --local DLCandCHAPTERLookupdata =         lib.DLCandCHAPTERLookupdata
 local NONDLCData =                      lib.NONDLCData
 --local NONDLCLookupdata =                lib.NONDLCLookupdata
@@ -372,7 +375,7 @@ local perfectedSetsInfo =               lib.perfectedSetsInfo
 local perfectedSets =                   lib.perfectedSets
 local nonPerfectedSets =                lib.nonPerfectedSets
 
---local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
+local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
 local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavoriteCategoriesUnsorted
 
 --Possible SlashCommand parameters
@@ -4490,6 +4493,18 @@ function lib.RegisterCustomSetSearchResultsListContextMenu(addonName, headerName
 end
 
 
+--Return the set saerch favorite category names and textures as a table, format:
+--[[
+    possibleSetSearchFavoriteCategoriesSorted[index] = {
+        category = string "lightningStaff",
+        categoryName = string "Lightning Staff",                            --in current client language, or fallback language en
+        texture = string "/esoui/art/progression/icon_lightningstaff.dds",
+    }
+]]
+function lib.GetSetSearchFavoriteCategories()
+    return possibleSetSearchFavoriteCategories
+end
+
 
 ------------------------------------------------------------------------
 -- 	UI related stuff
@@ -4731,7 +4746,7 @@ local chaptersInOrderLookupTable
 
 local function outputDLCorChapterRow(dlcId, dlcName, dlcType)
     local dlcTypeSuffix = ""
-    if dlcType ~= nil then
+    if dlcType ~= nil and dlcType > DLC_TYPE_BASE_GAME then
         dlcTypeSuffix = "  (".. tos(possibleDlcTypes[dlcType])  .. ")"
     end
     local releaseDateTimestamp = dlcAndChapterCollectibleIds[dlcId].releaseDate
@@ -4764,7 +4779,8 @@ end
 local function slashcommand_dlcs()
     if DLCandCHAPTERdata == nil then return end
     if dlcsInOrderLookupTable == nil then
-        for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
+        for _, dlcId in ipairs(DLCAndCHAPTERDataOrdered) do
+            local dlcName = DLCandCHAPTERdata[dlcId]
             local dlcType = dlcAndChapterCollectibleIds[dlcId].type
             if dlcType == DLC_TYPE_DUNGEONS or dlcType == DLC_TYPE_ZONE then
                 dlcsInOrderLookupTable = dlcsInOrderLookupTable or {}
@@ -4782,7 +4798,8 @@ end
 local function slashcommand_chapters()
     if DLCandCHAPTERdata == nil then return end
     if chaptersInOrderLookupTable == nil then
-        for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
+        for _, dlcId in ipairs(DLCAndCHAPTERDataOrdered) do
+            local dlcName = DLCandCHAPTERdata[dlcId]
             if dlcAndChapterCollectibleIds[dlcId].type == DLC_TYPE_CHAPTER then
                 chaptersInOrderLookupTable = chaptersInOrderLookupTable or {}
                 tins(chaptersInOrderLookupTable, {dlcId=dlcId, name=dlcName})
@@ -4799,7 +4816,8 @@ end
 local function slashcommand_dlcsandchapter()
     if DLCandCHAPTERdata == nil then return end
     d(libPrefix .. "DLCs & chapters in order of appearance [<LibSetsDLCId>] <name>  (<LibSetsDLCtype>)")
-    for dlcId, dlcName in ipairs(DLCandCHAPTERdata) do
+    for _, dlcId in ipairs(DLCAndCHAPTERDataOrdered) do
+        local dlcName = DLCandCHAPTERdata[dlcId]
         outputDLCorChapterRow(dlcId, dlcName, dlcAndChapterCollectibleIds[dlcId].type)
     end
 end

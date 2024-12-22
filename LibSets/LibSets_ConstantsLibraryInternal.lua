@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.73
+local MAJOR, MINOR = "LibSets", 0.74
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -551,7 +551,7 @@ local setTypesToName = {
         ["en"] = "Class specific",
         ["es"] = "Específico de la clase",
         ["fr"] = "Spécifique à la classe",
-        ["en"] = "Specyficzne dla klasy",
+        ["pl"] = "Specyficzne dla klasy",
         ["jp"] = "クラス固有の",
         ["ru"] = "Зависит от класса",
         ["zh"] = "职业限定",
@@ -899,13 +899,12 @@ local possibleDropMechanics         = {
     [35] = "LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY",  -- Cyrodiil Cheydinhal city / Weyon Priory, Chorrol
     [36] = "LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS", -- Cyrodiil board missions
     [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless/Infinite Archive dungeon
-    --[38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT", -- Golden Pursuit/Goldene Vorhaben
+    [38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT", -- Golden Pursuit/Goldene Vorhaben
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     --LIBSETS_DROP_MECHANIC_... = number
     --possibleDropMechanics[xx] = "LIBSETS_DROP_MECHANIC_..." --new dropmechanic ...
-    possibleDropMechanics[38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dropMechanicId, dropMechanicName in ipairs(possibleDropMechanics) do
@@ -1010,6 +1009,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
         [LIBSETS_DROP_MECHANIC_CRAFTED]                              = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
+        [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                       = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
     },
     ["es"] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
@@ -1229,7 +1229,6 @@ lib.dropMechanicIdToName          = {
 --Enable Drop Mechanic translations that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     --lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*) --new dropmechanic name in English
-    lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT] = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS)
 end
 
 lib.dropMechanicIdToNameTooltip   = {
@@ -1405,6 +1404,32 @@ lib.localization                 = {
         defaultActionLeftClick      = "Aktion beim",
         popupTooltipPosition        = "Angehefteter Tooltip Position",
         showLibSetsSettingsMenu     = "LibSets Einstellungen anzeigen",
+        --Set search favorite categories
+        star = "Favorit (Stern)",
+        --PvE
+        tank = "Tank",
+        stamDD = "Ausdauer DD",
+        magDD = "Magie DD",
+        stamHeal = "Ausdauer Heiler",
+        magHeal = "Magie Heiler",
+        hybrid = "Hybrid",
+        --PvP
+        PVPTank = "PVP Tank",
+        PVPStamDD = "PVP Ausdauer DD",
+        PVPMagDD = "PVP Magie DD",
+        PVPStamHeal = "PVP Ausdauer Heal",
+        PVPMagHeal = "PVP Magie Heal",
+        PVPHybrid = "PVP Hybrid",
+        --Other
+        farm = "Farmen",
+        sneak = "Schleichen",
+        --Weapon types
+        bow = "Bogen",
+        dualWield = "Beidhändig",
+        twoHand = "Zweihändig",
+        frostStaff = "Froststab",
+        fireStaff = "Feuerstab",
+        lightningStaff = "Blitzstab",
     },
     ["en"] = {
         de  = "German",
@@ -1497,6 +1522,32 @@ lib.localization                 = {
         popupTooltipPosition        = "Popup tooltip position",
         linkToChat                  = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
         showLibSetsSettingsMenu     = "Show LibSets settings",
+        --Set search favorite categories
+        star = "Favorite (star)",
+        --PvE
+        tank = "Tank",
+        stamDD = "Stamina DD",
+        magDD = "Magicka DD",
+        stamHeal = "Stamina Heal",
+        magHeal = "Magicka Heal",
+        hybrid = "Hybrid",
+        --PvP
+        PVPTank = "PVP Tank",
+        PVPStamDD = "PVP Stamina DD",
+        PVPMagDD = "PVP Magicka DD",
+        PVPStamHeal = "PVP Stamina Heal",
+        PVPMagHeal = "PVP Magicka Heal",
+        PVPHybrid = "PVP Hybrid",
+        --Other
+        farm = "Farm",
+        sneak = "Sneak",
+        --Weapon types
+        bow = "Bow",
+        dualWield = "Dual wield",
+        twoHand = "Two handed",
+        frostStaff = "Frost staff",
+        fireStaff = "Fire staff",
+        lightningStaff = "Lightning staff",
     },
     ["es"] = {
         de  = "Alemán",
@@ -1912,6 +1963,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]             = "/esoui/art/icons/housing_gen_lsb_announcementboard001.dds", -- Cyrodiil board missions
     [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "/esoui/art/icons/achievement_ic_treasurescamp.dds", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
     [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                     = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds",
+    [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                      = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds",
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
@@ -1922,7 +1974,6 @@ lib.dropMechanicIdToTexture            = dropMechanicIdToTexture
 --Enable Drop Mechanic textures that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     --lib.dropMechanicIdToTexture[LIBSETS_DROP_MECHANIC_*] = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds" --new dropmechanic texture
-    lib.dropMechanicIdToTexture[LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT] = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds"
 end
 
 
@@ -2029,6 +2080,7 @@ local possibleSetSearchFavoriteCategoriesSorted = {}
 for index, setSearchFavoriteCategory in ipairs(possibleSetSearchFavoriteCategoriesForSort) do
     possibleSetSearchFavoriteCategoriesSorted[index] = {
         category = setSearchFavoriteCategory,
+        categoryName = clientLocalization[setSearchFavoriteCategory],
         texture = possibleSetSearchFavoriteCategoriesUnsorted[setSearchFavoriteCategory],
     }
 end
