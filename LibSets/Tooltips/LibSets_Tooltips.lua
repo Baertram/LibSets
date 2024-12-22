@@ -29,6 +29,7 @@ local tins = table.insert
 --local unp = unpack
 local zostrfor = zo_strformat
 --local zocstrfor = ZO_CachedStrFormat
+local zoif = zo_iconFormat
 local zoitf = zo_iconTextFormat
 local zoitfns = zo_iconTextFormatNoSpace
 
@@ -55,6 +56,10 @@ local customAddonTooltipControlHooksCount = 0
 
 local getLibSetsSetPreviewTooltipSavedVariables = lib.getLibSetsSetPreviewTooltipSavedVariables
 local langAllowedCheck = lib.LangAllowedCheck
+
+local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavoriteCategoriesUnsorted
+--local possibleSetSearchFavoriteCategoriesSorted = lib.possibleSetSearchFavoriteCategories
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --SetIds which are blacklisted for zone related tooltip text (as they got no zoneId where they drop)
@@ -203,6 +208,7 @@ local addDropMechanic
 local addBossName
 local addSetType
 local addNeededTraits
+local addFavorites
 local tooltipTextures
 local anyTooltipInfoToAdd = false
 
@@ -217,7 +223,8 @@ local dropZonesPlaceholder = false
 local bossNamePlaceholder = false
 local neededTraitsPlaceholder = false
 local dlcNamePlaceHolder = false
-
+local setSearchFavoritesPlaceHolder = false
+local addLineBreakAfterNonEmptyParts = false
 
 --Variables for set preview tooltip
 local setPreviewTooltipSV
@@ -245,7 +252,8 @@ lib.GetDropMechanicTexture = getDropMechanicTexture
     <<3>>   Drop zones
     <<4>>   Boss/Dropped by names
     <<5>>   Number of needed traits researched
-    <<6>>   Chapter/DLC name set was introduced with",
+    <<6>>   Chapter/DLC name set was introduced with
+    <<7>>   Set search favorites icons
 ]]
 local function isCustomTooltipEnabled(value)
     setReconstructionCostPlaceholder = false
@@ -255,6 +263,8 @@ local function isCustomTooltipEnabled(value)
     bossNamePlaceholder = false
     neededTraitsPlaceholder = false
     dlcNamePlaceHolder = false
+    setSearchFavoritesPlaceHolder = false
+    addLineBreakAfterNonEmptyParts = false
 
     local useCustomTooltipPattern = value
     if useCustomTooltipPattern == nil then useCustomTooltipPattern = lib.svData.useCustomTooltipPattern end
@@ -284,10 +294,14 @@ local function isCustomTooltipEnabled(value)
                 elseif placeholder == "<<6>>" then
                     dlcNamePlaceHolder = true
                     doAdd = true
+                elseif placeholder == "<<7>>" then
+                    setSearchFavoritesPlaceHolder = true
+                    doAdd = true
                 end
             end
 --d(">>doAdd: " ..tos(doAdd))
             if doAdd == true then
+                addLineBreakAfterNonEmptyParts = lib.svData.addLineBreakAtCustomTooltipParts
                 return true
             end
         end
@@ -312,11 +326,12 @@ local function isLibSetsTooltipEnabled()
     addNeededTraits =           tooltipSV.addNeededTraits
     --currently addReconstructionCost uses the same setting like addNeededTraits
     addReconstructionCost =     tooltipSV.addReconstructionCost
+    addFavorites =              tooltipSV.addFavorites
 
     anyTooltipInfoToAdd = ((useCustomTooltip == true
                                 or (not useCustomTooltip and (addDropLocation == true or addDropMechanic == true or addDLC == true
                                                             or addBossName == true or addSetType == true or addNeededTraits == true
-                                                            or addReconstructionCost == true))
+                                                            or addReconstructionCost == true or addFavorites == true))
                             ) and true) or false
 end
 lib.IsLibSetsTooltipEnabled = isLibSetsTooltipEnabled
@@ -529,18 +544,35 @@ local function getLastItemLink(tooltipControl)
 	return itemLink, setId
 end
 
+local function isLineBreakAtEnd(str)
+    if str == nil or str == "" then return false end
+    local newStr = str
+    local endOfStr = string.sub(str, -2)
+    local isLineBreakAtTheEndOfStr = endOfStr ~= nil and endOfStr ~= "" and endOfStr == "\n"
+--d("isLineBreakAtTheEndOfStr: " ..tos(isLineBreakAtTheEndOfStr))
+    return isLineBreakAtTheEndOfStr
+end
+
+local function addLineBreakIfNotEmpty(str)
+    if str ~= nil and str ~= "" and isLineBreakAtEnd(str) == false then
+        str = str .. "\n"
+    end
+    return str
+end
+
 local function checkTraitsNeededGiven(setData)
     local setType = setData.setType
     return (setType ~= nil and setData.traitsNeeded ~= nil and setType == LIBSETS_SETTYPE_CRAFTED and true) or false
 end
 
 local function tableContentsAreAllTheSame(tabToCheck)
-    if tabToCheck == nil or ZO_IsTableEmpty(tabToCheck) then return false end
+    if ZO_IsTableEmpty(tabToCheck) then return false end
     local entriesChecked = {}
     for _, entry in pairs(tabToCheck) do
         entriesChecked[entry] = true
     end
     if NonContiguousCount(entriesChecked) == 1 then
+--d(">tab entries are all the same!")
         --All the same
         return true
     end
@@ -548,12 +580,19 @@ local function tableContentsAreAllTheSame(tabToCheck)
 end
 
 local function condenseTable(tabToCondense)
-    if tabToCondense ~= nil or tableContentsAreAllTheSame(tabToCondense) then
-        local retTab
-        for k, v in pairs(tabToCondense) do
-            retTab = { [k]=v }
-            return retTab
+    if tableContentsAreAllTheSame(tabToCondense) then
+        return { [1] = tabToCondense[1] }
+
+    elseif tabToCondense ~= nil then
+        local checkedTab = {}
+        local retTab = {}
+        for _, v in pairs(tabToCondense) do
+            if not checkedTab[v] then
+                checkedTab[v] = true
+                retTab[#retTab + 1] = v
+            end
         end
+        return retTab
     end
     return tabToCondense
 end
@@ -1250,6 +1289,27 @@ local function buildSetDropMechanicInfo(setData, itemLink, forTooltip)
            setDropZoneStrClean, setDropMechanicTextClean, setDropLocationsTextClean, setDropOverallTextsPerZoneClean
 end
 
+local function buildSetSearchFavoritesInfo(setData)
+    local setId = setData.setId
+    if not setId then return end
+    local setSearchFavoriteCategoriesOfSetId = LibSets_SearchUI_Shared.GetAllFavoritesCategories(LibSets_SearchUI_Shared, setId)
+    if ZO_IsTableEmpty(setSearchFavoriteCategoriesOfSetId) then return end
+
+    local l_setSearchFavoritesCategoryStr = ""
+    for _, setSearchFavoriteCategory in ipairs(setSearchFavoriteCategoriesOfSetId) do
+
+        local setSearchFavoriteCategoryTexture = possibleSetSearchFavoriteCategoriesUnsorted[setSearchFavoriteCategory]
+        if setSearchFavoriteCategoryTexture ~= nil and setSearchFavoriteCategoryTexture ~= "" then
+            if l_setSearchFavoritesCategoryStr == "" then
+                l_setSearchFavoritesCategoryStr = zoif(setSearchFavoriteCategoryTexture, 24, 24)
+            else
+                l_setSearchFavoritesCategoryStr = l_setSearchFavoritesCategoryStr .. " " .. zoif(setSearchFavoriteCategoryTexture, 24, 24)
+            end
+        end
+    end
+    return l_setSearchFavoritesCategoryStr
+end
+
 local function buildSetDLCInfo(setData)
     local DLCid = setData.dlcId
     if not DLCid then return end
@@ -1390,6 +1450,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
     local setDropLocationsText, setDropLocationsTextClean
     local setDropOverallTextsPerZone, setDropOverallTextsPerZoneClean
     local setDLCText, setDLCTextClean
+    local setSearchFavoritesText, setSearchFavoritesTextClean
     --dropZoneNames, dropMechanicNames, dropLocationNames
 
     --[[
@@ -1401,7 +1462,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
         dlcNamePlaceHolder =        placeholder == "<<6>>"
     ]]
 
-    --local setId = setData.setId
+    local setId = setData.setId
     local setType = setData.setType
 
     --d(string.format("<<1>> %s, <<2>> %s, <<3>> %s, <<4>> %s, <<5>> %s, <<6>> %s",
@@ -1434,6 +1495,13 @@ local function buildSetDataText(setData, itemLink, forTooltip)
         --d(">setDLCText: " ..tos(setDLCText))
     end
 
+    --Set search UI favorites textures
+    if not forTooltip or ((useCustomTooltip and setSearchFavoritesPlaceHolder) or (not useCustomTooltip and addFavorites)) then
+        setSearchFavoritesText = buildSetSearchFavoritesInfo(setData)
+        setSearchFavoritesTextClean = ""
+        --d(">setSearchFavoritesText: " ..tos(setSearchFavoritesText))
+    end
+
 
     --Drop mechanics
     local runDropMechanic = not forTooltip or ((useCustomTooltip and (dropMechanicPlaceholder or bossNamePlaceholder or dropZonesPlaceholder))
@@ -1446,7 +1514,12 @@ local function buildSetDataText(setData, itemLink, forTooltip)
 
         ----------------------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
+        --Custom tooltip defined by the user via LAM settings
         if useCustomTooltip == true then
+            --lib._debugDropZoneNames = ZO_ShallowTableCopy(dropZoneNames)
+            --lib._debugDropMechanicNames = ZO_ShallowTableCopy(dropMechanicNames)
+            --lib._debugDropLocationNames = ZO_ShallowTableCopy(dropLocationNames)
+
             --All zoneNames are the same = Condense them to 1, else keep them as same dropZones could have diffeferent dropMechanics and dropLocations and the order needs to be kept!
             local dropZoneNamesNew = condenseTable(dropZoneNames)
             dropZoneNames = dropZoneNamesNew
@@ -1454,6 +1527,11 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             dropMechanicNames = dropMechanicNamesNew
             local dropLocationNamesNew = condenseTable(dropLocationNames)
             dropLocationNames = dropLocationNamesNew
+
+            --lib._debugDropZoneNames_New = ZO_ShallowTableCopy(dropZoneNamesNew)
+            --lib._debugDropMechanicNames_New = ZO_ShallowTableCopy(dropMechanicNamesNew)
+            --lib._debugDropLocationNames_New = ZO_ShallowTableCopy(dropLocationNamesNew)
+
 
             --Build , separated texts of dropZones, dropMechanics, dropLocationNames
             if dropZoneNames and #dropZoneNames > 0 then
@@ -1480,11 +1558,15 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             setDropMechanicTextClean =  buildTextLinesFromTable(dropMechanicNamesClean, nil, false, false)
             setDropLocationsText =      buildTextLinesFromTable(dropLocationNames, nil, false, false)
             setDropLocationsTextClean = setDropLocationsText
-        ----------------------------------------------------------------------------------------------------------------
+            ----------------------------------------------------------------------------------------------------------------
         else
+            --Non custom tooltip: Defined by LibSets
             setDropZoneStr, setDropMechanicText, setDropLocationsText, setDropOverallTextsPerZone,
             setDropZoneStrClean, setDropMechanicTextClean, setDropLocationsTextClean, setDropOverallTextsPerZoneClean = buildSetDropMechanicInfo(setData, itemLink, forTooltip)
         end
+--lib._debugSetDropMechanicText = setDropMechanicText
+--lib._debugSetDropLocationsText = setDropLocationsText
+--lib._debugSetDropZoneStr = setDropZoneStr
         ----------------------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
         --d(">setDropZoneStr: " ..tos(setDropZoneStr) .. ", setDropMechanicText: " ..tos(setDropMechanicText) .. ", setDropLocationsText: " ..tos(setDropLocationsText).. ", setDropOverallTextsPerZone: " ..tos(setDropOverallTextsPerZone))
@@ -1549,6 +1631,11 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             setNeededTraitsText = reconstructionCostText
             setNeededTraitsTextClean = reconstructionCostTextClean
         end
+        if not setSearchFavoritesPlaceHolder then
+            setSearchFavoritesText = ""
+            setSearchFavoritesTextClean = ""
+        end
+
         --[[
         --Custom tooltip placeholders
             <<1>>   Set type
@@ -1556,17 +1643,81 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             <<3>>   Drop zones
             <<4>>   Boss/Dropped by names
             <<5>>   Number of needed traits researched
-            <<6>>   Chapter/DLC name set was introduced with",
+            <<6>>   Chapter/DLC name set was introduced with
+            <<7>>   Set search favorites textures
         ]]
         --replace special characters like <br> with \n
         local patternNew = strgsub(lib.svData.useCustomTooltipPattern, "<br>", "\n")
+
+        --Remove empty texts from the pattern
+        local patternsEmpty = {}
+        if setTypeText == nil or setTypeText == "" then
+            patternNew = strgsub(patternNew, "<<1>>", "")
+            patternsEmpty["setTypeText"] = true
+        end
+        if setDropMechanicText == nil or setDropMechanicText == "" then
+            patternNew = strgsub(patternNew, "<<2>>", "")
+            patternsEmpty["setDropMechanicText"] = true
+        end
+        if setDropZoneStr == nil or setDropZoneStr == "" then
+            patternNew = strgsub(patternNew, "<<3>>", "")
+            patternsEmpty["setDropZoneStr"] = true
+        end
+        if setDropLocationsText == nil or setDropLocationsText == "" then
+            patternNew = strgsub(patternNew, "<<4>>", "")
+            patternsEmpty["setDropLocationsText"] = true
+        end
+        if setNeededTraitsText == nil or setNeededTraitsText == "" then
+            patternNew = strgsub(patternNew, "<<5>>", "")
+            patternsEmpty["setNeededTraitsText"] = true
+        end
+        if setDLCText == nil or setDLCText == "" then
+            patternNew = strgsub(patternNew, "<<6>>", "")
+            patternsEmpty["setDLCText"] = true
+        end
+        if setSearchFavoritesText == nil or setSearchFavoritesText == "" then
+            patternNew = strgsub(patternNew, "<<7>>", "")
+            patternsEmpty["setSearchFavoritesText"] = true
+        end
+
+        --Add automatic linebreaks after the custom tooltip parts
+        if addLineBreakAfterNonEmptyParts == true then
+            --d(">addLineBreakAfterNonEmptyParts = true")
+            if not patternsEmpty["setTypeText"] then
+                setTypeText =           addLineBreakIfNotEmpty(setTypeText)
+                setTypeTextClean =      addLineBreakIfNotEmpty(setTypeTextClean)
+            end
+            if not patternsEmpty["setDropMechanicText"] then
+                setDropMechanicText =   addLineBreakIfNotEmpty(setDropMechanicText)
+                setDropMechanicTextClean =  addLineBreakIfNotEmpty(setDropMechanicTextClean)
+            end
+            if not patternsEmpty["setDropZoneStr"] then
+                setDropZoneStr =         addLineBreakIfNotEmpty(setDropZoneStr)
+                setDropZoneStrClean =    addLineBreakIfNotEmpty(setDropZoneStrClean)
+            end
+            if not patternsEmpty["setDropLocationsText"] then
+                setDropLocationsText =      addLineBreakIfNotEmpty(setDropLocationsText)
+                setDropLocationsTextClean = addLineBreakIfNotEmpty(setDropLocationsTextClean)
+            end
+            if not patternsEmpty["setDLCText"] then
+                setDLCText =                addLineBreakIfNotEmpty(setDLCText)
+                setDLCTextClean =           addLineBreakIfNotEmpty(setDLCTextClean)
+            end
+            if not patternsEmpty["setSearchFavoritesText"] then
+                setSearchFavoritesText =      addLineBreakIfNotEmpty(setSearchFavoritesText)
+                setSearchFavoritesTextClean = addLineBreakIfNotEmpty(setSearchFavoritesTextClean)
+            end
+        end
+
+        --Repalce the placeholders with the text now
         setInfoText = zostrfor(patternNew,
                 setTypeText,
                 setDropMechanicText,
                 setDropZoneStr,
                 setDropLocationsText,
                 setNeededTraitsText, --or reconstructableSetCosts for non craftable sets!
-                setDLCText
+                setDLCText,
+                setSearchFavoritesText
         )
         if not forTooltip then
             setInfoTextNoTextures = zostrfor(patternNew,
@@ -1575,7 +1726,8 @@ local function buildSetDataText(setData, itemLink, forTooltip)
                     setDropZoneStrClean,
                     setDropLocationsTextClean,
                     setNeededTraitsTextClean, --or reconstructableSetCosts for non craftable sets!
-                    setDLCTextClean
+                    setDLCTextClean,
+                    setSearchFavoritesTextClean
             )
         end
     else
@@ -1669,6 +1821,10 @@ local function buildSetDataText(setData, itemLink, forTooltip)
         if not forTooltip or addDLC then
             addSetInfoText(setDLCText)
             addSetInfoTextClean(setDLCTextClean)
+        end
+        if not forTooltip or addFavorites then
+            addSetInfoText(setSearchFavoritesText)
+            addSetInfoTextClean(setSearchFavoritesTextClean)
         end
     end
 
@@ -1822,6 +1978,10 @@ local function loadLAMSettingsMenu()
     local defaultSettings                         = lib.defaultSV
     local preventLAMTooltipEditSetFuncEndlessLoop = false
 
+    local function tooltipLAMDisabledFunc()
+        return not settings.modifyTooltips or isCustomTooltipEnabled()
+    end
+
     local optionsTable                            =
     {
 ------------------------------------------------------------------------------------------------------------------------
@@ -1875,7 +2035,7 @@ local function loadLAMSettingsMenu()
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.tooltipTextures,
-            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
+            disabled =  function() return tooltipLAMDisabledFunc() end,
             width =     "full",
         },
 
@@ -1896,7 +2056,7 @@ local function loadLAMSettingsMenu()
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addSetType,
-            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
+            disabled =  function() return tooltipLAMDisabledFunc() end,
             width =     "full",
         },
         {
@@ -1909,7 +2069,7 @@ local function loadLAMSettingsMenu()
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDropLocation,
-            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
+            disabled =  function() return tooltipLAMDisabledFunc() end,
             width =     "full",
         },
         {
@@ -1922,7 +2082,7 @@ local function loadLAMSettingsMenu()
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDropMechanic,
-            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
+            disabled =  function() return tooltipLAMDisabledFunc() end,
             width =     "full",
         },
         {
@@ -1935,7 +2095,7 @@ local function loadLAMSettingsMenu()
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addBossName,
-            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
+            disabled =  function() return tooltipLAMDisabledFunc() end,
             width =     "full",
         },
         {
@@ -1949,7 +2109,7 @@ local function loadLAMSettingsMenu()
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addNeededTraits,
-            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
+            disabled =  function() return tooltipLAMDisabledFunc() end,
             width =     "full",
         },
         {
@@ -1962,7 +2122,20 @@ local function loadLAMSettingsMenu()
                 isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDLC,
-            disabled =  function() return not settings.modifyTooltips or isCustomTooltipEnabled() end,
+            disabled =  function() return tooltipLAMDisabledFunc() end,
+            width =     "full",
+        },
+        {
+            type =      "checkbox",
+            name =      localization.favorites,
+            tooltip =   localization.favorites,
+            getFunc =   function() return settings.tooltipModifications.addFavorites end,
+            setFunc =   function(value)
+                lib.svData.tooltipModifications.addFavorites = value
+                isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.addFavorites,
+            disabled =  function() return tooltipLAMDisabledFunc() end,
             width =     "full",
         },
 
@@ -1998,6 +2171,19 @@ local function loadLAMSettingsMenu()
             default = defaultSettings.useCustomTooltipPattern,
             reference = "LibSets_LAM_EditBox_CustomTooltipPattern",
             --requiresReload = true,
+        },
+        {
+            type =      "checkbox",
+            name =      localization.addLineBreakAtCustomTooltipParts,
+            tooltip =   localization.addLineBreakAtCustomTooltipParts_TT,
+            getFunc =   function() return settings.addLineBreakAtCustomTooltipParts end,
+            setFunc =   function(value)
+                addLineBreakAfterNonEmptyParts = value
+                lib.svData.addLineBreakAtCustomTooltipParts = value
+            end,
+            default =   defaultSettings.addLineBreakAtCustomTooltipParts,
+            disabled =  function() return not settings.useCustomTooltipPattern end,
+            width =     "full",
         },
 
         ----------------------------------------------------------------------------------------------------------------

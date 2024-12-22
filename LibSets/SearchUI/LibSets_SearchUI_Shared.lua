@@ -1427,6 +1427,18 @@ function LibSets_SearchUI_Shared:ItemLinkToChat(data)
     end
 end
 
+function LibSets_SearchUI_Shared:GetAllFavoritesCategories(setId)
+    local setSearchFavoriteCategoriesOfSetId
+    local setSearchFavorites = lib.svData.setSearchFavorites
+    for favoriteCategory, data in pairs(setSearchFavorites) do
+        if data ~= nil and data[setId] then
+            setSearchFavoriteCategoriesOfSetId = setSearchFavoriteCategoriesOfSetId or {}
+            setSearchFavoriteCategoriesOfSetId[#setSearchFavoriteCategoriesOfSetId + 1] = favoriteCategory
+        end
+    end
+    return setSearchFavoriteCategoriesOfSetId
+end
+
 function LibSets_SearchUI_Shared:GetNextFavoritesCategory(setId)
     local setSearchFavorites = lib.svData.setSearchFavorites
     for favoriteCategory, data in pairs(setSearchFavorites) do
@@ -1454,7 +1466,7 @@ function LibSets_SearchUI_Shared:AddSetIdToFavorites(rowControl, setId, favorite
     self.resultsList:AddFavorite(rowControl, favoriteCategory)
     CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryAdded", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
 
-    self.resultsList:RefreshData() --To update filtered rows
+    self.resultsList:RefreshData() --To update filtered rows and tooltips
 end
 
 function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)

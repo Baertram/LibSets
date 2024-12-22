@@ -762,8 +762,10 @@ local function LoadSavedVariables()
             addNeededTraits = true,
             addReconstructionCost = true, --shares the same LAM checkbox as addNeededTraits
             addDLC          = true,
+            addFavorites    = true,
         },
         useCustomTooltipPattern = "",
+        addLineBreakAtCustomTooltipParts = false,
 
         --Created tooltip for set preview
         setPreviewTooltips = {
@@ -4503,6 +4505,31 @@ end
 ]]
 function lib.GetSetSearchFavoriteCategories()
     return possibleSetSearchFavoriteCategories
+end
+
+--Get the categoryData (category, categoryName, texture) as a table, for the passed in category
+--Return table:nilable categoryData { category = string "lightningStaff", categoryName = string "Lightning Staff", texture = string "/esoui/art/progression/icon_lightningstaff.dds" }
+function lib.GetSetSearchFavoriteCategoryData(category)
+    for _, setSearchFavoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
+        if setSearchFavoriteCategoryData.category and setSearchFavoriteCategoryData.category == category then
+            return setSearchFavoriteCategoryData
+        end
+    end
+    return nil
+end
+local libSets_GetSetSearchFavoriteCategoryData = lib.GetSetSearchFavoriteCategoryData
+
+--Get all categoryData (category, categoryName, texture) as a table, containing each category's data as subtable, for the passed in setId
+--Return table:nilable categoryDataOfSetId { [1] = { category = string "lightningStaff", categoryName = string "Lightning Staff", texture = string "/esoui/art/progression/icon_lightningstaff.dds" }, ... }
+function lib.GetSetSearchFavoritesCategoriesForSetId(setId)
+    local setSearchFavoriteCategoriesOfSetId = LibSets_SearchUI_Shared.GetAllFavoritesCategories(LibSets_SearchUI_Shared.setId)
+    if ZO_IsTableEmpty(setSearchFavoriteCategoriesOfSetId) then return nil end
+    local retTab = {}
+    for _, category in ipairs(setSearchFavoriteCategoriesOfSetId) do
+        local categoryData = libSets_GetSetSearchFavoriteCategoryData(category)
+        retTab[#retTab + 1] = categoryData
+    end
+    return retTab
 end
 
 
