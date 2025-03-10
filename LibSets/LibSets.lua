@@ -4896,6 +4896,8 @@ local function myInvItemLinkCallbackFunc(inventorySlot, slotActions, ctrl, alt, 
     if not hasSet or setId == nil then return end
 
     local setType = libSets_GetSetType(setId)
+    if setType == LIBSETS_SETTYPE_CRAFTED then return end
+
     local setTypeTexture = libSets_GetSetTypeTexture(setType, setId)
 
     local submenuEntris = {}
