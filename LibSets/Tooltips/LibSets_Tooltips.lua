@@ -166,6 +166,7 @@ local libSets_GetZoneName =                 lib.GetZoneName
 --local libSets_GetDropMechanicName =         lib.GetDropMechanicName
 local libSets_GetSetTypeName =              lib.GetSetTypeName
 local libSets_GetDLCName =                  lib.GetDLCName
+local libSets_GetSetTypeTexture =           lib.GetSetTypeTexture
 
 --The tooltip game data line after that the LibSets entries should be added
 local tooltipGameDataEntryToAddAfter = TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN
@@ -1334,11 +1335,7 @@ local function buildSetTypeInfo(setData, buildTextures)
         if setData.isVeteran ~= nil then
             setTypeTexture = vetDungTexture
         else
-            if setType == LIBSETS_SETTYPE_CLASS and setData.classId ~= nil then
-                setTypeTexture = lib.classData.icons[setData.classId]
-            else
-                setTypeTexture = setTypeToTexture[setType]
-            end
+            setTypeTexture = libSets_GetSetTypeTexture(setType, setData.setId, setData.classId)
         end
     end
     return setTypeName, setTypeTexture
@@ -1975,7 +1972,7 @@ local function loadLAMSettingsMenu()
     lib.LAMsettingsPanel = LAMsettingsPanel
 
     local settings = lib.svData
-    local defaultSettings                         = lib.defaultSV
+    local defaultSettings = lib.defaultSV
     local preventLAMTooltipEditSetFuncEndlessLoop = false
 
     local function tooltipLAMDisabledFunc()
@@ -2000,6 +1997,25 @@ local function loadLAMSettingsMenu()
             end,
             default =   defaultSettings.addSetCollectionsCurrentZoneButton,
             disabled =  function() return false end,
+            requiresReload = false,
+            width =     "full",
+        },
+------------------------------------------------------------------------------------------------------------------------
+        {
+            type = "header",
+            name = localization.headerItemLinks,
+        },
+        {
+            type =      "checkbox",
+            name =      localization.addSetCollectionsSearchItemLink,
+            tooltip =   localization.addSetCollectionsSearchItemLink,
+            getFunc =   function() return settings.addSetCollectionsSearchItemLink end,
+            setFunc =   function(value)
+                lib.svData.addSetCollectionsSearchItemLink = value
+                lib.addSetCollectionsSearchItemLinkContextMenuEntry()
+            end,
+            default =   defaultSettings.addSetCollectionsSearchItemLink,
+            disabled =  function() return LibCustomMenu == nil end,
             requiresReload = false,
             width =     "full",
         },

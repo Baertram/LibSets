@@ -28,12 +28,14 @@ local favoriteIconTexts = searchUI.favoriteIconTexts
 
 --LibScrollableMenu
 local LSM = LibScrollableMenu
-local isLSMEnabled = false --todo: Currently LSM does not support multiselection properly so we cannot use it here. LSM ~= nil and true or false
+local isLSMEnabled = LSM ~= nil --todo: Currently LSM does not support multiselection properly so we cannot use it here. LSM ~= nil and true or false
 local LSM_defaultComboBoxOptions = {
     visibleRowsDropdown = 15,
     visibleRowsSubmenu  = 15,
     sortEntries         = false,
     enableFilter        = true,
+    headerCollapsible   = true,
+    --enableMultiSelect = true,
 }
 
 
@@ -360,7 +362,7 @@ local function sortFilterComboBox(comboBox, sortType, suppressRebuild)
 end
 
 function LibSets_SearchUI_Keyboard:InitializeFilters()
-    self.LSM_Dropdowns = {}
+    if isLSMEnabled then self.LSM_Dropdowns = {} end
     local filters = self.filtersControl
 
     ------------------------------------------------
@@ -385,8 +387,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         setTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    setTypeDropdown:SetSortsItems(false)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.setTypeFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.setTypeFiltersControl, LSM_defaultComboBoxOptions) end
+    setTypeDropdown:SetSortsItems(false)
 
     for setType, isValid in pairs(lib.allowedSetTypes) do
         if isValid == true then
@@ -417,8 +419,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         armorTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_APPAREL_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    armorTypeDropdown:SetSortsItems(false)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.armorTypeFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.armorTypeFiltersControl, LSM_defaultComboBoxOptions) end
+    armorTypeDropdown:SetSortsItems(false)
 
     for armorType, _ in pairs(lib.armorTypesSets) do
         local _, armorTypeNameStr, armorTypeName = getArmorTypeTexture(armorType)
@@ -443,8 +445,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         weaponTypeDropdown:EnableMultiSelect(SI_ITEM_SETS_BOOK_WEAPON_TYPES_DROPDOWN_TEXT, getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    weaponTypeDropdown:SetSortsItems(false)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.weaponTypeFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.weaponTypeFiltersControl, LSM_defaultComboBoxOptions) end
+    weaponTypeDropdown:SetSortsItems(false)
 
     for weaponType, _ in pairs(lib.weaponTypesSets) do
         local _, weaponTypeNameStr, weaponTypeName = getWeaponTypeTexture(weaponType)
@@ -469,8 +471,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         equipmentTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    equipmentTypeDropdown:SetSortsItems(false)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.equipmentTypeFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.equipmentTypeFiltersControl, LSM_defaultComboBoxOptions) end
+    equipmentTypeDropdown:SetSortsItems(false)
 
     --local alreadyCheckedEquipTypes = {}
     for equipType, isValid in pairs(lib.equipTypesValid) do
@@ -498,8 +500,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         DLCIdDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    DLCIdDropdown:SetSortsItems(true)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.DCLIdFiltersControl, LSM_defaultComboBoxOptions) end
+    DLCIdDropdown:SetSortsItems(true)
 
     for DLCId, isValid in pairs(lib.allowedDLCIds) do
         if isValid == true then
@@ -526,8 +528,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         enchantmentSearchCategoryTypeDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    enchantmentSearchCategoryTypeDropdown:SetSortsItems(true)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.enchantSearchCategoryTypeFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.enchantSearchCategoryTypeFiltersControl, LSM_defaultComboBoxOptions) end
+    enchantmentSearchCategoryTypeDropdown:SetSortsItems(true)
 
     for enchantSearchCategoryType, isValid in pairs(lib.enchantSearchCategoryTypesValid) do
         if isValid == true and enchantSearchCategoryType ~= "all" then
@@ -556,8 +558,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         favoritesDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    favoritesDropdown:SetSortsItems(false)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.favoritesFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.favoritesFiltersControl, LSM_defaultComboBoxOptions) end
+    favoritesDropdown:SetSortsItems(false)
 
     local entry = favoritesDropdown:CreateItemEntry(GetString(SI_ARMORTYPE0)) -- None
     entry.filterType = 0
@@ -597,8 +599,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         numBonusDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    numBonusDropdown:SetSortsItems(true)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.numBonusFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.numBonusFiltersControl, LSM_defaultComboBoxOptions) end
+    numBonusDropdown:SetSortsItems(true)
 
     for numBonus=1, MAX_NUM_SET_BONUS, 1 do
         local entry = numBonusDropdown:CreateItemEntry(tostring(numBonus))
@@ -621,8 +623,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         dropZoneDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    dropZoneDropdown:SetSortsItems(true)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.dropZoneFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.dropZoneFiltersControl, LSM_defaultComboBoxOptions) end
+    dropZoneDropdown:SetSortsItems(true)
 
     local dropZoneIds = lib.GetAllDropZones()
     if dropZoneIds ~= nil then
@@ -671,8 +673,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         dropMechanicsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    dropMechanicsDropdown:SetSortsItems(false)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.dropMechanicsFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.dropMechanicsFiltersControl, LSM_defaultComboBoxOptions) end
+    dropMechanicsDropdown:SetSortsItems(false)
 
     for dropMechanicId, isValid in pairs(lib.allowedDropMechanics) do
         if isValid == true then
@@ -708,8 +710,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         dropLocationsDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    dropLocationsDropdown:SetSortsItems(true)
     if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.dropLocationsFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.dropLocationsFiltersControl, LSM_defaultComboBoxOptions) end
+    dropLocationsDropdown:SetSortsItems(true)
 
     local dropLocationNamesInClientLang = lib.GetAllDropLocationNames()
     if dropLocationNamesInClientLang ~= nil then

@@ -29,13 +29,8 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2024-12-03, Baertram, AP101044
+ Last updated: 2025-01-25, Baertram, AP101045
 ------------------------------------------------------------------------------------------------------------------------
---Fixed wrong ZOs data for sets like Motjers sorrow. This item shows as set on PTS:
-"|H1:item:4316:366:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h"
-bot not on live! So the total set was removed due to that.
-Had to add extra code to not remove the total set because of single items not shown as set.
-
  --Known bugs--
 
  --Todo list--
@@ -271,7 +266,7 @@ local clientLang = lib.clientLang
 ------------------------------------------------------------------------
 -- 	Local variables, global for the library
 ------------------------------------------------------------------------
-local CM = CALLBACK_MANAGER
+--local CM = CALLBACK_MANAGER
 local EM = EVENT_MANAGER
 local WM = WINDOW_MANAGER
 local ISCDM = ITEM_SET_COLLECTIONS_DATA_MANAGER
@@ -298,8 +293,7 @@ local gcmzidx = GetCurrentMapZoneIndex
 local gmidbzid = GetMapIndexByZoneId
 local gznbid = GetZoneNameById
 
-local gilsetinf = GetItemLinkSetInfo
-
+local gil = GetItemLink
 local gilat = GetItemLinkArmorType
 local gilet = GetItemLinkEquipType
 local giltt = GetItemLinkTraitType
@@ -369,11 +363,18 @@ local customTooltipHooksNeeded =        lib.customTooltipHooks.needed
 local classData =                       lib.classData
 local allClassSets =                    lib.classSets
 
+lib.lookupTableItemSetIdToItemSetCollectionsCategory = {}
+local lookupTableItemSetIdToItemSetCollectionsCategory = lib.lookupTableItemSetIdToItemSetCollectionsCategory
+
 local nonPerfectedSet2PerfectedSet =    lib.nonPerfectedSet2PerfectedSet
 local perfectedSet2NonPerfectedSet =    lib.perfectedSet2NonPerfectedSet
 local perfectedSetsInfo =               lib.perfectedSetsInfo
 local perfectedSets =                   lib.perfectedSets
 local nonPerfectedSets =                lib.nonPerfectedSets
+
+local libSets_GetSetType
+local setTypeToTexture = lib.setTypeToTexture
+
 
 local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
 local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavoriteCategoriesUnsorted
@@ -406,6 +407,7 @@ local callDebugParams = {
     scanitemids         = "DebugScanAllSetData",
 
     getall              = "DebugGetAllData",
+    getallnoitemids     = function() lib.DebugGetAllData(true, true, false) end,
     getallnames         = "DebugGetAllNames",
 
     getzones            = "DebugGetAllZoneInfo",
@@ -492,7 +494,7 @@ local function getLocalizedText(textName, lang, ...)
 
     local strForParams = {...}
     if strForParams ~= nil and #strForParams <= 7 then
-        localizedText = string.format(localizedText, unpack(strForParams))
+        localizedText = strfor(localizedText, unpack(strForParams))
     end
     return localizedText or ""
 end
@@ -673,6 +675,33 @@ local function getArmorTypeTexture(p_armorType)
 end
 lib.GetArmorTypeTexture = getArmorTypeTexture
 
+local function libSets_GetSetTypeTexture(setType, setId, classId)
+    if setType == nil and setId == nil then return end
+    if setType == nil then
+        libSets_GetSetType = libSets_GetSetType or lib.GetSetType
+        setType = libSets_GetSetType(setId)
+    end
+
+    local setTypeTexture
+    if setType ~= nil then
+        if setType == LIBSETS_SETTYPE_CLASS then
+            if classId == nil then
+                getSetInfo = getSetInfo or lib.GetSetInfo
+                local setInfoForClassId = getSetInfo(setId)
+                classId = setInfoForClassId ~= nil and setInfoForClassId.classId or nil
+            end
+            if classId then
+                setTypeTexture = classData.icons[classId]
+            end
+        end
+        if setTypeTexture == nil then
+            setTypeTexture = setTypeToTexture[setType]
+        end
+    end
+    return setTypeTexture
+end
+lib.GetSetTypeTexture = libSets_GetSetTypeTexture
+
 local function validateValueAgainstCheckTable(numberOrTable, checkTable, isAnyInCheckTable, doLocalDebug)
     isAnyInCheckTable = isAnyInCheckTable or false
     doLocalDebug = doLocalDebug or false
@@ -778,6 +807,9 @@ local function LoadSavedVariables()
 
         --UI stuff
         addSetCollectionsCurrentZoneButton = true,
+
+        --ItemLinks
+        addSetCollectionsSearchItemLink = true,
 
         --Search UI
         setSearchTooltipsAtTextFilters = true,
@@ -890,7 +922,7 @@ lib.DecompressSetIdItemIds = decompressSetIdItemIds
 --Check if an itemLink is a set and return the set's data from ESO API function GetItemLinkSetInfo
 local function checkSet(itemLink)
     if itemLink == nil or itemLink == "" then return false, "", 0, 0, 0, 0 end
-    local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = gilsetinf(itemLink, false)
+    local isSet, setName, numBonuses, numEquipped, maxEquipped, setId = gilsi(itemLink, false)
     if not isSet then isSet = false end
     return isSet, setName, setId, numBonuses, numEquipped, maxEquipped
 end
@@ -2586,6 +2618,7 @@ function lib.GetSetType(setId)
     if setData == nil then return end
     return setData[LIBSETS_TABLEKEY_SETTYPE]
 end
+libSets_GetSetType = lib.GetSetType
 
 --Returns the setType name as String
 --> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
@@ -3773,6 +3806,31 @@ end
 ------------------------------------------------------------------------
 -- 	Item set collections functions
 ------------------------------------------------------------------------
+local wasSetCollectionsBookOpenedYet = false
+local openItemSetCollectionBookOfCategoryData
+
+local maxRuns = 10
+local updaterName = MAJOR .. "_ItemSetCollectionsBookOpenedTask"
+local updateRunsDone = 0
+
+local recursiveLoopsMax = 250
+local recursiveLoopsCounter = 0
+local categoryIdDetermined, parentCategoryDetermined
+
+local function runItemSetCollectionsBookOpenedTask(repeatDelay, func, ...)
+    EM:UnregisterForUpdate(updaterName)
+    updateRunsDone = 0
+    params = {...}
+
+    repeatDelay = repeatDelay or 50
+    EM:RegisterForUpdate(updaterName, repeatDelay, function() return func(unpack(params))  end)
+end
+
+local function getSetCollectionsCategoryTree()
+    return ITEM_SET_COLLECTIONS_BOOK_KEYBOARD.categoryTree
+end
+
+
 --Returns string itemSetCollectionKey "setId:itemSetCollectionSlotId" of the itemLink
 --identifying a set item by setId and the equipment slot (e.g. hands, chest, ...) which potentially could have different
 --itemIds
@@ -3909,74 +3967,108 @@ function lib.GetNumItemSetCollectionZoneUnlockedPieces(zoneId)
     return getItemSetCollectionUnlockedAndTotal(zoneId)
 end
 
-
 --Open a node in the item set collections book for teh given category data table
 -->the table categoryData must be determined via lib.GetItemSetCollectionCategoryData before
 -->categoryData.parentId must be given and > 0! categoryData.category can be nil or <= 0, then the parentId will be shown
-local openItemSetCollectionBookOfCategoryData
-function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
-    if not checkIfSetsAreLoadedProperly() then return end
-    openItemSetCollectionBookOfCategoryData = openItemSetCollectionBookOfCategoryData or lib.OpenItemSetCollectionBookOfCategoryData
-    if not categoryData or type(categoryData) ~= "table"
-            or categoryData.parentCategory == nil or categoryData.parentCategory <= 0 then
+local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryData)
+    updateRunsDone = updateRunsDone + 1
+--d("[LibSets]checkIfOpenItemSetCollectionBookOfCategoryDataIsReady - categoryData: " ..tos(categoryData) .. "; updateRunsDone: " ..tos(updateRunsDone) .."; wasSetCollectionsBookOpenedYet: " ..tos(wasSetCollectionsBookOpenedYet))
+    if updateRunsDone >= maxRuns then
+        EM:UnregisterForUpdate(updaterName)
+        updateRunsDone = 0
         return
     end
-    if SCENE_MANAGER.currentScene.name ~= "itemSetsBook" then
-        MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "itemSetsBook")
-    end
-    local categoryTree = ITEM_SET_COLLECTIONS_BOOK_KEYBOARD.categoryTree
+
+    local categoryTree = getSetCollectionsCategoryTree()
     if not categoryTree then return end
-    --How to get the node control ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
-    --Scan all entries in ITEM_SET_COLLECTIONS_BOOK_KEYBOARD.categoryTree.nodes.dataEntry.data somehow?
-    --Or via categoryTree:GetTreeNodeByData or categoryTree:GetTreeNodeInTreeByData? Might not work as the equalityFunction
-    --which GetTreeNodeInTreeByData uses only checks via GetId() function
-    --
-    --From the categoryTree, by help of the parentCategory and the categoryId:
-    -->loop over categoryTree.rootNode.children
-    --->local parentCategoryData = categoryTree.rootNode.children[n].data.dataSource.categoryId == categoryData.parentCategory
-    --->select subCategory from the parentCategory: parentCategoryData.children.data.dataSource.categoryId == categoryData.category
-    ---->nodeToOpen = parentCategoryData.children.data.node
+
+    EM:UnregisterForUpdate(updaterName)
+
     local nodeToOpen --= ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
-    local parentCategoryIdToFind = categoryData.parentCategory
-    local categoryIdToFind = categoryData.category
     local parentCategories = categoryTree.rootNode.children
-    --Nothing found? Try again after 250ms
-    if not parentCategories then
-        zo_callLater(function()
-            return openItemSetCollectionBookOfCategoryData(categoryData)
-        end, 250)
-        return
-    end
-    for _, parentCategoryData in pairs(parentCategories) do
-        if nodeToOpen == nil then
-            if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
-                    and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
-                --No subCategory given?
-                if categoryIdToFind == nil or categoryIdToFind <= 0 then
-                    --return the node of the parentCategory
-                    nodeToOpen = parentCategoryData.data.node
-                    break
-                else
-                    --Search for the correct subCategory
-                    for _, subCategoryData in pairs(parentCategoryData.children) do
-                        if nodeToOpen == nil then
-                            if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
-                                    and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
-                                nodeToOpen = subCategoryData.data.node
-                                break
+
+    --Select the top-most entry or any chosen one?
+    if categoryData ~= LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE then
+        --How to get the node control ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
+        --Scan all entries in ITEM_SET_COLLECTIONS_BOOK_KEYBOARD.categoryTree.nodes.dataEntry.data somehow?
+        --Or via categoryTree:GetTreeNodeByData or categoryTree:GetTreeNodeInTreeByData? Might not work as the equalityFunction
+        --which GetTreeNodeInTreeByData uses only checks via GetId() function
+        --
+        --From the categoryTree, by help of the parentCategory and the categoryId:
+        -->loop over categoryTree.rootNode.children
+        --->local parentCategoryData = categoryTree.rootNode.children[n].data.dataSource.categoryId == categoryData.parentCategory
+        --->select subCategory from the parentCategory: parentCategoryData.children.data.dataSource.categoryId == categoryData.category
+        ---->nodeToOpen = parentCategoryData.children.data.node
+        local parentCategoryIdToFind = categoryData.parentCategory
+        local categoryIdToFind = categoryData.category
+--d(">category: " ..tos(categoryIdToFind) .. ", parentCategory: " .. tos(parentCategoryIdToFind))
+
+        for _, parentCategoryData in pairs(parentCategories) do
+            if nodeToOpen == nil then
+                if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
+                        and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
+--d(">found parentCategory")
+                    --No subCategory given?
+                    if categoryIdToFind == nil or categoryIdToFind <= 0 then
+--d(">no subcategory to open -> open parent category node")
+                        --return the node of the parentCategory
+                        nodeToOpen = parentCategoryData.data.node
+                        break
+                    else
+                        --Search for the correct subCategory
+                        for _, subCategoryData in pairs(parentCategoryData.children) do
+                            if nodeToOpen == nil then
+                                if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
+                                        and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
+--d(">found category")
+                                    nodeToOpen = subCategoryData.data.node
+                                    break
+                                end
                             end
                         end
                     end
                 end
+            else
+                break
             end
-        else
-            break
         end
+    else
+--d(">open topmost")
+        --Open the top most node: LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE
+        nodeToOpen = parentCategories[1].data.node
     end
-    if nodeToOpen == nil then return end
-    if categoryTree.selectedNode == nodeToOpen then return true end
+
+    if nodeToOpen == nil then
+        return
+    end
+    if categoryTree.selectedNode == nodeToOpen then
+--d("<node was already opened")
+        return true
+    end
+--d(">selecting node now!")
     categoryTree:SelectNode(nodeToOpen)
     return (categoryTree.selectedNode == nodeToOpen) or false
+end
+
+function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
+--d("[LibSets]OpenItemSetCollectionBookOfCategoryData")
+    if not checkIfSetsAreLoadedProperly() then return end
+    openItemSetCollectionBookOfCategoryData = openItemSetCollectionBookOfCategoryData or lib.OpenItemSetCollectionBookOfCategoryData
+    if not categoryData or type(categoryData) ~= "table"
+            or categoryData.parentCategory == nil or categoryData.parentCategory <= 0 then
+        if categoryData ~= LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE then
+            return
+        end
+    end
+
+    if SCENE_MANAGER.currentScene.name ~= "itemSetsBook" then
+        MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "itemSetsBook")
+--d(">showing the itemSetsBook scene now....")
+    end
+
+    --Now check repetively if the childnodes have been populated
+
+    runItemSetCollectionsBookOpenedTask(50, checkIfOpenItemSetCollectionBookOfCategoryDataIsReady, categoryData)
 end
 openItemSetCollectionBookOfCategoryData = lib.OpenItemSetCollectionBookOfCategoryData
 
@@ -4029,7 +4121,6 @@ function lib.OpenItemSetCollectionBookOfZone(zoneId)
     return openItemSetCollectionsBookOfZoneId(zoneId)
 end
 
-
 function lib.OpenSetItemCollectionBrowserForCurrentZone(useParentZone)
     if useParentZone == true then
         return openItemSetCollectionBookOfCurrentParentZone()
@@ -4039,7 +4130,119 @@ function lib.OpenSetItemCollectionBrowserForCurrentZone(useParentZone)
 end
 local openSetItemCollectionBrowserForCurrentZone = lib.OpenSetItemCollectionBrowserForCurrentZone
 
+local function recursivelyCheckItemSetIdAtChildren(childNodes, setIdToFind)
+    --d("[LibSets]recursivelyCheckItemSetIdAtChildren - setIdToFind: " ..tos(setIdToFind) .. ", childNodes: " ..tos(childNodes) .. ", recursiveLoopsCounter: " ..tos(recursiveLoopsCounter))
+    if categoryIdDetermined ~= nil and parentCategoryDetermined ~= nil then return categoryIdDetermined, parentCategoryDetermined end
+    if (categoryIdDetermined == nil and parentCategoryDetermined ~= nil) or (categoryIdDetermined ~= nil and parentCategoryDetermined == nil) then
+        categoryIdDetermined = nil
+        parentCategoryDetermined = nil
+    end
+    if setIdToFind == nil then return end
+    if recursiveLoopsCounter >= recursiveLoopsMax then
+        d("[LibSets]ERROR - Aborted due to recursive loop maximum reached within \'recursivelyCheckItemSetIdAtChildren\'")
+        return -99
+    end
 
+    --Cached lookupTable got the setid already?
+    local lookupTableData = lookupTableItemSetIdToItemSetCollectionsCategory[setIdToFind]
+    if lookupTableData ~= nil then
+--d(">taking categoryId from lookup table")
+        categoryIdDetermined = lookupTableData.category
+        parentCategoryDetermined = lookupTableData.parentCategory
+        return categoryIdDetermined, parentCategoryDetermined
+    end
+
+    if ZO_IsTableEmpty(childNodes) then
+        --d("<<childs are empty")
+        return categoryIdDetermined, parentCategoryDetermined
+    end
+
+    for idx, childNode in ipairs(childNodes) do
+        --d(">childNode: " ..tos(idx))
+
+        --The node got subNotes? Check these first
+        if childNode.children ~= nil then
+            --d(">>child got children!")
+            recursiveLoopsCounter = recursiveLoopsCounter + 1
+            categoryIdDetermined, parentCategoryDetermined = recursivelyCheckItemSetIdAtChildren(childNode.children, setIdToFind)
+        end
+
+        if categoryIdDetermined == nil and parentCategoryDetermined == nil then
+            local childNodeDataSource = childNode.GetData and childNode:GetData():GetDataSource() or nil
+            if childNodeDataSource and not ZO_IsTableEmpty(childNodeDataSource.collections) then
+                for collectionIdx, collectionData in ipairs(childNodeDataSource.collections) do
+                    local itemSetId = collectionData.itemSetId
+                    --d(">>collectionIdx: " .. tos(collectionIdx) .. ", setId: " .. tos(itemSetId))
+                    if itemSetId ~= nil then
+                        --Cache the already found categories of the setIds
+                        if lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] == nil then
+                            lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] = { category = childNodeDataSource.categoryId, parentCategory = childNodeDataSource.parentCategoryData.categoryId }
+                        end
+                        --SetIt matches the itemSetId at the collections? -> Return that categoryId
+                        if itemSetId == setIdToFind then
+                            categoryIdDetermined = childNodeDataSource.categoryId
+                            parentCategoryDetermined = childNodeDataSource.parentCategoryData.categoryId
+--d("<<Found setId: " .. tos(itemSetId) .. ", categoryId: " .. tos(categoryIdDetermined) .. ", parentCategory: " .. tos(parentCategoryDetermined))
+                            return categoryIdDetermined, parentCategoryDetermined
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return categoryIdDetermined, parentCategoryDetermined
+end
+
+local function checkIfSetItemCollectionBookForItemLinkIsReady(setId)
+    updateRunsDone = updateRunsDone + 1
+--d("[LibSets]checkIfSetItemCollectionBookForItemLinkIsReady - setId: " ..tos(setId) .. "; updateRunsDone: " ..tos(updateRunsDone) .."; wasSetCollectionsBookOpenedYet: " ..tos(wasSetCollectionsBookOpenedYet))
+    if updateRunsDone >= maxRuns then
+        EM:UnregisterForUpdate(updaterName)
+        updateRunsDone = 0
+        return
+    end
+
+    if wasSetCollectionsBookOpenedYet == true then
+        EM:UnregisterForUpdate(updaterName)
+
+        --Search all categories for the collections, and if the setId is in there
+        local categoryTree = getSetCollectionsCategoryTree()
+        local childNodes = categoryTree and categoryTree.rootNode and categoryTree.rootNode.children or nil
+        if childNodes == nil then
+--d("<[ABORT]childNodes are nil!")
+            return
+        end
+
+        --20250309 Here we need to recursively check the childNode's children and sub node's children
+--d(">childNodes: " .. tos(childNodes ~= nil and #childNodes))
+        local categoryIdOfSetId, parentCategoryofSetId = recursivelyCheckItemSetIdAtChildren(childNodes, setId)
+--d(">>categoryIdOfSetId: " .. tos(categoryIdOfSetId) .. "; parentCategoryofSetId: " .. tos(parentCategoryofSetId))
+        if categoryIdOfSetId == -99 then categoryIdOfSetId = nil end
+
+        if categoryIdOfSetId ~= nil and parentCategoryofSetId ~= nil then
+--d(">>opening node now - parent: " ..tos(parentCategoryofSetId) ..", category: " .. tos(categoryIdOfSetId))
+            return openItemSetCollectionBookOfCategoryData({ category = categoryIdOfSetId, parentCategory = parentCategoryofSetId})
+        end
+    end
+end
+
+function lib.OpenSetItemCollectionBookForItemLink(itemLink)
+--d("[LibSets]OpenSetItemCollectionBookForItemLink: " ..tos(itemLink))
+    recursiveLoopsCounter = 0
+    categoryIdDetermined = nil
+    parentCategoryDetermined = nil
+
+    if itemLink == nil then return end
+    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = gilsi(itemLink)
+    if not hasSet or setId == nil then return end
+
+    --Open the item set collections book at the top category
+    openItemSetCollectionBookOfCategoryData(LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE)
+    --Now check repetively if the childnodes have been populated
+    local delay = wasSetCollectionsBookOpenedYet == true and 25 or 100
+    runItemSetCollectionsBookOpenedTask(delay, checkIfSetItemCollectionBookForItemLinkIsReady, setId)
+end
+local libSets_OpenSetItemCollectionBookForItemLink = lib.OpenSetItemCollectionBookForItemLink
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
@@ -4682,11 +4885,66 @@ local function addUIButtons()
 end
 lib.addUIButtons = addUIButtons
 
+local function myInvItemLinkCallbackFunc(inventorySlot, slotActions, ctrl, alt, shift, command)
+    if not lib.svData.addSetCollectionsSearchItemLink then return end
+
+    local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    if bagId == nil or slotIndex == nil then return end
+    local itemLink = gil(bagId, slotIndex)
+    if itemLink == nil or itemLink == "" then return end
+    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = gilsi(itemLink)
+    if not hasSet or setId == nil then return end
+
+    local setType = libSets_GetSetType(setId)
+    local setTypeTexture = libSets_GetSetTypeTexture(setType, setId)
+
+    local submenuEntris = {}
+    local subMenuEntrySetCollectionsSearchItemLink =  {
+        label = zoitf(setTypeTexture, 32, 32, getLocalizedText("setCollectionsSearchItemLink", clientLang, zocstrfor("<<1>>", setName)), nil),
+        callback = function()
+            local l_itemLink = itemLink
+            --[[
+            local l_bagId, l_slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            if l_bagId == nil or l_slotIndex == nil then return end
+            local l_itemLink = gil(l_bagId, l_slotIndex)
+            if l_itemLink == nil or l_itemLink == "" then return end
+            ]]
+
+            libSets_OpenSetItemCollectionBookForItemLink(l_itemLink)
+        end,
+        itemType = MENU_ADD_OPTION_LABEL,
+    }
+    table.insert(submenuEntris, subMenuEntrySetCollectionsSearchItemLink)
+    AddCustomSubMenuItem(MAJOR, submenuEntris)
+    ShowMenu()
+end
+
+local libSets_customInvItemLinkContextMenuAdded = false
+local function addSetCollectionsSearchItemLinkContextMenuEntry()
+    local lcm = LibCustomMenu
+    if lcm == nil or libSets_customInvItemLinkContextMenuAdded then return end
+
+    local addSetCollectionsSearchItemLink = lib.svData.addSetCollectionsSearchItemLink
+    if addSetCollectionsSearchItemLink == true then
+        lcm:RegisterContextMenu(myInvItemLinkCallbackFunc, lcm.CATEGORY_LATE)
+        libSets_customInvItemLinkContextMenuAdded = true
+    end
+end
+lib.addSetCollectionsSearchItemLinkContextMenuEntry = addSetCollectionsSearchItemLinkContextMenuEntry
 
 
 local function createUIStuff()
     --Add buttons to jump to current zon at the set collections
     addUIButtons()
+
+    --Add the contextMenu at inventory
+    addSetCollectionsSearchItemLinkContextMenuEntry()
+    ITEM_SETS_BOOK_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if (newState == SCENE_FRAGMENT_SHOWN ) then
+--d(MAJOR .. "ITEM_SETS_BOOK_FRAGMENT opened!")
+            wasSetCollectionsBookOpenedYet = true
+        end
+    end)
 
     --Search UI
     InitSearchUI()
@@ -4870,6 +5128,7 @@ local function slash_debug_help()
     d("|--------------------------------------------------------")
     d("|-> \'getall\'               Scan all set's and itemIds, maps, zones, wayshrines, dungeons, update the language dependent variables and put them into the SavedVariables.\n|cFF0000Attention:|r |cFFFFFFThe UI will reload several times for the supported languages of the library!|r")
     d("|-> \'getallnames\'          Get all names (sets, zones, maps, wayshrines, DLCs) of the current client language")
+    d("|-> \'getallnoitemids\'      Scan all set's (no itemIds!) and maps, zones, wayshrines, dungeons, update the language dependent variables and put them into the SavedVariables.\n|cFF0000Attention:|r |cFFFFFFThe UI will reload several times for the supported languages of the library!|r")
     d("|-> \'getzones\'             Get all zone data")
     d("|-> \'getmapnamess\'         Get all map names of the current client language")
     d("|-> \'getwayshrines\'        Get all wayshrine data of the currently shown zone. If the map is not opened it will be opened")
@@ -4884,6 +5143,12 @@ local function slash_debug_help()
     d("<<< [" .. lib.name .. "] |c0000FFSlash command DEBUG help -|r END <<<")
 end
 
+local function removeStandardDebugSlashCommandOptions(options)
+    trem(options, 1) --Remove "debug"
+    trem(options, 1) --Remove <type> (original options[2], now at [1] after "debug" was removed"; e.g. "getall")
+end
+
+
 local function command_handler(args)
     local options = getOptionsFromSlashCommandString(args)
 
@@ -4894,8 +5159,7 @@ local function command_handler(args)
         slash_help()
     elseif firstParam ~= nil then
         if callSearchParams[firstParam] == true then
-            trem(options, 1)
-            trem(options, 2)
+            removeStandardDebugSlashCommandOptions(options)
             slash_search(options)
         elseif firstParam == "dlcs" then
             slashcommand_dlcs()
@@ -4907,10 +5171,13 @@ local function command_handler(args)
             if secondParam ~= nil then
                 local debugFunc = callDebugParams[secondParam]
                 if debugFunc ~= nil then
-                    trem(options, 1)
-                    trem(options, 2)
-                    if lib[debugFunc] ~= nil then
-                        lib[debugFunc](unp(options))
+                    if type(debugFunc) == "function" then
+                        debugFunc()
+                    else
+                        if lib[debugFunc] ~= nil then
+                            removeStandardDebugSlashCommandOptions(options)
+                            lib[debugFunc](unp(options))
+                        end
                     end
                 end
             else

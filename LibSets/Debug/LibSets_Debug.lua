@@ -134,6 +134,7 @@ local clientLang = lib.clientLang or GetCVar("language.2")
 local fallbackLang = lib.fallbackLang
 local supportedLanguages = lib.supportedLanguages
 local numSupportedLangs = lib.numSupportedLangs
+local nonOfficialLanguages = lib.nonOfficialLanguages
 
 local decompressSetIdItemIds = lib.DecompressSetIdItemIds
 local buildItemLink = lib.buildItemLink
@@ -183,6 +184,8 @@ local function MyCombineNonContiguousTables(dest, ...)
 end
 
 local function GetAllZoneInfo()
+    if nonOfficialLanguages[clientLang] then return end
+
     d(debugOutputStartLine..libPrefixWithVersion .. "GetAllZoneInfo, language: " ..tos(clientLang))
     local maxZoneId = 2000
     local zoneData = {}
@@ -240,7 +243,10 @@ end
 lib.DebugGetWayshrineInfo = GetWayshrineInfo
 
 local function GetWayshrineNames()
+    if nonOfficialLanguages[clientLang] then return end
+
     d(debugOutputStartLine..libPrefixWithVersion .. "GetWayshrineNames, language: " ..tos(clientLang))
+
     local wsNames = {}
     wsNames[clientLang] = {}
     for wsNodeId=1, gnftn(), 1 do
@@ -256,6 +262,9 @@ end
 
 local function GetMapNames(lang)
     lang = lang or clientLang
+
+    if nonOfficialLanguages[lang] then return end
+
     d(debugOutputStartLine..libPrefixWithVersion .. "GetMapNames, language: " ..tos(lang))
     local lz = lib.libZone
     if not lz then
@@ -654,6 +663,8 @@ function lib.DebugGetAllSetNames(noReloadInfo)
     local setNamesOfLangTable = {}
     local maxSetIdChecked = 0
 
+    local isNonOfficialLanguage = nonOfficialLanguages[clientLang] or false
+
     --Does not work as new setIds are unknown to table lib.setInfo until we scan the data and add it to the excel, to generate the code for this table!
     --So we FIRST need to call the function LibSets.DebugScanAllSetData(), update the table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS] with the scanned
     --setIds and their compressed itemIds, and afterwards we can use this fucntion DebugGetAllSetNames to rad this table, to get the new setIds
@@ -682,6 +693,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                     if not setWasChecked and itemIdToCheck ~= nil then
                         local isSet, setName, setId = isSetByItemId(itemIdToCheck)
                         if isSet and setId == setIdToCheck then
+                            --[[
                             local isNewSet = false
                             for _, setIdNewFound in ipairs(newSetIdsFound) do
                                 if setIdNewFound == setId then
@@ -689,12 +701,21 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                                     break
                                 end
                             end
+                            ]]
                             setWasChecked = true
-                            setName = zocstrfor("<<C:1>>", setName)
 
-                            if isNewSet == true then
-    --d(">new SetId found: " ..tos(setId) .. ", name: " ..tos(setName))
+                            --Non official language is scanned, so use the already provided setName in that language
+                            --or the English setName as fallback
+                            if isNonOfficialLanguage == true then
+                                setName = ""
+                                setName = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId][fallbackLang] or "n/a"
+                            else
+                                setName = zocstrfor("<<C:1>>", setName)
                             end
+
+                            --if isNewSet == true then
+    --d(">new SetId found: " ..tos(setId) .. ", name: " ..tos(setName))
+                            --end
 
                             if setName ~= "" then
                                 --Load the SV once
@@ -1218,8 +1239,11 @@ local debugGetDungeonFinderData = lib.DebugGetDungeonFinderData
 --            collectibleEndId number, the end ID of the collectibles to start the scan TO
 function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId, noReloadInfo)
     collectibleStartId = collectibleStartId or 1
-    collectibleEndId = collectibleEndId or 10000
+    collectibleEndId = collectibleEndId or lib.debugMaxCollectibleIds
     noReloadInfo = noReloadInfo or false
+
+    if nonOfficialLanguages[clientLang] then return end
+
     if collectibleEndId < collectibleStartId then collectibleEndId = collectibleStartId end
     d(libPrefix .. "Start to load all collectibles with start ID ".. collectibleStartId .. " to end ID " .. collectibleEndId .. "...")
     local collectiblesAdded = 0
@@ -1250,6 +1274,9 @@ local debugGetAllCollectibleNames = lib.DebugGetAllCollectibleNames
 --Saves a line with collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
 function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     noReloadInfo = noReloadInfo or false
+
+    if nonOfficialLanguages[clientLang] then return end
+
     local dlcNames = {}
     local collectiblesAdded = 0
     d(libPrefix .. "Start to load all DLC collectibles")

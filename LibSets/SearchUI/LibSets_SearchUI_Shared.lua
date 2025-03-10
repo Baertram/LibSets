@@ -7,13 +7,14 @@ local libPrefix = lib.prefix
 
 local zif = zo_iconFormat
 local zoitfns = zo_iconTextFormatNoSpace
+local zoitf = zo_iconTextFormat
 local tos = tostring
 local sgmatch = string.gmatch
 local strlow = string.lower
 local tins = table.insert
 local tsort = table.sort
 local tcon = table.concat
-
+local zocstrfor = ZO_CachedStrFormat
 
 local clientLang = lib.clientLang
 local fallbackLang = lib.fallbackLang
@@ -42,6 +43,7 @@ local libSets_GetWayshrineIds = lib.GetWayshrineIds
 local libSets_GetZoneName = lib.GetZoneName
 local libSets_ShowWayshrineNodeIdOnMap = lib.showWayshrineNodeIdOnMap
 local libSets_OpenMapOfZoneId = lib.openMapOfZoneId
+local libSets_OpenSetItemCollectionBookForItemLink = lib.OpenSetItemCollectionBookForItemLink
 
 local libSets_showSettingsMenu = lib.ShowSettingsMenu
 
@@ -1598,14 +1600,14 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     if not LibCustomMenu then return end
     local data = rowControl.data
     if data == nil then return end
-    local setId = rowControl.data.setId
+    local setId = data.setId
     local owningWindow = rowControl:GetOwningWindow()
 
     ClearMenu()
 
     --Link to chat
     AddCustomMenuItem(getLocalizedText("linkToChat"), function()
-        self:ItemLinkToChat(rowControl.data)
+        self:ItemLinkToChat(data)
     end)
 
     --Tooltips
@@ -1616,7 +1618,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         {
             label = GetString(SI_KEYBINDDISPLAYMODE2), --Automatic
             callback =function()
-                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, true)
+                self:ShowItemLinkPopupTooltip(owningWindow, data, true)
             end
         },
         {
@@ -1627,20 +1629,20 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             label = GetString(SI_NAMEPLATEDISPLAYCHOICE10), --Left (SI_KEYCODE_NARRATIONTEXTPS4125)
             callback = function()
                 lib.svData.setSearchPopupTooltipPosition = LEFT
-                --self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, RIGHT, -10, nil, LEFT)
-                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data)
+                --self:ShowItemLinkPopupTooltip(owningWindow, data, RIGHT, -10, nil, LEFT)
+                self:ShowItemLinkPopupTooltip(owningWindow, data)
             end
         },
         {
             label = GetString(SI_BINDING_NAME_TURN_RIGHT), --Right (SI_KEYCODE_NARRATIONTEXTPS4126)
             callback =function()
                 lib.svData.setSearchPopupTooltipPosition = RIGHT
-                --self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data, RIGHT, -10, nil, LEFT)
-                self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data)
+                --self:ShowItemLinkPopupTooltip(owningWindow, data, RIGHT, -10, nil, LEFT)
+                self:ShowItemLinkPopupTooltip(owningWindow, data)
             end
         },
     }
-    AddCustomMenuItem(getLocalizedText("popupTooltip"), function() self:ShowItemLinkPopupTooltip(owningWindow, rowControl.data) end)
+    AddCustomMenuItem(getLocalizedText("popupTooltip"), function() self:ShowItemLinkPopupTooltip(owningWindow, data) end)
     AddCustomSubMenuItem(getLocalizedText("popupTooltipPosition"), popupTooltipSubmenu)
 
     --Set favorites
@@ -1651,29 +1653,29 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         local favoriteCategoriesToAddSubmenuEntries = {}
         for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
             local favoriteCategory = favoriteCategoryData.category
---d("[LibSets]LibSets_SearchUI_Shared:ShowRowContextMenu - favoriteCategory: " ..tos(favoriteCategory))
+            --d("[LibSets]LibSets_SearchUI_Shared:ShowRowContextMenu - favoriteCategory: " ..tos(favoriteCategory))
             --if not ZO_IsTableEmpty(setSearchFavorites[favoriteCategory]) then
-                if not wasFavoriteHeaderAdded then
-                    AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory], function() end, MENU_ADD_OPTION_HEADER)
-                    wasFavoriteHeaderAdded = true
-                end
-                if self:IsSetIdInFavorites(setId, favoriteCategory) then
-                    AddCustomMenuItem(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
-                        self:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)
-                    end)
-                else
-                    --Add submenu with favorites that could be added
-                    --[[
-                    AddCustomMenuItem(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
-                        self:AddSetIdToFavorites(rowControl, setId, favoriteCategory)
-                    end)
-                    ]]
-                    local subMenuEntry = {
-                        label 		    = favoriteIconTexts[favoriteCategory] .. zo_strformat("<<C:1>>", favoriteCategory),
-                        callback 	    = function() self:AddSetIdToFavorites(rowControl, setId, favoriteCategory) end
-                    }
-                    table.insert(favoriteCategoriesToAddSubmenuEntries, subMenuEntry)
-                end
+            if not wasFavoriteHeaderAdded then
+                AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory], function() end, MENU_ADD_OPTION_HEADER)
+                wasFavoriteHeaderAdded = true
+            end
+            if self:IsSetIdInFavorites(setId, favoriteCategory) then
+                AddCustomMenuItem(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
+                    self:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)
+                end)
+            else
+                --Add submenu with favorites that could be added
+                --[[
+                AddCustomMenuItem(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
+                    self:AddSetIdToFavorites(rowControl, setId, favoriteCategory)
+                end)
+                ]]
+                local subMenuEntry = {
+                    label 		    = favoriteIconTexts[favoriteCategory] .. zo_strformat("<<C:1>>", favoriteCategory),
+                    callback 	    = function() self:AddSetIdToFavorites(rowControl, setId, favoriteCategory) end
+                }
+                table.insert(favoriteCategoriesToAddSubmenuEntries, subMenuEntry)
+            end
             --end
         end
         if not ZO_IsTableEmpty(favoriteCategoriesToAddSubmenuEntries) then
@@ -1778,6 +1780,23 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             AddCustomMenuItem(getLocalizedText("showAsTextWithIcons"), function()
                 getSetTextForCopyDialog(true)
             end)
+        end
+
+        --Show in set collections
+        if data.itemLink ~= nil then
+            local setType = data.setType
+            local isCraftedSet = setType == LIBSETS_SETTYPE_CRAFTED
+
+            if not isCraftedSet then
+                AddCustomMenuItem(getLocalizedText("headerItemLinks"), function() end, MENU_ADD_OPTION_HEADER)
+
+                local setName = data.name
+                local setTypeTexture = data.setTypeTexture
+                local searchEntryText = getLocalizedText("setCollectionsSearchItemLink", clientLang, zocstrfor("<<1>>", setName))
+                AddCustomMenuItem((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText, function()
+                    libSets_OpenSetItemCollectionBookForItemLink(data.itemLink)
+                end)
+            end
         end
 
         --Check for other addons which have added context menu entries here via API function

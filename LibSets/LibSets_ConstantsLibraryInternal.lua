@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.75
+local MAJOR, MINOR = "LibSets", 0.77
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -64,7 +64,7 @@ local APIVersions                    = {}
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101044 -- Patch U44 (2024-09-24)
+lib.lastSetsPreloadedCheckAPIVersion = 101045 -- Patch U45 "Fallen Banners" (2025-01-25)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,12 +83,12 @@ lib.lastSetsPreloadedCheckAPIVersion = 101044 -- Patch U44 (2024-09-24)
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101044 -- Patch U44 (2024-09-24)
+APIVersions["PTS"]                   = 101045 -- Patch U45 "Fallen Banners" (2025-01-25)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
 --> Change currentSimulatedPTSAPIversion to the proper current PTS APIversion in that case
-----[[
+--[[
 local currentSimulatedPTSAPIversion = nil --1010xx
 
 local getAPIVersionOrig = GetAPIVersion
@@ -120,9 +120,15 @@ lib.APIVersions                = APIVersions
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds
 lib.debugNumItemIdPackages     = 55         -- Increase this to find new added set itemIds after an update. It will be
---multiplied by lib.debugNumItemIdPackageSize to build the itemIds of the
+                                            --multiplied by lib.debugNumItemIdPackageSize to build the itemIds of the
+                                            --Curently scanned itemIds: 275000
 --items to scan inagme for sets -> build an itemLink->uses GetItemLinkSetInfo()
 lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the client may crash!
+
+
+--the maximum collectiblIds to scan via debug functions
+lib.debugMaxCollectibleIds = 15000
+
 ------------------------------------------------------------------------------------------------------------------------
 --The supported languages of this library
 local fallbackLang             = "en"
@@ -140,6 +146,14 @@ local supportedLanguages       = {
     ["jp"] = false, --TODO: Working on: Waiting for SetNames & other translations (by Calamath e.g.)
 }
 lib.supportedLanguages         = supportedLanguages
+
+--The languages which use a special client or custom addon, so debug functions need to skip existing data within LibSets.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] e.g.!
+local nonOfficialLanguages = {
+    ["pl"] = true,
+    ["jp"] = true,
+}
+lib.nonOfficialLanguages = nonOfficialLanguages
+
 
 local numSupportedLangs        = 0
 local supportedLanguagesIndex = {}
@@ -231,8 +245,14 @@ LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING            = "publicDungeonZoneMappi
 
 ------------------------------------------------------------------------------------------------------------------------
 --Set itemId table value (key is the itemId)
+-->simulaters for true/false, but takes less space in the data file
 LIBSETS_SET_ITEMID_TABLE_VALUE_OK                      = 1
 LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK                   = 2
+
+
+------------------------------------------------------------------------------------------------------------------------
+--Set collections category for the top-most tree node
+LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE = -1
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -1406,6 +1426,9 @@ lib.localization                 = {
         defaultActionLeftClick      = "Aktion beim",
         popupTooltipPosition        = "Angehefteter Tooltip Position",
         showLibSetsSettingsMenu     = "LibSets Einstellungen anzeigen",
+        headerItemLinks             = "Set ItemLinks",
+        addSetCollectionsSearchItemLink = "Set Items: Kontextmenü-> Set Sammlungen",
+        setCollectionsSearchItemLink = "Zeige %q in: Set-Sammlungen",
         --Set search favorite categories
         star = "Favorit (Stern)",
         --PvE
@@ -1526,6 +1549,9 @@ lib.localization                 = {
         popupTooltipPosition        = "Popup tooltip position",
         linkToChat                  = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
         showLibSetsSettingsMenu     = "Show LibSets settings",
+        headerItemLinks             = "Set ItemLinks",
+        addSetCollectionsSearchItemLink = "Set Items: Contextmenu-> Set Collections",
+        setCollectionsSearchItemLink = "Show %q in: Set-Collections",
         --Set search favorite categories
         star = "Favorite (star)",
         --PvE
