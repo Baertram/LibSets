@@ -1649,30 +1649,39 @@ local function buildSetDataText(setData, itemLink, forTooltip)
         --Remove empty texts from the pattern
         local patternsEmpty = {}
         if setTypeText == nil or setTypeText == "" then
+            patternNew = strgsub(patternNew, "<<1>><br>", "")
             patternNew = strgsub(patternNew, "<<1>>", "")
             patternsEmpty["setTypeText"] = true
         end
         if setDropMechanicText == nil or setDropMechanicText == "" then
+            patternNew = strgsub(patternNew, "<<2>><br>", "")
             patternNew = strgsub(patternNew, "<<2>>", "")
             patternsEmpty["setDropMechanicText"] = true
         end
         if setDropZoneStr == nil or setDropZoneStr == "" then
+            patternNew = strgsub(patternNew, "<<3>><br>", "")
             patternNew = strgsub(patternNew, "<<3>>", "")
             patternsEmpty["setDropZoneStr"] = true
         end
         if setDropLocationsText == nil or setDropLocationsText == "" then
+            patternNew = strgsub(patternNew, "<<4>><br>", "")
             patternNew = strgsub(patternNew, "<<4>>", "")
             patternsEmpty["setDropLocationsText"] = true
         end
         if setNeededTraitsText == nil or setNeededTraitsText == "" then
+            patternNew = strgsub(patternNew, "(<<5>>)<br>", "")
+            patternNew = strgsub(patternNew, "<<5>><br>", "")
+            patternNew = strgsub(patternNew, "(<<5>>)", "")
             patternNew = strgsub(patternNew, "<<5>>", "")
             patternsEmpty["setNeededTraitsText"] = true
         end
         if setDLCText == nil or setDLCText == "" then
+            patternNew = strgsub(patternNew, "<<6>><br>", "")
             patternNew = strgsub(patternNew, "<<6>>", "")
             patternsEmpty["setDLCText"] = true
         end
         if setSearchFavoritesText == nil or setSearchFavoritesText == "" then
+            patternNew = strgsub(patternNew, "<<7>><br>", "")
             patternNew = strgsub(patternNew, "<<7>>", "")
             patternsEmpty["setSearchFavoritesText"] = true
         end
@@ -1921,11 +1930,13 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
     --local isComparativeTooltip = (tooltipControl == comparativeTooltip1 or tooltipControl == comparativeTooltip2) or false
 
     local setInfoText = buildSetDataText(setData, itemLink, true)
-
     --Output of the tooltip line at the bottom
     if setInfoText == nil or setInfoText == "" then return end
+
+--lib._lastSetInfoText = setInfoText
+
     if tooltipControl.AddVerticalPadding then
-        tooltipControl:AddVerticalPadding(15)
+        tooltipControl:AddVerticalPadding(5)
     end
     ZO_Tooltip_AddDivider(tooltipControl)
     tooltipControl:AddLine(setInfoText)

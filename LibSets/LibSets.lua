@@ -811,6 +811,9 @@ local function LoadSavedVariables()
         --ItemLinks
         addSetCollectionsSearchItemLink = true,
 
+        --MasterCrafterTables
+        enableMasterCrafterSetsFavorites = true,
+
         --Search UI
         setSearchTooltipsAtTextFilters = true,
         setSearchTooltipsAtFilters = true,
@@ -5284,7 +5287,7 @@ local function onLibraryLoaded(event, name)
         --work properly now
         lib.fullyLoaded = true
 
-        --Add UI related stuff like the "jump to set collections' current zone", and the search UI
+        --Add UI related stuff like the "jump to set collections' current zone", the search UI, itemlink changes, master crafter tables
         createUIStuff()
 
         --Optional: Build the libSlashCommander autocomplete stuff, if LibSlashCommander is present and activated
