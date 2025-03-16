@@ -18,6 +18,7 @@ local strgmatch = string.gmatch
 local strlower = string.lower
 --local strlen = string.len
 local strfind = string.find
+local strsub = string.sub
 local strgsub = string.gsub
 --local strfor = string.format
 
@@ -225,6 +226,7 @@ local bossNamePlaceholder = false
 local neededTraitsPlaceholder = false
 local dlcNamePlaceHolder = false
 local setSearchFavoritesPlaceHolder = false
+local lastPlaceHolderInCustomTooltip = nil
 local addLineBreakAfterNonEmptyParts = false
 
 --Variables for set preview tooltip
@@ -279,25 +281,32 @@ local function isCustomTooltipEnabled(value)
                 if placeholder == "<<1>>" then
                     setTypePlaceholder = true
                     doAdd = true
+                    lastPlaceHolderInCustomTooltip = "setTypePlaceholder"
                 elseif placeholder == "<<2>>" then
                     dropMechanicPlaceholder = true
                     doAdd = true
+                    lastPlaceHolderInCustomTooltip = "dropMechanicPlaceholder"
                 elseif placeholder == "<<3>>" then
                     dropZonesPlaceholder = true
                     doAdd = true
+                    lastPlaceHolderInCustomTooltip = "dropZonesPlaceholder"
                 elseif placeholder == "<<4>>" then
                     bossNamePlaceholder = true
                     doAdd = true
+                    lastPlaceHolderInCustomTooltip = "bossNamePlaceholder"
                 elseif placeholder == "<<5>>" then
                     neededTraitsPlaceholder = true
                     setReconstructionCostPlaceholder = true
                     doAdd = true
+                    lastPlaceHolderInCustomTooltip = "neededTraitsPlaceholder"
                 elseif placeholder == "<<6>>" then
                     dlcNamePlaceHolder = true
                     doAdd = true
+                    lastPlaceHolderInCustomTooltip = "dlcNamePlaceHolder"
                 elseif placeholder == "<<7>>" then
                     setSearchFavoritesPlaceHolder = true
                     doAdd = true
+                    lastPlaceHolderInCustomTooltip = "setSearchFavoritesPlaceHolder"
                 end
             end
 --d(">>doAdd: " ..tos(doAdd))
@@ -554,8 +563,17 @@ local function isLineBreakAtEnd(str)
     return isLineBreakAtTheEndOfStr
 end
 
-local function addLineBreakIfNotEmpty(str)
-    if str ~= nil and str ~= "" and isLineBreakAtEnd(str) == false then
+local isSpecialChar = {
+    ["["] = true,
+    ["("] = true,
+    [")"] = true,
+    ["]"] = true,
+}
+local function addLineBreakIfNotEmpty(str, nextChar, customSetStringPart)
+d(">nextChar: " .. tos(nextChar))
+    if str ~= nil and str ~= "" and isLineBreakAtEnd(str) == false
+        and (nextChar == nil or (nextChar ~= nil and not isSpecialChar[nextChar]))
+        and (customSetStringPart == nil or (customSetStringPart ~= nil and customSetStringPart ~= lastPlaceHolderInCustomTooltip)) then
         str = str .. "\n"
     end
     return str
@@ -1342,6 +1360,21 @@ local function buildSetTypeInfo(setData, buildTextures)
 end
 lib.buildSetTypeInfo = buildSetTypeInfo
 
+--Check for non-needed linebreak between a passed in empty number and the other possible 6 numbers of custom tooltip text
+-->e.g. if <<3>><br><<4>> and <<3>> is not empty but <<4>> is empty now: Remove the <br> in between
+local function checkNonNeededLineBreak(patternNew, numberToCheck)
+    if type(numberToCheck) ~= "number" then return patternNew end
+    local numberToCheckStr = tos(numberToCheck)
+    for num=1, 7, 1 do
+        if num ~= numberToCheck then
+            if strfind(patternNew, "<<" .. tos(num) .. ">><br><<" .. numberToCheckStr .. ">>") ~= nil then
+                patternNew = strgsub(patternNew, "<<" .. tos(num) ..">><br>", "<<" .. tos(num) ..">>")
+            end
+        end
+    end
+    return patternNew
+end
+
 --If forTooltip == false: Provide ALL information, not based on the settings chosen -> Will be used for the search UI then
 local function buildSetDataText(setData, itemLink, forTooltip)
     if not setData then return end
@@ -1643,8 +1676,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             <<6>>   Chapter/DLC name set was introduced with
             <<7>>   Set search favorites textures
         ]]
-        --replace special characters like <br> with \n
-        local patternNew = strgsub(lib.svData.useCustomTooltipPattern, "<br>", "\n")
+        local patternNew = lib.svData.useCustomTooltipPattern
 
         --Remove empty texts from the pattern
         local patternsEmpty = {}
@@ -1654,21 +1686,25 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             patternsEmpty["setTypeText"] = true
         end
         if setDropMechanicText == nil or setDropMechanicText == "" then
+            patternNew = checkNonNeededLineBreak(patternNew, 2)
             patternNew = strgsub(patternNew, "<<2>><br>", "")
             patternNew = strgsub(patternNew, "<<2>>", "")
             patternsEmpty["setDropMechanicText"] = true
         end
         if setDropZoneStr == nil or setDropZoneStr == "" then
+            patternNew = checkNonNeededLineBreak(patternNew, 3)
             patternNew = strgsub(patternNew, "<<3>><br>", "")
             patternNew = strgsub(patternNew, "<<3>>", "")
             patternsEmpty["setDropZoneStr"] = true
         end
         if setDropLocationsText == nil or setDropLocationsText == "" then
+            patternNew = checkNonNeededLineBreak(patternNew, 4)
             patternNew = strgsub(patternNew, "<<4>><br>", "")
             patternNew = strgsub(patternNew, "<<4>>", "")
             patternsEmpty["setDropLocationsText"] = true
         end
         if setNeededTraitsText == nil or setNeededTraitsText == "" then
+            patternNew = checkNonNeededLineBreak(patternNew, 5)
             patternNew = strgsub(patternNew, "(<<5>>)<br>", "")
             patternNew = strgsub(patternNew, "<<5>><br>", "")
             patternNew = strgsub(patternNew, "(<<5>>)", "")
@@ -1676,42 +1712,59 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             patternsEmpty["setNeededTraitsText"] = true
         end
         if setDLCText == nil or setDLCText == "" then
+            patternNew = checkNonNeededLineBreak(patternNew, 6)
             patternNew = strgsub(patternNew, "<<6>><br>", "")
             patternNew = strgsub(patternNew, "<<6>>", "")
             patternsEmpty["setDLCText"] = true
         end
         if setSearchFavoritesText == nil or setSearchFavoritesText == "" then
+            patternNew = checkNonNeededLineBreak(patternNew, 7)
             patternNew = strgsub(patternNew, "<<7>><br>", "")
             patternNew = strgsub(patternNew, "<<7>>", "")
             patternsEmpty["setSearchFavoritesText"] = true
         end
 
+        --replace special characters like <br> with \n
+        --patternNew = strgsub(patternNew, "<br><br>", "\n") ----Do not allow multiple empty lines as tooltips are used by many addons
+        patternNew = strgsub(patternNew, "<br>", "\n")
+
         --Add automatic linebreaks after the custom tooltip parts
         if addLineBreakAfterNonEmptyParts == true then
             --d(">addLineBreakAfterNonEmptyParts = true")
             if not patternsEmpty["setTypeText"] then
-                setTypeText =           addLineBreakIfNotEmpty(setTypeText)
-                setTypeTextClean =      addLineBreakIfNotEmpty(setTypeTextClean)
+                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<1>>") + 5, 1)
+                setTypeText =                   addLineBreakIfNotEmpty(setTypeText, offsetPlaceholderNextChar, "setTypePlaceholder")
+                setTypeTextClean =              addLineBreakIfNotEmpty(setTypeTextClean, offsetPlaceholderNextChar,"setTypePlaceholder")
             end
             if not patternsEmpty["setDropMechanicText"] then
-                setDropMechanicText =   addLineBreakIfNotEmpty(setDropMechanicText)
-                setDropMechanicTextClean =  addLineBreakIfNotEmpty(setDropMechanicTextClean)
+                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<2>>") + 5, 1)
+                setDropMechanicText =           addLineBreakIfNotEmpty(setDropMechanicText, offsetPlaceholderNextChar,"dropMechanicPlaceholder")
+                setDropMechanicTextClean =      addLineBreakIfNotEmpty(setDropMechanicTextClean, offsetPlaceholderNextChar,"dropMechanicPlaceholder")
             end
             if not patternsEmpty["setDropZoneStr"] then
-                setDropZoneStr =         addLineBreakIfNotEmpty(setDropZoneStr)
-                setDropZoneStrClean =    addLineBreakIfNotEmpty(setDropZoneStrClean)
+                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<3>>") + 5, 1)
+                setDropZoneStr =                addLineBreakIfNotEmpty(setDropZoneStr, offsetPlaceholderNextChar,"dropZonesPlaceholder")
+                setDropZoneStrClean =           addLineBreakIfNotEmpty(setDropZoneStrClean, offsetPlaceholderNextChar,"dropZonesPlaceholder")
             end
             if not patternsEmpty["setDropLocationsText"] then
-                setDropLocationsText =      addLineBreakIfNotEmpty(setDropLocationsText)
-                setDropLocationsTextClean = addLineBreakIfNotEmpty(setDropLocationsTextClean)
+                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<4>>") + 5, 1)
+                setDropLocationsText =          addLineBreakIfNotEmpty(setDropLocationsText, offsetPlaceholderNextChar,"bossNamePlaceholder")
+                setDropLocationsTextClean =     addLineBreakIfNotEmpty(setDropLocationsTextClean, offsetPlaceholderNextChar,"bossNamePlaceholder")
+            end
+            if not patternsEmpty["setNeededTraitsText"] then
+                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<5>>") + 5, 1)
+                setNeededTraitsText =          addLineBreakIfNotEmpty(setNeededTraitsText, offsetPlaceholderNextChar,"neededTraitsPlaceholder")
+                setNeededTraitsTextClean =     addLineBreakIfNotEmpty(setNeededTraitsTextClean, offsetPlaceholderNextChar,"neededTraitsPlaceholder")
             end
             if not patternsEmpty["setDLCText"] then
-                setDLCText =                addLineBreakIfNotEmpty(setDLCText)
-                setDLCTextClean =           addLineBreakIfNotEmpty(setDLCTextClean)
+                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<6>>") + 5, 1)
+                setDLCText =                    addLineBreakIfNotEmpty(setDLCText, offsetPlaceholderNextChar,"dlcNamePlaceHolder")
+                setDLCTextClean =               addLineBreakIfNotEmpty(setDLCTextClean, offsetPlaceholderNextChar,"dlcNamePlaceHolder")
             end
             if not patternsEmpty["setSearchFavoritesText"] then
-                setSearchFavoritesText =      addLineBreakIfNotEmpty(setSearchFavoritesText)
-                setSearchFavoritesTextClean = addLineBreakIfNotEmpty(setSearchFavoritesTextClean)
+                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<7>>") + 5, 1)
+                setSearchFavoritesText =        addLineBreakIfNotEmpty(setSearchFavoritesText, offsetPlaceholderNextChar,"setSearchFavoritesPlaceHolder")
+                setSearchFavoritesTextClean =   addLineBreakIfNotEmpty(setSearchFavoritesTextClean, offsetPlaceholderNextChar,"setSearchFavoritesPlaceHolder")
             end
         end
 
@@ -1725,6 +1778,21 @@ local function buildSetDataText(setData, itemLink, forTooltip)
                 setDLCText,
                 setSearchFavoritesText
         )
+
+        --[[
+lib._debugSetInfoTextParts = {
+    patternNew = patternNew,
+    _1_setTypeText = setTypeText,
+    _2_setDropMechanicText = setDropMechanicText,
+    _3_setDropZoneStr = setDropZoneStr,
+    _4_setDropLocationsText = setDropLocationsText,
+    _5_setNeededTraitsText = setNeededTraitsText,
+    _6_setDLCText = setDLCText,
+    _7_setSearchFavoritesText = setSearchFavoritesText,
+    setInfoText = setInfoText,
+}
+]]
+
         if not forTooltip then
             setInfoTextNoTextures = zostrfor(patternNew,
                     setTypeTextClean,
