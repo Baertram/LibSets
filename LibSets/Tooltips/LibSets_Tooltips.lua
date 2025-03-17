@@ -570,7 +570,7 @@ local isSpecialChar = {
     ["]"] = true,
 }
 local function addLineBreakIfNotEmpty(str, nextChar, customSetStringPart)
-d(">nextChar: " .. tos(nextChar))
+--d(">nextChar: " .. tos(nextChar))
     if str ~= nil and str ~= "" and isLineBreakAtEnd(str) == false
         and (nextChar == nil or (nextChar ~= nil and not isSpecialChar[nextChar]))
         and (customSetStringPart == nil or (customSetStringPart ~= nil and customSetStringPart ~= lastPlaceHolderInCustomTooltip)) then
@@ -1732,37 +1732,44 @@ local function buildSetDataText(setData, itemLink, forTooltip)
         if addLineBreakAfterNonEmptyParts == true then
             --d(">addLineBreakAfterNonEmptyParts = true")
             if not patternsEmpty["setTypeText"] then
-                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<1>>") + 5, 1)
+                local offset = strfind(patternNew, "<<1>>", 1, true) + 5
+                local offsetPlaceholderNextChar = strsub(patternNew, offset, offset)
                 setTypeText =                   addLineBreakIfNotEmpty(setTypeText, offsetPlaceholderNextChar, "setTypePlaceholder")
                 setTypeTextClean =              addLineBreakIfNotEmpty(setTypeTextClean, offsetPlaceholderNextChar,"setTypePlaceholder")
             end
             if not patternsEmpty["setDropMechanicText"] then
-                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<2>>") + 5, 1)
+                local offset = strfind(patternNew, "<<2>>", 1, true) + 5
+                local offsetPlaceholderNextChar = strsub(patternNew, offset, offset)
                 setDropMechanicText =           addLineBreakIfNotEmpty(setDropMechanicText, offsetPlaceholderNextChar,"dropMechanicPlaceholder")
                 setDropMechanicTextClean =      addLineBreakIfNotEmpty(setDropMechanicTextClean, offsetPlaceholderNextChar,"dropMechanicPlaceholder")
             end
             if not patternsEmpty["setDropZoneStr"] then
-                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<3>>") + 5, 1)
+                local offset = strfind(patternNew, "<<3>>", 1, true) + 5
+                local offsetPlaceholderNextChar = strsub(patternNew, offset, offset)
                 setDropZoneStr =                addLineBreakIfNotEmpty(setDropZoneStr, offsetPlaceholderNextChar,"dropZonesPlaceholder")
                 setDropZoneStrClean =           addLineBreakIfNotEmpty(setDropZoneStrClean, offsetPlaceholderNextChar,"dropZonesPlaceholder")
             end
             if not patternsEmpty["setDropLocationsText"] then
-                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<4>>") + 5, 1)
+                local offset = strfind(patternNew, "<<4>>", 1, true) + 5
+                local offsetPlaceholderNextChar = strsub(patternNew, offset, offset)
                 setDropLocationsText =          addLineBreakIfNotEmpty(setDropLocationsText, offsetPlaceholderNextChar,"bossNamePlaceholder")
                 setDropLocationsTextClean =     addLineBreakIfNotEmpty(setDropLocationsTextClean, offsetPlaceholderNextChar,"bossNamePlaceholder")
             end
             if not patternsEmpty["setNeededTraitsText"] then
-                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<5>>") + 5, 1)
+                local offset = strfind(patternNew, "<<5>>", 1, true) + 5
+                local offsetPlaceholderNextChar = strsub(patternNew, offset, offset)
                 setNeededTraitsText =          addLineBreakIfNotEmpty(setNeededTraitsText, offsetPlaceholderNextChar,"neededTraitsPlaceholder")
                 setNeededTraitsTextClean =     addLineBreakIfNotEmpty(setNeededTraitsTextClean, offsetPlaceholderNextChar,"neededTraitsPlaceholder")
             end
             if not patternsEmpty["setDLCText"] then
-                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<6>>") + 5, 1)
+                local offset = strfind(patternNew, "<<6>>", 1, true) + 5
+                local offsetPlaceholderNextChar = strsub(patternNew, offset, offset)
                 setDLCText =                    addLineBreakIfNotEmpty(setDLCText, offsetPlaceholderNextChar,"dlcNamePlaceHolder")
                 setDLCTextClean =               addLineBreakIfNotEmpty(setDLCTextClean, offsetPlaceholderNextChar,"dlcNamePlaceHolder")
             end
             if not patternsEmpty["setSearchFavoritesText"] then
-                local offsetPlaceholderNextChar = strsub(patternNew, strfind(patternNew, "<<7>>") + 5, 1)
+                local offset = strfind(patternNew, "<<7>>", 1, true) + 5
+                local offsetPlaceholderNextChar = strsub(patternNew, offset, offset)
                 setSearchFavoritesText =        addLineBreakIfNotEmpty(setSearchFavoritesText, offsetPlaceholderNextChar,"setSearchFavoritesPlaceHolder")
                 setSearchFavoritesTextClean =   addLineBreakIfNotEmpty(setSearchFavoritesTextClean, offsetPlaceholderNextChar,"setSearchFavoritesPlaceHolder")
             end
