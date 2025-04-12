@@ -500,8 +500,6 @@ local function getItemLinkFromControl(rowControl)
             return gail(MAIL_INBOX:GetOpenMailId(), rowControl.id, LINK_STYLE_DEFAULT)
         elseif name == 'ZO_MailSendAttachments' then
             return gmqal(rowControl.id, LINK_STYLE_DEFAULT)
-        elseif name == "ZO_MailInboxMessageAttachments" then
-            return nil
         elseif name == "ZO_TradingHousePostedItemsListContents" then
             return gthlil(dataEntryData.slotIndex)
         elseif name == 'ZO_TradingHouseLeftPanePostItemFormInfo' then
