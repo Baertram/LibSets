@@ -961,7 +961,6 @@ lib.setDataPreloaded = {
         [64]={parentZoneId=103,isTrial=false},   --Blessed Crucible
         [973]={parentZoneId=888,isTrial=false},   --Bloodroot Forge
         [1201]={parentZoneId=1160,isTrial=false},   --Castle Thorn
-        [1201]={parentZoneId=1160,isTrial=false},   --Castle Thorn
         [176]={parentZoneId=108,isTrial=false},   --City of Ash I
         [681]={parentZoneId=108,isTrial=false},   --City of Ash II
         [1051]={parentZoneId=1011,isTrial=true},   --Cloudrest
