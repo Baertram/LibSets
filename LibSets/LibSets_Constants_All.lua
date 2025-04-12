@@ -4,13 +4,36 @@ if IsLibSetsAlreadyLoaded(false) then return end
 --This file contains the constant values needed for the library to work
 local lib = LibSets
 
-local gaci =        GetAchievementCategoryInfo
+
+local gaci
+local gci
 local gcifa =       GetCategoryInfoFromAchievementId
-local gci =         GetCollectibleInfo
 local zocstrfor =   ZO_CachedStrFormat
+
 
 --Helper function for the API check
 local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
+
+
+--Other helper functions
+--- Captures all returns from GetAchievementCategoryInfo.
+---@param topLevelIndex integer
+---@return string name
+local function GetAchievementCategoryInfoName(topLevelIndex)
+    local name, numSubCatgories, numAchievements, earnedPoints, totalPoints, hidesPoints = GetAchievementCategoryInfo(topLevelIndex)
+    return name
+end
+gaci = GetAchievementCategoryInfoName
+
+--- Captures all returns from GetCollectibleInfo.
+---@param collectibleId integer
+---@return string name
+local function GetCollectibleInfoName(collectibleId)
+    local name, description, icon, deprecatedLockedIcon, unlocked, purchasable, isActive, categoryType, hint = GetCollectibleInfo(collectibleId)
+    return name
+end
+gci = GetCollectibleInfoName
+
 
 --DLC & chapter type constants
 DLC_TYPE_BASE_GAME =    0
