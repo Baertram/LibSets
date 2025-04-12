@@ -229,7 +229,7 @@
                             <Controls>
                                 <Control name="$(parent)Favorite" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, zo_iconTextFormatNoSpace(LibSets.SearchUI.favoriteIcon, 24, 24, nameColumnValue), "isFavorite", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGame")
+                                        ZO_SortHeader_Initialize(self, zo_iconTextFormatNoSpace(LibSets.SearchUI.favoriteIcon, 24, 24, nameColumnValue or ""), "isFavorite", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGame")
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" />
                                     <Dimensions y="30" />
