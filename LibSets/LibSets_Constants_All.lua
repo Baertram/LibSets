@@ -42,6 +42,7 @@ local possibleDlcTypes = {
     [2] = "DLC_TYPE_DUNGEONS",
     [3] = "DLC_TYPE_ZONE",
     [4] = "DLC_TYPE_NORMAL_PATCH",
+--    [5] = "DLC_TYPE_SEASON_PART"
 }
 lib.possibleDlcTypes = possibleDlcTypes
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -103,6 +104,7 @@ local possibleDlcIds = {
     [35] = "NO_DLC_UPDATE43",
     [36] = "NO_DLC_UPDATE44",
     [37] = "DLC_FALLEN_BANNERS",
+    [38] = "DLC_SEASONS_OF_THE_WORMCULT1",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -201,7 +203,9 @@ lib.dlcAndChapterCollectibleIds = {
     --Update 44 new Battleground types and QOL patch
     [NO_DLC_UPDATE44] =             {name="Update 44", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1730116800}, --October 28th 2024
     --Fallen Banners
-    [DLC_FALLEN_BANNERS] =          {collectibleId=nil, achievementCategoryId=4107, type=DLC_TYPE_DUNGEONS, releaseDate=1741608000} --March 10th 2025
+    [DLC_FALLEN_BANNERS] =          {collectibleId=nil, achievementCategoryId=4107, type=DLC_TYPE_DUNGEONS, releaseDate=1741608000}, --March 10th 2025
+    --Seasons of the Wormcult Part1
+    [DLC_SEASONS_OF_THE_WORMCULT1] = {collectibleId=13439, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1748865600}, --June 2nd 2025
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}

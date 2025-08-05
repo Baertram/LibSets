@@ -812,7 +812,7 @@ local function LoadSavedVariables()
         addSetCollectionsSearchItemLink = true,
 
         --MasterCrafterTables
-        enableMasterCrafterSetsFavorites = true,
+        --enableMasterCrafterSetsFavorites = true,
 
         --Search UI
         setSearchTooltipsAtTextFilters = true,

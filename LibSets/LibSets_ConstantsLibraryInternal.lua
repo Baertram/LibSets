@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.78
+local MAJOR, MINOR = "LibSets", 0.79
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -64,7 +64,7 @@ local APIVersions                    = {}
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101045 -- Patch U45 "Fallen Banners" (2025-01-25)
+lib.lastSetsPreloadedCheckAPIVersion = 101046 -- Patch U46 "Seasons of the Wormcult Part 1" (2025-05-17)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,7 +83,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101045 -- Patch U45 "Fallen Banners" (202
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101045 -- Patch U45 "Fallen Banners" (2025-01-25)
+APIVersions["PTS"]                   = 101046 -- Patch U46 "Seasons of the Wormcult Part 1" (2025-05-17)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
@@ -140,7 +140,7 @@ local supportedLanguages       = {
     ["en"] = true,
     ["es"] = true,
     ["fr"] = true,
-    ["pl"] = true, --todo: Added 2024-09-24, check if working properly with debug functions if custom language addon for PL is not installed
+    ["pl"] = true, --todo: Added 2024-09-24,NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
     ["ru"] = true,
     ["zh"] = true,
     ["jp"] = false, --TODO: Working on: Waiting for SetNames & other translations (by Calamath e.g.)

@@ -1487,6 +1487,13 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
             lib.svDebugData.DebugGetAllData[apiVersion].langDone = lib.svDebugData.DebugGetAllData[apiVersion].langDone or {}
             lib.svDebugData.DebugGetAllData[apiVersion].langDone[clientLang] = os.date("%c")
 
+            --Skip non official languages as they might be missing/not enabled!
+            for langStr, _ in pairs(nonOfficialLanguages) do
+                --Add the languages to the already scanned ones -> Right from the start, to skip these
+                lib.svDebugData.DebugGetAllData[apiVersion].langDone[langStr] = true
+            end
+
+
             --Get all client language dependent data now
             --if not noItemIds then
             debugShowNewSetIds(true) -- Update internal tables with the new itemIds of the new determimed setIds
