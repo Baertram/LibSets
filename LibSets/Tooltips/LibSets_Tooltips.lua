@@ -2671,28 +2671,28 @@ end
 
 local tooltipSetDataWithoutItemIdsCached = lib.tooltipSetDataWithoutItemIdsCached
 
-local function tooltipOnAddGameData(tooltipControl, tooltipData, isGamePad)
---d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData) .. "; isGamePad: " .. tos(isGamePad))
-    --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
-    if not isGamePad and tooltipData == tooltipGameDataEntryToAddAfter then
-        --d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
-        if not anyTooltipInfoToAdd then return end
-
-        local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
-        if not isSet then return end
-
-        local setData = tooltipSetDataWithoutItemIdsCached[setId] or libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
-
-        addTooltipLine(tooltipControl, setData, itemLink)
-
-    elseif isGamePad == true then
-        if not anyTooltipInfoToAdd then return end
-        local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData, isGamePad)
+local function tooltipOnAddGameDataGamepad(tooltipControl, tooltipData)
+    local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData, true)
 --d(">isSet: " ..tos(isSet) ..", setId: " ..tos(setId))
+    if not isSet then return end
+
+    local setData = tooltipSetDataWithoutItemIdsCached[setId] or libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
+    addTooltipLine(tooltipControl, setData, itemLink, true)
+end
+
+local function tooltipOnAddGameData(tooltipControl, tooltipData)
+--d("[LibSets]tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
+    if not anyTooltipInfoToAdd then return end
+
+    --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
+    if tooltipData == tooltipGameDataEntryToAddAfter then
+        local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
+--d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip) .. ": " .. itemLink .. ", isSet: " ..tos(isSet))
         if not isSet then return end
 
         local setData = tooltipSetDataWithoutItemIdsCached[setId] or libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
-        addTooltipLine(tooltipControl, setData, itemLink, isGamePad)
+--d(">setData: " ..tos(setData))
+        addTooltipLine(tooltipControl, setData, itemLink)
     end
 end
 
@@ -2884,7 +2884,7 @@ end
 local function initGamePadTooltip(tooltip)
 --d("[LibSets]initGamePadTooltip - tooltip: " .. tos(tooltip))
     ZO_PostHook(tooltip, "LayoutItem",	function(tooltip, itemLink)
-        tooltipOnAddGameData(tooltip, itemLink, true)
+        tooltipOnAddGameDataGamepad(tooltip, itemLink)
     end)
 end
 
@@ -2908,7 +2908,10 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
                 ZO_PreHookHandler(itemTooltip, 'OnAddGameData', tooltipOnAddGameData)
                 --ZO_PreHookHandler(itemTooltip, 'OnHide', tooltipOnHide)
 
-                ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink) lastTooltipItemLink = itemLink end)
+                ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink)
+d("[LibSets]ZO_PopupTooltip_SetLink")
+                    lastTooltipItemLink = itemLink
+                end)
 
                 --Only for debugging
                 --[[
