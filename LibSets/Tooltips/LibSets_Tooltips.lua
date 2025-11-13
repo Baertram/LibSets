@@ -2681,19 +2681,19 @@ local function tooltipOnAddGameDataGamepad(tooltipControl, tooltipData)
 end
 
 local function tooltipOnAddGameData(tooltipControl, tooltipData)
-d("[LibSets]tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
+--d("[LibSets]tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
     if not anyTooltipInfoToAdd then return end
 
     --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
     if tooltipData == tooltipGameDataEntryToAddAfter then
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
-d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip) .. ": " .. itemLink .. ", isSet: " ..tos(isSet))
+--d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip) .. ": " .. itemLink .. ", isSet: " ..tos(isSet))
         if not isSet then return end
 
         local setData = tooltipSetDataWithoutItemIdsCached[setId] or libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
-d(">setData: " ..tos(setData))
-lib._debugTooltipSetData = setData
+--d(">setData: " ..tos(setData))
         addTooltipLine(tooltipControl, setData, itemLink)
+    end
 end
 
 
