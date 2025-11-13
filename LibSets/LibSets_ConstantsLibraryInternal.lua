@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.79
+local MAJOR, MINOR = "LibSets", 0.82
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -23,11 +23,16 @@ if IsLibSetsAlreadyLoaded(true) then return end
 LibSets                              = {} --Creation of the global variable
 local lib                            = LibSets
 
+--Are we on a console?
+local IsConsole = IsConsoleUI()
+lib.IsConsole = IsConsole
+
 ------------------------------------------------------------------------------------------------------------------------
 lib.name                             = MAJOR
 local libPrefix                      = "["..MAJOR.."]"
 lib.prefix = libPrefix
 lib.version                          = MINOR
+lib.author                           = "Baertram"
 lib.svName                           = "LibSets_SV_Data"
 lib.svDebugName                      = "LibSets_SV_DEBUG_Data"
 lib.svVersion                        = 0.38 -- ATTENTION: changing this will reset the SavedVariables!
@@ -64,7 +69,7 @@ local APIVersions                    = {}
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101046 -- Patch U46 "Seasons of the Wormcult Part 1" (2025-05-17)
+lib.lastSetsPreloadedCheckAPIVersion = 101048 -- Patch U48 "Seasons of the Wormcult Part 2" (2025-09-18)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -77,13 +82,13 @@ lib.lastSetsPreloadedCheckAPIVersion = 101046 -- Patch U46 "Seasons of the Wormc
 --of the game you are playing: live or PTS
 --> Several automatic routines like "scan the librray for new sets" is raised via this comparison function and LibSets' event
 --> EVENT_ADD_ON_LOADED -> function LoadSets()
--- as well as setIds and zoneIds in file LibSets_Data_All.lua, tables "setsOfNewerAPIVersion" and "zoneIdsOfNewAPIVersionOnly"
+-- as well as setIds and zoneIds in file Data/LibSets_Data_*.lua, tables "setsOfNewerAPIVersion" and "zoneIdsOfNewAPIVersionOnly"
 -- will be excluded from the LibSets tables, if the PTS version differs from the live version (GetAPIVersion())!
 -- Normally this will be the same as the "last sets preloaded check API version" above, as long as the PTS is not updated to a
--- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the vaalue here if you plan
+-- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the value here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101046 -- Patch U46 "Seasons of the Wormcult Part 1" (2025-05-17)
+APIVersions["PTS"]                   = 101048 -- Patch U47 "Seasons of the Wormcult Part 2"" (2025-09-18)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
@@ -1391,7 +1396,8 @@ lib.localization                 = {
         slashCommandDescription         = "Suche übersetzte Set Namen",
         slashCommandDescriptionClient   = "Suche Set ID/Namen (Spiel Sprache)",
         previewTT                = "Set Vorschau",
-        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set Namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste per TAB Taste/Maus ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.\n\n\nBenutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zuverstecken",
+        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set Namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste per TAB Taste/Maus ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.",
+        previewTT_SetSearch_TT   = "\n\n\nBenutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zuverstecken.",
         previewTTToChatToo       = "Vorschauf ItemLink in den Chat",
         previewTTToChatToo_TT    = "Wenn diese Option aktiviert ist wird der ItemLink des Vorschau Set Gegenstandes auch in deine Chat Eingabebox gesendet, damit du diesen jemanden schicken/ihn mit der Maus und STRG+C in deine Zwischenablage kopieren kannst.",
         headerUIStuff            = "Benutzer Oberfläche",
@@ -1455,6 +1461,7 @@ lib.localization                 = {
         frostStaff = "Froststab",
         fireStaff = "Feuerstab",
         lightningStaff = "Blitzstab",
+        settingWillReloadUI = "- ACHTUNG - \nDas Verändern dieser Einstellung wird die Benutzeroberfläche neuladen!",
     },
     ["en"] = {
         de  = "German",
@@ -1510,7 +1517,8 @@ lib.localization                 = {
         slashCommandDescription         = "Search translations of set names",
         slashCommandDescriptionClient   = "Search set ID/names (game client language)",
         previewTT                = "Set preview",
-        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is written to the chat entry editbox) via the TAB key/mouse you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
+        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is written to the chat entry editbox) via the TAB key/mouse you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.",
+        previewTT_SetSearch_TT   = "\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
         previewTTToChatToo       = "Preview itemLink to chat",
         previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to your clipboard using CTRL+C.",
         headerUIStuff            = "UI",
@@ -1578,6 +1586,7 @@ lib.localization                 = {
         frostStaff = "Frost staff",
         fireStaff = "Fire staff",
         lightningStaff = "Lightning staff",
+        settingWillReloadUI = "- CAUTION - \nChanging this setting will reload the UserInterface!",
     },
     ["es"] = {
         de  = "Alemán",

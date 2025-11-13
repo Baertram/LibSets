@@ -17,7 +17,7 @@ local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
 
 --Other helper functions
 --- Captures all returns from GetAchievementCategoryInfo.
----@param topLevelIndex integer
+---@param topLevelIndex number
 ---@return string name
 local function GetAchievementCategoryInfoName(topLevelIndex)
     local name, numSubCatgories, numAchievements, earnedPoints, totalPoints, hidesPoints = GetAchievementCategoryInfo(topLevelIndex)
@@ -26,10 +26,11 @@ end
 gaci = GetAchievementCategoryInfoName
 
 --- Captures all returns from GetCollectibleInfo.
----@param collectibleId integer
+---@param collectibleId number
 ---@return string name
 local function GetCollectibleInfoName(collectibleId)
-    local name, description, icon, deprecatedLockedIcon, unlocked, purchasable, isActive, categoryType, hint = GetCollectibleInfo(collectibleId)
+    --name, description, icon, deprecatedLockedIcon, unlocked, purchasable, isActive, categoryType, hint
+    local name, _, _, _, _, _, _, _, _ = GetCollectibleInfo(collectibleId)
     return name
 end
 gci = GetCollectibleInfoName
@@ -42,7 +43,7 @@ local possibleDlcTypes = {
     [2] = "DLC_TYPE_DUNGEONS",
     [3] = "DLC_TYPE_ZONE",
     [4] = "DLC_TYPE_NORMAL_PATCH",
---    [5] = "DLC_TYPE_SEASON_PART"
+    [5] = "DLC_TYPE_SEASON_PART",
 }
 lib.possibleDlcTypes = possibleDlcTypes
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -105,6 +106,8 @@ local possibleDlcIds = {
     [36] = "NO_DLC_UPDATE44",
     [37] = "DLC_FALLEN_BANNERS",
     [38] = "DLC_SEASONS_OF_THE_WORMCULT1",
+    [39] = "DLC_FEAST_OF_SHADOWS",
+    [40] = "DLC_SEASONS_OF_THE_WORMCULT2",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -205,11 +208,15 @@ lib.dlcAndChapterCollectibleIds = {
     --Fallen Banners
     [DLC_FALLEN_BANNERS] =          {collectibleId=nil, achievementCategoryId=4107, type=DLC_TYPE_DUNGEONS, releaseDate=1741608000}, --March 10th 2025
     --Seasons of the Wormcult Part1
-    [DLC_SEASONS_OF_THE_WORMCULT1] = {collectibleId=13439, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1748865600}, --June 2nd 2025
+    [DLC_SEASONS_OF_THE_WORMCULT1] = {collectibleId=13439, achievementCategoryId=nil, type=DLC_TYPE_SEASON_PART, releaseDate=1748865600}, --June 2nd 2025
+    --Feast of Shadows
+    [DLC_FEAST_OF_SHADOWS] =        {collectibleId=nil, achievementCategoryId=4440, type=DLC_TYPE_DUNGEONS, releaseDate=1755511200}, -- August 18th 2025
+    --Seasons of the Wormcult Part2
+    [DLC_SEASONS_OF_THE_WORMCULT2] = {collectibleId=nil, achievementCategoryId=4240, type=DLC_TYPE_SEASON_PART, releaseDate=1760702400}, --October 17th 2025
 }
-if checkIfPTSAPIVersionIsLive() then
+--if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
-end
+--end
 
 --Internal achievement example ids of the ESO DLCs and chapters
 local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds

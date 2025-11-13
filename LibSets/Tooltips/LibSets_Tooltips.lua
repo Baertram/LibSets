@@ -4,14 +4,20 @@ if IsLibSetsAlreadyLoaded(false) then return end
 --This file the sets data and info (pre-loaded from the specified API version)
 --It should be updated each time the APIversion increases to contain the new/changed data
 local lib = LibSets
+
+local IsConsole = lib.IsConsole
+
+
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = lib.prefix
 
 local lam
+local lhas
 --local placeHolder = ": "
 
 --local ZOs variables
 local EM = EVENT_MANAGER
+local gpTooltips = GAMEPAD_TOOLTIPS
 
 local tos = tostring
 local strgmatch = string.gmatch
@@ -47,11 +53,10 @@ local gil =         GetItemLink
 local isilscp =     IsItemLinkSetCollectionPiece
 local gircoc =      GetItemReconstructionCurrencyOptionCost
 
+
 --Custom tooltips
 local customTooltipHooksNeeded = lib.customTooltipHooks.needed
 local customTooltipHooksHooked = lib.customTooltipHooks.hooked
-
-local baseTooltipHooksDone = false
 local customAddonTooltipControlHooksCount = 0
 
 
@@ -61,6 +66,16 @@ local langAllowedCheck = lib.LangAllowedCheck
 local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavoriteCategoriesUnsorted
 --local possibleSetSearchFavoriteCategoriesSorted = lib.possibleSetSearchFavoriteCategories
 
+--"Only do once" variables
+local slashCommandsCreated = false
+local settingsMenuCreated = {
+    [true] = false, -- Gamepad / Console
+    [false] = false, --Keyboard & Mouse
+}
+local tooltipsHooked = {
+    [true] = false, -- Gamepad / Console
+    [false] = false, --Keyboard & Mouse
+}
 
 ------------------------------------------------------------------------------------------------------------------------
 --SetIds which are blacklisted for zone related tooltip text (as they got no zoneId where they drop)
@@ -176,6 +191,7 @@ local tooltipGameDataEntryToAddAfter = TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN
 --Possible tooltips controls
 --ZO_PopupToolTip
 --ZO_ItemToolTip
+--GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_RIGHT_TOOLTIP)
 local tooltipCtrls = {
     ["popup"] =     PopupTooltip,
     ["info"] =      InformationTooltip,
@@ -1995,7 +2011,7 @@ lib._debugSetInfoTextParts = {
 end
 lib.BuildSetDataText = buildSetDataText
 
-local function addTooltipLine(tooltipControl, setData, itemLink)
+local function addTooltipLine(tooltipControl, setData, itemLink, isGamePad)
 --d("addTooltipLine")
     --local isPopupTooltip = tooltipControl == popupTooltip or false
     --local isInformationTooltip = tooltipControl == infoTooltip or false
@@ -2008,16 +2024,28 @@ local function addTooltipLine(tooltipControl, setData, itemLink)
 
 --lib._lastSetInfoText = setInfoText
 
-    if tooltipControl.AddVerticalPadding then
-        tooltipControl:AddVerticalPadding(5)
+    if not isGamePad then
+        if tooltipControl.AddVerticalPadding then
+            tooltipControl:AddVerticalPadding(5)
+        end
+        ZO_Tooltip_AddDivider(tooltipControl)
+        tooltipControl:AddLine(setInfoText)
+    else
+        local libSetsSection = tooltipControl:AcquireSection(tooltipControl:GetStyle("bodySection"))
+        libSetsSection:AddLine("LibSets", tooltipControl:GetStyle("bodyHeader"))
+        libSetsSection:AddLine(setInfoText, tooltipControl:GetStyle("bodyDescription"))
+        tooltipControl:AddSection(libSetsSection)
     end
-    ZO_Tooltip_AddDivider(tooltipControl)
-    tooltipControl:AddLine(setInfoText)
 end
 
-local function tooltipItemCheck(tooltipControl, tooltipData)
-    --Get the item
-    local itemLink, setIdOfCraftableSet = getLastItemLink(tooltipControl)
+local function tooltipItemCheck(tooltipControl, tooltipData, isGamePad)
+    --Get the itemlink
+    local itemLink, setIdOfCraftableSet
+    if not isGamePad then
+        itemLink, setIdOfCraftableSet = getLastItemLink(tooltipControl)
+    else
+        itemLink = tooltipData
+    end
     if not itemLink or itemLink == "" then return false, nil end
     --Check if tooltip shows a set item
     local isSet, setId = isTooltipOfSetItem(itemLink, tooltipData)
@@ -2029,13 +2057,331 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- SETTINGS MENU
 ------------------------------------------------------------------------------------------------------------------------
-function lib.ShowSettingsMenu()
-    if lam == nil or lib.LAMsettingsPanel == nil then return end
-    lam:OpenToPanel(lib.LAMsettingsPanel)
+local addonsStr = GetString(SI_GAME_MENU_ADDONS)
+local LHAS_settingsEntryInGameMenu = ((LibAddonMenu2 ~= nil and (not IsConsole or (IsConsole and LibAddonMenu2.panelId ~= nil))) and addonsStr .." 2") or addonsStr
+function lib.ShowSettingsMenu(panelToShow)
+    panelToShow = panelToShow or lib.LHASsettingsPanel.panel
+    if not IsConsole and not IsInGamepadPreferredMode() then
+        if lam == nil or lib.LAMsettingsPanel == nil then return end
+        lam:OpenToPanel(lib.LAMsettingsPanel)
+    else
+        if lhas == nil or lib.LHASsettingsPanel == nil then return end
+
+
+        if IsConsole then
+            if lhas.scene == nil then return end
+            --Show the gamepad menu now (if not shown)
+            SCENE_MANAGER:Show("mainMenuGamepad")
+
+            --Select the LHAS entry in the mainMenuGamepad Scene now
+            lhas.scene:Show()
+
+            --Select the own addon panel
+            panelToShow:Select()
+        else
+            --Show the keyboard menu
+            if not GAME_MENU_SCENE:IsShowing() then
+                SCENE_MANAGER:Show("gameMenuInGame")
+            end
+
+            --Select the settings entry
+            local gameMenu = ZO_GameMenu_InGame.gameMenu
+            local settingsMenuEntry = (gameMenu and gameMenu.headerControls and gameMenu.headerControls[GetString(SI_GAME_MENU_SETTINGS)]) or nil
+            --local rootNodeChildren = (gameMenu and gameMenu.rootNode and gameMenu.rootNode.children) or nil
+            if settingsMenuEntry then
+                if not settingsMenuEntry.selected then
+                    settingsMenuEntry.control:SetSelected(true)
+                    settingsMenuEntry:SetOpen(true)
+                end
+                for _, subChildNode in ipairs(settingsMenuEntry.children) do
+                    local data = subChildNode.data
+                    if data.name == LHAS_settingsEntryInGameMenu then
+                        subChildNode.control:SetSelected(true)
+                        data.callback()
+                        --Select the own addon panel
+                        panelToShow:Select()
+                        return
+                    end
+                end
+            end
+        end
+    end
+end
+
+local reloadUITexture = "/esoui/art/miscellaneous/eso_icon_warning.dds"
+local reloadUITextureStr = "|cFF0000".. zo_iconFormatInheritColor(reloadUITexture, 24, 24) .."|r"
+local function loadLHASSettingsMenu()
+    if lhas == nil or settingsMenuCreated[true] then return end
+
+    local settings = lib.svData
+    local defaultSettings = lib.defaultSV
+    local preventLAMTooltipEditSetFuncEndlessLoop = false
+
+    local function tooltipLHASDisabledFunc()
+        return not settings.modifyTooltips or isCustomTooltipEnabled()
+    end
+
+    local LibSets_LHAS_EditBox_CustomTooltipPattern
+
+    --Add the dalog which asks for a reload UI if you change a setting that needs that, and you close the LHAS settings
+    --addAskBeforeSceneCloseReloadUIDialog()
+
+    -- Create addon settings panel
+    local LHASpanel = lhas:AddAddon(MAJOR, {
+        allowDefaults       = true,  -- Show "Reset to Defaults" button
+        allowRefresh        = true,    -- Enable automatic control updates
+        author              = lib.author,
+        version             = lib.version,
+        website             = "https://www.esoui.com/downloads/info2241-LibSets.html",
+        feedback            = "https://www.esoui.com/portal.php?id=136&a=bugreport",
+        donation            = "https://www.esoui.com/portal.php?id=136&a=faq&faqid=131",
+    })
+
+    local optionsTable =
+    {
+        --[[
+        ------------------------------------------------------------------------------------------------------------------------
+        {
+            type = lhas.ST_SECTION,
+            label = localization.headerUIStuff,
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.addSetCollectionsCurrentZoneButton,
+            tooltip =   localization.addSetCollectionsCurrentZoneButton,
+            getFunction =    function() return settings.addSetCollectionsCurrentZoneButton end,
+            setFunction =    function(value)
+            lib.svData.addSetCollectionsCurrentZoneButton = value
+            lib.addUIButtons()
+            end,
+            default =   defaultSettings.addSetCollectionsCurrentZoneButton,
+            disable =  function() return false end,
+        },
+        ------------------------------------------------------------------------------------------------------------------------
+                {
+                    type = lhas.ST_SECTION,
+                    label =localization.headerItemLinks,
+                },
+                {
+                    type =      lhas.ST_CHECKBOX,
+                    label =     localization.addSetCollectionsSearchItemLink,
+                    tooltip =   localization.addSetCollectionsSearchItemLink,
+                    getFunction =    function() return settings.addSetCollectionsSearchItemLink end,
+                    setFunction =    function(value)
+                        lib.svData.addSetCollectionsSearchItemLink = value
+                        lib.addSetCollectionsSearchItemLinkContextMenuEntry()
+                    end,
+                    default =   defaultSettings.addSetCollectionsSearchItemLink,
+                    disable =  function() return LibCustomMenu == nil end,
+                },
+        ]]
+        ------------------------------------------------------------------------------------------------------------------------
+        {
+            type = lhas.ST_SECTION,
+            label =localization.headerTooltips,
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     reloadUITextureStr .. " " .. localization.modifyTooltip,
+            tooltip =   reloadUITextureStr .. " " .. localization.settingWillReloadUI .. "\n" .. localization.modifyTooltip,
+            getFunction =    function() return settings.modifyTooltips end,
+            setFunction =    function(value)
+                lib.svData.modifyTooltips = value
+                useCustomTooltip = isCustomTooltipEnabled()
+                isLibSetsTooltipEnabled()
+
+                ReloadUI("ingame")
+            end,
+            default =   defaultSettings.modifyTooltips,
+            disable =  function() return false end,
+            requiresReload = true,
+        },
+
+        ----------------------------------------------------------------------------------------------------------------
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.tooltipTextures,
+            tooltip =   localization.tooltipTextures_TT,
+            getFunction =    function() return settings.tooltipModifications.tooltipTextures end,
+            setFunction =    function(value)
+            lib.svData.tooltipModifications.tooltipTextures = value
+            isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.tooltipTextures,
+            disable =  function() return tooltipLHASDisabledFunc() end,
+        },
+
+        ----------------------------------------------------------------------------------------------------------------
+        --- Default tooltip
+        {
+            type = lhas.ST_LABEL,
+            label = localization.defaultTooltipPattern .. ":\n"..localization.defaultTooltipPattern_TT,
+            tooltip = localization.defaultTooltipPattern .. ":\n"..localization.defaultTooltipPattern_TT
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.setType,
+            tooltip =   localization.setType,
+            getFunction =    function() return settings.tooltipModifications.addSetType end,
+            setFunction =    function(value)
+            lib.svData.tooltipModifications.addSetType = value
+            isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.addSetType,
+            disable =  function() return tooltipLHASDisabledFunc() end,
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.dropZones,
+            tooltip =   localization.dropZones,
+            getFunction =    function() return settings.tooltipModifications.addDropLocation end,
+            setFunction =    function(value)
+            lib.svData.tooltipModifications.addDropLocation = value
+            isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.addDropLocation,
+            disable =  function() return tooltipLHASDisabledFunc() end,
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.dropMechanic,
+            tooltip =   localization.dropMechanic,
+            getFunction =    function() return settings.tooltipModifications.addDropMechanic end,
+            setFunction =    function(value)
+            lib.svData.tooltipModifications.addDropMechanic = value
+            isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.addDropMechanic,
+            disable =  function() return tooltipLHASDisabledFunc() end,
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.droppedBy,
+            tooltip =   localization.droppedBy .. "/" .. localization.boss .. "/" .. GetString(SI_CHARACTER_SELECT_LOCATION_LABEL),
+            getFunction =    function() return settings.tooltipModifications.addBossName end,
+            setFunction =    function(value)
+            lib.svData.tooltipModifications.addBosslabel =value
+            isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.addBossName,
+            disable =  function() return tooltipLHASDisabledFunc() end,
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.neededTraitsOrReconstructionCost,
+            tooltip =   localization.neededTraitsOrReconstructionCost,
+            getFunction =    function() return settings.tooltipModifications.addNeededTraits end,
+            setFunction =    function(value)
+            lib.svData.tooltipModifications.addNeededTraits = value
+            lib.svData.tooltipModifications.addReconstructionCost = value
+            isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.addNeededTraits,
+            disable =  function() return tooltipLHASDisabledFunc() end,
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.dlc,
+            tooltip =   localization.dlc,
+            getFunction =    function() return settings.tooltipModifications.addDLC end,
+            setFunction =    function(value)
+            lib.svData.tooltipModifications.addDLC = value
+            isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.addDLC,
+            disable =  function() return tooltipLHASDisabledFunc() end,
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.favorites,
+            tooltip =   localization.favorites,
+            getFunction =    function() return settings.tooltipModifications.addFavorites end,
+            setFunction =    function(value)
+            lib.svData.tooltipModifications.addFavorites = value
+            isLibSetsTooltipEnabled()
+            end,
+            default =   defaultSettings.tooltipModifications.addFavorites,
+            disable =  function() return tooltipLHASDisabledFunc() end,
+        },
+
+        ----------------------------------------------------------------------------------------------------------------
+        --- Custom tooltip
+        {
+            type  = lhas.ST_LABEL,
+            label = localization.customTooltipPattern .. ":\n" .. localization.customTooltipPattern_TT,
+            tooltip  = localization.customTooltipPattern .. ":\n" .. localization.customTooltipPattern_TT,
+        },
+        {
+            type = lhas.ST_EDIT,
+            label =localization.customTooltipPattern,
+            tooltip = localization.customTooltipPattern,
+            getFunction =  function() return settings.useCustomTooltipPattern end,
+            setFunction =  function(value)
+            if not preventLAMTooltipEditSetFuncEndlessLoop then
+            useCustomTooltip = isCustomTooltipEnabled(value)
+            if not useCustomTooltip then
+            value = ""
+            settings.useCustomTooltipPattern = value
+            if LibSets_LHAS_EditBox_CustomTooltipPattern ~= nil then
+            preventLAMTooltipEditSetFuncEndlessLoop = true
+            LibSets_LHAS_EditBox_CustomTooltipPattern.editbox:SetText(value)
+            preventLAMTooltipEditSetFuncEndlessLoop = false
+            end
+            else
+            settings.useCustomTooltipPattern = value
+            end
+            isLibSetsTooltipEnabled()
+            end
+            end,
+            default = defaultSettings.useCustomTooltipPattern,
+            --reference = "LibSets_LHAS_EditBox_CustomTooltipPattern",
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.addLineBreakAtCustomTooltipParts,
+            tooltip =   localization.addLineBreakAtCustomTooltipParts_TT,
+            getFunction =    function() return settings.addLineBreakAtCustomTooltipParts end,
+            setFunction =    function(value)
+            addLineBreakAfterNonEmptyParts = value
+            lib.svData.addLineBreakAtCustomTooltipParts = value
+            end,
+            default =   defaultSettings.addLineBreakAtCustomTooltipParts,
+            disable =  function() return not settings.useCustomTooltipPattern end,
+            width =     "full",
+        },
+
+        ----------------------------------------------------------------------------------------------------------------
+        --- Slash command /lsp preview tooltip
+        {
+            type  = lhas.ST_LABEL,
+            title = localization.previewTT,
+            text  = localization.previewTT_TT, --todo 251113 add  .. localization.previewTT_SetSearch_TT once lss setSearch was added for Gamepad UI
+        },
+        {
+            type =      lhas.ST_CHECKBOX,
+            label =     localization.previewTTToChatToo,
+            tooltip =   localization.previewTTToChatToo_TT,
+            getFunction =    function() return settings.setPreviewTooltips.sendToChatToo end,
+            setFunction =    function(value)
+            lib.svData.setPreviewTooltips.sendToChatToo = value
+            end,
+            default =   defaultSettings.setPreviewTooltips.sendToChatToo,
+            disable =  function() return false end,
+            width =     "full",
+        },
+    }
+
+    local controlsCreated = LHASpanel:AddSettings(optionsTable)
+    LibSets_LHAS_EditBox_CustomTooltipPattern = nil --todo find the editbox in the controlsCreated and get it'S reference
+
+    lib.LHASsettingsPanel = {
+        panel = LHASpanel,
+        controls = controlsCreated,
+    }
 end
 
 local function loadLAMSettingsMenu()
-    if lam == nil then return end
+    if lam == nil or settingsMenuCreated[false] then return end
 
     local panelData = {
         type 				= 'panel',
@@ -2291,7 +2637,7 @@ local function loadLAMSettingsMenu()
         {
             type  = "description",
             title = localization.previewTT,
-            text  = localization.previewTT_TT,
+            text  = localization.previewTT_TT .. localization.previewTT_SetSearch_TT,
         },
         {
             type =      "checkbox",
@@ -2309,6 +2655,8 @@ local function loadLAMSettingsMenu()
 
     }
     lam:RegisterOptionControls(LAMPanelName, optionsTable)
+
+    settingsMenuCreated[false] = true
 end
 
 
@@ -2323,11 +2671,11 @@ end
 
 local tooltipSetDataWithoutItemIdsCached = lib.tooltipSetDataWithoutItemIdsCached
 
-local function tooltipOnAddGameData(tooltipControl, tooltipData)
---d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData))
+local function tooltipOnAddGameData(tooltipControl, tooltipData, isGamePad)
+--d("tooltipOnAddGameData-tooltipData: " ..tos(tooltipData) .. "; isGamePad: " .. tos(isGamePad))
     --Add line below the currently "last" line (mythic or stolen info at date 2022-02-12)
-    if tooltipData == tooltipGameDataEntryToAddAfter then
---d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
+    if not isGamePad and tooltipData == tooltipGameDataEntryToAddAfter then
+        --d(">anyTooltipInfoToAdd: " ..tos(anyTooltipInfoToAdd) .. ", useCustomTooltip: " ..tos(useCustomTooltip))
         if not anyTooltipInfoToAdd then return end
 
         local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData)
@@ -2336,17 +2684,59 @@ local function tooltipOnAddGameData(tooltipControl, tooltipData)
         local setData = tooltipSetDataWithoutItemIdsCached[setId] or libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
 
         addTooltipLine(tooltipControl, setData, itemLink)
+
+    elseif isGamePad == true then
+        if not anyTooltipInfoToAdd then return end
+        local isSet, setId, itemLink = tooltipItemCheck(tooltipControl, tooltipData, isGamePad)
+--d(">isSet: " ..tos(isSet) ..", setId: " ..tos(setId))
+        if not isSet then return end
+
+        local setData = tooltipSetDataWithoutItemIdsCached[setId] or libSets_GetSetInfo(setId, true, langToUse) --without itemIds, and names only in client laguage
+        addTooltipLine(tooltipControl, setData, itemLink, isGamePad)
     end
 end
 
 
 
 ------------------------------------------------------------------------------------------------------------------------
+-- Gamepad Tooltip
+------------------------------------------------------------------------------------------------------------------------
+local function hideGamepadTooltip(tooltipType)
+    tooltipType = tooltipType or GAMEPAD_LEFT_TOOLTIP
+    gpTooltips:ClearTooltip(tooltipType, true)
+    --gpTooltips:ClearTooltip(tooltipType)
+    --gpTooltips:Reset(tooltipType)
+    --gpTooltips:ResetScrollTooltipToTop(tooltipType)
+end
+
+local function showGamepadTooltipWithItemLink(tooltipType, itemLink)
+    tooltipType = tooltipType or GAMEPAD_LEFT_TOOLTIP
+    --d("[LibSets]showGamepadTooltipWithItemLink - type: " ..tos(tooltipType) .." - " .. itemLink)
+    --gpTooltips:Reset(tooltipType)
+    --gpTooltips:ClearTooltip(tooltipType, true)
+
+    --todo 20251031 Check if the currently shown scene contains the fragment of the gamepad tooltip
+    --and else add it, so the tooltip properly shows?
+    local tooltipContainer = gpTooltips:GetTooltipInfo(tooltipType).control.container
+    if not tooltipContainer then
+d("[LibSets]tooltip container for " .. tos(tooltipType) .. " is missing!")
+    end
+
+    --GAMEPAD_TOOLTIPS:LayoutItem(GAMEPAD_LEFT_TOOLTIP, itemLink)
+    gpTooltips:LayoutItem(tooltipType, itemLink, false, nil, true)
+end
+
+------------------------------------------------------------------------------------------------------------------------
 -- Tooltip preview
 ------------------------------------------------------------------------------------------------------------------------
 local function createPreviewTooltipAndShow(setId)
-    if popupTooltip and not popupTooltip:IsControlHidden() then
+    local useGamepadTooltip = (IsConsole or IsInGamepadPreferredMode()) or false
+
+
+    if not useGamepadTooltip and popupTooltip and not popupTooltip:IsControlHidden() then
         ZO_PopupTooltip_Hide()
+    elseif useGamepadTooltip then
+        hideGamepadTooltip(nil)
     end
     if setId == nil or setId <= 0 then return end
 
@@ -2381,7 +2771,11 @@ local function createPreviewTooltipAndShow(setId)
     local itemLink = lib_buildItemLink(setItemIdOfPreferedCriteria, quality)
     if itemLink == nil or itemLink == "" then return end
     d(libPrefix .."SetId \'".. tos(setId) .."\': " ..itemLink)
-    ZO_PopupTooltip_SetLink(itemLink)
+    if not useGamepadTooltip then
+        ZO_PopupTooltip_SetLink(itemLink)
+    else
+        showGamepadTooltipWithItemLink(nil, itemLink)
+    end
     return itemLink
 end
 lib.CreatePreviewTooltipAndShow = createPreviewTooltipAndShow
@@ -2450,17 +2844,19 @@ local function previewSetTooltipBySlashCommand(args)
 
     local itemLink = createPreviewTooltipAndShow(setId)
     if itemLink ~= nil and setPreviewTooltipSV.sendToChatToo == true then
-        StartChatInput(itemLink)
+        --StartChatInput(itemLink)
+        lib.SafeStartChatInput(itemLink)
     end
 end
 
 
 local function createSetTooltipPreviewSlashCommand()
-    if not lib.libSlashCommander then
+    if not lib.libSlashCommander and not slashCommandsCreated then
         SLASH_COMMANDS["/libsetspreview"] = previewSetTooltipBySlashCommand
         SLASH_COMMANDS["/setpreview"] =     previewSetTooltipBySlashCommand
         SLASH_COMMANDS["/setsp"] =          previewSetTooltipBySlashCommand
         SLASH_COMMANDS["/lsp"] =            previewSetTooltipBySlashCommand
+        slashCommandsCreated = true
     end
 end
 
@@ -2485,6 +2881,13 @@ local function hookCustomTooltipControlChecks(customTooltipControl)
     return false
 end
 
+local function initGamePadTooltip(tooltip)
+--d("[LibSets]initGamePadTooltip - tooltip: " .. tos(tooltip))
+    ZO_PostHook(tooltip, "LayoutItem",	function(tooltip, itemLink)
+        tooltipOnAddGameData(tooltip, itemLink, true)
+    end)
+end
+
 function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
 --d("[LibSets]HookTooltipControls")
     local svData = lib.svData
@@ -2493,30 +2896,50 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
 
     --hook into the tooltip types?
     if svData.modifyTooltips == true then
-        if not onlyAddonAdded and baseTooltipHooksDone == false then
-            --d("Hooks loaded")
-            ZO_PreHookHandler(popupTooltip, 'OnAddGameData', tooltipOnAddGameData)
-            --ZO_PreHookHandler(popupTooltip, 'OnHide', tooltipOnHide)
+--d(">modifyTooltips = true")
+        local isInGamepadMode = IsInGamepadPreferredMode()
+        if not IsConsole and not isInGamepadMode then
+            --Keyboard & mouse UI
+            if not onlyAddonAdded and not tooltipsHooked[false] then
+                --d("Hooks loaded")
+                ZO_PreHookHandler(popupTooltip, 'OnAddGameData', tooltipOnAddGameData)
+                --ZO_PreHookHandler(popupTooltip, 'OnHide', tooltipOnHide)
 
-            ZO_PreHookHandler(itemTooltip, 'OnAddGameData', tooltipOnAddGameData)
-            --ZO_PreHookHandler(itemTooltip, 'OnHide', tooltipOnHide)
+                ZO_PreHookHandler(itemTooltip, 'OnAddGameData', tooltipOnAddGameData)
+                --ZO_PreHookHandler(itemTooltip, 'OnHide', tooltipOnHide)
 
-            ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink) lastTooltipItemLink = itemLink end)
+                ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink) lastTooltipItemLink = itemLink end)
 
-            baseTooltipHooksDone = true
+                --Only for debugging
+                --[[
+                ZO_PreHook("ZO_Tooltip_OnAddGameData", function(tooltipControl, gameDataType, ...)
+                    --d("[ZO_Tooltip_OnAddGameData]name: " .. tos(tooltipControl:GetName()) .. ", gameDataType: " ..tos(gameDataType))
+                end)
+                ]]
 
-            --Only for debugging
-            ZO_PreHook("ZO_Tooltip_OnAddGameData", function(tooltipControl, gameDataType, ...)
---d("[ZO_Tooltip_OnAddGameData]name: " .. tos(tooltipControl:GetName()) .. ", gameDataType: " ..tos(gameDataType))
-            end)
+                tooltipsHooked[false] = true
+            end
+
+        elseif IsConsole or isInGamepadMode then
+            --Console or Gamepad UI
+--d(">>gamepad tooltips")
+            if not onlyAddonAdded and not tooltipsHooked[true] then
+                for tooltipType, _ in pairs(GAMEPAD_TOOLTIPS.tooltips) do
+                    initGamePadTooltip(GAMEPAD_TOOLTIPS:GetTooltip(tooltipType))
+                end
+
+                tooltipsHooked[true] = true
+            end
         end
+
+        ------------------------------------------------------------------------------------------------------------------------
 
         --Any custom tooltips added by addons?
         if customTooltipHooksNeeded ~= nil and #customTooltipHooksNeeded then
             local wasHookedInLoop = 0
             --Only apply a hook of one custom tooltip control, registered after EVENT_PLAYER_ACTIVATED of LibSets was run already?
             if onlyAddonAdded == true and customAddonTooltipCtrl ~= nil then
---d(">onlyAddonAdded: true, control: " ..tos(customAddonTooltipCtrl:GetName()))
+                --d(">onlyAddonAdded: true, control: " ..tos(customAddonTooltipCtrl:GetName()))
                 if hookCustomTooltipControlChecks(customAddonTooltipCtrl) == true then
                     --> OnAddGameData should call ZO_ItemTooltip_OnAddGameData -> ItemTooltipBase
                     if customAddonTooltipCtrl:GetHandler("OnAddGameData") == nil then
@@ -2525,7 +2948,7 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
                         --ZO_PreHook(customAddonTooltipCtrl, 'OnAddGameData', tooltipOnAddGameData)
                         local origOnAddGameData = customAddonTooltipCtrl:GetHandler("OnAddGameData")
                         customAddonTooltipCtrl:SetHandler('OnAddGameData', function(...)
---d("customAddonTooltipCtrl:OnAddGameData")
+                            --d("customAddonTooltipCtrl:OnAddGameData")
                             --ZO_Tooltip_OnAddGameData(...)
                             origOnAddGameData(...)
                             tooltipOnAddGameData(...)
@@ -2533,7 +2956,7 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
                     end
 
 
---d(">>1 SetHandler OnAddGameData done!")
+                    --d(">>1 SetHandler OnAddGameData done!")
                     customTooltipHooksHooked[customAddonTooltipCtrl:GetName()] = true
                     wasHookedInLoop = wasHookedInLoop + 1
                 end
@@ -2542,7 +2965,7 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
                 for _, toHookData in ipairs(customTooltipHooksNeeded) do
                     local ttCtrlName = (toHookData ~= nil and toHookData.tooltipCtrlName) or nil
                     if ttCtrlName ~= nil and ttCtrlName ~= "" then
---d(">onlyAddonAdded: ttCtrlName: " ..tos(ttCtrlName))
+                        --d(">onlyAddonAdded: ttCtrlName: " ..tos(ttCtrlName))
                         local ttCtrl = GetControl(ttCtrlName)
                         if hookCustomTooltipControlChecks(ttCtrl) == true then
                             --> OnAddGameData should call ZO_ItemTooltip_OnAddGameData -> ItemTooltipBase
@@ -2552,13 +2975,13 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
                                 --ZO_PreHook(ttCtrl, 'OnAddGameData', tooltipOnAddGameData)
                                 local origOnAddGameData = ttCtrl:GetHandler("OnAddGameData")
                                 ttCtrl:SetHandler('OnAddGameData', function(...)
---d("ttCtrl:OnAddGameData")
+                                    --d("ttCtrl:OnAddGameData")
                                     --ZO_Tooltip_OnAddGameData(...)
                                     origOnAddGameData(...)
                                     tooltipOnAddGameData(...)
                                 end)
                             end
---d(">>2 SetHandler OnAddGameData done!")
+                            --d(">>2 SetHandler OnAddGameData done!")
                             customTooltipHooksHooked[ttCtrlName] = true
                             wasHookedInLoop = wasHookedInLoop + 1
                         end
@@ -2578,9 +3001,8 @@ local hookTooltipControls = lib.HookTooltipControls
 -- EVENTs
 ------------------------------------------------------------------------------------------------------------------------
 local function onPlayerActivatedTooltips()
+--d("[LibSets]onPlayerActivatedTooltips - lam: " .. tos(lam) ..", lhas: " .. tos(lhas))
     EM:UnregisterForEvent(MAJOR .. "_Tooltips", EVENT_PLAYER_ACTIVATED) --only load once
-    if not lam then return end
-
     langToUse = langToUse or langAllowedCheck(clientLang)
     localization = localization or lib.localization[langToUse]
 
@@ -2588,8 +3010,9 @@ local function onPlayerActivatedTooltips()
     --Create the slash command
     setPreviewTooltipSV = getLibSetsSetPreviewTooltipSavedVariables()
     if not lib.svData or not setPreviewTooltipSV then return end
-    createSetTooltipPreviewSlashCommand()
 
+    createSetTooltipPreviewSlashCommand()
+--d(">tooltip SVs loaded")
 
 
     --Get the settings for the tooltips
@@ -2601,18 +3024,32 @@ local function onPlayerActivatedTooltips()
 --d(">useCustomTooltip: " ..tos(useCustomTooltip))
     isLibSetsTooltipEnabled()
 
-    --Build the settings menu for the tooltip
-    loadLAMSettingsMenu()
+    --Build the settings menu for the tooltip, either Gamepad / Console or Keyboard + mouse
+    if not IsConsole and not IsInGamepadPreferredMode() then
+        if not lam then return end
+        loadLAMSettingsMenu()
+    else
+        if not lhas then return end
+        loadLHASSettingsMenu()
+    end
 
     --Hook the base game tooltip controls now, and also checkf or addon added custom tooltip controls to hook
     hookTooltipControls()
     lib.customTooltipHooks.eventPlayerActivatedCalled = true
 end
 
-local function loadTooltipHooks()
-    lam = lib.libAddonMenu
-    if not lam then return end
+local function loadTooltipHooks(wasInputModeChanged)
+    wasInputModeChanged = wasInputModeChanged or false
+    if not IsConsole and not IsInGamepadPreferredMode() then
+        lam = lib.libAddonMenu
+    else
+        lhas = lib.libHarvensAddonSettings
+    end
 
-    EM:RegisterForEvent(MAJOR .. "_Tooltips", EVENT_PLAYER_ACTIVATED, onPlayerActivatedTooltips)
+    if not wasInputModeChanged then
+        EM:RegisterForEvent(MAJOR .. "_Tooltips", EVENT_PLAYER_ACTIVATED, onPlayerActivatedTooltips)
+    else
+       onPlayerActivatedTooltips() --Directly call the tooltip hooks and settings menu creation routines now
+    end
 end
 lib.loadTooltipHooks = loadTooltipHooks

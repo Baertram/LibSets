@@ -29,7 +29,7 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2025-01-25, Baertram, AP101045
+ Last updated: 2025-10-29, Baertram, AP101048
 ------------------------------------------------------------------------------------------------------------------------
  --Known bugs--
 
@@ -58,7 +58,7 @@ in the game which needs to be added to the excel (itemIds are only kept in the l
    If needed: Create an new file with the current APIversion, e.g. LibSets_Constants_<NEW PTS APIVersion integer>.lua and include the needed
    data which should only be available if playing on the PTS.
 2) Do the same like described at 1) with files LibSets_Data_<APIVersion integer>.lua files BUT move them to file
-   LibSets_Data_All.lua (and not LibSets_Constants_All.lua!)
+   Data/LibSets_Data_*.lua (and not LibSets_Constants_All.lua!)
 3) Update the txt manifest file LibSets.txt and increase the ## Version, ## AddOnVersion tags, and change the ## APIVersion tag to support the new APIVersion
    e.g. change 100027 100028 to 100028 100029
 4) To scan the data of the new APIVersion ingame login to the PTS (or live if the new APIversion is already live!) and check the file LibSets_Debug.lua for the
@@ -180,7 +180,7 @@ lib.setDataPreloaded = {
 
 -[ For the wayshrineInfo ]-
 After you have updated the "wayshrines" SavedVariables table to the excel document you need to use the created lua code,
-coming from Excel file "LibSets_SetData.xlsx", map "ESO wayshrine node constants" colum P, to the filename "LibSets_Data_All.lua".
+coming from Excel file "LibSets_SetData.xlsx", map "ESO wayshrine node constants" colum P, to the filenames "Data/LibSets_Data_*.lua".
 
 Do the same like described above at "For the setItemIds" but for the "wayshrine 2 zone data"
 here (Excel file "LibSets_SetData.xlsx", map "ESO wayshrine node constants", colum P) -> Minify all the column P code.
@@ -198,14 +198,14 @@ lib.setDataPreloaded = {
 It contains all the data combined from the other excel maps. You need to add new rows for each new set and fill in the new setIds,
 and the data. Be sure to drag&drop down ALL excel formulas from the rows above to the new rows as well!
 Be sure to update the columns here like washrines, settype, dlcId, traits needed, isVeteran, the drop zones and drop mechanic + dropmechanic names (of the bosses, drop location, drop info)
-This info in all the columns from left to right will generate the lua data in the most right columns which your are able to copy to the file LibSets_Data_All.lua at the end!
+This info in all the columns from left to right will generate the lua data in the most right columns which your are able to copy to the file Data/LibSets_Data_*.lua at the end!
 
 The new setIds are the ones that are, compared to the maximum setId from the existing rows, are higher (newer).
 So check the SavedVariables for their names, and information.
 -Non existing API information like "traits needed to craft" must be checked ingame at the crafting stations or on websites which provide this information already.
 -Wayshrines where the sets can be found/near their crafting station need to be checked on the map and need to be manually entered as well to the data row.
 After all info is updated you can look at the columns AX to BB which provide the generated LUA text for the table entries.
---> Copy ALL lines of this excel map to the file "LibSets_Data_All.lua" into the table "lib.setInfo"!
+--> Copy ALL lines of this excel map to the file "Data/LibSets_Data_*.lua" into the table "lib.setInfo"!
 --> New sets which are not known on the live server will automatically be removed as the internal LibSets tables are build (using function "checkIfSetExists(setId)"
     from file LibSets.lua). So just keep them also in this table "lib.SetInfo"!
 
@@ -250,6 +250,7 @@ LibSets_Data.All, table lib.setDataPreloaded, key LIBSETS_TABLEKEY_SET_PROCS
 -> Be sure to read and follow the comments at column G about the excel created duplicate "", "[, \ " etc. and how to remove them!
 ]]
 
+--Are we on a console?
 --Check if the library was loaded before already w/o chat output
 if IsLibSetsAlreadyLoaded(false) then return end
 
@@ -258,6 +259,8 @@ local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = lib.prefix
 local apiVersion = GetAPIVersion()
 local worldName = GetWorldName()
+
+local IsConsole = lib.IsConsole
 
 --The actual clients language
 local fallbackLang = lib.fallbackLang
@@ -270,6 +273,8 @@ local clientLang = lib.clientLang
 local EM = EVENT_MANAGER
 local WM = WINDOW_MANAGER
 local ISCDM = ITEM_SET_COLLECTIONS_DATA_MANAGER
+
+local dungeonFinder = DUNGEON_FINDER_KEYBOARD
 
 local tos = tostring
 local strgmatch = string.gmatch
@@ -304,6 +309,7 @@ local gilsi = GetItemLinkSetInfo
 local giliscs = GetItemLinkItemSetCollectionSlot
 local id64tos = Id64ToString
 
+local zostc = ZO_ShallowTableCopy
 
 ------------Global variables--------------
 --Get counter suffix
@@ -324,7 +330,7 @@ local noSetIdSets       = lib.noSetIdSets           -- <-- this table contains t
 local allSetNamesCached
 
 --Wayshrine node index -> zoneId mapping
-local wayshrine2zone = preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID]
+local wayshrine2zone = zostc(preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID])
 
 local libZone
 
@@ -515,6 +521,31 @@ local getIndexTableFromNonNumberKeyTable = function(sourceTable, useKey)
 end
 lib.GetIndexTableFromNonNumberKeyTable = getIndexTableFromNonNumberKeyTable
 
+--Check if the value is not 0 and not nil and then return the value, else return nil
+local function checkIsNotZero(value)
+    if nil == value or 0 == value then return nil end
+    return value
+end
+
+local function getTabIndexData(index, ...)
+    if index == nil or select("#", ...) == 0  then return end
+    --[[
+    if type(tab) ~= "table" then
+        tab = { tab }
+    end
+    ]]
+    return select(index, ...)
+end
+
+function lib.SafeStartChatInput(text, channel, target)
+    local isRestrictedCommunicationPermitted = true
+    if target ~= nil and IsCommunicationRestricted() then
+        isRestrictedCommunicationPermitted = CanCommunicateWith(target)
+    end
+    if IsChatSystemAvailableForCurrentPlatform() and isRestrictedCommunicationPermitted then
+        ZO_GetChatSystem():StartTextEntry(text, channel, target, true)
+    end
+end
 
 local equipTypes = {
     EQUIP_TYPE_HEAD,
@@ -1246,11 +1277,18 @@ end
 
 
 --Initialize the search UI now
-local function InitSearchUI()
+local function InitSearchUI(gamepadPreferred)
     if not lib.fullyLoaded then return end
-    LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(LibSets_SearchUI_TLC_Keyboard)
+    --We are in keyboard UI
+    if gamepadPreferred == nil or gamepadPreferred == false then
+        LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(LibSets_SearchUI_TLC_Keyboard)
+    end
+
+    --We are in gamepad UI
+    --if gamepadPreferred == nil or gamepadPreferred == true then
     --todo enable after Gamepad mode search UI xml and lua was created properly 2023-10-17
     --LibSets_SearchUI_Gamepad_TopLevel_OnInitialized(LibSets_SearchUI_TLC_Gamepad)
+    --end
 end
 
 
@@ -1980,6 +2018,8 @@ function lib.buildItemLink(itemId, itemQualitySubType)
     itemQualitySubType = itemQualitySubType or 366 -- Normal
     --itemQualitySubType values for Level 50 items:
     --return '|H1:item:'..tos(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
+    ITEMSTYLE_NONE = ITEMSTYLE_NONE or 0 --fix for console where there is no addoncompatibility aliases
+
     return strfor("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, itemQualitySubType, ITEMSTYLE_NONE, 0, 10000)
 end
 buildItemLink = lib.buildItemLink
@@ -2713,7 +2753,7 @@ function lib.GetDropMechanic(setId, withNames, lang)
     if withNames == true then
         local buildNames = false
         if setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES] ~= nil then
-            dropMechanicNames = ZO_ShallowTableCopy(setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES])
+            dropMechanicNames = zostc(setData[LIBSETS_TABLEKEY_DROPMECHANIC_NAMES])
             if lang ~= nil then
                 dropMechanicNames = removeLanguages(dropMechanicNames, lang)
             end
@@ -2721,7 +2761,7 @@ function lib.GetDropMechanic(setId, withNames, lang)
             buildNames = true
         end
         if not buildNames and setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES] ~= nil then
-            dropMechanicTooltips = ZO_ShallowTableCopy(setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES])
+            dropMechanicTooltips = zostc(setData[LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES])
             if lang ~= nil then
                 dropMechanicTooltips = removeLanguages(dropMechanicTooltips, lang)
             end
@@ -2729,7 +2769,7 @@ function lib.GetDropMechanic(setId, withNames, lang)
             buildNames = true
         end
         if not buildNames and setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES] ~= nil then
-            dropMechanicLocationNames = ZO_ShallowTableCopy(setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES])
+            dropMechanicLocationNames = zostc(setData[LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES])
             if lang ~= nil then
                 dropMechanicLocationNames = removeLanguages(dropMechanicLocationNames, lang)
             end
@@ -3274,7 +3314,7 @@ function lib.GetSetInfo(setId, noItemIds, lang)
     --Copy the return table so that we cannot accidently directly change LibSets.setInfo[setId] by changing the return table!!!
     --Also: lib.setInfo[setId]["setNames"]["en"] will be overwritten as function lib.GetSetInfo is called and passing in ONLY 1 language!
     --So we need to assure that original setInfoTable[LIBSETS_TABLEKEY_SETNAMES] is not manipulated!
-    returnTab = ZO_ShallowTableCopy(setInfoTable)
+    returnTab = zostc(setInfoTable)
 
     --Only now check if itemIds are needed "in the copied return table" (but kep them in the original LibSets.setInfo[setId] !!!
     if noItemIds == true then
@@ -3660,55 +3700,352 @@ end
 
 --[[
 [LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] = {
-        [638]={parentZoneId=888,isTrial=true},   --Aetherian Archive
+        --The preloaded zoneIds of dungeons, and their parent zoneIds, plus the dungeonFinderId and Indices, and their motif/nodeath/speedrun/hardmode/trifecta achievementIds
+        --[1389]={parentZoneId=41,isTrial=true,dungeonFinderId={[false]=613,[true]=614},achievementId={[false]=3468,[true]=3469},motif=3547,hardmode=3470,speedRun=3471,noDeath=3472,trifecta=3474},   --Bal Sunnar
+        -->[zoneId=number] table:nilable dungeonZoneData = { parentZoneId=number,isTrial=boolean,achievementId=table{[isVeteran boolean false]=number,[isVeteran boolean true]=number},dungeonFinderId={[isVeteran boolean false]=number,[isVeteran boolean true]=number},motif=achievementIdNumber,hardmode=achievementIdNumber,speedRun=achievementIdNumber,noDeath=achievementIdNumber,trifecta=achievementIdNumber}
+        ---> Only [zoneId] and parentZoneId are non-optional, all other values/subtables/values in subtables could be nil!
 ]]
+local preloadedZoneDungeonMappingData
+local function isPreloadedZoneDungeonMappingGiven(zoneId, subTable, veteran)
+    preloadedZoneDungeonMappingData = preloadedZoneDungeonMappingData or zostc(preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING])
+    local zoneIdDungeonData = (zoneId ~= nil and preloadedZoneDungeonMappingData ~= nil and preloadedZoneDungeonMappingData[zoneId]) or nil
+    if zoneIdDungeonData == nil then return false, nil end
+
+    if subTable ~= nil then
+        local subTableData = checkIsNotZero(zoneIdDungeonData[subTable])
+        if subTableData == nil then return true, nil end
+        if veteran == nil then return true, subTableData end
+        return true, checkIsNotZero(subTableData[veteran])
+    end
+    return true, checkIsNotZero(zoneIdDungeonData)
+end
+
+
 --Returns a boolean isZoneIdADungeon by the help of a zoneId
 --> Parameters: zoneId number: The zone id given
 --> Returns:    boolean isZoneIdADungeon
 function lib.IsDungeonZoneId(zoneId)
-    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil then return false end
-    return (preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] ~= nil and true) or false
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId), 1)
 end
 isDungeonZoneId = lib.IsDungeonZoneId
 
 --Returns a table dungeonZoneData by the help of a zoneId
 --> Parameters: zoneId number: The zone id given
---> Returns:    table:nilable dungeonZoneData = { parentZoneId=number,isTrial=boolean }
+--> Returns:    table:nilable dungeonZoneData = { parentZoneId=number,isTrial=boolean,dungeonFinderIndex=table{[isVeteran boolean false]=number,[isVeteran boolean true]=number},dungeonFinderId={[isVeteran boolean false]=number,[isVeteran boolean true]=number},motif=achievementIdNumber,hardmode=achievementIdNumber,speedRun=achievementIdNumber,noDeath=achievementIdNumber,trifecta=achievementIdNumber}
+----> Only parentZoneId is non-optional, all other values/subtables/values in subtables could be nil!
 function lib.GetDungeonZoneData(zoneId)
-    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil then return end
-    return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId]
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId), 2)
 end
 
 --Returns boolean isZoneIdATrialDungeon. If the zoneId is no dungeon the return value will be nil
 --> Parameters: zoneId number: The zone id given
 --> Returns:    boolean:nilable isZoneIdATrialDungeon
 function lib.IsDungeonZoneIdTrial(zoneId)
-    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
-    return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId]["isTrial"]
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "isTrial"), 2)
 end
 isDungeonZoneIdTrial = lib.IsDungeonZoneIdTrial
 
 --Returns boolean isTrial of zoneId. If the zoneId is no dungeon the return value will be nil
 --> Parameters: zoneId number: The zone id given
 --> Returns:    boolean:nilable isTrial
-function lib.GetDungeonZoneIdIsTrial(zoneId)
-    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
-    return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId]["isTrial"]
+function lib.GetDungeonZoneIdIsTrial(zoneId) --todo 20250821 what is the difference to Lib.IsDungeonZoneIdTrial(zoneId)?
+    return isDungeonZoneIdTrial(zoneId)
 end
 
 --Returns number parentZoneId. If the zoneId is no dungeon the return value will be nil
 --> Parameters: zoneId number: The zone id given
 --> Returns:    number:nilable parentZoneId
 function lib.GetDungeonZoneIdParentZoneId(zoneId)
-    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
-    return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId]["parentZoneId"]
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "parentZoneId"), 2)
 end
 
+
+--Returns the ESO DungeonFinderId as a table, with key [true]=id for the veteran dungeon, and [false]=id for the normal dungeon in the dungeon finder list
+--> Parameters: zoneId number: The zone id given
+--              boolean:nilable veteran
+--> Returns:    If optinal boolean parameter veteran was specified: number:nilable the dungeonFinderId of the true (veteran) / false (normal) dungeon will be returned
+-->             Else:                                               table:nilable {[boolean:nilable isVeteranTrue]=number:nilable,[boolean:nilable isVeteranFalse]=number:nilable}
+function lib.GetDungeonZoneIdDungeonFinderId(zoneId, veteran)
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "dungeonFinderId", veteran), 2)
+end
+local getDungeonZoneIdDungeonFinderId = lib.GetDungeonZoneIdDungeonFinderId
+
+--Returns the ESO dungeon achievementId as a table, with key [true]=id for the veteran dungeon, and [false]=id for the normal dungeon
+--> Parameters: zoneId number: The zone id given
+--              boolean:nilable veteran
+--> Returns:    If optinal boolean parameter veteran was specified: number:nilable the achievementId of the true (veteran) / false (normal) dungeon will be returned
+-->             Else:                                               table:nilable {[boolean:nilable isVeteranTrue]=number:nilable,[boolean:nilable isVeteranFalse]=number:nilable}
+function lib.GetDungeonZoneIdDungeonAchievementId(zoneId, veteran)
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "achievementId", veteran), 2)
+end
+
+--Local helper function to get the dungeon finder data node entries of normal and/or veteran dungeons
+local dungeonFinderRetTable
+local maxNormalDungeons = 40 --20250825
+local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenTable, p_retTableDungeons, dungeonId, isVeteran)
+    --local veteranIconString = "|t100%:100%:EsoUI/Art/UnitFrames/target_veteranRank_icon.dds|t "
+    local veteranIconStringPattern = "|t.-:.-:EsoUI/Art/UnitFrames/target_veteranRank_icon.dds|t%s*"
+    local dungeonsAddedCounter = 0
+    if dungeonFinderRootNodeChildrenTable == nil or dungeonFinderRootNodeChildrenTable.children == nil then return 0 end
+    if not isVeteran then
+        maxNormalDungeons = #dungeonFinderRootNodeChildrenTable.children + 2 --(2 headlines)
+    end
+    for rootNodeIdx, childData in ipairs(dungeonFinderRootNodeChildrenTable.children) do
+        if childData and childData.data then
+            p_retTableDungeons = p_retTableDungeons or {}
+            local data = childData.data
+--d(">getDungeonFinderDataFromChildNodes-idx: " .. tos(rootNodeIdx) .. "; id: " .. tos(data.id) .. "; name: " .. tos(data.nameKeyboard))
+            if dungeonId == nil or dungeonId == data.id then
+                --Check the name for the veteran icon and remove if + update the isVeteran boolean in the table
+                local name = data.nameKeyboard
+                local nameClean = name
+                local substMadeCount=0
+                local isVeteranDungeon = false
+                nameClean, substMadeCount = zo_strgsub(name, veteranIconStringPattern, "")
+                if substMadeCount > 0 then
+                    isVeteranDungeon = true
+                end
+                --zoneId can be determined via GetActivityZoneId(activityId) where activityId = data.id
+                local dungeonData
+                if dungeonId == nil then
+                    --for debug messages
+                    dungeonData = data.id .. "|" .. nameClean .. "|" .. data.zoneId .. "|" .. tos(isVeteranDungeon)
+                else
+                    --for searched dungeonId, to open the dungeon in the dungeonFinder UI
+                    dungeonData = { index = rootNodeIdx, id = data.id, name = nameClean, zoneId = data.zoneId, isVeteran = isVeteranDungeon }
+                end
+
+                tins(p_retTableDungeons, dungeonData)
+                dungeonsAddedCounter = dungeonsAddedCounter +1
+
+                --Special dungeonId searched for? Then return the found one here
+                if dungeonId ~= nil then return dungeonsAddedCounter end
+            end
+        end
+    end
+    if #p_retTableDungeons > 0 then
+        tsort(p_retTableDungeons)
+    end
+    return dungeonsAddedCounter
+end
+
+local function scrollToDungeonFinderListNow(index, delay, isVeteranDungeon)
+    if index == nil then return end
+    if dungeonFinder and dungeonFinder.navigationTree and dungeonFinder.navigationTree.rootNode then
+        delay = delay or 0
+        isVeteranDungeon = isVeteranDungeon or false
+        if isVeteranDungeon then
+            index = maxNormalDungeons + index --Veterna list starts below the normal list
+        end
+        zo_callLater(function()
+            local dungeonFinderRootNodeChildren = dungeonFinder.navigationTree.rootNode.children
+            local dataList = isVeteranDungeon and dungeonFinderRootNodeChildren[2].children or dungeonFinderRootNodeChildren[1].children
+            ZO_ScrollList_ScrollAbsolute(ZO_DungeonFinder_KeyboardListSection, index)
+        end, delay)
+    end
+end
+
+local function scrollToDungeonFinderListByDungeonId(dungeonFinderIndex, dungeonId)
+--d("[LibSets]scrollToDungeonFinderListByDungeonId-dungeonFinderIndex: " ..tos(dungeonFinderIndex) .. ", dungeonId: " ..tos(dungeonId))
+    if dungeonFinderIndex == nil or dungeonId == nil then return false end
+    local dungeonsAddedNormal = 0
+    local dungeonsAddedVet = 0
+
+    --Will contain the found dungeons' data
+    dungeonFinderRetTable = {}
+
+    if dungeonFinder and dungeonFinder.navigationTree and dungeonFinder.navigationTree.rootNode then
+        local dfRootNode = dungeonFinder.navigationTree.rootNode
+        if dfRootNode.children then
+            --Specific dungeons?
+            if dungeonFinderIndex == 3 then
+                --Normal
+                local dungeonsData = dfRootNode.children[1]
+                if dungeonsData ~= nil then
+                    maxNormalDungeons = 0
+                    dungeonsAddedNormal = getDungeonFinderDataFromChildNodes(dungeonsData, dungeonFinderRetTable, dungeonId, false)
+                    if dungeonsAddedNormal == 1 then
+--d(">found normal " .. tos(dungeonFinderRetTable[1].nameClean) .." dungeonId at index: " ..tos(dungeonFinderRetTable[1].index))
+                        scrollToDungeonFinderListNow(dungeonFinderRetTable[1].index, 50, false)
+                        return true
+                    end
+                end
+                --Veteran (if already given for the char)
+                dungeonsData = dfRootNode.children[2]
+                if dungeonsData ~= nil then
+                    dungeonsAddedVet = getDungeonFinderDataFromChildNodes(dungeonsData, dungeonFinderRetTable, dungeonId, true)
+                    if dungeonsAddedVet == 1 then
+--d(">found veteran " .. tos(dungeonFinderRetTable[1].nameClean) .." dungeonId at index: " ..tos(dungeonFinderRetTable[1].index))
+                        scrollToDungeonFinderListNow(dungeonFinderRetTable[1].index, 50, true)
+                        return true
+                    end
+                end
+                --dungeonsAdded = dungeonsAddedNormal + dungeonsAddedVet
+            --else
+                --[[
+                --Not supported currently
+                local dungeonsData = dfRootNode.children[dungeonFinderIndex]
+                dungeonsAdded = getDungeonFinderDataFromChildNodes(dungeonsData, dungeonFinderRetTable, dungeonId)
+                if dungeonsAdded == 1 then
+                    --todo get the dungeonFinderRetTable[1].index and scroll to it
+                    return true
+                end
+                ]]
+            end
+        end
+    end
+    return false
+end
+lib.ScrollToDungeonFinderListByDungeonId = scrollToDungeonFinderListByDungeonId
+
+local function openDungeonFinder(dungeonFinderIndex, callbackFunc, ...)
+    if dungeonFinder and dungeonFinder.navigationTree then
+        local dfRootNode = dungeonFinder.navigationTree.rootNode
+        if dfRootNode and dfRootNode.children then
+--d("Dungeonfinder is open already!")
+            --call callback function
+            if type(callbackFunc) == "function" then
+                return callbackFunc(dungeonFinderIndex, ...)
+            end
+            return
+        end
+    end
+
+    --ELSE: Open the dungeon finder first
+    --Select the category of the dungeon finder
+    --ZO_UI_SYSTEM_MANAGER:RequestOpenUISystem(UI_SYSTEM_DUNGEON_FINDER)
+    GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment()) --> TODO 20220715 Does not work anymore!!!???
+    --Open the group menu -> Should be done within GROUP_MENU_KEYBOARD:ShowCategory(categoryFragment)
+    if not KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
+      SCENE_MANAGER:Show("groupMenuKeyboard")
+    end
+    --[[
+    --Hide the currently shown fragment
+    if GROUP_MENU_KEYBOARD.currentCategoryFragment then
+        SCENE_MANAGER:RemoveFragment(GROUP_MENU_KEYBOARD.currentCategoryFragment)
+    end
+    local dungeonFinderKeyboardFragment = dungeonFinder:GetFragment()
+    SCENE_MANAGER:AddFragment(dungeonFinderKeyboardFragment)
+    GROUP_MENU_KEYBOARD.currentCategoryFragment = dungeonFinderKeyboardFragment
+    ]]
+
+    --Click the dungeonFinder entry at left category list
+    if not dungeonFinder or not dungeonFinder.navigationTree or not dungeonFinder.navigationTree.rootNode
+            or not dungeonFinder.navigationTree.rootNode.children then
+        ZO_GroupMenu_KeyboardCategoriesScrollChildZO_GroupMenuKeyboard_StatusIconChildlessHeader4:OnMouseUp(MOUSE_BUTTON_INDEX_LEFT, true)
+    end
+
+    local additionalParams = { ... }
+    --Change the dropdown top right
+    zo_callLater(function()
+        --Select entry "Specific dungeon" from dungeon dropdown
+        ZO_DungeonFinder_KeyboardFilter.m_comboBox:SelectItemByIndex(dungeonFinderIndex)
+        --Callback function needed?
+        if type(callbackFunc) == "function" then
+            callbackFunc(dungeonFinderIndex, unpack(additionalParams))
+        end
+    end, 250)
+    return nil
+end
+lib.OpenDungeonFinder = openDungeonFinder --globally for debug functions
+
+--Try to open the ESO dungeon finder and scroll to the list of the provided zoneId's dungeon.
+--If the zoneId is no dungeon zoneId, but a parent zoneId, it will scroll to the first dungeon found in the parent zoneId.
+--If the zoneId is not found the return value will be nil.
+--> Parameters: zoneId number: The zone id/parent zoneId given
+-->             veteranDungeon boolean: true, use the veteran dungeon of the zoneId. Default will be using normal dungeon Id
+--> Returns:    boolean:nilable wasDungeonFinderOpenedAndScrolledToDungeon
+function lib.OpenDungeonFinderByZoneId(zoneId, veteranDungeon)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
+    local wasOpened = false
+
+--d("[LibSets]OpenDungeonFinderByZoneId-zoneId: " ..tos(zoneId) ..", veteran: " ..tos(veteranDungeon))
+    local dungeonFinderDataOfZoneId = getDungeonZoneIdDungeonFinderId(zoneId)
+    if checkIsNotZero(dungeonFinderDataOfZoneId) then
+        veteranDungeon = veteranDungeon or false
+        local dungeonFinderId = dungeonFinderDataOfZoneId[veteranDungeon]
+--d(">dungeonFinderId: " .. tos(dungeonFinderId))
+        if checkIsNotZero(dungeonFinderId) then
+            --Open the scene of the dungeon finder, choose "Specific dungeon"
+            wasOpened = openDungeonFinder(3, scrollToDungeonFinderListByDungeonId, dungeonFinderId)
+        end
+    end
+    return wasOpened
+end
+
+
+--Returns the achievementId for the motif which can be found in the dungeon
+--> Parameters: zoneId number: The zone id given
+--> Returns:    number:nilable achievementIdForMotifOfDungeon
+function lib.GetDungeonZoneIdMotifId(zoneId)
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "motif"), 2)
+end
+
+--Returns the achievementId for the HardMode of the dungeon
+--> Parameters: zoneId number: The zone id given
+--> Returns:    number:nilable achievementIdForHardModeOfDungeon
+function lib.GetDungeonZoneIdHardmodeId(zoneId)
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "hardMode"), 2)
+end
+
+--Returns the achievementId for the SpeedRun of the dungeon
+--> Parameters: zoneId number: The zone id given
+--> Returns:    number:nilable achievementIdForSpeedRunOfDungeon
+function lib.GetDungeonZoneIdSpeedRunId(zoneId)
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "speedRun"), 2)
+end
+
+--Returns the achievementId for the NoDeath of the dungeon
+--> Parameters: zoneId number: The zone id given
+--> Returns:    number:nilable achievementIdForNoDeathOfDungeon
+function lib.GetDungeonZoneIdNoDeathId(zoneId)
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "noDeath"), 2)
+end
+
+--Returns the achievementId for the Trifecta of the dungeon
+--> Parameters: zoneId number: The zone id given
+--> Returns:    number:nilable achievementIdForTrifectaOfDungeon
+function lib.GetDungeonZoneIdTrifectaId(zoneId)
+    return getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "trifecta"), 2)
+end
+
+--Returns the table with the achievementIds of the motif, hardMode, speedRun, noDeath, trifecta, and their names
+--> Parameters: zoneId number: The zone id given
+--> Returns:    table:nilable achievementIdsForDungeon = { motif=table:nilable { id=number, nameRaw=string, name=string}, speedRun=table:nilable { id=number, nameRaw=string, name=string}, hardMode=table:nilable { id=number, nameRaw=string, name=string}, noDeath=table:nilable { id=number, nameRaw=string, name=string}, trifecta=table:nilable { id=number, nameRaw=string, name=string}, }
+local achievementNamesToAdd = {
+    "motif", "hardMode", "speedRun", "noDeath", "trifecta"
+}
+function lib.GetDungeonZoneIdAchievementIds(zoneId)
+    if zoneId == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
+    local dungeondataOfZoneId = preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING][zoneId]
+    local retTab
+    for _, achievementDungeonType in ipairs(achievementNamesToAdd) do
+        local achievementId = dungeondataOfZoneId[achievementDungeonType]
+        if checkIsNotZero(achievementId) then
+            retTab = retTab or {}
+            local achievementNameRaw = GetAchievementName(achievementId)
+            retTab[achievementDungeonType] = { id = achievementId, nawName = achievementNameRaw, name = zo_strformat("<<1>>", achievementNameRaw) }
+        end
+    end
+    return retTab
+end
+
+--Returns the wayshrinenodeIndex, and the dungeonFinderId for the dungeon of the zoneId
+--> Parameters: zoneId number: The zone id given
+--              boolean:nilable veteran
+--> Returns:    number:nilable wayshrineNodeIndex
+-->             number:nilable dungeonFinderId
+function lib.GetDungeonZoneIdWayshrineNodeIndex(zoneId, veteran)
+    local wayshrineNodeIndex = getTabIndexData(isPreloadedZoneDungeonMappingGiven(zoneId, "wayshrine"), 2)
+    local dungeonFinderId = getDungeonZoneIdDungeonFinderId(zoneId, veteran)
+    return wayshrineNodeIndex, dungeonFinderId
+end
 
 --Returns a table of zoneIds which are a dungeon
 --> Returns:    dungeonZoneIdData table = { [zoneIdOfDungeon] = { parentZoneId=number, isTrial=boolean }, ... }
 function lib.GetAllDungeonZoneIdData()
-    return preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING]
+    preloadedZoneDungeonMappingData = preloadedZoneDungeonMappingData or zostc(preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING])
+    return preloadedZoneDungeonMappingData
 end
 
 
@@ -3730,7 +4067,7 @@ isPublicDungeonZoneId = lib.IsPublicDungeonZoneId
 --> Returns:    table:nilable publicDungeonZoneData = { parentZoneId=number, DLCID=DLC_xxx constant number }
 function lib.GetPublicDungeonZoneData(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil then return end
-    return preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]
+    return zostc(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId])
 end
 
 --Returns boolean isZoneIdAPublicDungeonOfDLCId. If the zoneId is no public dungeon the return value will be nil
@@ -3748,7 +4085,7 @@ end
 --> Returns:    DLC_xxx:nilable DLCIdOfPublicDungeonZoneId
 function lib.GetPublicDungeonZoneIdDLCId(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
-    return preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["DLCId"]
+    return zostc(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["DLCId"])
 end
 
 --Returns number parentZoneId. If the zoneId is no public dungeon the return value will be nil
@@ -3756,13 +4093,13 @@ end
 --> Returns:    number:nilable parentZoneId
 function lib.GetPublicDungeonZoneIdParentZoneId(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
-    return preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["parentZoneId"]
+    return zostc(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["parentZoneId"])
 end
 
 --Returns a table of zoneIds which are a dungeon
 --> Returns:    publicDungeonZoneIdData table = { [zoneIdOfPublicDungeon] = { parentZoneId=number, DLCID=DLC_xxx constant number }, ... }
 function lib.GetAllPublicDungeonZoneIdData()
-    return preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING]
+    return zostc(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING])
 end
 
 
@@ -3823,7 +4160,7 @@ local categoryIdDetermined, parentCategoryDetermined
 local function runItemSetCollectionsBookOpenedTask(repeatDelay, func, ...)
     EM:UnregisterForUpdate(updaterName)
     updateRunsDone = 0
-    params = {...}
+    local params = {...}
 
     repeatDelay = repeatDelay or 50
     EM:RegisterForUpdate(updaterName, repeatDelay, function() return func(unpack(params))  end)
@@ -3868,10 +4205,10 @@ getCurrentZoneIds = lib.GetCurrentZoneIds
 
 
 --Returns the complete mapping table between set item collections parentCategory, category and zoneIds
---> See file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
+--> See file Data/LibSets_Data_*.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
 local preloadedSetItemCollectionMappingToZoneCopy
 function lib.GetItemSetCollectionToZoneIds()
-    preloadedSetItemCollectionMappingToZoneCopy = preloadedSetItemCollectionMappingToZoneCopy or ZO_ShallowTableCopy(preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING])
+    preloadedSetItemCollectionMappingToZoneCopy = preloadedSetItemCollectionMappingToZoneCopy or zostc(preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING])
     return preloadedSetItemCollectionMappingToZoneCopy
 end
 
@@ -3946,7 +4283,7 @@ local function getItemSetCollectionUnlockedAndTotal(zoneId)
 end
 
 --Get the number of unlocked and total itemSetCollection pieces in a categoryId (categoryId needs to be the categoryId of
---the Item Set Collections UI, see mapping table at file LibSets_Data_All.lua ->
+--the Item Set Collections UI, see mapping table at file Data/LibSets_Data_*.lua ->
 --number categoryId The zone's categoryId
 --returns number sumNumUnlocked, number sumNumTotal
 function lib.GetNumItemSetCollectionCategoryUnlockedPieces(categoryId)
@@ -4374,7 +4711,7 @@ end
 --> Returns:    nilable:LibSetsAllSetProcDataAllowedInPvP table
 function lib.GetAllSetDataWithProcAllowedInPvP()
     if not checkIfSetsAreLoadedProperly() then return end
-    return preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP]
+    return zostc(preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP])
 end
 
 
@@ -4394,7 +4731,7 @@ end
 --> Returns:    nilable:LibSetsAllSetProcData table
 function lib.GetAllSetProcData()
     if not checkIfSetsAreLoadedProperly() then return end
-    return preloaded[LIBSETS_TABLEKEY_SET_PROCS]
+    return zostc(preloaded[LIBSETS_TABLEKEY_SET_PROCS])
 end
 
 
@@ -4895,17 +5232,30 @@ local function myInvItemLinkCallbackFunc(inventorySlot, slotActions, ctrl, alt, 
     if bagId == nil or slotIndex == nil then return end
     local itemLink = gil(bagId, slotIndex)
     if itemLink == nil or itemLink == "" then return end
-    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = gilsi(itemLink)
-    if not hasSet or setId == nil then return end
+    local hasSet, setName, _, _, _, setId, _ = gilsi(itemLink)
+    if not hasSet or setId == nil or setName == nil then return end
 
+    libSets_GetSetType = libSets_GetSetType or lib.GetSetType
     local setType = libSets_GetSetType(setId)
-    if setType == LIBSETS_SETTYPE_CRAFTED then return end
+    if setType == nil or setType == LIBSETS_SETTYPE_CRAFTED then return end
 
     local setTypeTexture = libSets_GetSetTypeTexture(setType, setId)
+    if setTypeTexture == nil then setTypeTexture = "" end
+
+    local labelLocalizedText = getLocalizedText("setCollectionsSearchItemLink", clientLang, zocstrfor("<<1>>", setName))
+    --[[
+    d("====================")
+    d("[LibSets]DEBUG - CONTEXT MENU - START")
+    d(">setId: " .. tos(setId) ..", setType: " .. tos(setType) .. ", name: " .. tos(setName))
+    d(">localizedText: " .. tos(labelLocalizedText))
+    d(">texture: " .. tos(setTypeTexture))
+    d("[LibSets]DEBUG - CONTEXT MENU - END")
+    ]]
+    if labelLocalizedText == nil then return end
 
     local submenuEntris = {}
     local subMenuEntrySetCollectionsSearchItemLink =  {
-        label = zoitf(setTypeTexture, 32, 32, getLocalizedText("setCollectionsSearchItemLink", clientLang, zocstrfor("<<1>>", setName)), nil),
+        label = zoitf(setTypeTexture, 32, 32, labelLocalizedText, nil),
         callback = function()
             local l_itemLink = itemLink
             --[[
@@ -4938,21 +5288,29 @@ end
 lib.addSetCollectionsSearchItemLinkContextMenuEntry = addSetCollectionsSearchItemLinkContextMenuEntry
 
 
-local function createUIStuff()
-    --Add buttons to jump to current zon at the set collections
-    addUIButtons()
+--Create UI stuff for the PC
+local itemSetsBookCallbackAdded = false
+local function createUIStuff(gamepadPreferred)
+    --Only in keyboard UI
+    if gamepadPreferred == false then
+        --Add buttons to jump to current zon at the set collections
+        addUIButtons()
 
-    --Add the contextMenu at inventory
-    addSetCollectionsSearchItemLinkContextMenuEntry()
-    ITEM_SETS_BOOK_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if (newState == SCENE_FRAGMENT_SHOWN ) then
---d(MAJOR .. "ITEM_SETS_BOOK_FRAGMENT opened!")
-            wasSetCollectionsBookOpenedYet = true
+        --Add the contextMenu at inventory
+        addSetCollectionsSearchItemLinkContextMenuEntry()
+        if not itemSetsBookCallbackAdded then
+            ITEM_SETS_BOOK_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+                if (newState == SCENE_FRAGMENT_SHOWN ) then
+                    --d(MAJOR .. "ITEM_SETS_BOOK_FRAGMENT opened!")
+                    wasSetCollectionsBookOpenedYet = true
+                end
+            end)
+            itemSetsBookCallbackAdded = true
         end
-    end)
+    end
 
     --Search UI
-    InitSearchUI()
+    InitSearchUI(gamepadPreferred)
 end
 
 ------------------------------------------------------------------------
@@ -5090,7 +5448,7 @@ local function slashcommand_chapters()
     if chaptersInOrderLookupTable == nil then
         for _, dlcId in ipairs(DLCAndCHAPTERDataOrdered) do
             local dlcName = DLCandCHAPTERdata[dlcId]
-            if dlcAndChapterCollectibleIds[dlcId].type == DLC_TYPE_CHAPTER then
+            if dlcAndChapterCollectibleIds[dlcId].type == DLC_TYPE_CHAPTER or dlcAndChapterCollectibleIds[dlcId].type == DLC_TYPE_SEASON_PART then
                 chaptersInOrderLookupTable = chaptersInOrderLookupTable or {}
                 tins(chaptersInOrderLookupTable, {dlcId=dlcId, name=dlcName})
             end
@@ -5118,7 +5476,9 @@ local function slash_help()
     d("|-> \'/libsets chapters\'          Write the list of chapters to the chat")
     d("|-> \'/libsets dlcs\'              Write the list of dlcs to the chat")
     d("|-> \'/libsets dlcsandchapters\'   Write the list of dlcs and chapters to the chat")
-    d("|-> \'/lss\' or \'libsets search\' <optional search term>        Show the search UI. If <optional search term> was provided the search UI will search this set name directly.")
+    if not IsConsole and not IsInGamepadPreferredMode() then --todo 251113 remove once gamepad & console set search UI works
+        d("|-> \'/lss\' or \'libsets search\' <optional search term>        Show the search UI. If <optional search term> was provided the search UI will search this set name directly.")
+    end
     d("|-> \'/lsp\' <optional search term>\'        Start a set search in the chat editbox and show found sets directly (only if LibSlashCommander is activated!). You can search by name or setId. Selecting a found set will show a preview of a set's item, and (if enabled in your LibSets settings menu) provide the itemlink in the chat editbox too.")
     d("|-> \'/libsets debug\' <optional debug option>       Write debugging information to the chat. If <optional debug option> was provided, this function will be called (if valid).")
     d("<<< [" .. lib.name .. "] |c0000FFSlash command help -|r END <<<")
@@ -5192,6 +5552,24 @@ local function command_handler(args)
     end
 end
 
+local function createSetSearchSlashCommands(doAdd)
+    --Only in PC mode
+    if doAdd then
+        if not IsConsole and not IsInGamepadPreferredMode() then
+            if SLASH_COMMANDS["/libsetssearch"] == nil then
+                SLASH_COMMANDS["/libsetssearch"] = slash_search_helper
+            end
+            if SLASH_COMMANDS["/lss"] == nil then
+                SLASH_COMMANDS["/lss"] = slash_search_helper
+            end
+        end
+    else
+        if IsConsole or IsInGamepadPreferredMode() then
+            SLASH_COMMANDS["/libsetssearch"] = nil
+            SLASH_COMMANDS["/lss"] = nil
+        end
+    end
+end
 
 local function createSlashCommands()
     SLASH_COMMANDS["/libsets"] = command_handler
@@ -5201,10 +5579,6 @@ local function createSlashCommands()
     if SLASH_COMMANDS["/ls"] == nil then
         SLASH_COMMANDS["/ls"] = command_handler
     end
-    SLASH_COMMANDS["/libsetssearch"] = slash_search_helper
-    if SLASH_COMMANDS["/lss"] == nil then
-        SLASH_COMMANDS["/lss"] = slash_search_helper
-    end
 
     --Add the slash command for the DLC/chapter info
     SLASH_COMMANDS["/libsetsdlcsandchapters"] = slashcommand_dlcsandchapter
@@ -5213,6 +5587,8 @@ local function createSlashCommands()
     SLASH_COMMANDS["/dlcs"] = slashcommand_dlcs
     SLASH_COMMANDS["/libsetschapters"] = slashcommand_chapters
     SLASH_COMMANDS["/chapters"] = slashcommand_chapters
+
+    createSetSearchSlashCommands(true)
 end
 
 
@@ -5230,7 +5606,7 @@ end
 local function onLibraryLoaded(event, name)
     --Only load lib if ingame
     if name ~= MAJOR then return end
-    EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
+    EVENT_MANAGER:UnregisterForEvent(MAJOR .. "_EVENT_ADD_ON_LOADED", EVENT_ADD_ON_LOADED)
     lib.startedLoading = true
     lib.setsLoaded = false
 
@@ -5240,6 +5616,7 @@ local function onLibraryLoaded(event, name)
     lib.libZone = libZone
     lib.libAddonMenu = LibAddonMenu2
     lib.libSlashCommander = LibSlashCommander
+    lib.libHarvensAddonSettings = LibHarvensAddonSettings
 
     --The actual API version
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
@@ -5283,16 +5660,44 @@ local function onLibraryLoaded(event, name)
         --Slash commands
         createSlashCommands()
 
+        --Optional: Build the libSlashCommander autocomplete stuff, if LibSlashCommander is present and activated
+        -->See file LibSet_AutoCompletion.lua
+        lib.buildLSCSetSearchAutoComplete()
+
         --All library data was loaded and scanned, so set the variables to "successfull" now, in order to let the API functions
         --work properly now
         lib.fullyLoaded = true
 
-        --Add UI related stuff like the "jump to set collections' current zone", the search UI, itemlink changes, master crafter tables
-        createUIStuff()
+        --Only if not on Consoles
+        if not IsConsole then
+            --Add UI related stuff like the "jump to set collections' current zone", the search UI, itemlink changes, master crafter tables
+            createUIStuff(IsInGamepadPreferredMode())
+        end
 
-        --Optional: Build the libSlashCommander autocomplete stuff, if LibSlashCommander is present and activated
-        -->See file LibSet_AutoCompletion.lua
-        lib.buildLSCSetSearchAutoComplete()
+        --Does the input mode change from keyboard + mouse to gamepad?
+        --Check if tooltip hooks need to be done again for "the other mode"
+        local function onGamepadPreferredModeChanged(_, gamepadPreferred)
+            if gamepadPreferred == true then
+                --Was the set keyboard search UI initialized before in keyboard mode, then hide it if it's shown
+                if LIBSETS_SEARCH_UI_KEYBOARD ~= nil and LIBSETS_SEARCH_UI_KEYBOARD:IsShown() then
+                    LIBSETS_SEARCH_UI_KEYBOARD:HideUI()
+                end
+            else
+                --Was the set gamepad search UI initialized before in keyboard mode, then hide it if it's shown
+                --[[
+                if LIBSETS_SEARCH_UI_GAMEPAD ~= nil and LIBSETS_SEARCH_UI_GAMEPAD:IsShown() then
+                    LIBSETS_SEARCH_UI_GAMEPAD:HideUI()
+                end
+                ]]
+            end
+            --Invalidate or ReEnable the SlashCommands for the set search UI
+            createSetSearchSlashCommands(not gamepadPreferred)
+            --Initialize the UI stuff and the Set Search UI for keyboard or gamepad (if not already done)
+            createUIStuff(gamepadPreferred)
+            --Load the proper tooltip hooks if not already done
+            lib.loadTooltipHooks(true)
+        end
+        EM:RegisterForEvent(MAJOR .. "_EVENT_GAMEPAD_PREFERRED_MODE_CHANGED", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, onGamepadPreferredModeChanged)
 
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
         --TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
@@ -5312,4 +5717,4 @@ local function onLibraryLoaded(event, name)
 end
 
 --Load the addon now
-EM:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, onLibraryLoaded)
+EM:RegisterForEvent(MAJOR .. "_EVENT_ADD_ON_LOADED", EVENT_ADD_ON_LOADED, onLibraryLoaded)

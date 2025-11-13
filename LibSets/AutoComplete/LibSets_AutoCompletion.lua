@@ -5,6 +5,10 @@ if IsLibSetsAlreadyLoaded(false) then return end
 --It should be updated each time the APIversion increases to contain the new/changed data
 local lib = LibSets
 
+--Only if not on consoles - Should be handled by PC folder hopefully
+local IsConsole = lib.IsConsole
+
+
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = lib.prefix
 
@@ -85,7 +89,8 @@ local function buildAutoComplete(command, langToUse)
             if setId ~= nil and type(setId) == "number" then
                 local itemLink = createPreviewTooltipAndShow(setId)
                 if itemLink ~= nil and setPreviewTooltipSV.sendToChatToo == true then
-                    StartChatInput(itemLink)
+                    lib.SafeStartChatInput(itemLink)
+                    --StartChatInput(itemLink)
                 end
             end
         end)
@@ -118,7 +123,20 @@ local function buildAutoComplete(command, langToUse)
                         createPreviewTooltipAndShow = createPreviewTooltipAndShow or lib.CreatePreviewTooltipAndShow
                         local itemLink = createPreviewTooltipAndShow(setId)
                         if itemLink ~= nil and setPreviewTooltipSV.sendToChatToo == true then
-                            StartChatInput(itemLink)
+                            if not IsConsole and not IsInGamepadPreferredMode() then
+                                --StartChatInput(itemLink)
+                                lib.SafeStartChatInput(itemLink)
+                            else
+                                --20251031 Does not work on console, as we get an error at chatsystem:SetSettings all of sudden...
+                                --or latest when we press UP key after adding the text by addon -> Only if LibSlashCommander is loaded
+                                --CallSecureProtected("StartChatInput", itemLink)
+
+                                --LibSlashCommander function to safely put something into chat
+                                lib.SafeStartChatInput(itemLink)
+                                --[[
+                                GAMEPAD_CHAT_SYSTEM.textEntry:Open(itemLink)
+                                ]]
+                            end
                         end
                     end)
                     --Get the translated zone names

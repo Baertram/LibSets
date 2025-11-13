@@ -1425,7 +1425,8 @@ end
 function LibSets_SearchUI_Shared:ItemLinkToChat(data)
     if data and data.itemLink ~= nil then
         d(libPrefix .."SetId \'".. tos(data.setId) .."\': " ..data.itemLink)
-        StartChatInput(data.itemLink)
+        --StartChatInput(data.itemLink)
+        lib.SafeStartChatInput(data.itemLink)
     end
 end
 

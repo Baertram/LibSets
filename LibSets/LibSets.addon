@@ -1,0 +1,71 @@
+##
+## Check file LibSets.lua with information how to update the library with new content.
+## Short description: All data for the update comes from
+## API functions and scanned info ingame, stored to the LibSets.lua SavedVariables file.
+## The data needs to be transfered to the Excel LibSets_SetData.xlsx file afterwards.
+## (Attention: The excel Uses forumlas cross the different tabs! So always respect and drag&drop the formulas for new rows!)
+
+## Title: LibSets
+## Description: List of all ingame sets and functions to check what set type they are, set names, itemIds, drop locations, etc.
+## Author: Baertram
+## APIVersion: 101048 101049
+## Version: 0.8.2
+## AddOnVersion: 000802
+## IsLibrary: true
+## SavedVariables: LibSets_SV_Data LibSets_SV_DEBUG_Data
+## OptionalDependsOn: LibAddonMenu-2.0>=41 LibCustomMenu>=730 LibHarvensAddonSettings>=2007 LibScrollableMenu>=020307 LibSlashCommander>=45 LibZone>=0895
+
+## This Add-On is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries. All rights reserved.
+
+##Read the file LibSets.lua, at the top, to see what needs to be done to update the data in this library /after an APIversion change e.g.)
+
+##Constant values internally for the library
+LibSets_ConstantsLibraryInternal.lua
+
+##Constant values as base for ALL API versions
+LibSets_Constants_All.lua
+
+##Constant values dependent only on the current API version(s): If the file exists, it will be loaded
+##-->Currently disabled!
+##LibSets_Constants_$(APIVersion).lua
+
+##Data file with the data for ALL Api versions
+##!!!!!!!!!!!! Update the data from the API version dependent files to this file, if the API version increases, or the old APIversion data will not be loaded anymore !!!!!!!!!!
+Data/LibSets_Data_Zones.lua
+Data/LibSets_Data_Sets.lua
+Data/LibSets_Data_SetItemIds.lua
+Data/LibSets_Data_SetNames.lua
+##Data/LibSets_Data_SetProcs.lua
+Data/LibSets_Data_SetOtherData.lua
+
+
+##Functions and base library code
+LibSets.lua
+
+##Only on PC, Tooltip functions
+Tooltips/LibSets_Tooltips.lua
+
+##Optional: if library LibSlashCommander is loaded: Chat auto completion for set names
+AutoComplete/LibSets_AutoCompletion.lua
+
+##Debug functions
+Debug/LibSets_Debug.lua
+
+##XML - Copy text dialog
+PC/CopyText/LibSets_CopyTextDialog.lua
+PC/CopyText/LibSets_CopyTextDialog.xml
+
+##XML - Search
+SearchUI/LibSets_SearchUI_Shared.lua
+SearchUI/LibSets_SearchUI.xml
+## Keyboard
+SearchUI/Keyboard/LibSets_SearchUI_List_Keyboard.lua
+SearchUI/Keyboard/LibSets_SearchUI_Keyboard.lua
+## Gamepad - Non functional/supported as of 20231011
+## SearchUI/Gamepad/LibSets_SearchUI_List_Gamepad.lua
+## SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua
+
+
+# This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
+# The Elder Scrolls and related logos are registered trademarks or trademarks of ZeniMax Media Inc.
+# in the United States and/or other countries. All rights reserved.

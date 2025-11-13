@@ -65,7 +65,6 @@ end
 
 --[[ XML Handlers ]]--
 function LibSets_SearchUI_Gamepad_TopLevel_OnInitialized(self)
+    if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then return end
 	LIBSETS_SEARCH_UI_GAMEPAD = LibSets_SearchUI_Gamepad:New(self)
 end
-
-

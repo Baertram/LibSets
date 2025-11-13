@@ -70,7 +70,7 @@
 -------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.debugBuildMixedSetNames()           |    MIXING NEW SET NAMES INTO THE PRELOADED DATA
                                                 |    Put other language setNames here in the variable called "otherLangSetNames" below a table key representing the language
-                                                |    you want to "mix" into the LibSets_Data_All.lua file's table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]" (e.g. ["jp"]).
+                                                |    you want to "mix" into the Data/LibSets_Data_*.lua file's table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]" (e.g. ["jp"]).
                                                 |    For further details please read the function's description and comments in file LibSets_Debug.lua
                                                 |-> This function is not client language dependent!
 -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -354,7 +354,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
                 if setInfo[setId] == nil then
                     doAddAsNew = true
                 else
-                    --Already manually added to the "newer APIversion" table in LibSets_Data_All.lua?
+                    --Already manually added to the "newer APIversion" table in Data/LibSets_Data_*.lua?
                     -->Could be already in lib.setInfo but does count as "new" then until the PTS APIversion is live!
                     if setsOfNewerAPIVersion ~= nil and (forceShowOtherApiVersionSets == true or not isPTSAPIVersionLive) then
                         for _, setIdOfNewerAPIVersion in ipairs(setsOfNewerAPIVersion) do
@@ -425,7 +425,7 @@ local function checkForNewSetIds(setIdTable, funcToCallForEachSetId, combineFrom
 lib._newSetIdsFound_checkForNewSetIds = newSetIdsFound
 end
 
---Return all the setId's itemIds as table, from file LibSets_Data_All.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
+--Return all the setId's itemIds as table, from file Data/LibSets_Data_*.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS]
 local function getAllSetItemIds()
     checkForNewSetIds(lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS], lib.DecompressSetIdItemIds, true, false)
     return lib.CachedSetItemIdsTable
@@ -614,7 +614,7 @@ local function compressSetItemIdTable(toMinify)
     return minifiedTable
 end
 
---Compress the itemIds of a set to lower the filesize of LibSets_Data_All.lua, table LIBSETS_TABLEKEY_SETITEMIDS.
+--Compress the itemIds of a set to lower the filesize of Data/LibSets_Data_*.lua, table LIBSETS_TABLEKEY_SETITEMIDS.
 local function compressSetItemIdsNow(setsDataTable, noReloadInfo)
     noReloadInfo = noReloadInfo or false
     d(libPrefix .. " Compressing the set itemIds now...")
@@ -1106,38 +1106,6 @@ local function getNewSetName(newSetId)
     return unknownName
 end
 
---Local helper function to get the dungeon finder data node entries of normal and/or veteran dungeons
-local retTableDungeons
-local function getDungeonFinderDataFromChildNodes(dungeonFinderRootNodeChildrenTable)
-    local veteranIconString = "|t100%:100%:EsoUI/Art/UnitFrames/target_veteranRank_icon.dds|t "
-    local veteranIconStringPattern = "|t.-:.-:EsoUI/Art/UnitFrames/target_veteranRank_icon.dds|t%s*"
-    local dungeonsAddedCounter = 0
-    if dungeonFinderRootNodeChildrenTable == nil or dungeonFinderRootNodeChildrenTable.children == nil then return 0 end
-    for _, childData in ipairs(dungeonFinderRootNodeChildrenTable.children) do
-        if childData and childData.data then
-            retTableDungeons = retTableDungeons or {}
-            local data = childData.data
-            --Check the name for the veteran icon and remove if + update the isVeteran boolean in the table
-            local name = data.nameKeyboard
-            local nameClean = name
-            local substMadeCount=0
-            local isVeteranDungeon = false
-            nameClean, substMadeCount = zo_strgsub(name, veteranIconStringPattern, "")
-            if substMadeCount > 0 then
-                isVeteranDungeon = true
-            end
-            --zoneId can be determined via GetActivityZoneId(activityId) where activityId = data.id
-
-            local dungeonData = data.id .. "|" .. nameClean .. "|" .. data.zoneId .. "|" .. tos(isVeteranDungeon)
-            tins(retTableDungeons, dungeonData)
-            dungeonsAddedCounter = dungeonsAddedCounter +1
-        end
-    end
-    tsort(retTableDungeons)
-    return dungeonsAddedCounter
-end
-
-
 --Read all dungeons from the dungeon finder and save them to the SavedVariables key "dungeonFinderData" (LIBSETS_TABLEKEY_DUNGEONFINDER_DATA).
 --The format will be:
 --dungeonFinderData[integerIndexIncreasedBy1] = dungeonId .. "|" .. dungeonName .. "|" .. zoneId .. "|" .. isVeteranDungeon
@@ -1152,16 +1120,22 @@ end
 --->!!!Attention!!!You MUST open the dungeon finder->go to specific dungeon dropdown entry in order to build the dungeons list needed first!!!
 --Parameter: dungeonFinderIndex number. Possible values are 1=Normal or 2=Veteran or 3=Both dungeons. Leave empty to use 3=Both dungeons
 local preventEndlessCallDungeonFinderData = false
+local retTableDungeons
+local getDungeonFinderDataFromChildNodes = lib.GetDungeonFinderDataFromChildNodes
+local openDungeonFinder = lib.OpenDungeonFinder
+
 function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
     noReloadInfo = noReloadInfo or false
     d(libPrefix .. "Start to load all dungeon data from the keyboard dungeon finder...")
     dungeonFinderIndex = dungeonFinderIndex or 3
-    local dungeonFinder = DUNGEON_FINDER_KEYBOARD
+
     retTableDungeons = nil
     local dungeonsAddedNormal = 0
     local dungeonsAddedVet = 0
     local dungeonsAdded = 0
     local openDungeonFinderNow = false
+
+    local dungeonFinder = DUNGEON_FINDER_KEYBOARD
     if dungeonFinder and dungeonFinder.navigationTree and dungeonFinder.navigationTree.rootNode then
         local dfRootNode = dungeonFinder.navigationTree.rootNode
         if dfRootNode.children then
@@ -1169,17 +1143,17 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
                 --Normal
                 local dungeonsData = dfRootNode.children[1]
                 if dungeonsData ~= nil then
-                    dungeonsAddedNormal = getDungeonFinderDataFromChildNodes(dungeonsData)
+                    dungeonsAddedNormal = getDungeonFinderDataFromChildNodes(dungeonsData, retTableDungeons, nil)
                 end
                 --Veteran (if already given for the char)
                 dungeonsData = dfRootNode.children[2]
                 if dungeonsData ~= nil then
-                    dungeonsAddedVet = getDungeonFinderDataFromChildNodes(dungeonsData)
+                    dungeonsAddedVet = getDungeonFinderDataFromChildNodes(dungeonsData, retTableDungeons, nil)
                 end
                 dungeonsAdded = dungeonsAddedNormal + dungeonsAddedVet
             else
                 local dungeonsData = dfRootNode.children[dungeonFinderIndex]
-                dungeonsAdded = getDungeonFinderDataFromChildNodes(dungeonsData)
+                dungeonsAdded = getDungeonFinderDataFromChildNodes(dungeonsData, retTableDungeons, nil)
             end
         else
             if preventEndlessCallDungeonFinderData == true then
@@ -1200,36 +1174,12 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
         if noReloadInfo == true then return end
         d(pleaseReloadUI)
     else
-        local noDataFoundText = "<No dungeon data was found!"
-        if preventEndlessCallDungeonFinderData == true and openDungeonFinderNow == true then
-            --Select the category of the dungeon finder
-            --ZO_UI_SYSTEM_MANAGER:RequestOpenUISystem(UI_SYSTEM_DUNGEON_FINDER)
-            GROUP_MENU_KEYBOARD:ShowCategory(DUNGEON_FINDER_KEYBOARD:GetFragment()) --> TODO 20220715 Does not work anymore!!!???
-            --Open the group menu -> Should be done within GROUP_MENU_KEYBOARD:ShowCategory(categoryFragment)
-            if not KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
-              SCENE_MANAGER:Show("groupMenuKeyboard")
-            end
-            --[[
-            --Hide the currently shown fragment
-            if GROUP_MENU_KEYBOARD.currentCategoryFragment then
-                SCENE_MANAGER:RemoveFragment(GROUP_MENU_KEYBOARD.currentCategoryFragment)
-            end
-            local dungeonFinderKeyboardFragment = dungeonFinder:GetFragment()
-            SCENE_MANAGER:AddFragment(dungeonFinderKeyboardFragment)
-            GROUP_MENU_KEYBOARD.currentCategoryFragment = dungeonFinderKeyboardFragment
-            ]]
-            if not dungeonFinder or not dungeonFinder.navigationTree or not dungeonFinder.navigationTree.rootNode
-                    or not dungeonFinder.navigationTree.rootNode.children then
-                ZO_GroupMenu_KeyboardCategoriesScrollChildZO_GroupMenuKeyboard_StatusIconChildlessHeader3:OnMouseUp(MOUSE_BUTTON_INDEX_LEFT, true)
-            end
-            zo_callLater(function()
-                --Select entry "Sepcific dungeon" from dungeon dropdown
-                ZO_DungeonFinder_KeyboardFilter.m_comboBox:SelectItemByIndex(3)
-                --Redundant call to the same function
-                lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
-            end, 250)
+        if openDungeonFinderNow == true then
+            local noDataFoundText = "<No dungeon data was found! Opening the dungeon finder now"
+            d(noDataFoundText)
+            --Open the dungeon finder and then redundant call to the same function to check again
+            openDungeonFinder(dungeonFinderIndex, lib.DebugGetDungeonFinderData, noReloadInfo)
         end
-        d(noDataFoundText)
     end
 end
 local debugGetDungeonFinderData = lib.DebugGetDungeonFinderData
@@ -1335,10 +1285,10 @@ end
 local debugGetAllCollectibleDLCNames = lib.DebugGetAllCollectibleDLCNames
 
 --Only show the setIds that were added with the latest "Set itemId scan" via function "LibSets.DebugScanAllSetData()".
--->The function will compare the setIds of this table with the setIds in the file LibSets_Data_All.lua table lib.setInfo!
+-->The function will compare the setIds of this table with the setIds in the file Data/LibSets_Data_*.lua table lib.setInfo!
 --->If there are no new setIds you either did NOT use the function "LibSets.DebugScanAllSetData()" before, did a reloadui,
 --->copied the contents from the SavedVariables table to the lua minifier AND have transfered the scanned itemIds to the
----<file LibSets_Data_All.lua table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS].
+---<file Data/LibSets_Data_*.lua table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETITEMIDS].
 --->Or there are no new setIds since the last time you updated this table.
 function lib.DebugShowNewSetIds(noChatOutput)
     noChatOutput = noChatOutput or false
@@ -1576,7 +1526,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- MIXING NEW SET NAMES INTO THE PRELOADED DATA
 -- Put other language setNames here in the variable called "otherLangSetNames" below a table key representing the language
--- you want to "mix" into the LibSets_Data_All.lua file's table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]" (e.g. ["jp"])
+-- you want to "mix" into the Data/LibSets_Data_*.lua file's table "lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]" (e.g. ["jp"])
 ------------------------------------------------------------------------------------------------------------------------
 local otherLangSetNames={
     --Example
@@ -1591,7 +1541,7 @@ local otherLangSetNames={
 -- Example:  ["jp"] = { [19]={["jp"]="妖術師の法衣"},[20]={["jp"]="魔法使いの鎧"},[21]={["jp"]="アカヴィリのドラゴンガード"}, ... },
 
 --Run the function LibSets.debugBuildMixedSetNames() (see below) ingame to:
---3. Get the existing data of table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] from file "LibSets_Data_All.lua"
+--3. Get the existing data of table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] from file "Data/LibSets_Data_*.lua"
 --4. Let it parse the table otherLangSetNames above
 --5. For each language detected update the table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] with the (new) entries of the language above
 --6. Dump the table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] to the SavedVariables of LibSets, with the key "MixedSetNamesForDataAll"
@@ -1599,7 +1549,7 @@ local otherLangSetNames={
 --Manual tasks afterwards
 --7. You need to logout then and copy the SavedVariables table "MixedSetNamesForDataAll"
 --8. Use a lua minifier to shrink the code, e.g. https://mothereff.in/lua-minifier
---9* Put the shrinked lua table contents in the preloaded data table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] in file "LibSets_Data_All.lua"
+--9* Put the shrinked lua table contents in the preloaded data table lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] in file "Data/LibSets_Data_*.lua"
 --   Now all new/ changed entries should be in there, old ones + the ones from table "otherLangSetNames" above!
 --11. Delete the contents of table "otherLangSetNames" above in this file "LibSets_Debug.lua" again
 function lib.debugBuildMixedSetNames()

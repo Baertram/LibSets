@@ -986,5 +986,6 @@ end
 
 --[[ XML Handlers ]]--
 function LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(self)
-	LIBSETS_SEARCH_UI_KEYBOARD = LibSets_SearchUI_Keyboard:New(self)
+    if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then return end
+    LIBSETS_SEARCH_UI_KEYBOARD = LibSets_SearchUI_Keyboard:New(self)
 end
