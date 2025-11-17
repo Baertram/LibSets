@@ -2909,7 +2909,6 @@ function lib.HookTooltipControls(onlyAddonAdded, customAddonTooltipCtrl)
                 --ZO_PreHookHandler(itemTooltip, 'OnHide', tooltipOnHide)
 
                 ZO_PreHook("ZO_PopupTooltip_SetLink", function(itemLink)
-d("[LibSets]ZO_PopupTooltip_SetLink")
                     lastTooltipItemLink = itemLink
                 end)
 
