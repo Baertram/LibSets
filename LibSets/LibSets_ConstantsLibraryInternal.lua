@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.85
+local MAJOR, MINOR = "LibSets", 0.86
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
