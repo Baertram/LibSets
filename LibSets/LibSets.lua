@@ -29,7 +29,7 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2025-11-13, Baertram, AP101048
+ Last updated: 2026-01-11, Baertram, AP101048
 ------------------------------------------------------------------------------------------------------------------------
  --Known bugs--
 
@@ -5682,7 +5682,7 @@ local function onLibraryLoaded(event, name)
                 if LIBSETS_SEARCH_UI_KEYBOARD ~= nil and LIBSETS_SEARCH_UI_KEYBOARD:IsShown() then
                     LIBSETS_SEARCH_UI_KEYBOARD:HideUI()
                 end
-            else
+            --else
                 --Was the set gamepad search UI initialized before in keyboard mode, then hide it if it's shown
                 --[[
                 if LIBSETS_SEARCH_UI_GAMEPAD ~= nil and LIBSETS_SEARCH_UI_GAMEPAD:IsShown() then

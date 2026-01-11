@@ -2112,6 +2112,8 @@ local reloadUITexture = "/esoui/art/miscellaneous/eso_icon_warning.dds"
 local reloadUITextureStr = "|cFF0000".. zo_iconFormatInheritColor(reloadUITexture, 24, 24) .."|r"
 local function loadLHASSettingsMenu()
     if lhas == nil or settingsMenuCreated[true] then return end
+    --Settings menu for LibAddonMenu was created first -> Stay with that
+    if lam ~= nil and settingsMenuCreated[false] then return true end
 
     local settings = lib.svData
     local defaultSettings = lib.defaultSV
@@ -2204,8 +2206,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.tooltipTextures_TT,
             getFunction =    function() return settings.tooltipModifications.tooltipTextures end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.tooltipTextures = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.tooltipTextures = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.tooltipTextures,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2224,8 +2226,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.setType,
             getFunction =    function() return settings.tooltipModifications.addSetType end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addSetType = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addSetType = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addSetType,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2236,8 +2238,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.dropZones,
             getFunction =    function() return settings.tooltipModifications.addDropLocation end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addDropLocation = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addDropLocation = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDropLocation,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2248,8 +2250,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.dropMechanic,
             getFunction =    function() return settings.tooltipModifications.addDropMechanic end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addDropMechanic = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addDropMechanic = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDropMechanic,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2260,8 +2262,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.droppedBy .. "/" .. localization.boss .. "/" .. GetString(SI_CHARACTER_SELECT_LOCATION_LABEL),
             getFunction =    function() return settings.tooltipModifications.addBossName end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addBosslabel =value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addBosslabel =value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addBossName,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2272,9 +2274,9 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.neededTraitsOrReconstructionCost,
             getFunction =    function() return settings.tooltipModifications.addNeededTraits end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addNeededTraits = value
-            lib.svData.tooltipModifications.addReconstructionCost = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addNeededTraits = value
+                lib.svData.tooltipModifications.addReconstructionCost = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addNeededTraits,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2285,8 +2287,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.dlc,
             getFunction =    function() return settings.tooltipModifications.addDLC end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addDLC = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addDLC = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDLC,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2297,8 +2299,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.favorites,
             getFunction =    function() return settings.tooltipModifications.addFavorites end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addFavorites = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addFavorites = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addFavorites,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2317,21 +2319,21 @@ local function loadLHASSettingsMenu()
             tooltip = localization.customTooltipPattern,
             getFunction =  function() return settings.useCustomTooltipPattern end,
             setFunction =  function(value)
-            if not preventLAMTooltipEditSetFuncEndlessLoop then
-            useCustomTooltip = isCustomTooltipEnabled(value)
-            if not useCustomTooltip then
-            value = ""
-            settings.useCustomTooltipPattern = value
-            if LibSets_LHAS_EditBox_CustomTooltipPattern ~= nil then
-            preventLAMTooltipEditSetFuncEndlessLoop = true
-            LibSets_LHAS_EditBox_CustomTooltipPattern.editbox:SetText(value)
-            preventLAMTooltipEditSetFuncEndlessLoop = false
-            end
-            else
-            settings.useCustomTooltipPattern = value
-            end
-            isLibSetsTooltipEnabled()
-            end
+                if not preventLAMTooltipEditSetFuncEndlessLoop then
+                    useCustomTooltip = isCustomTooltipEnabled(value)
+                    if not useCustomTooltip then
+                        value = ""
+                        settings.useCustomTooltipPattern = value
+                        if LibSets_LHAS_EditBox_CustomTooltipPattern ~= nil then
+                            preventLAMTooltipEditSetFuncEndlessLoop = true
+                            LibSets_LHAS_EditBox_CustomTooltipPattern.editbox:SetText(value)
+                            preventLAMTooltipEditSetFuncEndlessLoop = false
+                        end
+                    else
+                        settings.useCustomTooltipPattern = value
+                    end
+                    isLibSetsTooltipEnabled()
+                end
             end,
             default = defaultSettings.useCustomTooltipPattern,
             --reference = "LibSets_LHAS_EditBox_CustomTooltipPattern",
@@ -2342,8 +2344,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.addLineBreakAtCustomTooltipParts_TT,
             getFunction =    function() return settings.addLineBreakAtCustomTooltipParts end,
             setFunction =    function(value)
-            addLineBreakAfterNonEmptyParts = value
-            lib.svData.addLineBreakAtCustomTooltipParts = value
+                addLineBreakAfterNonEmptyParts = value
+                lib.svData.addLineBreakAtCustomTooltipParts = value
             end,
             default =   defaultSettings.addLineBreakAtCustomTooltipParts,
             disable =  function() return not settings.useCustomTooltipPattern end,
@@ -2363,7 +2365,7 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.previewTTToChatToo_TT,
             getFunction =    function() return settings.setPreviewTooltips.sendToChatToo end,
             setFunction =    function(value)
-            lib.svData.setPreviewTooltips.sendToChatToo = value
+                lib.svData.setPreviewTooltips.sendToChatToo = value
             end,
             default =   defaultSettings.setPreviewTooltips.sendToChatToo,
             disable =  function() return false end,
@@ -2382,6 +2384,8 @@ end
 
 local function loadLAMSettingsMenu()
     if lam == nil or settingsMenuCreated[false] then return end
+    --Settings menu for LibHarvensAddonSettings was creted first -> Stay with that
+    if lhas ~= nil and settingsMenuCreated[true] then return true end
 
     local panelData = {
         type 				= 'panel',
