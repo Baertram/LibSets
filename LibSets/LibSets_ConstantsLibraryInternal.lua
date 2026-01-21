@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.87
+local MAJOR, MINOR = "LibSets", 0.88
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -26,6 +26,16 @@ local lib                            = LibSets
 --Are we on a console?
 local IsConsole = IsConsoleUI()
 lib.IsConsole = IsConsole
+lib.searchUI = {
+    controlName = {
+        [false] = "LibSets_SearchUI_TLC_Keyboard",
+        [true]  = "LibSets_SearchUI_TLC_Gamepad",
+    },
+    control = {
+        [false] = nil, --Keybaord: LibSets_SearchUI_TLC_Keyboard Updated as keybaord search UI is initialized
+        [true]  = nil -- Gamepad: LibSets_SearchUI_TLC_Gamepad Updated ass gamepad search UI is initialized (currently as of 2026-01-21 it does not exist!)
+    }
+}
 
 ------------------------------------------------------------------------------------------------------------------------
 lib.name                             = MAJOR
@@ -69,7 +79,7 @@ local APIVersions                    = {}
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101048 -- Patch U48 "Seasons of the Wormcult Part 2" (2025-09-18)
+lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-21)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -88,7 +98,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101048 -- Patch U48 "Seasons of the Wormc
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the value here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101048 -- Patch U47 "Seasons of the Wormcult Part 2"" (2025-09-18)
+APIVersions["PTS"]                   = 101049 -- Patch U49 "Season 0" (2026-01-21)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
@@ -135,27 +145,40 @@ lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the clien
 lib.debugMaxCollectibleIds = 15000
 
 ------------------------------------------------------------------------------------------------------------------------
+--base game languages
+local langDE = "de"
+local langEN = "en"
+local langES = "es"
+local langFR = "fr"
+local langRU = "ru"
+local langZH = "zh"
+--base game special languages (own client needed)
+local langJP = "jp"
+--Custom languages
+local langPL = "pl"
+
+
 --The supported languages of this library
-local fallbackLang             = "en"
+local fallbackLang             = langEN
 lib.fallbackLang               = fallbackLang
 --During debugging these languages will be scanned for their setNames and an automatic langauge switch and reloadUI will
 --be done -> If the value == true
 local supportedLanguages       = {
-    ["de"] = true,
-    ["en"] = true,
-    ["es"] = true,
-    ["fr"] = true,
-    ["pl"] = true, --todo: Added 2024-09-24,NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
-    ["ru"] = true,
-    ["zh"] = true,
-    ["jp"] = false, --TODO: Working on: Waiting for SetNames & other translations (by Calamath e.g.)
+    [langDE] = true,
+    [langEN] = true,
+    [langES] = true,
+    [langFR] = true,
+    [langPL] = true, --todo: Added 2024-09-24,NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
+    [langRU] = true,
+    [langZH] = true,
+    [langJP] = false, --TODO: Working on: Waiting for SetNames & other translations (by Calamath e.g.)
 }
 lib.supportedLanguages         = supportedLanguages
 
 --The languages which use a special client or custom addon, so debug functions need to skip existing data within LibSets.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] e.g.!
 local nonOfficialLanguages = {
-    ["pl"] = true,
-    ["jp"] = true,
+    [langPL] = true,
+    [langJP] = true,
 }
 lib.nonOfficialLanguages = nonOfficialLanguages
 
@@ -177,14 +200,14 @@ lib.supportedLanguagesIndex = supportedLanguagesIndex
 -->Can be used as a LibAddonMenu choices table, see function LibSets.GetSupportedLanguageChoices()
 local supportedLanguageChoices, supportedLanguageChoicesValues
 supportedLanguageChoices = {
-    [1] = "de",
-    [2] = "en",
-    [3] = "es",
-    [4] = "fr",
-    [5] = "ru",
-    [6] = "zh",
-    [7] = "pl",
-    --[xx] = "jp", --not supported yet JP
+    [1] = langDE,
+    [2] = langEN,
+    [3] = langES,
+    [4] = langFR,
+    [5] = langRU,
+    [6] = langZH,
+    [7] = langPL,
+    --[xx] = langJP, --not supported yet JP
 }
 supportedLanguageChoicesValues = {}
 for langId=1, #supportedLanguageChoices, 1 do
@@ -192,7 +215,6 @@ for langId=1, #supportedLanguageChoices, 1 do
 end
 lib.supportedLanguageChoices = supportedLanguageChoices
 lib.supportedLanguageChoicesValues = supportedLanguageChoicesValues
-
 
 --The actual clients language
 local clientLang      = GetCVar("language.2")
@@ -208,7 +230,9 @@ lib.clientLang        = clientLang
 local noSetIdString                                    = "NoSetId"
 LIBSETS_TABLEKEY_NEWSETIDS                             = "NewSetIDs"
 LIBSETS_TABLEKEY_NAMES                                 = "Names"
+local LIBSETS_TABLEKEY_NAMES = LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_SETITEMIDS                            = "setItemIds"
+local LIBSETS_TABLEKEY_SETITEMIDS = LIBSETS_TABLEKEY_SETITEMIDS
 LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID                   = LIBSETS_TABLEKEY_SETITEMIDS .. noSetIdString
 LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED                 = LIBSETS_TABLEKEY_SETITEMIDS .. "_Compressed"
 LIBSETS_TABLEKEY_SETS_EQUIP_TYPES                      = "setsEquipTypes"
@@ -234,6 +258,7 @@ LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     = "collectible" .. LIBSET
 LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                 = "collectible_DLC" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_DROPMECHANIC                          = "dropMechanic"
+local LIBSETS_TABLEKEY_DROPMECHANIC = LIBSETS_TABLEKEY_DROPMECHANIC
 LIBSETS_TABLEKEY_DROPMECHANIC_SORTED                   = "dropMechanicSorted"
 LIBSETS_TABLEKEY_DROPMECHANIC_NAMES                    = LIBSETS_TABLEKEY_DROPMECHANIC .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES            = LIBSETS_TABLEKEY_DROPMECHANIC .. "Tooltip" .. LIBSETS_TABLEKEY_NAMES
@@ -245,6 +270,8 @@ LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING     = "setItemCollectionsZone
 LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES          = "enchantSearchCategories"
 LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                  = "dungeonZoneMapping"
 LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING            = "publicDungeonZoneMapping"
+LIBSETS_TABLEKEY_TABLENAME                             = "tableName"
+local LIBSETS_TABLEKEY_TABLENAME = LIBSETS_TABLEKEY_TABLENAME
 
 
 
@@ -252,12 +279,15 @@ LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING            = "publicDungeonZoneMappi
 --Set itemId table value (key is the itemId)
 -->simulaters for true/false, but takes less space in the data file
 LIBSETS_SET_ITEMID_TABLE_VALUE_OK                      = 1
+local LIBSETS_SET_ITEMID_TABLE_VALUE_OK = LIBSETS_SET_ITEMID_TABLE_VALUE_OK
 LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK                   = 2
+local LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK = LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK
 
 
 ------------------------------------------------------------------------------------------------------------------------
 --Set collections category for the top-most tree node
 LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE = -1
+local LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE = LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -301,8 +331,27 @@ for setTypeId, setTypeName in ipairs(possibleSetTypes) do
     _G[setTypeName] = setTypeId
 end
 local maxSetTypes               = #possibleSetTypes
-LIBSETS_SETTYPE_ITERATION_BEGIN = LIBSETS_SETTYPE_ARENA
-LIBSETS_SETTYPE_ITERATION_END   = _G[possibleSetTypes[maxSetTypes]]
+local LIBSETS_SETTYPE_ITERATION_BEGIN = LIBSETS_SETTYPE_ARENA
+local LIBSETS_SETTYPE_ITERATION_END   = _G[possibleSetTypes[maxSetTypes]]
+LIBSETS_SETTYPE_ITERATION_BEGIN = LIBSETS_SETTYPE_ITERATION_BEGIN
+LIBSETS_SETTYPE_ITERATION_END = LIBSETS_SETTYPE_ITERATION_END
+
+local LIBSETS_SETTYPE_ARENA = LIBSETS_SETTYPE_ARENA
+local LIBSETS_SETTYPE_BATTLEGROUND = LIBSETS_SETTYPE_BATTLEGROUND
+local LIBSETS_SETTYPE_CRAFTED = LIBSETS_SETTYPE_CRAFTED
+local LIBSETS_SETTYPE_CYRODIIL = LIBSETS_SETTYPE_CYRODIIL
+local LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD = LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD
+local LIBSETS_SETTYPE_DUNGEON = LIBSETS_SETTYPE_DUNGEON
+local LIBSETS_SETTYPE_IMPERIALCITY = LIBSETS_SETTYPE_IMPERIALCITY
+local LIBSETS_SETTYPE_MONSTER = LIBSETS_SETTYPE_MONSTER
+local LIBSETS_SETTYPE_OVERLAND = LIBSETS_SETTYPE_OVERLAND
+local LIBSETS_SETTYPE_SPECIAL = LIBSETS_SETTYPE_SPECIAL
+local LIBSETS_SETTYPE_TRIAL = LIBSETS_SETTYPE_TRIAL
+local LIBSETS_SETTYPE_MYTHIC = LIBSETS_SETTYPE_MYTHIC
+local LIBSETS_SETTYPE_IMPERIALCITY_MONSTER = LIBSETS_SETTYPE_IMPERIALCITY_MONSTER
+local LIBSETS_SETTYPE_CYRODIIL_MONSTER = LIBSETS_SETTYPE_CYRODIIL_MONSTER
+local LIBSETS_SETTYPE_CLASS = LIBSETS_SETTYPE_CLASS
+
 
 lib.allowedSetTypes             = {}
 for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
@@ -315,56 +364,56 @@ end
 --------------------------------------------------------------------------
 lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_ARENA]                         = {
-        ["tableName"] = "arenaSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "arenaSets",
     },
     [LIBSETS_SETTYPE_BATTLEGROUND]                  = {
-        ["tableName"] = "battlegroundSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "battlegroundSets",
     },
     [LIBSETS_SETTYPE_CRAFTED]                       = {
-        ["tableName"] = "craftedSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "craftedSets",
     },
     [LIBSETS_SETTYPE_CYRODIIL]                      = {
-        ["tableName"] = "cyrodiilSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "cyrodiilSets",
     },
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = {
-        ["tableName"] = "dailyRandomDungeonAndImperialCityRewardSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "dailyRandomDungeonAndImperialCityRewardSets",
     },
     [LIBSETS_SETTYPE_DUNGEON]                       = {
-        ["tableName"] = "dungeonSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "dungeonSets",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY]                  = {
-        ["tableName"] = "imperialCitySets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "imperialCitySets",
     },
     [LIBSETS_SETTYPE_MONSTER]                       = {
-        ["tableName"] = "monsterSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "monsterSets",
     },
     [LIBSETS_SETTYPE_OVERLAND]                      = {
-        ["tableName"] = "overlandSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "overlandSets",
     },
     [LIBSETS_SETTYPE_SPECIAL]                       = {
-        ["tableName"] = "specialSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "specialSets",
     },
     [LIBSETS_SETTYPE_TRIAL]                         = {
-        ["tableName"] = "trialSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "trialSets",
     },
     [LIBSETS_SETTYPE_MYTHIC]                        = {
-        ["tableName"] = "mythicSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "mythicSets",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = {
-        ["tableName"] = "monsterSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "monsterSets",
     },
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = {
-        ["tableName"] = "monsterSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "monsterSets",
     },
     [LIBSETS_SETTYPE_CLASS]                         = {
-        ["tableName"] = "classSets",
+        [LIBSETS_TABLEKEY_TABLENAME] = "classSets",
     },
 }
 --setTypeToLibraryInternalVariableNames only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
     --[[
     lib.setTypeToLibraryInternalVariableNames[LIBSETS_SETTYPE_*                       ] ={
-        ["tableName"] = "",
+        [LIBSETS_TABLEKEY_TABLENAME] = "",
     }
     ]]
 end
@@ -375,44 +424,48 @@ end
 LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL = 0
 LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD = -99
 LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS = -98
+
+local LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL = LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL
+local LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD = LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD
+local LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS = LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS
 --Special zone names
 local specialZoneNames = {
-    ["de"] = {
+    [langDE] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Alle Zonen (in Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Levelaufstieg",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Schlachtfelder",
     },
-    ["en"] = {
+    [langEN] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "All Zones (in Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Level-Up",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Battlegrounds",
     },
-    ["es"] = {
+    [langES] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Todas las zonas (en Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Elevar a mismo nivel",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Campos de batalla",
     },
-    ["fr"] = {
+    [langFR] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Toutes les zones (en Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Montée de niveau",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Champs de bataille",
     },
-    ["pl"] = {
+    [langPL] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Wszystkie Obszary (w Tamriel)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Level-Up",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Pola Bitew",
     },
-    ["ru"] = {
+    [langRU] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "Все зоны (в Тамриэле)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "Уровень повышен",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "Поля боя",
     },
-    ["jp"] = {
+    [langJP] = {
         [LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "すべてのゾーン (タムリエル)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "レベルアップ",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "戦場",
     },
-    ["zh"] = { --by Lykeion, 2024029
+    [langZH] = { --by Lykeion, 2024029
 		[LIBSETS_SPECIAL_ZONEID_ALLZONES_OF_TAMRIEL] = "所有地区 (于塔姆瑞尔)",
         [LIBSETS_SPECIAL_ZONEID_LEVELUPREWARD] = "升级",
         [LIBSETS_SPECIAL_ZONEID_BATTLEGROUNDS] = "战场",
@@ -432,166 +485,166 @@ lib.counterSuffix    = "Counter"
 --------------------------------------------------------------------------
 local setTypesToName = {
     [LIBSETS_SETTYPE_ARENA]                         = {
-        ["de"] = "Arena",
-        ["en"] = "Arena",
-        ["es"] = "Arena",
-        ["fr"] = "Arène",
-        ["pl"] = "Arena",
-        ["jp"] = "アリーナ",
-        ["ru"] = "Aрена",
-        ["zh"] = "竞技场",
+        [langDE] = "Arena",
+        [langEN] = "Arena",
+        [langES] = "Arena",
+        [langFR] = "Arène",
+        [langPL] = "Arena",
+        [langJP] = "アリーナ",
+        [langRU] = "Aрена",
+        [langZH] = "竞技场",
     },
     [LIBSETS_SETTYPE_BATTLEGROUND]                  = {
-        ["de"] = "Schlachtfeld", --SI_LEADERBOARDTYPE4,
-        ["en"] = "Battleground",
-        ["es"] = "Campo de batalla",
-        ["fr"] = "Champ de bataille",
-        ["pl"] = "Pole Bitwy",
-        ["jp"] = "バトルグラウンド",
-        ["ru"] = "Поле боя",
-        ["zh"] = "战场",
+        [langDE] = "Schlachtfeld", --SI_LEADERBOARDTYPE4,
+        [langEN] = "Battleground",
+        [langES] = "Campo de batalla",
+        [langFR] = "Champ de bataille",
+        [langPL] = "Pole Bitwy",
+        [langJP] = "バトルグラウンド",
+        [langRU] = "Поле боя",
+        [langZH] = "战场",
     },
     [LIBSETS_SETTYPE_CRAFTED]                       = {
-        ["de"] = "Handwerklich hergestellt", --SI_ITEM_FORMAT_STR_CRAFTED
-        ["en"] = "Crafted",
-        ["es"] = "Hecho a mano",
-        ["fr"] = "Artisanal",
-        ["pl"] = "Wytworzone",
-        ["jp"] = "クラフトセット",
-        ["ru"] = "Созданный",
-        ["zh"] = "制造",
+        [langDE] = "Handwerklich hergestellt", --SI_ITEM_FORMAT_STR_CRAFTED
+        [langEN] = "Crafted",
+        [langES] = "Hecho a mano",
+        [langFR] = "Artisanal",
+        [langPL] = "Wytworzone",
+        [langJP] = "クラフトセット",
+        [langRU] = "Созданный",
+        [langZH] = "制造",
     },
     [LIBSETS_SETTYPE_CYRODIIL]                      = {
-        ["de"] = "Cyrodiil", --SI_CAMPAIGNRULESETTYPE1,
-        ["en"] = "Cyrodiil",
-        ["es"] = "Cyrodiil",
-        ["fr"] = "Cyrodiil",
-        ["pl"] = "Cyrodiil",
-        ["jp"] = "シロディール",
-        ["ru"] = "Сиродил",
-        ["zh"] = "西罗帝尔",
+        [langDE] = "Cyrodiil", --SI_CAMPAIGNRULESETTYPE1,
+        [langEN] = "Cyrodiil",
+        [langES] = "Cyrodiil",
+        [langFR] = "Cyrodiil",
+        [langPL] = "Cyrodiil",
+        [langJP] = "シロディール",
+        [langRU] = "Сиродил",
+        [langZH] = "西罗帝尔",
     },
     [LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD] = {
-        ["de"] = "Zufälliges Verlies & Kaiserstadt Belohnung", --SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT & SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR
-        ["en"] = "Random Dungeons & Imperial city " .. zocstrfor("<<c:1>>", "Reward"),
-        ["es"] = "Mazmorras aleatorias y ciudad imperial " .. zocstrfor("<<c:1>>", "Recompensa"),
-        ["fr"] = "Donjons aléatoires & Cité impériale " .. zocstrfor("<<c:1>>", "Récompense"),
-        ["pl"] = "Losowe Lochy & Cesarskie Miasto " .. zocstrfor("<<c:1>>", "Nagroda"),
-        ["jp"] = "デイリー報酬",
-        ["ru"] = "Случайное ежедневное подземелье и награда Имперского города",
-        ["zh"] = "随机地下城 & 帝都 " .. zocstrfor("<<c:1>>", "奖励"),
+        [langDE] = "Zufälliges Verlies & Kaiserstadt Belohnung", --SI_DUNGEON_FINDER_RANDOM_FILTER_TEXT & SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 SI_LEVEL_UP_REWARDS_GAMEPAD_REWARD_SECTION_HEADER_SINGULAR
+        [langEN] = "Random Dungeons & Imperial city " .. zocstrfor("<<c:1>>", "Reward"),
+        [langES] = "Mazmorras aleatorias y ciudad imperial " .. zocstrfor("<<c:1>>", "Recompensa"),
+        [langFR] = "Donjons aléatoires & Cité impériale " .. zocstrfor("<<c:1>>", "Récompense"),
+        [langPL] = "Losowe Lochy & Cesarskie Miasto " .. zocstrfor("<<c:1>>", "Nagroda"),
+        [langJP] = "デイリー報酬",
+        [langRU] = "Случайное ежедневное подземелье и награда Имперского города",
+        [langZH] = "随机地下城 & 帝都 " .. zocstrfor("<<c:1>>", "奖励"),
     },
     [LIBSETS_SETTYPE_DUNGEON]                       = {
-        ["de"] = "Verlies", --SI_ZONEDISPLAYTYPE2 SI_INSTANCEDISPLAYTYPE2
-        ["en"] = "Dungeon",
-        ["es"] = "Calabozo",
-        ["fr"] = "Donjon",
-        ["pl"] = "Loch",
-        ["jp"] = "ダンジョン",
-        ["ru"] = "Подземелье",
-        ["zh"] = "地下城",
+        [langDE] = "Verlies", --SI_ZONEDISPLAYTYPE2 SI_INSTANCEDISPLAYTYPE2
+        [langEN] = "Dungeon",
+        [langES] = "Calabozo",
+        [langFR] = "Donjon",
+        [langPL] = "Loch",
+        [langJP] = "ダンジョン",
+        [langRU] = "Подземелье",
+        [langZH] = "地下城",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY]                  = {
-        ["de"] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
-        ["en"] = "Imperial city",
-        ["es"] = "Ciudad imperial",
-        ["fr"] = "Cité impériale",
-        ["pl"] = "Cesarskie Miasto",
-        ["jp"] = "帝都",
-        ["ru"] = "Имперский город",
-        ["zh"] = "帝都",
+        [langDE] = "Kaiserstadt", --SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4
+        [langEN] = "Imperial city",
+        [langES] = "Ciudad imperial",
+        [langFR] = "Cité impériale",
+        [langPL] = "Cesarskie Miasto",
+        [langJP] = "帝都",
+        [langRU] = "Имперский город",
+        [langZH] = "帝都",
     },
     [LIBSETS_SETTYPE_MONSTER]                       = {
-        ["de"] = "Monster",
-        ["en"] = "Monster",
-        ["es"] = "Monstruo",
-        ["fr"] = "Monstre",
-        ["pl"] = "Potwór",
-        ["jp"] = "モンスター",
-        ["ru"] = "Монстр",
-        ["zh"] = "怪物",
+        [langDE] = "Monster",
+        [langEN] = "Monster",
+        [langES] = "Monstruo",
+        [langFR] = "Monstre",
+        [langPL] = "Potwór",
+        [langJP] = "モンスター",
+        [langRU] = "Монстр",
+        [langZH] = "怪物",
     },
     [LIBSETS_SETTYPE_OVERLAND]                      = {
-        ["de"] = "Überland",
-        ["en"] = "Overland",
-        ["es"] = "Zone terrestre",
-        ["fr"] = "Zone",
-        ["pl"] = "Otwarty świat",
-        ["jp"] = "陸上",
-        ["ru"] = "Поверхности",
-        ["zh"] = "陆上",
+        [langDE] = "Überland",
+        [langEN] = "Overland",
+        [langES] = "Zone terrestre",
+        [langFR] = "Zone",
+        [langPL] = "Otwarty świat",
+        [langJP] = "陸上",
+        [langRU] = "Поверхности",
+        [langZH] = "陆上",
     },
     [LIBSETS_SETTYPE_SPECIAL]                       = {
-        ["de"] = "Besonders", --SI_HOTBARCATEGORY9
-        ["en"] = "Special",
-        ["es"] = "Especial",
-        ["fr"] = "Spécial",
-        ["pl"] = "Specjalne",
-        ["jp"] = "スペシャル",
-        ["ru"] = "Специальный",
-        ["zh"] = "特殊",
+        [langDE] = "Besonders", --SI_HOTBARCATEGORY9
+        [langEN] = "Special",
+        [langES] = "Especial",
+        [langFR] = "Spécial",
+        [langPL] = "Specjalne",
+        [langJP] = "スペシャル",
+        [langRU] = "Специальный",
+        [langZH] = "特殊",
     },
     [LIBSETS_SETTYPE_TRIAL]                         = {
-        ["de"] = "Prüfungen", --SI_LFGACTIVITY4
-        ["en"] = "Trial",
-        ["es"] = "Ensayo",
-        ["fr"] = "Épreuves",
-        ["pl"] = "Próby",
-        ["jp"] = "試練",
-        ["ru"] = "Испытание",
-        ["zh"] = "试炼",
+        [langDE] = "Prüfungen", --SI_LFGACTIVITY4
+        [langEN] = "Trial",
+        [langES] = "Ensayo",
+        [langFR] = "Épreuves",
+        [langPL] = "Próby",
+        [langJP] = "試練",
+        [langRU] = "Испытание",
+        [langZH] = "试炼",
     },
     [LIBSETS_SETTYPE_MYTHIC]                        = {
-        ["de"] = "Mythisch",
-        ["en"] = "Mythic",
-        ["es"] = "Mítico",
-        ["fr"] = "Mythique",
-        ["pl"] = "Mityczny",
-        ["jp"] = "神話上の",
-        ["ru"] = "мифический",
-        ["zh"] = "神话",
+        [langDE] = "Mythisch",
+        [langEN] = "Mythic",
+        [langES] = "Mítico",
+        [langFR] = "Mythique",
+        [langPL] = "Mityczny",
+        [langJP] = "神話上の",
+        [langRU] = "мифический",
+        [langZH] = "神话",
     },
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = {
-        ["de"] = "Kaiserstadt Monster",
-        ["en"] = "Imperial city monster",
-        ["es"] = "Ciudad imperial monstruo",
-        ["fr"] = "Monstre de la Cité impériale",
-        ["pl"] = "Potwór z Cesarskiego Maista",
-        ["jp"] = "帝都 モンスター",
-        ["ru"] = "Имперский город Монстр",
-        ["zh"] = "帝都怪物",
+        [langDE] = "Kaiserstadt Monster",
+        [langEN] = "Imperial city monster",
+        [langES] = "Ciudad imperial monstruo",
+        [langFR] = "Monstre de la Cité impériale",
+        [langPL] = "Potwór z Cesarskiego Maista",
+        [langJP] = "帝都 モンスター",
+        [langRU] = "Имперский город Монстр",
+        [langZH] = "帝都怪物",
     },
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]          = {
-        ["de"] = "Cyrodiil Monster",
-        ["en"] = "Cyrodiil monster",
-        ["es"] = "Cyrodiil monstruo",
-        ["fr"] = "Monstre de Cyrodiil",
-        ["pl"] = "Potwór z Cyrodiil",
-        ["jp"] = "シロディール モンスター",
-        ["ru"] = "Сиродил Монстр",
-        ["zh"] = "西罗帝尔怪物",
+        [langDE] = "Cyrodiil Monster",
+        [langEN] = "Cyrodiil monster",
+        [langES] = "Cyrodiil monstruo",
+        [langFR] = "Monstre de Cyrodiil",
+        [langPL] = "Potwór z Cyrodiil",
+        [langJP] = "シロディール モンスター",
+        [langRU] = "Сиродил Монстр",
+        [langZH] = "西罗帝尔怪物",
     },
     [LIBSETS_SETTYPE_CLASS] = {
-        ["de"] = "Klassen spezifisch",
-        ["en"] = "Class specific",
-        ["es"] = "Específico de la clase",
-        ["fr"] = "Spécifique à la classe",
-        ["pl"] = "Specyficzne dla klasy",
-        ["jp"] = "クラス固有の",
-        ["ru"] = "Зависит от класса",
-        ["zh"] = "职业限定",
+        [langDE] = "Klassen spezifisch",
+        [langEN] = "Class specific",
+        [langES] = "Específico de la clase",
+        [langFR] = "Spécifique à la classe",
+        [langPL] = "Specyficzne dla klasy",
+        [langJP] = "クラス固有の",
+        [langRU] = "Зависит от класса",
+        [langZH] = "职业限定",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
     --[[
     setTypesToName[LIBSETS_SETTYPE_*                       ] = {
-        ["de"] = "",
-        ["en"] = "",
-        ["fr"] = "",
-        ["jp"] = "",
-        ["ru"] = "",
-        ["zh"] = "",
+        [langDE] = "",
+        [langEN] = "",
+        [langFR] = "",
+        [langJP] = "",
+        [langRU] = "",
+        [langZH] = "",
     }
     ]]
 end
@@ -819,42 +872,42 @@ lib.countMonsterSetBonus            = 2
 lib.countUndauntedChests            = 3
 --The undaunted chest NPC names
 local undauntedChestIds             = {
-    ["de"] = {
+    [langDE] = {
         [1] = "Glirion der Rotbart",
         [2] = "Maj al-Ragath",
         [3] = "Urgarlag Häuptlingsfluch",
     },
-    ["en"] = {
+    [langEN] = {
         [1] = "Glirion the Redbeard",
         [2] = "Maj al-Ragath",
         [3] = "Urgarlag Chief-bane",
     },
-    ["es"] = {
+    [langES] = {
         [1] = "Glirion el Barbarroja",
         [2] = "Maj al-Ragath",
         [3] = "Urgarlag la Castradora",
     },
-    ["fr"] = {
+    [langFR] = {
         [1] = "Glirion Barbe-Rousse",
         [2] = "Maj al-Ragath",
         [3] = "Urgalarg l'Èmasculatrice",
     },
-    ["pl"] = {
+    [langPL] = {
         [1] = "Glirion Czerwonobrody",
         [2] = "Maj al-Ragath",
         [3] = "Urgarlag Zguba-Wodzów",
     },
-    ["ru"] = {
+    [langRU] = {
         [1] = "Глирион Краснобородый",
         [2] = "Мадж аль-Рагат",
         [3] = "Ургарлаг Бич Вождей",
     },
-    ["zh"] = {
+    [langZH] = {
         [1] = "紅胡子格利里恩",
         [2] = "瑪吉·阿示拉加斯",
         [3] = "烏示加拉格·酋長克星",
     },
-    ["jp"] = {
+    [langJP] = {
         [1] = "赤髭グリリオン",
         [2] = "マジ・アルラガス",
         [3] = "族長殺しのウルガルラグ",
@@ -939,6 +992,48 @@ local maxDropMechanicIds              = #possibleDropMechanics
 LIBSETS_DROP_MECHANIC_ITERATION_BEGIN = 1
 LIBSETS_DROP_MECHANIC_ITERATION_END   = _G[possibleDropMechanics[maxDropMechanicIds]]
 
+local LIBSETS_DROP_MECHANIC_ITERATION_BEGIN = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN
+local LIBSETS_DROP_MECHANIC_ITERATION_END = LIBSETS_DROP_MECHANIC_ITERATION_END
+
+local LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY = LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY
+local LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA = LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA
+local LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD = LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD
+local LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS = LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_VLASTARUS
+local LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST = LIBSETS_DROP_MECHANIC_ARENA_STAGE_CHEST
+local LIBSETS_DROP_MECHANIC_MONSTER_NAME = LIBSETS_DROP_MECHANIC_MONSTER_NAME
+local LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE = LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE
+local LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS = LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS
+local LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON = LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_PUBLIC_DUNGEON
+local LIBSETS_DROP_MECHANIC_OVERLAND_CHEST = LIBSETS_DROP_MECHANIC_OVERLAND_CHEST
+local LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD = LIBSETS_DROP_MECHANIC_BATTLEGROUND_REWARD
+local LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD = LIBSETS_DROP_MECHANIC_MAIL_DAILY_RANDOM_DUNGEON_REWARD
+local LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS = LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_VAULTS
+local LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD = LIBSETS_DROP_MECHANIC_LEVEL_UP_REWARD
+local LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR = LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR
+local LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT = LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT
+local LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT = LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT
+local LIBSETS_DROP_MECHANIC_REWARD_BY_NPC = LIBSETS_DROP_MECHANIC_REWARD_BY_NPC
+local LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST = LIBSETS_DROP_MECHANIC_OVERLAND_OBLIVION_PORTAL_FINAL_CHEST
+local LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES = LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES
+local LIBSETS_DROP_MECHANIC_DUNGEON_CHEST = LIBSETS_DROP_MECHANIC_DUNGEON_CHEST
+local LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER = LIBSETS_DROP_MECHANIC_DAILY_QUEST_REWARD_COFFER
+local LIBSETS_DROP_MECHANIC_FISHING_HOLE = LIBSETS_DROP_MECHANIC_FISHING_HOLE
+local LIBSETS_DROP_MECHANIC_OVERLAND_LOOT = LIBSETS_DROP_MECHANIC_OVERLAND_LOOT
+local LIBSETS_DROP_MECHANIC_TRIAL_BOSS = LIBSETS_DROP_MECHANIC_TRIAL_BOSS
+local LIBSETS_DROP_MECHANIC_MOB_TYPE = LIBSETS_DROP_MECHANIC_MOB_TYPE
+local LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS = LIBSETS_DROP_MECHANIC_GROUP_DUNGEON_BOSS
+local LIBSETS_DROP_MECHANIC_CRAFTED = LIBSETS_DROP_MECHANIC_CRAFTED
+local LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST = LIBSETS_DROP_MECHANIC_PUBLIC_DUNGEON_CHEST
+local LIBSETS_DROP_MECHANIC_HARVEST_NODES = LIBSETS_DROP_MECHANIC_HARVEST_NODES
+local LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP = LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP
+local LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL = LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL
+local LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY = LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY
+local LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY = LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY
+local LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS = LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS
+local LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE = LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE
+local LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT = LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT
+
+
 lib.allowedDropMechanics              = { }
 for i = LIBSETS_DROP_MECHANIC_ITERATION_BEGIN, LIBSETS_DROP_MECHANIC_ITERATION_END do
     lib.allowedDropMechanics[i] = true
@@ -960,7 +1055,7 @@ lib.setId2DropLocationNames = {}
 ---The names of the drop mechanics
 local cyrodiilAndBattlegroundText = GetString(SI_CAMPAIGNRULESETTYPE1) .. "/" .. GetString(SI_LEADERBOARDTYPE4)
 lib.dropMechanicIdToName          = {
-    ["de"] = {
+    [langDE] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Gerechter Lohn (" .. cyrodiilAndBattlegroundText .. " eMail)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil Stadt: Bruma (Quartiermeister/Tägliche Quest)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil Stadt: Erntefurt (Quartiermeister/Tägliche Quest)",
@@ -995,7 +1090,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil: Stadt Cheydinhal / Weynon Priorei, bei Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Auftragstafeln",
     },
-    ["en"] = {
+    [langEN] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Rewards for the worthy",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil City: Bruma (quartermaster/daily quest)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil City: Cropsford (quartermaster/daily quest)",
@@ -1036,7 +1131,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
         [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                       = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
     },
-    ["es"] = {
+    [langES] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Ciudad Cyrodiil: Bruma (intendente/búsqueda diaria)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Ciudad Cyrodiil: Cropsford (intendente/búsqueda diaria)",
@@ -1070,7 +1165,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
-    ["fr"] = {
+    [langFR] = {
 	    [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Récompenses des dignes",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cité de Cyrodiil : Bruma (intendant/quête quotidienne)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cité de Cyrodiil : Cropsford (intendant/quête quotidienne)",
@@ -1110,7 +1205,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CRAFTED]                              = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
     },
-        ["pl"] = {
+        [langPL] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Nagrody dla zasłużonych",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Miasto Cyrodiil: Bruma (kwatermistrz/codzienne zlecenie)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Miasto Cyrodiil City: Cropsford (qkwatermistrz/codzienne zlecenie)",
@@ -1146,7 +1241,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Tablice zleceń Cyrodiil",
 
     },
-    ["ru"] = {
+    [langRU] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Награда достойным",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Сиродил: город Брума (квартирмейстер/ежедневный квест)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Сиродил: город Кропсфорд (квартирмейстер/ежедневный квест)",
@@ -1180,7 +1275,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
-    ["jp"] = {
+    [langJP] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "貢献に見合った報酬です",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "Cyrodiil シティ: ブルーマ (補給係/デイリークエスト)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "Cyrodiil シティ: クロップスフォード (補給係/デイリークエスト)",
@@ -1214,7 +1309,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
     },
-    ["zh"] = { --by Lykeion, 2024029
+    [langZH] = { --by Lykeion, 2024029
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "给有价值的人的奖励",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_BRUMA]                  = "西罗帝尔城镇: 布鲁玛 (军需官/日常任务)",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CROPSFORD]              = "西罗帝尔城镇: 克罗普斯福特 (军需官/日常任务)",
@@ -1253,11 +1348,11 @@ lib.dropMechanicIdToName          = {
 
 --Enable Drop Mechanic translations that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*) --new dropmechanic name in English
+    --lib.dropMechanicIdToName[langEN][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*) --new dropmechanic name in English
 end
 
 lib.dropMechanicIdToNameTooltip   = {
-    ["de"] = {
+    [langDE] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = cyrodiilAndBattlegroundText .. " mail - Enthält nur die neuesten Gegenstandssets!\nDa weiterhin neue Sets hinzugefügt werden, werden ältere Sets hier entfernt und anderen Cyrodiil-Quellen hinzugefügt:\nAlle PvP-Gegenstandssets werden jetzt in Cyrodiil-Dungeons, Dolmen und Missionen gefunden.\nTägliche Quests und Händler in der Stadt werden nach Leicht, Mittel und Schwer aufgeteilt. Ausnahme: Cheydinhal und Chorrol/Weynon Priory droppen jedes Set.\nAlle PvP-Sets sind als Einzelcontainer sowohl bei Stadthändlern als auch bei Elite-Ausrüstungshändlern erhältlich.\nDungeons lassen Taillen- und Fuß-Gegenstandssets fallen.\nDolmen lassen Schmuck fallen.\nBoard-Missionen lassen alle anderen Rüstungsteile fallen.\nBei Kopfgeld- und Scout-Missionen erhältst du Rüstungsteile.\nKampf- und Kriegsfront-Missionen geben Waffenslot-Items.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Bosse in Gewölben haben die Chance, eine Taille oder Füße fallen zu lassen.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Überland Gruppenbosse haben eine Chance von 100%, Kopf, Brust, Beine oder Waffen fallen zu lassen.",
@@ -1267,7 +1362,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Truhe, welche man bei einem Elite Gear Händler in Cyrodiil (Östliches Elsweyr Tor, Südliches Hochfels Tor, Nördliches Morrowind Tor), oder in Vvardenfall für Schlachtfelder (Ald Carac, Foyada Quarry, Ularra), für Allianzpunkte kaufen kann.",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Alle Bosse: Hände, Taille, Füße, Brust, Schultern, Kopf, Beine\nLetzte Bosse: Waffen, Schild\nQuest Belohnung: Schmuck, Waffe, Schild (Gebunden beim Aufheben)",
     },
-    ["en"] = {
+    [langEN] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail) - Contains only newest item sets!\nAs new sets continue to get added, older sets will be removed here and added into other Cyrodiil sources:\nAll PvP item sets will now drop from Cyrodiil delves, dolmens and board missions.\nTown Daily Quest and Merchants will be divided by Light, Medium and Heavy. Exception: Cheydinhal and Chorrol/Weynon Priory reward any set.\nAll PvP sets are available as individual containers on both Town Merchants and Elite Gear Vendors.\nDelves will drop waist and feet item sets\nDolmens will drop jewelry\nBoard Missions will drop all other armor pieces.\nBounty and Scout missions will award armor pieces.\nBattle and Warfront missions will reward weapon slot pieces.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Delve bosses have a chance to drop a waist or feet.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Overland group bosses have a 100% chance to drop head, chest, legs, or weapon.",
@@ -1278,7 +1373,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Chest that can be exchanged for Alliance Points at a elite gear lockbox merchant in Cyrodiil (Eastern Elsweyr Gate, Southern High Rock Gate, Northern Morrowind Gate), or a battleground merchant in Vvardenfell (Ald Carac, Foyada Quarry, Ularra)",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
     },
-    ["es"] = {
+    [langES] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Recompensa por el mérito (" .. cyrodiilAndBattlegroundText .. " mail) - ¡Contiene solo conjuntos de artículos más nuevos!\nA medida que se sigan agregando nuevos conjuntos, los conjuntos más antiguos se eliminarán aquí y se agregarán a otras fuentes de Cyrodiil:\nTodos los conjuntos de elementos PvP ahora aparecerán en las excavaciones, dólmenes y misiones de tablero de Cyrodiil.\nLas misiones diarias de la ciudad y los comerciantes se dividirán por Luz , Medio y Pesado. Excepción: Cheydinhal y Chorrol/Weynon Priory recompensan cualquier conjunto.\nTodos los conjuntos PvP están disponibles como contenedores individuales tanto en los comerciantes de la ciudad como en los vendedores de equipo de élite.\nLos excavadores arrojarán conjuntos de artículos para cintura y pies\nLos dólmenes arrojarán joyas\nLas misiones del tablero arrojarán todos otras piezas de armadura.\nLas misiones de recompensa y exploración otorgarán piezas de armadura.\nLas misiones de batalla y frente de guerra recompensarán piezas de ranuras para armas.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Los jefes de cuevas pueden soltar cinturones o calzado.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Los jefes del mundo sueltan siempre piezas de cabeza, pecho, piernas, o armas.",
@@ -1287,7 +1382,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Cofre que se puede canjear por Piedras TelVar en un vendedor de equipos TelVar en la base de tu facción, en las alcantarillas de la Ciudad Imperial.",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Todos los jefes: manos, cintura, pies, pecho, hombros, cabeza, piernas\nJefes finales: arma, escudo\nContenedores de recompensa de misión: joyas, arma, escudo (se vincula al recogerlo))",
     },
-    ["fr"] = {
+    [langFR] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Récompenses des dignes (" .. cyrodiilAndBattlegroundText .. " par courrier) - Ne contient que les ensembles d'objets les plus récents !\nÀ mesure que de nouveaux ensembles sont ajoutés, les anciens seront retirés d'ici et ajoutés à d'autres sources en Cyrodiil :\nTous les ensembles d'objets JcJ seront désormais obtenus à partir des antres, dolmens et missions du tableau de Cyrodiil.\nLes quêtes quotidiennes de la ville et les marchands seront divisés par Léger, Moyen et Lourd. Exception : Cheydinhal et Chorrol/Weynon Priory récompensent n'importe quel ensemble.\nTous les ensembles JcJ sont disponibles en tant que conteneurs individuels chez les marchands de la ville et les vendeurs d'équipement d'élite.\nLes antres feront tomber les ensembles de taille et de pieds.\nLes dolmens feront tomber des bijoux.\nLes missions du tableau feront tomber toutes les autres pièces d'armure.\nLes missions de prime et d'éclaireur récompenseront des pièces d'armure.\nLes missions de bataille et de front de guerre récompenseront des pièces d'arme.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Les boss des antres ont une chance de faire tomber une taille ou des pieds.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Les boss de groupe en zone ont 100% de chances de faire tomber une tête, une poitrine, des jambes ou une arme.",
@@ -1298,7 +1393,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Coffre échangeable contre des Points d'Alliance chez un marchand de coffres d'équipement élite à Cyrodiil (Porte orientale d'Elsweyr, Porte méridionale de Haute-Roche, Porte septentrionale de Morrowind) ou chez un marchand de champs de bataille à Vvardenfell (Ald Carac, Foyada Quarry, Ularra)",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Tous les boss : Mains, Taille, Pieds, Poitrine, Épaule, Tête, Jambes\nBoss final : Arme, Bouclier\nConteneurs de récompenses de quête : Bijoux, Arme, Bouclier (Liés quand ramassés)",
     },
-    ["pl"] = {
+    [langPL] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Nagrody dla zasłużonych (" .. cyrodiilAndBattlegroundText .. " wiadomość) - Zawiera tylko najnowsze zestawy przedmiotów!\nW miarę dodawania nowych zestawów, starsze zestawy będą usuwane i dodawane do innych źródeł Cyrodiil:\nWszystkie zestawy przedmiotów PvP będą teraz upuszczane z Jam Cyrodiil, dolmenów i zadań z Tablicy zleceń.\nCodzienne zlecenia i handlarze w mieście dzielą się na kategorie: łatwe, średnie i trudne.  Wyjątek: Cheydinhal and Chorrol/Weynon Priory wypada każdy zestaw.\nWszystkie zestawy PvP są dostępne jako pojedyncze kontenery zarówno u zwykłych handlarzy miejskich, jak i u elitarnych.\nW Jamach wypadają zestawy przedmiotów na talię i stopy\nW Dolmenach wypada Biżuteria\nZlecenia z Tablicy zleceń dają wszystkie inne elementy zbroi.\nMisje typu Łowca nagród i zwiadowcze dają elementy zbroi.\nNagrodami za Misje Bojowe i Front Wojenny są bronie.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Bossowie Jam mają szansę na upuszczenie elementu zbroi do założenia na talię lub stopy.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Bossowie grupowi Otwartego świata mają 100% szans na upuszczenie elementu zbroi do założenie na głowę, tors, nogi, lub broni.",
@@ -1309,7 +1404,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Skrzynia, którą można wymienić na Punkty Sojuszu u handlarza elitarnym ekwipunkiem w Cyrodiil (wschodnia brama Elsweyr, południowa brama Wysokiej Skały, północna brama Morrowind) lub u handlarza Pola Bitewnego w Vvardenfell (Ald Carac, Kamieniołom Foyada, Ularra).",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Wszyscy bossowie: Ręce, Talia, Stopy, Tors, Ramiona, Głowa, Nogi\nFinałowi bossowie: Broń, Tarcza\nPojemniki z nagrodami za zadania: Biżuteria, Broń, Tarcza (Przywiązuje się przy zebraniu))",
     },
-    ["ru"] = {
+    [langRU] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Награда достойным (" .. cyrodiilAndBattlegroundText .. " почта) - Содержит только новейшие наборы предметов!\nПо мере добавления новых наборов старые наборы будут удалены отсюда и добавлены в другие источники Сиродила:\nВсе наборы PvP-предметов теперь будут выпадать из подземелий, дольменов и миссий на доске Сиродила.\nГородские ежедневные задания и торговцы будут разделены по Свету. , средний и тяжелый. Исключение: Чейдинхол и Приорат Коррола/Вейнона дают награду за любой набор.\nВсе PvP-наборы доступны в виде отдельных контейнеров как у городских торговцев, так и у продавцов элитного снаряжения.\nВ Дельвах из комплектов предметов для талии и ног выпадут все.\nИз дольменов выпадут драгоценности.\nИз настольных миссий выпадут все. другие части доспехов.\nЗа миссии Bounty и Scout будут выдаваться части доспехов.\nЗа миссии Battle and Warfront будут выдаваться части слотов для оружия.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "Боссы вылазок дают шанс выпадания талии или голени.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "Групповые боссы дают 100% шанс выпадания головы, груди, ног или оружия.",
@@ -1318,7 +1413,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Сундук, который можно обменять на камни ТелВар у продавца оборудования ТелВар на базе вашей фракции в канализации Имперского города",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Все боссы: Руки, Поясница, Ноги, Грудь, Плечо, Голова, Ноги\nФинальные боссы: Оружие, Щит\nКонтейнеры с наградами за квест: Ювелирные изделия, Оружие, Щит (привязывается при получении))",
     },
-    ["jp"] = {
+    [langJP] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "貢献に見合った報酬です (" .. cyrodiilAndBattlegroundText .. " メール) - 最新アイテムセットのみを収録！\n新しいセットが追加され続けるため、古いセットはここで削除され、シロディールの他のソースに追加されます:\nすべての PvP アイテム セットはシロディールの洞窟、ドルメン、ボード ミッションからドロップされます。\nタウンのデイリー クエストと商人は光によって分割されます。 、ミディアムとヘビー。 例外: シェイディンハルとチョロル/ウェイノン修道院はどのセットでも報酬を獲得します。\nすべての PvP セットは、町の商人およびエリート装備ベンダーの両方で個別のコンテナとして入手できます。\nデルブは腰と足のアイテム セットをドロップします\nドルメンはジュエリーをドロップします\nボード ミッションはすべてをドロップします 他のアーマー ピース。\n賞金稼ぎミッションとスカウト ミッションではアーマー ピースが獲得できます。\nバトル ミッションとウォーフロント ミッションでは武器スロット ピースが獲得できます。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "洞窟ボスは、胴体や足装備をドロップすることがあります。",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "ワールドボスは、頭、腰、脚の各防具、または武器のいずれかが必ずドロップします。",
@@ -1327,7 +1422,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "「インペリアルシティ下水道の派閥基地にあるTelVar機器ベンダーでTelVarストーンと交換できるチェスト。」",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "すべてのボス: 手、腰、足、胸、肩、頭、脚\n最終ボス: 武器、盾\nクエスト報酬コンテナ: ジュエリー、武器、盾 (ピックアップ時にバインド))",
     },
-    ["zh"] = { --by Lykeion, 2024029
+    [langZH] = { --by Lykeion, 2024029
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "给有价值的人的奖励 (" .. cyrodiilAndBattlegroundText .. " 邮件) - 只包含最新的套装!\n随着新套装的不断加入, 就套装将被从此获取途径中移除并被加入到西罗帝尔的其他获取途径中:\n所有Pvp套装现将从西罗帝尔洞穴, 暗锚和任务中掉落.\n城镇日常任务和商人将会以轻, 中, 重区分. 特例: 香丁赫尔和克洛文/文扬修道院将会奖励任意套装.\n所有PvP套装都可以宝箱形式从城镇商人或精选装备商人处获取.\n洞穴会掉落腰部和足部装备\n暗锚会掉落珠宝\n公告板任务会掉落其他身体部位装备.\n赏金和侦查任务奖励服装.\n战斗和前线作战任务奖励武器.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE]               = "洞穴Boss有几率掉落腰部或足部装备.",
         [LIBSETS_DROP_MECHANIC_OVERLAND_WORLDBOSS]                = "陆上组队Boss必定掉落头, 胸, 腿或武器.",
@@ -1342,8 +1437,8 @@ lib.dropMechanicIdToNameTooltip   = {
 --DropMechanic translations only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
     --[[
-    lib.dropMechanicIdToName["en"][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*)
-    lib.dropMechanicIdToNameTooltip["en"][LIBSETS_DROP_MECHANIC_*] = ""
+    lib.dropMechanicIdToName[langEN][LIBSETS_DROP_MECHANIC_*] = GetString(SI_*)
+    lib.dropMechanicIdToNameTooltip[langEN][LIBSETS_DROP_MECHANIC_*] = ""
     ]]
 end
 
@@ -1358,7 +1453,7 @@ local undauntedStr               = GetString(SI_VISUALARMORTYPE4)
 local dungeonStr                 = GetString(SI_ZONEDISPLAYTYPE2) -- SI_INSTANCEDISPLAYTYPE2
 local setTypeArenaName           = setTypesToName[LIBSETS_SETTYPE_ARENA]
 lib.localization                 = {
-    ["de"] = {
+    [langDE] = {
         de                       = "Deutsch",
         en                       = "Englisch",
         fr                       = "Französisch",
@@ -1369,7 +1464,7 @@ lib.localization                 = {
         zh                       = "Chinesisch",
         dlc                      = "Kapitel,DLC&Patch",
         dropZones                = "Drop Zonen",
-        dropZoneArena            = setTypeArenaName["de"],
+        dropZoneArena            = setTypeArenaName[langDE],
         dropZoneImperialSewers   = "Kanalisation der Kaiserstadt",
         droppedBy                = "Drop durch",
         setId                    = "Set ID",
@@ -1463,7 +1558,7 @@ lib.localization                 = {
         lightningStaff = "Blitzstab",
         settingWillReloadUI = "- ACHTUNG - \nDas Verändern dieser Einstellung wird die Benutzeroberfläche neuladen!",
     },
-    ["en"] = {
+    [langEN] = {
         de  = "German",
         en  = "English",
         fr  = "French",
@@ -1480,7 +1575,7 @@ lib.localization                 = {
         dropZonePublicDungeon    = GetString(SI_ZONEDISPLAYTYPE6), -- SI_INSTANCEDISPLAYTYPE6
         dropZoneBattleground     = GetString(SI_ZONEDISPLAYTYPE9), -- SI_INSTANCEDISPLAYTYPE9
         dropZoneTrial            = GetString(SI_LFGACTIVITY4),
-        dropZoneArena            = setTypeArenaName["en"],
+        dropZoneArena            = setTypeArenaName[langEN],
         dropZoneMail             = GetString(SI_WINDOW_TITLE_MAIL),
         dropZoneCrafted          = GetString(SI_SPECIALIZEDITEMTYPE213),
         dropZoneCyrodiil         = GetString(SI_CAMPAIGNRULESETTYPE1),
@@ -1588,7 +1683,7 @@ lib.localization                 = {
         lightningStaff = "Lightning staff",
         settingWillReloadUI = "- CAUTION - \nChanging this setting will reload the UserInterface!",
     },
-    ["es"] = {
+    [langES] = {
         de  = "Alemán",
         en  = "Inglés",
         fr  = "Francés",
@@ -1599,7 +1694,7 @@ lib.localization                 = {
         zh  = "Chino",
         dlc                    = "Capítulo/DLC",
         dropZones              = "Zonas de caída",
-        dropZoneArena          = setTypeArenaName["es"],
+        dropZoneArena          = setTypeArenaName[langES],
         dropZoneImperialSewers = "Alcantarillas de la Ciudad Imperial",
         droppedBy              = "Dejado por",
         setType                = "Tipo de conjunto",
@@ -1607,7 +1702,7 @@ lib.localization                 = {
         undauntedChest         = undauntedStr .. " cofre",
         modifyTooltip          = "Mejorar información sobre herramientas por información de conjunto",
     },
-    ["fr"] = {
+    [langFR] = {
         de  = "Allemand",
         en  = "Anglais",
         fr  = "Français",
@@ -1624,7 +1719,7 @@ lib.localization                 = {
         dropZonePublicDungeon    = GetString(SI_ZONEDISPLAYTYPE6),
         dropZoneBattleground     = GetString(SI_ZONEDISPLAYTYPE9),
         dropZoneTrial            = GetString(SI_LFGACTIVITY4),
-        dropZoneArena            = setTypeArenaName["fr"],
+        dropZoneArena            = setTypeArenaName[langFR],
         dropZoneMail             = GetString(SI_WINDOW_TITLE_MAIL),
         dropZoneCrafted          = GetString(SI_SPECIALIZEDITEMTYPE213),
         dropZoneCyrodiil         = GetString(SI_CAMPAIGNRULESETTYPE1),
@@ -1692,7 +1787,7 @@ lib.localization                 = {
         wayshrines                  = "Autels",
         invertSelection             = "≠ Inverser la sélection",
     },
-    ["pl"] = {
+    [langPL] = {
         de  = "Niemiecki",
         en  = "Angielski",
         fr  = "Francuski",
@@ -1709,7 +1804,7 @@ lib.localization                 = {
         dropZonePublicDungeon    = GetString(SI_ZONEDISPLAYTYPE6), -- SI_INSTANCEDISPLAYTYPE6
         dropZoneBattleground     = GetString(SI_ZONEDISPLAYTYPE9), -- SI_INSTANCEDISPLAYTYPE9
         dropZoneTrial            = GetString(SI_LFGACTIVITY4),
-        dropZoneArena            = setTypeArenaName["pl"],
+        dropZoneArena            = setTypeArenaName[langPL],
         dropZoneMail             = GetString(SI_WINDOW_TITLE_MAIL),
         dropZoneCrafted          = GetString(SI_SPECIALIZEDITEMTYPE213),
         dropZoneCyrodiil         = GetString(SI_CAMPAIGNRULESETTYPE1),
@@ -1784,7 +1879,7 @@ lib.localization                 = {
         linkToChat                  = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
         showLibSetsSettingsMenu     = "Pokaż Ustawienia LibSets",
     },
-    ["ru"] = {
+    [langRU] = {
         de  = "Нeмeцкий",
         en  = "Aнглийcкий",
         fr  = "Фpaнцузcкий",
@@ -1795,7 +1890,7 @@ lib.localization                 = {
         zh  = "Китайский",
         dlc                    = "Глава/DLC",
         dropZones              = "Зоны сброса",
-        dropZoneArena          = setTypeArenaName["ru"],
+        dropZoneArena          = setTypeArenaName[langRU],
         dropZoneImperialSewers = "Канализация Имперского города",
         droppedBy              = "Снизился на",
         setType                = "Тип набора",
@@ -1805,7 +1900,7 @@ lib.localization                 = {
         slashCommandDescription = "Найти переводы названий наборов",
         slashCommandDescriptionClient = "Поиск по названию набора (язык игры)",
     },
-    ["jp"] = {
+    [langJP] = {
         de  = "ドイツ語",
         en  = "英語",
         fr  = "フランス語",
@@ -1816,7 +1911,7 @@ lib.localization                 = {
         zh  = "中国語",
         dlc                    = "チャプター/ DLC",
         dropZones              = "ドロップゾーン",
-        dropZoneArena          = setTypeArenaName["jp"],
+        dropZoneArena          = setTypeArenaName[langJP],
         dropZoneImperialSewers = "インペリアルシティ下水道",
         droppedBy              = "によってドロップ",
         setType                = "セットの種類",
@@ -1826,7 +1921,7 @@ lib.localization                 = {
         slashCommandDescription = "セット名の翻訳を検索",
         slashCommandDescriptionClient = "セット名の検索 (ゲーム言語)",
     },
-    ["zh"] = {
+    [langZH] = {
         --By Lykeion - 20240229
         de  = "德文",
         en  = "英文",
@@ -1844,7 +1939,7 @@ lib.localization                 = {
         dropZonePublicDungeon    = GetString(SI_ZONEDISPLAYTYPE6),
         dropZoneBattleground     = GetString(SI_ZONEDISPLAYTYPE9),
         dropZoneTrial            = GetString(SI_LFGACTIVITY4),
-        dropZoneArena            = setTypeArenaName["zh"],
+        dropZoneArena            = setTypeArenaName[langZH],
         dropZoneMail             = GetString(SI_WINDOW_TITLE_MAIL),
         dropZoneCrafted          = GetString(SI_SPECIALIZEDITEMTYPE213),
         dropZoneCyrodiil         = GetString(SI_CAMPAIGNRULESETTYPE1),

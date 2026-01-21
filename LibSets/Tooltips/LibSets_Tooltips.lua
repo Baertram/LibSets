@@ -53,12 +53,18 @@ local gil =         GetItemLink
 local isilscp =     IsItemLinkSetCollectionPiece
 local gircoc =      GetItemReconstructionCurrencyOptionCost
 
+--Libraries
+local LSM = lib.LSM --LibScrollableMenu
+local checkLSM = lib.CheckLSM
+
 
 --Custom tooltips
 local customTooltipHooksNeeded = lib.customTooltipHooks.needed
 local customTooltipHooksHooked = lib.customTooltipHooks.hooked
 local customAddonTooltipControlHooksCount = 0
 
+--Search UI
+local libSetsSearchUIShared --LibSets_SearchUI_Shared
 
 local getLibSetsSetPreviewTooltipSavedVariables = lib.getLibSetsSetPreviewTooltipSavedVariables
 local langAllowedCheck = lib.LangAllowedCheck
@@ -159,11 +165,25 @@ local isJewelryTraitType =      lib.isJewelryTraitType
 local isWeaponTraitType =       lib.isWeaponTraitType
 local isArmorTraitType =        lib.isArmorTraitType
 
+local LIBSETS_TABLEKEY_DROPMECHANIC_SORTED = LIBSETS_TABLEKEY_DROPMECHANIC_SORTED
+local LIBSETS_TABLEKEY_ZONEIDS_SORTED = LIBSETS_TABLEKEY_ZONEIDS_SORTED
+local LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES = LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES
+local LIBSETS_TABLEKEY_DROPMECHANIC_NAMES = LIBSETS_TABLEKEY_DROPMECHANIC_NAMES
+local LIBSETS_TABLEKEY_ZONEIDS = LIBSETS_TABLEKEY_ZONEIDS
+local LIBSETS_TABLEKEY_DROPMECHANIC = LIBSETS_TABLEKEY_DROPMECHANIC
+
+local LIBSETS_SETTYPE_CYRODIIL_MONSTER = LIBSETS_SETTYPE_CYRODIIL_MONSTER
+local LIBSETS_SETTYPE_IMPERIALCITY_MONSTER = LIBSETS_SETTYPE_IMPERIALCITY_MONSTER
+local LIBSETS_SETTYPE_MONSTER = LIBSETS_SETTYPE_MONSTER
+local LIBSETS_SETTYPE_CRAFTED = LIBSETS_SETTYPE_CRAFTED
+
+--[[
 local monsterSetTypes = {
     [LIBSETS_SETTYPE_MONSTER] =                 true,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    true,
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER] =        true,
 }
+]]
 local monsterSetTypeToVeteranStr = {
     [LIBSETS_SETTYPE_MONSTER] =                 veteranDungeonIconStr,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialCityStr,
@@ -1325,7 +1345,8 @@ end
 local function buildSetSearchFavoritesInfo(setData)
     local setId = setData.setId
     if not setId then return end
-    local setSearchFavoriteCategoriesOfSetId = LibSets_SearchUI_Shared.GetAllFavoritesCategories(LibSets_SearchUI_Shared, setId)
+    libSetsSearchUIShared = libSetsSearchUIShared or LibSets_SearchUI_Shared
+    local setSearchFavoriteCategoriesOfSetId = libSetsSearchUIShared.GetAllFavoritesCategories(libSetsSearchUIShared, setId)
     if ZO_IsTableEmpty(setSearchFavoriteCategoriesOfSetId) then return end
 
     local l_setSearchFavoritesCategoryStr = ""
@@ -2174,7 +2195,7 @@ local function loadLHASSettingsMenu()
                         lib.addSetCollectionsSearchItemLinkContextMenuEntry()
                     end,
                     default =   defaultSettings.addSetCollectionsSearchItemLink,
-                    disable =  function() return LibCustomMenu == nil end,
+                    disable =  function() return LSM == nil end,
                 },
         ]]
         ------------------------------------------------------------------------------------------------------------------------
@@ -2449,8 +2470,10 @@ local function loadLAMSettingsMenu()
                 lib.addSetCollectionsSearchItemLinkContextMenuEntry()
             end,
             default =   defaultSettings.addSetCollectionsSearchItemLink,
-            disabled =  function() return LibCustomMenu == nil end,
-            requiresReload = false,
+            disabled =  function()
+                return lib.LCM == nil
+            end,
+            requiresReload = true,
             width =     "full",
         },
 ------------------------------------------------------------------------------------------------------------------------

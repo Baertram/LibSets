@@ -8,6 +8,10 @@ local lib = LibSets
 lib.setDataPreloaded = lib.setDataPreloaded or {}
 local setDataPreloaded = lib.setDataPreloaded
 
+local LIBSETS_TABLEKEY_SETS_EQUIP_TYPES = LIBSETS_TABLEKEY_SETS_EQUIP_TYPES
+local LIBSETS_TABLEKEY_SETS_ARMOR_TYPES = LIBSETS_TABLEKEY_SETS_ARMOR_TYPES
+local LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES = LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES
+local LIBSETS_TABLEKEY_SETS_JEWELRY = LIBSETS_TABLEKEY_SETS_JEWELRY
 
 ------------------------------------------------------------------------------------------------------------------------
 --> Last updated: API 101048, 2025-11-13, Baertram

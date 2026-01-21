@@ -12,9 +12,26 @@ local setDataPreloaded = lib.setDataPreloaded
 --Current APIversion is live or PTS check
 local isPTSAPIVersionLive = lib.checkIfPTSAPIVersionIsLive()
 
+local LIBSETS_SETTYPE_ARENA = LIBSETS_SETTYPE_ARENA
+local LIBSETS_SETTYPE_BATTLEGROUND = LIBSETS_SETTYPE_BATTLEGROUND
+local LIBSETS_SETTYPE_CRAFTED = LIBSETS_SETTYPE_CRAFTED
+local LIBSETS_SETTYPE_CYRODIIL = LIBSETS_SETTYPE_CYRODIIL
+local LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD = LIBSETS_SETTYPE_DAILYRANDOMDUNGEONANDICREWARD
+local LIBSETS_SETTYPE_DUNGEON = LIBSETS_SETTYPE_DUNGEON
+local LIBSETS_SETTYPE_IMPERIALCITY = LIBSETS_SETTYPE_IMPERIALCITY
+local LIBSETS_SETTYPE_MONSTER = LIBSETS_SETTYPE_MONSTER
+local LIBSETS_SETTYPE_OVERLAND = LIBSETS_SETTYPE_OVERLAND
+local LIBSETS_SETTYPE_SPECIAL = LIBSETS_SETTYPE_SPECIAL
+local LIBSETS_SETTYPE_TRIAL = LIBSETS_SETTYPE_TRIAL
+local LIBSETS_SETTYPE_MYTHIC = LIBSETS_SETTYPE_MYTHIC
+local LIBSETS_SETTYPE_IMPERIALCITY_MONSTER = LIBSETS_SETTYPE_IMPERIALCITY_MONSTER
+local LIBSETS_SETTYPE_CYRODIIL_MONSTER = LIBSETS_SETTYPE_CYRODIIL_MONSTER
+local LIBSETS_SETTYPE_CLASS = LIBSETS_SETTYPE_CLASS
+
+
 
 ------------------------------------------------------------------------------------------------------------------------
---> Last updated: API 101048, 2025-11-13, Baertram
+--> Last updated: API 101049, 2026-01-21, Baertram
 ------------------------------------------------------------------------------------------------------------------------
 
 
@@ -61,8 +78,8 @@ lib.specialBonusSets = specialBonusSets
 --}
 local setsOfNewerAPIVersion = {
     --setIds not yet on live server - BEGIN
-    --- Sets of ApiVersion 101048 ???: Craftable sets where we cannot reach the crafting tables yet with update 46/47
-    --....
+    --- Sets of APIVersion 101049 "Season 0"
+    848,849,850,851,853,855
     --setIds not yet on live server - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion

@@ -8,6 +8,7 @@ local lib = LibSets
 lib.setDataPreloaded = lib.setDataPreloaded or {}
 local setDataPreloaded = lib.setDataPreloaded
 
+local LIBSETS_TABLEKEY_SETNAMES = LIBSETS_TABLEKEY_SETNAMES
 
 ------------------------------------------------------------------------------------------------------------------------
 --> Last updated: API 101048, 2025-11-13, Baertram

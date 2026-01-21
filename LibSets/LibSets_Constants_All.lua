@@ -5,11 +5,13 @@ if IsLibSetsAlreadyLoaded(false) then return end
 local lib = LibSets
 
 
+local select =      select
+local zogcifa =     GetCategoryInfoFromAchievementId
+local zogaci =      GetAchievementCategoryInfo
+local zogci =       GetCollectibleInfo
+local zocstrfor =   ZO_CachedStrFormat
 local gaci
 local gci
-local gcifa =       GetCategoryInfoFromAchievementId
-local zocstrfor =   ZO_CachedStrFormat
-
 
 --Helper function for the API check
 local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
@@ -20,8 +22,7 @@ local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
 ---@param topLevelIndex number
 ---@return string name
 local function GetAchievementCategoryInfoName(topLevelIndex)
-    local name, numSubCatgories, numAchievements, earnedPoints, totalPoints, hidesPoints = GetAchievementCategoryInfo(topLevelIndex)
-    return name
+    return select(1, zogaci(topLevelIndex))
 end
 gaci = GetAchievementCategoryInfoName
 
@@ -30,14 +31,14 @@ gaci = GetAchievementCategoryInfoName
 ---@return string name
 local function GetCollectibleInfoName(collectibleId)
     --name, description, icon, deprecatedLockedIcon, unlocked, purchasable, isActive, categoryType, hint
-    local name, _, _, _, _, _, _, _, _ = GetCollectibleInfo(collectibleId)
-    return name
+    return select(1, zogci(collectibleId))
 end
 gci = GetCollectibleInfoName
 
 
 --DLC & chapter type constants
-DLC_TYPE_BASE_GAME =    0
+DLC_TYPE_BASE_GAME = 0
+local DLC_TYPE_BASE_GAME = DLC_TYPE_BASE_GAME
 local possibleDlcTypes = {
     [1] = "DLC_TYPE_CHAPTER",
     [2] = "DLC_TYPE_DUNGEONS",
@@ -58,8 +59,10 @@ end
 local maxDlcTypes = #possibleDlcTypes
 
 --Iterators for the ESO dlc and chapter constants
-DLC_TYPE_ITERATION_BEGIN = DLC_TYPE_BASE_GAME
-DLC_TYPE_ITERATION_END   = _G[possibleDlcTypes[maxDlcTypes]]
+local DLC_TYPE_ITERATION_BEGIN = DLC_TYPE_BASE_GAME
+local DLC_TYPE_ITERATION_END   = _G[possibleDlcTypes[maxDlcTypes]]
+DLC_TYPE_ITERATION_BEGIN = DLC_TYPE_ITERATION_BEGIN
+DLC_TYPE_ITERATION_END = DLC_TYPE_ITERATION_END
 lib.allowedDLCTypes = {}
 for i = DLC_TYPE_ITERATION_BEGIN, DLC_TYPE_ITERATION_END do
     lib.allowedDLCTypes[i] = true
@@ -67,6 +70,7 @@ end
 
 --DLC & Chapter ID constants (for LibSets)
 DLC_BASE_GAME = 0
+local DLC_BASE_GAME = DLC_BASE_GAME
 local possibleDlcIds = {
     [1]  = "DLC_IMPERIAL_CITY",
     [2]  = "DLC_ORSINIUM",
@@ -113,7 +117,7 @@ lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
-    --possibleDlcIds[#possibleDlcIds + 1] = "DLC_xxx"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_SEASON0"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -122,7 +126,9 @@ end
 local maxDlcId = #possibleDlcIds
 --Iterators for the ESO dlc and chapter constants
 DLC_ITERATION_BEGIN = DLC_BASE_GAME
+local DLC_ITERATION_BEGIN = DLC_ITERATION_BEGIN
 DLC_ITERATION_END   = _G[possibleDlcIds[maxDlcId]]
+local DLC_ITERATION_END = DLC_ITERATION_END
 lib.allowedDLCIds = {}
 for i = DLC_ITERATION_BEGIN, DLC_ITERATION_END do
     lib.allowedDLCIds[i] = true
@@ -214,9 +220,10 @@ lib.dlcAndChapterCollectibleIds = {
     --Seasons of the Wormcult Part2
     [DLC_SEASONS_OF_THE_WORMCULT2] = {collectibleId=nil, achievementCategoryId=4240, type=DLC_TYPE_SEASON_PART, releaseDate=1760702400}, --October 17th 2025
 }
---if checkIfPTSAPIVersionIsLive() then
+if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
---end
+    lib.dlcAndChapterCollectibleIds[DLC_SEASON0] = {collectibleId=11111, achievementCategoryId=nil, type=DLC_TYPE_SEASON_PART, releaseDate=1773057600}
+end
 
 --Internal achievement example ids of the ESO DLCs and chapters
 local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds
@@ -243,26 +250,30 @@ for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
     local collectibleId = dlcAndChapterData.collectibleId
     local achievementCategoryId = dlcAndChapterData.achievementCategoryId
     local dlcType = dlcAndChapterData.type
-    if dlcType ~= nil and dlcType ~= DLC_TYPE_NORMAL_PATCH then
-        DLCandCHAPTERLookupdata[dlcType] = DLCandCHAPTERLookupdata[dlcType] or {}
-        if collectibleId ~= nil and collectibleId ~= -1 then
-            local name = zocstrfor(dlcStrFormatPattern, gci(collectibleId))
-            DLCandCHAPTERdata[dlcId] = name
-            DLCandCHAPTERLookupdata[dlcType][dlcId] = name
-            DLCAndCHAPTERDataOrdered[#DLCAndCHAPTERDataOrdered + 1] = dlcId
-        elseif achievementCategoryId ~= nil and achievementCategoryId ~= -1 then
-            local name = zocstrfor(dlcStrFormatPattern, gaci(gcifa(achievementCategoryId)))
-            DLCandCHAPTERdata[dlcId] = name
-            DLCandCHAPTERLookupdata[dlcType][dlcId] = name
-            DLCAndCHAPTERDataOrdered[#DLCAndCHAPTERDataOrdered + 1] = dlcId
-            --else
-            --no collectibleId and no achievementCategoryId provided? -> Normal patch with QOL features then
+    if dlcType ~= nil then
+        --DLC type = NOT PATCH
+        if dlcType ~= DLC_TYPE_NORMAL_PATCH then
+            DLCandCHAPTERLookupdata[dlcType] = DLCandCHAPTERLookupdata[dlcType] or {}
+            if collectibleId ~= nil and collectibleId ~= -1 then
+                local name = zocstrfor(dlcStrFormatPattern, gci(collectibleId))
+                DLCandCHAPTERdata[dlcId] = name
+                DLCandCHAPTERLookupdata[dlcType][dlcId] = name
+                DLCAndCHAPTERDataOrdered[#DLCAndCHAPTERDataOrdered + 1] = dlcId
+            elseif achievementCategoryId ~= nil and achievementCategoryId ~= -1 then
+                local name = zocstrfor(dlcStrFormatPattern, gaci(zogcifa(achievementCategoryId)))
+                DLCandCHAPTERdata[dlcId] = name
+                DLCandCHAPTERLookupdata[dlcType][dlcId] = name
+                DLCAndCHAPTERDataOrdered[#DLCAndCHAPTERDataOrdered + 1] = dlcId
+                --else
+                --no collectibleId and no achievementCategoryId provided? -> Normal patch with QOL features then
+            end
+
+        else    --DLC type = PATCH
+            NONDLCLookupdata[dlcType] = NONDLCLookupdata[dlcType] or {}
+            local name = dlcAndChapterData["name"] or "n/a"
+            NONDLCLookupdata[dlcType][dlcId] = name
+            NONDLCData[dlcId] = name
         end
-    elseif dlcType == DLC_TYPE_NORMAL_PATCH then
-        NONDLCLookupdata[dlcType] = NONDLCLookupdata[dlcType] or {}
-        local name = dlcAndChapterData["name"] or "n/a"
-        NONDLCLookupdata[dlcType][dlcId] = name
-        NONDLCData[dlcId] = name
     end
 end
 
@@ -278,7 +289,7 @@ local classData = {
     setsList = {}, --Will be dynamically filled upon need, by API function lib.GetClassSets(classId)
 }
 for i = 1, GetNumClasses(), 1 do
-    local classId, _, _, _, _, _, keyboardIcon, gamepadIcon = GetClassInfo(i)
+    local classId = GetClassInfo(i)
     if classId ~= nil then
         local classIndex = GetClassIndexById(classId)
         classData.index2Id[classIndex] = classId

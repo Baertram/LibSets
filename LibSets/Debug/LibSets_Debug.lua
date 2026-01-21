@@ -146,6 +146,25 @@ local libPrefixWithVersion = "[".. MAJOR .. " v" .. tos(MINOR).."]"
 local storedInSVFileLibSetsInTable = "->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table "
 local pleaseReloadUI = ">Please do a /reloadui to update the file properly!"
 
+
+--LibSets constants
+local LIBSETS_TABLEKEY_NEWSETIDS                              = LIBSETS_TABLEKEY_NEWSETIDS
+local LIBSETS_TABLEKEY_SETITEMIDS                             = LIBSETS_TABLEKEY_SETITEMIDS
+local LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID                    = LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID
+local LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED                  = LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED
+local LIBSETS_TABLEKEY_SETS_EQUIP_TYPES                       = LIBSETS_TABLEKEY_SETS_EQUIP_TYPES
+local LIBSETS_TABLEKEY_SETS_ARMOR_TYPES                       = LIBSETS_TABLEKEY_SETS_ARMOR_TYPES
+local LIBSETS_TABLEKEY_SETS_JEWELRY                           = LIBSETS_TABLEKEY_SETS_JEWELRY
+local LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES                     = LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES
+local LIBSETS_TABLEKEY_SETNAMES                               = LIBSETS_TABLEKEY_SETNAMES
+local LIBSETS_TABLEKEY_MAPS                                   = LIBSETS_TABLEKEY_MAPS
+local LIBSETS_TABLEKEY_WAYSHRINES                             = LIBSETS_TABLEKEY_WAYSHRINES
+local LIBSETS_TABLEKEY_WAYSHRINE_NAMES                        = LIBSETS_TABLEKEY_WAYSHRINE_NAMES
+local LIBSETS_TABLEKEY_ZONE_DATA                              = LIBSETS_TABLEKEY_ZONE_DATA
+local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
+local LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                      = LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
+local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES
+
 -------------------------------------------------------------------------------------------------------------------------------
 -- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
 -- e.g. to get the new wayshrines names and zoneNames

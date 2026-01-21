@@ -27,8 +27,11 @@ local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategor
 local favoriteIconTexts = searchUI.favoriteIconTexts
 
 --LibScrollableMenu
-local LSM = LibScrollableMenu
-local isLSMEnabled = LSM ~= nil --todo: Currently LSM does not support multiselection properly so we cannot use it here. LSM ~= nil and true or false
+--Libraries
+local LSM = lib.LSM --LibScrollableMenu
+local checkLSM = lib.CheckLSM
+
+local isLSMEnabled = false
 local LSM_defaultComboBoxOptions = {
     visibleRowsDropdown = 15,
     visibleRowsSubmenu  = 15,
@@ -85,17 +88,18 @@ end
 --Search UI for keyboard mode
 ------------------------------------------------------------------------------------------------------------------------
 
-LibSets_SearchUI_Keyboard = LibSets_SearchUI_Shared:Subclass()
+LibSets_SearchUI_Keyboard = LibSets_SearchUI_Shared:Subclass() --Inherit keyboard SearchUI from Shared SearchUI, to provide base methods and setup
 
 ------------------------------------------------
---- Initialization
+--- Initialization -
+---- Keyboard Sets Search UI - Overwritten Shared methods, or defined new methods only for keyboard
 ------------------------------------------------
 function LibSets_SearchUI_Keyboard:New(...)
     return LibSets_SearchUI_Shared.New(self, ...)
 end
 
 function LibSets_SearchUI_Keyboard:Initialize(control)
-    LibSets_SearchUI_Shared.Initialize(self, control)
+    LibSets_SearchUI_Shared.Initialize(self, control) --Call Shared master class initialization first
 
     local backGround = self.control:GetNamedChild("BG")
     backGround:SetAlpha(1)
@@ -362,6 +366,7 @@ local function sortFilterComboBox(comboBox, sortType, suppressRebuild)
 end
 
 function LibSets_SearchUI_Keyboard:InitializeFilters()
+    isLSMEnabled = checkLSM()
     if isLSMEnabled then self.LSM_Dropdowns = {} end
     local filters = self.filtersControl
 
