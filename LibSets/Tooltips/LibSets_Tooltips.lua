@@ -143,7 +143,7 @@ local dropLocationZonesStr =    localization.dropZones
 --local dlcStr =                  localization.dlc
 local droppedByStr =            localization.droppedBy
 local dungeonStr =              localization.dropZoneDungeon
-local endlessArchiveDungeonStr = localization.dropZoneEndlessArchive
+--local endlessArchiveDungeonStr = localization.dropZoneEndlessArchive
 local vetDungeonStr =           localization.dropZoneVeteranDungeon
 local imperialCityStr =         localization.dropZoneImperialCity
 local imperialSewersStr =       localization.dropZoneImperialSewers
@@ -154,16 +154,16 @@ local veteranDungeonIconStr =   zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
 local reconstructionCostsStr =  localization.reconstructionCosts
 local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
-local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
+--local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 local undauntedChestStr =       localization.undauntedChest
 local undauntedChestIdNames =   lib.undauntedChestIds[langToUse]
 
-local isJewelryEquipType =      lib.isJewelryEquipType
-local isWeaponEquipType =       lib.isWeaponEquipType
-local isArmorEquipType =        lib.isArmorEquipType
-local isJewelryTraitType =      lib.isJewelryTraitType
-local isWeaponTraitType =       lib.isWeaponTraitType
-local isArmorTraitType =        lib.isArmorTraitType
+--local isJewelryEquipType =      lib.isJewelryEquipType
+--local isWeaponEquipType =       lib.isWeaponEquipType
+--local isArmorEquipType =        lib.isArmorEquipType
+--local isJewelryTraitType =      lib.isJewelryTraitType
+--local isWeaponTraitType =       lib.isWeaponTraitType
+--local isArmorTraitType =        lib.isArmorTraitType
 
 local LIBSETS_TABLEKEY_DROPMECHANIC_SORTED = LIBSETS_TABLEKEY_DROPMECHANIC_SORTED
 local LIBSETS_TABLEKEY_ZONEIDS_SORTED = LIBSETS_TABLEKEY_ZONEIDS_SORTED
@@ -227,10 +227,14 @@ local itemTooltip =         tooltipCtrls["item"]
 
 
 --Other addons
+local MM_name = "MasterMerchant"
+local MM_windowListName = "WindowList"
+local MM_contentsName = 'Contents'
+local MM_WindowListName = MM_name .. MM_windowListName
 local masterMerchantCtrlNames = {
-    ['MasterMerchantWindowListContents'] = true,
-    ['MasterMerchantWindowList'] = true,
-    ['MasterMerchantGuildWindowListContents'] = true,
+    [MM_WindowListName] = true,
+    [MM_WindowListName .. MM_contentsName] = true,
+    [MM_name .. 'Guild' .. MM_windowListName .. MM_contentsName] = true,
 }
 local IIfACtrlNames = {
     ["IIFA_ListItem"] = true
