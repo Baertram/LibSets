@@ -5323,7 +5323,7 @@ local function myInvItemLinkCallbackFunc(inventorySlot, slotActions, ctrl, alt, 
     }
     table.insert(submenuEntris, subMenuEntrySetCollectionsSearchItemLink)
     --Add LibCustomMenu submenu to the inventory context menu and show it
-    AddCustomSubmenuItem(MAJOR, submenuEntris)
+    AddCustomSubMenuItem(MAJOR, submenuEntris)
     ShowMenu()
 end
 
@@ -5331,6 +5331,7 @@ end
 local libSets_customInvItemLinkContextMenuAdded = false
 local function addSetCollectionsSearchItemLinkContextMenuEntry()
     if libSets_customInvItemLinkContextMenuAdded or LCM == nil or LCM.RegisterContextMenu == nil
+    or AddCustomSubMenuItem == nil
     or not lib.svData.addSetCollectionsSearchItemLink then return end
 
     LCM:RegisterContextMenu(myInvItemLinkCallbackFunc, LCM.CATEGORY_LATE)
