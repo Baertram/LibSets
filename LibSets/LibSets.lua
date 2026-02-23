@@ -4366,7 +4366,7 @@ end
 -->categoryData.parentId must be given and > 0! categoryData.category can be nil or <= 0, then the parentId will be shown
 local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryData)
     updateRunsDone = updateRunsDone + 1
---d("[LibSets]checkIfOpenItemSetCollectionBookOfCategoryDataIsReady - categoryData: " ..tos(categoryData) .. "; updateRunsDone: " ..tos(updateRunsDone) .."; wasSetCollectionsBookOpenedYet: " ..tos(wasSetCollectionsBookOpenedYet))
+    --d("[LibSets]checkIfOpenItemSetCollectionBookOfCategoryDataIsReady - categoryData: " ..tos(categoryData) .. "; updateRunsDone: " ..tos(updateRunsDone) .."; wasSetCollectionsBookOpenedYet: " ..tos(wasSetCollectionsBookOpenedYet))
     if updateRunsDone >= maxRuns then
         EM:UnregisterForUpdate(updaterName)
         updateRunsDone = 0
@@ -4379,7 +4379,8 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
     EM:UnregisterForUpdate(updaterName)
 
     local nodeToOpen --= ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
-    local parentCategories = categoryTree.rootNode.children
+    local parentCategories = (categoryTree ~= nil and categoryTree.rootNode ~= nil and categoryTree.rootNode.children) or nil
+    if parentCategories == nil then return end --20260125 Fix nil error apearing if opening from BMU UI's zone list contextMenu
 
     --Select the top-most entry or any chosen one?
     if categoryData ~= LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE then
@@ -4395,16 +4396,16 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
         ---->nodeToOpen = parentCategoryData.children.data.node
         local parentCategoryIdToFind = categoryData.parentCategory
         local categoryIdToFind = categoryData.category
---d(">category: " ..tos(categoryIdToFind) .. ", parentCategory: " .. tos(parentCategoryIdToFind))
+        --d(">category: " ..tos(categoryIdToFind) .. ", parentCategory: " .. tos(parentCategoryIdToFind))
 
         for _, parentCategoryData in pairs(parentCategories) do
             if nodeToOpen == nil then
                 if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
                         and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
---d(">found parentCategory")
+                    --d(">found parentCategory")
                     --No subCategory given?
                     if categoryIdToFind == nil or categoryIdToFind <= 0 then
---d(">no subcategory to open -> open parent category node")
+                        --d(">no subcategory to open -> open parent category node")
                         --return the node of the parentCategory
                         nodeToOpen = parentCategoryData.data.node
                         break
@@ -4414,7 +4415,7 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
                             if nodeToOpen == nil then
                                 if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
                                         and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
---d(">found category")
+                                    --d(">found category")
                                     nodeToOpen = subCategoryData.data.node
                                     break
                                 end
@@ -4427,7 +4428,7 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
             end
         end
     else
---d(">open topmost")
+        --d(">open topmost")
         --Open the top most node: LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE
         nodeToOpen = parentCategories[1].data.node
     end
@@ -4436,10 +4437,10 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
         return
     end
     if categoryTree.selectedNode == nodeToOpen then
---d("<node was already opened")
+        --d("<node was already opened")
         return true
     end
---d(">selecting node now!")
+    --d(">selecting node now!")
     categoryTree:SelectNode(nodeToOpen)
     return (categoryTree.selectedNode == nodeToOpen) or false
 end

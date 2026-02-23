@@ -9,6 +9,8 @@ local select =      select
 local zogcifa =     GetCategoryInfoFromAchievementId
 local zogaci =      GetAchievementCategoryInfo
 local zogci =       GetCollectibleInfo
+local zogcn =       GetCollectibleName
+local zogan =       GetAchievementName
 local zocstrfor =   ZO_CachedStrFormat
 local gaci
 local gci
@@ -22,7 +24,7 @@ local checkIfPTSAPIVersionIsLive = lib.checkIfPTSAPIVersionIsLive
 ---@param topLevelIndex number
 ---@return string name
 local function GetAchievementCategoryInfoName(topLevelIndex)
-    return select(1, zogaci(topLevelIndex))
+    return zogan(topLevelIndex) --select(1, zogaci(topLevelIndex))
 end
 gaci = GetAchievementCategoryInfoName
 
@@ -31,7 +33,7 @@ gaci = GetAchievementCategoryInfoName
 ---@return string name
 local function GetCollectibleInfoName(collectibleId)
     --name, description, icon, deprecatedLockedIcon, unlocked, purchasable, isActive, categoryType, hint
-    return select(1, zogci(collectibleId))
+    return zogcn(collectibleId) -- select(1, zogci(collectibleId))
 end
 gci = GetCollectibleInfoName
 

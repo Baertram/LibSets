@@ -4,6 +4,8 @@ local MAJOR, MINOR = "LibSets", 0.88
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
 local strlower     = string.lower
+local GetString = GetString
+local zogcn     = GetCollectibleName
 
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
@@ -134,9 +136,9 @@ lib.APIVersions                = APIVersions
 ------------------------------------------------------------------------------------------------------------------------
 --These values are used inside the debug function "scanAllSetData" (see file LibSets_Debug.lua) for scanning the setIds and
 --their itemIds
-lib.debugNumItemIdPackages     = 55         -- Increase this to find new added set itemIds after an update. It will be
+lib.debugNumItemIdPackages     = 60         -- Increase this to find new added set itemIds after an update. It will be
                                             --multiplied by lib.debugNumItemIdPackageSize to build the itemIds of the
-                                            --Curently scanned itemIds: 275000
+                                            --Curently scanned itemIds: 300000
 --items to scan inagme for sets -> build an itemLink->uses GetItemLinkSetInfo()
 lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the client may crash!
 
@@ -978,6 +980,7 @@ local possibleDropMechanics         = {
     [36] = "LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS", -- Cyrodiil board missions
     [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless/Infinite Archive dungeon
     [38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT", -- Golden Pursuit/Goldene Vorhaben
+    [39] = "LIBSETS_DROP_MECHANIC_NIGHT_MARKET", --Night Market/Nachtmarkt
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -1032,6 +1035,7 @@ local LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY = LIB
 local LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS = LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS
 local LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE = LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE
 local LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT = LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT
+local LIBSETS_DROP_MECHANIC_NIGHT_MARKET = LIBSETS_DROP_MECHANIC_NIGHT_MARKET
 
 
 lib.allowedDropMechanics              = { }
@@ -1130,6 +1134,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CRAFTED]                              = GetString(SI_ITEM_FORMAT_STR_CRAFTED),
         [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
         [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                       = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
+        [LIBSETS_DROP_MECHANIC_NIGHT_MARKET]                         = zogcn(4485), --Night Market
     },
     [langES] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
@@ -2098,6 +2103,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_IMPERIAL_CITY_TREASURE_TROVE_SCAMP]  = "/esoui/art/icons/achievement_ic_treasurescamp.dds", --Imperial city treasure scamps	Kaiserstadt Schatzgoblin
     [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                     = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds",
     [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                      = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds",
+    [LIBSETS_DROP_MECHANIC_NIGHT_MARKET]                        = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds", --todo 20260223
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
