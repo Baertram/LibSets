@@ -224,6 +224,7 @@ lib.dlcAndChapterCollectibleIds = {
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
+    --todo 260233 Change collectibleId to real "Season 0" text!
     lib.dlcAndChapterCollectibleIds[DLC_SEASON0] = {collectibleId=11111, achievementCategoryId=nil, type=DLC_TYPE_SEASON_PART, releaseDate=1773057600}
 end
 
