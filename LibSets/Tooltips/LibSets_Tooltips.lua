@@ -53,12 +53,18 @@ local gil =         GetItemLink
 local isilscp =     IsItemLinkSetCollectionPiece
 local gircoc =      GetItemReconstructionCurrencyOptionCost
 
+--Libraries
+local LSM = lib.LSM --LibScrollableMenu
+local checkLSM = lib.CheckLSM
+
 
 --Custom tooltips
 local customTooltipHooksNeeded = lib.customTooltipHooks.needed
 local customTooltipHooksHooked = lib.customTooltipHooks.hooked
 local customAddonTooltipControlHooksCount = 0
 
+--Search UI
+local libSetsSearchUIShared --LibSets_SearchUI_Shared
 
 local getLibSetsSetPreviewTooltipSavedVariables = lib.getLibSetsSetPreviewTooltipSavedVariables
 local langAllowedCheck = lib.LangAllowedCheck
@@ -137,7 +143,7 @@ local dropLocationZonesStr =    localization.dropZones
 --local dlcStr =                  localization.dlc
 local droppedByStr =            localization.droppedBy
 local dungeonStr =              localization.dropZoneDungeon
-local endlessArchiveDungeonStr = localization.dropZoneEndlessArchive
+--local endlessArchiveDungeonStr = localization.dropZoneEndlessArchive
 local vetDungeonStr =           localization.dropZoneVeteranDungeon
 local imperialCityStr =         localization.dropZoneImperialCity
 local imperialSewersStr =       localization.dropZoneImperialSewers
@@ -148,22 +154,36 @@ local veteranDungeonIconStr =   zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
 local reconstructionCostsStr =  localization.reconstructionCosts
 local neededTraitsStr =         localization.neededTraits
 local dropMechanicStr =         localization.dropMechanic
-local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
+--local battlegroundStr =         GetString(SI_LEADERBOARDTYPE4) --Battleground
 local undauntedChestStr =       localization.undauntedChest
 local undauntedChestIdNames =   lib.undauntedChestIds[langToUse]
 
-local isJewelryEquipType =      lib.isJewelryEquipType
-local isWeaponEquipType =       lib.isWeaponEquipType
-local isArmorEquipType =        lib.isArmorEquipType
-local isJewelryTraitType =      lib.isJewelryTraitType
-local isWeaponTraitType =       lib.isWeaponTraitType
-local isArmorTraitType =        lib.isArmorTraitType
+--local isJewelryEquipType =      lib.isJewelryEquipType
+--local isWeaponEquipType =       lib.isWeaponEquipType
+--local isArmorEquipType =        lib.isArmorEquipType
+--local isJewelryTraitType =      lib.isJewelryTraitType
+--local isWeaponTraitType =       lib.isWeaponTraitType
+--local isArmorTraitType =        lib.isArmorTraitType
 
+local LIBSETS_TABLEKEY_DROPMECHANIC_SORTED = LIBSETS_TABLEKEY_DROPMECHANIC_SORTED
+local LIBSETS_TABLEKEY_ZONEIDS_SORTED = LIBSETS_TABLEKEY_ZONEIDS_SORTED
+local LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES = LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES
+local LIBSETS_TABLEKEY_DROPMECHANIC_NAMES = LIBSETS_TABLEKEY_DROPMECHANIC_NAMES
+local LIBSETS_TABLEKEY_ZONEIDS = LIBSETS_TABLEKEY_ZONEIDS
+local LIBSETS_TABLEKEY_DROPMECHANIC = LIBSETS_TABLEKEY_DROPMECHANIC
+
+local LIBSETS_SETTYPE_CYRODIIL_MONSTER = LIBSETS_SETTYPE_CYRODIIL_MONSTER
+local LIBSETS_SETTYPE_IMPERIALCITY_MONSTER = LIBSETS_SETTYPE_IMPERIALCITY_MONSTER
+local LIBSETS_SETTYPE_MONSTER = LIBSETS_SETTYPE_MONSTER
+local LIBSETS_SETTYPE_CRAFTED = LIBSETS_SETTYPE_CRAFTED
+
+--[[
 local monsterSetTypes = {
     [LIBSETS_SETTYPE_MONSTER] =                 true,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    true,
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER] =        true,
 }
+]]
 local monsterSetTypeToVeteranStr = {
     [LIBSETS_SETTYPE_MONSTER] =                 veteranDungeonIconStr,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialCityStr,
@@ -207,10 +227,14 @@ local itemTooltip =         tooltipCtrls["item"]
 
 
 --Other addons
+local MM_name = "MasterMerchant"
+local MM_windowListName = "WindowList"
+local MM_contentsName = 'Contents'
+local MM_WindowListName = MM_name .. MM_windowListName
 local masterMerchantCtrlNames = {
-    ['MasterMerchantWindowListContents'] = true,
-    ['MasterMerchantWindowList'] = true,
-    ['MasterMerchantGuildWindowListContents'] = true,
+    [MM_WindowListName] = true,
+    [MM_WindowListName .. MM_contentsName] = true,
+    [MM_name .. 'Guild' .. MM_windowListName .. MM_contentsName] = true,
 }
 local IIfACtrlNames = {
     ["IIFA_ListItem"] = true
@@ -1325,7 +1349,8 @@ end
 local function buildSetSearchFavoritesInfo(setData)
     local setId = setData.setId
     if not setId then return end
-    local setSearchFavoriteCategoriesOfSetId = LibSets_SearchUI_Shared.GetAllFavoritesCategories(LibSets_SearchUI_Shared, setId)
+    libSetsSearchUIShared = libSetsSearchUIShared or LibSets_SearchUI_Shared
+    local setSearchFavoriteCategoriesOfSetId = libSetsSearchUIShared.GetAllFavoritesCategories(libSetsSearchUIShared, setId)
     if ZO_IsTableEmpty(setSearchFavoriteCategoriesOfSetId) then return end
 
     local l_setSearchFavoritesCategoryStr = ""
@@ -2060,13 +2085,12 @@ end
 local addonsStr = GetString(SI_GAME_MENU_ADDONS)
 local LHAS_settingsEntryInGameMenu = ((LibAddonMenu2 ~= nil and (not IsConsole or (IsConsole and LibAddonMenu2.panelId ~= nil))) and addonsStr .." 2") or addonsStr
 function lib.ShowSettingsMenu(panelToShow)
-    panelToShow = panelToShow or lib.LHASsettingsPanel.panel
     if not IsConsole and not IsInGamepadPreferredMode() then
         if lam == nil or lib.LAMsettingsPanel == nil then return end
         lam:OpenToPanel(lib.LAMsettingsPanel)
     else
         if lhas == nil or lib.LHASsettingsPanel == nil then return end
-
+        panelToShow = panelToShow or lib.LHASsettingsPanel.panel
 
         if IsConsole then
             if lhas.scene == nil then return end
@@ -2112,6 +2136,8 @@ local reloadUITexture = "/esoui/art/miscellaneous/eso_icon_warning.dds"
 local reloadUITextureStr = "|cFF0000".. zo_iconFormatInheritColor(reloadUITexture, 24, 24) .."|r"
 local function loadLHASSettingsMenu()
     if lhas == nil or settingsMenuCreated[true] then return end
+    --Settings menu for LibAddonMenu was created first -> Stay with that
+    if lam ~= nil and settingsMenuCreated[false] then return true end
 
     local settings = lib.svData
     local defaultSettings = lib.defaultSV
@@ -2172,7 +2198,7 @@ local function loadLHASSettingsMenu()
                         lib.addSetCollectionsSearchItemLinkContextMenuEntry()
                     end,
                     default =   defaultSettings.addSetCollectionsSearchItemLink,
-                    disable =  function() return LibCustomMenu == nil end,
+                    disable =  function() return LSM == nil end,
                 },
         ]]
         ------------------------------------------------------------------------------------------------------------------------
@@ -2204,8 +2230,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.tooltipTextures_TT,
             getFunction =    function() return settings.tooltipModifications.tooltipTextures end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.tooltipTextures = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.tooltipTextures = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.tooltipTextures,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2224,8 +2250,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.setType,
             getFunction =    function() return settings.tooltipModifications.addSetType end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addSetType = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addSetType = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addSetType,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2236,8 +2262,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.dropZones,
             getFunction =    function() return settings.tooltipModifications.addDropLocation end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addDropLocation = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addDropLocation = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDropLocation,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2248,8 +2274,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.dropMechanic,
             getFunction =    function() return settings.tooltipModifications.addDropMechanic end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addDropMechanic = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addDropMechanic = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDropMechanic,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2260,8 +2286,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.droppedBy .. "/" .. localization.boss .. "/" .. GetString(SI_CHARACTER_SELECT_LOCATION_LABEL),
             getFunction =    function() return settings.tooltipModifications.addBossName end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addBosslabel =value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addBosslabel =value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addBossName,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2272,9 +2298,9 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.neededTraitsOrReconstructionCost,
             getFunction =    function() return settings.tooltipModifications.addNeededTraits end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addNeededTraits = value
-            lib.svData.tooltipModifications.addReconstructionCost = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addNeededTraits = value
+                lib.svData.tooltipModifications.addReconstructionCost = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addNeededTraits,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2285,8 +2311,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.dlc,
             getFunction =    function() return settings.tooltipModifications.addDLC end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addDLC = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addDLC = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addDLC,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2297,8 +2323,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.favorites,
             getFunction =    function() return settings.tooltipModifications.addFavorites end,
             setFunction =    function(value)
-            lib.svData.tooltipModifications.addFavorites = value
-            isLibSetsTooltipEnabled()
+                lib.svData.tooltipModifications.addFavorites = value
+                isLibSetsTooltipEnabled()
             end,
             default =   defaultSettings.tooltipModifications.addFavorites,
             disable =  function() return tooltipLHASDisabledFunc() end,
@@ -2317,21 +2343,21 @@ local function loadLHASSettingsMenu()
             tooltip = localization.customTooltipPattern,
             getFunction =  function() return settings.useCustomTooltipPattern end,
             setFunction =  function(value)
-            if not preventLAMTooltipEditSetFuncEndlessLoop then
-            useCustomTooltip = isCustomTooltipEnabled(value)
-            if not useCustomTooltip then
-            value = ""
-            settings.useCustomTooltipPattern = value
-            if LibSets_LHAS_EditBox_CustomTooltipPattern ~= nil then
-            preventLAMTooltipEditSetFuncEndlessLoop = true
-            LibSets_LHAS_EditBox_CustomTooltipPattern.editbox:SetText(value)
-            preventLAMTooltipEditSetFuncEndlessLoop = false
-            end
-            else
-            settings.useCustomTooltipPattern = value
-            end
-            isLibSetsTooltipEnabled()
-            end
+                if not preventLAMTooltipEditSetFuncEndlessLoop then
+                    useCustomTooltip = isCustomTooltipEnabled(value)
+                    if not useCustomTooltip then
+                        value = ""
+                        settings.useCustomTooltipPattern = value
+                        if LibSets_LHAS_EditBox_CustomTooltipPattern ~= nil then
+                            preventLAMTooltipEditSetFuncEndlessLoop = true
+                            LibSets_LHAS_EditBox_CustomTooltipPattern.editbox:SetText(value)
+                            preventLAMTooltipEditSetFuncEndlessLoop = false
+                        end
+                    else
+                        settings.useCustomTooltipPattern = value
+                    end
+                    isLibSetsTooltipEnabled()
+                end
             end,
             default = defaultSettings.useCustomTooltipPattern,
             --reference = "LibSets_LHAS_EditBox_CustomTooltipPattern",
@@ -2342,8 +2368,8 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.addLineBreakAtCustomTooltipParts_TT,
             getFunction =    function() return settings.addLineBreakAtCustomTooltipParts end,
             setFunction =    function(value)
-            addLineBreakAfterNonEmptyParts = value
-            lib.svData.addLineBreakAtCustomTooltipParts = value
+                addLineBreakAfterNonEmptyParts = value
+                lib.svData.addLineBreakAtCustomTooltipParts = value
             end,
             default =   defaultSettings.addLineBreakAtCustomTooltipParts,
             disable =  function() return not settings.useCustomTooltipPattern end,
@@ -2363,7 +2389,7 @@ local function loadLHASSettingsMenu()
             tooltip =   localization.previewTTToChatToo_TT,
             getFunction =    function() return settings.setPreviewTooltips.sendToChatToo end,
             setFunction =    function(value)
-            lib.svData.setPreviewTooltips.sendToChatToo = value
+                lib.svData.setPreviewTooltips.sendToChatToo = value
             end,
             default =   defaultSettings.setPreviewTooltips.sendToChatToo,
             disable =  function() return false end,
@@ -2382,6 +2408,8 @@ end
 
 local function loadLAMSettingsMenu()
     if lam == nil or settingsMenuCreated[false] then return end
+    --Settings menu for LibHarvensAddonSettings was creted first -> Stay with that
+    if lhas ~= nil and settingsMenuCreated[true] then return true end
 
     local panelData = {
         type 				= 'panel',
@@ -2445,8 +2473,10 @@ local function loadLAMSettingsMenu()
                 lib.addSetCollectionsSearchItemLinkContextMenuEntry()
             end,
             default =   defaultSettings.addSetCollectionsSearchItemLink,
-            disabled =  function() return LibCustomMenu == nil end,
-            requiresReload = false,
+            disabled =  function()
+                return lib.LCM == nil
+            end,
+            requiresReload = true,
             width =     "full",
         },
 ------------------------------------------------------------------------------------------------------------------------

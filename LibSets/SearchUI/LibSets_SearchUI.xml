@@ -122,7 +122,7 @@
 
         <!-- LibSets Search UI - Keyboard mode -->
         <TopLevelControl name="LibSets_SearchUI_TLC_Keyboard" inherits="LibSets_SearchUI_TLC_Shared">
-            <Dimensions x="900" y="600"/>
+            <!-- <Dimensions x="900" y="600"/> Allow resize -->
             <DimensionConstraints minX="900" minY="600"/>
             <Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="CENTER" offsetX="0" offsetY="0"/>
 

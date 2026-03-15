@@ -7,23 +7,24 @@ local libPrefix = lib.prefix
 
 local zif = zo_iconFormat
 local zoitfns = zo_iconTextFormatNoSpace
-local zoitf = zo_iconTextFormat
+--local zoitf = zo_iconTextFormat
 local tos = tostring
 local sgmatch = string.gmatch
 local strlow = string.lower
 local tins = table.insert
 local tsort = table.sort
-local tcon = table.concat
+local tcon = table.conca
 local zocstrfor = ZO_CachedStrFormat
+local zoite = ZO_IsTableEmpty
 
 local clientLang = lib.clientLang
 local fallbackLang = lib.fallbackLang
 local langAllowedCheck = lib.LangAllowedCheck
 
-local localization = lib.localization
-local booleanToOnOff = localization[fallbackLang].booleanToOnOff
+--local localization = lib.localization
+--local booleanToOnOff = localization[fallbackLang].booleanToOnOff
 
-local getIndexTableFromNonNumberKeyTable = lib.GetIndexTableFromNonNumberKeyTable
+--local getIndexTableFromNonNumberKeyTable = lib.GetIndexTableFromNonNumberKeyTable
 
 local getLocalizedText = lib.GetLocalizedText
 local libSets_GetSetInfo = lib.GetSetInfo
@@ -55,6 +56,8 @@ local gilsi = GetItemLinkSetInfo
 local TT_Popup = PopupTooltip
 local TT_Text = InformationTooltip
 
+--Libraries
+local checkLSM = lib.CheckLSM
 
 --Event upater names
 local searchHistoryEventUpdaterName = MAJOR .. "_SearchHistory_Update"
@@ -308,8 +311,10 @@ local function OnClick_CheckBoxLabel(cbControl, svEntryName, selfVar, svValueNam
     end
 end
 
+--Loop over the radioButtonEntries in the group and disable "the other" value
+--[[
 local function updateSettingsRadioButtonGroup(radioButtonGroupName, svEntryName, svEntryToSkip, cboxCtrl, selfVar)
-    if radioButtonGroupName == nil or radioButtonGroupName == "" or ZO_IsTableEmpty(radioButtonGroupsSettings[radioButtonGroupName])
+    if radioButtonGroupName == nil or radioButtonGroupName == "" or zoite(radioButtonGroupsSettings[radioButtonGroupName])
             or svEntryName == nil or lib.svData[svEntryName] == nil or svEntryToSkip == nil then return end
 
     for key, ZO_MenuCboxIndex in pairs(radioButtonGroupsSettings[radioButtonGroupName]) do
@@ -325,6 +330,7 @@ local function updateSettingsRadioButtonGroup(radioButtonGroupName, svEntryName,
         end
     end
 end
+]]
 
 
 local function isItemFilterTypeMatching(item, filterType)
@@ -335,7 +341,7 @@ local function clearSearchHistory(searchType)
     --d("Clear search history, type: " ..tos(searchType))
     local settings = lib.svData
     local searchHistory = settings.setSearchHistory
-    if ZO_IsTableEmpty(searchHistory[searchType]) then return end
+    if zoite(searchHistory[searchType]) then return end
     lib.svData.setSearchHistory[searchType] = {}
 end
 
@@ -424,16 +430,16 @@ local function addOtherAddonsContextMenuEntries(rowControl, setId)
                 end
                 if isVisible == true then
                     if not dividerWasAdded then
-                        AddCustomMenuItem("-", function() end)
+                        AddScrollableMenuDivider()
                         dividerWasAdded = true
                     end
                     --Custom addon's name header
                     local headerName = customContextMenuEntriesData.headerName
                     if headerName ~= nil then
-                        AddCustomMenuItem(headerName, function() end, MENU_ADD_OPTION_HEADER)
+                        AddCustomScrollableMenuHeader(headerName)
                     end
                     --Addon name submenu
-                    AddCustomSubMenuItem(submenuName, submenuEntries)
+                    AddCustomScrollableSubMenuEntry(submenuName, submenuEntries)
                 end
             end
         end
@@ -447,6 +453,7 @@ LibSets_SearchUI_Shared = ZO_InitializingObject:Subclass()
 
 ------------------------------------------------
 --- Initialization
+-----> Shared Set Search UI provides methods both applicable for Keyboard and Gamepad input mode
 ------------------------------------------------
 function LibSets_SearchUI_Shared:Initialize(control)
     self.control = control
@@ -553,7 +560,7 @@ function LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries(dropdownContro
 --d("LibSets_SearchUI_Shared:SelectMultiSelectDropdownEntries")
 --lib._debugDropDownControl = dropdownControl
     refreshResultsListAfterwards = refreshResultsListAfterwards or false
-    if ZO_IsTableEmpty(entriesToSelect) then return end
+    if zoite(entriesToSelect) then return end
     local comboBox = getComboBoxFromDropdownControl(dropdownControl)
     if comboBox ~= nil then
         comboBox:ClearAllSelections()
@@ -604,7 +611,7 @@ end
 -->See format of searchParams at the Initialize function of this class, above!
 function LibSets_SearchUI_Shared:Show(searchParams, searchDoneCallback, searchErrorCallback, searchCanceledCallback)
 
-    if searchParams ~= nil and not ZO_IsTableEmpty(searchParams) then
+    if searchParams ~= nil and not zoite(searchParams) then
         --Search parameters, passed in (preset UI elements with them, if provided)
         self.searchParams = searchParams
 
@@ -853,7 +860,7 @@ local function searchFilterPrefix(searchInput, searchTab, isBonusearch, setId)
                 end
                 --d(">>>searchQuery: " .. tostring(searchQuery) .. ", searchColonOffset: " .. tostring(searchColonOffset) .. ", bonusLineNr: " .. tostring(bonusLineNr))
             end
-            if not ZO_IsTableEmpty(searchTab) then
+            if not zoite(searchTab) then
                 for i = 1, #searchTab do
                     --No bonus line to search? Else: Only if the current line of the table is the bonus line nr. specified
                     if not isBonusearch or (bonusLineNr == nil or tonumber(bonusLineNr) == i or (realBonusLineNr ~= nil and tonumber(realBonusLineNr) == i)) then
@@ -918,7 +925,7 @@ function LibSets_SearchUI_Shared:DidAnyFilterChange()
     if lastSearchParams == nil then
 --d(">no lastSearchParams")
         if searchParams ~= nil then
-            if ZO_IsTableEmpty(searchParams) then
+            if zoite(searchParams) then
 --d(">searchParams is empty")
                 return false
             else
@@ -949,7 +956,7 @@ function LibSets_SearchUI_Shared:DidAnyFilterChange()
         if searchParamEntry ~= nil then
             if type(v) == "table" then --and type(lastSearchParamEntry) == "table" then no need to check if lastSearchParams enty is a table too as they got copied from searchParams, so type must be same
                 --The table was emptied: Changed
-                if ZO_IsTableEmpty(v) then
+                if zoite(v) then
 --d(">table is empty")
                     return true
                 else
@@ -991,11 +998,11 @@ function LibSets_SearchUI_Shared:PreFilterMasterList(defaultMasterListBase)
 --d("[LibSets_SearchUI_Shared]PreFilterMasterList")
 --lib._debugDefaultMasterListBase = ZO_ShallowTableCopy(defaultMasterListBase)
 
-    if defaultMasterListBase == nil or ZO_IsTableEmpty(defaultMasterListBase) then return end
+    if defaultMasterListBase == nil or zoite(defaultMasterListBase) then return end
     --The search parameters of the filters (multiselect dropdowns) were provided?
     -->Passed in from the LibSets_SearchUI_Shared:StartSearch() function
     local searchParams = self.searchParams
-    if searchParams ~= nil and not ZO_IsTableEmpty(searchParams) then
+    if searchParams ~= nil and not zoite(searchParams) then
         local setsBaseList = {}
         --Language of client, or of not supported: fallbackLang
         local langTouse = langAllowedCheck(clientLang)
@@ -1489,7 +1496,7 @@ end
 function LibSets_SearchUI_Shared:RemoveAllSetFavorites(favoriteCategory)
     if possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory] == nil then return end
     local setFavorites = lib.svData.setSearchFavorites[favoriteCategory]
-    if ZO_IsTableEmpty(setFavorites) then return end
+    if zoite(setFavorites) then return end
 
     lib.svData.setSearchFavorites[favoriteCategory] = {}
     CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoveAll", favoriteCategory, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
@@ -1497,85 +1504,83 @@ function LibSets_SearchUI_Shared:RemoveAllSetFavorites(favoriteCategory)
     self.resultsList:RefreshData() --To remove the Favorite markers
 end
 
+
 function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
-    if not LibCustomMenu then return end
+    if not checkLSM() then return end
+
     local selfVar = self
-    ClearMenu()
+    ClearCustomScrollableMenu()
     --Settings headline
-    AddCustomMenuItem(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305), function() end, MENU_ADD_OPTION_HEADER)
+    AddCustomScrollableMenuHeader(settingsIconText .. " " .. GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305))
 
     --Show LibSets settings
-    AddCustomMenuItem(showLibSetsSettingsStr, function() libSets_showSettingsMenu() end)
+    AddCustomScrollableMenuEntry(showLibSetsSettingsStr, function() libSets_showSettingsMenu() end)
 
 
     --What should happen by default if we left click a row?
     -->Multiple checkboxes here, just auto uncheck others via the table radioButtonGroupRowLeftLickDefaultAction
-    radioButtonGroupsSettings["rowLeftLickDefaultAction"] = {}
+    --radioButtonGroupsSettings["rowLeftLickDefaultAction"] = {}
 
     --Default left click action = link to chat
-    AddCustomMenuItem(defaultActionLeftClickStr .." |t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_LMB.dds|t", function() end, MENU_ADD_OPTION_HEADER)
-    local cbDefaultActionLeftClickOnRowLinkToChatIndex = AddCustomMenuItem(linkToChatStr,
-            function(cboxCtrl)
-                --OnClick_CheckBoxLabel(cboxCtrl, "setSearchUIRowLeftClickDefaultAction", selfVar, "linkToChat")
-                updateSettingsRadioButtonGroup("rowLeftLickDefaultAction", "setSearchUIRowLeftClickDefaultAction", "linkToChat", cboxCtrl, selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbDefaultActionLeftClickOnRowLinkToChatIndex, lib.svData.setSearchUIRowLeftClickDefaultAction, "linkToChat")
-    radioButtonGroupsSettings["rowLeftLickDefaultAction"]["linkToChat"] = cbDefaultActionLeftClickOnRowLinkToChatIndex
+    AddCustomScrollableMenuHeader(defaultActionLeftClickStr .." |t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_LMB.dds|t")
+
+    local cbDefaultActionLeftClickOnRowLinkToChatIndex = AddCustomScrollableMenuRadioButton(linkToChatStr,
+            function(comboBox, itemName, item, checked, data)
+                lib.svData.setSearchUIRowLeftClickDefaultAction = "linkToChat"
+                --OnClick_CheckBoxLabel(moc(), "setSearchUIRowLeftClickDefaultAction", selfVar, "linkToChat")
+                --updateSettingsRadioButtonGroup("rowLeftLickDefaultAction", "setSearchUIRowLeftClickDefaultAction", "linkToChat", moc(), selfVar)
+            end, function() return lib.svData.setSearchUIRowLeftClickDefaultAction == "linkToChat" end)
+    --setMenuItemCheckboxState(cbDefaultActionLeftClickOnRowLinkToChatIndex, lib.svData.setSearchUIRowLeftClickDefaultAction, "linkToChat")
+    --radioButtonGroupsSettings["rowLeftLickDefaultAction"]["linkToChat"] = cbDefaultActionLeftClickOnRowLinkToChatIndex
 
     --Default left click action = Popup tooltip
-    local cbDefaultActionLeftClickOnRowPopupTooltipIndex = AddCustomMenuItem(popupTooltipStr,
-            function(cboxCtrl)
-                --OnClick_CheckBoxLabel(cboxCtrl, "setSearchUIRowLeftClickDefaultAction", selfVar, "popupTooltip")
-                updateSettingsRadioButtonGroup("rowLeftLickDefaultAction", "setSearchUIRowLeftClickDefaultAction", "popupTooltip", cboxCtrl, selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbDefaultActionLeftClickOnRowPopupTooltipIndex, lib.svData.setSearchUIRowLeftClickDefaultAction, "popupTooltip")
-    radioButtonGroupsSettings["rowLeftLickDefaultAction"]["popupTooltip"] = cbDefaultActionLeftClickOnRowPopupTooltipIndex
+    local cbDefaultActionLeftClickOnRowPopupTooltipIndex = AddCustomScrollableMenuRadioButton(popupTooltipStr,
+            function(comboBox, itemName, item, checked, data)
+                lib.svData.setSearchUIRowLeftClickDefaultAction = "popupTooltip"
+                --OnClick_CheckBoxLabel(moc(), "setSearchUIRowLeftClickDefaultAction", selfVar, "popupTooltip")
+                --updateSettingsRadioButtonGroup("rowLeftLickDefaultAction", "setSearchUIRowLeftClickDefaultAction", "popupTooltip", moc(), selfVar)
+            end, function() return lib.svData.setSearchUIRowLeftClickDefaultAction == "popupTooltip" end)
+    --setMenuItemCheckboxState(cbDefaultActionLeftClickOnRowPopupTooltipIndex, lib.svData.setSearchUIRowLeftClickDefaultAction, "popupTooltip")
+    --radioButtonGroupsSettings["rowLeftLickDefaultAction"]["popupTooltip"] = cbDefaultActionLeftClickOnRowPopupTooltipIndex
 
 
 
     --Tooltips
-    AddCustomMenuItem(tooltipsStr, function() end, MENU_ADD_OPTION_HEADER)
-    local cbShowTextFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("textBoxFilterTooltips"),
-            function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtTextFilters", selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbShowTextFilterTooltipsIndex, lib.svData.setSearchTooltipsAtTextFilters)
-    local cbShowDropDownFilterTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterTooltips"),
-            function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilters", selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
-    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomMenuItem(getLocalizedText("dropdownFilterEntryTooltips"),
-            function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "setSearchTooltipsAtFilterEntries", selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
+    AddCustomScrollableMenuHeader(tooltipsStr)
+    local cbShowTextFilterTooltipsIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("textBoxFilterTooltips"),
+            function(comboBox, itemName, item, checked, data)
+                OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtTextFilters", selfVar)
+            end, function() return lib.svData.setSearchTooltipsAtTextFilters end)
+    --setMenuItemCheckboxState(cbShowTextFilterTooltipsIndex, lib.svData.setSearchTooltipsAtTextFilters)
+    local cbShowDropDownFilterTooltipsIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("dropdownFilterTooltips"),
+            function(comboBox, itemName, item, checked, data)
+                OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtFilters", selfVar)
+            end, function() return lib.svData.setSearchTooltipsAtFilters end)
+    --setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
+    local cbShowDropDownFilterEntryTooltipsIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("dropdownFilterEntryTooltips"),
+            function(comboBox, itemName, item, checked, data)
+                OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtFilterEntries", selfVar)
+            end, function() return lib.svData.setSearchTooltipsAtFilterEntries end)
+    --setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
 
 
     --Dropped by
-    AddCustomMenuItem(getLocalizedText("droppedBy"), function() end, MENU_ADD_OPTION_HEADER)
-    local cbShowSetDroppedByExtraTooltipIndex = AddCustomMenuItem(showAsTooltipStr,
-            function(cboxCtrl)
-                OnClick_CheckBoxLabel(cboxCtrl, "showSetSearchDropLocationTooltip", selfVar)
-            end,
-            MENU_ADD_OPTION_CHECKBOX)
-    setMenuItemCheckboxState(cbShowSetDroppedByExtraTooltipIndex, lib.svData.showSetSearchDropLocationTooltip)
+    AddCustomScrollableMenuHeader(getLocalizedText("droppedBy"))
+    local cbShowSetDroppedByExtraTooltipIndex = AddCustomScrollableMenuCheckbox(showAsTooltipStr,
+            function(comboBox, itemName, item, checked, data)
+                OnClick_CheckBoxLabel(moc(), "showSetSearchDropLocationTooltip", selfVar)
+            end, function() return lib.svData.showSetSearchDropLocationTooltip end)
+    --setMenuItemCheckboxState(cbShowSetDroppedByExtraTooltipIndex, lib.svData.showSetSearchDropLocationTooltip)
 
     --Set names
     if clientLang ~= fallbackLang then
-        AddCustomMenuItem(setNamesStr, function() end, MENU_ADD_OPTION_HEADER)
-        --AddCustomMenuItem("-", function() end)
-        local cbShowSetNamesInEnglishTooIndex = AddCustomMenuItem(getLocalizedText("searchUIShowSetNameInEnglishToo"),
-                function(cboxCtrl)
-                    OnClick_CheckBoxLabel(cboxCtrl, "setSearchShowSetNamesInEnglishToo", selfVar)
-                end,
-                MENU_ADD_OPTION_CHECKBOX)
-        setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
+        AddCustomScrollableMenuHeader(setNamesStr)
+        --AddScrollableMenuDivider()
+        local cbShowSetNamesInEnglishTooIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("searchUIShowSetNameInEnglishToo"),
+                function(comboBox, itemName, item, checked, data)
+                    OnClick_CheckBoxLabel(moc(), "setSearchShowSetNamesInEnglishToo", selfVar)
+                end, function() return lib.svData.setSearchShowSetNamesInEnglishToo end)
+        --setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
     end
 
     --Favorites
@@ -1583,36 +1588,37 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     local wasFavoriteHeaderAdded = false
     for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
         local favoriteCategory = favoriteCategoryData.category
-        if not ZO_IsTableEmpty(setSearchFavorites[favoriteCategory]) then
+        if not zoite(setSearchFavorites[favoriteCategory]) then
             if not wasFavoriteHeaderAdded then
-                AddCustomMenuItem(favoritesStr, function() end, MENU_ADD_OPTION_HEADER)
+                AddCustomScrollableMenuHeader(favoritesStr)
                 wasFavoriteHeaderAdded = true
             end
-            AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory] .. " " .. GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
+            AddCustomScrollableMenuEntry(favoriteIconWithNameTexts[favoriteCategory] .. " " .. GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
                 self:RemoveAllSetFavorites(favoriteCategory)
             end)
         end
     end
 
-    ShowMenu(anchorControl)
+    ShowCustomScrollableMenu(anchorControl)
 end
 
 function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
-    if not LibCustomMenu then return end
+    if not checkLSM() then return end
+
     local data = rowControl.data
     if data == nil then return end
     local setId = data.setId
     local owningWindow = rowControl:GetOwningWindow()
 
-    ClearMenu()
+    ClearCustomScrollableMenu()
 
     --Link to chat
-    AddCustomMenuItem(getLocalizedText("linkToChat"), function()
+    AddCustomScrollableMenuEntry(getLocalizedText("linkToChat"), function()
         self:ItemLinkToChat(data)
     end)
 
     --Tooltips
-    AddCustomMenuItem(getLocalizedText("tooltips"), function() end, MENU_ADD_OPTION_HEADER)
+    AddCustomScrollableMenuHeader(getLocalizedText("tooltips"))
 
     --Popup tooltip
     local popupTooltipSubmenu = {
@@ -1643,8 +1649,8 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end
         },
     }
-    AddCustomMenuItem(getLocalizedText("popupTooltip"), function() self:ShowItemLinkPopupTooltip(owningWindow, data) end)
-    AddCustomSubMenuItem(getLocalizedText("popupTooltipPosition"), popupTooltipSubmenu)
+    AddCustomScrollableMenuEntry(getLocalizedText("popupTooltip"), function()  self:ShowItemLinkPopupTooltip(owningWindow, data)  end)
+    AddCustomScrollableSubMenuEntry(getLocalizedText("popupTooltipPosition"), popupTooltipSubmenu)
 
     --Set favorites
     if setId ~= nil then
@@ -1655,19 +1661,19 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
             local favoriteCategory = favoriteCategoryData.category
             --d("[LibSets]LibSets_SearchUI_Shared:ShowRowContextMenu - favoriteCategory: " ..tos(favoriteCategory))
-            --if not ZO_IsTableEmpty(setSearchFavorites[favoriteCategory]) then
+            --if not zoite(setSearchFavorites[favoriteCategory]) then
             if not wasFavoriteHeaderAdded then
-                AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory], function() end, MENU_ADD_OPTION_HEADER)
+                AddCustomScrollableMenuHeader(favoriteIconWithNameTexts[favoriteCategory])
                 wasFavoriteHeaderAdded = true
             end
             if self:IsSetIdInFavorites(setId, favoriteCategory) then
-                AddCustomMenuItem(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
+                AddCustomScrollableMenuEntry(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
                     self:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)
                 end)
             else
                 --Add submenu with favorites that could be added
                 --[[
-                AddCustomMenuItem(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
+                AddCustomScrollableMenuEntry(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
                     self:AddSetIdToFavorites(rowControl, setId, favoriteCategory)
                 end)
                 ]]
@@ -1675,18 +1681,18 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                     label 		    = favoriteIconTexts[favoriteCategory] .. zo_strformat("<<C:1>>", favoriteCategory),
                     callback 	    = function() self:AddSetIdToFavorites(rowControl, setId, favoriteCategory) end
                 }
-                table.insert(favoriteCategoriesToAddSubmenuEntries, subMenuEntry)
+                tins(favoriteCategoriesToAddSubmenuEntries, subMenuEntry)
             end
             --end
         end
-        if not ZO_IsTableEmpty(favoriteCategoriesToAddSubmenuEntries) then
-            AddCustomSubMenuItem(GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE), favoriteCategoriesToAddSubmenuEntries)
+        if not zoite(favoriteCategoriesToAddSubmenuEntries) then
+            AddCustomScrollableSubMenuEntry(GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE), favoriteCategoriesToAddSubmenuEntries)
         end
 
         --Drop zones
         local setDropZones = libSets_GetDropZonesBySetId(setId)
         local zoneIdSubmenuEntries = {}
-        if not ZO_IsTableEmpty(setDropZones) then
+        if not zoite(setDropZones) then
             local alreadyAddedZoneIds = {}
             for _, zoneId in ipairs(data.zoneIds) do
                 if zoneId ~= -1 and not alreadyAddedZoneIds[zoneId] then
@@ -1695,7 +1701,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                         label 		    = zoneName,
                         callback 	    = function() libSets_OpenMapOfZoneId(zoneId) end
                     }
-                    table.insert(zoneIdSubmenuEntries, subMenuEntry)
+                    tins(zoneIdSubmenuEntries, subMenuEntry)
                     alreadyAddedZoneIds[zoneId] = true
                 end
             end
@@ -1705,7 +1711,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         --Get the drop location wayshrines
         local wayshrinesSubmenuEntries = {}
         local setWayshrines = libSets_GetWayshrineIds(setId)
-        if not ZO_IsTableEmpty(setWayshrines) then
+        if not zoite(setWayshrines) then
             checkAndGetWayshrineName(setWayshrines)
 
             local alreadyAddedWayshrines = {}
@@ -1722,22 +1728,22 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                         label 		    = wayshrineName,
                         callback 	    = function() libSets_ShowWayshrineNodeIdOnMap(wayshrineNodeIndex) end
                     }
-                    table.insert(wayshrinesSubmenuEntries, subMenuEntry)
+                    tins(wayshrinesSubmenuEntries, subMenuEntry)
                     alreadyAddedWayshrines[wayshrineNodeIndex] = true
                 end
             end
 
         end
 
-        local gotDropZones = not ZO_IsTableEmpty(zoneIdSubmenuEntries)
-        local gotWayshrines = not ZO_IsTableEmpty(wayshrinesSubmenuEntries)
+        local gotDropZones = not zoite(zoneIdSubmenuEntries)
+        local gotWayshrines = not zoite(wayshrinesSubmenuEntries)
         if gotDropZones or gotWayshrines then
-            AddCustomMenuItem(dropZoneAndWayshrinesStr, function() end, MENU_ADD_OPTION_HEADER)
+            AddCustomScrollableMenuHeader(dropZoneAndWayshrinesStr)
             if gotDropZones then
-                AddCustomSubMenuItem(dropZonesStr, zoneIdSubmenuEntries)
+                AddCustomScrollableSubMenuEntry(dropZonesStr, zoneIdSubmenuEntries)
             end
             if gotWayshrines then
-                AddCustomSubMenuItem(wayshrinesStr, wayshrinesSubmenuEntries)
+                AddCustomScrollableSubMenuEntry(wayshrinesStr, wayshrinesSubmenuEntries)
             end
         end
 
@@ -1752,9 +1758,9 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 lib.showSetSearchDropLocationTooltip = not lib.showSetSearchDropLocationTooltip
             end
 
-            AddCustomMenuItem(getLocalizedText("droppedBy"), function() end, MENU_ADD_OPTION_HEADER)
+            AddCustomScrollableMenuHeader(getLocalizedText("droppedBy"))
             local showAsTooltipEnabledState = getLocalizedText("showAsTooltip") .. ": " .. tos(booleanToOnOff[not lib.showSetSearchDropLocationTooltip])
-            AddCustomMenuItem(showAsTooltipEnabledState, function()
+            AddCustomScrollableMenuEntry(showAsTooltipEnabledState, function()
                 ZO_Tooltips_HideTextTooltip()
                 toggleSetDropLocationTooltip()
                 self:ShowSetDropLocationTooltip(rowControl, data)
@@ -1774,11 +1780,11 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 copyDialog:Show({ text=(withTextures == true and data.setDataText) or data.setDataTextClean, setData=data }, textParams)
             end
 
-            AddCustomMenuItem(getLocalizedText("setInfos"), function() end, MENU_ADD_OPTION_HEADER)
-            AddCustomMenuItem(getLocalizedText("showAsText"), function()
+            AddCustomScrollableMenuHeader(getLocalizedText("setInfos"))
+            AddCustomScrollableMenuEntry(getLocalizedText("showAsText"), function()
                 getSetTextForCopyDialog(false)
             end)
-            AddCustomMenuItem(getLocalizedText("showAsTextWithIcons"), function()
+            AddCustomScrollableMenuEntry(getLocalizedText("showAsTextWithIcons"), function()
                 getSetTextForCopyDialog(true)
             end)
         end
@@ -1789,12 +1795,12 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             local isCraftedSet = setType == LIBSETS_SETTYPE_CRAFTED
 
             if not isCraftedSet then
-                AddCustomMenuItem(getLocalizedText("headerItemLinks"), function() end, MENU_ADD_OPTION_HEADER)
+                AddCustomScrollableMenuHeader(getLocalizedText("headerItemLinks"))
 
                 local setName = data.name
                 local setTypeTexture = data.setTypeTexture
                 local searchEntryText = getLocalizedText("setCollectionsSearchItemLink", clientLang, zocstrfor("<<1>>", setName))
-                AddCustomMenuItem((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText, function()
+                AddCustomScrollableMenuEntry((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText, function()
                     libSets_OpenSetItemCollectionBookForItemLink(data.itemLink)
                 end)
             end
@@ -1804,24 +1810,24 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         --LibSets.AddSetSearchResultsListContextMenuEntries(addonName, submenuEntries)
         addOtherAddonsContextMenuEntries(rowControl, setId)
     end
-    ShowMenu(rowControl)
+    ShowCustomScrollableMenu(rowControl)
 end
 
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
-    if LibCustomMenu == nil then return end
+    if LCM == nil then return end
     local selfVar = self
     local comboBox = getComboBoxFromDropdownControl(dropdownControl)
 
     --Multiselect filter dropdown context menu?
     if selfVar.multiSelectFilterDropdowns ~= nil and ZO_IsElementInNumericallyIndexedTable(selfVar.multiSelectFilterDropdowns, dropdownControl) then
-        ClearMenu()
+        ClearCustomScrollableMenu()
         local numEntries = comboBox:GetNumItems()
         local numSelectedEntries = comboBox:GetNumSelectedEntries()
         local notAllSelected = numSelectedEntries < numEntries
 
         if notAllSelected then
             --Select all
-            AddCustomMenuItem(GetString(SI_ITEMFILTERTYPE0), function()
+            AddCustomScrollableMenuEntry(GetString(SI_ITEMFILTERTYPE0), function()
                 selfVar:SelectAllAtMultiSelectDropdown(dropdownControl)
                 selfVar:OnFilterChanged(dropdownControl)
             end)
@@ -1830,14 +1836,14 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
         if numSelectedEntries > 0 then
             if notAllSelected then
                 --Invert selection
-                AddCustomMenuItem(invertSelectionStr, function()
+                AddCustomScrollableMenuEntry(invertSelectionStr, function()
                     selfVar:SelectInvertMultiSelectDropdown(dropdownControl)
                     selfVar:OnFilterChanged(dropdownControl)
                 end)
             end
 
             --Clear all selections
-            AddCustomMenuItem(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
+            AddCustomScrollableMenuEntry(GetString(SI_ATTRIBUTEPOINTALLOCATIONMODE_CLEARKEYBIND1), function()
                 selfVar:ResetMultiSelectDropdown(dropdownControl)
                 selfVar:OnFilterChanged(dropdownControl)
             end)
@@ -1845,38 +1851,38 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
 
         --Favorite filter muliselect dropdown?
         if dropdownControl == self.favoritesFiltersControl then
-            AddCustomMenuItem("-")
+            AddScrollableMenuDivider()
             for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
                 local favoriteCategory = favoriteCategoryData.category
                 local entriesToSelect = { [1] = favoriteCategory }
-                AddCustomMenuItem(favoriteIconWithNameTexts[favoriteCategory] .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
+                AddCustomScrollableMenuEntry(favoriteIconWithNameTexts[favoriteCategory] .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()  selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true)  end)
             end
 
             --Zones filter muliselect dropdown?
         elseif dropdownControl == self.dropZoneFiltersControl then
-            AddCustomMenuItem("-")
+            AddScrollableMenuDivider()
             local setIdsOfCurrentZone, currentZoneId, currentParentZoneId = libSets_getsetIdsOfCurrentZone()
-            if not ZO_IsTableEmpty(setIdsOfCurrentZone) then
+            if not zoite(setIdsOfCurrentZone) then
                 local currentZoneName, currentParentZoneName = libSets_getCurrentZoneName()
                 local currentZoneSetStr = getLocalizedText("showCurrentZoneSets") .. " \'" .. currentZoneName .. "\' (" ..tos(currentZoneId) .. ")"
 
                 local entriesToSelect = { [1] = currentZoneId }
-                AddCustomMenuItem(currentZoneSetStr, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true) end)
+                AddCustomScrollableMenuEntry(currentZoneSetStr, function()  selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesToSelect, true)  end)
                 if currentParentZoneId ~= nil and currentParentZoneId ~= currentZoneId then
                     local currentParentZoneSetStr = getLocalizedText("showCurrentZoneSets") .. " \'" .. currentParentZoneName .. "\' (" ..tos(currentParentZoneId) .. ")"
                     local entriesForParentZoneToSelect = { [1] = currentParentZoneId }
-                    AddCustomMenuItem(currentParentZoneSetStr, function() selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesForParentZoneToSelect, true) end)
+                    AddCustomScrollableMenuEntry(currentParentZoneSetStr, function()  selfVar:SelectMultiSelectDropdownEntries(dropdownControl, entriesForParentZoneToSelect, true)  end)
                 end
             end
         end
 
-        ShowMenu(dropdownControl)
+        ShowCustomScrollableMenu(dropdownControl)
     end
 end
 
 function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shift, alt, ctrl, command)
 --d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
-    if LibCustomMenu == nil then return end
+    if LCM == nil then return end
     local selfVar = self
     local settings = lib.svData
     local doShowMenu = false
@@ -1889,40 +1895,40 @@ function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shif
             local searchType = SEARCH_TYPE_NAME
             local searchHistoryOfSearchMode = searchHistory[searchType]
             if searchHistoryOfSearchMode ~= nil and #searchHistoryOfSearchMode > 0 then
-                ClearMenu()
+                ClearCustomScrollableMenu()
                 for _, searchTerm in ipairs(searchHistoryOfSearchMode) do
-                    AddCustomMenuItem(searchTerm, function()
+                    AddCustomScrollableMenuEntry(searchTerm, function()
                         selfVar:SetSearchEditBoxValue(editBoxControl, searchTerm)
-                        ClearMenu()
+                        ClearCustomScrollableMenu()
                     end)
                 end
-                AddCustomMenuItem("-", function() end)
-                AddCustomMenuItem(clearSearchHistoryStr, function()
+                AddScrollableMenuDivider()
+                AddCustomScrollableMenuEntry(clearSearchHistoryStr, function()
                     clearSearchHistory(searchType)
-                    ClearMenu()
+                    ClearCustomScrollableMenu()
                 end)
                 doShowMenu = true
             end
         end
     --Bonus text field
     elseif editBoxControl == selfVar.bonusSearchEditBoxControl then
-        ClearMenu()
+        ClearCustomScrollableMenu()
         if settings.setSearchSaveBonusHistory then
             local searchHistory = settings.setSearchHistory
             local searchType = SEARCH_TYPE_BONUS
             local searchHistoryOfSearchMode = searchHistory[searchType]
             if searchHistoryOfSearchMode ~= nil and #searchHistoryOfSearchMode > 0 then
-                ClearMenu()
+                ClearCustomScrollableMenu()
                 for _, searchTerm in ipairs(searchHistoryOfSearchMode) do
-                    AddCustomMenuItem(searchTerm, function()
+                    AddCustomScrollableMenuEntry(searchTerm, function()
                         selfVar:SetSearchEditBoxValue(editBoxControl, searchTerm)
-                        ClearMenu()
+                        ClearCustomScrollableMenu()
                     end)
                 end
-                AddCustomMenuItem("-", function() end)
-                AddCustomMenuItem(clearSearchHistoryStr, function()
+                AddScrollableMenuDivider()
+                AddCustomScrollableMenuEntry(clearSearchHistoryStr, function()
                     clearSearchHistory(searchType)
-                    ClearMenu()
+                    ClearCustomScrollableMenu()
                 end)
                 doShowMenu = true
             end
@@ -1930,7 +1936,7 @@ function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shif
     end
     --Show the context menu now?
     if doShowMenu == true then
-        ShowMenu(editBoxControl)
+        ShowCustomScrollableMenu(editBoxControl)
     end
 end
 

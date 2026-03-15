@@ -29,7 +29,7 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2025-11-24, Baertram, AP101048
+ Last updated: 2026-03-14, Baertram, AP101049
 ------------------------------------------------------------------------------------------------------------------------
  --Known bugs--
 
@@ -311,6 +311,52 @@ local id64tos = Id64ToString
 
 local zostc = ZO_ShallowTableCopy
 
+--LibSets constants
+local LIBSETS_TABLEKEY_NEWSETIDS                              = LIBSETS_TABLEKEY_NEWSETIDS
+--local LIBSETS_TABLEKEY_NAMES                                  = LIBSETS_TABLEKEY_NAMES
+local LIBSETS_TABLEKEY_SETITEMIDS                             = LIBSETS_TABLEKEY_SETITEMIDS
+local LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID                    = LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID
+local LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED                  = LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED                 
+local LIBSETS_TABLEKEY_SETS_EQUIP_TYPES                       = LIBSETS_TABLEKEY_SETS_EQUIP_TYPES                      
+--local LIBSETS_TABLEKEY_SETS_ARMOR                      = LIBSETS_TABLEKEY_SETS_ARMOR                     
+local LIBSETS_TABLEKEY_SETS_ARMOR_TYPES                       = LIBSETS_TABLEKEY_SETS_ARMOR_TYPES                      
+local LIBSETS_TABLEKEY_SETS_JEWELRY                           = LIBSETS_TABLEKEY_SETS_JEWELRY                          
+--local LIBSETS_TABLEKEY_SETS_WEAPONS                    = LIBSETS_TABLEKEY_SETS_WEAPONS                   
+local LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES                     = LIBSETS_TABLEKEY_SETS_WEAPONS_TYPES                    
+local LIBSETS_TABLEKEY_SETNAMES                               = LIBSETS_TABLEKEY_SETNAMES                              
+local LIBSETS_TABLEKEY_SETNAMES_NO_SETID                      = LIBSETS_TABLEKEY_SETNAMES_NO_SETID                     
+--local LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION                  = LIBSETS_TABLEKEY_LASTCHECKEDAPIVERSION
+local LIBSETS_TABLEKEY_NUMBONUSES                             = LIBSETS_TABLEKEY_NUMBONUSES                            
+local LIBSETS_TABLEKEY_MAXEQUIPPED                            = LIBSETS_TABLEKEY_MAXEQUIPPED                           
+local LIBSETS_TABLEKEY_SETTYPE                                = LIBSETS_TABLEKEY_SETTYPE                               
+local LIBSETS_TABLEKEY_MAPS                                   = LIBSETS_TABLEKEY_MAPS                                  
+local LIBSETS_TABLEKEY_WAYSHRINES                             = LIBSETS_TABLEKEY_WAYSHRINES                            
+local LIBSETS_TABLEKEY_WAYSHRINE_NAMES                        = LIBSETS_TABLEKEY_WAYSHRINE_NAMES                       
+local LIBSETS_TABLEKEY_ZONEIDS                                = LIBSETS_TABLEKEY_ZONEIDS                               
+--local LIBSETS_TABLEKEY_ZONEIDS_SORTED                         = LIBSETS_TABLEKEY_ZONEIDS_SORTED
+local LIBSETS_TABLEKEY_ZONE_DATA                              = LIBSETS_TABLEKEY_ZONE_DATA                             
+local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                    
+local LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                      = LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     
+local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                 
+local LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                 = LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                
+local LIBSETS_TABLEKEY_DROPMECHANIC                           = LIBSETS_TABLEKEY_DROPMECHANIC
+--local LIBSETS_TABLEKEY_DROPMECHANIC_SORTED                    = LIBSETS_TABLEKEY_DROPMECHANIC_SORTED
+local LIBSETS_TABLEKEY_DROPMECHANIC_NAMES                     = LIBSETS_TABLEKEY_DROPMECHANIC_NAMES                    
+local LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES             = LIBSETS_TABLEKEY_DROPMECHANIC_TOOLTIP_NAMES            
+local LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES            = LIBSETS_TABLEKEY_DROPMECHANIC_LOCATION_NAMES           
+--local LIBSETS_TABLEKEY_MIXED_SETNAMES                         = LIBSETS_TABLEKEY_MIXED_SETNAMES
+--local LIBSETS_TABLEKEY_SET_PROCS                              = LIBSETS_TABLEKEY_SET_PROCS                             
+local LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP               = LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP              
+local LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING      = LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING     
+local LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES           = LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES          
+local LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                   = LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                  
+local LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING             = LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING            
+
+--Libraries
+local LCM --LibCustomMenu
+local LSM -- LibScrollableMenu
+local libZone -- LibZone
+
 ------------Global variables--------------
 --Get counter suffix
 local counterSuffix = lib.counterSuffix or "Counter"
@@ -332,7 +378,6 @@ local allSetNamesCached
 --Wayshrine node index -> zoneId mapping
 local wayshrine2zone = zostc(preloaded[LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID])
 
-local libZone
 
 --local lib variables
 local localizationData
@@ -378,8 +423,14 @@ local perfectedSetsInfo =               lib.perfectedSetsInfo
 local perfectedSets =                   lib.perfectedSets
 local nonPerfectedSets =                lib.nonPerfectedSets
 
+local LIBSETS_SETTYPE_CLASS = LIBSETS_SETTYPE_CLASS
+local LIBSETS_SETTYPE_CRAFTED = LIBSETS_SETTYPE_CRAFTED
+
 local libSets_GetSetType
 local setTypeToTexture = lib.setTypeToTexture
+
+local searchUIData = lib.searchUI
+local searchUIKeyboard--, searchUIGamepad
 
 
 local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
@@ -1281,7 +1332,10 @@ local function InitSearchUI(gamepadPreferred)
     if not lib.fullyLoaded then return end
     --We are in keyboard UI
     if gamepadPreferred == nil or gamepadPreferred == false then
-        LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(LibSets_SearchUI_TLC_Keyboard)
+        searchUIKeyboard = searchUIKeyboard or GetControl(searchUIData.controlName[false]) --LibSets_SearchUI_TLC_Keyboard
+        if searchUIKeyboard == nil then return end
+        lib.searchUI.control[false] = searchUIKeyboard
+        LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(searchUIKeyboard)
     end
 
     --We are in gamepad UI
@@ -4312,7 +4366,7 @@ end
 -->categoryData.parentId must be given and > 0! categoryData.category can be nil or <= 0, then the parentId will be shown
 local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryData)
     updateRunsDone = updateRunsDone + 1
---d("[LibSets]checkIfOpenItemSetCollectionBookOfCategoryDataIsReady - categoryData: " ..tos(categoryData) .. "; updateRunsDone: " ..tos(updateRunsDone) .."; wasSetCollectionsBookOpenedYet: " ..tos(wasSetCollectionsBookOpenedYet))
+    --d("[LibSets]checkIfOpenItemSetCollectionBookOfCategoryDataIsReady - categoryData: " ..tos(categoryData) .. "; updateRunsDone: " ..tos(updateRunsDone) .."; wasSetCollectionsBookOpenedYet: " ..tos(wasSetCollectionsBookOpenedYet))
     if updateRunsDone >= maxRuns then
         EM:UnregisterForUpdate(updaterName)
         updateRunsDone = 0
@@ -4325,7 +4379,8 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
     EM:UnregisterForUpdate(updaterName)
 
     local nodeToOpen --= ZO_ItemSetsBook_Keyboard_TopLevelCategoriesScrollChildZO_TreeStatusLabelSubCategory14.node
-    local parentCategories = categoryTree.rootNode.children
+    local parentCategories = (categoryTree ~= nil and categoryTree.rootNode ~= nil and categoryTree.rootNode.children) or nil
+    if parentCategories == nil then return end --20260125 Fix nil error apearing if opening from BMU UI's zone list contextMenu
 
     --Select the top-most entry or any chosen one?
     if categoryData ~= LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE then
@@ -4341,16 +4396,16 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
         ---->nodeToOpen = parentCategoryData.children.data.node
         local parentCategoryIdToFind = categoryData.parentCategory
         local categoryIdToFind = categoryData.category
---d(">category: " ..tos(categoryIdToFind) .. ", parentCategory: " .. tos(parentCategoryIdToFind))
+        --d(">category: " ..tos(categoryIdToFind) .. ", parentCategory: " .. tos(parentCategoryIdToFind))
 
         for _, parentCategoryData in pairs(parentCategories) do
             if nodeToOpen == nil then
                 if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
                         and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
---d(">found parentCategory")
+                    --d(">found parentCategory")
                     --No subCategory given?
                     if categoryIdToFind == nil or categoryIdToFind <= 0 then
---d(">no subcategory to open -> open parent category node")
+                        --d(">no subcategory to open -> open parent category node")
                         --return the node of the parentCategory
                         nodeToOpen = parentCategoryData.data.node
                         break
@@ -4360,7 +4415,7 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
                             if nodeToOpen == nil then
                                 if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
                                         and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
---d(">found category")
+                                    --d(">found category")
                                     nodeToOpen = subCategoryData.data.node
                                     break
                                 end
@@ -4373,7 +4428,7 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
             end
         end
     else
---d(">open topmost")
+        --d(">open topmost")
         --Open the top most node: LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE
         nodeToOpen = parentCategories[1].data.node
     end
@@ -4382,10 +4437,10 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
         return
     end
     if categoryTree.selectedNode == nodeToOpen then
---d("<node was already opened")
+        --d("<node was already opened")
         return true
     end
---d(">selecting node now!")
+    --d(">selecting node now!")
     categoryTree:SelectNode(nodeToOpen)
     return (categoryTree.selectedNode == nodeToOpen) or false
 end
@@ -4884,7 +4939,7 @@ function lib.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, even
             if not alreadyRegistered then
                 local uniqueEventFilterAddonNamespaceTag = buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityIdToRegister)
                 --Not registered for the eventId, setId and addOnEventNamespace yet? So register it now
-                EVENT_MANAGER:RegisterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, function(_, ...)
+                EM:RegisterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, function(_, ...)
                     --Get the abilityId from the event's normal callback function
                     local abilityId
                     -- EVENT_EFFECT_CHANGED:
@@ -4899,7 +4954,7 @@ function lib.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, even
                     callbackFunc(...)
                 end)
                 --Add the filter on the abilityId for the same uniqueEventName
-                EVENT_MANAGER:AddFilterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, REGISTER_FILTER_ABILITY_ID, abilityIdToRegister)
+                EM:AddFilterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, REGISTER_FILTER_ABILITY_ID, abilityIdToRegister)
 
                 -- Add additonal filters, e.g. on a unitTag
                 -- Multiple filters are handled here:
@@ -4910,7 +4965,7 @@ function lib.RegisterSetProcEventCallbackForAbilityIds(addOnEventNamespace, even
                     for i = 1, select("#", filterParams), 2 do
                         local filterType = select(i, filterParams)
                         local filterParameter = select(i + 1, filterParams)
-                        EVENT_MANAGER:AddFilterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, filterType, filterParameter)
+                        EM:AddFilterForEvent(uniqueEventFilterAddonNamespaceTag, eventId, filterType, filterParameter)
                     end
                 end
 
@@ -4939,7 +4994,7 @@ local function unregisterSetProcEventAndDeleteEventList(eventId, addOnEventNames
     local alreadyRegistered = GetRegisteredSetProcEventDatatOfAbilityId(lib.eventListSetProcs, eventId, addOnEventNamespace, setId, abilityId, true)
     if alreadyRegistered == true then
         local uniqueAddonNamespaceEventName = buildUniqueEventFilterAddonNamespaceTag(addOnEventNamespace, abilityId)
-        EVENT_MANAGER:UnregisterForEvent(uniqueAddonNamespaceEventName, eventId)
+        EM:UnregisterForEvent(uniqueAddonNamespaceEventName, eventId)
         if setId ~= nil then
             if abilityId ~= nil then
                 lib.eventListSetProcs[eventId][addOnEventNamespace][setId][abilityId] = nil
@@ -5022,7 +5077,7 @@ end
 -- 	API - Custom context menu entries at the set search UI results list
 ------------------------------------------------------------------------
 local customContextMenuErrorPrefixStr = "[" .. MAJOR .. "]:RegisterCustomSetSearchResultsListContextMenu ERROR - addon: %q"
-local customContextMenuSetSearchParamErrorStr = customContextMenuErrorPrefixStr .. " - parameter \'headerName\' must be nil or a String. Parameter \'submenuName\' must be nil or a String. Parameter \'submenuEntries\' (%s) must be a table of submenu entries (See library \'LibCustomMenu\', and the addon name must be a string. Parameter visibleFunc must be nil or a function with 1st parameter \'rowControl\' of the menu parent and 2nd optinonal parameter \'setId\', returning a boolean."
+local customContextMenuSetSearchParamErrorStr = customContextMenuErrorPrefixStr .. " - parameter \'headerName\' must be nil or a String. Parameter \'submenuName\' must be nil or a String. Parameter \'submenuEntries\' (%s) must be a table of submenu entries (See library \'LibScrollableMenu\', and the addon name must be a string. Parameter visibleFunc must be nil or a function with 1st parameter \'rowControl\' of the menu parent and 2nd optinonal parameter \'setId\', returning a boolean."
 local customContextMenuSetSearchExistsAlreadyErrorStr = customContextMenuErrorPrefixStr .. " was already registered!"
 function lib.RegisterCustomSetSearchResultsListContextMenu(addonName, headerName, submenuName, submenuEntries, visibleFunc)
     assert(type(addonName) == "string" and (headerName == nil or type(headerName) == "string") and (submenuName == nil or type(submenuName) == "string") and type(submenuEntries) == "table" and (visibleFunc == nil or type(visibleFunc) == "function"), strfor(customContextMenuSetSearchParamErrorStr, tos(addonName), tos(submenuName), tos(submenuEntries)))
@@ -5177,24 +5232,24 @@ local function addUIButtons()
             --ZO_CreateStringId(LIBSETS_SHOW_ITEM_SET_COLLECTION_CURRENT_ZONE,            localization.currentZone)   --"Current zone")
 
             --Add "show current parent zone" button to item set collection UI top right corner
-            local moreOptionsButtonTooltip = (LibCustomMenu ~= nil and tos(localization.moreOptions)) or tos(localization.currentZone)
+            local moreOptionsButtonTooltip = (LSM ~= nil and tos(localization.moreOptions)) or tos(localization.currentZone)
             local buttonDataOpenCurrentParentZone =
             {
                 buttonName      = "MoreOptions",
                 parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
                 tooltip         = libPrefix .. moreOptionsButtonTooltip,
                 callback        = function()
-                    if LibCustomMenu ~= nil then
-                        ClearMenu()
-                        AddCustomMenuItem(localization.parentZone, function()
+                    if LSM ~= nil then
+                        ClearCustomScrollableMenu()
+                        AddCustomScrollableMenuEntry(localization.parentZone, function()
                             openSetItemCollectionBrowserForCurrentZone(true)
                         end)
-                        AddCustomMenuItem(localization.currentZone, function()
+                        AddCustomScrollableMenuEntry(localization.currentZone, function()
                             if not openSetItemCollectionBrowserForCurrentZone(false) then
                                 openSetItemCollectionBrowserForCurrentZone(true)
                             end
                         end)
-                        ShowMenu(lib.itemSetCollectionBookMoreOptionsButton)
+                        ShowCustomScrollableMenu(lib.itemSetCollectionBookMoreOptionsButton)
                     else
                         if not openSetItemCollectionBrowserForCurrentZone(false) then
                             openSetItemCollectionBrowserForCurrentZone(true)
@@ -5226,8 +5281,6 @@ end
 lib.addUIButtons = addUIButtons
 
 local function myInvItemLinkCallbackFunc(inventorySlot, slotActions, ctrl, alt, shift, command)
-    if not lib.svData.addSetCollectionsSearchItemLink then return end
-
     local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
     if bagId == nil or slotIndex == nil then return end
     local itemLink = gil(bagId, slotIndex)
@@ -5270,20 +5323,20 @@ local function myInvItemLinkCallbackFunc(inventorySlot, slotActions, ctrl, alt, 
         itemType = MENU_ADD_OPTION_LABEL,
     }
     table.insert(submenuEntris, subMenuEntrySetCollectionsSearchItemLink)
+    --Add LibCustomMenu submenu to the inventory context menu and show it
     AddCustomSubMenuItem(MAJOR, submenuEntris)
     ShowMenu()
 end
 
+--Register an inventory contextMenu addition via LibCustomMenu (if enabled)
 local libSets_customInvItemLinkContextMenuAdded = false
 local function addSetCollectionsSearchItemLinkContextMenuEntry()
-    local lcm = LibCustomMenu
-    if lcm == nil or libSets_customInvItemLinkContextMenuAdded then return end
+    if libSets_customInvItemLinkContextMenuAdded or LCM == nil or LCM.RegisterContextMenu == nil
+    or AddCustomSubMenuItem == nil
+    or not lib.svData.addSetCollectionsSearchItemLink then return end
 
-    local addSetCollectionsSearchItemLink = lib.svData.addSetCollectionsSearchItemLink
-    if addSetCollectionsSearchItemLink == true then
-        lcm:RegisterContextMenu(myInvItemLinkCallbackFunc, lcm.CATEGORY_LATE)
-        libSets_customInvItemLinkContextMenuAdded = true
-    end
+    LCM:RegisterContextMenu(myInvItemLinkCallbackFunc, LCM.CATEGORY_LATE)
+    libSets_customInvItemLinkContextMenuAdded = true
 end
 lib.addSetCollectionsSearchItemLinkContextMenuEntry = addSetCollectionsSearchItemLinkContextMenuEntry
 
@@ -5602,21 +5655,47 @@ local function onPlayerActivated(eventId, isFirst)
     end
 end
 
+local LSM_wasChecked = false
+local function checkOptionalLibraryLibScrollableMenu()
+--d("[LibSets]checkOptionalLibraryLibScrollableMenu - LSM_wasChecked: " ..tos(LSM_wasChecked) .. ", LSM: " .. tos(LSM))
+    if not LSM_wasChecked and LSM == nil then
+        LSM = LibScrollableMenu
+        LSM_wasChecked = true
+        if LSM ~= nil and LSM.version >= "2.40" then --Got the correct needed version?
+            lib.LSM = LSM
+        end
+        --d(">LSM.version: " .. tos((LSM ~= nil and LSM.version) or ""))
+    end
+end
+local function checkOptionalLibraries()
+    ----Optional libraries
+    checkOptionalLibraryLibScrollableMenu() --LibScrollableMenu
+    LCM = LibCustomMenu
+    lib.libCustomMenu = LCM
+    lib.libAddonMenu = LibAddonMenu2
+    lib.libHarvensAddonSettings = LibHarvensAddonSettings
+    lib.libSlashCommander = LibSlashCommander
+    libZone = LibZone
+    lib.libZone = libZone
+end
+lib.CheckOptionalLibraries = checkOptionalLibraries
+
+local function checkLSM()
+    checkOptionalLibraryLibScrollableMenu()
+    return LSM ~= nil
+end
+lib.CheckLSM = checkLSM
+
 --Addon loaded function
 local function onLibraryLoaded(event, name)
     --Only load lib if ingame
     if name ~= MAJOR then return end
-    EVENT_MANAGER:UnregisterForEvent(MAJOR .. "_EVENT_ADD_ON_LOADED", EVENT_ADD_ON_LOADED)
+    EM:UnregisterForEvent(MAJOR .. "_EVENT_ADD_ON_LOADED", EVENT_ADD_ON_LOADED)
     lib.startedLoading = true
     lib.setsLoaded = false
 
     --Check for libraries
-    -->LibZone
-    libZone = LibZone
-    lib.libZone = libZone
-    lib.libAddonMenu = LibAddonMenu2
-    lib.libSlashCommander = LibSlashCommander
-    lib.libHarvensAddonSettings = LibHarvensAddonSettings
+    checkOptionalLibraries()
 
     --The actual API version
     lib.APIVersions["live"] = lib.APIVersions["live"] or GetAPIVersion()
@@ -5682,7 +5761,7 @@ local function onLibraryLoaded(event, name)
                 if LIBSETS_SEARCH_UI_KEYBOARD ~= nil and LIBSETS_SEARCH_UI_KEYBOARD:IsShown() then
                     LIBSETS_SEARCH_UI_KEYBOARD:HideUI()
                 end
-            else
+            --else
                 --Was the set gamepad search UI initialized before in keyboard mode, then hide it if it's shown
                 --[[
                 if LIBSETS_SEARCH_UI_GAMEPAD ~= nil and LIBSETS_SEARCH_UI_GAMEPAD:IsShown() then
