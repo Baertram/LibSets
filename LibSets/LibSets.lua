@@ -29,7 +29,7 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2026-01-11, Baertram, AP101048
+ Last updated: 2026-03-14, Baertram, AP101049
 ------------------------------------------------------------------------------------------------------------------------
  --Known bugs--
 
@@ -5657,12 +5657,14 @@ end
 
 local LSM_wasChecked = false
 local function checkOptionalLibraryLibScrollableMenu()
+--d("[LibSets]checkOptionalLibraryLibScrollableMenu - LSM_wasChecked: " ..tos(LSM_wasChecked) .. ", LSM: " .. tos(LSM))
     if not LSM_wasChecked and LSM == nil then
         LSM = LibScrollableMenu
         LSM_wasChecked = true
         if LSM ~= nil and LSM.version >= "2.40" then --Got the correct needed version?
             lib.LSM = LSM
         end
+        --d(">LSM.version: " .. tos((LSM ~= nil and LSM.version) or ""))
     end
 end
 local function checkOptionalLibraries()

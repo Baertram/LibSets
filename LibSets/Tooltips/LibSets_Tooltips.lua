@@ -2085,13 +2085,12 @@ end
 local addonsStr = GetString(SI_GAME_MENU_ADDONS)
 local LHAS_settingsEntryInGameMenu = ((LibAddonMenu2 ~= nil and (not IsConsole or (IsConsole and LibAddonMenu2.panelId ~= nil))) and addonsStr .." 2") or addonsStr
 function lib.ShowSettingsMenu(panelToShow)
-    panelToShow = panelToShow or lib.LHASsettingsPanel.panel
     if not IsConsole and not IsInGamepadPreferredMode() then
         if lam == nil or lib.LAMsettingsPanel == nil then return end
         lam:OpenToPanel(lib.LAMsettingsPanel)
     else
         if lhas == nil or lib.LHASsettingsPanel == nil then return end
-
+        panelToShow = panelToShow or lib.LHASsettingsPanel.panel
 
         if IsConsole then
             if lhas.scene == nil then return end

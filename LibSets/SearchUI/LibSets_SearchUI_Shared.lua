@@ -57,7 +57,6 @@ local TT_Popup = PopupTooltip
 local TT_Text = InformationTooltip
 
 --Libraries
-local LSM = lib.LSM --LibScrollableMenu
 local checkLSM = lib.CheckLSM
 
 --Event upater names
@@ -437,7 +436,7 @@ local function addOtherAddonsContextMenuEntries(rowControl, setId)
                     --Custom addon's name header
                     local headerName = customContextMenuEntriesData.headerName
                     if headerName ~= nil then
-                        AddScrollableMenuHeader(headerName)
+                        AddCustomScrollableMenuHeader(headerName)
                     end
                     --Addon name submenu
                     AddCustomScrollableSubMenuEntry(submenuName, submenuEntries)
@@ -1604,7 +1603,8 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
 end
 
 function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
-    if not LSM then return end
+    if not checkLSM() then return end
+
     local data = rowControl.data
     if data == nil then return end
     local setId = data.setId
@@ -1618,7 +1618,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     end)
 
     --Tooltips
-    AddScrollableMenuHeader(getLocalizedText("tooltips"))
+    AddCustomScrollableMenuHeader(getLocalizedText("tooltips"))
 
     --Popup tooltip
     local popupTooltipSubmenu = {
@@ -1663,7 +1663,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             --d("[LibSets]LibSets_SearchUI_Shared:ShowRowContextMenu - favoriteCategory: " ..tos(favoriteCategory))
             --if not zoite(setSearchFavorites[favoriteCategory]) then
             if not wasFavoriteHeaderAdded then
-                AddScrollableMenuHeader(favoriteIconWithNameTexts[favoriteCategory])
+                AddCustomScrollableMenuHeader(favoriteIconWithNameTexts[favoriteCategory])
                 wasFavoriteHeaderAdded = true
             end
             if self:IsSetIdInFavorites(setId, favoriteCategory) then
@@ -1738,7 +1738,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         local gotDropZones = not zoite(zoneIdSubmenuEntries)
         local gotWayshrines = not zoite(wayshrinesSubmenuEntries)
         if gotDropZones or gotWayshrines then
-            AddScrollableMenuHeader(dropZoneAndWayshrinesStr)
+            AddCustomScrollableMenuHeader(dropZoneAndWayshrinesStr)
             if gotDropZones then
                 AddCustomScrollableSubMenuEntry(dropZonesStr, zoneIdSubmenuEntries)
             end
@@ -1758,7 +1758,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 lib.showSetSearchDropLocationTooltip = not lib.showSetSearchDropLocationTooltip
             end
 
-            AddScrollableMenuHeader(getLocalizedText("droppedBy"))
+            AddCustomScrollableMenuHeader(getLocalizedText("droppedBy"))
             local showAsTooltipEnabledState = getLocalizedText("showAsTooltip") .. ": " .. tos(booleanToOnOff[not lib.showSetSearchDropLocationTooltip])
             AddCustomScrollableMenuEntry(showAsTooltipEnabledState, function()
                 ZO_Tooltips_HideTextTooltip()
@@ -1780,7 +1780,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 copyDialog:Show({ text=(withTextures == true and data.setDataText) or data.setDataTextClean, setData=data }, textParams)
             end
 
-            AddScrollableMenuHeader(getLocalizedText("setInfos"))
+            AddCustomScrollableMenuHeader(getLocalizedText("setInfos"))
             AddCustomScrollableMenuEntry(getLocalizedText("showAsText"), function()
                 getSetTextForCopyDialog(false)
             end)
@@ -1795,7 +1795,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             local isCraftedSet = setType == LIBSETS_SETTYPE_CRAFTED
 
             if not isCraftedSet then
-                AddScrollableMenuHeader(getLocalizedText("headerItemLinks"))
+                AddCustomScrollableMenuHeader(getLocalizedText("headerItemLinks"))
 
                 local setName = data.name
                 local setTypeTexture = data.setTypeTexture

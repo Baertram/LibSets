@@ -114,12 +114,13 @@ local possibleDlcIds = {
     [38] = "DLC_SEASONS_OF_THE_WORMCULT1",
     [39] = "DLC_FEAST_OF_SHADOWS",
     [40] = "DLC_SEASONS_OF_THE_WORMCULT2",
+    [41] = "DLC_SEASON0",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
-    possibleDlcIds[#possibleDlcIds + 1] = "DLC_SEASON0"
+    --possibleDlcIds[#possibleDlcIds + 1] = "DLC_***"
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -221,11 +222,11 @@ lib.dlcAndChapterCollectibleIds = {
     [DLC_FEAST_OF_SHADOWS] =        {collectibleId=nil, achievementCategoryId=4440, type=DLC_TYPE_DUNGEONS, releaseDate=1755511200}, -- August 18th 2025
     --Seasons of the Wormcult Part2
     [DLC_SEASONS_OF_THE_WORMCULT2] = {collectibleId=nil, achievementCategoryId=4240, type=DLC_TYPE_SEASON_PART, releaseDate=1760702400}, --October 17th 2025
+    --Season 0
+    [DLC_SEASON0]                  = {collectibleId=11111, achievementCategoryId=nil, type=DLC_TYPE_SEASON_PART, releaseDate=1773057600} -- March 9th 2026
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
-    --todo 260233 Change collectibleId to real "Season 0" text!
-    lib.dlcAndChapterCollectibleIds[DLC_SEASON0] = {collectibleId=11111, achievementCategoryId=nil, type=DLC_TYPE_SEASON_PART, releaseDate=1773057600}
 end
 
 --Internal achievement example ids of the ESO DLCs and chapters
