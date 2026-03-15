@@ -7,8 +7,16 @@
 
 --local tins = table.insert
 
+--[[
+local LIBSETS_TABLEKEY_SET_PROCS = LIBSETS_TABLEKEY_SET_PROCS
+local LIBSETS_SETPROC_CHECKTYPE_EVENT_POWER_UPDATE = LIBSETS_SETPROC_CHECKTYPE_EVENT_POWER_UPDATE
+local LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT = LIBSETS_SETPROC_CHECKTYPE_ABILITY_EVENT_COMBAT_EVENT
+local LIBSETS_SETPROC_CHECKTYPE_SPECIAL = LIBSETS_SETPROC_CHECKTYPE_SPECIAL
+local LIBSETS_SETPROC_CHECKTYPE_EVENT_BOSSES_CHANGED = LIBSETS_SETPROC_CHECKTYPE_EVENT_BOSSES_CHANGED
+]]
+
 ------------------------------------------------------------------------------------------------------------------------
---> Last updated: API 101047, 2025-08-21, Baertram
+--> Last updated: API 101049, 2026-01-21, Baertram
 ------------------------------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------------------------------

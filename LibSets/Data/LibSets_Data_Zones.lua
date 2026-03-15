@@ -17,7 +17,7 @@ local isPTSAPIVersionLive = lib.checkIfPTSAPIVersionIsLive()
 
 
 ------------------------------------------------------------------------------------------------------------------------
---> Last updated: API 101048, 2025-11-13, Baertram
+--> Last updated: API 101049, 2026-03-14, Baertram
 ------------------------------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------------------------------
@@ -176,6 +176,7 @@ lib.zoneIdsOfNewAPIVersionOnly = zoneIdsOfNewAPIVersionOnly
     setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING] =
     {
         --Special Category at the top
+        { parentCategory=124, category=133, zoneIds={1559}},--Night Market
         { parentCategory=124, category=130, zoneIds={1502}},--Solstice
         --Aldmeri-Dominion
         { parentCategory=1, category=11, zoneIds={381}},--Auridon
