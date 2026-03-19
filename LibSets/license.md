@@ -1,8 +1,8 @@
-========================================================================
+========================================================================<br>
     Title:      LibSets - A set item library for the game The Elder Scrolls Online<br>
-    Author:     @Baertram (EU server, PC)
-    Contact:    www.esoui.com - Private message to "Baertram"
-    www.github.com - https://github.com/Baertram/LibSets
+    Author:     @Baertram (EU server, PC)<br>
+    Contact:    www.esoui.com - Private message to "Baertram"<br>
+    www.github.com - https://github.com/Baertram/LibSets<br>
 
 
 - LICENSING - CC BY-NC-ND -
