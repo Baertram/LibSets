@@ -111,12 +111,18 @@ function LibSets_SearchUI_List:Setup( )
 	self.sortHeaderGroup:SelectAndResetSortForKey(self.currentSortKey) -- Will call "SortScrollList" internally
 	--The sort function
     self.sortFunction = function( listEntry1, listEntry2 )
-        if     self.currentSortKey == nil or self.sortKeys[self.currentSortKey] == nil
-            or listEntry1.data == nil or listEntry1.data[self.currentSortKey] == nil
-            or listEntry2.data == nil or listEntry2.data[self.currentSortKey] == nil then
+        local currentSortKey = self.currentSortKey
+        local currentSortOrder = self.currentSortOrder
+        local sortKeys = self.sortKeys
+        local listEntry1Data = listEntry1.data
+        local listEntry2Data = listEntry2.data
+
+        if     currentSortKey == nil or currentSortOrder == nil or ZO_IsTableEmpty(sortKeys) or sortKeys[currentSortKey] == nil
+            or listEntry1Data == nil or listEntry1Data[currentSortKey] == nil
+            or listEntry2Data == nil or listEntry2Data[currentSortKey] == nil then
             return nil
         end
-        return ZO_TableOrderingFunction(listEntry1.data, listEntry2.data, self.currentSortKey, self.sortKeys, self.currentSortOrder)
+        return ZO_TableOrderingFunction(listEntry1Data, listEntry2Data, currentSortKey, sortKeys, currentSortOrder)
 	end
 
     --Sort headers
@@ -536,7 +542,7 @@ function LibSets_SearchUI_List:BuildSortKeys()
         --["timestamp"]               = { isId64          = true, tiebreaker = "name"  }, --isNumeric = true
         --["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         --["gearId"]                  = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
-        ["isFavorite"]              = { isNumeric = true,               tiebreaker = "name" },
+        ["isFavorite"]              = { caseInsensitive = true,         tiebreaker = "name" },
         ["name"]                    = { caseInsensitive = true },
         ["setType"]                 = { isNumeric = true,               tiebreaker = "name" },
         ["armorOrWeaponType"]       = { isNumeric = true,               tiebreaker = "name" },

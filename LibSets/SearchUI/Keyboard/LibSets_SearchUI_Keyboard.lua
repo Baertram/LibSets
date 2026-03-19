@@ -2,6 +2,7 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = lib.prefix
 
+local tos = tostring
 local zoitf = zo_iconTextFormat
 local getLocalizedText = lib.GetLocalizedText
 local buildSetTypeInfo = lib.buildSetTypeInfo
@@ -21,7 +22,8 @@ local searchUIThrottledSearchHandlerName = searchUIName .. "_ThrottledSearch"
 local searchUIThrottledDelay = 500
 
 local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
-
+local MIN_WIDTH = 934
+local MIN_HEIGHT = 600
 
 local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
 local favoriteIconTexts = searchUI.favoriteIconTexts
@@ -99,7 +101,7 @@ function LibSets_SearchUI_Keyboard:New(...)
 end
 
 function LibSets_SearchUI_Keyboard:Initialize(control)
-    LibSets_SearchUI_Shared.Initialize(self, control) --Call Shared master class initialization first
+    LibSets_SearchUI_Shared.Initialize(self, control) --Call Shared master class initialization first: Sets control._object = self
 
     local backGround = self.control:GetNamedChild("BG")
     backGround:SetAlpha(1)
@@ -232,7 +234,6 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.tooltipControlTLC:AllowBringToTop(true)
     self.tooltipControl = LibSets_SearchUI_Tooltip -- The set item tooltip preview
     self.tooltipKeyboardHookWasDone = false
-
 
     SYSTEMS:RegisterKeyboardObject(searchUIName, self)
 end
@@ -990,6 +991,19 @@ end
 
 
 --[[ XML Handlers ]]--
+function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart)
+    ZO_Tooltips_HideTextTooltip()
+    if resizeStart then
+        --d("[LibSets]Keyboard TLC resize START - currentWidth: " ..tos(self:GetWidth()) .. ", currentHeight: " ..tos(self:GetHeight()))
+    else
+        --local newWidth, newHeight = self:GetDimensions()
+        --d("[LibSets]Keyboard TLC resize STOP - newWidth: " ..tos(newWidth) .. ", newHeight: " ..tos(newHeight))
+        --Commit the scrollList now to rebuild it's size: self._object = LIBSETS_SEARCH_UI_KEYBOARD
+        zo_callLater(function() ZO_ScrollList_Commit(self._object.resultsList) end, 0) --call next frame to apply the UI's height first before the list resizes
+    end
+end
+
+--Initialization of the LibSets keyboard search UI -> Called from EVENT_ADD_ON_LOADED
 function LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(self)
     if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then return end
     LIBSETS_SEARCH_UI_KEYBOARD = LibSets_SearchUI_Keyboard:New(self)

@@ -1,35 +1,36 @@
 --[[========================================================================
-    This is free and unencumbered software released into the public domain.
+    Title:      LibSets - A set item library for the game The Elder Scrolls Online
+    Author:     @Baertram (EU server, PC)
+    Contact:    www.esoui.com - Private message to "Baertram"
+                www.github.com - https://github.com/Baertram/LibSets
 
-    Anyone is free to copy, modify, publish, use, compile, sell, or
-    distribute this software, either in source code form or as a compiled
-    binary, for any purpose, commercial or non-commercial, and by any
-    means.
+    - LICENSING - CC BY-NC-ND -
 
-    In jurisdictions that recognize copyright laws, the author or authors
-    of this software dedicate any and all copyright interest in the
-    software to the public domain. We make this dedication for the benefit
-    of the public at large and to the detriment of our heirs and
-    successors. We intend this dedication to be an overt act of
-    relinquishment in perpetuity of all present and future rights to this
-    software under copyright law.
+    [You are free to]
+    - Share — copy and redistribute the material in any medium or format
+    The licensor (@Baertram) cannot revoke these freedoms as long as you follow the license terms.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-    IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-    OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-    ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-    OTHER DEALINGS IN THE SOFTWARE.
+    [Under the following terms]
+    - Attribution — You must give appropriate credit to the author (@Baertram), provide a link to the license, and indicate
+     if changes were made.
+     You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
 
-    For more information, please refer to <http://unlicense.org/>
+    - NonCommercial — You may not use the material for commercial purposes.
+
+    - NoDerivatives — If you remix, transform, or build upon the material, you may not distribute the modified material.
+     Contact the author @Baertram if you want to use data from this library outside the library!
+
+    - No additional restrictions — You may not apply legal terms or technological measures that legally restrict others
+     from doing anything the license permits.
+
+    For more information, please refer to <https://creativecommons.org/licenses/by-nc-nd/4.0/>
 ========================================================================
 
 
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2026-03-14, Baertram, AP101049
+ Last updated: 2026-03-19, Baertram, AP101049
 ------------------------------------------------------------------------------------------------------------------------
  --Known bugs--
 
@@ -39,11 +40,14 @@
     so basically convert itemId to setId+slotId back to itemId and then compare input itemId to output itemId and if it's the same you got the non-unique version, otherwise it's the unique one
     you could actually do that in LibSets while scanning sets and then mark your data accordingly
 
-    2) Integrate FCOItemSaver's marker icon mapping to LibSets set search favorite icons in FCOIS settings -> LibSets needs API to return the set search favorite icons for that to work7
+    2) Integrate FCOItemSaver's marker icon mapping to LibSets set search favorite icons in FCOIS settings -> LibSets needs API to return the set search favorite icons for that to work
+    -- and how do we make it properly apply the FCOIS marker icon to each current held set Item in all backs + new looted items? > Performance wise
+
+    3) Set search UI keyboard resizable
 
 
  --Currently working on--
-
+3) Set search UI keyboard resizable
 
 ========================================================================================================================
  !!! API VERSION UPDATE - What needs to be scanned and done in this library and the Excel file?                     !!!

@@ -8,29 +8,29 @@
 ## Title: LibSets
 ## Description: List of all ingame sets and functions to check what set type they are, set names, itemIds, drop locations, etc.
 ## Author: Baertram
-## APIVersion: 101048 101049
-## Version: 0.8.9
-## AddOnVersion: 000809
+## APIVersion: 101049 101050
+## Version: 0.9.0
+## AddOnVersion: 0009000
 ## IsLibrary: true
 ## SavedVariables: LibSets_SV_Data LibSets_SV_DEBUG_Data
 ## OptionalDependsOn: LibAddonMenu-2.0 LibCustomMenu LibHarvensAddonSettings LibScrollableMenu LibSlashCommander LibZone
 
-## This Add-On is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries. All rights reserved.
+# This Add-On is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries. All rights reserved.
 
-##Read the file LibSets.lua, at the top, to see what needs to be done to update the data in this library /after an APIversion change e.g.)
+#Read the file LibSets.lua, at the top, to see what needs to be done to update the data in this library /after an APIversion change e.g.)
 
-##Constant values internally for the library
+#Constant values internally for the library
 LibSets_ConstantsLibraryInternal.lua
 
-##Constant values as base for ALL API versions
+#Constant values as base for ALL API versions
 LibSets_Constants_All.lua
 
-##Constant values dependent only on the current API version(s): If the file exists, it will be loaded
-##-->Currently disabled!
-##LibSets_Constants_$(APIVersion).lua
+#Constant values dependent only on the current API version(s): If the file exists, it will be loaded
+#-->Currently disabled!
+#LibSets_Constants_$(APIVersion).lua
 
-##Data file with the data for ALL Api versions
-##!!!!!!!!!!!! Update the data from the API version dependent files to this file, if the API version increases, or the old APIversion data will not be loaded anymore !!!!!!!!!!
+#Data file with the data for ALL Api versions
+#!!!!!!!!!!!! Update the data from the API version dependent files to this file, if the API version increases, or the old APIversion data will not be loaded anymore !!!!!!!!!!
 Data/LibSets_Data_Zones.lua
 Data/LibSets_Data_Sets.lua
 Data/LibSets_Data_SetItemIds.lua
@@ -39,31 +39,32 @@ Data/LibSets_Data_SetNames.lua
 Data/LibSets_Data_SetOtherData.lua
 
 
-##Functions and base library code
+#Functions and base library code
 LibSets.lua
 
-##Only on PC, Tooltip functions
+#Tooltips
 Tooltips/LibSets_Tooltips.lua
 
-##Optional: if library LibSlashCommander is loaded: Chat auto completion for set names
+#Optional: if library LibSlashCommander is loaded: Chat auto completion for set names
 AutoComplete/LibSets_AutoCompletion.lua
 
-##Debug functions
+#Debug functions
 Debug/LibSets_Debug.lua
 
-##XML - Copy text dialog
+#XML - Copy text dialog
 PC/CopyText/LibSets_CopyTextDialog.lua
 PC/CopyText/LibSets_CopyTextDialog.xml
 
-##XML - Search
+#XML - Search UI - Shared
+SearchUI/LibSets_SearchUI_Shared.xml
 SearchUI/LibSets_SearchUI_Shared.lua
-SearchUI/LibSets_SearchUI.xml
-## Keyboard
+# Keyboard
+SearchUI/Keyboard/LibSets_SearchUI_Keyboard.xml
 SearchUI/Keyboard/LibSets_SearchUI_List_Keyboard.lua
 SearchUI/Keyboard/LibSets_SearchUI_Keyboard.lua
-## Gamepad - Non functional/supported as of 20231011
-## SearchUI/Gamepad/LibSets_SearchUI_List_Gamepad.lua
-## SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua
+#Gamepad - Non functional/supported as of 20231011
+#SearchUI/Gamepad/LibSets_SearchUI_List_Gamepad.lua
+#SearchUI/Gamepad/LibSets_SearchUI_Gamepad.lua
 
 
 # This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
