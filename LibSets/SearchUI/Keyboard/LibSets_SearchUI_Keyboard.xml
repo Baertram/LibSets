@@ -27,30 +27,32 @@
                 <!-- Filters at the top -->
                 <Control name="$(parent)Filters" override="true" level="1">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="10" />
                     <Dimensions y="125" />
                     <Controls>
 
                         <!-- Filter MultiSelect dropdown boxes - Row 1 -->
                         <Control name="$(parent)FilterRow1Container" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="5" />
-                            <DimensionConstraints minX="934" minY="30" maxY="41.6"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="5" />
+                            <DimensionConstraints minX="934" maxX="100%" minY="30" maxY="41.6"/>
                             <Controls>
                                 <Control name="$(grandparent)SetTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="2" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                 </Control>
                                 <Control name="$(grandparent)ArmorTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)SetTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                 </Control>
                                 <Control name="$(grandparent)WeaponTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)ArmorTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                 </Control>
                                 <Control name="$(grandparent)EquipmentTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)WeaponTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-64" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                 </Control>
                             </Controls>
                         </Control>
@@ -59,12 +61,12 @@
                         <Control name="$(parent)FilterRow2Container" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)FilterRow1Container" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="5" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)FilterRow1Container" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="5" />
-                            <DimensionConstraints minX="934" minY="30" maxY="41.6"/>
+                            <DimensionConstraints minX="934" maxX="100%" minY="30" maxY="41.6"/>
                             <Controls>
                                 <!-- Filter edit box - Name text search -->
-                                <Backdrop name="$(grandparent)TextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" tier="LOW" layer="CONTROLS" level="1">
+                                <Backdrop name="$(grandparent)TextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" resizeToFitConstrains="X" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)" offsetX="4" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                     <Controls>
                                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" />
                                     </Controls>
@@ -73,16 +75,16 @@
                                 <!-- Filter more MultiSelect dropdown boxes - row 2 -->
                                 <Control name="$(grandparent)DLCIdFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)TextSearch" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                 </Control>
                                 <Control name="$(grandparent)EnchantSearchCategoryTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)DLCIdFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                 </Control>
                                 <Control name="$(grandparent)FavoritesFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)EnchantSearchCategoryTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-2" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                 </Control>
                             </Controls>
                         </Control>
@@ -92,12 +94,12 @@
                         <Control name="$(parent)FilterRow3Container" tier="LOW" layer="CONTROLS" level="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)FilterRow2Container" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="5" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)FilterRow2Container" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="5" />
-                            <DimensionConstraints minX="934" minY="30" maxY="41.6"/>
+                            <DimensionConstraints minX="934" maxX="100%" minY="30" maxY="41.6"/>
                             <Controls>
                                 <!-- Filter edit box - Bonus text search -->
-                                <Backdrop name="$(grandparent)BonusTextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" tier="LOW" layer="CONTROLS" level="1">
+                                <Backdrop name="$(grandparent)BonusTextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" resizeToFitConstrains="X" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)" offsetX="4" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                     <Controls>
                                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" />
                                     </Controls>
@@ -106,21 +108,21 @@
                                 <!-- Filter more MultiSelect dropdown boxes - row 3 -->
                                 <Control name="$(grandparent)NumBonusFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)BonusTextSearch" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
-                                    <DimensionConstraints minX="80" maxY="30"/>
+                                    <DimensionConstraints minX="80" maxX="25%" maxY="30"/>
                                 </Control>
 
                                 <Control name="$(grandparent)DropZoneFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)NumBonusFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
-                                    <DimensionConstraints minX="190" maxY="30"/>
+                                    <DimensionConstraints minX="190" maxX="25%" maxY="30"/>
                                 </Control>
                                 <Control name="$(grandparent)DropMechanicsFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)DropZoneFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
-                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <DimensionConstraints minX="200" maxX="25%" maxY="30"/>
                                 </Control>
                                 <Control name="$(grandparent)DropLocationsFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)DropMechanicsFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-2" offsetY="0" />
-                                    <DimensionConstraints minX="180" maxX="100%" maxY="30"/>
+                                    <DimensionConstraints minX="180" maxX="25%" maxY="30"/>
                                 </Control>
                             </Controls>
                         </Control>

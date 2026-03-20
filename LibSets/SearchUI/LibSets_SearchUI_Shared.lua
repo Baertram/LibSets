@@ -1814,7 +1814,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
 end
 
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
-    if LCM == nil then return end
+    if not checkLSM() then return end
     local selfVar = self
     local comboBox = getComboBoxFromDropdownControl(dropdownControl)
 

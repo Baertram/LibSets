@@ -361,6 +361,37 @@ local LCM --LibCustomMenu
 local LSM -- LibScrollableMenu
 local libZone -- LibZone
 
+local LSM_wasChecked = false
+local function checkOptionalLibraryLibScrollableMenu()
+    --d("[LibSets]checkOptionalLibraryLibScrollableMenu - LSM_wasChecked: " ..tos(LSM_wasChecked) .. ", LSM: " .. tos(LSM))
+    if not LSM_wasChecked and LSM == nil then
+        LSM = LibScrollableMenu
+        LSM_wasChecked = true
+        if LSM ~= nil and LSM.version >= "2.40" then --Got the correct needed version?
+            lib.LSM = LSM
+        end
+        --d(">LSM.version: " .. tos((LSM ~= nil and LSM.version) or ""))
+    end
+end
+local function checkOptionalLibraries()
+    ----Optional libraries
+    checkOptionalLibraryLibScrollableMenu() --LibScrollableMenu
+    LCM = LibCustomMenu
+    lib.libCustomMenu = LCM
+    lib.libAddonMenu = LibAddonMenu2
+    lib.libHarvensAddonSettings = LibHarvensAddonSettings
+    lib.libSlashCommander = LibSlashCommander
+    libZone = LibZone
+    lib.libZone = libZone
+end
+lib.CheckOptionalLibraries = checkOptionalLibraries
+
+local function checkLSM()
+    checkOptionalLibraryLibScrollableMenu()
+    return LSM ~= nil
+end
+lib.CheckLSM = checkLSM
+
 ------------Global variables--------------
 --Get counter suffix
 local counterSuffix = lib.counterSuffix or "Counter"
@@ -5243,7 +5274,7 @@ local function addUIButtons()
                 parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
                 tooltip         = libPrefix .. moreOptionsButtonTooltip,
                 callback        = function()
-                    if LSM ~= nil then
+                    if checkLSM() == true then
                         ClearCustomScrollableMenu()
                         AddCustomScrollableMenuEntry(localization.parentZone, function()
                             openSetItemCollectionBrowserForCurrentZone(true)
@@ -5658,37 +5689,6 @@ local function onPlayerActivated(eventId, isFirst)
         lib.DebugGetAllData(false)
     end
 end
-
-local LSM_wasChecked = false
-local function checkOptionalLibraryLibScrollableMenu()
---d("[LibSets]checkOptionalLibraryLibScrollableMenu - LSM_wasChecked: " ..tos(LSM_wasChecked) .. ", LSM: " .. tos(LSM))
-    if not LSM_wasChecked and LSM == nil then
-        LSM = LibScrollableMenu
-        LSM_wasChecked = true
-        if LSM ~= nil and LSM.version >= "2.40" then --Got the correct needed version?
-            lib.LSM = LSM
-        end
-        --d(">LSM.version: " .. tos((LSM ~= nil and LSM.version) or ""))
-    end
-end
-local function checkOptionalLibraries()
-    ----Optional libraries
-    checkOptionalLibraryLibScrollableMenu() --LibScrollableMenu
-    LCM = LibCustomMenu
-    lib.libCustomMenu = LCM
-    lib.libAddonMenu = LibAddonMenu2
-    lib.libHarvensAddonSettings = LibHarvensAddonSettings
-    lib.libSlashCommander = LibSlashCommander
-    libZone = LibZone
-    lib.libZone = libZone
-end
-lib.CheckOptionalLibraries = checkOptionalLibraries
-
-local function checkLSM()
-    checkOptionalLibraryLibScrollableMenu()
-    return LSM ~= nil
-end
-lib.CheckLSM = checkLSM
 
 --Addon loaded function
 local function onLibraryLoaded(event, name)

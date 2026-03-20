@@ -1,4 +1,4 @@
-<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/DakJaniels/esoui_gui_xsd/blob/main/esoui_gui_xml.xsd">
 <!-- LibSets Search UI - Font definitions -->
 	<Font name="MyFontGame16" font="$(MEDIUM_FONT)|$(KB_16)|soft-shadow-thin" />
     <Font name="MyFontGame18" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thik" />
@@ -45,7 +45,7 @@
         </Backdrop>
 
          <!--Virtual Multiselect ComboBoxes - PTS API 101040: ZO_ComboBox is cappable to do multi selection & scroll -->
-		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="0"> <!-- 20240310 level was 1 but that makes the inherited ZO_ComboBox OpenDropdown control draw at level 0 behind the LibSetsSearchUIMultiSelectComboBox ... -->
+		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="0" resizeToFitConstrains="X"> <!-- 20240310 level was 1 but that makes the inherited ZO_ComboBox OpenDropdown control draw at level 0 behind the LibSetsSearchUIMultiSelectComboBox ... -->
             <OnMouseEnter>
                 LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
             </OnMouseEnter>
