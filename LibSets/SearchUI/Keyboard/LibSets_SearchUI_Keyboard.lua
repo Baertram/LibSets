@@ -999,7 +999,7 @@ function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart)
         --local newWidth, newHeight = self:GetDimensions()
         --d("[LibSets]Keyboard TLC resize STOP - newWidth: " ..tos(newWidth) .. ", newHeight: " ..tos(newHeight))
         --Commit the scrollList now to rebuild it's size: self._object = LIBSETS_SEARCH_UI_KEYBOARD
-        zo_callLater(function() ZO_ScrollList_Commit(self._object.resultsList) end, 0) --call next frame to apply the UI's height first before the list resizes
+        ZO_ScrollList_Commit(self._object.resultsListControl)
     end
 end
 
