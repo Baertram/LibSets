@@ -28,16 +28,24 @@ local lib                            = LibSets
 --Are we on a console?
 local IsConsole = IsConsoleUI()
 lib.IsConsole = IsConsole
-lib.searchUI = {
+lib.SearchUI = {
+    name = MAJOR .. "_SearchUI",
     controlName = {
         [false] = "LibSets_SearchUI_TLC_Keyboard",
         [true]  = "LibSets_SearchUI_TLC_Gamepad",
     },
     control = {
-        [false] = nil, --Keybaord: LibSets_SearchUI_TLC_Keyboard Updated as keybaord search UI is initialized
-        [true]  = nil -- Gamepad: LibSets_SearchUI_TLC_Gamepad Updated ass gamepad search UI is initialized (currently as of 2026-01-21 it does not exist!)
-    }
+        [false] = nil, --Keyboard: LibSets_SearchUI_TLC_Keyboard Updated as keyboard search UI is initialized
+        [true]  = nil -- Gamepad: LibSets_SearchUI_TLC_Gamepad Updated ass gamepad search UI is initialized (currently as of 2023-11 it does not exist!)
+    },
+    KeyboardVars = {
+        minWidth = 934,
+        minHeight = 600,
+    },
+    --GamepadVars = {
+    --},
 }
+
 
 ------------------------------------------------------------------------------------------------------------------------
 lib.name                             = MAJOR

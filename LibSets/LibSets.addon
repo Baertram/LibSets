@@ -59,6 +59,7 @@ PC/CopyText/LibSets_CopyTextDialog.xml
 SearchUI/LibSets_SearchUI_Shared.xml
 SearchUI/LibSets_SearchUI_Shared.lua
 # Keyboard
+SearchUI/Keyboard/LibSets_SearchUI_Keyboard_XML_API.lua
 SearchUI/Keyboard/LibSets_SearchUI_Keyboard.xml
 SearchUI/Keyboard/LibSets_SearchUI_List_Keyboard.lua
 SearchUI/Keyboard/LibSets_SearchUI_Keyboard.lua

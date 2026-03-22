@@ -106,11 +106,8 @@ local favoriteIconFrostStaff =  possibleSetSearchFavoriteCategoriesUnsorted.fros
 local favoriteIconFireStaff =   possibleSetSearchFavoriteCategoriesUnsorted.fireStaff
 local favoriteIconLightningStaff=possibleSetSearchFavoriteCategoriesUnsorted.lightningStaff
 
-
---The search UI table
-lib.SearchUI = {}
+--The SearchUI table
 local searchUI = lib.SearchUI
-searchUI.name = MAJOR .. "_SearchUI"
 local searchUIName = searchUI.name
 
 --For the XML sort header

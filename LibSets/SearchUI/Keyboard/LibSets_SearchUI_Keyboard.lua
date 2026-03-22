@@ -16,15 +16,16 @@ local libSets_GetSetItemIds = lib.GetSetItemIds
 
 --The search UI table
 local searchUI = lib.SearchUI
+local searchUIKeyboardVars = searchUI.KeyboardVars
 local searchUIName = searchUI.name
+local MIN_WIDTH =   searchUIKeyboardVars.minWidth
+local MIN_HEIGHT =  searchUIKeyboardVars.minHeight
+
 
 local searchUIThrottledSearchHandlerName = searchUIName .. "_ThrottledSearch"
 local searchUIThrottledDelay = 500
 
 local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
-local MIN_WIDTH = 934
-local MIN_HEIGHT = 600
-
 local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
 local favoriteIconTexts = searchUI.favoriteIconTexts
 
@@ -107,6 +108,9 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     backGround:SetAlpha(1)
 
     local filters = self.filtersControl
+    local filtersRow1 = filters:GetNamedChild("FilterRow1Container")
+    local filtersRow2 = filters:GetNamedChild("FilterRow1Container")
+    local filtersRow3 = filters:GetNamedChild("FilterRow1Container")
     local content = self.contentControl
 
     local selfVar = self
@@ -210,6 +214,42 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         [self.dropLocationsFiltersControl] =                "dropLocations",
         [self.numBonusFiltersControl] =                     "numBonuses",
     }
+    --Default minimum width and maximum width of the multiselect controls: This minX will always be kept as minimum even if the UI is resized
+    -->If the UI is resized the new width will be calculated based on minX mulitplied with a factor "current TLC width divided by default TLC width"
+    self.multiSelectMinAndMaxData = {}
+
+    --Row1
+    self.multiSelectMinAndMaxData[self.setTypeFiltersControl] = { minX = 200, maxX = "25%", } --[[anchors = {
+        [1] = { point=TOPLEFT,    relativeTo=filtersRow1,                       relativePoint=TOPLEFT,    offsetX="2",    offsetY="0" },
+        }
+    }]]
+    self.multiSelectMinAndMaxData[self.armorTypeFiltersControl] = { minX = 200, maxX = "25%", } --[[anchors = {
+        [1] = { point=TOPLEFT,    relativeTo=self.setTypeFiltersControl,        relativePoint=TOPRIGHT,   offsetX="5",    offsetY="0" },
+        }
+    }]]
+    self.multiSelectMinAndMaxData[self.weaponTypeFiltersControl] = { minX = 200, maxX = "25%", } --[[anchors = {
+        [1] = { point=TOPLEFT,    relativeTo=self.armorTypeFiltersControl,      relativePoint=TOPRIGHT,   offsetX="5",    offsetY="0" },
+        }
+    }]]
+    self.multiSelectMinAndMaxData[self.equipmentTypeFiltersControl] = { minX = 200, maxX = "25%", } --[[anchors = {
+            [1] = { point=TOPLEFT,    relativeTo=self.weaponTypeFiltersControl, relativePoint=TOPRIGHT,   offsetX="5",    offsetY="0" },
+            [2] = { point=TOPRIGHT,   relativeTo=filtersRow1,                   relativePoint=TOPRIGHT,   offsetX="-64",  offsetY="0" },
+        }
+    }]]
+
+    --Row2
+    self.multiSelectMinAndMaxData[self.searchEditBoxControl] =                      { minX = 200, maxX = "25%"}
+    self.multiSelectMinAndMaxData[self.DCLIdFiltersControl] =                       { minX = 200, maxX = "25%"}
+    self.multiSelectMinAndMaxData[self.enchantSearchCategoryTypeFiltersControl] =   { minX = 200, maxX = "25%"}
+    self.multiSelectMinAndMaxData[self.favoritesFiltersControl] =                   { minX = 200, maxX = "25%"}
+
+    --Row 3
+    self.multiSelectMinAndMaxData[self.bonusSearchEditBoxControl] =                 { minX = 200, maxX = "25%"}
+    self.multiSelectMinAndMaxData[self.numBonusFiltersControl] =                    { minX = 100, maxX = "15%"}
+    self.multiSelectMinAndMaxData[self.dropZoneFiltersControl] =                    { minX = 190, maxX = "20%"}
+    self.multiSelectMinAndMaxData[self.dropMechanicsFiltersControl] =               { minX = 200, maxX = "20%"}
+    self.multiSelectMinAndMaxData[self.dropLocationsFiltersControl] =               { minX = 180, maxX = "20%"}
+
     --Is this multiselect dropdown relevant to change the itemIds of setIds (for the itemLink creation at the results list)
     self.isItemIdRelevantMultiSelectFilterDropdown = {
         [self.armorTypeFiltersControl] =                    true,
@@ -220,6 +260,11 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
 
     self:InitializeFilters() --> Filter data (masterlist base for ZO_SortFilterScrollList) was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
 
+    --Load the saved LibSets Search UI TopLevelControl position and size
+    self:LoadSearchUIPositionAndSize()
+
+    --Set the minX and maxX constraints of these controls initially
+    self:SetMultiSelectDropdownDimensionConstranints()
 
     --Results list -> ZO_SortFilterList
     self.counterControl = content:GetNamedChild("Counter")
@@ -242,6 +287,38 @@ end
 ------------------------------------------------
 --- UI
 ------------------------------------------------
+--Load the LibSets Search UI position and size from the SavedVariables
+function LibSets_SearchUI_Keyboard:LoadSearchUIPositionAndSize()
+    --todo read saved SV position and size and apply to the TopLevelControl so the dropdown boxes can re-apply their
+    --calculated size too
+end
+
+--Save the LibSets Search UI position and size to the SavedVariables
+function LibSets_SearchUI_Keyboard:SaveSearchUIPositionAndSize()
+    --todo save position and size to the SV
+end
+
+
+--Set the multiSlect dropdown controls dimension constraints, based on the LibSets Search UI TopLevelControl size
+local defaultMinAndMaxXForMultiSelectControl = { minX = 50, } --maxX = nil }
+function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownDimensionConstranints()
+    for multiSelectControl, multiSelectMinAndMaxDataOfControl in pairs(self.multiSelectMinAndMaxData) do
+        if multiSelectMinAndMaxDataOfControl then
+            multiSelectControl.minX = multiSelectMinAndMaxDataOfControl.minX or defaultMinAndMaxXForMultiSelectControl.minX
+            --Calculate the new width based on the TLC width and apply it
+            lib.XMLGetDynamicWidth(multiSelectControl, nil, nil, true)
+
+            --Reanchor the control again, if needed
+            local anchors = multiSelectMinAndMaxDataOfControl.anchors
+            if not ZO_IsTableEmpty(anchors) then
+                multiSelectControl:ClearAnchors()
+                for _, anchorData in ipairs(anchors) do
+                    multiSelectControl:SetAnchor(anchorData.point, anchorData.relativeTo, anchorData.relativePoint, anchorData.offsetX, anchorData.offsetY)
+                end
+            end
+        end
+    end
+end
 
 function LibSets_SearchUI_Keyboard:UpdateSearchParamsFromSlashcommand(slashOptions)
     if slashOptions ~= nil and not ZO_IsTableEmpty(slashOptions) then
@@ -996,10 +1073,17 @@ function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart)
     if resizeStart then
         --d("[LibSets]Keyboard TLC resize START - currentWidth: " ..tos(self:GetWidth()) .. ", currentHeight: " ..tos(self:GetHeight()))
     else
+        local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
+
         --local newWidth, newHeight = self:GetDimensions()
         --d("[LibSets]Keyboard TLC resize STOP - newWidth: " ..tos(newWidth) .. ", newHeight: " ..tos(newHeight))
-        --Commit the scrollList now to rebuild it's size: self._object = LIBSETS_SEARCH_UI_KEYBOARD
-        ZO_ScrollList_Commit(self._object.resultsListControl)
+        --Commit the scrollList now to rebuild it's size
+        ZO_ScrollList_Commit(libSetsSearchUIKeyboardObject.resultsListControl)
+
+        --Save the TLC's size and position to the SavedVariables
+        libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize()
+        --Calculate the multiselect dropdown filter boxes size (width) based on the actual TLC width now
+        libSetsSearchUIKeyboardObject:SetMultiSelectDropdownDimensionConstranints()
     end
 end
 

@@ -464,7 +464,7 @@ local LIBSETS_SETTYPE_CRAFTED = LIBSETS_SETTYPE_CRAFTED
 local libSets_GetSetType
 local setTypeToTexture = lib.setTypeToTexture
 
-local searchUIData = lib.searchUI
+local searchUI = lib.SearchUI
 local searchUIKeyboard--, searchUIGamepad
 
 
@@ -1367,9 +1367,9 @@ local function InitSearchUI(gamepadPreferred)
     if not lib.fullyLoaded then return end
     --We are in keyboard UI
     if gamepadPreferred == nil or gamepadPreferred == false then
-        searchUIKeyboard = searchUIKeyboard or GetControl(searchUIData.controlName[false]) --LibSets_SearchUI_TLC_Keyboard
+        searchUIKeyboard = searchUIKeyboard or GetControl(searchUI.controlName[false]) --LibSets_SearchUI_TLC_Keyboard
         if searchUIKeyboard == nil then return end
-        lib.searchUI.control[false] = searchUIKeyboard
+        searchUI.control[false] = searchUIKeyboard
         LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(searchUIKeyboard)
     end
 
