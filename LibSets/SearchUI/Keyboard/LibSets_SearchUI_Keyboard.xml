@@ -130,7 +130,7 @@
                     </Controls>
                 </Control>
 
-                <!-- Filter results -->
+                <!-- Filter results - ZO_ScrollList -->
                 <Control name="$(parent)Content" override="true" tier="LOW" layer="CONTROLS" level="0">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Filters" relativePoint="BOTTOMLEFT" offsetX="8" offsetY="0" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="-8" offsetY="-16" />
@@ -155,7 +155,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Favorite" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="350" maxX="350" />
+                                    <DimensionConstraints minX="350" maxX="30%" />
                                 </Control>
                                 <Control name="$(parent)SetType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -163,7 +163,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" maxX="30" />
+                                    <DimensionConstraints minX="30" maxX="9%" />
                                 </Control>
                                 <Control name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -171,7 +171,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SetType" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" maxX="30" />
+                                    <DimensionConstraints minX="30" maxX="9%" />
                                 </Control>
                                 <Control name="$(parent)EquipSlot" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -179,7 +179,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" maxX="30" />
+                                    <DimensionConstraints minX="30" maxX="9%" />
                                 </Control>
                                 <Control name="$(parent)DropLocations" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -187,7 +187,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)EquipSlot" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="300" maxX="300" />
+                                    <DimensionConstraints minX="300" maxX="40%" />
                                 </Control>
                                 <Control name="$(parent)SetId" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>

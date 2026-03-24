@@ -14,9 +14,11 @@ local TLC_SEARCH_UI_MIN_HEIGHT=  searchUIKeyboardVars.minHeight
 
 --[[ XML API functions ]]--
 --LibSets.XMLGetDynamicMinWidth - Calculate the minimum width based on the width of the TopLevelControl
-function lib.XMLGetDynamicWidth(XMLcontrol, minWidth, maxWidth, applyValues)
+function lib.XMLGetDynamicWidth(XMLcontrol, minWidth, maxWidth, applyValues, minHeight, maxHeight)
+    minHeight = minHeight or 10
+    maxHeight = maxHeight or 30
     applyValues = applyValues or false
---d("[LibSets]XMLGetDynamicMinWidth - XMLControl: " .. tos(XMLcontrol:GetName()) .. ", minWidth: " .. tos(minWidth) .. ", maxWidth: " .. tos(maxWidth) .. ", applyValues: " ..tos(applyValues))
+d("[LibSets]XMLGetDynamicMinWidth - XMLControl: " .. tos(XMLcontrol:GetName()) .. ", minWidth: " .. tos(minWidth) .. ", maxWidth: " .. tos(maxWidth) .. ", applyValues: " ..tos(applyValues))
     if XMLcontrol == nil then return end
 
     local newWidth = 0
@@ -52,9 +54,9 @@ function lib.XMLGetDynamicWidth(XMLcontrol, minWidth, maxWidth, applyValues)
 
     --No TLC width determined -> Use passed in minWidth instead
     local tlcWidth = tlcOfXMLControl:GetWidth()
---d(">>tlcWidth: " .. tos(tlcWidth) .. "; minWidthValue: " ..tos(minWidthValue) .. "; minWidthType: " ..tos(minWidthType) .."; TLCMinWidth: " ..tos(TLC_SEARCH_UI_MIN_WIDTH))
+d(">>tlcWidth: " .. tos(tlcWidth) .. "; minWidthValue: " ..tos(minWidthValue) .. "; minWidthType: " ..tos(minWidthType) .."; TLCMinWidth: " ..tos(TLC_SEARCH_UI_MIN_WIDTH))
     if tlcWidth == nil or tlcWidth <= 0 then
---d("<<ABORT tlcWidth")
+d("<<ABORT tlcWidth")
         return minWidthValue
     end
 
@@ -69,14 +71,14 @@ function lib.XMLGetDynamicWidth(XMLcontrol, minWidth, maxWidth, applyValues)
             --CurrentTLCWidth divided by TLCdefaultMinimumWidth
             if tlcWidth > TLC_SEARCH_UI_MIN_WIDTH then
                 local calculationFactor = zo_clamp(tlcWidth / TLC_SEARCH_UI_MIN_WIDTH, 1, 10) --max factor *10
-    --d(">>calculated factor: " .. tos(calculationFactor) .. ", widthFactorCalcBase: " ..tos(tlcWidth / TLC_SEARCH_UI_MIN_WIDTH))
+d(">>calculated factor: " .. tos(calculationFactor) .. ", widthFactorCalcBase: " ..tos(tlcWidth / TLC_SEARCH_UI_MIN_WIDTH))
                 newWidth = zo_clamp(minWidthValue * calculationFactor, minWidthValue, tlcWidth) --the minimum size multiplied by the factor = new desired width
             else
---d(">>using minWidthValue")
+d(">>using minWidthValue")
                 newWidth = minWidthValue
             end
         end
---d(">newWidth: " .. tos(newWidth))
+d(">newWidth: " .. tos(newWidth))
     end
 
     --Check if maxWidth was given, then check if our cotrol would be wider now, and resize to the maximum width then
@@ -98,9 +100,9 @@ function lib.XMLGetDynamicWidth(XMLcontrol, minWidth, maxWidth, applyValues)
 
     --Apply the new width to the XML control now?
     if applyValues then
-        if XMLcontrol.SetWidth then
---d("!>>Applying newWidth to the control now, maxWidthValue: " ..tos(maxWidthValue))
-            XMLcontrol:SetDimensionConstraints(newWidth, 10, newWidth, 30) --minX, minY, maxX, maxY
+        if XMLcontrol.SetDimensionConstraints then
+d("!>>Applying newWidth " ..tos(newWidth) .." to the control now, maxWidthValue: " ..tos(maxWidthValue))
+            XMLcontrol:SetDimensionConstraints(newWidth, minHeight, newWidth, maxHeight) --minX, minY, maxX, maxY
         end
     end
     return newWidth

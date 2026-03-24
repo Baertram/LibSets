@@ -95,22 +95,22 @@
 				<Label name="$(parent)SetType" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" maxX="30" />
+                    <DimensionConstraints minX="30" maxX="5%" />
 				</Label>
 				<Label name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)SetType" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" maxX="30" />
+                    <DimensionConstraints minX="30" maxX="5%" />
 				</Label>
 				<Label name="$(parent)EquipSlot" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" maxX="30" />
+                    <DimensionConstraints minX="30" maxX="5%" />
 				</Label>
 				<Label name="$(parent)DropLocations" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)EquipSlot" />
 					<Dimensions y="30" />
-                    <DimensionConstraints minX="300" maxX="300" />
+                    <DimensionConstraints minX="300" maxX="75%" />
 				</Label>
 				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DropLocations" />

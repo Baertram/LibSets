@@ -260,18 +260,19 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
 
     self:InitializeFilters() --> Filter data (masterlist base for ZO_SortFilterScrollList) was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
 
-    --Load the saved LibSets Search UI TopLevelControl position and size
-    self:LoadSearchUIPositionAndSize()
-
-    --Set the minX and maxX constraints of these controls initially
-    self:SetMultiSelectDropdownDimensionConstranints()
-
     --Results list -> ZO_SortFilterList
     self.counterControl = content:GetNamedChild("Counter")
 
     self.resultsListControl = content:GetNamedChild("List")
     self.resultsList = LibSets_SearchUI_List:New(content, self) --pass in the parent control of "Headers" and "List" -> "Contents"
 
+    --Load the saved LibSets Search UI TopLevelControl position and size
+    self:LoadSearchUIPositionAndSize()
+
+    --Set the minX and maxX constraints of the filter header controls
+    self:SetMultiSelectDropdownDimensionConstranints()
+    --Set the minX and maxX constraints of the resultsList header column controls
+    self.resultsList:SetHeaderAndColumnDimensionConstranints()
 
 
     --Tooltip
@@ -1068,22 +1069,32 @@ end
 
 
 --[[ XML Handlers ]]--
+local currentWidth, currentHeight
+local updateListColumnWithCounter = 0
 function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart)
     ZO_Tooltips_HideTextTooltip()
+    local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
     if resizeStart then
+        currentWidth, currentHeight = self:GetDimensions()
         --d("[LibSets]Keyboard TLC resize START - currentWidth: " ..tos(self:GetWidth()) .. ", currentHeight: " ..tos(self:GetHeight()))
+        libSetsSearchUIKeyboardObject.resultsList.updateListColumnWith = nil
     else
-        local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
+        local newWidth, newHeight = self:GetDimensions()
+        if (currentWidth and currentWidth ~= newWidth) or (newHeight and newHeight ~= currentHeight) then
+            --Save the TLC's size and position to the SavedVariables
+            libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize()
+            --Calculate the multiselect dropdown filter boxes size (width) based on the actual TLC width now
+            libSetsSearchUIKeyboardObject:SetMultiSelectDropdownDimensionConstranints()
+            --Set the column width update flag to the list so the next ZO_ScrollList's dataType setupFunction will resize the columns
+            updateListColumnWithCounter = updateListColumnWithCounter + 1
+            libSetsSearchUIKeyboardObject.resultsList.updateListColumnWith = updateListColumnWithCounter
 
-        --local newWidth, newHeight = self:GetDimensions()
-        --d("[LibSets]Keyboard TLC resize STOP - newWidth: " ..tos(newWidth) .. ", newHeight: " ..tos(newHeight))
-        --Commit the scrollList now to rebuild it's size
-        ZO_ScrollList_Commit(libSetsSearchUIKeyboardObject.resultsListControl)
-
-        --Save the TLC's size and position to the SavedVariables
-        libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize()
-        --Calculate the multiselect dropdown filter boxes size (width) based on the actual TLC width now
-        libSetsSearchUIKeyboardObject:SetMultiSelectDropdownDimensionConstranints()
+            --d("[LibSets]Keyboard TLC resize STOP - newWidth: " ..tos(newWidth) .. ", newHeight: " ..tos(newHeight))
+            --Commit the scrollList now to rebuild it's size
+            ZO_ScrollList_Commit(libSetsSearchUIKeyboardObject.resultsListControl)
+        end
+        currentWidth = nil
+        currentHeight = nil
     end
 end
 

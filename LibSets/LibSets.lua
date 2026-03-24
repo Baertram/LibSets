@@ -30,9 +30,11 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2026-03-19, Baertram, AP101049
+ Last updated: 2026-03-24, Baertram, AP101049
 ------------------------------------------------------------------------------------------------------------------------
  --Known bugs--
+ --260324 Set search UI DLC dropdown list got several blank entries?
+
 
  --Todo list--
 
@@ -43,7 +45,7 @@
     2) Integrate FCOItemSaver's marker icon mapping to LibSets set search favorite icons in FCOIS settings -> LibSets needs API to return the set search favorite icons for that to work
     -- and how do we make it properly apply the FCOIS marker icon to each current held set Item in all backs + new looted items? > Performance wise
 
-    3) Set search UI keyboard resizable
+    3) Set search UI keyboard resizable -- Working on
 
 
  --Currently working on--
