@@ -17,6 +17,12 @@
             <OnResizeStop>
                 LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, false)
             </OnResizeStop>
+            <OnMoveStart>
+                LibSets_SearchUI_Keyboard_TopLevel_OnMove(self, true)
+            </OnMoveStart>
+            <OnMoveStop>
+                LibSets_SearchUI_Keyboard_TopLevel_OnMove(self, false)
+            </OnMoveStop>
 
             <Controls>
                 <!-- Background -->

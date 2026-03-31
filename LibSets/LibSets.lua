@@ -934,6 +934,12 @@ local function LoadSavedVariables()
         --enableMasterCrafterSetsFavorites = true,
 
         --Search UI
+        searchUI = {
+            x = 0,
+            y = 0,
+            width = 934,
+            height = 600,
+        },
         setSearchTooltipsAtTextFilters = true,
         setSearchTooltipsAtFilters = true,
         setSearchTooltipsAtFilterEntries = true,

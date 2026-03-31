@@ -18,9 +18,8 @@ local libSets_GetSetItemIds = lib.GetSetItemIds
 local searchUI = lib.SearchUI
 local searchUIKeyboardVars = searchUI.KeyboardVars
 local searchUIName = searchUI.name
-local MIN_WIDTH =   searchUIKeyboardVars.minWidth
-local MIN_HEIGHT =  searchUIKeyboardVars.minHeight
-
+local TLC_SEARCH_UI_MIN_WIDTH =   searchUIKeyboardVars.minWidth
+local TLC_SEARCH_UI_MIN_HEIGHT=  searchUIKeyboardVars.minHeight
 
 local searchUIThrottledSearchHandlerName = searchUIName .. "_ThrottledSearch"
 local searchUIThrottledDelay = 500
@@ -102,7 +101,7 @@ function LibSets_SearchUI_Keyboard:New(...)
 end
 
 function LibSets_SearchUI_Keyboard:Initialize(control)
-    LibSets_SearchUI_Shared.Initialize(self, control) --Call Shared master class initialization first: Sets control._object = self
+    LibSets_SearchUI_Shared.Initialize(self, control) --Call Shared master class initialization first: Sets self.comtrol = control, and control._object = self
 
     local backGround = self.control:GetNamedChild("BG")
     backGround:SetAlpha(1)
@@ -289,14 +288,37 @@ end
 --- UI
 ------------------------------------------------
 --Load the LibSets Search UI position and size from the SavedVariables
-function LibSets_SearchUI_Keyboard:LoadSearchUIPositionAndSize()
-    --todo read saved SV position and size and apply to the TopLevelControl so the dropdown boxes can re-apply their
-    --calculated size too
+function LibSets_SearchUI_Keyboard:LoadSearchUIPositionAndSize(tlcCtrl)
+    --Read saved SV position and size and apply to the TopLevelControl so the dropdown boxes can re-apply their
+    tlcCtrl = tlcCtrl or self.control
+    if tlcCtrl == nil then return end
+    local searchUISV = lib.svData.searchUI
+    if searchUISV == nil then return end
+
+    tlcCtrl:ClearAnchors()
+    tlcCtrl:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, searchUISV.x, searchUISV.y)
+    tlcCtrl:SetDimensions(searchUISV.width, searchUISV.height)
 end
 
 --Save the LibSets Search UI position and size to the SavedVariables
-function LibSets_SearchUI_Keyboard:SaveSearchUIPositionAndSize()
-    --todo save position and size to the SV
+function LibSets_SearchUI_Keyboard:SaveSearchUIPositionAndSize(tlcCtrl)
+    --Save position and size to the SV
+    tlcCtrl = tlcCtrl or self.control
+    if tlcCtrl == nil then return end
+    local searchUISV = lib.svData.searchUI
+    if searchUISV == nil then return end
+
+    local x, y = tlcCtrl:GetLeft(), tlcCtrl:GetTop()
+    if x <= 0 then x = 0 end
+    if y <= 0 then y = 0 end
+    searchUISV.x = x
+    searchUISV.y = y
+
+    local width, height = tlcCtrl:GetDimensions()
+    if width <= TLC_SEARCH_UI_MIN_WIDTH then width = TLC_SEARCH_UI_MIN_WIDTH end
+    if height <= TLC_SEARCH_UI_MIN_HEIGHT then height = TLC_SEARCH_UI_MIN_HEIGHT end
+    searchUISV.width = width
+    searchUISV.height = height
 end
 
 
@@ -1084,7 +1106,7 @@ function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart)
         local newWidth, newHeight = self:GetDimensions()
         if (currentWidth and currentWidth ~= newWidth) or (newHeight and newHeight ~= currentHeight) then
             --Save the TLC's size and position to the SavedVariables
-            libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize()
+            libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize(self)
             --Calculate the multiselect dropdown filter boxes size (width) based on the actual TLC width now
             libSetsSearchUIKeyboardObject:SetMultiSelectDropdownDimensionConstranints()
             --Set the column width update flag to the list so the next ZO_ScrollList's dataType setupFunction will resize the columns
@@ -1097,6 +1119,14 @@ function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart)
         end
         currentWidth = nil
         currentHeight = nil
+    end
+end
+
+function LibSets_SearchUI_Keyboard_TopLevel_OnMove(self, moveStart)
+    ZO_Tooltips_HideTextTooltip()
+    local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
+    if not moveStart then
+        libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize(self)
     end
 end
 

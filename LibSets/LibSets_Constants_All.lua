@@ -230,6 +230,7 @@ lib.dlcAndChapterCollectibleIds = {
     --Seasons of the Wormcult Part2
     [DLC_SEASONS_OF_THE_WORMCULT2] = {collectibleId=nil, achievementCategoryId=13, type=DLC_TYPE_SEASON_PART, releaseDate=1760702400}, --October 17th 2025  --text ok 260331
     --Season 0
+    --TODO add achievementCategoryIndex or collectibleID!
     [DLC_SEASON0]                  = {collectibleId=nil, achievementCategoryId=nil, type=DLC_TYPE_SEASON_PART, releaseDate=1773057600} -- March 9th 2026 --todo text missing 260331
 }
 if checkIfPTSAPIVersionIsLive() then
