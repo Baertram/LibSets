@@ -109,7 +109,7 @@ LIBSETS_TABLEKEY_WAYSHRINES                         = "wayshrines"
 LIBSETS_TABLEKEY_WAYSHRINE_NAMES                    = "wayshrine" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_ZONE_DATA                          = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                 = "dungeonFinderData"
-LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                  = "collectible" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES         = "achievementCategories" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID             = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_MIXED_SETNAMES                     = "MixedSetNamesForDataAll"
 LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP           = "setProcsAllowedInPvP"
@@ -341,9 +341,9 @@ local LIBSETS_TABLEKEY_WAYSHRINE_NAMES                        = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_ZONEIDS                                = LIBSETS_TABLEKEY_ZONEIDS                               
 --local LIBSETS_TABLEKEY_ZONEIDS_SORTED                         = LIBSETS_TABLEKEY_ZONEIDS_SORTED
 local LIBSETS_TABLEKEY_ZONE_DATA                              = LIBSETS_TABLEKEY_ZONE_DATA                             
-local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                    
-local LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                      = LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     
-local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                 
+local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
+local LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES             = LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES
+local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES
 local LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                 = LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                
 local LIBSETS_TABLEKEY_DROPMECHANIC                           = LIBSETS_TABLEKEY_DROPMECHANIC
 --local LIBSETS_TABLEKEY_DROPMECHANIC_SORTED                    = LIBSETS_TABLEKEY_DROPMECHANIC_SORTED
@@ -514,7 +514,7 @@ local callDebugParams = {
     shownewsets         = "DebugShowNewSetIds",
 
     getdungeons         = "DebugGetDungeonFinderData",
-    getcollectiblenames = "DebugGetAllCollectibleNames",
+    getachievementcategorynames = "DebugGetAllAchievementCategoryNames",
     getdlcnames         = "DebugGetAllCollectibleDLCNames",
 }
 
@@ -977,7 +977,7 @@ local function LoadSavedVariables()
         [LIBSETS_TABLEKEY_WAYSHRINE_NAMES]          = {},
         [LIBSETS_TABLEKEY_ZONE_DATA]                = {},
         [LIBSETS_TABLEKEY_DUNGEONFINDER_DATA]       = {},
-        [LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]        = {},
+        [LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] = {},
         [LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]    = {},
     }
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
@@ -5590,7 +5590,7 @@ local function slash_debug_help()
     d("|-> \'getwayshrinenames\'    Get all wayshrine names of the current client language")
     d("|-> \'getsetnames\'          Get all set names of the current client language")
     d("|-> \'getdungeons\'          Get the dungeon data. If the dungeon's view at the group window is not yet opened it will be opened.")
-    d("|-> \'getcollectiblenames\'  Get the collectible names of all collectibles of the current client language.")
+    d("|-> \'getachievementcategorynames\'  Get the achievement category names of all achievements of the current client language.")
     d("|-> \'getdlcnames\'          Get the DLC collectible names of the current client language.")
     d("|-> \'shownewsets\'          Show the new setIds and names of sets which were scanned and found but not transfered to the preoaded data yet. Needs to run \'scanitemids\' first!")
     d("|-> \'scanitemids\'          Scan all itemIds of sets")

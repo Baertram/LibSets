@@ -48,7 +48,7 @@
                                                 |   ---> The function will try to do this automatically for you
                                                 |-> This function is not client language dependent!
 -------------------------------------------------------------------------------------------------------------------------------------------------
-    LibSets.DebugGetAllCollectibleNames()       |   Get all the collectible ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
+    LibSets.DebugGetAllAchievementCategoryNames()|  Get all the achievement category ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
                                                 |-> This function IS client language dependent!
@@ -162,7 +162,7 @@ local LIBSETS_TABLEKEY_WAYSHRINES                             = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_WAYSHRINE_NAMES                        = LIBSETS_TABLEKEY_WAYSHRINE_NAMES
 local LIBSETS_TABLEKEY_ZONE_DATA                              = LIBSETS_TABLEKEY_ZONE_DATA
 local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
-local LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                      = LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
+local LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES            = LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES
 local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES
 
 -------------------------------------------------------------------------------------------------------------------------------
@@ -461,9 +461,9 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES]                    = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]       = nil
 
     else
         lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
@@ -482,9 +482,9 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES]                    = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]       = nil
     end
     d(libPrefix .. "Cleared all SavedVariables".. onlyNamesText .." in file \'" .. MAJOR .. ".lua\'.")
     if noReloadInfo == true then return end
@@ -1203,41 +1203,46 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
 end
 local debugGetDungeonFinderData = lib.DebugGetDungeonFinderData
 
---This function scans the collectibles for their names to provide a list for the new DLCs and chapters
---Parameters: collectibleStartId number, the start ID of the collectibles to start the scan FROM
---            collectibleEndId number, the end ID of the collectibles to start the scan TO
-function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId, noReloadInfo)
-    collectibleStartId = collectibleStartId or 1
-    collectibleEndId = collectibleEndId or lib.debugMaxCollectibleIds
-    noReloadInfo = noReloadInfo or false
+--This function scans the achievements categories for their names to provide a list containing e.g. the new DLCs/chapters/seasons
+--Parameters: achievementStartId number, the start ID of the achievement to start the scan FROM
+--            achievementEndId number, the end ID of the achievement to start the scan TO
+--            noReloadInfo boolean, suppress the reload UI information at the end
+--            ingameList boolean, if true the SavedVariables will be created with an ingame readbale list (via merTorchbug e.g.), not using any |
+function lib.DebugGetAllAchievementCategoryNames(achievementStartId, achievementEndId, noReloadInfo, ingameList)
+    achievementStartId = achievementStartId or 1
+    achievementEndId   = achievementEndId or lib.debugMaxCollectibleIds
+    noReloadInfo       = noReloadInfo or false
 
     if nonOfficialLanguages[clientLang] then return end
 
-    if collectibleEndId < collectibleStartId then collectibleEndId = collectibleStartId end
-    d(libPrefix .. "Start to load all collectibles with start ID ".. collectibleStartId .. " to end ID " .. collectibleEndId .. "...")
-    local collectiblesAdded = 0
-    local collectibleDataScanned
-    for i=collectibleStartId, collectibleEndId, 1 do
+    if achievementEndId < achievementStartId then achievementEndId = achievementStartId end
+    d(libPrefix .. "Start to load all collectibles with start ID ".. achievementStartId .. " to end ID " .. achievementEndId .. "...")
+    local achievementCategoriesAdded = 0
+    local achievementDataScanned
+    local alreadyAdded = {}
+    for i= achievementStartId, achievementEndId, 1 do
         local topLevelIndex, categoryIndex = GetCategoryInfoFromAchievementId(i)
-        local collectibleName = zocstrfor("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
-        if collectibleName and collectibleName ~= "" then
-            collectibleDataScanned = collectibleDataScanned or {}
-            collectibleDataScanned[i] = tos(i) .. "|" .. collectibleName
-            collectiblesAdded = collectiblesAdded +1
+        local achievementCategoryName      = zocstrfor("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
+        if achievementCategoryName and achievementCategoryName ~= "" and not alreadyAdded[achievementCategoryName] then
+            alreadyAdded[achievementCategoryName] = true
+            achievementDataScanned                = achievementDataScanned or {}
+
+            achievementDataScanned[i]  = ((not ingameList and tos(i) .. "|") or "") .. achievementCategoryName
+            achievementCategoriesAdded = achievementCategoriesAdded +1
         end
     end
-    if collectiblesAdded > 0 then
-        tsort(collectibleDataScanned)
+    if achievementCategoriesAdded > 0 then
+        tsort(achievementDataScanned)
         LoadSavedVariables()
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] or {}
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = {}
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = collectibleDataScanned
-        d("->Stored " .. tos(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tos(clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES]             = lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES][clientLang] = achievementDataScanned
+        d("->Stored " .. tos(achievementCategoriesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES .. "\', language: \'" ..tos(clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
         if noReloadInfo == true then return end
         d("Please do a /reloadui or logout to update the SavedVariables data now!")
     end
 end
-local debugGetAllCollectibleNames = lib.DebugGetAllCollectibleNames
+local debugGetAllAchievementCategoryNames = lib.DebugGetAllAchievementCategoryNames
 
 --This function scans the collectibles for their DLC names to provide a list for the new DLCs and chapters
 --Saves a line with collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
@@ -1372,7 +1377,7 @@ local debugShowNewSetIds = lib.DebugShowNewSetIds
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames(noReloadInfo)
     noReloadInfo = noReloadInfo or false
-    debugGetAllCollectibleNames(nil, nil, noReloadInfo)
+    debugGetAllAchievementCategoryNames(nil, nil, noReloadInfo)
     d(">>>--------------->>>")
     debugGetAllCollectibleDLCNames(noReloadInfo)
     d(">>>--------------->>>")

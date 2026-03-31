@@ -152,7 +152,7 @@ lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the clien
 
 
 --the maximum collectiblIds to scan via debug functions
-lib.debugMaxCollectibleIds = 15000
+lib.debugMaxCollectibleIds = 250000
 
 ------------------------------------------------------------------------------------------------------------------------
 --base game languages
@@ -264,7 +264,7 @@ LIBSETS_TABLEKEY_ZONEIDS                               = "zoneIds"
 LIBSETS_TABLEKEY_ZONEIDS_SORTED                        = "zoneIdsSorted"
 LIBSETS_TABLEKEY_ZONE_DATA                             = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                    = "dungeonFinderData"
-LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     = "collectible" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES            = "achievementCategory" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                 = "collectible_DLC" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_DROPMECHANIC                          = "dropMechanic"

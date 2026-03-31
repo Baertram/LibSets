@@ -449,6 +449,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if isLSMEnabled then self.LSM_Dropdowns = {} end
     local filters = self.filtersControl
 
+    local AddCustomScrollableComboBoxDropdownMenu = AddCustomScrollableComboBoxDropdownMenu
+
     ------------------------------------------------
     local function OnFilterChanged(dropdownControl)
         self:OnFilterChanged(dropdownControl)
