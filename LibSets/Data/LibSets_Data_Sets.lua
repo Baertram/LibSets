@@ -145,7 +145,7 @@ local setInfo = {
 [850] = {wayshrines={616,616,616,}, dlcId=DLC_SEASON0	, zoneIds={1559,1559,1559}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_NIGHT_MARKET}	}, --Thousand Eyes / Tausend Augen   [Night Market, Night Market, Night Market]
 [849] = {wayshrines={616,616,616,}, dlcId=DLC_SEASON0	, zoneIds={1559,1559,1559}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_NIGHT_MARKET}	}, --Glittering Goad / Glanzvoller Ansporn   [Night Market, Night Market, Night Market]
 [851] = {wayshrines={616,616,616,}, dlcId=DLC_SEASON0	, zoneIds={1559,1559,1559}, veteran={[EQUIP_TYPE_HEAD]=true, [EQUIP_TYPE_SHOULDERS]=false}	, setType=LIBSETS_SETTYPE_MONSTER	, dropMechanic={LIBSETS_DROP_MECHANIC_NIGHT_MARKET}	}, --The Ruckus / Der Krawall   [Night Market, Night Market, Night Market]
-[855] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SEASON0	, zoneIds={181}, veteran=false	, setType=LIBSETS_SETTYPE_CYRODIIL		}, --Gorethief / Blutdieb   [Cyrodiil]
+[855] = {wayshrines={-1,-1,-1,}, dlcId=DLC_SEASON0	, zoneIds={181,181,181,181,181,181}, veteran=false	, setType=LIBSETS_SETTYPE_CYRODIIL	, dropMechanic={LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY,LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS,LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT,LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY,LIBSETS_DROP_MECHANIC_OVERLAND_BOSS_DELVE,LIBSETS_DROP_MECHANIC_DOLMEN_HARROWSTORM_MAGICAL_ANOMALIES}	}, --Gorethief / Blutdieb   [Cyrodiil, Cyrodiil, Cyrodiil, Cyrodiil, Cyrodiil, Cyrodiil]
 } --lib.setInfo
 lib.setInfo = setInfo
 

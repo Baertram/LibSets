@@ -145,6 +145,7 @@ local libPrefix = lib.prefix
 local libPrefixWithVersion = "[".. MAJOR .. " v" .. tos(MINOR).."]"
 local storedInSVFileLibSetsInTable = "->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table "
 local pleaseReloadUI = ">Please do a /reloadui to update the file properly!"
+local upperCaseFirstFormatter = "<<C:1>>"
 
 
 --LibSets constants
@@ -218,7 +219,7 @@ local function GetAllZoneInfo()
             --With API100027 Elsywer every non-used zoneIndex will be 1 instead 0 :-(
             --So we need to check if the zoneIndex is 1 and the zoneId <> the zoneId for index 1
             if (zi == 1 and zoneId == zoneIndex1ZoneId) or zi ~= 1 then
-                local zoneNameClean = zostrfor("<<C:1>>", gznbidx(zi))
+                local zoneNameClean = zostrfor(upperCaseFirstFormatter, gznbidx(zi))
                 if zoneNameClean ~= nil then
                     zoneData[clientLang][zoneId] = zoneId .. "|" .. zi .. "|" .. pzid .. "|" ..zoneNameClean
                 end
@@ -241,15 +242,15 @@ local function GetWayshrineInfo()
     if currentMapsZoneIndex == nil then d("<-Error: map zone index missing." .. errorMapNavigateText) return end
     local currentZoneId = gzid(currentMapsZoneIndex)
     if currentZoneId == nil then d("<-Error: map zone id missing." .. errorMapNavigateText) return end
-    local currentMapName = zocstrfor("<<C:1>>", currentMapIndex and GetMapNameByIndex(currentMapIndex) or gmnbid(currentMapId))
-    local currentZoneName = zocstrfor("<<C:1>>", gznbidx(currentMapsZoneIndex))
+    local currentMapName = zocstrfor(upperCaseFirstFormatter, currentMapIndex and GetMapNameByIndex(currentMapIndex) or gmnbid(currentMapId))
+    local currentZoneName = zocstrfor(upperCaseFirstFormatter, gznbidx(currentMapsZoneIndex))
     d("->mapIndex: " .. tos(currentMapIndex) .. ", mapId: " .. tos(currentMapId) ..
             ", mapName: " .. tos(currentMapName) .. ", mapZoneIndex: " ..tos(currentMapsZoneIndex) .. ", zoneId: " .. tos(currentZoneId) ..
             ", zoneName: " ..tos(currentZoneName))
     for i=1, gnftn(), 1 do
         local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = gftninf(i)
         if wsisShownInCurrentMap then
-            local wsNameStripped = zocstrfor("<<C:1>>",wsname)
+            local wsNameStripped = zocstrfor(upperCaseFirstFormatter,wsname)
             d("->[" .. tos(i) .. "] " ..tos(wsNameStripped))
             --Export for excel split at | char
             --WayshrineNodeId, mapIndex, mapId, mapName, zoneIndex, zoneId, zoneName, POIType, wayshrineName
@@ -272,7 +273,7 @@ local function GetWayshrineNames()
         --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
         local _, wsLocalizedName = gftninf(wsNodeId)
         if wsLocalizedName ~= nil then
-            local wsLocalizedNameClean = zocstrfor("<<C:1>>", wsLocalizedName)
+            local wsLocalizedNameClean = zocstrfor(upperCaseFirstFormatter, wsLocalizedName)
             wsNames[clientLang][wsNodeId] = tos(wsNodeId) .. "|" .. wsLocalizedNameClean
         end
     end
@@ -314,7 +315,7 @@ local function GetMapNames(lang)
             if zoneId and not zoneIdsLocalized[zoneId] then
                 local zoneName = gznbidx(zoneIndex)
                 if not zoneName or zoneName == "" then zoneName = unknownName end
-                zoneIdsLocalized[zoneId] = zocstrfor("<<C:1>>", zoneName)
+                zoneIdsLocalized[zoneId] = zocstrfor(upperCaseFirstFormatter, zoneName)
             end
         end
     end
@@ -324,7 +325,7 @@ local function GetMapNames(lang)
         local mapId = GetMapIdByIndex(mapIndex)
         --d(">zoneId: " ..tos(zoneId) .. ", mapIndex: " ..tos(mapIndex))
         if mapIndex ~= nil then
-            local mapName = zocstrfor("<<C:1>>", GetMapNameByIndex(mapIndex))
+            local mapName = zocstrfor(upperCaseFirstFormatter, GetMapNameByIndex(mapIndex))
             if mapName ~= nil then
                 mapNames[mapIndex] = tos(mapId) .. "|" .. tos(mapIndex) .. "|" .. mapName .. "|" .. tos(zoneId) .. "|" .. zoneNameLocalized
             end
@@ -729,7 +730,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                                 setName = ""
                                 setName = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId][fallbackLang] or "n/a"
                             else
-                                setName = zocstrfor("<<C:1>>", setName)
+                                setName = zocstrfor(upperCaseFirstFormatter, setName)
                             end
 
                             --if isNewSet == true then
@@ -849,7 +850,7 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
                     end
                     if newSetName == nil then newSetName = unknownName end
                     if newSetName ~= unknownName then
-                        newSetName = zocstrfor("<<C:1>>", newSetName)
+                        newSetName = zocstrfor(upperCaseFirstFormatter, newSetName)
                     else
                         newSetName = unknownName .. " - Name unknown in LibSets.setDataPreloaded[\'" .. LIBSETS_TABLEKEY_SETNAMES .. "\']"
                     end
@@ -950,7 +951,7 @@ local function loadSetsByIds(packageNr, from, to, noReloadInfo)
 
                                 --Update the set name of the client language, if missing
                                 if setName ~= nil and not setNames[setId] or setNames[setId] ~= nil and not setNames[setId][clientLang] then
-                                    local setNameClean = zocstrfor("<<C:1>>", setName)
+                                    local setNameClean = zocstrfor(upperCaseFirstFormatter, setName)
                                     if setNameClean ~= nil then
                                         setNames[setId] = setNames[setId] or {}
                                         setNames[setId][clientLang] = setNameClean
@@ -1121,7 +1122,7 @@ local function getNewSetName(newSetId)
     if not setItemLink or setItemLink == "" then return unknownName end
     --                hasSet bool, setName string, numBonuses integer, numEquipped integer, maxEquipped integer, setId integer
     local hasSet, setName, _, _, _, setId = gilsetinf(setItemLink, false)
-    if hasSet == true and setId == newSetId then return zocstrfor("<<C:1>>", setName) end
+    if hasSet == true and setId == newSetId then return zocstrfor(upperCaseFirstFormatter, setName) end
     return unknownName
 end
 
@@ -1212,27 +1213,27 @@ function lib.DebugGetAllAchievementCategoryNames(achievementStartId, achievement
     achievementStartId = achievementStartId or 1
     achievementEndId   = achievementEndId or lib.debugMaxCollectibleIds
     noReloadInfo       = noReloadInfo or false
+    ingameList         = ingameList or false
 
     if nonOfficialLanguages[clientLang] then return end
 
     if achievementEndId < achievementStartId then achievementEndId = achievementStartId end
-    d(libPrefix .. "Start to load all collectibles with start ID ".. achievementStartId .. " to end ID " .. achievementEndId .. "...")
+    d(libPrefix .. "Start to load all achievements with start ID ".. achievementStartId .. " to end ID " .. achievementEndId .. "...")
     local achievementCategoriesAdded = 0
-    local achievementDataScanned
+    local achievementDataScanned = {}
     local alreadyAdded = {}
     for i= achievementStartId, achievementEndId, 1 do
-        local topLevelIndex, categoryIndex = GetCategoryInfoFromAchievementId(i)
-        local achievementCategoryName      = zocstrfor("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
-        if achievementCategoryName and achievementCategoryName ~= "" and not alreadyAdded[achievementCategoryName] then
-            alreadyAdded[achievementCategoryName] = true
-            achievementDataScanned                = achievementDataScanned or {}
-
-            achievementDataScanned[i]  = ((not ingameList and tos(i) .. "|") or "") .. achievementCategoryName
-            achievementCategoriesAdded = achievementCategoriesAdded +1
+        local topLevelIndex = GetCategoryInfoFromAchievementId(i)
+        if topLevelIndex ~= nil then
+            local achievementCategoryName = zocstrfor(upperCaseFirstFormatter, GetAchievementCategoryInfo(topLevelIndex))
+            if achievementCategoryName and achievementCategoryName ~= "" and not alreadyAdded[achievementCategoryName] then
+                alreadyAdded[achievementCategoryName] = true
+                achievementDataScanned[topLevelIndex]  = ((not ingameList and tos(topLevelIndex) .. "|") or "") .. achievementCategoryName
+                achievementCategoriesAdded = achievementCategoriesAdded +1
+            end
         end
     end
     if achievementCategoriesAdded > 0 then
-        tsort(achievementDataScanned)
         LoadSavedVariables()
         lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES]             = lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] or {}
         lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES][clientLang] = {}
@@ -1263,7 +1264,7 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
         for i=1, numCollectibles do
             local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex, i)
             local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-            collectibleName = zocstrfor("<<C:1>>", collectibleName)
+            collectibleName = zocstrfor(upperCaseFirstFormatter, collectibleName)
             dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
             collectiblesAdded = collectiblesAdded +1
         end
@@ -1275,7 +1276,7 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
         for i=1, numCollectibles do
             local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex, i)
             local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-            collectibleName = zocstrfor("<<C:1>>", collectibleName)
+            collectibleName = zocstrfor(upperCaseFirstFormatter, collectibleName)
             dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
             collectiblesAdded = collectiblesAdded +1
         end
@@ -1285,14 +1286,14 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleIndex)
         local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-        collectibleName = zocstrfor("<<C:1>>", collectibleName)
+        collectibleName = zocstrfor(upperCaseFirstFormatter, collectibleName)
         dlcNames[collectibleId] = collectibleId .. "|DLC|" .. collectibleName
         collectiblesAdded = collectiblesAdded +1
     end
     for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleIndex)
         local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-        collectibleName = zocstrfor("<<C:1>>", collectibleName)
+        collectibleName = zocstrfor(upperCaseFirstFormatter, collectibleName)
         dlcNames[collectibleId] = collectibleId .. "|CHAPTER|" .. collectibleName
         collectiblesAdded = collectiblesAdded +1
     end
@@ -1333,7 +1334,7 @@ function lib.DebugShowNewSetIds(noChatOutput)
             if newSetName == nil or newSetName == "" then
                 newSetName = getNewSetName(newSetId)
             end
-            newSetName = zocstrfor("<<C:1>>", newSetName)
+            newSetName = zocstrfor(upperCaseFirstFormatter, newSetName)
             if not noChatOutput then d(strfor(">>New setId found: %s -> name: %s", tos(newSetId), tos(newSetName))) end
             if newSetName and newSetName ~= unknownName then
                 tempSetNamesOfClientLang = tempSetNamesOfClientLang or {}
