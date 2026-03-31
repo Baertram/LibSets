@@ -162,7 +162,7 @@ local LIBSETS_TABLEKEY_WAYSHRINES                             = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_WAYSHRINE_NAMES                        = LIBSETS_TABLEKEY_WAYSHRINE_NAMES
 local LIBSETS_TABLEKEY_ZONE_DATA                              = LIBSETS_TABLEKEY_ZONE_DATA
 local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
-local LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES            = LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES
+local LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES             = LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES
 local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES
 
 -------------------------------------------------------------------------------------------------------------------------------
@@ -462,7 +462,7 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES]                    = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]       = nil
 
     else
@@ -483,7 +483,7 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES]                    = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]       = nil
     end
     d(libPrefix .. "Cleared all SavedVariables".. onlyNamesText .." in file \'" .. MAJOR .. ".lua\'.")
@@ -1234,10 +1234,10 @@ function lib.DebugGetAllAchievementCategoryNames(achievementStartId, achievement
     if achievementCategoriesAdded > 0 then
         tsort(achievementDataScanned)
         LoadSavedVariables()
-        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES]             = lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES] or {}
-        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES][clientLang] = {}
-        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES][clientLang] = achievementDataScanned
-        d("->Stored " .. tos(achievementCategoriesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORIY_NAMES .. "\', language: \'" ..tos(clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES]             = lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES][clientLang] = achievementDataScanned
+        d("->Stored " .. tos(achievementCategoriesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES .. "\', language: \'" ..tos(clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
         if noReloadInfo == true then return end
         d("Please do a /reloadui or logout to update the SavedVariables data now!")
     end
