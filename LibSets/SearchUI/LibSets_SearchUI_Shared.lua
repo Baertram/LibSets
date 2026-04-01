@@ -1480,14 +1480,37 @@ function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId, fav
     if not self:IsSetIdInFavorites(setId, favoriteCategory) then return end
     if possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory] == nil then return end
 
+    local wasRemoved = false
     if lib.svData.setSearchFavorites[favoriteCategory] ~= nil then
-        lib.svData.setSearchFavorites[favoriteCategory][setId] = nil
+        if lib.svData.setSearchFavorites[favoriteCategory][setId] ~= nil then
+            lib.svData.setSearchFavorites[favoriteCategory][setId] = nil
+            wasRemoved = true
+        end
     end
+    if wasRemoved then
+        self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
+        CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoved", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
 
-    self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
-    CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoved", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
+        self.resultsList:RefreshData() --To update filtered rows
+    end
+end
 
-    self.resultsList:RefreshData() --To update filtered rows
+function LibSets_SearchUI_Shared:RemoveSetIdFromAllFavorites(rowControl, setId)
+    local setSearchFavorites = lib.svData.setSearchFavorites
+    local wasRemoved = false
+    for favoriteCategory, setIds in pairs(setSearchFavorites) do
+        for setIdToCompare, _ in pairs(setIds) do
+            if setIdToCompare == setId then
+                setSearchFavorites[favoriteCategory][setId] = nil
+                wasRemoved = true
+                self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
+                CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoved", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
+            end
+        end
+    end
+    if wasRemoved then
+        self.resultsList:RefreshData() --To update filtered rows
+    end
 end
 
 function LibSets_SearchUI_Shared:RemoveAllSetFavorites(favoriteCategory)
@@ -1608,14 +1631,17 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     local owningWindow = rowControl:GetOwningWindow()
 
     local setName = zocstrfor("<<1>>", data.name)
+    local setTypeName = data.setTypeName
     local setTypeTexture = data.setTypeTexture
     local searchEntryText = getLocalizedText("setCollectionsSearchItemLink", clientLang, setName)
     local searchEntryTextWithTexture = (setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText
-    local setNameWithTexture = ((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. setName) or setName) .. " [" ..tos(setId) .. "]"
+    local setNameWithSetId           = setName .. " [" ..tos(setId) .. "]"
 
     ClearCustomScrollableMenu()
 
-    AddCustomScrollableMenuHeader(setNameWithTexture)
+    AddCustomScrollableMenuHeader(setNameWithSetId)
+    AddCustomScrollableMenuEntry((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. setTypeName) or setTypeName,
+                                    function() end, LSM_ENTRY_TYPE_NORMAL, nil, { enabled = false })
 
     --Link to chat
     AddCustomScrollableMenuEntry(getLocalizedText("linkToChat"), function()
@@ -1654,7 +1680,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end
         },
     }
-    AddCustomScrollableMenuEntry(getLocalizedText("popupTooltip"), function()  self:ShowItemLinkPopupTooltip(owningWindow, data)  end)
+    AddCustomScrollableMenuEntry(getLocalizedText("popupTooltip"), function() self:ShowItemLinkPopupTooltip(owningWindow, data) end)
     AddCustomScrollableSubMenuEntry(getLocalizedText("popupTooltipPosition"), popupTooltipSubmenu)
 
     --Set favorites
@@ -1662,6 +1688,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         --Set search favorites
         local setSearchFavorites = lib.svData.setSearchFavorites
         local wasFavoriteHeaderAdded = false
+        local removeAllFavoritesAdded = false
         local favoriteCategoriesToAddSubmenuEntries = {}
         for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
             local favoriteCategory = favoriteCategoryData.category
@@ -1672,6 +1699,12 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 wasFavoriteHeaderAdded = true
             end
             if self:IsSetIdInFavorites(setId, favoriteCategory) then
+                if not removeAllFavoritesAdded then
+                    removeAllFavoritesAdded = true
+                    AddCustomScrollableMenuEntry(GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " - " .. GetString(SI_HOUSINGFURNITUREBOUNDFILTER0), function()
+                        self:RemoveSetIdFromAllFavorites(rowControl, setId)
+                    end)
+                end
                 AddCustomScrollableMenuEntry(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
                     self:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)
                 end)
