@@ -23,7 +23,7 @@
         <!-- Virtual Sort headers -->
         <Control name="LibSetsSearchUISortHeader" inherits="ZO_SortHeaderBehavior" virtual="true" level="2">
             <Controls>
-                <Label name="$(parent)Name" font="MyFontGame18" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                <Label name="$(parent)Name" font="MyFontGame18" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
                     <AnchorFill />
                 </Label>
             </Controls>
@@ -67,6 +67,7 @@
 
 		<!-- Virtual labels -->
         <Label name="LibSetsSearchUIRowLabel" font="MyFontGame16" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER" virtual="true" />
+        <Label name="LibSetsSearchUIRowLabelRightAlign" font="MyFontGame16" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT" verticalAlignment="CENTER" virtual="true" />
 
         <!-- Virtual Rows -->
 		<Control name="LibSetsSearchUIRow" mouseEnabled="true" virtual="true" hidden="false">
@@ -84,39 +85,32 @@
 				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
 				<Label name="$(parent)Favorite" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" />
-					<Dimensions y="30" />
-                    <DimensionConstraints minX="24" maxX="24" />
+                    <DimensionConstraints minX="24" maxX="24" minY="30" maxY="30" />
 				</Label>
 				<Label name="$(parent)Name" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Favorite" />
-					<Dimensions y="30" />
-                    <DimensionConstraints minX="350" maxX="350" />
+                    <DimensionConstraints minX="400" maxX="400" minY="30" maxY="30" />
 				</Label>
 				<Label name="$(parent)SetType" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" />
-					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" maxX="5%" />
+                    <DimensionConstraints minX="40" maxX="40" minY="30" maxY="30" />
 				</Label>
 				<Label name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)SetType" />
-					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" maxX="5%" />
+                    <DimensionConstraints minX="40" maxX="40" minY="30" maxY="30" />
 				</Label>
 				<Label name="$(parent)EquipSlot" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
-					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" maxX="5%" />
+                    <DimensionConstraints minX="40" maxX="40" minY="30" maxY="30" />
 				</Label>
 				<Label name="$(parent)DropLocations" inherits="LibSetsSearchUIRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)EquipSlot" />
-					<Dimensions y="30" />
-                    <DimensionConstraints minX="300" maxX="75%" />
+                    <DimensionConstraints minX="300" maxX="1200" minY="30" maxY="30" />
 				</Label>
-				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabel">
-					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DropLocations" />
-					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
-					<Dimensions y="30" />
-                    <DimensionConstraints minX="30" maxX="30" />
+				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabelRightAlign">
+					<!--<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DropLocations" /> -->
+					<Anchor point="RIGHT" relativePoint="RIGHT" offsetX="-4" />
+                    <DimensionConstraints minX="40" maxX="40" minY="30" maxY="30" />
 				</Label>
 			</Controls>
 		</Control>

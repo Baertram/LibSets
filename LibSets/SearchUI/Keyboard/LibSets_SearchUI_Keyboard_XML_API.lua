@@ -14,11 +14,12 @@ local TLC_SEARCH_UI_MIN_HEIGHT=  searchUIKeyboardVars.minHeight
 
 --[[ XML API functions ]]--
 --LibSets.XMLGetDynamicMinWidth - Calculate the minimum width based on the width of the TopLevelControl
-function lib.XMLGetDynamicWidth(XMLcontrol, minWidth, maxWidth, applyValues, minHeight, maxHeight)
+function lib.XMLGetDynamicWidth(XMLcontrol, minWidth, maxWidth, applyValues, minHeight, maxHeight, forceMaxWidth)
     minHeight = minHeight or 10
     maxHeight = maxHeight or 30
     applyValues = applyValues or false
-d("[LibSets]XMLGetDynamicMinWidth - XMLControl: " .. tos(XMLcontrol:GetName()) .. ", minWidth: " .. tos(minWidth) .. ", maxWidth: " .. tos(maxWidth) .. ", applyValues: " ..tos(applyValues))
+    forceMaxWidth = forceMaxWidth or false
+d("[LibSets]XMLGetDynamicMinWidth - XMLControl: " .. tos(XMLcontrol:GetName()) .. ", minWidth: " .. tos(minWidth) .. ", maxWidth: " .. tos(maxWidth) .. ", applyValues: " ..tos(applyValues) .. ", forceMaxWidth: " .. tos(forceMaxWidth))
     if XMLcontrol == nil then return end
 
     local newWidth = 0
@@ -30,6 +31,8 @@ d("[LibSets]XMLGetDynamicMinWidth - XMLControl: " .. tos(XMLcontrol:GetName()) .
     local minWidthValue, maxWidthValue
 
     --d(">TLControl: " .. tos(tlcOfXMLControl:GetName()))
+
+    local factorMultiplier = XMLcontrol.factorMultiplier or 1
 
     --XML Control's minX and maxX have been set or future usage in this API function?
     if minWidth == nil then
@@ -70,8 +73,8 @@ d("<<ABORT tlcWidth")
             --Was the TLC control's size changed > the usual width? Calucalte how much it was resized, using a factor
             --CurrentTLCWidth divided by TLCdefaultMinimumWidth
             if tlcWidth > TLC_SEARCH_UI_MIN_WIDTH then
-                local calculationFactor = zo_clamp(tlcWidth / TLC_SEARCH_UI_MIN_WIDTH, 1, 10) --max factor *10
-d(">>calculated factor: " .. tos(calculationFactor) .. ", widthFactorCalcBase: " ..tos(tlcWidth / TLC_SEARCH_UI_MIN_WIDTH))
+                local calculationFactor = (zo_clamp(tlcWidth / TLC_SEARCH_UI_MIN_WIDTH, 1, 10)) * factorMultiplier --max factor *10
+d(">>calculated factor: " .. tos(calculationFactor) .. ", widthFactorCalcBase: " ..tos(tlcWidth / TLC_SEARCH_UI_MIN_WIDTH) .. "; factorMultiplier: " .. tos(factorMultiplier))
                 newWidth = zo_clamp(minWidthValue * calculationFactor, minWidthValue, tlcWidth) --the minimum size multiplied by the factor = new desired width
             else
 d(">>using minWidthValue")
@@ -89,12 +92,23 @@ d(">newWidth: " .. tos(newWidth))
             maxWidthValue = maxWidth(XMLcontrol) --must return a number
         elseif maxWidthType == "string" then
             maxWidthValue = maxWidth
+d("[------ MAX WIDTH = String")
+            if zo_plainstrfind(maxWidthValue, "calcByTLCWidth,") ~= nil then
+                --Get the value behind the , (usually a negative value)
+                local value = tonumber(string.sub(maxWidthValue, 16))
+d(">>found calcByTLCWidth, value: " .. tos(value))
+                if type(value) == "number" then
+                    maxWidthValue = tlcWidth + value
+                    maxWidthType = "number"
+                end
+            end
+
         elseif maxWidthType == "number" then
             maxWidthValue = maxWidth
         end
         if maxWidthValue ~= nil and maxWidthType ~= "string" then
             newWidth = zo_clamp(newWidth, minWidthValue, maxWidthValue)
---d(">newWidth changed due to maxWidth: " .. tos(newWidth) .. ", maxWidth: " .. tos(maxWidthValue))
+d(">newWidth changed due to maxWidth: " .. tos(newWidth) .. ", maxWidth: " .. tos(maxWidthValue))
         end
     end
 
@@ -102,7 +116,7 @@ d(">newWidth: " .. tos(newWidth))
     if applyValues then
         if XMLcontrol.SetDimensionConstraints then
 d("!>>Applying newWidth " ..tos(newWidth) .." to the control now, maxWidthValue: " ..tos(maxWidthValue))
-            XMLcontrol:SetDimensionConstraints(newWidth, minHeight, newWidth, maxHeight) --minX, minY, maxX, maxY
+            XMLcontrol:SetDimensionConstraints(newWidth, minHeight, (not forceMaxWidth and newWidth) or maxWidthValue, maxHeight) --minX, minY, maxX, maxY
         end
     end
     return newWidth

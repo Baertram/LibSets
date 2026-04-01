@@ -19,6 +19,7 @@ local favoriteIconTextStar = searchUI.favoriteIconTextStar
 local favoriteIconTexts    = searchUI.favoriteIconTexts
 
 --Library's local helpers
+local LIBSETS_TABLEKEY_ZONEIDS = LIBSETS_TABLEKEY_ZONEIDS
 local preloadedSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
 
 --local libSets_IsNoESOSet = lib.IsNoESOSet
@@ -136,35 +137,37 @@ function LibSets_SearchUI_List:Setup( )
 	self.headerSetId =              self.headers:GetNamedChild("SetId")
 
     --Add the headers to the table of dimensionConstraints update, and add the column names of virtual XML template LibSetsSearchUIRow
-    --so the function LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstranints(rowControl, columnsToo) can upate them too
+    --so the function LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstraints(rowControl, columnsToo) can upate them too
     self.headerAndColumnsMinAndMaxData = {}
     self.headerAndColumnsMinAndMaxData[self.headerFavorite] =                   { minX = 24,    maxX = 24,      columnName="Favorite" }
-    self.headerAndColumnsMinAndMaxData[self.headerName] =                       { minX = 350,   maxX = 350,     columnName="Name"}
-    self.headerAndColumnsMinAndMaxData[self.headerSetType] =                    { minX = 30,    maxX = "5%",    columnName="SetType"}
-    self.headerAndColumnsMinAndMaxData[self.headerArmorOrWeaponType] =          { minX = 30,    maxX = "5%",    columnName="ArmorOrWeaponType"}
-    self.headerAndColumnsMinAndMaxData[self.headerEquipSlot] =                  { minX = 30,    maxX = "5%",    columnName="EquipSlot"}
-    self.headerAndColumnsMinAndMaxData[self.headerDropLocations] =              { minX = 300,   maxX = "75%",   columnName="DropLocations"}
-    self.headerAndColumnsMinAndMaxData[self.headerSetId] =                      { minX = 30,    maxX = 30,      columnName="SetId"}
+    self.headerAndColumnsMinAndMaxData[self.headerName] =                       { minX = 400,   maxX = 400,     columnName="Name"}
+    self.headerAndColumnsMinAndMaxData[self.headerSetType] =                    { minX = 40,    maxX = 40,      columnName="SetType"}
+    self.headerAndColumnsMinAndMaxData[self.headerArmorOrWeaponType] =          { minX = 40,    maxX = 40,      columnName="ArmorOrWeaponType"}
+    self.headerAndColumnsMinAndMaxData[self.headerEquipSlot] =                  { minX = 40,    maxX = 40,      columnName="EquipSlot"}
+    self.headerAndColumnsMinAndMaxData[self.headerDropLocations] =              { minX = 300,   maxX = "calcByTLCWidth,-650",    factorMultiplier=2, columnName="DropLocations"}
+    --self.headerAndColumnsMinAndMaxData[self.headerSetId] =                      { minX = 40,    maxX = 40,    columnName="SetId", anchors = { [1] = { point = RIGHT, relativeTo=self.headers, relativePoint=RIGHT } }}
 
     --Build initial masterlist via self:BuildMasterList() --> Do not automatically here but only as the LibSets search UI opens first time!
     --self:RefreshData()
 end
 
 --Update the list's header columns and the virtual XML template LibSetsSearchUIRow columns in width and anchors
-function LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstranints(rowControl, columnsToo, noHeader)
+function LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstraints(rowControl, columnsToo, noHeader)
     if ZO_IsTableEmpty(self.headerAndColumnsMinAndMaxData) then return end
 
     local changeColumnsToo = rowControl ~= nil and columnsToo == true
     noHeader = noHeader or false
 
---d("LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstranints - rowControl: " ..tos((rowControl and rowControl:GetName()) or nil) .. "; changeColumnsToo: " .. tos(changeColumnsToo) ..", columnsToo: " ..tos(columnsToo) .. "; noHeader: " ..tos(noHeader))
+--d("LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstraints - rowControl: " ..tos((rowControl and rowControl:GetName()) or nil) .. "; changeColumnsToo: " .. tos(changeColumnsToo) ..", columnsToo: " ..tos(columnsToo) .. "; noHeader: " ..tos(noHeader))
 
     for controlToSetDimensions, dimensionsData in pairs(self.headerAndColumnsMinAndMaxData) do
         if dimensionsData then
             controlToSetDimensions.minX = dimensionsData.minX
+            controlToSetDimensions.maxX = dimensionsData.maxX
+            controlToSetDimensions.factorMultiplier = dimensionsData.factorMultiplier
             if not noHeader then
                 --Calculate the new width based on the TLC width and apply it
-                lib.XMLGetDynamicWidth(controlToSetDimensions, nil, nil, true)
+                lib.XMLGetDynamicWidth(controlToSetDimensions, nil, nil, true, nil, nil, true)
 
                 --Reanchor the control again, if needed
                 local anchors = dimensionsData.anchors
@@ -186,7 +189,9 @@ function LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstranints(rowContro
                     if rowChildControl ~= nil then
     --d("Changing the column: " ..tos(rowChildControl:GetName()))
                         rowChildControl.minX = dimensionsData.minX
-                        lib.XMLGetDynamicWidth(rowChildControl, nil, nil, true, 30, 30)
+                        rowChildControl.maxX = dimensionsData.maxX
+                        rowChildControl.factorMultiplier = dimensionsData.factorMultiplier
+                        lib.XMLGetDynamicWidth(rowChildControl, nil, nil, true, 30, 30, true)
                     end
                 end
             end
@@ -217,7 +222,7 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
         --Was this control resized already?
         local controlUpdatedListColumnWith = control._updatedListColumnWith
         if controlUpdatedListColumnWith == nil or controlUpdatedListColumnWith < updateListColumnWith then
-            self:SetHeaderAndColumnDimensionConstranints(control, true, true)
+            self:SetHeaderAndColumnDimensionConstraints(control, true, true)
             control._updatedListColumnWith = updateListColumnWith
         end
     end
@@ -597,7 +602,7 @@ function LibSets_SearchUI_List:FilterScrollList()
     --Set the minX and maxX constraints of the resultsList header column controls
     --> Do that here, once, after the ZO_ScrollList's dataType has applied the row column's width via the setupFunction
     if self.updateListColumnWith ~= nil then
-        self:SetHeaderAndColumnDimensionConstranints(nil, false, false)
+        self:SetHeaderAndColumnDimensionConstraints(nil, false, false)
     end
 end
 

@@ -146,6 +146,7 @@
                         <Control name="$(parent)Headers" tier="LOW" layer="CONTROLS" level="1">
                             <Dimensions y="30" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-10" offsetY="0" />
                             <Controls>
                                 <Control name="$(parent)Favorite" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -161,7 +162,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Favorite" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="350" maxX="30%" />
+                                    <DimensionConstraints minX="400" maxX="400" />
                                 </Control>
                                 <Control name="$(parent)SetType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -169,7 +170,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" maxX="9%" />
+                                    <DimensionConstraints minX="40" maxX="40" />
                                 </Control>
                                 <Control name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -177,7 +178,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SetType" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" maxX="9%" />
+                                    <DimensionConstraints minX="40" maxX="40" />
                                 </Control>
                                 <Control name="$(parent)EquipSlot" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -185,7 +186,7 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" maxX="9%" />
+                                    <DimensionConstraints minX="40" maxX="40" />
                                 </Control>
                                 <Control name="$(parent)DropLocations" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
@@ -193,16 +194,16 @@
                                     </OnInitialized>
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)EquipSlot" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="300" maxX="40%" />
+                                    <DimensionConstraints minX="300" maxX="1200" />
                                 </Control>
                                 <Control name="$(parent)SetId" inherits="LibSetsSearchUISortHeader">
                                     <OnInitialized>
-                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("setId"), "setId", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("setId"), "setId", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
                                     </OnInitialized>
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DropLocations" />
-                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
+                                    <!--<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DropLocations" />-->
+                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-10" />
                                     <Dimensions y="30" />
-                                    <DimensionConstraints minX="30" maxX="30" />
+                                    <DimensionConstraints minX="40" maxX="40" />
                                 </Control>
                             </Controls>
                         </Control>

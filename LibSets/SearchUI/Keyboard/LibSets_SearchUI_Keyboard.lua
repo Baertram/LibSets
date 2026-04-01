@@ -269,9 +269,9 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self:LoadSearchUIPositionAndSize()
 
     --Set the minX and maxX constraints of the filter header controls
-    self:SetMultiSelectDropdownDimensionConstranints()
+    self:SetMultiSelectDropdownDimensionConstraints()
     --Set the minX and maxX constraints of the resultsList header column controls
-    self.resultsList:SetHeaderAndColumnDimensionConstranints()
+    self.resultsList:SetHeaderAndColumnDimensionConstraints()
 
 
     --Tooltip
@@ -324,7 +324,7 @@ end
 
 --Set the multiSlect dropdown controls dimension constraints, based on the LibSets Search UI TopLevelControl size
 local defaultMinAndMaxXForMultiSelectControl = { minX = 50, } --maxX = nil }
-function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownDimensionConstranints()
+function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownDimensionConstraints()
     for multiSelectControl, multiSelectMinAndMaxDataOfControl in pairs(self.multiSelectMinAndMaxData) do
         if multiSelectMinAndMaxDataOfControl then
             multiSelectControl.minX = multiSelectMinAndMaxDataOfControl.minX or defaultMinAndMaxXForMultiSelectControl.minX
@@ -369,6 +369,8 @@ function LibSets_SearchUI_Keyboard:ShowUI(slashOptions)
     end
 
     LibSets_SearchUI_Shared.ShowUI(self)
+    --Force the resize functions now to recalculate the dropdowns and list header and column width
+    LibSets_SearchUI_Keyboard_TopLevel_OnResize(self.control, false, true)
 
     --Was called from slash command and any search term was entered?
     self:UpdateSearchParamsFromSlashcommand(slashOptions)
@@ -1095,7 +1097,7 @@ end
 --[[ XML Handlers ]]--
 local currentWidth, currentHeight
 local updateListColumnWithCounter = 0
-function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart)
+function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart, forceResizeNow)
     ZO_Tooltips_HideTextTooltip()
     local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
     if resizeStart then
@@ -1104,11 +1106,11 @@ function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart)
         libSetsSearchUIKeyboardObject.resultsList.updateListColumnWith = nil
     else
         local newWidth, newHeight = self:GetDimensions()
-        if (currentWidth and currentWidth ~= newWidth) or (newHeight and newHeight ~= currentHeight) then
+        if (forceResizeNow or (currentWidth and currentWidth ~= newWidth) or (newHeight and newHeight ~= currentHeight)) then
             --Save the TLC's size and position to the SavedVariables
             libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize(self)
             --Calculate the multiselect dropdown filter boxes size (width) based on the actual TLC width now
-            libSetsSearchUIKeyboardObject:SetMultiSelectDropdownDimensionConstranints()
+            libSetsSearchUIKeyboardObject:SetMultiSelectDropdownDimensionConstraints()
             --Set the column width update flag to the list so the next ZO_ScrollList's dataType setupFunction will resize the columns
             updateListColumnWithCounter = updateListColumnWithCounter + 1
             libSetsSearchUIKeyboardObject.resultsList.updateListColumnWith = updateListColumnWithCounter
