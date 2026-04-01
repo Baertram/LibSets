@@ -1611,7 +1611,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     local setTypeTexture = data.setTypeTexture
     local searchEntryText = getLocalizedText("setCollectionsSearchItemLink", clientLang, setName)
     local searchEntryTextWithTexture = (setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText
-    local setNameWithTexture = (setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. setName) or setName
+    local setNameWithTexture = ((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. setName) or setName) .. " [" ..tos(setId) .. "]"
 
     ClearCustomScrollableMenu()
 
@@ -1812,7 +1812,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         --LibSets.AddSetSearchResultsListContextMenuEntries(addonName, submenuEntries)
         addOtherAddonsContextMenuEntries(rowControl, setId)
     end
-    ShowCustomScrollableMenu(rowControl, { visibleRowsDropdown = 15 })
+    ShowCustomScrollableMenu(rowControl, { visibleRowsDropdown = 18 })
 end
 
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
