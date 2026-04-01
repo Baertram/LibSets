@@ -356,7 +356,9 @@ local LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP               = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING      = LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING     
 local LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES           = LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES          
 local LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                   = LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                  
-local LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING             = LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING            
+local LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING             = LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING
+
+local LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE = LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE
 
 --Libraries
 local LCM --LibCustomMenu
@@ -1735,9 +1737,11 @@ local function LoadSets()
     for _, category2ZoneData in ipairs(preloadedSetItemCollectionMappingToZone) do
         local parentCategoryId = category2ZoneData.parentCategory
         local categoryId = category2ZoneData.category
-        --Parent categories table
-        lib.setItemCollectionParentCategories[parentCategoryId] = lib.setItemCollectionParentCategories[parentCategoryId] or {}
-        lib.setItemCollectionParentCategories[parentCategoryId][categoryId] = category2ZoneData
+        if parentCategoryId ~= nil then
+            --Parent categories table
+            lib.setItemCollectionParentCategories[parentCategoryId] = lib.setItemCollectionParentCategories[parentCategoryId] or {}
+            lib.setItemCollectionParentCategories[parentCategoryId][categoryId] = category2ZoneData
+        end
         --Categories table
         lib.setItemCollectionCategories[categoryId] = category2ZoneData
         --Zone to categories / category to zones mapping tables
@@ -4443,24 +4447,26 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
 
         for _, parentCategoryData in pairs(parentCategories) do
             if nodeToOpen == nil then
-                if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
-                        and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
-                    --d(">found parentCategory")
-                    --No subCategory given?
-                    if categoryIdToFind == nil or categoryIdToFind <= 0 then
-                        --d(">no subcategory to open -> open parent category node")
-                        --return the node of the parentCategory
-                        nodeToOpen = parentCategoryData.data.node
-                        break
-                    else
-                        --Search for the correct subCategory
-                        for _, subCategoryData in pairs(parentCategoryData.children) do
-                            if nodeToOpen == nil then
-                                if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
-                                        and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
-                                    --d(">found category")
-                                    nodeToOpen = subCategoryData.data.node
-                                    break
+                if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId then
+                    if (parentCategoryIdToFind ~= nil and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind) or
+                        (parentCategoryIdToFind == nil and parentCategoryData.data.dataSource.categoryId == categoryIdToFind) then
+    --d(">found parentCategory: " .. tos(parentCategoryIdToFind ~= nil and parentCategoryIdToFind or categoryIdToFind))
+                        --No subCategory given or no parentCategory to find given? Use the categoryId at the current level
+                        if categoryIdToFind == nil or categoryIdToFind <= 0 or parentCategoryIdToFind == nil then
+                            --d(">no subcategory to open -> open parent category node")
+                            --return the node of the parentCategory
+                            nodeToOpen = parentCategoryData.data.node
+                            break
+                        else
+                            --Search for the correct subCategory
+                            for _, subCategoryData in pairs(parentCategoryData.children) do
+                                if nodeToOpen == nil then
+                                    if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
+                                            and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
+                                        --d(">found category")
+                                        nodeToOpen = subCategoryData.data.node
+                                        break
+                                    end
                                 end
                             end
                         end
@@ -4492,9 +4498,8 @@ function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
 --d("[LibSets]OpenItemSetCollectionBookOfCategoryData")
     if not checkIfSetsAreLoadedProperly() then return end
     openItemSetCollectionBookOfCategoryData = openItemSetCollectionBookOfCategoryData or lib.OpenItemSetCollectionBookOfCategoryData
-    if not categoryData or type(categoryData) ~= "table"
-            or categoryData.parentCategory == nil or categoryData.parentCategory <= 0 then
-        if categoryData ~= LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE then
+    if not categoryData or type(categoryData) ~= "table" then
+        if categoryData and categoryData ~= LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE then
             return
         end
     end
@@ -4612,16 +4617,30 @@ local function recursivelyCheckItemSetIdAtChildren(childNodes, setIdToFind)
                     local itemSetId = collectionData.itemSetId
                     --d(">>collectionIdx: " .. tos(collectionIdx) .. ", setId: " .. tos(itemSetId))
                     if itemSetId ~= nil then
-                        --Cache the already found categories of the setIds
-                        if lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] == nil then
-                            lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] = { category = childNodeDataSource.categoryId, parentCategory = childNodeDataSource.parentCategoryData.categoryId }
-                        end
-                        --SetIt matches the itemSetId at the collections? -> Return that categoryId
-                        if itemSetId == setIdToFind then
-                            categoryIdDetermined = childNodeDataSource.categoryId
-                            parentCategoryDetermined = childNodeDataSource.parentCategoryData.categoryId
---d("<<Found setId: " .. tos(itemSetId) .. ", categoryId: " .. tos(categoryIdDetermined) .. ", parentCategory: " .. tos(parentCategoryDetermined))
-                            return categoryIdDetermined, parentCategoryDetermined
+                        if childNodeDataSource.categoryId and childNodeDataSource.parentCategoryData then
+                            --Cache the already found categories of the setIds
+                            if lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] == nil then
+                                lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] = { category = childNodeDataSource.categoryId, parentCategory = childNodeDataSource.parentCategoryData.categoryId }
+                            end
+                            --SetIt matches the itemSetId at the collections? -> Return that categoryId
+                            if itemSetId == setIdToFind then
+                                categoryIdDetermined = childNodeDataSource.categoryId
+                                parentCategoryDetermined = childNodeDataSource.parentCategoryData.categoryId
+                                --d("<<Found setId: " .. tos(itemSetId) .. ", categoryId: " .. tos(categoryIdDetermined) .. ", parentCategory: " .. tos(parentCategoryDetermined))
+                                return categoryIdDetermined, parentCategoryDetermined
+                            end
+                        --Main level entry without explicit category (e.g. Nightmarket)?
+                        elseif childNodeDataSource.categoryId and childNodeDataSource.parentCategoryData == nil then
+                            --Cache the already found categories of the setIds
+                            if lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] == nil then
+                                lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] = { category = childNodeDataSource.categoryId }
+                            end
+                            --SetIt matches the itemSetId at the collections? -> Return that categoryId
+                            if itemSetId == setIdToFind then
+                                categoryIdDetermined = childNodeDataSource.categoryId
+                                --d("<<Found setId: " .. tos(itemSetId) .. ", categoryId: " .. tos(categoryIdDetermined) .. ", without parent category")
+                                return categoryIdDetermined, nil
+                            end
                         end
                     end
                 end
@@ -4657,7 +4676,7 @@ local function checkIfSetItemCollectionBookForItemLinkIsReady(setId)
 --d(">>categoryIdOfSetId: " .. tos(categoryIdOfSetId) .. "; parentCategoryofSetId: " .. tos(parentCategoryofSetId))
         if categoryIdOfSetId == -99 then categoryIdOfSetId = nil end
 
-        if categoryIdOfSetId ~= nil and parentCategoryofSetId ~= nil then
+        if categoryIdOfSetId ~= nil then
 --d(">>opening node now - parent: " ..tos(parentCategoryofSetId) ..", category: " .. tos(categoryIdOfSetId))
             return openItemSetCollectionBookOfCategoryData({ category = categoryIdOfSetId, parentCategory = parentCategoryofSetId})
         end
@@ -4671,7 +4690,7 @@ function lib.OpenSetItemCollectionBookForItemLink(itemLink)
     parentCategoryDetermined = nil
 
     if itemLink == nil then return end
-    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = gilsi(itemLink)
+    local hasSet, _, _, _, _, setId = gilsi(itemLink)
     if not hasSet or setId == nil then return end
 
     --Open the item set collections book at the top category

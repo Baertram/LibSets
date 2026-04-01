@@ -1607,7 +1607,15 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     local setId = data.setId
     local owningWindow = rowControl:GetOwningWindow()
 
+    local setName = zocstrfor("<<1>>", data.name)
+    local setTypeTexture = data.setTypeTexture
+    local searchEntryText = getLocalizedText("setCollectionsSearchItemLink", clientLang, setName)
+    local searchEntryTextWithTexture = (setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText
+    local setNameWithTexture = (setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. setName) or setName
+
     ClearCustomScrollableMenu()
+
+    AddCustomScrollableMenuHeader(setNameWithTexture)
 
     --Link to chat
     AddCustomScrollableMenuEntry(getLocalizedText("linkToChat"), function()
@@ -1794,10 +1802,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             if not isCraftedSet then
                 AddCustomScrollableMenuHeader(getLocalizedText("headerItemLinks"))
 
-                local setName = data.name
-                local setTypeTexture = data.setTypeTexture
-                local searchEntryText = getLocalizedText("setCollectionsSearchItemLink", clientLang, zocstrfor("<<1>>", setName))
-                AddCustomScrollableMenuEntry((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText, function()
+                AddCustomScrollableMenuEntry(searchEntryTextWithTexture, function()
                     libSets_OpenSetItemCollectionBookForItemLink(data.itemLink)
                 end)
             end
@@ -1807,7 +1812,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         --LibSets.AddSetSearchResultsListContextMenuEntries(addonName, submenuEntries)
         addOtherAddonsContextMenuEntries(rowControl, setId)
     end
-    ShowCustomScrollableMenu(rowControl)
+    ShowCustomScrollableMenu(rowControl, { visibleRowsDropdown = 15 })
 end
 
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
@@ -1878,12 +1883,15 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
 end
 
 function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shift, alt, ctrl, command)
---d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
+    --d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
     if not checkLSM() then return end
+    if not editBoxControl then return end
     local selfVar = self
     local settings = lib.svData
     local doShowMenu = false
     local anyEntryAddedAlready = false
+
+    ClearCustomScrollableMenu()
 
     --Add "Clear editbox" entry
     if editBoxControl:GetText() ~= "" then
@@ -1922,9 +1930,8 @@ function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shif
                 doShowMenu = true
             end
         end
-    --Bonus text field
+        --Bonus text field
     elseif editBoxControl == selfVar.bonusSearchEditBoxControl then
-        ClearCustomScrollableMenu()
         if settings.setSearchSaveBonusHistory then
             local searchHistory = settings.setSearchHistory
             local searchType = SEARCH_TYPE_BONUS
