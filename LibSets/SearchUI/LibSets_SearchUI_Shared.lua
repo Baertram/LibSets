@@ -106,11 +106,8 @@ local favoriteIconFrostStaff =  possibleSetSearchFavoriteCategoriesUnsorted.fros
 local favoriteIconFireStaff =   possibleSetSearchFavoriteCategoriesUnsorted.fireStaff
 local favoriteIconLightningStaff=possibleSetSearchFavoriteCategoriesUnsorted.lightningStaff
 
-
---The search UI table
-lib.SearchUI = {}
+--The SearchUI table
 local searchUI = lib.SearchUI
-searchUI.name = MAJOR .. "_SearchUI"
 local searchUIName = searchUI.name
 
 --For the XML sort header
@@ -430,7 +427,7 @@ local function addOtherAddonsContextMenuEntries(rowControl, setId)
                 end
                 if isVisible == true then
                     if not dividerWasAdded then
-                        AddScrollableMenuDivider()
+                        AddCustomScrollableMenuDivider()
                         dividerWasAdded = true
                     end
                     --Custom addon's name header
@@ -1483,14 +1480,37 @@ function LibSets_SearchUI_Shared:RemoveSetIdFromFavorites(rowControl, setId, fav
     if not self:IsSetIdInFavorites(setId, favoriteCategory) then return end
     if possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory] == nil then return end
 
+    local wasRemoved = false
     if lib.svData.setSearchFavorites[favoriteCategory] ~= nil then
-        lib.svData.setSearchFavorites[favoriteCategory][setId] = nil
+        if lib.svData.setSearchFavorites[favoriteCategory][setId] ~= nil then
+            lib.svData.setSearchFavorites[favoriteCategory][setId] = nil
+            wasRemoved = true
+        end
     end
+    if wasRemoved then
+        self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
+        CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoved", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
 
-    self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
-    CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoved", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
+        self.resultsList:RefreshData() --To update filtered rows
+    end
+end
 
-    self.resultsList:RefreshData() --To update filtered rows
+function LibSets_SearchUI_Shared:RemoveSetIdFromAllFavorites(rowControl, setId)
+    local setSearchFavorites = lib.svData.setSearchFavorites
+    local wasRemoved = false
+    for favoriteCategory, setIds in pairs(setSearchFavorites) do
+        for setIdToCompare, _ in pairs(setIds) do
+            if setIdToCompare == setId then
+                setSearchFavorites[favoriteCategory][setId] = nil
+                wasRemoved = true
+                self.resultsList:RemoveFavorite(rowControl, favoriteCategory)
+                CM:FireCallbacks(MAJOR .. "_SetSearchFavoriteCategoryRemoved", favoriteCategory, setId, possibleSetSearchFavoriteCategoriesUnsorted[favoriteCategory])
+            end
+        end
+    end
+    if wasRemoved then
+        self.resultsList:RefreshData() --To update filtered rows
+    end
 end
 
 function LibSets_SearchUI_Shared:RemoveAllSetFavorites(favoriteCategory)
@@ -1575,7 +1595,7 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     --Set names
     if clientLang ~= fallbackLang then
         AddCustomScrollableMenuHeader(setNamesStr)
-        --AddScrollableMenuDivider()
+        --AddCustomScrollableMenuDivider()
         local cbShowSetNamesInEnglishTooIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("searchUIShowSetNameInEnglishToo"),
                 function(comboBox, itemName, item, checked, data)
                     OnClick_CheckBoxLabel(moc(), "setSearchShowSetNamesInEnglishToo", selfVar)
@@ -1610,7 +1630,18 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     local setId = data.setId
     local owningWindow = rowControl:GetOwningWindow()
 
+    local setName = zocstrfor("<<1>>", data.name)
+    local setTypeName = data.setTypeName
+    local setTypeTexture = data.setTypeTexture
+    local searchEntryText = getLocalizedText("setCollectionsSearchItemLink", clientLang, setName)
+    local searchEntryTextWithTexture = (setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText
+    local setNameWithSetId           = setName .. " [" ..tos(setId) .. "]"
+
     ClearCustomScrollableMenu()
+
+    AddCustomScrollableMenuHeader(setNameWithSetId)
+    AddCustomScrollableMenuEntry((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. setTypeName) or setTypeName,
+                                    function() end, LSM_ENTRY_TYPE_NORMAL, nil, { enabled = false })
 
     --Link to chat
     AddCustomScrollableMenuEntry(getLocalizedText("linkToChat"), function()
@@ -1649,7 +1680,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end
         },
     }
-    AddCustomScrollableMenuEntry(getLocalizedText("popupTooltip"), function()  self:ShowItemLinkPopupTooltip(owningWindow, data)  end)
+    AddCustomScrollableMenuEntry(getLocalizedText("popupTooltip"), function() self:ShowItemLinkPopupTooltip(owningWindow, data) end)
     AddCustomScrollableSubMenuEntry(getLocalizedText("popupTooltipPosition"), popupTooltipSubmenu)
 
     --Set favorites
@@ -1657,6 +1688,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         --Set search favorites
         local setSearchFavorites = lib.svData.setSearchFavorites
         local wasFavoriteHeaderAdded = false
+        local removeAllFavoritesAdded = false
         local favoriteCategoriesToAddSubmenuEntries = {}
         for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
             local favoriteCategory = favoriteCategoryData.category
@@ -1667,6 +1699,12 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
                 wasFavoriteHeaderAdded = true
             end
             if self:IsSetIdInFavorites(setId, favoriteCategory) then
+                if not removeAllFavoritesAdded then
+                    removeAllFavoritesAdded = true
+                    AddCustomScrollableMenuEntry(GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " - " .. GetString(SI_HOUSINGFURNITUREBOUNDFILTER0), function()
+                        self:RemoveSetIdFromAllFavorites(rowControl, setId)
+                    end)
+                end
                 AddCustomScrollableMenuEntry(favoriteIconTexts[favoriteCategory] .. " " .. GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) .. " '" .. zo_strformat("<<C:1>>", favoriteCategory) .. "'", function()
                     self:RemoveSetIdFromFavorites(rowControl, setId, favoriteCategory)
                 end)
@@ -1797,10 +1835,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             if not isCraftedSet then
                 AddCustomScrollableMenuHeader(getLocalizedText("headerItemLinks"))
 
-                local setName = data.name
-                local setTypeTexture = data.setTypeTexture
-                local searchEntryText = getLocalizedText("setCollectionsSearchItemLink", clientLang, zocstrfor("<<1>>", setName))
-                AddCustomScrollableMenuEntry((setTypeTexture ~= nil and setTypeTexture ~= "" and setTypeTexture .. searchEntryText) or searchEntryText, function()
+                AddCustomScrollableMenuEntry(searchEntryTextWithTexture, function()
                     libSets_OpenSetItemCollectionBookForItemLink(data.itemLink)
                 end)
             end
@@ -1810,11 +1845,11 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
         --LibSets.AddSetSearchResultsListContextMenuEntries(addonName, submenuEntries)
         addOtherAddonsContextMenuEntries(rowControl, setId)
     end
-    ShowCustomScrollableMenu(rowControl)
+    ShowCustomScrollableMenu(rowControl, { visibleRowsDropdown = 18 })
 end
 
 function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift, alt, ctrl, command)
-    if LCM == nil then return end
+    if not checkLSM() then return end
     local selfVar = self
     local comboBox = getComboBoxFromDropdownControl(dropdownControl)
 
@@ -1851,7 +1886,7 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
 
         --Favorite filter muliselect dropdown?
         if dropdownControl == self.favoritesFiltersControl then
-            AddScrollableMenuDivider()
+            AddCustomScrollableMenuDivider()
             for _, favoriteCategoryData in ipairs(possibleSetSearchFavoriteCategories) do
                 local favoriteCategory = favoriteCategoryData.category
                 local entriesToSelect = { [1] = favoriteCategory }
@@ -1860,7 +1895,7 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
 
             --Zones filter muliselect dropdown?
         elseif dropdownControl == self.dropZoneFiltersControl then
-            AddScrollableMenuDivider()
+            AddCustomScrollableMenuDivider()
             local setIdsOfCurrentZone, currentZoneId, currentParentZoneId = libSets_getsetIdsOfCurrentZone()
             if not zoite(setIdsOfCurrentZone) then
                 local currentZoneName, currentParentZoneName = libSets_getCurrentZoneName()
@@ -1881,11 +1916,27 @@ function LibSets_SearchUI_Shared:ShowDropdownContextMenu(dropdownControl, shift,
 end
 
 function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shift, alt, ctrl, command)
---d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
-    if LCM == nil then return end
+    --d("LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu")
+    if not checkLSM() then return end
+    if not editBoxControl then return end
     local selfVar = self
     local settings = lib.svData
     local doShowMenu = false
+    local anyEntryAddedAlready = false
+
+    ClearCustomScrollableMenu()
+
+    --Add "Clear editbox" entry
+    if editBoxControl:GetText() ~= "" then
+        ClearCustomScrollableMenu()
+        anyEntryAddedAlready = true
+        AddCustomScrollableMenuEntry(GetString(SI_GAMEPAD_MAIL_SEND_CLEAR), function()
+            selfVar:SetSearchEditBoxValue(editBoxControl, "")
+            ClearCustomScrollableMenu()
+        end)
+        AddCustomScrollableMenuDivider()
+        doShowMenu = true
+    end
 
     --Search set name/id text field
     if editBoxControl == selfVar.searchEditBoxControl then
@@ -1895,14 +1946,16 @@ function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shif
             local searchType = SEARCH_TYPE_NAME
             local searchHistoryOfSearchMode = searchHistory[searchType]
             if searchHistoryOfSearchMode ~= nil and #searchHistoryOfSearchMode > 0 then
-                ClearCustomScrollableMenu()
+                if not anyEntryAddedAlready then
+                    ClearCustomScrollableMenu()
+                end
                 for _, searchTerm in ipairs(searchHistoryOfSearchMode) do
                     AddCustomScrollableMenuEntry(searchTerm, function()
                         selfVar:SetSearchEditBoxValue(editBoxControl, searchTerm)
                         ClearCustomScrollableMenu()
                     end)
                 end
-                AddScrollableMenuDivider()
+                AddCustomScrollableMenuDivider()
                 AddCustomScrollableMenuEntry(clearSearchHistoryStr, function()
                     clearSearchHistory(searchType)
                     ClearCustomScrollableMenu()
@@ -1910,22 +1963,23 @@ function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shif
                 doShowMenu = true
             end
         end
-    --Bonus text field
+        --Bonus text field
     elseif editBoxControl == selfVar.bonusSearchEditBoxControl then
-        ClearCustomScrollableMenu()
         if settings.setSearchSaveBonusHistory then
             local searchHistory = settings.setSearchHistory
             local searchType = SEARCH_TYPE_BONUS
             local searchHistoryOfSearchMode = searchHistory[searchType]
             if searchHistoryOfSearchMode ~= nil and #searchHistoryOfSearchMode > 0 then
-                ClearCustomScrollableMenu()
+                if not anyEntryAddedAlready then
+                    ClearCustomScrollableMenu()
+                end
                 for _, searchTerm in ipairs(searchHistoryOfSearchMode) do
                     AddCustomScrollableMenuEntry(searchTerm, function()
                         selfVar:SetSearchEditBoxValue(editBoxControl, searchTerm)
                         ClearCustomScrollableMenu()
                     end)
                 end
-                AddScrollableMenuDivider()
+                AddCustomScrollableMenuDivider()
                 AddCustomScrollableMenuEntry(clearSearchHistoryStr, function()
                     clearSearchHistory(searchType)
                     ClearCustomScrollableMenu()
@@ -1936,7 +1990,7 @@ function LibSets_SearchUI_Shared:OnSearchEditBoxContextMenu(editBoxControl, shif
     end
     --Show the context menu now?
     if doShowMenu == true then
-        ShowCustomScrollableMenu(editBoxControl)
+        ShowCustomScrollableMenu(editBoxControl, { visibleRowsDropdown = 15 })
     end
 end
 

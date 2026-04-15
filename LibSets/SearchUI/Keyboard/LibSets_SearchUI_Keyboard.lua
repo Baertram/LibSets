@@ -2,6 +2,7 @@ local lib = LibSets
 local MAJOR, MINOR = lib.name, lib.version
 local libPrefix = lib.prefix
 
+local tos = tostring
 local zoitf = zo_iconTextFormat
 local getLocalizedText = lib.GetLocalizedText
 local buildSetTypeInfo = lib.buildSetTypeInfo
@@ -15,14 +16,15 @@ local libSets_GetSetItemIds = lib.GetSetItemIds
 
 --The search UI table
 local searchUI = lib.SearchUI
+local searchUIKeyboardVars = searchUI.KeyboardVars
 local searchUIName = searchUI.name
+local TLC_SEARCH_UI_MIN_WIDTH =   searchUIKeyboardVars.minWidth
+local TLC_SEARCH_UI_MIN_HEIGHT=  searchUIKeyboardVars.minHeight
 
 local searchUIThrottledSearchHandlerName = searchUIName .. "_ThrottledSearch"
 local searchUIThrottledDelay = 500
 
 local MAX_NUM_SET_BONUS = searchUI.MAX_NUM_SET_BONUS
-
-
 local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
 local favoriteIconTexts = searchUI.favoriteIconTexts
 
@@ -30,6 +32,7 @@ local favoriteIconTexts = searchUI.favoriteIconTexts
 --Libraries
 local LSM = lib.LSM --LibScrollableMenu
 local checkLSM = lib.CheckLSM
+local lib_CleanDLCTimeStamp = lib.CleanDLCTimeStamp
 
 local isLSMEnabled = false
 local LSM_defaultComboBoxOptions = {
@@ -40,7 +43,7 @@ local LSM_defaultComboBoxOptions = {
     headerCollapsible   = true,
     --enableMultiSelect = true,
 }
-
+local LSM_comboBoxOptionsDLCID = ZO_ShallowTableCopy(LSM_defaultComboBoxOptions)
 
 --Debugging - TODO: Disable again
 --LibSets._debug = {} --todo remove after debugging/testing
@@ -99,12 +102,15 @@ function LibSets_SearchUI_Keyboard:New(...)
 end
 
 function LibSets_SearchUI_Keyboard:Initialize(control)
-    LibSets_SearchUI_Shared.Initialize(self, control) --Call Shared master class initialization first
+    LibSets_SearchUI_Shared.Initialize(self, control) --Call Shared master class initialization first: Sets self.comtrol = control, and control._object = self
 
     local backGround = self.control:GetNamedChild("BG")
     backGround:SetAlpha(1)
 
     local filters = self.filtersControl
+    local filtersRow1 = filters:GetNamedChild("FilterRow1Container")
+    local filtersRow2 = filters:GetNamedChild("FilterRow1Container")
+    local filtersRow3 = filters:GetNamedChild("FilterRow1Container")
     local content = self.contentControl
 
     local selfVar = self
@@ -208,6 +214,42 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         [self.dropLocationsFiltersControl] =                "dropLocations",
         [self.numBonusFiltersControl] =                     "numBonuses",
     }
+    --Default minimum width and maximum width of the multiselect controls: This minX will always be kept as minimum even if the UI is resized
+    -->If the UI is resized the new width will be calculated based on minX mulitplied with a factor "current TLC width divided by default TLC width"
+    self.multiSelectMinAndMaxData = {}
+
+    --Row1
+    self.multiSelectMinAndMaxData[self.setTypeFiltersControl] = { minX = 200, maxX = "25%", } --[[anchors = {
+        [1] = { point=TOPLEFT,    relativeTo=filtersRow1,                       relativePoint=TOPLEFT,    offsetX="2",    offsetY="0" },
+        }
+    }]]
+    self.multiSelectMinAndMaxData[self.armorTypeFiltersControl] = { minX = 200, maxX = "25%", } --[[anchors = {
+        [1] = { point=TOPLEFT,    relativeTo=self.setTypeFiltersControl,        relativePoint=TOPRIGHT,   offsetX="5",    offsetY="0" },
+        }
+    }]]
+    self.multiSelectMinAndMaxData[self.weaponTypeFiltersControl] = { minX = 200, maxX = "25%", } --[[anchors = {
+        [1] = { point=TOPLEFT,    relativeTo=self.armorTypeFiltersControl,      relativePoint=TOPRIGHT,   offsetX="5",    offsetY="0" },
+        }
+    }]]
+    self.multiSelectMinAndMaxData[self.equipmentTypeFiltersControl] = { minX = 200, maxX = "25%", } --[[anchors = {
+            [1] = { point=TOPLEFT,    relativeTo=self.weaponTypeFiltersControl, relativePoint=TOPRIGHT,   offsetX="5",    offsetY="0" },
+            [2] = { point=TOPRIGHT,   relativeTo=filtersRow1,                   relativePoint=TOPRIGHT,   offsetX="-64",  offsetY="0" },
+        }
+    }]]
+
+    --Row2
+    self.multiSelectMinAndMaxData[self.searchEditBoxControl] =                      { minX = 200, maxX = "25%"}
+    self.multiSelectMinAndMaxData[self.DCLIdFiltersControl] =                       { minX = 200, maxX = "25%"}
+    self.multiSelectMinAndMaxData[self.enchantSearchCategoryTypeFiltersControl] =   { minX = 200, maxX = "25%"}
+    self.multiSelectMinAndMaxData[self.favoritesFiltersControl] =                   { minX = 200, maxX = "25%"}
+
+    --Row 3
+    self.multiSelectMinAndMaxData[self.bonusSearchEditBoxControl] =                 { minX = 200, maxX = "25%"}
+    self.multiSelectMinAndMaxData[self.numBonusFiltersControl] =                    { minX = 100, maxX = "15%"}
+    self.multiSelectMinAndMaxData[self.dropZoneFiltersControl] =                    { minX = 190, maxX = "20%"}
+    self.multiSelectMinAndMaxData[self.dropMechanicsFiltersControl] =               { minX = 200, maxX = "20%"}
+    self.multiSelectMinAndMaxData[self.dropLocationsFiltersControl] =               { minX = 180, maxX = "20%"}
+
     --Is this multiselect dropdown relevant to change the itemIds of setIds (for the itemLink creation at the results list)
     self.isItemIdRelevantMultiSelectFilterDropdown = {
         [self.armorTypeFiltersControl] =                    true,
@@ -218,13 +260,19 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
 
     self:InitializeFilters() --> Filter data (masterlist base for ZO_SortFilterScrollList) was prepared at LibSets.lua, EVENT_ADD_ON_LOADED -> after function LoadSets() was called
 
-
     --Results list -> ZO_SortFilterList
     self.counterControl = content:GetNamedChild("Counter")
 
     self.resultsListControl = content:GetNamedChild("List")
     self.resultsList = LibSets_SearchUI_List:New(content, self) --pass in the parent control of "Headers" and "List" -> "Contents"
 
+    --Load the saved LibSets Search UI TopLevelControl position and size
+    self:LoadSearchUIPositionAndSize()
+
+    --Set the minX and maxX constraints of the filter header controls
+    self:SetMultiSelectDropdownDimensionConstraints()
+    --Set the minX and maxX constraints of the resultsList header column controls
+    self.resultsList:SetHeaderAndColumnDimensionConstraints()
 
 
     --Tooltip
@@ -233,7 +281,6 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
     self.tooltipControl = LibSets_SearchUI_Tooltip -- The set item tooltip preview
     self.tooltipKeyboardHookWasDone = false
 
-
     SYSTEMS:RegisterKeyboardObject(searchUIName, self)
 end
 
@@ -241,6 +288,61 @@ end
 ------------------------------------------------
 --- UI
 ------------------------------------------------
+--Load the LibSets Search UI position and size from the SavedVariables
+function LibSets_SearchUI_Keyboard:LoadSearchUIPositionAndSize(tlcCtrl)
+    --Read saved SV position and size and apply to the TopLevelControl so the dropdown boxes can re-apply their
+    tlcCtrl = tlcCtrl or self.control
+    if tlcCtrl == nil then return end
+    local searchUISV = lib.svData.searchUI
+    if searchUISV == nil then return end
+
+    tlcCtrl:ClearAnchors()
+    tlcCtrl:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, searchUISV.x, searchUISV.y)
+    tlcCtrl:SetDimensions(searchUISV.width, searchUISV.height)
+end
+
+--Save the LibSets Search UI position and size to the SavedVariables
+function LibSets_SearchUI_Keyboard:SaveSearchUIPositionAndSize(tlcCtrl)
+    --Save position and size to the SV
+    tlcCtrl = tlcCtrl or self.control
+    if tlcCtrl == nil then return end
+    local searchUISV = lib.svData.searchUI
+    if searchUISV == nil then return end
+
+    local x, y = tlcCtrl:GetLeft(), tlcCtrl:GetTop()
+    if x <= 0 then x = 0 end
+    if y <= 0 then y = 0 end
+    searchUISV.x = x
+    searchUISV.y = y
+
+    local width, height = tlcCtrl:GetDimensions()
+    if width <= TLC_SEARCH_UI_MIN_WIDTH then width = TLC_SEARCH_UI_MIN_WIDTH end
+    if height <= TLC_SEARCH_UI_MIN_HEIGHT then height = TLC_SEARCH_UI_MIN_HEIGHT end
+    searchUISV.width = width
+    searchUISV.height = height
+end
+
+
+--Set the multiSlect dropdown controls dimension constraints, based on the LibSets Search UI TopLevelControl size
+local defaultMinAndMaxXForMultiSelectControl = { minX = 50, } --maxX = nil }
+function LibSets_SearchUI_Keyboard:SetMultiSelectDropdownDimensionConstraints()
+    for multiSelectControl, multiSelectMinAndMaxDataOfControl in pairs(self.multiSelectMinAndMaxData) do
+        if multiSelectMinAndMaxDataOfControl then
+            multiSelectControl.minX = multiSelectMinAndMaxDataOfControl.minX or defaultMinAndMaxXForMultiSelectControl.minX
+            --Calculate the new width based on the TLC width and apply it
+            lib.XMLGetDynamicWidth(multiSelectControl, nil, nil, true)
+
+            --Reanchor the control again, if needed
+            local anchors = multiSelectMinAndMaxDataOfControl.anchors
+            if not ZO_IsTableEmpty(anchors) then
+                multiSelectControl:ClearAnchors()
+                for _, anchorData in ipairs(anchors) do
+                    multiSelectControl:SetAnchor(anchorData.point, anchorData.relativeTo, anchorData.relativePoint, anchorData.offsetX, anchorData.offsetY)
+                end
+            end
+        end
+    end
+end
 
 function LibSets_SearchUI_Keyboard:UpdateSearchParamsFromSlashcommand(slashOptions)
     if slashOptions ~= nil and not ZO_IsTableEmpty(slashOptions) then
@@ -268,6 +370,8 @@ function LibSets_SearchUI_Keyboard:ShowUI(slashOptions)
     end
 
     LibSets_SearchUI_Shared.ShowUI(self)
+    --Force the resize functions now to recalculate the dropdowns and list header and column width
+    LibSets_SearchUI_Keyboard_TopLevel_OnResize(self.control, false, true)
 
     --Was called from slash command and any search term was entered?
     self:UpdateSearchParamsFromSlashcommand(slashOptions)
@@ -369,6 +473,8 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     isLSMEnabled = checkLSM()
     if isLSMEnabled then self.LSM_Dropdowns = {} end
     local filters = self.filtersControl
+
+    local AddCustomScrollableComboBoxDropdownMenu = AddCustomScrollableComboBoxDropdownMenu
 
     ------------------------------------------------
     local function OnFilterChanged(dropdownControl)
@@ -505,15 +611,33 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         DLCIdDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.DCLIdFiltersControl, LSM_defaultComboBoxOptions) end
+    if isLSMEnabled then
+        --Add custom filter function for the collapsible filter header, so we can search the tooltip text for the date too
+        LSM_comboBoxOptionsDLCID.customFilterFunc = function(p_item, p_filterString)
+            local found = false
+            local name = p_item.label or p_item.name
+            local tooltip = p_item.tooltipText
+            local filtertStringLower = zo_strlower(p_filterString)
+            if name ~= "" then
+                found = zo_strlower(name):find(filtertStringLower) ~= nil
+            end
+            if not found and tooltip ~= "" then
+                found = zo_strlower(tooltip):find(filtertStringLower) ~= nil
+            end
+            return found
+        end
+        self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.DCLIdFiltersControl, LSM_comboBoxOptionsDLCID)
+    end
     DLCIdDropdown:SetSortsItems(true)
 
     for DLCId, isValid in pairs(lib.allowedDLCIds) do
         if isValid == true then
-            local dlcName = lib.GetDLCName(DLCId)
+            local dlcName, releaseDateTimestamp = lib.GetDLCInfo(DLCId)
             local entry = DLCIdDropdown:CreateItemEntry(dlcName)
             entry.filterType = DLCId
             entry.nameClean = dlcName
+            entry.releaseDateTimeStamp = releaseDateTimestamp
+            entry.tooltipText = select(2, lib_CleanDLCTimeStamp(releaseDateTimestamp, true))
             DLCIdDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
     end
@@ -990,6 +1114,44 @@ end
 
 
 --[[ XML Handlers ]]--
+local currentWidth, currentHeight
+local updateListColumnWithCounter = 0
+function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart, forceResizeNow)
+    ZO_Tooltips_HideTextTooltip()
+    local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
+    if resizeStart then
+        currentWidth, currentHeight = self:GetDimensions()
+        --d("[LibSets]Keyboard TLC resize START - currentWidth: " ..tos(self:GetWidth()) .. ", currentHeight: " ..tos(self:GetHeight()))
+        libSetsSearchUIKeyboardObject.resultsList.updateListColumnWith = nil
+    else
+        local newWidth, newHeight = self:GetDimensions()
+        if (forceResizeNow or (currentWidth and currentWidth ~= newWidth) or (newHeight and newHeight ~= currentHeight)) then
+            --Save the TLC's size and position to the SavedVariables
+            libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize(self)
+            --Calculate the multiselect dropdown filter boxes size (width) based on the actual TLC width now
+            libSetsSearchUIKeyboardObject:SetMultiSelectDropdownDimensionConstraints()
+            --Set the column width update flag to the list so the next ZO_ScrollList's dataType setupFunction will resize the columns
+            updateListColumnWithCounter = updateListColumnWithCounter + 1
+            libSetsSearchUIKeyboardObject.resultsList.updateListColumnWith = updateListColumnWithCounter
+
+            --d("[LibSets]Keyboard TLC resize STOP - newWidth: " ..tos(newWidth) .. ", newHeight: " ..tos(newHeight))
+            --Commit the scrollList now to rebuild it's size
+            ZO_ScrollList_Commit(libSetsSearchUIKeyboardObject.resultsListControl)
+        end
+        currentWidth = nil
+        currentHeight = nil
+    end
+end
+
+function LibSets_SearchUI_Keyboard_TopLevel_OnMove(self, moveStart)
+    ZO_Tooltips_HideTextTooltip()
+    local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
+    if not moveStart then
+        libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize(self)
+    end
+end
+
+--Initialization of the LibSets keyboard search UI -> Called from EVENT_ADD_ON_LOADED
 function LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(self)
     if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then return end
     LIBSETS_SEARCH_UI_KEYBOARD = LibSets_SearchUI_Keyboard:New(self)

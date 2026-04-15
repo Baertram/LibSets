@@ -19,6 +19,7 @@ local favoriteIconTextStar = searchUI.favoriteIconTextStar
 local favoriteIconTexts    = searchUI.favoriteIconTexts
 
 --Library's local helpers
+local LIBSETS_TABLEKEY_ZONEIDS = LIBSETS_TABLEKEY_ZONEIDS
 local preloadedSetNames = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES]
 
 --local libSets_IsNoESOSet = lib.IsNoESOSet
@@ -111,16 +112,23 @@ function LibSets_SearchUI_List:Setup( )
 	self.sortHeaderGroup:SelectAndResetSortForKey(self.currentSortKey) -- Will call "SortScrollList" internally
 	--The sort function
     self.sortFunction = function( listEntry1, listEntry2 )
-        if     self.currentSortKey == nil or self.sortKeys[self.currentSortKey] == nil
-            or listEntry1.data == nil or listEntry1.data[self.currentSortKey] == nil
-            or listEntry2.data == nil or listEntry2.data[self.currentSortKey] == nil then
+        local currentSortKey = self.currentSortKey
+        local currentSortOrder = self.currentSortOrder
+        local sortKeys = self.sortKeys
+        local listEntry1Data = listEntry1.data
+        local listEntry2Data = listEntry2.data
+
+        if     currentSortKey == nil or currentSortOrder == nil or ZO_IsTableEmpty(sortKeys) or sortKeys[currentSortKey] == nil
+            or listEntry1Data == nil or listEntry1Data[currentSortKey] == nil
+            or listEntry2Data == nil or listEntry2Data[currentSortKey] == nil then
             return nil
         end
-        return ZO_TableOrderingFunction(listEntry1.data, listEntry2.data, self.currentSortKey, self.sortKeys, self.currentSortOrder)
+        return ZO_TableOrderingFunction(listEntry1Data, listEntry2Data, currentSortKey, sortKeys, currentSortOrder)
 	end
 
     --Sort headers
 	self.headers =                  self.control:GetNamedChild("Headers")
+    self.headerFavorite =           self.headers:GetNamedChild("Favorite")
     self.headerName =               self.headers:GetNamedChild("Name")
     self.headerSetType =            self.headers:GetNamedChild("SetType")
 	self.headerArmorOrWeaponType =  self.headers:GetNamedChild("ArmorOrWeaponType")
@@ -128,8 +136,67 @@ function LibSets_SearchUI_List:Setup( )
 	self.headerDropLocations =      self.headers:GetNamedChild("DropLocations")
 	self.headerSetId =              self.headers:GetNamedChild("SetId")
 
+    --Add the headers to the table of dimensionConstraints update, and add the column names of virtual XML template LibSetsSearchUIRow
+    --so the function LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstraints(rowControl, columnsToo) can upate them too
+    self.headerAndColumnsMinAndMaxData = {}
+    self.headerAndColumnsMinAndMaxData[self.headerFavorite] =                   { minX = 24,    maxX = 24,      columnName="Favorite" }
+    self.headerAndColumnsMinAndMaxData[self.headerName] =                       { minX = 400,   maxX = 400,     columnName="Name"}
+    self.headerAndColumnsMinAndMaxData[self.headerSetType] =                    { minX = 40,    maxX = 40,      columnName="SetType"}
+    self.headerAndColumnsMinAndMaxData[self.headerArmorOrWeaponType] =          { minX = 40,    maxX = 40,      columnName="ArmorOrWeaponType"}
+    self.headerAndColumnsMinAndMaxData[self.headerEquipSlot] =                  { minX = 40,    maxX = 40,      columnName="EquipSlot"}
+    self.headerAndColumnsMinAndMaxData[self.headerDropLocations] =              { minX = 300,   maxX = "calcByTLCWidth,-650",    factorMultiplier=2, columnName="DropLocations"}
+    --self.headerAndColumnsMinAndMaxData[self.headerSetId] =                      { minX = 40,    maxX = 40,    columnName="SetId", anchors = { [1] = { point = RIGHT, relativeTo=self.headers, relativePoint=RIGHT } }}
+
     --Build initial masterlist via self:BuildMasterList() --> Do not automatically here but only as the LibSets search UI opens first time!
     --self:RefreshData()
+end
+
+--Update the list's header columns and the virtual XML template LibSetsSearchUIRow columns in width and anchors
+function LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstraints(rowControl, columnsToo, noHeader)
+    if ZO_IsTableEmpty(self.headerAndColumnsMinAndMaxData) then return end
+
+    local changeColumnsToo = rowControl ~= nil and columnsToo == true
+    noHeader = noHeader or false
+
+--d("LibSets_SearchUI_List:SetHeaderAndColumnDimensionConstraints - rowControl: " ..tos((rowControl and rowControl:GetName()) or nil) .. "; changeColumnsToo: " .. tos(changeColumnsToo) ..", columnsToo: " ..tos(columnsToo) .. "; noHeader: " ..tos(noHeader))
+
+    for controlToSetDimensions, dimensionsData in pairs(self.headerAndColumnsMinAndMaxData) do
+        if dimensionsData then
+            controlToSetDimensions.minX = dimensionsData.minX
+            controlToSetDimensions.maxX = dimensionsData.maxX
+            controlToSetDimensions.factorMultiplier = dimensionsData.factorMultiplier
+            if not noHeader then
+                --Calculate the new width based on the TLC width and apply it
+                lib.XMLGetDynamicWidth(controlToSetDimensions, nil, nil, true, nil, nil, true)
+
+                --Reanchor the control again, if needed
+                local anchors = dimensionsData.anchors
+                if not ZO_IsTableEmpty(anchors) then
+                    controlToSetDimensions:ClearAnchors()
+                    for _, anchorData in ipairs(anchors) do
+                        controlToSetDimensions:SetAnchor(anchorData.point, anchorData.relativeTo, anchorData.relativePoint, anchorData.offsetX, anchorData.offsetY)
+                    end
+                end
+            end
+
+            --Columns should be changed in size too?
+            if changeColumnsToo == true then
+                local columnName = dimensionsData.columnName
+--d(">columnName: " .. tos(columnName))
+                --Find the column name childControl of the rowControl and change it liek the header control above
+                if columnName ~= nil and columnName ~= "" then
+                    local rowChildControl = rowControl:GetNamedChild(columnName)
+                    if rowChildControl ~= nil then
+    --d("Changing the column: " ..tos(rowChildControl:GetName()))
+                        rowChildControl.minX = dimensionsData.minX
+                        rowChildControl.maxX = dimensionsData.maxX
+                        rowChildControl.factorMultiplier = dimensionsData.factorMultiplier
+                        lib.XMLGetDynamicWidth(rowChildControl, nil, nil, true, 30, 30, true)
+                    end
+                end
+            end
+        end
+    end
 end
 
 --[[
@@ -147,6 +214,19 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     control.data = data
 
     local lastColumn
+
+    --Set the list row's column width constraints based on the TLC width
+    -->Only if the TLC was resized! Update each row control once then (visible and new visible upon scrolling -> until next resize of the TLC)
+    local updateListColumnWith = self.updateListColumnWith
+    if updateListColumnWith ~= nil then
+        --Was this control resized already?
+        local controlUpdatedListColumnWith = control._updatedListColumnWith
+        if controlUpdatedListColumnWith == nil or controlUpdatedListColumnWith < updateListColumnWith then
+            self:SetHeaderAndColumnDimensionConstraints(control, true, true)
+            control._updatedListColumnWith = updateListColumnWith
+        end
+    end
+
 
     local favoriteColumn = control:GetNamedChild("Favorite")
     favoriteColumn.normalColor = ZO_DEFAULT_TEXT
@@ -168,7 +248,6 @@ function LibSets_SearchUI_List:SetupItemRow(control, data)
     end
     favoriteColumn:SetText(favoriteIconColumnText)
     favoriteColumn:SetHidden(false)
-
 
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
@@ -346,10 +425,24 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local dropLocationSort --A string containing the zoneId of a drop location first, and then the dropLocationIds at that zone? Used to sort the drop location column properly
 
     local dropMechanicTab = setData.dropMechanic
-    if dropMechanicTab ~= nil and not ZO_IsTableEmpty(dropMechanicTab) then
+    if not ZO_IsTableEmpty(dropMechanicTab) then
         local overallTextsPerZone = setInfoParts["overallTextsPerZone"]
         if overallTextsPerZone ~= nil and overallTextsPerZone.enabled == true then
-            dropLocationText = overallTextsPerZone.data[1]
+            local overallTextsPerZoneData = overallTextsPerZone.data
+            --Add up to 5 rows of drop locations text to the set search UI entry
+            dropLocationText = overallTextsPerZoneData[1]
+            if overallTextsPerZoneData[2] ~= nil then
+                dropLocationText = dropLocationText .. "   " .. overallTextsPerZoneData[2]
+            end
+            if overallTextsPerZoneData[3] ~= nil then
+                dropLocationText = dropLocationText .. "   " .. overallTextsPerZoneData[3]
+            end
+            if overallTextsPerZoneData[4] ~= nil then
+                dropLocationText = dropLocationText .. "   " .. overallTextsPerZoneData[4]
+            end
+            if overallTextsPerZoneData[5] ~= nil then
+                dropLocationText = dropLocationText .. "   " .. overallTextsPerZoneData[5]
+            end
         end
 
         local dropZoneIds = setData[LIBSETS_TABLEKEY_ZONEIDS]
@@ -505,6 +598,12 @@ function LibSets_SearchUI_List:FilterScrollList()
 
     --Update the counter
     self:UpdateCounter(scrollData)
+
+    --Set the minX and maxX constraints of the resultsList header column controls
+    --> Do that here, once, after the ZO_ScrollList's dataType has applied the row column's width via the setupFunction
+    if self.updateListColumnWith ~= nil then
+        self:SetHeaderAndColumnDimensionConstraints(nil, false, false)
+    end
 end
 
 --The sort keys for the sort headers of the list
@@ -536,7 +635,7 @@ function LibSets_SearchUI_List:BuildSortKeys()
         --["timestamp"]               = { isId64          = true, tiebreaker = "name"  }, --isNumeric = true
         --["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
         --["gearId"]                  = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
-        ["isFavorite"]              = { isNumeric = true,               tiebreaker = "name" },
+        ["isFavorite"]              = { caseInsensitive = true,         tiebreaker = "name" },
         ["name"]                    = { caseInsensitive = true },
         ["setType"]                 = { isNumeric = true,               tiebreaker = "name" },
         ["armorOrWeaponType"]       = { isNumeric = true,               tiebreaker = "name" },

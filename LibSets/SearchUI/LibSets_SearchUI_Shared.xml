@@ -1,0 +1,123 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/DakJaniels/esoui_gui_xsd/blob/main/esoui_gui_xml.xsd">
+<!-- LibSets Search UI - Font definitions -->
+	<Font name="MyFontGame16" font="$(MEDIUM_FONT)|$(KB_16)|soft-shadow-thin" />
+    <Font name="MyFontGame18" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thik" />
+    <Font name="MyFontGame20" font="$(BOLD_FONT)|$(KB_20)|soft-shadow-thik" />
+
+    <Controls>
+
+        <!-- LibSets Search UI - Virtual template -->
+        <TopLevelControl name="LibSets_SearchUI_TLC_Shared" mouseEnabled="true" movable="true" clampedToScreen="true" hidden="true" virtual="true" level="1">
+            <Controls>
+                <Control name="$(parent)Filters">
+                    <Controls>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Content">
+                    <Controls>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <!-- Virtual Sort headers -->
+        <Control name="LibSetsSearchUISortHeader" inherits="ZO_SortHeaderBehavior" virtual="true" level="2">
+            <Controls>
+                <Label name="$(parent)Name" font="MyFontGame18" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                    <AnchorFill />
+                </Label>
+            </Controls>
+            <OnMouseEnter>
+                LibSets_SearchUI_Shared_SortHeaderTooltip(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+        </Control>
+
+		<!--Virtual Backdrops - The background of the UI -->
+		<Backdrop name="LibSetsSearchUIBackdrop" inherits="ZO_DarkThinFrame" virtual="true" tier="LOW" layer="BACKGROUND" level="0">
+			<Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+            <Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
+            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+			<!--<Center file="/esoui/art/upsell/upsell_greymoor_bg.dds" /> -->
+        </Backdrop>
+
+         <!--Virtual Multiselect ComboBoxes - PTS API 101040: ZO_ComboBox is cappable to do multi selection & scroll -->
+		<Control name="LibSetsSearchUIMultiSelectComboBox" inherits="ZO_ComboBox" virtual="true" tier="LOW" layer="CONTROLS" level="0" resizeToFitConstrains="X"> <!-- 20240310 level was 1 but that makes the inherited ZO_ComboBox OpenDropdown control draw at level 0 behind the LibSetsSearchUIMultiSelectComboBox ... -->
+            <OnMouseEnter>
+                LibSets_SearchUI_Shared_ControlTooltip(self, BOTTOM, self, TOP, 0, -10)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+            <OnMouseUp>
+                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                    --ZO_ComboBox_DropdownClicked(self)
+                    local comboBox = ZO_ComboBox_ObjectFromContainer(self)
+                    if comboBox and not comboBox:IsDropdownVisible() then
+                        comboBox:ShowDropdown()
+                    end
+                else
+                    LibSets_SearchUI_Shared_Dropdown_OnMouseUp(self, button, upInside, shift, alt, ctrl, command)
+                end
+            </OnMouseUp>
+        </Control>
+
+		<!-- Virtual labels -->
+        <Label name="LibSetsSearchUIRowLabel" font="MyFontGame16" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER" virtual="true" />
+        <Label name="LibSetsSearchUIRowLabelRightAlign" font="MyFontGame16" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT" verticalAlignment="CENTER" virtual="true" />
+
+        <!-- Virtual Rows -->
+		<Control name="LibSetsSearchUIRow" mouseEnabled="true" virtual="true" hidden="false">
+			<Dimensions y="30" />
+			<OnMouseEnter>
+                LibSets_SearchUI_Shared_Row_OnMouseEnter(self)
+			</OnMouseEnter>
+			<OnMouseExit>
+                LibSets_SearchUI_Shared_Row_OnMouseExit(self)
+			</OnMouseExit>
+            <OnMouseUp>
+                LibSets_SearchUI_Shared_Row_OnMouseUp(self, button, upInside, shift, alt, ctrl, command)
+			</OnMouseUp>
+			<Controls>
+				<Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
+				<Label name="$(parent)Favorite" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" />
+                    <DimensionConstraints minX="24" maxX="24" minY="30" maxY="30" />
+				</Label>
+				<Label name="$(parent)Name" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Favorite" />
+                    <DimensionConstraints minX="400" maxX="400" minY="30" maxY="30" />
+				</Label>
+				<Label name="$(parent)SetType" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" />
+                    <DimensionConstraints minX="40" maxX="40" minY="30" maxY="30" />
+				</Label>
+				<Label name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)SetType" />
+                    <DimensionConstraints minX="40" maxX="40" minY="30" maxY="30" />
+				</Label>
+				<Label name="$(parent)EquipSlot" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
+                    <DimensionConstraints minX="40" maxX="40" minY="30" maxY="30" />
+				</Label>
+				<Label name="$(parent)DropLocations" inherits="LibSetsSearchUIRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)EquipSlot" />
+                    <DimensionConstraints minX="300" maxX="1200" minY="30" maxY="30" />
+				</Label>
+				<Label name="$(parent)SetId" inherits="LibSetsSearchUIRowLabelRightAlign">
+					<!--<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DropLocations" /> -->
+					<Anchor point="RIGHT" relativePoint="RIGHT" offsetX="-4" />
+                    <DimensionConstraints minX="40" maxX="40" minY="30" maxY="30" />
+				</Label>
+			</Controls>
+		</Control>
+
+    </Controls>
+</GuiXml>
+
+
+
+

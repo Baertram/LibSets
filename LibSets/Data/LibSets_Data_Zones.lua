@@ -175,8 +175,9 @@ lib.zoneIdsOfNewAPIVersionOnly = zoneIdsOfNewAPIVersionOnly
     --mapped to zoneIds so they will miss that sub-table!
     setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING] =
     {
-        --Special Category at the top
-        { parentCategory=124, category=133, zoneIds={1559}},--Night Market
+        --Special Category without parent category
+        { parentCategory=nil, category=133, zoneIds={1559}},--Night Market
+        --Special Category with subcategory
         { parentCategory=124, category=130, zoneIds={1502}},--Solstice
         --Aldmeri-Dominion
         { parentCategory=1, category=11, zoneIds={381}},--Auridon

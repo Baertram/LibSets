@@ -1,0 +1,314 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/DakJaniels/esoui_gui_xsd/blob/main/esoui_gui_xml.xsd">
+    <Controls>
+
+        <!-- LibSets Search UI - Keyboard mode -->
+        <TopLevelControl name="LibSets_SearchUI_TLC_Keyboard" inherits="LibSets_SearchUI_TLC_Shared" resizeHandleSize="8">
+            <!-- <Dimensions x="900" y="600"/> Allow resize -->
+            <DimensionConstraints minX="934" minY="600" maxX="100%" maxY="100%" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="CENTER" offsetX="0" offsetY="0"/>
+
+            <OnInitialized>
+                --Not done here, but at LibSets.lua, EVENT_ADD_ON_LOADED, after all set data was prepared for the filters!
+                --LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(self)
+            </OnInitialized>
+            <OnResizeStart>
+                LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, true)
+            </OnResizeStart>
+            <OnResizeStop>
+                LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, false)
+            </OnResizeStop>
+            <OnMoveStart>
+                LibSets_SearchUI_Keyboard_TopLevel_OnMove(self, true)
+            </OnMoveStart>
+            <OnMoveStop>
+                LibSets_SearchUI_Keyboard_TopLevel_OnMove(self, false)
+            </OnMoveStop>
+
+            <Controls>
+                <!-- Background -->
+		    	<Backdrop name="$(parent)BG" alpha="1" inherits="LibSetsSearchUIBackdrop" centerColor="666666">
+		    		<AnchorFill/>
+				</Backdrop>
+
+                <!-- Filters at the top -->
+                <Control name="$(parent)Filters" override="true" level="1">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="10" />
+                    <Dimensions y="125" />
+                    <Controls>
+
+                        <!-- Filter MultiSelect dropdown boxes - Row 1 -->
+                        <Control name="$(parent)FilterRow1Container" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="5" />
+                            <DimensionConstraints minX="934" maxX="100%" minY="30" maxY="41.6"/>
+                            <Controls>
+                                <Control name="$(grandparent)SetTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="2" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxY="30"/>
+                                </Control>
+                                <Control name="$(grandparent)ArmorTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)SetTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxY="30"/>
+                                </Control>
+                                <Control name="$(grandparent)WeaponTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)ArmorTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxY="30"/>
+                                </Control>
+                                <Control name="$(grandparent)EquipmentTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)WeaponTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-64" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxY="30"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <!-- Filter MultiSelect dropdown boxes - Row 2 -->
+                        <Control name="$(parent)FilterRow2Container" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FilterRow1Container" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)FilterRow1Container" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="5" />
+                            <DimensionConstraints minX="934" minY="30" maxY="41.6"/>
+                            <Controls>
+                                <!-- Filter edit box - Name text search -->
+                                <Backdrop name="$(grandparent)TextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" resizeToFitConstrains="X" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)" offsetX="4" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <Controls>
+                                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" />
+                                    </Controls>
+                                </Backdrop>
+
+                                <!-- Filter more MultiSelect dropdown boxes - row 2 -->
+                                <Control name="$(grandparent)DLCIdFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)TextSearch" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxY="30"/>
+                                </Control>
+                                <Control name="$(grandparent)EnchantSearchCategoryTypeFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)DLCIdFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxY="30"/>
+                                </Control>
+                                <Control name="$(grandparent)FavoritesFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)EnchantSearchCategoryTypeFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-2" offsetY="0" />
+                                    <DimensionConstraints minX="200"  maxY="30"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+
+                        <!-- Filter MultiSelect dropdown boxes - Row 3 -->
+                        <Control name="$(parent)FilterRow3Container" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FilterRow2Container" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)FilterRow2Container" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="5" />
+                            <DimensionConstraints minX="934" maxX="100%" minY="30" maxY="41.6"/>
+                            <Controls>
+                                <!-- Filter edit box - Bonus text search -->
+                                <Backdrop name="$(grandparent)BonusTextSearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" resizeToFitConstrains="X" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)" offsetX="4" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxY="30"/>
+                                    <Controls>
+                                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" />
+                                    </Controls>
+                                </Backdrop>
+
+                                <!-- Filter more MultiSelect dropdown boxes - row 3 -->
+                                <Control name="$(grandparent)NumBonusFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)BonusTextSearch" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <DimensionConstraints minX="100" maxY="30"/>
+                                </Control>
+
+                                <Control name="$(grandparent)DropZoneFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)NumBonusFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <DimensionConstraints minX="190" maxX="300" maxY="30"/>
+                                </Control>
+                                <Control name="$(grandparent)DropMechanicsFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)DropZoneFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <DimensionConstraints minX="200" maxX="300" maxY="30"/>
+                                </Control>
+                                <Control name="$(grandparent)DropLocationsFilter" inherits="LibSetsSearchUIMultiSelectComboBox" tier="LOW" layer="CONTROLS" level="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)DropMechanicsFilter" relativePoint="TOPRIGHT" offsetX="5" offsetY="0" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-2" offsetY="0" />
+                                    <DimensionConstraints minX="180" maxX="100%" maxY="30"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                    </Controls>
+                </Control>
+
+                <!-- Filter results - ZO_ScrollList -->
+                <Control name="$(parent)Content" override="true" tier="LOW" layer="CONTROLS" level="0">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Filters" relativePoint="BOTTOMLEFT" offsetX="8" offsetY="0" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="-8" offsetY="-16" />
+                    <Controls>
+
+                        <!-- ZO_SortFilterScrollList - Sort header -->
+                        <Control name="$(parent)Headers" tier="LOW" layer="CONTROLS" level="1">
+                            <Dimensions y="30" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-10" offsetY="0" />
+                            <Controls>
+                                <Control name="$(parent)Favorite" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, zo_iconTextFormatNoSpace(LibSets.SearchUI.favoriteIcon, 24, 24, ""), "isFavorite", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGame")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="24" maxX="24" />
+                                </Control>
+                                <Control name="$(parent)Name" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, GetString(SI_ITEMLISTSORTTYPE2), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Favorite" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="400" maxX="400" />
+                                </Control>
+                                <Control name="$(parent)SetType" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("setType"), "setType", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="40" maxX="40" />
+                                </Control>
+                                <Control name="$(parent)ArmorOrWeaponType" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("armorOrWeaponType"), "armorOrWeaponType", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SetType" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="40" maxX="40" />
+                                </Control>
+                                <Control name="$(parent)EquipSlot" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("equipSlot"), "equipSlot", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)ArmorOrWeaponType" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="40" maxX="40" />
+                                </Control>
+                                <Control name="$(parent)DropLocations" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("droppedBy"), "dropLocationSort", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)EquipSlot" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="300" maxX="1200" />
+                                </Control>
+                                <Control name="$(parent)SetId" inherits="LibSetsSearchUISortHeader">
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, LibSets.GetLocalizedText("setId"), "setId", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                    <!--<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DropLocations" />-->
+                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-10" />
+                                    <Dimensions y="30" />
+                                    <DimensionConstraints minX="40" maxX="40" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <!-- ZO_SortFilterScrollList -->
+                        <Control name="$(parent)List" inherits="ZO_ScrollList" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="0" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="-6" />
+                        </Control>
+
+                        <!-- Counter - Showing currently number of filtered rows -->
+                        <Label name="$(parent)Counter" font="ZoFontGameSmall" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" tier="LOW" layer="CONTROLS" level="1">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="0" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <!-- Buttons at the top -->
+                <Button name="$(parent)ButtonClose" tier="LOW" layer="CONTROLS" level="2">
+					<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT"
+							offsetX="6"  offsetY="4" />
+                    <Dimensions x="36" y="36" />
+                    <Textures normal="/esoui/art/buttons/closebutton_up.dds"
+                              pressed="/esoui/art/buttons/closebutton_down.dds"
+                              mouseOver="/esoui/art/buttons/closebutton_mouseOver.dds"
+                              disabled="/esoui/art/buttons/closebutton_disabled.dds" />
+                    <OnClicked>
+                        self:GetParent()._object:HideUI()
+                    </OnClicked>
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                        SetTooltipText(InformationTooltip, GetString(SI_DIALOG_CLOSE))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Button>
+                <Button name="$(parent)ButtonSettings" tier="LOW" layer="CONTROLS" level="1">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ButtonClose" relativePoint="LEFT" offsetX="-10" offsetY="-2" />
+                    <Dimensions x="30" y="30" />
+                    <Textures normal="esoui/art/chatwindow/chat_options_up.dds"
+                              pressed="esoui/art/chatwindow/chat_options_down.dds"
+                              mouseOver="esoui/art/chatwindow/chat_options_over.dds"/>
+                    <OnClicked>
+                        self:GetParent()._object:ShowSettingsMenu(self)
+                    </OnClicked>
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                        SetTooltipText(InformationTooltip, GetString(SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1305))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Button>
+
+                <Button name="$(parent)ButtonSearch" tier="LOW" layer="CONTROLS" level="2">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="7" />
+                    <Dimensions x="26" y="26" />
+                    <Textures normal="/esoui/art/buttons/searchbutton_normal.dds"
+                              pressed="/esoui/art/buttons/searchbutton_mousedown.dds"
+                              mouseOver="/esoui/art/buttons/searchbutton_mouseOver.dds"
+                              disabled="/esoui/art/buttons/searchbutton_disabled.dds" />
+                    <OnClicked>
+                        self:GetParent()._object:Search(false, nil)
+                    </OnClicked>
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                        SetTooltipText(InformationTooltip, GetString(SI_TRADING_HOUSE_DO_SEARCH))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Button>
+
+                <Button name="$(parent)ButtonReset" tier="LOW" layer="CONTROLS" level="1">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ButtonSearch" relativePoint="TOPLEFT" offsetX="-5" offsetY="0" />
+                    <Dimensions x="26" y="26" />
+                    <Textures normal="/esoui/art/buttons/switch_up.dds"
+                              pressed="/esoui/art/buttons/switch_down.dds"
+                              mouseOver="/esoui/art/buttons/switch_mouseOver.dds"
+                              disabled="/esoui/art/buttons/switch_disabled.dds" />
+                    <OnClicked>
+                        self:GetParent()._object:Reset()
+                    </OnClicked>
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
+                        SetTooltipText(InformationTooltip, GetString(SI_TRADING_HOUSE_RESET_SEARCH))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+
+
+        <!-- LibSets Search UI - Keyboard mode - Set tooltip -->
+		<TopLevelControl name="LibSets_SearchUI_TooltipTopLevel" inherits="TooltipTopLevel">
+			<Controls>
+				<Tooltip name="LibSets_SearchUI_Tooltip" inherits="ZO_ItemIconTooltip"/>
+			</Controls>
+		</TopLevelControl>
+    </Controls>
+</GuiXml>
+
+
+
+

@@ -28,16 +28,24 @@ local lib                            = LibSets
 --Are we on a console?
 local IsConsole = IsConsoleUI()
 lib.IsConsole = IsConsole
-lib.searchUI = {
+lib.SearchUI = {
+    name = MAJOR .. "_SearchUI",
     controlName = {
         [false] = "LibSets_SearchUI_TLC_Keyboard",
         [true]  = "LibSets_SearchUI_TLC_Gamepad",
     },
     control = {
-        [false] = nil, --Keybaord: LibSets_SearchUI_TLC_Keyboard Updated as keybaord search UI is initialized
-        [true]  = nil -- Gamepad: LibSets_SearchUI_TLC_Gamepad Updated ass gamepad search UI is initialized (currently as of 2026-01-21 it does not exist!)
-    }
+        [false] = nil, --Keyboard: LibSets_SearchUI_TLC_Keyboard Updated as keyboard search UI is initialized
+        [true]  = nil -- Gamepad: LibSets_SearchUI_TLC_Gamepad Updated ass gamepad search UI is initialized (currently as of 2023-11 it does not exist!)
+    },
+    KeyboardVars = {
+        minWidth = 934,
+        minHeight = 600,
+    },
+    --GamepadVars = {
+    --},
 }
+
 
 ------------------------------------------------------------------------------------------------------------------------
 lib.name                             = MAJOR
@@ -144,7 +152,7 @@ lib.debugNumItemIdPackageSize  = 5000       -- do not increase this or the clien
 
 
 --the maximum collectiblIds to scan via debug functions
-lib.debugMaxCollectibleIds = 15000
+lib.debugMaxCollectibleIds = 250000
 
 ------------------------------------------------------------------------------------------------------------------------
 --base game languages
@@ -256,8 +264,9 @@ LIBSETS_TABLEKEY_ZONEIDS                               = "zoneIds"
 LIBSETS_TABLEKEY_ZONEIDS_SORTED                        = "zoneIdsSorted"
 LIBSETS_TABLEKEY_ZONE_DATA                             = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                    = "dungeonFinderData"
-LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     = "collectible" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES            = "achievementCategory" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                 = "collectible_DLC" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     = "collectible" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_DROPMECHANIC                          = "dropMechanic"
 local LIBSETS_TABLEKEY_DROPMECHANIC = LIBSETS_TABLEKEY_DROPMECHANIC

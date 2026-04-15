@@ -48,7 +48,7 @@
                                                 |   ---> The function will try to do this automatically for you
                                                 |-> This function is not client language dependent!
 -------------------------------------------------------------------------------------------------------------------------------------------------
-    LibSets.DebugGetAllCollectibleNames()       |   Get all the collectible ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
+    LibSets.DebugGetAllAchievementCategoryNames()|  Get all the achievement category ids and names saved to the SavedVars key constant LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES
                                                 |   ->  Use /script SetCVar("language.2", "<lang>") (where <lang> is e.g. "de", "en", "fr") to change the client language
                                                 |       and then scan the names again with the new client language!
                                                 |-> This function IS client language dependent!
@@ -145,6 +145,7 @@ local libPrefix = lib.prefix
 local libPrefixWithVersion = "[".. MAJOR .. " v" .. tos(MINOR).."]"
 local storedInSVFileLibSetsInTable = "->Stored in SaveVariables file \'" .. MAJOR .. ".lua\', in the table "
 local pleaseReloadUI = ">Please do a /reloadui to update the file properly!"
+local upperCaseFirstFormatter = "<<C:1>>"
 
 
 --LibSets constants
@@ -162,8 +163,10 @@ local LIBSETS_TABLEKEY_WAYSHRINES                             = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_WAYSHRINE_NAMES                        = LIBSETS_TABLEKEY_WAYSHRINE_NAMES
 local LIBSETS_TABLEKEY_ZONE_DATA                              = LIBSETS_TABLEKEY_ZONE_DATA
 local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
-local LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                      = LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
+local LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES             = LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES
 local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES
+local LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                      = LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
+local LIBSETS_TABLEKEY_MIXED_SETNAMES                         = LIBSETS_TABLEKEY_MIXED_SETNAMES
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
@@ -218,7 +221,7 @@ local function GetAllZoneInfo()
             --With API100027 Elsywer every non-used zoneIndex will be 1 instead 0 :-(
             --So we need to check if the zoneIndex is 1 and the zoneId <> the zoneId for index 1
             if (zi == 1 and zoneId == zoneIndex1ZoneId) or zi ~= 1 then
-                local zoneNameClean = zostrfor("<<C:1>>", gznbidx(zi))
+                local zoneNameClean = zostrfor(upperCaseFirstFormatter, gznbidx(zi))
                 if zoneNameClean ~= nil then
                     zoneData[clientLang][zoneId] = zoneId .. "|" .. zi .. "|" .. pzid .. "|" ..zoneNameClean
                 end
@@ -241,15 +244,15 @@ local function GetWayshrineInfo()
     if currentMapsZoneIndex == nil then d("<-Error: map zone index missing." .. errorMapNavigateText) return end
     local currentZoneId = gzid(currentMapsZoneIndex)
     if currentZoneId == nil then d("<-Error: map zone id missing." .. errorMapNavigateText) return end
-    local currentMapName = zocstrfor("<<C:1>>", currentMapIndex and GetMapNameByIndex(currentMapIndex) or gmnbid(currentMapId))
-    local currentZoneName = zocstrfor("<<C:1>>", gznbidx(currentMapsZoneIndex))
+    local currentMapName = zocstrfor(upperCaseFirstFormatter, currentMapIndex and GetMapNameByIndex(currentMapIndex) or gmnbid(currentMapId))
+    local currentZoneName = zocstrfor(upperCaseFirstFormatter, gznbidx(currentMapsZoneIndex))
     d("->mapIndex: " .. tos(currentMapIndex) .. ", mapId: " .. tos(currentMapId) ..
             ", mapName: " .. tos(currentMapName) .. ", mapZoneIndex: " ..tos(currentMapsZoneIndex) .. ", zoneId: " .. tos(currentZoneId) ..
             ", zoneName: " ..tos(currentZoneName))
     for i=1, gnftn(), 1 do
         local wsknown, wsname, wsnormalizedX, wsnormalizedY, wsicon, wsglowIcon, wspoiType, wsisShownInCurrentMap, wslinkedCollectibleIsLocked = gftninf(i)
         if wsisShownInCurrentMap then
-            local wsNameStripped = zocstrfor("<<C:1>>",wsname)
+            local wsNameStripped = zocstrfor(upperCaseFirstFormatter,wsname)
             d("->[" .. tos(i) .. "] " ..tos(wsNameStripped))
             --Export for excel split at | char
             --WayshrineNodeId, mapIndex, mapId, mapName, zoneIndex, zoneId, zoneName, POIType, wayshrineName
@@ -272,7 +275,7 @@ local function GetWayshrineNames()
         --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
         local _, wsLocalizedName = gftninf(wsNodeId)
         if wsLocalizedName ~= nil then
-            local wsLocalizedNameClean = zocstrfor("<<C:1>>", wsLocalizedName)
+            local wsLocalizedNameClean = zocstrfor(upperCaseFirstFormatter, wsLocalizedName)
             wsNames[clientLang][wsNodeId] = tos(wsNodeId) .. "|" .. wsLocalizedNameClean
         end
     end
@@ -314,7 +317,7 @@ local function GetMapNames(lang)
             if zoneId and not zoneIdsLocalized[zoneId] then
                 local zoneName = gznbidx(zoneIndex)
                 if not zoneName or zoneName == "" then zoneName = unknownName end
-                zoneIdsLocalized[zoneId] = zocstrfor("<<C:1>>", zoneName)
+                zoneIdsLocalized[zoneId] = zocstrfor(upperCaseFirstFormatter, zoneName)
             end
         end
     end
@@ -324,7 +327,7 @@ local function GetMapNames(lang)
         local mapId = GetMapIdByIndex(mapIndex)
         --d(">zoneId: " ..tos(zoneId) .. ", mapIndex: " ..tos(mapIndex))
         if mapIndex ~= nil then
-            local mapName = zocstrfor("<<C:1>>", GetMapNameByIndex(mapIndex))
+            local mapName = zocstrfor(upperCaseFirstFormatter, GetMapNameByIndex(mapIndex))
             if mapName ~= nil then
                 mapNames[mapIndex] = tos(mapId) .. "|" .. tos(mapIndex) .. "|" .. mapName .. "|" .. tos(zoneId) .. "|" .. zoneNameLocalized
             end
@@ -461,10 +464,10 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
-
+        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES]                    = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]       = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]       = nil
     else
         lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
@@ -482,9 +485,10 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_WAYSHRINE_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_ZONE_DATA] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_MIXED_SETNAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = nil
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES]                    = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]       = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]       = nil
     end
     d(libPrefix .. "Cleared all SavedVariables".. onlyNamesText .." in file \'" .. MAJOR .. ".lua\'.")
     if noReloadInfo == true then return end
@@ -729,7 +733,7 @@ function lib.DebugGetAllSetNames(noReloadInfo)
                                 setName = ""
                                 setName = lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId][clientLang] or lib.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES][setId][fallbackLang] or "n/a"
                             else
-                                setName = zocstrfor("<<C:1>>", setName)
+                                setName = zocstrfor(upperCaseFirstFormatter, setName)
                             end
 
                             --if isNewSet == true then
@@ -849,7 +853,7 @@ local function showSetCountsScanned(finished, keepUncompressedetItemIds, noReloa
                     end
                     if newSetName == nil then newSetName = unknownName end
                     if newSetName ~= unknownName then
-                        newSetName = zocstrfor("<<C:1>>", newSetName)
+                        newSetName = zocstrfor(upperCaseFirstFormatter, newSetName)
                     else
                         newSetName = unknownName .. " - Name unknown in LibSets.setDataPreloaded[\'" .. LIBSETS_TABLEKEY_SETNAMES .. "\']"
                     end
@@ -950,7 +954,7 @@ local function loadSetsByIds(packageNr, from, to, noReloadInfo)
 
                                 --Update the set name of the client language, if missing
                                 if setName ~= nil and not setNames[setId] or setNames[setId] ~= nil and not setNames[setId][clientLang] then
-                                    local setNameClean = zocstrfor("<<C:1>>", setName)
+                                    local setNameClean = zocstrfor(upperCaseFirstFormatter, setName)
                                     if setNameClean ~= nil then
                                         setNames[setId] = setNames[setId] or {}
                                         setNames[setId][clientLang] = setNameClean
@@ -1121,7 +1125,7 @@ local function getNewSetName(newSetId)
     if not setItemLink or setItemLink == "" then return unknownName end
     --                hasSet bool, setName string, numBonuses integer, numEquipped integer, maxEquipped integer, setId integer
     local hasSet, setName, _, _, _, setId = gilsetinf(setItemLink, false)
-    if hasSet == true and setId == newSetId then return zocstrfor("<<C:1>>", setName) end
+    if hasSet == true and setId == newSetId then return zocstrfor(upperCaseFirstFormatter, setName) end
     return unknownName
 end
 
@@ -1203,41 +1207,46 @@ function lib.DebugGetDungeonFinderData(dungeonFinderIndex, noReloadInfo)
 end
 local debugGetDungeonFinderData = lib.DebugGetDungeonFinderData
 
---This function scans the collectibles for their names to provide a list for the new DLCs and chapters
---Parameters: collectibleStartId number, the start ID of the collectibles to start the scan FROM
---            collectibleEndId number, the end ID of the collectibles to start the scan TO
-function lib.DebugGetAllCollectibleNames(collectibleStartId, collectibleEndId, noReloadInfo)
-    collectibleStartId = collectibleStartId or 1
-    collectibleEndId = collectibleEndId or lib.debugMaxCollectibleIds
-    noReloadInfo = noReloadInfo or false
+--This function scans the achievements categories for their names to provide a list containing e.g. the new DLCs/chapters/seasons
+--Parameters: achievementStartId number, the start ID of the achievement to start the scan FROM
+--            achievementEndId number, the end ID of the achievement to start the scan TO
+--            noReloadInfo boolean, suppress the reload UI information at the end
+--            ingameList boolean, if true the SavedVariables will be created with an ingame readbale list (via merTorchbug e.g.), not using any |
+function lib.DebugGetAllAchievementCategoryNames(achievementStartId, achievementEndId, noReloadInfo, ingameList)
+    achievementStartId = achievementStartId or 1
+    achievementEndId   = achievementEndId or lib.debugMaxCollectibleIds
+    noReloadInfo       = noReloadInfo or false
+    ingameList         = ingameList or false
 
     if nonOfficialLanguages[clientLang] then return end
 
-    if collectibleEndId < collectibleStartId then collectibleEndId = collectibleStartId end
-    d(libPrefix .. "Start to load all collectibles with start ID ".. collectibleStartId .. " to end ID " .. collectibleEndId .. "...")
-    local collectiblesAdded = 0
-    local collectibleDataScanned
-    for i=collectibleStartId, collectibleEndId, 1 do
-        local topLevelIndex, categoryIndex = GetCategoryInfoFromAchievementId(i)
-        local collectibleName = zocstrfor("<<C:1>>", GetAchievementCategoryInfo(topLevelIndex))
-        if collectibleName and collectibleName ~= "" then
-            collectibleDataScanned = collectibleDataScanned or {}
-            collectibleDataScanned[i] = tos(i) .. "|" .. collectibleName
-            collectiblesAdded = collectiblesAdded +1
+    if achievementEndId < achievementStartId then achievementEndId = achievementStartId end
+    d(libPrefix .. "Start to load all achievements with start ID ".. achievementStartId .. " to end ID " .. achievementEndId .. "...")
+    local achievementCategoriesAdded = 0
+    local achievementDataScanned = {}
+    local alreadyAdded = {}
+    for i= achievementStartId, achievementEndId, 1 do
+        local topLevelIndex = GetCategoryInfoFromAchievementId(i)
+        if topLevelIndex ~= nil then
+            local achievementCategoryName = zocstrfor(upperCaseFirstFormatter, GetAchievementCategoryInfo(topLevelIndex))
+            if achievementCategoryName and achievementCategoryName ~= "" and not alreadyAdded[achievementCategoryName] then
+                alreadyAdded[achievementCategoryName] = true
+                achievementDataScanned[topLevelIndex]  = ((not ingameList and tos(topLevelIndex) .. "|") or "") .. achievementCategoryName
+                achievementCategoriesAdded = achievementCategoriesAdded +1
+            end
         end
     end
-    if collectiblesAdded > 0 then
-        tsort(collectibleDataScanned)
+    if achievementCategoriesAdded > 0 then
         LoadSavedVariables()
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] or {}
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = {}
-        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = collectibleDataScanned
-        d("->Stored " .. tos(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tos(clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES]             = lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES][clientLang] = achievementDataScanned
+        d("->Stored " .. tos(achievementCategoriesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES .. "\', language: \'" ..tos(clientLang).."\'\nPlease do a /reloadui or logout to update the SavedVariables data now!")
         if noReloadInfo == true then return end
         d("Please do a /reloadui or logout to update the SavedVariables data now!")
     end
 end
-local debugGetAllCollectibleNames = lib.DebugGetAllCollectibleNames
+local debugGetAllAchievementCategoryNames = lib.DebugGetAllAchievementCategoryNames
 
 --This function scans the collectibles for their DLC names to provide a list for the new DLCs and chapters
 --Saves a line with collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
@@ -1249,45 +1258,17 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     local dlcNames = {}
     local collectiblesAdded = 0
     d(libPrefix .. "Start to load all DLC collectibles")
-    --DLCs
-    --[[
-    WRONG as of ZOs_DanBatson because GetCollectibleCategoryInfo needs a opLevelIndex and not a collectible category type id!)
-    local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC)
-    for collectibleSubCategoryIndex=1, numSubCategories do
-        local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex)
-        for i=1, numCollectibles do
-            local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex, i)
-            local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-            collectibleName = zocstrfor("<<C:1>>", collectibleName)
-            dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
-            collectiblesAdded = collectiblesAdded +1
-        end
-    end
-    --Chapters
-    local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
-    for collectibleSubCategoryIndex=1, numSubCategories do
-        local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex)
-        for i=1, numCollectibles do
-            local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex, i)
-            local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-            collectibleName = zocstrfor("<<C:1>>", collectibleName)
-            dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
-            collectiblesAdded = collectiblesAdded +1
-        end
-    end
-    ]]
-
     for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleIndex)
         local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-        collectibleName = zocstrfor("<<C:1>>", collectibleName)
+        collectibleName = zocstrfor(upperCaseFirstFormatter, collectibleName)
         dlcNames[collectibleId] = collectibleId .. "|DLC|" .. collectibleName
         collectiblesAdded = collectiblesAdded +1
     end
     for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleIndex)
         local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-        collectibleName = zocstrfor("<<C:1>>", collectibleName)
+        collectibleName = zocstrfor(upperCaseFirstFormatter, collectibleName)
         dlcNames[collectibleId] = collectibleId .. "|CHAPTER|" .. collectibleName
         collectiblesAdded = collectiblesAdded +1
     end
@@ -1302,6 +1283,44 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     end
 end
 local debugGetAllCollectibleDLCNames = lib.DebugGetAllCollectibleDLCNames
+
+
+--This function scans the collectibles names to provide a list for the new DLCs and chapters e.g.
+--Saves a line with collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
+function lib.DebugGetAllCollectibleNames(noReloadInfo)
+    noReloadInfo = noReloadInfo or false
+
+    if nonOfficialLanguages[clientLang] then return end
+
+    local collectibleNames  = {}
+    local collectiblesAdded = 0
+    d(libPrefix .. "Start to load all collectibles")
+
+    for collectibleCategoryIndex=1, GetNumCollectibleCategories(), 1 do
+        for collectibleIndex=1, GetTotalCollectiblesByCategoryType(collectibleCategoryIndex) do
+            local collectibleId = GetCollectibleIdFromType(collectibleCategoryIndex, collectibleIndex)
+            if collectibleId and collectibleId ~= 0 then
+                local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId)
+                if collectibleName and collectibleName ~= "" then
+                    collectibleName                 = zocstrfor(upperCaseFirstFormatter, collectibleName)
+                    collectibleNames[collectibleId] = collectibleId .. "|DLC|" .. collectibleName
+                    collectiblesAdded               = collectiblesAdded +1
+                end
+            end
+        end
+    end
+    if collectiblesAdded > 0 then
+        LoadSavedVariables()
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = collectibleNames
+        d("->Stored " .. tos(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tos(clientLang).."\'")
+        if noReloadInfo == true then return end
+        d("Please do a /reloadui or logout to update the SavedVariables data now!")
+    end
+end
+local debugGetAllCollectibleNames = lib.DebugGetAllCollectibleNames
+
 
 --Only show the setIds that were added with the latest "Set itemId scan" via function "LibSets.DebugScanAllSetData()".
 -->The function will compare the setIds of this table with the setIds in the file Data/LibSets_Data_*.lua table lib.setInfo!
@@ -1328,7 +1347,7 @@ function lib.DebugShowNewSetIds(noChatOutput)
             if newSetName == nil or newSetName == "" then
                 newSetName = getNewSetName(newSetId)
             end
-            newSetName = zocstrfor("<<C:1>>", newSetName)
+            newSetName = zocstrfor(upperCaseFirstFormatter, newSetName)
             if not noChatOutput then d(strfor(">>New setId found: %s -> name: %s", tos(newSetId), tos(newSetName))) end
             if newSetName and newSetName ~= unknownName then
                 tempSetNamesOfClientLang = tempSetNamesOfClientLang or {}
@@ -1372,7 +1391,7 @@ local debugShowNewSetIds = lib.DebugShowNewSetIds
 --Run all the debug functions for the current client language where one does not need to open any menus, dungeon finder or map for
 function lib.DebugGetAllNames(noReloadInfo)
     noReloadInfo = noReloadInfo or false
-    debugGetAllCollectibleNames(nil, nil, noReloadInfo)
+    debugGetAllAchievementCategoryNames(nil, nil, noReloadInfo)
     d(">>>--------------->>>")
     debugGetAllCollectibleDLCNames(noReloadInfo)
     d(">>>--------------->>>")

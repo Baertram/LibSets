@@ -30,9 +30,11 @@
 ========================================================================================================================
  !!! TODO / BUGs list !!!
 ========================================================================================================================
- Last updated: 2026-03-19, Baertram, AP101049
+ Last updated: 2026-03-24, Baertram, AP101049
 ------------------------------------------------------------------------------------------------------------------------
  --Known bugs--
+ --260324 Set search UI DLC dropdown list got several blank entries?
+
 
  --Todo list--
 
@@ -43,7 +45,7 @@
     2) Integrate FCOItemSaver's marker icon mapping to LibSets set search favorite icons in FCOIS settings -> LibSets needs API to return the set search favorite icons for that to work
     -- and how do we make it properly apply the FCOIS marker icon to each current held set Item in all backs + new looted items? > Performance wise
 
-    3) Set search UI keyboard resizable
+    3) Set search UI keyboard resizable -- Working on
 
 
  --Currently working on--
@@ -107,7 +109,7 @@ LIBSETS_TABLEKEY_WAYSHRINES                         = "wayshrines"
 LIBSETS_TABLEKEY_WAYSHRINE_NAMES                    = "wayshrine" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_ZONE_DATA                          = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                 = "dungeonFinderData"
-LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                  = "collectible" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES         = "achievementCategories" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID             = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_MIXED_SETNAMES                     = "MixedSetNamesForDataAll"
 LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP           = "setProcsAllowedInPvP"
@@ -339,9 +341,9 @@ local LIBSETS_TABLEKEY_WAYSHRINE_NAMES                        = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_ZONEIDS                                = LIBSETS_TABLEKEY_ZONEIDS                               
 --local LIBSETS_TABLEKEY_ZONEIDS_SORTED                         = LIBSETS_TABLEKEY_ZONEIDS_SORTED
 local LIBSETS_TABLEKEY_ZONE_DATA                              = LIBSETS_TABLEKEY_ZONE_DATA                             
-local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                    
-local LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                      = LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     
-local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                 
+local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
+local LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES             = LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES
+local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES
 local LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                 = LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                
 local LIBSETS_TABLEKEY_DROPMECHANIC                           = LIBSETS_TABLEKEY_DROPMECHANIC
 --local LIBSETS_TABLEKEY_DROPMECHANIC_SORTED                    = LIBSETS_TABLEKEY_DROPMECHANIC_SORTED
@@ -354,12 +356,50 @@ local LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP               = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING      = LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING     
 local LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES           = LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES          
 local LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                   = LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                  
-local LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING             = LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING            
+local LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING             = LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING
+
+local LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE = LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE
+local DLC_TYPE_BASE_GAME = DLC_TYPE_BASE_GAME
+local DLC_TYPE_CHAPTER = DLC_TYPE_CHAPTER
+local DLC_TYPE_SEASON_PART = DLC_TYPE_SEASON_PART
+local DLC_TYPE_ZONE = DLC_TYPE_ZONE
+local DLC_TYPE_DUNGEONS = DLC_TYPE_DUNGEONS
 
 --Libraries
 local LCM --LibCustomMenu
 local LSM -- LibScrollableMenu
 local libZone -- LibZone
+
+local LSM_wasChecked = false
+local function checkOptionalLibraryLibScrollableMenu()
+    --d("[LibSets]checkOptionalLibraryLibScrollableMenu - LSM_wasChecked: " ..tos(LSM_wasChecked) .. ", LSM: " .. tos(LSM))
+    if not LSM_wasChecked and LSM == nil then
+        LSM = LibScrollableMenu
+        LSM_wasChecked = true
+        if LSM ~= nil and LSM.version >= "2.40" then --Got the correct needed version?
+            lib.LSM = LSM
+        end
+        --d(">LSM.version: " .. tos((LSM ~= nil and LSM.version) or ""))
+    end
+end
+local function checkOptionalLibraries()
+    ----Optional libraries
+    checkOptionalLibraryLibScrollableMenu() --LibScrollableMenu
+    LCM = LibCustomMenu
+    lib.libCustomMenu = LCM
+    lib.libAddonMenu = LibAddonMenu2
+    lib.libHarvensAddonSettings = LibHarvensAddonSettings
+    lib.libSlashCommander = LibSlashCommander
+    libZone = LibZone
+    lib.libZone = libZone
+end
+lib.CheckOptionalLibraries = checkOptionalLibraries
+
+local function checkLSM()
+    checkOptionalLibraryLibScrollableMenu()
+    return LSM ~= nil
+end
+lib.CheckLSM = checkLSM
 
 ------------Global variables--------------
 --Get counter suffix
@@ -433,7 +473,7 @@ local LIBSETS_SETTYPE_CRAFTED = LIBSETS_SETTYPE_CRAFTED
 local libSets_GetSetType
 local setTypeToTexture = lib.setTypeToTexture
 
-local searchUIData = lib.searchUI
+local searchUI = lib.SearchUI
 local searchUIKeyboard--, searchUIGamepad
 
 
@@ -481,7 +521,7 @@ local callDebugParams = {
     shownewsets         = "DebugShowNewSetIds",
 
     getdungeons         = "DebugGetDungeonFinderData",
-    getcollectiblenames = "DebugGetAllCollectibleNames",
+    getachievementcategorynames = "DebugGetAllAchievementCategoryNames",
     getdlcnames         = "DebugGetAllCollectibleDLCNames",
 }
 
@@ -503,6 +543,9 @@ local getCurrentZoneIds
 local isDungeonZoneId
 local isDungeonZoneIdTrial
 local isPublicDungeonZoneId
+
+local cleanDLCTimeStamp = lib.CleanDLCTimeStamp
+
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -901,6 +944,12 @@ local function LoadSavedVariables()
         --enableMasterCrafterSetsFavorites = true,
 
         --Search UI
+        searchUI = {
+            x = 0,
+            y = 0,
+            width = 934,
+            height = 600,
+        },
         setSearchTooltipsAtTextFilters = true,
         setSearchTooltipsAtFilters = true,
         setSearchTooltipsAtFilterEntries = true,
@@ -944,7 +993,7 @@ local function LoadSavedVariables()
         [LIBSETS_TABLEKEY_WAYSHRINE_NAMES]          = {},
         [LIBSETS_TABLEKEY_ZONE_DATA]                = {},
         [LIBSETS_TABLEKEY_DUNGEONFINDER_DATA]       = {},
-        [LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]        = {},
+        [LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] = {},
         [LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]    = {},
     }
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
@@ -1336,9 +1385,9 @@ local function InitSearchUI(gamepadPreferred)
     if not lib.fullyLoaded then return end
     --We are in keyboard UI
     if gamepadPreferred == nil or gamepadPreferred == false then
-        searchUIKeyboard = searchUIKeyboard or GetControl(searchUIData.controlName[false]) --LibSets_SearchUI_TLC_Keyboard
+        searchUIKeyboard = searchUIKeyboard or GetControl(searchUI.controlName[false]) --LibSets_SearchUI_TLC_Keyboard
         if searchUIKeyboard == nil then return end
-        lib.searchUI.control[false] = searchUIKeyboard
+        searchUI.control[false] = searchUIKeyboard
         LibSets_SearchUI_Keyboard_TopLevel_OnInitialized(searchUIKeyboard)
     end
 
@@ -1696,9 +1745,11 @@ local function LoadSets()
     for _, category2ZoneData in ipairs(preloadedSetItemCollectionMappingToZone) do
         local parentCategoryId = category2ZoneData.parentCategory
         local categoryId = category2ZoneData.category
-        --Parent categories table
-        lib.setItemCollectionParentCategories[parentCategoryId] = lib.setItemCollectionParentCategories[parentCategoryId] or {}
-        lib.setItemCollectionParentCategories[parentCategoryId][categoryId] = category2ZoneData
+        if parentCategoryId ~= nil then
+            --Parent categories table
+            lib.setItemCollectionParentCategories[parentCategoryId] = lib.setItemCollectionParentCategories[parentCategoryId] or {}
+            lib.setItemCollectionParentCategories[parentCategoryId][categoryId] = category2ZoneData
+        end
         --Categories table
         lib.setItemCollectionCategories[categoryId] = category2ZoneData
         --Zone to categories / category to zones mapping tables
@@ -3689,6 +3740,16 @@ function lib.GetDLCName(dlcId)
     return dlcName
 end
 
+--Returns the name and the timestamp it was released of the DLC by help of the DLC id
+--> Parameters: dlcId number: The DLC id given in a set's info
+--> Returns:    name dlcName, nilable:number releaseDateTimeStamp
+function lib.GetDLCInfo(dlcId)
+    if not DLCandCHAPTERdata then return end
+    local dlcName = DLCandCHAPTERdata[dlcId] or NONDLCData[dlcId] or ""
+    local releaseDateTimeStamp = (dlcAndChapterCollectibleIds[dlcId] ~= nil and dlcAndChapterCollectibleIds[dlcId].releaseDate) or nil
+    return dlcName, releaseDateTimeStamp
+end
+
 --Returns the name of the DLC by help of the DLC id
 --> Parameters: undauntedChestId number: The undaunted chest id given in a set's info
 --> Returns:    name undauntedChestName
@@ -4404,24 +4465,26 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
 
         for _, parentCategoryData in pairs(parentCategories) do
             if nodeToOpen == nil then
-                if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId
-                        and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind then
-                    --d(">found parentCategory")
-                    --No subCategory given?
-                    if categoryIdToFind == nil or categoryIdToFind <= 0 then
-                        --d(">no subcategory to open -> open parent category node")
-                        --return the node of the parentCategory
-                        nodeToOpen = parentCategoryData.data.node
-                        break
-                    else
-                        --Search for the correct subCategory
-                        for _, subCategoryData in pairs(parentCategoryData.children) do
-                            if nodeToOpen == nil then
-                                if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
-                                        and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
-                                    --d(">found category")
-                                    nodeToOpen = subCategoryData.data.node
-                                    break
+                if parentCategoryData.data and parentCategoryData.data.dataSource and parentCategoryData.data.dataSource.categoryId then
+                    if (parentCategoryIdToFind ~= nil and parentCategoryData.data.dataSource.categoryId == parentCategoryIdToFind) or
+                        (parentCategoryIdToFind == nil and parentCategoryData.data.dataSource.categoryId == categoryIdToFind) then
+    --d(">found parentCategory: " .. tos(parentCategoryIdToFind ~= nil and parentCategoryIdToFind or categoryIdToFind))
+                        --No subCategory given or no parentCategory to find given? Use the categoryId at the current level
+                        if categoryIdToFind == nil or categoryIdToFind <= 0 or parentCategoryIdToFind == nil then
+                            --d(">no subcategory to open -> open parent category node")
+                            --return the node of the parentCategory
+                            nodeToOpen = parentCategoryData.data.node
+                            break
+                        else
+                            --Search for the correct subCategory
+                            for _, subCategoryData in pairs(parentCategoryData.children) do
+                                if nodeToOpen == nil then
+                                    if subCategoryData.data and subCategoryData.data.dataSource and subCategoryData.data.dataSource.categoryId
+                                            and subCategoryData.data.dataSource.categoryId == categoryIdToFind then
+                                        --d(">found category")
+                                        nodeToOpen = subCategoryData.data.node
+                                        break
+                                    end
                                 end
                             end
                         end
@@ -4453,9 +4516,8 @@ function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
 --d("[LibSets]OpenItemSetCollectionBookOfCategoryData")
     if not checkIfSetsAreLoadedProperly() then return end
     openItemSetCollectionBookOfCategoryData = openItemSetCollectionBookOfCategoryData or lib.OpenItemSetCollectionBookOfCategoryData
-    if not categoryData or type(categoryData) ~= "table"
-            or categoryData.parentCategory == nil or categoryData.parentCategory <= 0 then
-        if categoryData ~= LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE then
+    if not categoryData or type(categoryData) ~= "table" then
+        if categoryData and categoryData ~= LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE then
             return
         end
     end
@@ -4573,16 +4635,30 @@ local function recursivelyCheckItemSetIdAtChildren(childNodes, setIdToFind)
                     local itemSetId = collectionData.itemSetId
                     --d(">>collectionIdx: " .. tos(collectionIdx) .. ", setId: " .. tos(itemSetId))
                     if itemSetId ~= nil then
-                        --Cache the already found categories of the setIds
-                        if lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] == nil then
-                            lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] = { category = childNodeDataSource.categoryId, parentCategory = childNodeDataSource.parentCategoryData.categoryId }
-                        end
-                        --SetIt matches the itemSetId at the collections? -> Return that categoryId
-                        if itemSetId == setIdToFind then
-                            categoryIdDetermined = childNodeDataSource.categoryId
-                            parentCategoryDetermined = childNodeDataSource.parentCategoryData.categoryId
---d("<<Found setId: " .. tos(itemSetId) .. ", categoryId: " .. tos(categoryIdDetermined) .. ", parentCategory: " .. tos(parentCategoryDetermined))
-                            return categoryIdDetermined, parentCategoryDetermined
+                        if childNodeDataSource.categoryId and childNodeDataSource.parentCategoryData then
+                            --Cache the already found categories of the setIds
+                            if lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] == nil then
+                                lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] = { category = childNodeDataSource.categoryId, parentCategory = childNodeDataSource.parentCategoryData.categoryId }
+                            end
+                            --SetIt matches the itemSetId at the collections? -> Return that categoryId
+                            if itemSetId == setIdToFind then
+                                categoryIdDetermined = childNodeDataSource.categoryId
+                                parentCategoryDetermined = childNodeDataSource.parentCategoryData.categoryId
+                                --d("<<Found setId: " .. tos(itemSetId) .. ", categoryId: " .. tos(categoryIdDetermined) .. ", parentCategory: " .. tos(parentCategoryDetermined))
+                                return categoryIdDetermined, parentCategoryDetermined
+                            end
+                        --Main level entry without explicit category (e.g. Nightmarket)?
+                        elseif childNodeDataSource.categoryId and childNodeDataSource.parentCategoryData == nil then
+                            --Cache the already found categories of the setIds
+                            if lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] == nil then
+                                lookupTableItemSetIdToItemSetCollectionsCategory[itemSetId] = { category = childNodeDataSource.categoryId }
+                            end
+                            --SetIt matches the itemSetId at the collections? -> Return that categoryId
+                            if itemSetId == setIdToFind then
+                                categoryIdDetermined = childNodeDataSource.categoryId
+                                --d("<<Found setId: " .. tos(itemSetId) .. ", categoryId: " .. tos(categoryIdDetermined) .. ", without parent category")
+                                return categoryIdDetermined, nil
+                            end
                         end
                     end
                 end
@@ -4618,7 +4694,7 @@ local function checkIfSetItemCollectionBookForItemLinkIsReady(setId)
 --d(">>categoryIdOfSetId: " .. tos(categoryIdOfSetId) .. "; parentCategoryofSetId: " .. tos(parentCategoryofSetId))
         if categoryIdOfSetId == -99 then categoryIdOfSetId = nil end
 
-        if categoryIdOfSetId ~= nil and parentCategoryofSetId ~= nil then
+        if categoryIdOfSetId ~= nil then
 --d(">>opening node now - parent: " ..tos(parentCategoryofSetId) ..", category: " .. tos(categoryIdOfSetId))
             return openItemSetCollectionBookOfCategoryData({ category = categoryIdOfSetId, parentCategory = parentCategoryofSetId})
         end
@@ -4632,7 +4708,7 @@ function lib.OpenSetItemCollectionBookForItemLink(itemLink)
     parentCategoryDetermined = nil
 
     if itemLink == nil then return end
-    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = gilsi(itemLink)
+    local hasSet, _, _, _, _, setId = gilsi(itemLink)
     if not hasSet or setId == nil then return end
 
     --Open the item set collections book at the top category
@@ -5243,7 +5319,7 @@ local function addUIButtons()
                 parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
                 tooltip         = libPrefix .. moreOptionsButtonTooltip,
                 callback        = function()
-                    if LSM ~= nil then
+                    if checkLSM() == true then
                         ClearCustomScrollableMenu()
                         AddCustomScrollableMenuEntry(localization.parentZone, function()
                             openSetItemCollectionBrowserForCurrentZone(true)
@@ -5455,29 +5531,7 @@ local function outputDLCorChapterRow(dlcId, dlcName, dlcType)
         dlcTypeSuffix = "  (".. tos(possibleDlcTypes[dlcType])  .. ")"
     end
     local releaseDateTimestamp = dlcAndChapterCollectibleIds[dlcId].releaseDate
-    local releaseDateStr
-    local onlyDateWithoutTimeStr
-    if releaseDateTimestamp ~= nil and type(releaseDateTimestamp) == "number" and releaseDateTimestamp >= 0 and releaseDateTimestamp <= 2147483647 then
-        releaseDateStr = os.date("%c", releaseDateTimestamp)
-        --Strip the hours, minutes, seconds at the space
-        if string.find(releaseDateStr, " ", 1, true) ~= nil then
-            for param in strgmatch(releaseDateStr, "([^%s]+)%s*") do
-                if param ~= nil and param ~= "" then
-                    onlyDateWithoutTimeStr =  param
-                    break
-                end
-            end
-        else
-            onlyDateWithoutTimeStr = releaseDateStr
-        end
-    end
-    if onlyDateWithoutTimeStr == nil then
-        onlyDateWithoutTimeStr = ""
-    end
-    if onlyDateWithoutTimeStr ~= "" then
-        onlyDateWithoutTimeStr = onlyDateWithoutTimeStr .. ": "
-    end
-
+    local releaseDateStr, onlyDateWithoutTimeStr = cleanDLCTimeStamp(releaseDateTimestamp)
     d("> [".. tos(dlcId) .."] " .. onlyDateWithoutTimeStr .. dlcName .. dlcTypeSuffix)
 end
 
@@ -5557,7 +5611,7 @@ local function slash_debug_help()
     d("|-> \'getwayshrinenames\'    Get all wayshrine names of the current client language")
     d("|-> \'getsetnames\'          Get all set names of the current client language")
     d("|-> \'getdungeons\'          Get the dungeon data. If the dungeon's view at the group window is not yet opened it will be opened.")
-    d("|-> \'getcollectiblenames\'  Get the collectible names of all collectibles of the current client language.")
+    d("|-> \'getachievementcategorynames\'  Get the achievement category names of all achievements of the current client language.")
     d("|-> \'getdlcnames\'          Get the DLC collectible names of the current client language.")
     d("|-> \'shownewsets\'          Show the new setIds and names of sets which were scanned and found but not transfered to the preoaded data yet. Needs to run \'scanitemids\' first!")
     d("|-> \'scanitemids\'          Scan all itemIds of sets")
@@ -5658,37 +5712,6 @@ local function onPlayerActivated(eventId, isFirst)
         lib.DebugGetAllData(false)
     end
 end
-
-local LSM_wasChecked = false
-local function checkOptionalLibraryLibScrollableMenu()
---d("[LibSets]checkOptionalLibraryLibScrollableMenu - LSM_wasChecked: " ..tos(LSM_wasChecked) .. ", LSM: " .. tos(LSM))
-    if not LSM_wasChecked and LSM == nil then
-        LSM = LibScrollableMenu
-        LSM_wasChecked = true
-        if LSM ~= nil and LSM.version >= "2.40" then --Got the correct needed version?
-            lib.LSM = LSM
-        end
-        --d(">LSM.version: " .. tos((LSM ~= nil and LSM.version) or ""))
-    end
-end
-local function checkOptionalLibraries()
-    ----Optional libraries
-    checkOptionalLibraryLibScrollableMenu() --LibScrollableMenu
-    LCM = LibCustomMenu
-    lib.libCustomMenu = LCM
-    lib.libAddonMenu = LibAddonMenu2
-    lib.libHarvensAddonSettings = LibHarvensAddonSettings
-    lib.libSlashCommander = LibSlashCommander
-    libZone = LibZone
-    lib.libZone = libZone
-end
-lib.CheckOptionalLibraries = checkOptionalLibraries
-
-local function checkLSM()
-    checkOptionalLibraryLibScrollableMenu()
-    return LSM ~= nil
-end
-lib.CheckLSM = checkLSM
 
 --Addon loaded function
 local function onLibraryLoaded(event, name)
