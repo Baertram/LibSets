@@ -165,6 +165,8 @@ local LIBSETS_TABLEKEY_ZONE_DATA                              = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                     = LIBSETS_TABLEKEY_DUNGEONFINDER_DATA
 local LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES             = LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES
 local LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                  = LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES
+local LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                      = LIBSETS_TABLEKEY_COLLECTIBLE_NAMES
+local LIBSETS_TABLEKEY_MIXED_SETNAMES                         = LIBSETS_TABLEKEY_MIXED_SETNAMES
 
 -------------------------------------------------------------------------------------------------------------------------------
 -- Data update functions - Only for developers of this lib to get new data from e.g. the PTS or after major patches on live.
@@ -465,7 +467,7 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES]                    = nil
         lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]       = nil
-
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]       = nil
     else
         lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_NO_SETID] = nil
@@ -486,6 +488,7 @@ function lib.DebugResetSavedVariables(noReloadInfo, onlyNames)
         lib.svDebugData[LIBSETS_TABLEKEY_SETNAMES]                    = nil
         lib.svDebugData[LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES] = nil
         lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES]       = nil
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES]       = nil
     end
     d(libPrefix .. "Cleared all SavedVariables".. onlyNamesText .." in file \'" .. MAJOR .. ".lua\'.")
     if noReloadInfo == true then return end
@@ -1255,34 +1258,6 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     local dlcNames = {}
     local collectiblesAdded = 0
     d(libPrefix .. "Start to load all DLC collectibles")
-    --DLCs
-    --[[
-    WRONG as of ZOs_DanBatson because GetCollectibleCategoryInfo needs a opLevelIndex and not a collectible category type id!)
-    local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC)
-    for collectibleSubCategoryIndex=1, numSubCategories do
-        local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex)
-        for i=1, numCollectibles do
-            local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleSubCategoryIndex, i)
-            local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-            collectibleName = zocstrfor(upperCaseFirstFormatter, collectibleName)
-            dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
-            collectiblesAdded = collectiblesAdded +1
-        end
-    end
-    --Chapters
-    local _, numSubCategories, _, _, _, _ = GetCollectibleCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
-    for collectibleSubCategoryIndex=1, numSubCategories do
-        local _, numCollectibles, _, _ = GetCollectibleSubCategoryInfo(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex)
-        for i=1, numCollectibles do
-            local collectibleId = GetCollectibleId(COLLECTIBLE_CATEGORY_TYPE_CHAPTER, collectibleSubCategoryIndex, i)
-            local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
-            collectibleName = zocstrfor(upperCaseFirstFormatter, collectibleName)
-            dlcNames[collectibleId] = collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
-            collectiblesAdded = collectiblesAdded +1
-        end
-    end
-    ]]
-
     for collectibleIndex=1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_DLC, collectibleIndex)
         local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId) -- Will return true or false. If the user unlocked throught ESO+ without buying DLC it will return true.
@@ -1308,6 +1283,44 @@ function lib.DebugGetAllCollectibleDLCNames(noReloadInfo)
     end
 end
 local debugGetAllCollectibleDLCNames = lib.DebugGetAllCollectibleDLCNames
+
+
+--This function scans the collectibles names to provide a list for the new DLCs and chapters e.g.
+--Saves a line with collectibleId .. "|" .. collectibleSubCategoryIndex .. "|" .. collectibleName
+function lib.DebugGetAllCollectibleNames(noReloadInfo)
+    noReloadInfo = noReloadInfo or false
+
+    if nonOfficialLanguages[clientLang] then return end
+
+    local collectibleNames  = {}
+    local collectiblesAdded = 0
+    d(libPrefix .. "Start to load all collectibles")
+
+    for collectibleCategoryIndex=1, GetNumCollectibleCategories(), 1 do
+        for collectibleIndex=1, GetTotalCollectiblesByCategoryType(collectibleCategoryIndex) do
+            local collectibleId = GetCollectibleIdFromType(collectibleCategoryIndex, collectibleIndex)
+            if collectibleId and collectibleId ~= 0 then
+                local collectibleName, _, _, _, _ = GetCollectibleInfo(collectibleId)
+                if collectibleName and collectibleName ~= "" then
+                    collectibleName                 = zocstrfor(upperCaseFirstFormatter, collectibleName)
+                    collectibleNames[collectibleId] = collectibleId .. "|DLC|" .. collectibleName
+                    collectiblesAdded               = collectiblesAdded +1
+                end
+            end
+        end
+    end
+    if collectiblesAdded > 0 then
+        LoadSavedVariables()
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] = lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES] or {}
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = {}
+        lib.svDebugData[LIBSETS_TABLEKEY_COLLECTIBLE_NAMES][clientLang] = collectibleNames
+        d("->Stored " .. tos(collectiblesAdded) .." entries in SaveVariables file \'" .. MAJOR .. ".lua\', in the table \'" .. LIBSETS_TABLEKEY_COLLECTIBLE_NAMES .. "\', language: \'" ..tos(clientLang).."\'")
+        if noReloadInfo == true then return end
+        d("Please do a /reloadui or logout to update the SavedVariables data now!")
+    end
+end
+local debugGetAllCollectibleNames = lib.DebugGetAllCollectibleNames
+
 
 --Only show the setIds that were added with the latest "Set itemId scan" via function "LibSets.DebugScanAllSetData()".
 -->The function will compare the setIds of this table with the setIds in the file Data/LibSets_Data_*.lua table lib.setInfo!

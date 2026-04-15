@@ -32,6 +32,7 @@ local favoriteIconTexts = searchUI.favoriteIconTexts
 --Libraries
 local LSM = lib.LSM --LibScrollableMenu
 local checkLSM = lib.CheckLSM
+local lib_CleanDLCTimeStamp = lib.CleanDLCTimeStamp
 
 local isLSMEnabled = false
 local LSM_defaultComboBoxOptions = {
@@ -42,7 +43,7 @@ local LSM_defaultComboBoxOptions = {
     headerCollapsible   = true,
     --enableMultiSelect = true,
 }
-
+local LSM_comboBoxOptionsDLCID = ZO_ShallowTableCopy(LSM_defaultComboBoxOptions)
 
 --Debugging - TODO: Disable again
 --LibSets._debug = {} --todo remove after debugging/testing
@@ -610,15 +611,33 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     if ZO_ComboBox.EnableMultiSelect ~= nil then
         DLCIdDropdown:EnableMultiSelect(getLocalizedText("multiSelectFilterSelectedText", nil, filterTypeText, filterTypeText), getLocalizedText("noMultiSelectFiltered", nil, filterTypeText))
     end
-    if isLSMEnabled then self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.DCLIdFiltersControl, LSM_defaultComboBoxOptions) end
+    if isLSMEnabled then
+        --Add custom filter function for the collapsible filter header, so we can search the tooltip text for the date too
+        LSM_comboBoxOptionsDLCID.customFilterFunc = function(p_item, p_filterString)
+            local found = false
+            local name = p_item.label or p_item.name
+            local tooltip = p_item.tooltipText
+            local filtertStringLower = zo_strlower(p_filterString)
+            if name ~= "" then
+                found = zo_strlower(name):find(filtertStringLower) ~= nil
+            end
+            if not found and tooltip ~= "" then
+                found = zo_strlower(tooltip):find(filtertStringLower) ~= nil
+            end
+            return found
+        end
+        self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.DCLIdFiltersControl, LSM_comboBoxOptionsDLCID)
+    end
     DLCIdDropdown:SetSortsItems(true)
 
     for DLCId, isValid in pairs(lib.allowedDLCIds) do
         if isValid == true then
-            local dlcName = lib.GetDLCName(DLCId)
+            local dlcName, releaseDateTimestamp = lib.GetDLCInfo(DLCId)
             local entry = DLCIdDropdown:CreateItemEntry(dlcName)
             entry.filterType = DLCId
             entry.nameClean = dlcName
+            entry.releaseDateTimeStamp = releaseDateTimestamp
+            entry.tooltipText = select(2, lib_CleanDLCTimeStamp(releaseDateTimestamp, true))
             DLCIdDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
     end

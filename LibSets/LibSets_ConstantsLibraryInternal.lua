@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.90
+local MAJOR, MINOR = "LibSets", 0.92
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -83,16 +83,19 @@ lib.customContextMenuEntries = {
 ---------------------------------------------------------------------------------
 local APIVersions                    = {}
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
---!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
+
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
 lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-21)
+
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
---!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 ------------------------------------------------------------------------------------------------------------------------
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -108,7 +111,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-2
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the value here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101049 -- Patch U49 "Season 0" (2026-01-21)
+APIVersions["PTS"]                   = 101050 -- Patch U50 "Season 0 Part 2" (2026-04-15)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
@@ -266,6 +269,7 @@ LIBSETS_TABLEKEY_ZONE_DATA                             = "zoneData"
 LIBSETS_TABLEKEY_DUNGEONFINDER_DATA                    = "dungeonFinderData"
 LIBSETS_TABLEKEY_ACHIEVEMENT_CATEGORY_NAMES            = "achievementCategory" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_COLLECTIBLE_DLC_NAMES                 = "collectible_DLC" .. LIBSETS_TABLEKEY_NAMES
+LIBSETS_TABLEKEY_COLLECTIBLE_NAMES                     = "collectible" .. LIBSETS_TABLEKEY_NAMES
 LIBSETS_TABLEKEY_WAYSHRINENODEID2ZONEID                = "wayshrineNodeId2zoneId"
 LIBSETS_TABLEKEY_DROPMECHANIC                          = "dropMechanic"
 local LIBSETS_TABLEKEY_DROPMECHANIC = LIBSETS_TABLEKEY_DROPMECHANIC
@@ -989,6 +993,7 @@ local possibleDropMechanics         = {
     [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless/Infinite Archive dungeon
     [38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT", -- Golden Pursuit/Goldene Vorhaben
     [39] = "LIBSETS_DROP_MECHANIC_NIGHT_MARKET", --Night Market/Nachtmarkt
+    [40] = "LIBSETS_DROP_MECHANIC_ZONE_STORYLINE", --Zone story line/Zonen Geschichte
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -1044,6 +1049,8 @@ local LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS = LIBSETS_DROP_MECHANIC_CYRO
 local LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE = LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE
 local LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT = LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT
 local LIBSETS_DROP_MECHANIC_NIGHT_MARKET = LIBSETS_DROP_MECHANIC_NIGHT_MARKET
+local LIBSETS_DROP_MECHANIC_ZONE_STORYLINE = LIBSETS_DROP_MECHANIC_ZONE_STORYLINE
+local LIBSETS_DROP_MECHANIC_ANTIQUITIES = LIBSETS_DROP_MECHANIC_ANTIQUITIES
 
 
 lib.allowedDropMechanics              = { }
@@ -1101,6 +1108,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Weynon Priorei, bei Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil: Stadt Cheydinhal / Weynon Priorei, bei Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Auftragstafeln",
+        [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                       = "Zonen Geschichte",
     },
     [langEN] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Rewards for the worthy",
@@ -1136,6 +1144,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
+        [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                       = "Zone Storyline",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -1374,6 +1383,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Truhe, welche man bei einem TelVar Ausrüstungs Händler in der eigenne Fraktionsbasis in der Kaiserstadt Kanalisation für TelVar Steine eintauschen kann.",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Truhe, welche man bei einem Elite Gear Händler in Cyrodiil (Östliches Elsweyr Tor, Südliches Hochfels Tor, Nördliches Morrowind Tor), oder in Vvardenfall für Schlachtfelder (Ald Carac, Foyada Quarry, Ularra), für Allianzpunkte kaufen kann.",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Alle Bosse: Hände, Taille, Füße, Brust, Schultern, Kopf, Beine\nLetzte Bosse: Waffen, Schild\nQuest Belohnung: Schmuck, Waffe, Schild (Gebunden beim Aufheben)",
+        [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                    = "Erhalte es, durch die Zonen Geschichte",
     },
     [langEN] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail) - Contains only newest item sets!\nAs new sets continue to get added, older sets will be removed here and added into other Cyrodiil sources:\nAll PvP item sets will now drop from Cyrodiil delves, dolmens and board missions.\nTown Daily Quest and Merchants will be divided by Light, Medium and Heavy. Exception: Cheydinhal and Chorrol/Weynon Priory reward any set.\nAll PvP sets are available as individual containers on both Town Merchants and Elite Gear Vendors.\nDelves will drop waist and feet item sets\nDolmens will drop jewelry\nBoard Missions will drop all other armor pieces.\nBounty and Scout missions will award armor pieces.\nBattle and Warfront missions will reward weapon slot pieces.",
@@ -1385,6 +1395,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers.",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Chest that can be exchanged for Alliance Points at a elite gear lockbox merchant in Cyrodiil (Eastern Elsweyr Gate, Southern High Rock Gate, Northern Morrowind Gate), or a battleground merchant in Vvardenfell (Ald Carac, Foyada Quarry, Ularra)",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
+        [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                    = "You can acquire it by going through the zone storyline",
     },
     [langES] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Recompensa por el mérito (" .. cyrodiilAndBattlegroundText .. " mail) - ¡Contiene solo conjuntos de artículos más nuevos!\nA medida que se sigan agregando nuevos conjuntos, los conjuntos más antiguos se eliminarán aquí y se agregarán a otras fuentes de Cyrodiil:\nTodos los conjuntos de elementos PvP ahora aparecerán en las excavaciones, dólmenes y misiones de tablero de Cyrodiil.\nLas misiones diarias de la ciudad y los comerciantes se dividirán por Luz , Medio y Pesado. Excepción: Cheydinhal y Chorrol/Weynon Priory recompensan cualquier conjunto.\nTodos los conjuntos PvP están disponibles como contenedores individuales tanto en los comerciantes de la ciudad como en los vendedores de equipo de élite.\nLos excavadores arrojarán conjuntos de artículos para cintura y pies\nLos dólmenes arrojarán joyas\nLas misiones del tablero arrojarán todos otras piezas de armadura.\nLas misiones de recompensa y exploración otorgarán piezas de armadura.\nLas misiones de batalla y frente de guerra recompensarán piezas de ranuras para armas.",
@@ -2112,6 +2123,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                     = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds",
     [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                      = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds",
     [LIBSETS_DROP_MECHANIC_NIGHT_MARKET]                        = "/esoui/art/treeicons/nightmarket_down.dds",
+    [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                      = "/esoui/art/treeicons/nightmarket_down.dds" --todo 20260415 Storyline -> Scroll texture?
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",

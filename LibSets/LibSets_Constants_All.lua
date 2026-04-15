@@ -5,6 +5,7 @@ if IsLibSetsAlreadyLoaded(false) then return end
 local lib = LibSets
 
 
+local strgmatch =   string.gmatch
 local zogcn     =   GetCollectibleName
 local zogaci    =   GetAchievementCategoryInfo
 local zocstrfor =   ZO_CachedStrFormat
@@ -117,6 +118,7 @@ local possibleDlcIds = {
     [39] = "DLC_FEAST_OF_SHADOWS",
     [40] = "DLC_SEASONS_OF_THE_WORMCULT2",
     [41] = "DLC_SEASON0",
+    [42] = "DLC_SEASON0_PART2",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -230,12 +232,41 @@ lib.dlcAndChapterCollectibleIds = {
     --Seasons of the Wormcult Part2
     [DLC_SEASONS_OF_THE_WORMCULT2] = {collectibleId=nil, achievementCategoryId=13, type=DLC_TYPE_SEASON_PART, releaseDate=1760702400}, --October 17th 2025  --text ok 260331
     --Season 0
-    --TODO add achievementCategoryIndex or collectibleID!
-    [DLC_SEASON0]                  = {collectibleId=nil, achievementCategoryId=nil, type=DLC_TYPE_SEASON_PART, releaseDate=1773057600} -- March 9th 2026 --todo text missing 260331
+    [DLC_SEASON0]                  = {name="Season 0", type=DLC_TYPE_SEASON_PART, releaseDate=1773057600}, -- March 9th 2026
+    --Season 0 Part 2
+    [DLC_SEASON0_PART2]            = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400}, -- June 8th 2026
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
 end
+
+local function cleanDLCTimeStamp(releaseDateTimestamp, withoutColon)
+    local releaseDateStr, onlyDateWithoutTimeStr
+    if releaseDateTimestamp ~= nil and type(releaseDateTimestamp) == "number" and releaseDateTimestamp >= 0 and releaseDateTimestamp <= 2147483647 then
+        releaseDateStr = os.date("%c", releaseDateTimestamp)
+        --Strip the hours, minutes, seconds at the space
+        if string.find(releaseDateStr, " ", 1, true) ~= nil then
+            for param in strgmatch(releaseDateStr, "([^%s]+)%s*") do
+                if param ~= nil and param ~= "" then
+                    onlyDateWithoutTimeStr =  param
+                    break
+                end
+            end
+        else
+            onlyDateWithoutTimeStr = releaseDateStr
+        end
+    end
+
+    if releaseDateStr == nil then releaseDateStr = "" end
+    if onlyDateWithoutTimeStr == nil then
+        onlyDateWithoutTimeStr = ""
+    end
+    if not withoutColon and onlyDateWithoutTimeStr ~= "" then
+        onlyDateWithoutTimeStr = onlyDateWithoutTimeStr .. ": "
+    end
+    return releaseDateStr, onlyDateWithoutTimeStr
+end
+lib.CleanDLCTimeStamp = cleanDLCTimeStamp
 
 --Internal achievement example ids of the ESO DLCs and chapters
 local dlcAndChapterCollectibleIds = lib.dlcAndChapterCollectibleIds
@@ -265,24 +296,34 @@ for dlcId, dlcAndChapterData in ipairs(dlcAndChapterCollectibleIds) do
     if dlcType ~= nil then
         --DLC type = NOT PATCH
         if dlcType ~= DLC_TYPE_NORMAL_PATCH then
-            DLCandCHAPTERLookupdata[dlcType] = DLCandCHAPTERLookupdata[dlcType] or {}
+            local name
             if collectibleId ~= nil and collectibleId ~= -1 then
-                local name = zocstrfor(dlcStrFormatPattern, gci(collectibleId))
-                DLCandCHAPTERdata[dlcId] = name
-                DLCandCHAPTERLookupdata[dlcType][dlcId] = name
-                DLCAndCHAPTERDataOrdered[#DLCAndCHAPTERDataOrdered + 1] = dlcId
+                name = zocstrfor(dlcStrFormatPattern, gci(collectibleId))
             elseif achievementCategoryId ~= nil and achievementCategoryId ~= -1 then
-                local name = zocstrfor(dlcStrFormatPattern, gaci(achievementCategoryId))
+                name = zocstrfor(dlcStrFormatPattern, gaci(achievementCategoryId))
+            end
+            if name == nil then
+                name = dlcAndChapterData.name
+                if name == nil then
+                    --use the timestamp as name
+                    if dlcAndChapterData.releaseDate ~= nil then
+                        local nameWithoutTime
+                        name, nameWithoutTime = cleanDLCTimeStamp(dlcAndChapterData.releaseDate, true)
+                        name = nameWithoutTime
+                    else
+                        name = "n/a"
+                    end
+                end
+            end
+            if name ~= nil then
+                DLCandCHAPTERLookupdata[dlcType] = DLCandCHAPTERLookupdata[dlcType] or {}
                 DLCandCHAPTERdata[dlcId] = name
                 DLCandCHAPTERLookupdata[dlcType][dlcId] = name
                 DLCAndCHAPTERDataOrdered[#DLCAndCHAPTERDataOrdered + 1] = dlcId
-                --else
-                --no collectibleId and no achievementCategoryId provided? -> Normal patch with QOL features then
             end
-
         else    --DLC type = PATCH
             NONDLCLookupdata[dlcType] = NONDLCLookupdata[dlcType] or {}
-            local name = dlcAndChapterData["name"] or "n/a"
+            local name = dlcAndChapterData.name or "n/a"
             NONDLCLookupdata[dlcType][dlcId] = name
             NONDLCData[dlcId] = name
         end

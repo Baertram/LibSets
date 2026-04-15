@@ -359,6 +359,11 @@ local LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING                   = LIBSETS_TABLEKEY
 local LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING             = LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING
 
 local LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE = LIBSETS_SET_COLLECTIONS_CATEGORY_TOPMOST_NODE
+local DLC_TYPE_BASE_GAME = DLC_TYPE_BASE_GAME
+local DLC_TYPE_CHAPTER = DLC_TYPE_CHAPTER
+local DLC_TYPE_SEASON_PART = DLC_TYPE_SEASON_PART
+local DLC_TYPE_ZONE = DLC_TYPE_ZONE
+local DLC_TYPE_DUNGEONS = DLC_TYPE_DUNGEONS
 
 --Libraries
 local LCM --LibCustomMenu
@@ -538,6 +543,9 @@ local getCurrentZoneIds
 local isDungeonZoneId
 local isDungeonZoneIdTrial
 local isPublicDungeonZoneId
+
+local cleanDLCTimeStamp = lib.CleanDLCTimeStamp
+
 
 ------------------------------------------------------------------------
 -- 	Local helper functions
@@ -3732,6 +3740,16 @@ function lib.GetDLCName(dlcId)
     return dlcName
 end
 
+--Returns the name and the timestamp it was released of the DLC by help of the DLC id
+--> Parameters: dlcId number: The DLC id given in a set's info
+--> Returns:    name dlcName, nilable:number releaseDateTimeStamp
+function lib.GetDLCInfo(dlcId)
+    if not DLCandCHAPTERdata then return end
+    local dlcName = DLCandCHAPTERdata[dlcId] or NONDLCData[dlcId] or ""
+    local releaseDateTimeStamp = (dlcAndChapterCollectibleIds[dlcId] ~= nil and dlcAndChapterCollectibleIds[dlcId].releaseDate) or nil
+    return dlcName, releaseDateTimeStamp
+end
+
 --Returns the name of the DLC by help of the DLC id
 --> Parameters: undauntedChestId number: The undaunted chest id given in a set's info
 --> Returns:    name undauntedChestName
@@ -5513,29 +5531,7 @@ local function outputDLCorChapterRow(dlcId, dlcName, dlcType)
         dlcTypeSuffix = "  (".. tos(possibleDlcTypes[dlcType])  .. ")"
     end
     local releaseDateTimestamp = dlcAndChapterCollectibleIds[dlcId].releaseDate
-    local releaseDateStr
-    local onlyDateWithoutTimeStr
-    if releaseDateTimestamp ~= nil and type(releaseDateTimestamp) == "number" and releaseDateTimestamp >= 0 and releaseDateTimestamp <= 2147483647 then
-        releaseDateStr = os.date("%c", releaseDateTimestamp)
-        --Strip the hours, minutes, seconds at the space
-        if string.find(releaseDateStr, " ", 1, true) ~= nil then
-            for param in strgmatch(releaseDateStr, "([^%s]+)%s*") do
-                if param ~= nil and param ~= "" then
-                    onlyDateWithoutTimeStr =  param
-                    break
-                end
-            end
-        else
-            onlyDateWithoutTimeStr = releaseDateStr
-        end
-    end
-    if onlyDateWithoutTimeStr == nil then
-        onlyDateWithoutTimeStr = ""
-    end
-    if onlyDateWithoutTimeStr ~= "" then
-        onlyDateWithoutTimeStr = onlyDateWithoutTimeStr .. ": "
-    end
-
+    local releaseDateStr, onlyDateWithoutTimeStr = cleanDLCTimeStamp(releaseDateTimestamp)
     d("> [".. tos(dlcId) .."] " .. onlyDateWithoutTimeStr .. dlcName .. dlcTypeSuffix)
 end
 
