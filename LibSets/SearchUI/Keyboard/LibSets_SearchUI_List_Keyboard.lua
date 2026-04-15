@@ -305,15 +305,16 @@ function LibSets_SearchUI_List:CreateEntryForSet(setId, setData)
     local itemId
     --The name column
     local nameColumnValue, nameColumnValueClean
+    local setNames = setData.setNames
     if not isClientLangEqualToFallbackLang then
 --[[
     if setData.setNames[fallbackLang] == nil then
     d(">setName['en'] is missing-setId: " .. tos(setData.setId) .. " - "..tos(setData.setNames[clientLang]))
     end
 ]]
-        nameColumnValueClean = setData.setNames[clientLang] or setData.setNames[fallbackLang]
+        nameColumnValueClean = setNames[clientLang] or setNames[fallbackLang]
     else
-        nameColumnValueClean = setData.setNames[clientLang]
+        nameColumnValueClean = setNames[clientLang]
     end
     --Show English set names too?
     if setSearchShowSetNamesInEnglishToo == true and not isClientLangEqualToFallbackLang then
