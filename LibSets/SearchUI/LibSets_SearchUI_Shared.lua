@@ -63,7 +63,6 @@ local checkLSM = lib.CheckLSM
 local searchHistoryEventUpdaterName = MAJOR .. "_SearchHistory_Update"
 
 --Strings
-local droppedByStr = getLocalizedText("droppedBy")
 local clearSearchHistoryStr = getLocalizedText("clearHistory")
 local dropZonesStr = getLocalizedText("dropZones")
 local wayshrinesStr = getLocalizedText("wayshrines")
@@ -74,6 +73,14 @@ local linkToChatStr = getLocalizedText("linkToChat")
 local popupTooltipStr = getLocalizedText("popupTooltip")
 local tooltipsStr = getLocalizedText("tooltips")
 local showAsTooltipStr = getLocalizedText("showAsTooltip")
+local setSearchDropLocationTooltipPosStr = getLocalizedText("setSearchDropLocationTooltipPos")
+local autoStr = getLocalizedText("auto")
+local topStr = getLocalizedText("top")
+local rightStr = getLocalizedText("right")
+local bottomStr = getLocalizedText("bottom")
+local leftStr = getLocalizedText("left")
+
+
 local setNamesStr = getLocalizedText("setNames")
 local favoritesStr = getLocalizedText("favorites")
 local showLibSetsSettingsStr = getLocalizedText("showLibSetsSettingsMenu")
@@ -1315,7 +1322,7 @@ local function anchorAllTooltipsAutomatically(selfVar, rowControl, tooltipCtrl, 
             ]]
                 if tooltipCtrl ~= itemLinkTooltipCtrl then
                     local anchor_1, offset_X, offset_Y, anchor_2, showLeftOfItemlinkTooltip = getTooltipsPositionBasedOnSpaceLeft(itemLinkTooltipCtrl, tooltipCtrl)
-                    anchorTo = showLeftOfItemlinkTooltip == true and LEFT or RIGHT
+                    anchorTo = (showLeftOfItemlinkTooltip == true and LEFT) or RIGHT
                     if anchorTo == LEFT then
                         anchorCtrl = itemLinkTooltipCtrl
                     end
@@ -1367,6 +1374,7 @@ function LibSets_SearchUI_Shared:ShowItemLinkTooltip(rowControl, data)
 end
 
 function LibSets_SearchUI_Shared:HideItemLinkTooltip()
+    --Do not hide the tooltip if the extra DropZone tooltip is enabled at the rows -> Takes care of hide tooltip automatically
     ClearTooltip(self.tooltipControl)
 end
 
@@ -1409,15 +1417,27 @@ end
 
 function LibSets_SearchUI_Shared:ShowSetDropLocationTooltip(rowControl, data, itemLinkTooltipShownLeftOfControl)
     ZO_Tooltips_HideTextTooltip()
-    if not lib.svData.showSetSearchDropLocationTooltip then return end
-    if data.setDataText == nil then return end
+    local settings = lib.svData
+    if not settings.showSetSearchDropLocationTooltip or not data then return end
+    local setDataText = data.setDataText
+    if setDataText == nil or setDataText == "" then return end
 
+    local setSearchDropLocationTooltipPos = settings.setSearchDropLocationTooltipPos
     local owningCtrl = rowControl:GetOwningWindow()
     local anchorCtrl = owningCtrl
     local anchorTo = RIGHT
     anchorCtrl, anchorTo = anchorAllTooltipsAutomatically(self, rowControl, TT_Text, anchorCtrl, itemLinkTooltipShownLeftOfControl)
+    if setSearchDropLocationTooltipPos ~= -1 then
+        --No automatic anchor position determination?
+        anchorTo = setSearchDropLocationTooltipPos
+        --Do not anchor the small extra tooltip to the top/bottom of the setItemLink tooltip, just anchor to top or bottom of the setSearchUI control
+        if anchorTo == TOP or anchorTo == BOTTOM then
+            anchorCtrl = owningCtrl
+        end
+    end
+    --d(">anchorCtrl: " ..tos(anchorCtrl:GetName()) .. "; anchorTo: " ..tos(anchorTo))
 
-    local dropLocationText = "|cF0F0F0" .. data.name .. "|r\n\n" .. data.setDataText
+    local dropLocationText = "|cF0F0F0" .. data.name .. "|r\n\n" .. setDataText
     ZO_Tooltips_ShowTextTooltip(anchorCtrl, anchorTo, dropLocationText)
 end
 
@@ -1590,6 +1610,56 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
             function(comboBox, itemName, item, checked, data)
                 OnClick_CheckBoxLabel(moc(), "showSetSearchDropLocationTooltip", selfVar)
             end, function() return lib.svData.showSetSearchDropLocationTooltip end)
+
+    local subMenuEntriesTooltipPositions = {
+        {
+            label = autoStr,
+            callback = function() lib.svData.setSearchDropLocationTooltipPos = -1  end,
+            enabled = function() return lib.svData.showSetSearchDropLocationTooltip end,
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            checked =  function() return lib.svData.setSearchDropLocationTooltipPos == -1  end,
+            buttonGroup = 1,
+        },
+        {
+            label = "-",
+            entryType = LSM_ENTRY_TYPE_DIVIDER,
+        },
+        {
+            label = topStr,
+            callback = function() lib.svData.setSearchDropLocationTooltipPos = TOP  end,
+            enabled = function() return lib.svData.showSetSearchDropLocationTooltip end,
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            checked =  function() return lib.svData.setSearchDropLocationTooltipPos == TOP  end,
+            buttonGroup = 1,
+        },
+        {
+            label = rightStr,
+            callback = function() lib.svData.setSearchDropLocationTooltipPos = RIGHT  end,
+            enabled = function() return lib.svData.showSetSearchDropLocationTooltip end,
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            checked =  function() return lib.svData.setSearchDropLocationTooltipPos == RIGHT  end,
+            buttonGroup = 1,
+        },
+        {
+            label = bottomStr,
+            callback = function() lib.svData.setSearchDropLocationTooltipPos = BOTTOM  end,
+            enabled = function() return lib.svData.showSetSearchDropLocationTooltip end,
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            checked =  function() return lib.svData.setSearchDropLocationTooltipPos == BOTTOM  end,
+            buttonGroup = 1,
+        },
+        {
+            label = leftStr,
+            callback = function() lib.svData.setSearchDropLocationTooltipPos = LEFT  end,
+            enabled = function() return lib.svData.showSetSearchDropLocationTooltip end,
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            checked =  function() return lib.svData.setSearchDropLocationTooltipPos == LEFT  end,
+            buttonGroup = 1,
+        },
+    }
+    AddCustomScrollableMenuEntry(setSearchDropLocationTooltipPosStr, nil, LSM_ENTRY_TYPE_SUBMENU, subMenuEntriesTooltipPositions, {
+        enabled = function() return lib.svData.showSetSearchDropLocationTooltip end,
+    }) --text, callback, entryType, entries, additionalData)
     --setMenuItemCheckboxState(cbShowSetDroppedByExtraTooltipIndex, lib.svData.showSetSearchDropLocationTooltip)
 
     --Set names
@@ -2042,7 +2112,9 @@ function LibSets_SearchUI_Shared_Row_OnMouseUp(rowControl, mouseButton, upInside
 end
 
 function LibSets_SearchUI_Shared_Row_OnMouseEnter(rowControl)
-    ZO_Tooltips_HideTextTooltip()
+    if not lib.svData.showSetSearchDropLocationTooltip then
+        ZO_Tooltips_HideTextTooltip()
+    end --Do not hide the text tooltip here if the extra drop zone texttooltip is enabled! Tooltip hide is handled there then
     if IsInGamepadPreferredMode() then
         if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
             LIBSETS_SEARCH_UI_GAMEPAD:OnRowMouseEnter(rowControl)
@@ -2063,6 +2135,20 @@ function LibSets_SearchUI_Shared_Row_OnMouseExit(rowControl)
     else
         if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
             LIBSETS_SEARCH_UI_KEYBOARD:OnRowMouseExit(rowControl)
+        end
+    end
+end
+
+function LibSets_SearchUI_Shared_BringWindowToTop()
+    if IsInGamepadPreferredMode() then
+        --[[
+        if LIBSETS_SEARCH_UI_GAMEPAD ~= nil then
+            LIBSETS_SEARCH_UI_GAMEPAD.control:BringWindowToTop()
+        end
+        ]]
+    else
+        if LIBSETS_SEARCH_UI_KEYBOARD ~= nil then
+            LIBSETS_SEARCH_UI_KEYBOARD.control:BringWindowToTop()
         end
     end
 end

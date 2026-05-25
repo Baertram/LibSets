@@ -964,7 +964,8 @@ local function LoadSavedVariables()
         },
         setSearchPopupTooltipPosition = RIGHT,
         showSetSearchDropLocationTooltip = false,
-        setSearchUIRowLeftClickDefaultAction = "linkToChat"
+        setSearchDropLocationTooltipPos = -1,
+        setSearchUIRowLeftClickDefaultAction = "linkToChat",
     }
     defaults = updateDefaultsData(defaults)
 

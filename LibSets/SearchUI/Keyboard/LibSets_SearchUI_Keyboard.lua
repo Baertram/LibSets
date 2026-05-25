@@ -1074,12 +1074,13 @@ end
 ------------------------------------------------
 function LibSets_SearchUI_Keyboard:OnRowMouseEnter(rowControl)
     self.resultsList:Row_OnMouseEnter(rowControl)
+    local data = rowControl.data
+    self.tooltipControl.data = data
+    local shownLeftOfControl = self:ShowItemLinkTooltip(rowControl, data)
 
-    self.tooltipControl.data = rowControl.data
-    local shownLeftOfControl = self:ShowItemLinkTooltip(rowControl, rowControl.data)
     --Depending on position of the itemLinkTooltip -> show the setDropLocation on the other side of the set search UI
     -->If there is the space. Else show it centered below the set search UI
-    self:ShowSetDropLocationTooltip(rowControl, rowControl.data, shownLeftOfControl)
+    self:ShowSetDropLocationTooltip(rowControl, data, shownLeftOfControl)
 end
 
 function LibSets_SearchUI_Keyboard:OnRowMouseExit(rowControl)
@@ -1118,6 +1119,7 @@ local currentWidth, currentHeight
 local updateListColumnWithCounter = 0
 function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart, forceResizeNow)
     ZO_Tooltips_HideTextTooltip()
+    LibSets_SearchUI_Shared_BringWindowToTop()
     local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
     if resizeStart then
         currentWidth, currentHeight = self:GetDimensions()
@@ -1145,6 +1147,7 @@ end
 
 function LibSets_SearchUI_Keyboard_TopLevel_OnMove(self, moveStart)
     ZO_Tooltips_HideTextTooltip()
+    LibSets_SearchUI_Shared_BringWindowToTop()
     local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
     if not moveStart then
         libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize(self)

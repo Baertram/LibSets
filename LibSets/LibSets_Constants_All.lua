@@ -118,13 +118,14 @@ local possibleDlcIds = {
     [39] = "DLC_FEAST_OF_SHADOWS",
     [40] = "DLC_SEASONS_OF_THE_WORMCULT2",
     [41] = "DLC_SEASON0",
-    [42] = "DLC_SEASON0_PART2",
+    --[42] = "DLC_SEASON0_PART2",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_***"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_SEASON0_PART2" --42
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -234,10 +235,11 @@ lib.dlcAndChapterCollectibleIds = {
     --Season 0
     [DLC_SEASON0]                  = {name="Season 0", type=DLC_TYPE_SEASON_PART, releaseDate=1773057600}, -- March 9th 2026
     --Season 0 Part 2
-    [DLC_SEASON0_PART2]            = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400}, -- June 8th 2026
+    --[DLC_SEASON0_PART2]            = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400}, -- June 8th 2026
 }
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
+    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {name=<nilable:string>, collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
+    lib.dlcAndChapterCollectibleIds[DLC_SEASON0_PART2] = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400} ---- June 8th 2026
 end
 
 local function cleanDLCTimeStamp(releaseDateTimestamp, withoutColon)

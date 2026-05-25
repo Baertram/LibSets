@@ -2092,6 +2092,9 @@ local LHAS_settingsEntryInGameMenu = ((LibAddonMenu2 ~= nil and (not IsConsole o
 function lib.ShowSettingsMenu(panelToShow)
     if not IsConsole and not IsInGamepadPreferredMode() then
         if lam == nil or lib.LAMsettingsPanel == nil then return end
+        if LIBSETS_SEARCH_UI_KEYBOARD then
+            LIBSETS_SEARCH_UI_KEYBOARD:HideUI()
+        end
         lam:OpenToPanel(lib.LAMsettingsPanel)
     else
         if lhas == nil or lib.LHASsettingsPanel == nil then return end
@@ -2099,6 +2102,9 @@ function lib.ShowSettingsMenu(panelToShow)
 
         if IsConsole then
             if lhas.scene == nil then return end
+            if LIBSETS_SEARCH_UI_GAMEPAD then
+                LIBSETS_SEARCH_UI_GAMEPAD:HideUI()
+            end
             --Show the gamepad menu now (if not shown)
             SCENE_MANAGER:Show("mainMenuGamepad")
 
@@ -2118,6 +2124,9 @@ function lib.ShowSettingsMenu(panelToShow)
             local settingsMenuEntry = (gameMenu and gameMenu.headerControls and gameMenu.headerControls[GetString(SI_GAME_MENU_SETTINGS)]) or nil
             --local rootNodeChildren = (gameMenu and gameMenu.rootNode and gameMenu.rootNode.children) or nil
             if settingsMenuEntry then
+                if LIBSETS_SEARCH_UI_GAMEPAD then
+                    LIBSETS_SEARCH_UI_GAMEPAD:HideUI()
+                end
                 if not settingsMenuEntry.selected then
                     settingsMenuEntry.control:SetSelected(true)
                     settingsMenuEntry:SetOpen(true)
@@ -2386,8 +2395,16 @@ local function loadLHASSettingsMenu()
         {
             type  = lhas.ST_LABEL,
             title = localization.previewTT,
-            text  = localization.previewTT_TT, --todo 251113 add  .. localization.previewTT_SetSearch_TT once lss setSearch was added for Gamepad UI
+            text  = localization.previewTT_TT,
         },
+        --[[
+        --todo 251113 add  .. localization.previewTT_SetSearch_TT once lss setSearch was added for Gamepad UI
+        {
+            type  = lhas.ST_LABEL,
+            title = localization.setSearchTT,
+            text  = localization.previewTT_SetSearch_TT,
+        },
+        ]]
         {
             type =      lhas.ST_CHECKBOX,
             label =     localization.previewTTToChatToo,
@@ -2672,7 +2689,12 @@ local function loadLAMSettingsMenu()
         {
             type  = "description",
             title = localization.previewTT,
-            text  = localization.previewTT_TT .. localization.previewTT_SetSearch_TT,
+            text  = localization.previewTT_TT,
+        },
+        {
+            type  = "description",
+            title = localization.setSearchTT,
+            text  = localization.previewTT_SetSearch_TT,
         },
         {
             type =      "checkbox",

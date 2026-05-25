@@ -79,6 +79,7 @@ lib.specialBonusSets = specialBonusSets
 --}
 local setsOfNewerAPIVersion = {
     --setIds not yet on live server - BEGIN
+    854,
     --setIds not yet on live server - END
 }
 lib.setsOfNewerAPIVersion = setsOfNewerAPIVersion
