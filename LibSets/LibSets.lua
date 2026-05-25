@@ -378,7 +378,7 @@ local function checkOptionalLibraryLibScrollableMenu()
     if not LSM_wasChecked and LSM == nil then
         LSM = LibScrollableMenu
         LSM_wasChecked = true
-        if LSM ~= nil and LSM.version >= "2.40" then --Got the correct needed version?
+        if LSM ~= nil and LSM.version >= "2.43" then --Got the correct needed version?
             lib.LSM = LSM
         end
         --d(">LSM.version: " .. tos((LSM ~= nil and LSM.version) or ""))
@@ -978,6 +978,7 @@ local function LoadSavedVariables()
         showSetSearchDropLocationTooltip = false,
         setSearchDropLocationTooltipPos = -1,
         setSearchUIRowLeftClickDefaultAction = "linkToChat",
+        setSearchDLCDropdownSortBy = 1, --"nameClean"
     }
     defaults = updateDefaultsData(defaults)
 

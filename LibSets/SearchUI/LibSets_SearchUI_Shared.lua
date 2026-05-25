@@ -293,7 +293,8 @@ local function setMenuItemCheckboxState(checkboxIndex, newState, ifMatchesValue)
     end
 end
 
--- called from clicking the "Auto reload" label
+-- called from clicking the "Auto reload" label --> Only needed for LibCustomMenu but not LibScrollableMenu anymore!
+--[[
 local function OnClick_CheckBoxLabel(cbControl, svEntryName, selfVar, svValueName)
     local currentState = lib.svData[svEntryName]
     if currentState == nil then return end
@@ -314,6 +315,7 @@ local function OnClick_CheckBoxLabel(cbControl, svEntryName, selfVar, svValueNam
         end
     end
 end
+]]
 
 --Loop over the radioButtonEntries in the group and disable "the other" value
 --[[
@@ -1390,6 +1392,7 @@ function LibSets_SearchUI_Shared:ShowItemLinkPopupTooltip(parent, data, auto)
 
     if not auto then
         local setSearchPopupTooltipPosition = lib.svData.setSearchPopupTooltipPosition
+        if setSearchPopupTooltipPosition == -1 then return end
         if setSearchPopupTooltipPosition == LEFT then
             anchor1 = RIGHT
             anchor2 = LEFT
@@ -1582,22 +1585,52 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     --radioButtonGroupsSettings["rowLeftLickDefaultAction"]["popupTooltip"] = cbDefaultActionLeftClickOnRowPopupTooltipIndex
 
 
+    --Filters
+    AddCustomScrollableMenuHeader(GetString(SI_GAMEPAD_BANK_FILTER_HEADER))
+    local dlcDropdownFilterSubmenu = {
+        {
+            label = "Sort by name",
+            callback = function()
+                lib.svData.setSearchDLCDropdownSortBy = 1
+                --todo 260525 rebuild the DLCs filter dropdown sortOrder
+                --LIBSETS_SEARCH_UI_KEYBOARD:UpdateDropdownSort("DLCIds", nil, false)
+            end,
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            checked =  function() return lib.svData.setSearchDLCDropdownSortBy == 1  end,
+            buttonGroup = 3,
+        },
+        {
+            label = "Sort by date of release",
+            callback = function()
+                lib.svData.setSearchDLCDropdownSortBy = 2
+                --todo 260525 rebuild the DLCs filter dropdown sortOrder
+                --LIBSETS_SEARCH_UI_KEYBOARD:UpdateDropdownSort("DLCIds", nil, false)
+            end,
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            checked =  function() return lib.svData.setSearchDLCDropdownSortBy == 2  end,
+            buttonGroup = 3,
+        },
+    }
+    AddCustomScrollableSubMenuEntry(getLocalizedText("DLCDropdown"), dlcDropdownFilterSubmenu)
 
     --Tooltips
     AddCustomScrollableMenuHeader(tooltipsStr)
     local cbShowTextFilterTooltipsIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("textBoxFilterTooltips"),
             function(comboBox, itemName, item, checked, data)
-                OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtTextFilters", selfVar)
+                --OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtTextFilters", selfVar)
+                lib.svData.setSearchTooltipsAtTextFilters = checked
             end, function() return lib.svData.setSearchTooltipsAtTextFilters end)
     --setMenuItemCheckboxState(cbShowTextFilterTooltipsIndex, lib.svData.setSearchTooltipsAtTextFilters)
     local cbShowDropDownFilterTooltipsIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("dropdownFilterTooltips"),
             function(comboBox, itemName, item, checked, data)
-                OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtFilters", selfVar)
+                --OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtFilters", selfVar)
+                lib.svData.setSearchTooltipsAtFilters = checked
             end, function() return lib.svData.setSearchTooltipsAtFilters end)
     --setMenuItemCheckboxState(cbShowDropDownFilterTooltipsIndex, lib.svData.setSearchTooltipsAtFilters)
     local cbShowDropDownFilterEntryTooltipsIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("dropdownFilterEntryTooltips"),
             function(comboBox, itemName, item, checked, data)
-                OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtFilterEntries", selfVar)
+                --OnClick_CheckBoxLabel(moc(), "setSearchTooltipsAtFilterEntries", selfVar)
+                lib.svData.setSearchTooltipsAtFilterEntries = checked
             end, function() return lib.svData.setSearchTooltipsAtFilterEntries end)
     --setMenuItemCheckboxState(cbShowDropDownFilterEntryTooltipsIndex, lib.svData.setSearchTooltipsAtFilterEntries)
 
@@ -1606,7 +1639,8 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     AddCustomScrollableMenuHeader(getLocalizedText("droppedBy"))
     local cbShowSetDroppedByExtraTooltipIndex = AddCustomScrollableMenuCheckbox(showAsTooltipStr,
             function(comboBox, itemName, item, checked, data)
-                OnClick_CheckBoxLabel(moc(), "showSetSearchDropLocationTooltip", selfVar)
+                lib.svData.showSetSearchDropLocationTooltip = checked
+                --OnClick_CheckBoxLabel(moc(), "showSetSearchDropLocationTooltip", selfVar)
             end, function() return lib.svData.showSetSearchDropLocationTooltip end)
 
     local subMenuEntriesTooltipPositions = {
@@ -1655,9 +1689,7 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
             buttonGroup = 1,
         },
     }
-    AddCustomScrollableMenuEntry(setSearchDropLocationTooltipPosStr, nil, LSM_ENTRY_TYPE_SUBMENU, subMenuEntriesTooltipPositions, {
-        enabled = function() return lib.svData.showSetSearchDropLocationTooltip end,
-    }) --text, callback, entryType, entries, additionalData)
+    AddCustomScrollableMenuEntry(setSearchDropLocationTooltipPosStr, nil, LSM_ENTRY_TYPE_SUBMENU, subMenuEntriesTooltipPositions, nil) --text, callback, entryType, entries, additionalData)
     --setMenuItemCheckboxState(cbShowSetDroppedByExtraTooltipIndex, lib.svData.showSetSearchDropLocationTooltip)
 
     --Set names
@@ -1666,7 +1698,8 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
         --AddCustomScrollableMenuDivider()
         local cbShowSetNamesInEnglishTooIndex = AddCustomScrollableMenuCheckbox(getLocalizedText("searchUIShowSetNameInEnglishToo"),
                 function(comboBox, itemName, item, checked, data)
-                    OnClick_CheckBoxLabel(moc(), "setSearchShowSetNamesInEnglishToo", selfVar)
+                    --OnClick_CheckBoxLabel(moc(), "setSearchShowSetNamesInEnglishToo", selfVar)
+                    lib.svData.setSearchShowSetNamesInEnglishToo = checked
                 end, function() return lib.svData.setSearchShowSetNamesInEnglishToo end)
         --setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
     end
@@ -1722,17 +1755,24 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
     --Popup tooltip
     local popupTooltipSubmenu = {
         {
-            label = GetString(SI_KEYBINDDISPLAYMODE2), --Automatic
+            label = autoStr, --Automatic
             callback =function()
+                lib.svData.setSearchPopupTooltipPosition = -1
                 self:ShowItemLinkPopupTooltip(owningWindow, data, true)
-            end
+            end,
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            buttonGroup = 2,
+            checked = function() return lib.svData.setSearchPopupTooltipPosition == -1 end
         },
         {
             label = "-",
             callback = function() end,
         },
         {
-            label = GetString(SI_NAMEPLATEDISPLAYCHOICE10), --Left (SI_KEYCODE_NARRATIONTEXTPS4125)
+            label = leftStr, --Left (SI_KEYCODE_NARRATIONTEXTPS4125)
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            buttonGroup = 2,
+            checked = function() return lib.svData.setSearchPopupTooltipPosition == LEFT end,
             callback = function()
                 lib.svData.setSearchPopupTooltipPosition = LEFT
                 --self:ShowItemLinkPopupTooltip(owningWindow, data, RIGHT, -10, nil, LEFT)
@@ -1740,7 +1780,10 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             end
         },
         {
-            label = GetString(SI_BINDING_NAME_TURN_RIGHT), --Right (SI_KEYCODE_NARRATIONTEXTPS4126)
+            label = rightStr, --Right (SI_KEYCODE_NARRATIONTEXTPS4126)
+            entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
+            buttonGroup = 2,
+            checked = function() return lib.svData.setSearchPopupTooltipPosition == RIGHT end,
             callback =function()
                 lib.svData.setSearchPopupTooltipPosition = RIGHT
                 --self:ShowItemLinkPopupTooltip(owningWindow, data, RIGHT, -10, nil, LEFT)

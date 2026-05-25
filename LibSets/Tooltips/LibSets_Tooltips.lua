@@ -877,7 +877,7 @@ local function getSetDropMechanicInfo(setData, buildTextures)
                             end
                         end
                     end
-lib._debugDropZoneIdsTheSame = dropZoneIdsTheSame
+--lib._debugDropZoneIdsTheSame = dropZoneIdsTheSame
 
                     --Same dropZoneIds were found?
                     if not ZO_IsTableEmpty(dropZoneIdsTheSame) then
@@ -912,7 +912,7 @@ lib._debugDropZoneIdsTheSame = dropZoneIdsTheSame
                         dropZoneIdsTheSame = nil
                         dropMechanicTabTheSame = nil
                     end
-lib._debugDropMechanicTabTheSame = dropMechanicTabTheSame
+--lib._debugDropMechanicTabTheSame = dropMechanicTabTheSame
                 end
             end
         end
@@ -2465,7 +2465,7 @@ local function loadLAMSettingsMenu()
         ------------------------------------------------------------------------------------------------------------------------
         {
             type = "header",
-            name = localization.slashCommands,
+            name = localization.headerSlashCommands,
         },
         --- Slash command /lsp preview tooltip
         {
