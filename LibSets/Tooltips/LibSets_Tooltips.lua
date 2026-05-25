@@ -2398,6 +2398,7 @@ local function loadLHASSettingsMenu()
             text  = localization.previewTT_TT,
         },
         --[[
+        --- Slash command /lss set search UI
         --todo 251113 add  .. localization.previewTT_SetSearch_TT once lss setSearch was added for Gamepad UI
         {
             type  = lhas.ST_LABEL,
@@ -2461,6 +2462,36 @@ local function loadLAMSettingsMenu()
 
     local optionsTable                            =
     {
+        ------------------------------------------------------------------------------------------------------------------------
+        {
+            type = "header",
+            name = localization.slashCommands,
+        },
+        --- Slash command /lsp preview tooltip
+        {
+            type  = "description",
+            title = localization.previewTT,
+            text  = localization.previewTT_TT,
+        },
+        {
+            type =      "checkbox",
+            name =      localization.previewTTToChatToo,
+            tooltip =   localization.previewTTToChatToo_TT,
+            getFunc =   function() return settings.setPreviewTooltips.sendToChatToo end,
+            setFunc =   function(value)
+                lib.svData.setPreviewTooltips.sendToChatToo = value
+            end,
+            default =   defaultSettings.setPreviewTooltips.sendToChatToo,
+            disabled =  function() return false end,
+            width =     "full",
+        },
+        --- Slash command /lss set search UI
+        {
+            type  = "description",
+            title = localization.setSearchTT,
+            text  = localization.previewTT_SetSearch_TT,
+        },
+
 ------------------------------------------------------------------------------------------------------------------------
         {
             type = "header",
@@ -2683,33 +2714,6 @@ local function loadLAMSettingsMenu()
             disabled =  function() return not settings.useCustomTooltipPattern end,
             width =     "full",
         },
-
-        ----------------------------------------------------------------------------------------------------------------
-        --- Slash command /lsp preview tooltip
-        {
-            type  = "description",
-            title = localization.previewTT,
-            text  = localization.previewTT_TT,
-        },
-        {
-            type  = "description",
-            title = localization.setSearchTT,
-            text  = localization.previewTT_SetSearch_TT,
-        },
-        {
-            type =      "checkbox",
-            name =      localization.previewTTToChatToo,
-            tooltip =   localization.previewTTToChatToo_TT,
-            getFunc =   function() return settings.setPreviewTooltips.sendToChatToo end,
-            setFunc =   function(value)
-                lib.svData.setPreviewTooltips.sendToChatToo = value
-            end,
-            default =   defaultSettings.setPreviewTooltips.sendToChatToo,
-            disabled =  function() return false end,
-            width =     "full",
-        },
-
-
     }
     lam:RegisterOptionControls(LAMPanelName, optionsTable)
 

@@ -238,7 +238,7 @@ lib.dlcAndChapterCollectibleIds = {
     --[DLC_SEASON0_PART2]            = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400}, -- June 8th 2026
 }
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {name=<nilable:string>, collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
+    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {name=<string:nilable>, collectibleId=<number:nilable>, achievementCategoryId=<number:nilable>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
     lib.dlcAndChapterCollectibleIds[DLC_SEASON0_PART2] = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400} ---- June 8th 2026
 end
 
@@ -355,3 +355,4 @@ for i = 1, GetNumClasses(), 1 do
     end
 end
 lib.classData = classData
+--lib.classSets = {}

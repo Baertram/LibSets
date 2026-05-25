@@ -1561,6 +1561,7 @@ lib.localization                 = {
         headerItemLinks             = "Set ItemLinks",
         addSetCollectionsSearchItemLink = "Set Items: Kontextmenü-> Set Sammlungen",
         setCollectionsSearchItemLink = "Zeige %q in: Set-Sammlungen",
+        headerSlashCommands = "Chat Kommandos",
         --Set search favorite categories
         star = "Favorit (Stern)",
         --PvE
@@ -1693,6 +1694,7 @@ lib.localization                 = {
         headerItemLinks             = "Set ItemLinks",
         addSetCollectionsSearchItemLink = "Set Items: Contextmenu-> Set Collections",
         setCollectionsSearchItemLink = "Show %q in: Set-Collections",
+        headerSlashCommands = "Slash Commands",
         --Set search favorite categories
         star = "Favorite (star)",
         --PvE

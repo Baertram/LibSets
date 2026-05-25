@@ -1431,9 +1431,7 @@ function LibSets_SearchUI_Shared:ShowSetDropLocationTooltip(rowControl, data, it
         --No automatic anchor position determination?
         anchorTo = setSearchDropLocationTooltipPos
         --Do not anchor the small extra tooltip to the top/bottom of the setItemLink tooltip, just anchor to top or bottom of the setSearchUI control
-        if anchorTo == TOP or anchorTo == BOTTOM then
-            anchorCtrl = owningCtrl
-        end
+        anchorCtrl = owningCtrl
     end
     --d(">anchorCtrl: " ..tos(anchorCtrl:GetName()) .. "; anchorTo: " ..tos(anchorTo))
 

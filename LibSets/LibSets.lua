@@ -365,6 +365,8 @@ local DLC_TYPE_SEASON_PART = DLC_TYPE_SEASON_PART
 local DLC_TYPE_ZONE = DLC_TYPE_ZONE
 local DLC_TYPE_DUNGEONS = DLC_TYPE_DUNGEONS
 
+local emptySetItemLinkPattern = "|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h"
+
 --Libraries
 local LCM --LibCustomMenu
 local LSM -- LibScrollableMenu
@@ -437,26 +439,26 @@ local allowedDropMechanics =            lib.allowedDropMechanics
 local dropLocationNames =               lib.dropLocationNames
 local dropLocation2SetIds =             lib.dropLocationNames2SetIds
 local setId2DropLocations =             lib.setId2DropLocationNames
-local dropMechanicIdToName =            lib.dropMechanicIdToName
-local dropMechanicIdToNameTooltip =     lib.dropMechanicIdToNameTooltip
-local undauntedChestIds =               lib.undauntedChestIds
-local possibleDlcTypes =                lib.possibleDlcTypes
+local dropMechanicIdToName =            zostc(lib.dropMechanicIdToName)
+local dropMechanicIdToNameTooltip =     zostc(lib.dropMechanicIdToNameTooltip)
+local undauntedChestIds =               zostc(lib.undauntedChestIds)
+local possibleDlcTypes =                zostc(lib.possibleDlcTypes)
 --local possibleDlcIds =                  lib.possibleDlcIds
-local DLCandCHAPTERdata =               lib.DLCAndCHAPTERData
-local DLCAndCHAPTERDataOrdered =        lib.DLCAndCHAPTERDataOrdered
+local DLCandCHAPTERdata =               zostc(lib.DLCAndCHAPTERData)
+local DLCAndCHAPTERDataOrdered =        zostc(lib.DLCAndCHAPTERDataOrdered)
 --local DLCandCHAPTERLookupdata =         lib.DLCandCHAPTERLookupdata
-local NONDLCData =                      lib.NONDLCData
+local NONDLCData =                      zostc(lib.NONDLCData)
 --local NONDLCLookupdata =                lib.NONDLCLookupdata
-local allowedDLCTypes =                 lib.allowedDLCTypes
-local allowedDLCIds =                   lib.allowedDLCIds
-local dlcAndChapterCollectibleIds =     lib.dlcAndChapterCollectibleIds
+local allowedDLCTypes =                 zostc(lib.allowedDLCTypes)
+local allowedDLCIds =                   zostc(lib.allowedDLCIds)
+local dlcAndChapterCollectibleIds =     zostc(lib.dlcAndChapterCollectibleIds)
 
 local customTooltipHooksNeeded =        lib.customTooltipHooks.needed
 --local customTooltipHooksHooked =        lib.customTooltipHooks.hooked
 --local customTooltipHooksEventPlayerActivatedCalled = lib.customTooltipHooks.eventPlayerActivatedCalled
 
-local classData =                       lib.classData
-local allClassSets =                    lib.classSets
+local classData =                       zostc(lib.classData)
+local allClassSets =                    lib.classSets --todo 260525 Why isn't this table filled anywhere?
 
 lib.lookupTableItemSetIdToItemSetCollectionsCategory = {}
 local lookupTableItemSetIdToItemSetCollectionsCategory = lib.lookupTableItemSetIdToItemSetCollectionsCategory
@@ -477,8 +479,8 @@ local searchUI = lib.SearchUI
 local searchUIKeyboard--, searchUIGamepad
 
 
-local possibleSetSearchFavoriteCategories = lib.possibleSetSearchFavoriteCategories
-local possibleSetSearchFavoriteCategoriesUnsorted = lib.possibleSetSearchFavoriteCategoriesUnsorted
+local possibleSetSearchFavoriteCategories = zostc(lib.possibleSetSearchFavoriteCategories)
+local possibleSetSearchFavoriteCategoriesUnsorted = zostc(lib.possibleSetSearchFavoriteCategoriesUnsorted)
 
 --Possible SlashCommand parameters
 -->help
@@ -867,6 +869,16 @@ end
         return checkTable[numberOrTable] or false
     end
     return result
+end
+
+--Return a copy of the LibSets API table data, so addons cannot update LibSets referenced data by accident
+local function safeReturnAPItable(tabData)
+    if nil == tabData then return end
+    if type(tabData) ~= "table" then
+        --local retVar = tabData
+        return tabData
+    end
+    return ZO_ShallowTableCopy(tabData)
 end
 
 
@@ -1777,10 +1789,11 @@ local function LoadSets()
     lib.dropLocationNames2SetIds = dropLocation2SetIds
     lib.setId2DropLocationNames = setId2DropLocations
 
+    --todo 260525 lib.classSets = classSets Do we need to iterate the setData and fill the lib.classSets table here too?
 
     lib.setsScanning = false
     lib.setsLoaded = true
-end
+end -- function LoadSets()
 
 --======= Set itemIds ==================================================================================================
 --Get the itemID(s) of a setId, filtered (if filter parameters are not nil).
@@ -2106,9 +2119,29 @@ local function getDropMechanicAndDropLocationNames(setId, langToUse, setData)
 end
 lib.GetDropMechanicAndDropLocationNames = getDropMechanicAndDropLocationNames
 
+
+
+
+
+
+
+--======================================================================================================================
+--======================================================================================================================
+--======================================================================================================================
 ------------------------------------------------------------------------
--- 	Global helper functions
+--v- 	API BEGIN/API START - Global helper functions   -v-
+        ----> API block ends at identifier:   --^-    API END --^-
+        --> API functions of this library are globally accessible functions via lib.<functionName> where lib is LibSets,
+        --> Examples:   local setNameStr = LibSets.GetSetName(123)
+        -->             local setItemLink = LibSets.buildItemLink(50234, 368)
+        -->             local setDataTab  = LibSets.GetSetInfo(123)
+        ----> local functions within this API block are only helpers and not usable as API from your addon!!!
 ------------------------------------------------------------------------
+--======================================================================================================================
+--======================================================================================================================
+--======================================================================================================================
+
+
 --Create an example itemlink of the setItem's itemId (level 50, CP160) using the itemQuality subtype.
 --Standard value for the qualitySubType is 366 which means "Normal" quality.
 --The following qualities are available:
@@ -2130,7 +2163,7 @@ function lib.buildItemLink(itemId, itemQualitySubType)
     --return '|H1:item:'..tos(itemId)..':30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:10000:0|h|h'
     ITEMSTYLE_NONE = ITEMSTYLE_NONE or 0 --fix for console where there is no addoncompatibility aliases
 
-    return strfor("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, itemQualitySubType, ITEMSTYLE_NONE, 0, 10000)
+    return strfor(emptySetItemLinkPattern, itemId, itemQualitySubType, ITEMSTYLE_NONE, 0, 10000)
 end
 buildItemLink = lib.buildItemLink
 
@@ -2355,8 +2388,8 @@ end
 --Returns perfectedSetId and perfectedSetZoneId of the non perfected setId provided.
 --Returned value will be nil if nonPerfectedSetId is no set with a matching perfected setId
 --> Parameters: nonPerfectedSetId number: The set's setId
---> Returns:    nilable:number perfectedSetId
--->             nilable:number perfectedSetZoneId
+--> Returns:    number:nilable perfectedSetId
+-->             number:nilable perfectedSetZoneId
 function lib.GetPerfectedSetId(nonPerfectedSetId)
     if nonPerfectedSetId == nil then return nil, nil end
     if not checkIfSetsAreLoadedProperly(nonPerfectedSetId) then return nil, nil end
@@ -2371,8 +2404,8 @@ end
 --Returns nonPerfectedSetId and nonPerfectedSetZoneId of the non perfected setId provided.
 --Returned value will be nil if perfectedSetId is no set with a matching non perfected setId
 --> Parameters: perfectedSetId number: The set's setId
---> Returns:    nilable:number nonPerfectedSetId
--->             nilable:number nonPerfectedSetZoneId
+--> Returns:    number:nilable nonPerfectedSetId
+-->             number:nilable nonPerfectedSetZoneId
 function lib.GetPerfectedSetId(perfectedSetId)
     if perfectedSetId == nil then return nil, nil end
     if not checkIfSetsAreLoadedProperly(perfectedSetId) then return nil, nil end
@@ -2386,14 +2419,14 @@ end
 --Returns table perfectedSetInfo about the setId provided if it's a perfected set, or a non perfected set
 --> Parameters: setId number: The set's setId (non perfected or perfected)
 ---> Attention: Table returned is nil if setId provided is neither a perfected nor a non perfected set
---> Returns:    nilable:table perfectedSetInfo = {
--->                 nilable:boolean isPerfectedSet,
+--> Returns:    table:nilable perfectedSetInfo = {
+-->                 boolean:nilable isPerfectedSet,
 -->
--->                 nilable:number  nonPerfectedSetId=<setIdOfNonPerfectedSet>,
--->                 nilable:number  nonPerfectedSetZoneId=<zoneIdOfNonPerfectedSet>,
+-->                 number:nilable  nonPerfectedSetId=<setIdOfNonPerfectedSet>,
+-->                 number:nilable  nonPerfectedSetZoneId=<zoneIdOfNonPerfectedSet>,
 -->
--->                 nilable:number  perfectedSetId=<setIdOfPerfectedSet>,
--->                 nilable:number  perfectedSetZoneId=<zoneIdOfPerfectedSet>,
+-->                 number:nilable  perfectedSetId=<setIdOfPerfectedSet>,
+-->                 number:nilable  perfectedSetZoneId=<zoneIdOfPerfectedSet>,
 -->             }
 function lib.GetPerfectedSetInfo(setId)
     if setId == nil then return end
@@ -2411,7 +2444,7 @@ function lib.GetAllPerfectedSetIds()
     if ZO_IsTableEmpty(perfectedSets) then
         fillPerfectedSetsTables()
     end
-    return perfectedSets
+    return safeReturnAPItable(perfectedSets)
 end
 
 --Returns table with key = index and value = setId of nonPerfected sets
@@ -2420,7 +2453,7 @@ function lib.GetAllNonPerfectedSetIds()
     if ZO_IsTableEmpty(nonPerfectedSets) then
         fillPerfectedSetsTables()
     end
-    return nonPerfectedSets
+    return safeReturnAPItable(nonPerfectedSets)
 end
 
 
@@ -2469,7 +2502,7 @@ end
 --> Parameters: setId number: The set's setId
 -->             itemLink String: An itemlink of a setItem -> only needed if the veteran data contains equipTypes and should be checked
 -->                              against these.
---> Returns:    isVeteranSet boolean
+--> Returns:    isVeteranSet boolean:nilable
 function lib.IsVeteranSet(setId, itemLink)
 	if not checkIfSetsAreLoadedProperly(setId) then return false end
 	local isVeteranSet = false
@@ -2502,7 +2535,7 @@ end
 --> Returns:    isArmorTypeSet boolean
 function lib.IsArmorTypeSet(setId, armorType)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId or not armorType then return end
+    if not setId or not armorType then return false end
     if not lib.armorTypesSets[armorType] then return end
     return lib.armorTypesSets[armorType][setId] or false
 end
@@ -2512,7 +2545,7 @@ end
 --> Returns:    isLightArmorSet boolean
 function lib.IsLightArmorSet(setId)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId then return end
+    if not setId then return false end
     return lib.armorTypesSets[ARMORTYPE_LIGHT][setId] or false
 end
 
@@ -2521,7 +2554,7 @@ end
 --> Returns:    isMediumArmorSet boolean
 function lib.IsMediumArmorSet(setId)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId then return end
+    if not setId then return false end
     return lib.armorTypesSets[ARMORTYPE_MEDIUM][setId] or false
 end
 
@@ -2530,16 +2563,32 @@ end
 --> Returns:    isHeavyArmorSet boolean
 function lib.IsHeavyArmorSet(setId)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId then return end
+    if not setId then return false end
     return lib.armorTypesSets[ARMORTYPE_HEAVY][setId] or false
 end
+
+--Returns true/false if the set got items with all armor types
+--> Parameters: setId number: The set's setId
+--> Returns:    isAllArmorSet boolean
+function lib.IsAllArmorSet(setId)
+    if not checkIfSetsAreLoadedProperly(setId) then return false end
+    if not setId then return false end
+    local armorTypesSets = lib.armorTypesSets
+    if armorTypesSets[ARMORTYPE_LIGHT][setId] and
+            armorTypesSets[ARMORTYPE_MEDIUM][setId] and
+            armorTypesSets[ARMORTYPE_HEAVY][setId] then
+        return true
+    end
+    return false
+end
+
 
 --Returns true/false if the set got items with armor
 --> Parameters: setId number: The set's setId
 --> Returns:    isArmorSet boolean
 function lib.IsArmorSet(setId)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId then return end
+    if not setId then return false end
     return lib.armorSets[setId] or false
 end
 
@@ -2548,7 +2597,7 @@ end
 --> Returns:    isJewelrySet boolean
 function lib.IsJewelrySet(setId)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId then return end
+    if not setId then return false end
     return lib.jewelrySets[setId] or false
 end
 
@@ -2557,7 +2606,7 @@ end
 --> Returns:    isWeaponSet boolean
 function lib.IsWeaponSet(setId)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId then return end
+    if not setId then return false end
     return lib.weaponSets[setId] or false
 end
 
@@ -2567,8 +2616,8 @@ end
 --> Returns:    isWeaponTypeSet boolean
 function lib.IsWeaponTypeSet(setId, weaponType)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId or not weaponType then return end
-    if not lib.weaponTypesSets[weaponType] then return end
+    if not setId or not weaponType then return false end
+    if not lib.weaponTypesSets[weaponType] then return false end
     return lib.weaponTypesSets[weaponType][setId] or false
 end
 
@@ -2578,8 +2627,8 @@ end
 --> Returns:    isEquipTypeSet boolean
 function lib.IsEquipTypeSet(setId, equipType)
     if not checkIfSetsAreLoadedProperly(setId) then return false end
-    if not setId or not equipType then return end
-    if not lib.equipTypesSets[equipType] then return end
+    if not setId or not equipType then return false end
+    if not lib.equipTypesSets[equipType] then return false end
     return lib.equipTypesSets[equipType][setId] or false
 end
 
@@ -2589,51 +2638,51 @@ end
 ------------------------------------------------------------------------
 --Returns a table of setIds where the set got items with a given armorType
 --> Parameters: armorType number: The armorType to check for
---> Returns:    armorTypeSetIds table
+--> Returns:    armorTypeSetIds table:nilable
 function lib.GetAllArmorTypeSets(armorType)
-    if not checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return end
     if not armorType then return end
-    return lib.armorTypesSets[armorType]
+    return safeReturnAPItable(lib.armorTypesSets[armorType])
 end
 
---Returns a table of setIds where the set got items with an armorType
---> Returns:    armorSet table
+--Returns a table of setIds where the set got items with any armorType
+--> Returns:    armorSet table:nilable
 function lib.GetAllArmorSets()
-    if not checkIfSetsAreLoadedProperly() then return false end
-    return lib.armorSets
+    if not checkIfSetsAreLoadedProperly() then return end
+    return safeReturnAPItable(lib.armorSets)
 end
 
 --Returns a table of setIds where the set got items with a jewelryType
---> Returns:    jewelrySets table
+--> Returns:    jewelrySets table:nilable
 function lib.GetAllJewelrySets()
-    if not checkIfSetsAreLoadedProperly() then return false end
-    return lib.jewelrySets
+    if not checkIfSetsAreLoadedProperly() then return end
+    return safeReturnAPItable(lib.jewelrySets)
 end
 
 
---Returns a table of setIds where the set got items with a weaponType
---> Returns:    weaponSets table
+--Returns a table of setIds where the set got items with any weaponType
+--> Returns:    weaponSets table:nilable
 function lib.GetAllWeaponSets()
-    if not checkIfSetsAreLoadedProperly() then return false end
-    return lib.weaponSets
+    if not checkIfSetsAreLoadedProperly() then return end
+    return safeReturnAPItable(lib.weaponSets)
 end
 
 --Returns a table of setIds where the set got items with a given weaponType
 --> Parameters: weaponType number: The weaponType to check for
---> Returns:    weaponTypeSetIds table
+--> Returns:    weaponTypeSetIds table:nilable
 function lib.GetAllWeaponTypeSets(weaponType)
-    if not checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return end
     if not weaponType then return end
-    return lib.weaponTypesSets[weaponType]
+    return safeReturnAPItable(lib.weaponTypesSets[weaponType])
 end
 
 --Returns a table of setIds where the set got items with a given equipType
 --> Parameters: equipType number: The equipType to check for
---> Returns:    equipTypeSetIds table
+--> Returns:    equipTypeSetIds table:nilable
 function lib.GetAllEquipTypeSets(equipType)
-    if not checkIfSetsAreLoadedProperly() then return false end
+    if not checkIfSetsAreLoadedProperly() then return end
     if not equipType then return end
-    return lib.equipTypesSets[equipType]
+    return safeReturnAPItable(lib.equipTypesSets[equipType])
 end
 
 
@@ -2643,7 +2692,7 @@ end
 --> Parameters: setId number: The set's setId
 -->             withRelatedZoneIds boolean: Also provide a mappingTable as 2nd return value which contains the wayshrine's zoneId
 -->             in this format: wayshrineNodsId2ZoneId = { [wayshrineNodeId1]= zoneId1, [wayshrineNodeId2]= zoneId2,... }
---> Returns:    wayshrineNodeIds table
+--> Returns:    wayshrineNodeIds table:nilable
 function lib.GetWayshrineIds(setId, withRelatedZoneIds)
     withRelatedZoneIds = withRelatedZoneIds or false
     if setId == nil then return end
@@ -2659,12 +2708,12 @@ function lib.GetWayshrineIds(setId, withRelatedZoneIds)
             wayshrineNodsId2ZoneId[wayshrineNodeId] = wayshrine2zone[wayshrineNodeId]
         end
     end
-    return setData[LIBSETS_TABLEKEY_WAYSHRINES], wayshrineNodsId2ZoneId
+    return safeReturnAPItable(setData[LIBSETS_TABLEKEY_WAYSHRINES]), wayshrineNodsId2ZoneId
 end
 
 --Returns the wayshrineNodeIds's related zoneId, where this wayshrine is located
 --> Parameters: wayshrineNodeId number
---> Returns:    zoneId number
+--> Returns:    zoneId number:nilable
 function lib.GetWayshrinesZoneId(wayshrineNodeId)
     if wayshrineNodeId == nil then return end
     if not checkIfSetsAreLoadedProperly() then return end
@@ -2675,31 +2724,31 @@ end
 
 --Returns the drop zoneIds as table for the setId
 --> Parameters: setId number: The set's setId
---> Returns:    zoneIds table, or NIL if set's DLCid is unknown
+--> Returns:    zoneIds table:nilable
 function lib.GetZoneIds(setId)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly(setId) then return end
     local setData = setInfo[setId]
     if setData == nil or setData[LIBSETS_TABLEKEY_ZONEIDS] == nil then return end
-    return setData[LIBSETS_TABLEKEY_ZONEIDS]
+    return safeReturnAPItable(setData[LIBSETS_TABLEKEY_ZONEIDS])
 end
 
 --Returns the dlcId as number for the setId
 --> Parameters: setId number: The set's setId
---> Returns:    dlcId number, or NIL if set's DLCid is unknown
+--> Returns:    dlcId number:nilable
 function lib.GetDLCId(setId)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly(setId) then return end
     local setData = setInfo[setId]
     if setData == nil or setData.dlcId == nil then return end
-    return setData.dlcId
+    return safeReturnAPItable(setData.dlcId)
 end
 local lib_GetDLCId = lib.GetDLCId
 
 --Returns Boolean true/false if the set's dlcId is the currently active DLC.
 --Means the set is "new added with this DLC".
 --> Parameters: setId number: The set's setId
---> Returns:    wasAddedWithCurrentDLC Boolean, or NIL if set's DLCid is unknown
+--> Returns:    wasAddedWithCurrentDLC boolean:nilable
 function lib.IsCurrentDLC(setId)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly(setId) then return end
@@ -2711,12 +2760,12 @@ end
 
 --Returns the table of DLCIDs of LibSets (the constants in LibSets.allowedDLCIds, see file LibSets_ConstantsLibraryInternal.lua)
 function lib.GetAllDLCIds()
-    return allowedDLCIds
+    return safeReturnAPItable(allowedDLCIds)
 end
 
 --Returns the dlcType as number for the setId
 --> Parameters: setId number: The set's setId
---> Returns:    dlcType number, or NIL if set's DLCType is unknown
+--> Returns:    dlcType number:nilable
 function lib.GetDLCType(setId)
     local dlcId = lib_GetDLCId(setId)
     if dlcId ~= nil and allowedDLCIds[dlcId] then
@@ -2730,7 +2779,7 @@ end
 
 --Returns the name of the DLC type by help of the DLC type id
 --> Parameters: dlcId number: The DLC id given in a set's info
---> Returns:    name dlcTypeName
+--> Returns:    dlcTypeName string:nilable
 function lib.GetDLCTypeName(dlcTypeId)
     if not lib.possibleDlcTypes then return end
     local dlcTypeName = lib.possibleDlcTypes[dlcTypeId] or ""
@@ -2739,23 +2788,23 @@ end
 
 --Returns the table of DLC types of LibSets (the constants in LibSets.allowedDLCTypes, see file LibSets_ConstantsLibraryInternal.lua)
 function lib.GetAllDLCTypes()
-    return lib.allowedDLCTypes
+    return safeReturnAPItable(lib.allowedDLCTypes)
 end
 
 --Returns the number of researched traits needed to craft this set. This will only check the craftable sets!
 --> Parameters: setId number: The set's setId
---> Returns:    traitsNeededToCraft number
+--> Returns:    traitsNeededToCraft number:nilable
 function lib.GetTraitsNeeded(setId)
     if setId == nil then return end
     if not isCraftedSet(setId) then return end
     local setData = setInfo[setId]
     if setData == nil or setData.traitsNeeded == nil then return end
-    return setData.traitsNeeded
+    return safeReturnAPItable(setData.traitsNeeded)
 end
 
 --Returns the type of the setId!
 --> Parameters: setId number: The set's setId
---> Returns:    LibSetsSetType number
+--> Returns:    LibSetsSetType number:nilable
 ---> Possible values are the setTypes of LibSets one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 function lib.GetSetType(setId)
     if setId == nil then return end
@@ -2769,14 +2818,14 @@ function lib.GetSetType(setId)
         end
     end
     if setData == nil then return end
-    return setData[LIBSETS_TABLEKEY_SETTYPE]
+    return safeReturnAPItable(setData[LIBSETS_TABLEKEY_SETTYPE])
 end
 libSets_GetSetType = lib.GetSetType
 
 --Returns the setType name as String
 --> Parameters: libSetsSetType number: The set's setType (one of the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 -->             lang String the language for the setType name. Can be left nil -> The client language will be used then
---> Returns:    String setTypeName
+--> Returns:    setTypeName string:nilable
 function lib.GetSetTypeName(libSetsSetType, lang)
     if libSetsSetType == nil then return end
     lang = langAllowedCheck(lang)
@@ -2794,7 +2843,7 @@ end
 
 --Returns the table of setTypes of LibSets (the constants in LibSets.allowedSetTypes, see file LibSets_Constants.lua)
 function lib.GetAllSetTypes()
-    return lib.allowedSetTypes
+    return safeReturnAPItable(lib.allowedSetTypes)
 end
 
 --Returns the name of the drop mechanic ID (Aren cstage chest, worldboss, city, email rewards for the worthy, ...)
@@ -2802,7 +2851,7 @@ end
 --> Parameters: dropMechanicId number: The LibSetsDropMechanidIc (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 -->             lang String: The 2char language String for the used translation. If left empty the current client's
 -->             language will be used.
---> Returns:    String dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc, String dropMechanicNameTooltipLocalized: The tooltip of the dropMechanic
+--> Returns:    string:nilable dropMachanicNameLocalized: The name fo the LibSetsDropMechanidIc, string:nilable dropMechanicNameTooltipLocalized: The tooltip of the dropMechanic
 function lib.GetDropMechanicName(libSetsDropMechanicId, lang)
     if libSetsDropMechanicId == nil or libSetsDropMechanicId <= 0 then return nil, nil end
     if not allowedDropMechanics[libSetsDropMechanicId] then return nil, nil end
@@ -2820,7 +2869,7 @@ getDropMechanicName = lib.GetDropMechanicName
 --Returns the dropMechanicIDs of the setId!
 --> Parameters: setId number:           The set's setId
 -->             withNames bolean:       Should the function return the dropMechanic names as well?
---> Returns:    LibSetsDropMechanicIds  table, LibSetsDropMechanicNamesForEachId table, LibSetsDropMechanicTooltipForEachId table, LibSetsDropMechanicLocationNames table, LibSetsZoneIdsOfDrop table
+--> Returns:    LibSetsDropMechanicIds  table:nilable, LibSetsDropMechanicNamesForEachId table:nilable, LibSetsDropMechanicTooltipForEachId table:nilable, LibSetsDropMechanicLocationNames table:nilable, LibSetsZoneIdsOfDrop table:nilable
 ---> table LibSetsDropMechanicIds: The key is a number starting at 1 and increasing by 1, and the value is one of the dropMechanics
 --->   of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 ---> table LibSetsDropMechanicNamesForEachId: The key is an index, same as the index in table LibSetsDropMechanicIds,
@@ -2896,28 +2945,30 @@ end
 
 --Returns the table of dropMechanics of LibSets (the constants in LibSets.allowedDropMechanics, see file LibSets_Constants.lua)
 function lib.GetAllDropMechanics()
-    return allowedDropMechanics
+    return safeReturnAPItable(allowedDropMechanics)
 end
 
 --Returns the table of dropZones of LibSets: All sets data was scanned for zoneIds where it could drop, and a complete list
 --of lib.dropZones = {[zoneId] = true, ... } was created
 function lib.GetAllDropZones()
     if not checkIfSetsAreLoadedProperly() then return end
-    return dropZones
+    return safeReturnAPItable(dropZones)
 end
 
---Returns table LibSets.zoneId2SetId
+--Returns the table of mapping between setId and the dropZones
+--Returns table:nilable LibSets.zoneId2SetId
 function lib.GetDropZonesBySetId(setId)
     if not checkIfSetsAreLoadedProperly(setId) then return end
     if setId == nil or setId2ZoneIds[setId] == nil then return end
-    return setId2ZoneIds[setId]
+    return safeReturnAPItable(setId2ZoneIds[setId])
 end
 
---Returns table LibSets.setId2ZoneId was created.
+--Returns the table of mapping between dropZones and the setIds
+--Returns table:nilable LibSets.setId2ZoneId was created.
 function lib.GetSetIdsByDropZone(zoneId)
     if not checkIfSetsAreLoadedProperly() then return end
     if zoneId == nil or zoneId2SetIds[zoneId] == nil then return end
-    return zoneId2SetIds[zoneId]
+    return safeReturnAPItable(zoneId2SetIds[zoneId])
 end
 local getSetIdsByDropZone = lib.GetSetIdsByDropZone
 
@@ -2929,7 +2980,7 @@ function lib.GetSetIdsOfCurrentZone()
     local setIdsOfCurrentZone
 
     --Get current zoneId
-    local currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex = getCurrentZoneIds()
+    local currentZoneId, currentZoneParentId = getCurrentZoneIds()
     if currentZoneId == nil and currentZoneParentId == nil then return end
 
 --d(">currentZoneId: " ..tos(currentZoneId))
@@ -2950,26 +3001,27 @@ end
 
 --Returns the table of dropLocationNames of LibSets: All sets data was scanned for dropLocation names, and a complete list
 --of lib.dropLocationNames = {["de"] = { "Name1", "Name2", ... }, ["en"] = { "Name1", "Name2", ...} } was created
+--Returns table:nilable dropLocationNames
 function lib.GetAllDropLocationNames(lang)
     if not checkIfSetsAreLoadedProperly() then return end
     lang = langAllowedCheck(lang)
-    return dropLocationNames[lang]
+    return safeReturnAPItable(dropLocationNames[lang])
 end
 
---Returns table LibSets.setId2DropLocationNames
+--Returns table:nilable LibSets.setId2DropLocationNames
 function lib.GetDropLocationNamesBySetId(setId, lang)
     if not checkIfSetsAreLoadedProperly(setId) then return end
     if setId == nil or setId2DropLocations[setId] == nil then return end
     lang = langAllowedCheck(lang)
-    return setId2DropLocations[setId][lang]
+    return safeReturnAPItable(setId2DropLocations[setId][lang])
 end
 
---Returns table LibSets.dropLocationNames2SetIds was created.
+--Returns table:nilable LibSets.dropLocationNames2SetIds was created.
 function lib.GetSetIdsByDropLocationName(dropLocationName, lang)
     if not checkIfSetsAreLoadedProperly() then return end
     lang = langAllowedCheck(lang)
     if dropLocationName == nil or dropLocation2SetIds[lang] == nil then return end
-    return dropLocation2SetIds[lang][dropLocationName]
+    return safeReturnAPItable(dropLocation2SetIds[lang][dropLocationName])
 end
 
 
@@ -2978,7 +3030,7 @@ end
 --> Returns: setIds table
 function lib.GetAllSetIds()
     if not checkIfSetsAreLoadedProperly() then return end
-    return lib.setIds
+    return safeReturnAPItable(lib.setIds)
 end
 local lib_GetAllSetIds = lib.GetAllSetIds
 
@@ -3119,7 +3171,7 @@ function lib.GetSetEnchantSearchCategories(setId, equipType, traitType, armorTyp
         enchantSearchCategoriesOfSetId = setInfo[setId][LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES]
     end
     if enchantSearchCategoriesOfSetId ~= nil and not ZO_IsTableEmpty(enchantSearchCategoriesOfSetId) then
-        return enchantSearchCategoriesOfSetId
+        return safeReturnAPItable(enchantSearchCategoriesOfSetId)
     end
 
     --Get all itemIds filtered where an enchantSearchCategory is used. 2nd return param will be a table containing a subtable with key LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES
@@ -3138,13 +3190,13 @@ function lib.GetSetEnchantSearchCategories(setId, equipType, traitType, armorTyp
             setInfo[setId][LIBSETS_TABLEKEY_ENCHANT_SEARCHCATEGORY_TYPES] = enchantSearchCategoriesOfSetId
         end
     end
-    return enchantSearchCategoriesOfSetId
+    return safeReturnAPItable(enchantSearchCategoriesOfSetId)
 end
 
 --Returns the name as String of the setId provided
 --> Parameters: setId number: The set's setId
 --> lang String: The language to return the setName in. Can be left empty and the client language will be used then
---> Returns:    String setName
+--> Returns:    string:nilable setName
 function lib.GetSetName(setId, lang)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly(setId) then return end
@@ -3160,14 +3212,14 @@ function lib.GetSetName(setId, lang)
         setNames =  allSetNamesCached
     end
     if setNames[setId] == nil or setNames[setId][lang] == nil then return end
-    return setNames[setId][lang]
+    return safeReturnAPItable(setNames[setId][lang])
 end
 
 --Returns all names of the setId as a table
 --The table returned uses the key=language (2 characters String e.g. "en") and the value = name String, e.g.
 --{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
 --> Parameters: setId number: The set's setId
---> Returns:    table setNames
+--> Returns:    table:nilable setNames
 ----> Contains a table with the different names of the set, for each scanned language (setNames = {["de"] = String nameDE, ["en"] = String nameEN})
 function lib.GetSetNames(setId)
     if setId == nil then return end
@@ -3183,15 +3235,16 @@ function lib.GetSetNames(setId)
         setNames =  allSetNamesCached
     end
     if setNames[setId] == nil then return end
-    return setNames[setId]
+    return safeReturnAPItable(setNames[setId])
 end
 local lib_GetSetNames = lib.GetSetNames
+
 
 --Returns all sets names as table.
 --The table returned uses the key=setId and value = table of setNames.
 --The key in the table of setNames is [language] (2 characters String e.g. "en") and the value = name String, e.g.
 --{["fr"]="Les Vêtements du sorcier",["en"]="Vestments of the Warlock",["de"]="Gewänder des Hexers"}
---> Returns: setNames table
+--> Returns: table:nilable setNames
 function lib.GetAllSetNames()
     if not checkIfSetsAreLoadedProperly() then return end
     if allSetNamesCached == nil then
@@ -3208,7 +3261,7 @@ function lib.GetAllSetNames()
         end
         allSetNamesCached = setNames
     end
-    return allSetNamesCached
+    return safeReturnAPItable(allSetNamesCached)
 end
 
 
@@ -3216,7 +3269,7 @@ end
 --> Parameters: setId number: The set's setId,
 -->             noItemIds boolean optional: Set this to true if you do not need the itemIds subtable LIBSETS_TABLEKEY_SETITEMIDS in the return table. Dafault will be false
 -->             lang String optional: The 2char language String to use for language dependent info. If left nil all supported languages will be returned.
---> Returns:    table setInfo
+--> Returns:    table:nilable setInfo
 ----> Contains:
 ----> number setId
 ----> number dlcId (the dlcId where the set was added, see file LibSets_Constants.lua, constants DLC_BASE_GAME to e.g. DLC_ELSWEYR)
@@ -3440,13 +3493,13 @@ function lib.GetSetInfo(setId, noItemIds, lang)
         end
     end
 
-    return returnTab
+    return safeReturnAPItable(returnTab)
 end
 getSetInfo = lib.GetSetInfo
 
 --Returns the possible armor types's of a set
 --> Parameters: setId number: The set's id
---> Returns:    table armorTypesOfSet: Contains all armor types possible as key and the Boolean value
+--> Returns:    table:nilable armorTypesOfSet: Contains all armor types possible as key and the Boolean value
 -->             true/false if this setId got items of this armorType
 function lib.GetSetArmorTypes(setId)
     local armorTypesOfSet = {}
@@ -3478,12 +3531,12 @@ function lib.GetSetArmorTypes(setId)
     end
     --If it's not already added to the armorTypesOfSet table add it
     --Return the armorTypesOfSet table
-    return armorTypesOfSet
+    return safeReturnAPItable(armorTypesOfSet)
 end
 
 --Returns the armor types's name
 --> Parameters: armorType ESOArmorType: The ArmorType (https://wiki.esoui.com/Globals#ArmorType)
---> Returns:    String armorTypeName: The name fo the armor type in the current client's language
+--> Returns:    String:nilable armorTypeName: The name fo the armor type in the current client's language
 function lib.GetArmorTypeName(armorType)
     if armorType == ARMORTYPE_NONE then return end
     local armorTypeNames = lib.armorTypeNames
@@ -3494,7 +3547,7 @@ end
 
 --Returns the armor types of a set's item
 --> Parameters: itemId number: The set item's itemId
---> Returns:    number armorTypeOfSetItem: The armorType (https://wiki.esoui.com/Globals#ArmorType) of the setItem
+--> Returns:    number:nilable armorTypeOfSetItem: The armorType (https://wiki.esoui.com/Globals#ArmorType) of the setItem
 function lib.GetItemsArmorType(itemId)
     --Build an itemLink from the itemId
     local itemLink = buildItemLink(itemId)
@@ -3510,7 +3563,7 @@ end
 
 --Returns the possible weapon types's of a set
 --> Parameters: setId number: The set's id
---> Returns:    table weaponTypesOfSet: Contains all weapon types possible as key and the Boolean value
+--> Returns:    table:nilable weaponTypesOfSet: Contains all weapon types possible as key and the Boolean value
 -->             true/false if this setId got items of this weaponType
 function lib.GetSetWeaponTypes(setId)
     local weaponTypesOfSet = {}
@@ -3547,7 +3600,7 @@ end
 
 --Returns the weapon types of a set's item
 --> Parameters: itemId number: The set item's itemId
---> Returns:    number weaponTypeOfSetItem: The weaponType (https://wiki.esoui.com/Globals#WeaponType) of the setItem
+--> Returns:    number:nilable weaponTypeOfSetItem: The weaponType (https://wiki.esoui.com/Globals#WeaponType) of the setItem
 function lib.GetItemsWeaponType(itemId)
     --Build an itemLink from the itemId
     local itemLink = buildItemLink(itemId)
@@ -3565,7 +3618,7 @@ end
 --> Parameters: setsItemIds table: The itemIds that need to be chedked in addition to the itemId parameter
 -->The tables key must be the itemId and the value a boolean value e.g.
 -->Example setsItemIds = { [123456]=true, [12678]=true, ... }
---> Returns: equippedItems number
+--> Returns: number:nilable equippedItems
 function lib.GetNumEquippedItemsByItemIds(setsItemIds)
     if not setsItemIds then return 0 end
     local equippedItems = 0
@@ -3592,13 +3645,13 @@ end
 --equipped number of items of this set.
 --> Parameters: setId number: The setId
 --> Returns:
--->          equippedItems number Number of currently equipped items of this setId
--->          maxEquipped number Number of maximum equipped items of this setId
--->          itemId number The itemId of an example item of the setId
+-->          number:nilable equippedItems Number of currently equipped items of this setId
+-->          number:nilable maxEquipped Number of maximum equipped items of this setId
+-->          number:nilable itemId  The itemId of an example item of the setId
 function lib.GetNumEquippedItemsBySetId(setId)
     if not setId then return nil, nil, nil end
     --Get any itemId of the setId
-    local itemId = lib.GetSetItemId(setId)
+    local itemId = libSets_GetSetItemId(setId)
     local setIdRet, equippedItems, maxEquipped, _ = getSetEquippedInfo(itemId)
     if not setIdRet then return nil, nil, nil end
     return equippedItems, maxEquipped, itemId
@@ -3608,9 +3661,9 @@ end
 --the maximum equipped number of items of this set.
 --> Parameters: itemId number: The itemId of any set's item
 --> Returns:
--->          equippedItems number Number of currently equipped items of this setId
--->          maxEquipped number Number of maximum equipped items of this setId
--->          setId number The setId of the itemId specified
+-->          number:nilable equippedItems Number of currently equipped items of this setId
+-->          number:nilablemaxEquipped Number of maximum equipped items of this setId
+-->          number:nilablesetId The setId of the itemId specified
 function lib.GetNumEquippedItemsByItemId(itemId)
     if not itemId then return nil, nil, nil end
     --Get any itemId of the setId
@@ -3622,7 +3675,7 @@ end
 
 --Returns the possible equip types's of a set
 --> Parameters: setId number: The set's id
---> Returns:    table equipTypesOfSet: Contains all equip types possible as key and the Boolean value
+--> Returns:    table:nilable equipTypesOfSet: Contains all equip types possible as key and the Boolean value
 -->             true/false if this setId got items of this equipType
 function lib.GetSetEquipTypes(setId)
     local equipTypesOfSet = {}
@@ -3642,7 +3695,7 @@ end
 --Returns the id number of the set name provided
 --> Parameters: setName String: The set's name
 --> lang String: The language to check for. Can be left empty and the client language will be used then
---> Returns:  NILABLE number setId, NILABLE table setNames
+--> Returns:  number:nilable setId, table:nilable setNames
 function lib.GetSetByName(setName, lang)
     if not checkIfSetsAreLoadedProperly() then return end
     lang = langAllowedCheck(lang)
@@ -3651,13 +3704,13 @@ function lib.GetSetByName(setName, lang)
     for setId, namesOfSets in pairs(setNames) do
         local setNameInLanguageToSearch = namesOfSets[lang]
         if setNameInLanguageToSearch ~= nil and setNameInLanguageToSearch == setName then
-            return setId, namesOfSets
+            return setId, safeReturnAPItable(namesOfSets)
         end
     end
     for setId, namesOfSetsNonESO in pairs(setNamesNonESO) do
         local setNameNonESOInLanguageToSearch = namesOfSetsNonESO[lang]
         if setNameNonESOInLanguageToSearch ~= nil and setNameNonESOInLanguageToSearch == setName then
-            return setId, namesOfSetsNonESO
+            return setId, safeReturnAPItable(namesOfSetsNonESO)
         end
     end
     return nil
@@ -3665,7 +3718,7 @@ end
 
 --Returns the bonus description text of a set itemlink, as a table (each bonus description text = 1 table entry)
 --> Parameters: itemLink String: The set item's itemlink
---> Returns:  NILABLE table bonuses
+--> Returns:  table:nilable bonuses
 function lib.GetSetBonuses(itemLink, numBonuses)
     local bonuses
     if numBonuses > 0 then
@@ -3684,18 +3737,18 @@ end
 
 --Returns table with setData for all sets that are class sets and match the classId specified
 --> Parameters: classId number:optional A class's Id
---> Returns:    table setsInfo
+--> Returns:    table:nilable setsInfo
 function lib.GetClassSets(classId)
     if classId == nil then return end
     if not checkIfSetsAreLoadedProperly() then return end
-    return getSetsOfClassId(classId)
+    return safeReturnAPItable(getSetsOfClassId(classId))
 end
 
 --Returns a table of setIds where the set is a class specific one
---> Returns:    classSets table
+--> Returns:    table:nilable classSets
 function lib.GetAllClassSets()
     if not checkIfSetsAreLoadedProperly() then return false end
-    return lib.classSets
+    return safeReturnAPItable(lib.classSets)
 end
 
 
@@ -3706,6 +3759,7 @@ end
 --If it's a crafted set you can specify a faction ID in order to jump to the selected faction's zone
 --> Parameters: setId number: The set's setId
 -->             OPTIONAL factionIndex: The index of the faction (1=Admeri Dominion, 2=Daggerfall Covenant, 3=Ebonheart Pact)
+--> Returns boolean:nilable jumpWasDone
 function lib.JumpToSetId(setId, factionIndex)
     if setId == nil or setInfo[setId] == nil or setInfo[setId][LIBSETS_TABLEKEY_WAYSHRINES] == nil then return false end
     if not checkIfSetsAreLoadedProperly(setId) then return end
@@ -3734,7 +3788,7 @@ end
 ------------------------------------------------------------------------
 --Returns the name of the DLC by help of the DLC id
 --> Parameters: dlcId number: The DLC id given in a set's info
---> Returns:    name dlcName
+--> Returns:    string:nilable dlcName
 function lib.GetDLCName(dlcId)
     if not DLCandCHAPTERdata then return end
     local dlcName = DLCandCHAPTERdata[dlcId] or NONDLCData[dlcId] or ""
@@ -3743,7 +3797,7 @@ end
 
 --Returns the name and the timestamp it was released of the DLC by help of the DLC id
 --> Parameters: dlcId number: The DLC id given in a set's info
---> Returns:    name dlcName, nilable:number releaseDateTimeStamp
+--> Returns:    string:nilable dlcName, number:nilable releaseDateTimeStamp
 function lib.GetDLCInfo(dlcId)
     if not DLCandCHAPTERdata then return end
     local dlcName = DLCandCHAPTERdata[dlcId] or NONDLCData[dlcId] or ""
@@ -3753,7 +3807,7 @@ end
 
 --Returns the name of the DLC by help of the DLC id
 --> Parameters: undauntedChestId number: The undaunted chest id given in a set's info
---> Returns:    name undauntedChestName
+--> Returns:    string:nilable undauntedChestName
 function lib.GetUndauntedChestName(undauntedChestId, lang)
     if undauntedChestId < 1 or undauntedChestId > lib.countUndauntedChests then return end
     lang = langAllowedCheck(lang)
@@ -3768,20 +3822,20 @@ end
 --Returns the name of the zone by help of the zoneId, if the zoneId is 0 or below
 --> Parameters: zoneIdEqualsOrBelowZero number: The zone id given in a set's info
 -->             lang String the language for the zone name. Can be left nil -> The client language will be used then
---> Returns:    name zoneNameSpecial
+--> Returns:    string:nilable zoneNameSpecial
 function lib.GetSpecialZoneNameById(zoneIdEqualsOrBelowZero, lang)
     if zoneIdEqualsOrBelowZero == nil then return end
     lang = langAllowedCheck(lang)
     local specialZoneNames = lib.specialZoneNames[lang]
     if specialZoneNames == nil then return end
-    return specialZoneNames[zoneIdEqualsOrBelowZero]
+    return safeReturnAPItable(specialZoneNames[zoneIdEqualsOrBelowZero])
 end
 local libSets_GetSpecialZoneNameById =  lib.GetSpecialZoneNameById
 
 --Returns the name of the zone by help of the zoneId
 --> Parameters: zoneId number: The zone id given in a set's info
 -->             language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated
---> Returns:    name zoneName
+--> Returns:    string:nilable zoneName
 function lib.GetZoneName(zoneId, lang)
     if not zoneId then return end
     lang = langAllowedCheck(lang)
@@ -3801,10 +3855,10 @@ local getZoneName = lib.GetZoneName
 
 --Returns the name of the current zone's zoneId, and the parentZone's name
 --> Parameters: language String: ONLY possible to be used if additional library "LibZone" (https://www.esoui.com/downloads/info2171-LibZone.html) is activated
---> Returns:    name zoneName, name parentZoneName
+--> Returns:    string:nilable zoneName, string:nilable parentZoneName
 function lib.GetCurrentZoneName(lang)
     getCurrentZoneIds = getCurrentZoneIds or lib.GetCurrentZoneIds
-    local currentZoneId, currentZoneParentId, currentZoneIndex, currentZoneParentIndex = getCurrentZoneIds()
+    local currentZoneId, currentZoneParentId = getCurrentZoneIds()
     if currentZoneId == nil and currentZoneParentId ~= nil then
         currentZoneId = currentZoneParentId
     end
@@ -3827,7 +3881,7 @@ end
 ]]
 local preloadedZoneDungeonMappingData
 local function isPreloadedZoneDungeonMappingGiven(zoneId, subTable, veteran)
-    preloadedZoneDungeonMappingData = preloadedZoneDungeonMappingData or zostc(preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING])
+    preloadedZoneDungeonMappingData = preloadedZoneDungeonMappingData or safeReturnAPItable(preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING])
     local zoneIdDungeonData = (zoneId ~= nil and preloadedZoneDungeonMappingData ~= nil and preloadedZoneDungeonMappingData[zoneId]) or nil
     if zoneIdDungeonData == nil then return false, nil end
 
@@ -3965,6 +4019,10 @@ local function scrollToDungeonFinderListNow(index, delay, isVeteranDungeon)
     end
 end
 
+--Scroll to the dungeon finder's list
+--> Params:     number dungeonFinderIndex (1 normal, 2 veteran)
+-->             number dungeonId The id of the dungeon to scroll to
+--> Returns:    boolean scrolledToDungeon
 local function scrollToDungeonFinderListByDungeonId(dungeonFinderIndex, dungeonId)
 --d("[LibSets]scrollToDungeonFinderListByDungeonId-dungeonFinderIndex: " ..tos(dungeonFinderIndex) .. ", dungeonId: " ..tos(dungeonId))
     if dungeonFinderIndex == nil or dungeonId == nil then return false end
@@ -4018,6 +4076,11 @@ local function scrollToDungeonFinderListByDungeonId(dungeonFinderIndex, dungeonI
 end
 lib.ScrollToDungeonFinderListByDungeonId = scrollToDungeonFinderListByDungeonId
 
+--Open the dungeon finder's list at the dungeonFinderIndex
+--> Params:     number dungeonFinderIndex (1 normal, 2 veteran)
+-->             function:nilable callbackFunc A callback function to execute once the dungeonFinder was opened at the list
+-->             ... callback function's parameters passed in
+--> Returns:    boolean:nilable openedDungeonFinder
 local function openDungeonFinder(dungeonFinderIndex, callbackFunc, ...)
     if dungeonFinder and dungeonFinder.navigationTree then
         local dfRootNode = dungeonFinder.navigationTree.rootNode
@@ -4164,7 +4227,7 @@ end
 --Returns a table of zoneIds which are a dungeon
 --> Returns:    dungeonZoneIdData table = { [zoneIdOfDungeon] = { parentZoneId=number, isTrial=boolean }, ... }
 function lib.GetAllDungeonZoneIdData()
-    preloadedZoneDungeonMappingData = preloadedZoneDungeonMappingData or zostc(preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING])
+    preloadedZoneDungeonMappingData = preloadedZoneDungeonMappingData or safeReturnAPItable(preloaded[LIBSETS_TABLEKEY_DUNGEON_ZONE_MAPPING])
     return preloadedZoneDungeonMappingData
 end
 
@@ -4187,7 +4250,7 @@ isPublicDungeonZoneId = lib.IsPublicDungeonZoneId
 --> Returns:    table:nilable publicDungeonZoneData = { parentZoneId=number, DLCID=DLC_xxx constant number }
 function lib.GetPublicDungeonZoneData(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil then return end
-    return zostc(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId])
+    return safeReturnAPItable(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId])
 end
 
 --Returns boolean isZoneIdAPublicDungeonOfDLCId. If the zoneId is no public dungeon the return value will be nil
@@ -4205,7 +4268,7 @@ end
 --> Returns:    DLC_xxx:nilable DLCIdOfPublicDungeonZoneId
 function lib.GetPublicDungeonZoneIdDLCId(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
-    return zostc(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["DLCId"])
+    return safeReturnAPItable(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["DLCId"])
 end
 
 --Returns number parentZoneId. If the zoneId is no public dungeon the return value will be nil
@@ -4213,13 +4276,13 @@ end
 --> Returns:    number:nilable parentZoneId
 function lib.GetPublicDungeonZoneIdParentZoneId(zoneId)
     if zoneId == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING] == nil or preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId] == nil then return nil end
-    return zostc(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["parentZoneId"])
+    return safeReturnAPItable(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING][zoneId]["parentZoneId"])
 end
 
 --Returns a table of zoneIds which are a dungeon
 --> Returns:    publicDungeonZoneIdData table = { [zoneIdOfPublicDungeon] = { parentZoneId=number, DLCID=DLC_xxx constant number }, ... }
 function lib.GetAllPublicDungeonZoneIdData()
-    return zostc(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING])
+    return safeReturnAPItable(preloaded[LIBSETS_TABLEKEY_PUBLICDUNGEON_ZONE_MAPPING])
 end
 
 
@@ -4291,7 +4354,7 @@ local function getSetCollectionsCategoryTree()
 end
 
 
---Returns string itemSetCollectionKey "setId:itemSetCollectionSlotId" of the itemLink
+--Returns string:nilable itemSetCollectionKey "setId:itemSetCollectionSlotId" of the itemLink
 --identifying a set item by setId and the equipment slot (e.g. hands, chest, ...) which potentially could have different
 --itemIds
 function lib.GetItemSetCollectionsSlotKey(itemLink)
@@ -4328,51 +4391,51 @@ getCurrentZoneIds = lib.GetCurrentZoneIds
 --> See file Data/LibSets_Data_*.lua, table lib.setDataPreloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING]
 local preloadedSetItemCollectionMappingToZoneCopy
 function lib.GetItemSetCollectionToZoneIds()
-    preloadedSetItemCollectionMappingToZoneCopy = preloadedSetItemCollectionMappingToZoneCopy or zostc(preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING])
+    preloadedSetItemCollectionMappingToZoneCopy = preloadedSetItemCollectionMappingToZoneCopy or safeReturnAPItable(preloaded[LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING])
     return preloadedSetItemCollectionMappingToZoneCopy
 end
 
---Returns the zoneIds (table) which are linked to a item set collection's categoryId
+--Returns the table:nilable zoneIds which are linked to a item set collection's categoryId
 --Not all categories are connected to a zone though! The result will be nil in these cases.
 --Example return table: {148}
 function lib.GetItemSetCollectionZoneIds(categoryId)
     if not checkIfSetsAreLoadedProperly() then return end
     if categoryId == nil then return end
     if lib.setItemCollectionCategory2ZoneId[categoryId] then
-        return lib.setItemCollectionCategory2ZoneId[categoryId]
+        return safeReturnAPItable(lib.setItemCollectionCategory2ZoneId[categoryId])
     end
     return
 end
 local getItemSetCollectionZoneIds = lib.GetItemSetCollectionZoneIds
 
---Returns the categoryIds (table) which are linked to a item set collection's zoneId
+--Returns the table:nilable categoryIds which are linked to a item set collection's zoneId
 --Not all zoneIds are connected to a category though! The result will be nil in these cases.
 --Example return table: {39}
 function lib.GetItemSetCollectionCategoryIds(zoneId)
     if not checkIfSetsAreLoadedProperly() then return end
     if zoneId == nil then return end
     if lib.setItemCollectionZoneId2Category[zoneId] ~= nil then
-        return lib.setItemCollectionZoneId2Category[zoneId]
+        return safeReturnAPItable(lib.setItemCollectionZoneId2Category[zoneId])
     end
     return
 end
 local getItemSetCollectionCategoryIds = lib.GetItemSetCollectionCategoryIds
 
---Returns the parent category data (table) containing the zoneIds, and possible boolean parameters
+--Returns the table:nilable parentCategoryData containing the zoneIds, and possible boolean parameters
 --isDungeon, isArena, isTrial of ALL categoryIds below this parent -> See file LibSets_data_all.lua ->
 --table lib.setDataPreloaded -> table key LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
 --Example return table: { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
 function lib.GetItemSetCollectionParentCategoryData(parentCategoryId)
     if not checkIfSetsAreLoadedProperly() then return end
     if parentCategoryId == nil then return end
-    local parentCategorySubCategories = lib.setItemCollectionParentCategories[parentCategoryId]
+    local parentCategorySubCategories = safeReturnAPItable(lib.setItemCollectionParentCategories[parentCategoryId])
     if parentCategorySubCategories then
         return parentCategorySubCategories
     end
     return
 end
 
---Returns the category data (table) containing the zoneIds, and possible boolean parameters
+--Returns the table:nilable categoryData containing the zoneIds, and possible boolean parameters
 --isDungeon, isArena, isTrial -> See file LibSets_data_alllua -> table lib.setDataPreloaded ->
 --table key LIBSETS_TABLEKEY_SET_ITEM_COLLECTIONS_ZONE_MAPPING
 --Example return table: { parentCategory=5, category=39, zoneIds={148}, isDungeon=true},--Arx Corinium
@@ -4380,7 +4443,7 @@ function lib.GetItemSetCollectionCategoryData(categoryId)
     if not checkIfSetsAreLoadedProperly() then return end
     if categoryId == nil then return end
     if lib.setItemCollectionCategories[categoryId] then
-        return lib.setItemCollectionCategories[categoryId]
+        return safeReturnAPItable(lib.setItemCollectionCategories[categoryId])
     end
     return
 end
@@ -4402,7 +4465,7 @@ local function getItemSetCollectionUnlockedAndTotal(zoneId)
     return sumNumUnlocked, sumNumTotal
 end
 
---Get the number of unlocked and total itemSetCollection pieces in a categoryId (categoryId needs to be the categoryId of
+--Get the number:nilable of unlocked and total itemSetCollection pieces in a categoryId (categoryId needs to be the categoryId of
 --the Item Set Collections UI, see mapping table at file Data/LibSets_Data_*.lua ->
 --number categoryId The zone's categoryId
 --returns number sumNumUnlocked, number sumNumTotal
@@ -4421,7 +4484,7 @@ end
 
 --Get the number of unlocked and total itemSetCollection pieces in a zoneId
 --number zoneId The zone's ID
---returns number sumNumUnlocked, number sumNumTotal
+--returns number:nilable sumNumUnlocked, number sumNumTotal
 function lib.GetNumItemSetCollectionZoneUnlockedPieces(zoneId)
     if not zoneId or zoneId == 0 then return nil, nil end
     return getItemSetCollectionUnlockedAndTotal(zoneId)
@@ -4513,6 +4576,8 @@ local function checkIfOpenItemSetCollectionBookOfCategoryDataIsReady(categoryDat
     return (categoryTree.selectedNode == nodeToOpen) or false
 end
 
+--Open the Set collections book with the set of the passed in categoryData
+--> Params:     table categoryData
 function lib.OpenItemSetCollectionBookOfCategoryData(categoryData)
 --d("[LibSets]OpenItemSetCollectionBookOfCategoryData")
     if not checkIfSetsAreLoadedProperly() then return end
@@ -4702,6 +4767,7 @@ local function checkIfSetItemCollectionBookForItemLinkIsReady(setId)
     end
 end
 
+--Open the set collections book for the set od the passed in setItem's itemLink
 function lib.OpenSetItemCollectionBookForItemLink(itemLink)
 --d("[LibSets]OpenSetItemCollectionBookForItemLink: " ..tos(itemLink))
     recursiveLoopsCounter = 0
@@ -4719,6 +4785,7 @@ function lib.OpenSetItemCollectionBookForItemLink(itemLink)
     runItemSetCollectionsBookOpenedTask(delay, checkIfSetItemCollectionBookForItemLinkIsReady, setId)
 end
 local libSets_OpenSetItemCollectionBookForItemLink = lib.OpenSetItemCollectionBookForItemLink
+
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
@@ -4844,7 +4911,7 @@ end
 
 --Returns the setsData of all the setIds which are allowed proc sets in PvP/AvA campaigns
 --> Parameters: none
---> Returns:    nilable:LibSetsAllSetProcDataAllowedInPvP table
+--> Returns:    table:nilable LibSetsAllSetProcDataAllowedInPvP
 function lib.GetAllSetDataWithProcAllowedInPvP()
     if not checkIfSetsAreLoadedProperly() then return end
     return zostc(preloaded[LIBSETS_TABLEKEY_SET_PROCS_ALLOWED_IN_PVP])
@@ -4864,7 +4931,7 @@ end
 
 --Returns the procData of all the setIds
 --> Parameters: none
---> Returns:    nilable:LibSetsAllSetProcData table
+--> Returns:    table:nilable LibSetsAllSetProcData
 function lib.GetAllSetProcData()
     if not checkIfSetsAreLoadedProperly() then return end
     return zostc(preloaded[LIBSETS_TABLEKEY_SET_PROCS])
@@ -4873,7 +4940,7 @@ end
 
 --Returns the procData of the setId as table, containing the abilityIds, unitTag, cooldown, icon, etc.
 --> Parameters: setId number: The set's setId
---> Returns:    nilable:LibSetsSetProcData table
+--> Returns:    table:nilable LibSetsSetProcData
 --[ [
     [number setId] = {
         [number LIBSETS_SETPROC_CHECKTYPE_ constant from LibSets_ConstantsLibraryInternal.lua] = {
@@ -4915,11 +4982,11 @@ end
 
 --Returns the abilityIds of the setId's procData
 --> Parameters: setId number: The set's setId
--->             nilable:setProcCheckType number: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
+-->             number:nilable setProcCheckType: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
 -->             the abilityIds in. If left entry all setprocCheckTypes will be read and the abilityIds taken from their indices.
--->             nilable:procIndex number: The procIndex to get the abilityIds from. If left entry all abilityIds of all indices
+-->             number:nilable procIndex: The procIndex to get the abilityIds from. If left entry all abilityIds of all indices
 -->             of the setProcCheckType will be read
---> Returns:    nilable:LibSetsSetProcDataAbilityIds table {[index1] = abilityId1, [index2] = abilityId2}
+--> Returns:    table:nilable LibSetsSetProcDataAbilityIds {[index1] = abilityId1, [index2] = abilityId2}
 function lib.GetSetProcAbilityIds(setId, setProcCheckType, procIndex)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly(setId) then return end
@@ -4930,11 +4997,11 @@ end
 
 --Returns the debuffIds of the setId's procData
 --> Parameters: setId number: The set's setId
--->             nilable:setProcCheckType number: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
+-->             number:nilable setProcCheckType: The setProcCheckType (See file LibSets_ConstantsLibryInternal.lua) to search
 -->             the debuffIds in. If left entry all setprocCheckTypes will be read and the debuffIds taken from their indices.
--->             nilable:procIndex number: The procIndex to get the debuffIds from. If left entry all debuffIds of all indices
+-->             number:nilable procIndex: The procIndex to get the debuffIds from. If left entry all debuffIds of all indices
 -->             of the setProcCheckType will be read
---> Returns:    nilable:LibSetsSetProcDataDebuffIds table {[index1] = debuffId1, [index2] = debuffId2}
+--> Returns:    table:nilable LibSetsSetProcDataDebuffIds {[index1] = debuffId1, [index2] = debuffId2}
 function lib.GetSetProcDebuffIds(setId, setProcCheckType, procIndex)
     if setId == nil then return end
     if not checkIfSetsAreLoadedProperly(setId) then return end
@@ -4998,7 +5065,7 @@ end
 -- Possible additional filterTypes are:
 -- REGISTER_FILTER_UNIT_TAG, REGISTER_FILTER_UNIT_TAG_PREFIX or more https://wiki.esoui.com/AddFilterForEvent ,
 -- Attention: DO NOT USE the filterType REGISTER_FILTER_ABILITY_ID, because this is already handled by this function internally!
--- Returns nilable:successfulRegister boolean
+-- Returns boolean:nilable successfulRegister
 --
 --Example call, will register EVENT_COMBAT_EVENT for the abilityId 135659 of th setId 487 (Winter), and call the function myCombatEventFunc
 --which's parameters must be the ones of the EVENT_COMBAT_EVENT (w/o the first eventId)->result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow
@@ -5091,7 +5158,7 @@ local function unregisterSetProcEventAndDeleteEventList(eventId, addOnEventNames
 end
 
 -- Unregister the registered callback functions for the Set procs eventId at the addOnEventNamespace
--- Returns nilable:succesfulUnregister boolean
+-- Returns boolean:nilable succesfulUnregister
 function lib.UnRegisterSetProcEventCallbackForEventId(addOnEventNamespace, eventId)
     if not addOnEventNamespace or addOnEventNamespace == "" then return end
     if eventId ~= nil then
@@ -5110,7 +5177,7 @@ function lib.UnRegisterSetProcEventCallbackForEventId(addOnEventNamespace, event
 end
 
 -- Unregister the registered callback functions for the Set procs eventId at the addOnEventNamespace, setId and abilityId
--- Returns nilable:succesfulUnregister boolean
+-- Returns boolean:nilable succesfulUnregister
 function lib.UnRegisterSetProcEventCallbackForAbilityId(addOnEventNamespace, eventId, setId, abilityId)
     if not addOnEventNamespace or addOnEventNamespace == "" or not setId or not abilityId then return end
     if eventId ~= nil then
@@ -5129,7 +5196,7 @@ function lib.UnRegisterSetProcEventCallbackForAbilityId(addOnEventNamespace, eve
 end
 
 -- Unregister the registered callback functions for the Set procs eventId at the addOnEventNamespace and setId
--- Returns nilable:succesfulUnregister boolean
+-- Returns boolean:nilable succesfulUnregister
 function lib.UnRegisterSetProcEventCallbackForSetId(addOnEventNamespace, eventId, setId)
     if not addOnEventNamespace or addOnEventNamespace == "" or not setId then return end
     if eventId ~= nil then
@@ -5210,6 +5277,20 @@ function lib.GetSetSearchFavoritesCategoriesForSetId(setId)
     end
     return retTab
 end
+
+
+--======================================================================================================================
+--======================================================================================================================
+------------------------------------------------------------------------
+--^-    API END --^-
+------------------------------------------------------------------------
+--======================================================================================================================
+--======================================================================================================================
+--======================================================================================================================
+
+
+
+
 
 
 ------------------------------------------------------------------------
