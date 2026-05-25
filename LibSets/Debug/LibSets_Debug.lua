@@ -5,7 +5,7 @@
    ---------------------------------------------------------------------------------------------------------------------------------------------
     Function name (execute with /script in chat)|   Description
    ---------------------------------------------------------------------------------------------------------------------------------------------
-    LibSets.DebugGetAllData(resetCurrentAPI)
+    LibSets.DebugGetAllData(resetCurrentAPI, noItemIds, onlyNames)
                                                 |  Attention: This function will need some time to scan all + realoduis for each supported client language. But it should update all needed
                                                 |              SV tables with 1 function call!
                                                 |
@@ -14,6 +14,8 @@
                                                 |   loaded and transfered to the SavedVariables table "DebugGetAllData". Then it will go on with the next supported language which was
                                                 |   not scanned for yet.
                                                 |   Parameter resetCurrentAPI boolean: If set to true it will reset already scanned data for the current APIVersion and rescans it new!
+                                                |   Parameter noItemIds boolean: If set to true it will not scan the itemIds
+                                                |   Parameter onlyNames boolean: If set to true it will only collect the names of the different languages (setNames, collectibleNames, etc.)
 -------------------------------------------------------------------------------------------------------------------------------------------------
     LibSets.DebugResetSavedVariables()          |   Reset ALL data in the SavedVariables. Should be run ONCE before new data is scanned!
 -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -133,7 +135,8 @@ local isPTSAPIVersionLive = lib.checkIfPTSAPIVersionIsLive()
 local clientLang = lib.clientLang or GetCVar("language.2")
 local fallbackLang = lib.fallbackLang
 local supportedLanguages = lib.supportedLanguages
-local numSupportedLangs = lib.numSupportedLangs
+--local numSupportedLangs = lib.numSupportedLangs
+local numSupportedLangsForDebug = lib.numSupportedLangsForDebug
 local nonOfficialLanguages = lib.nonOfficialLanguages
 
 local decompressSetIdItemIds = lib.DecompressSetIdItemIds
@@ -1511,7 +1514,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
                 --Get the language to scan as next one, if not all were scanned already
                 local runData = lib.svDebugData.DebugGetAllData[apiVersion]
                 local numLangsScanned = NonContiguousCount(runData.langDone)
-                if numLangsScanned < numSupportedLangs then
+                if numLangsScanned < numSupportedLangsForDebug then
                     for langStr, isSupported in pairs(supportedLanguages) do
                         if isSupported == true then
                             if not runData.langDone[langStr] then

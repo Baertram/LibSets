@@ -197,14 +197,22 @@ lib.nonOfficialLanguages = nonOfficialLanguages
 
 
 local numSupportedLangs        = 0
+local numSupportedLangsForDebug = 0
 local supportedLanguagesIndex = {}
 for supportedLanguage, isSupported in pairs(supportedLanguages) do
     if isSupported == true then
         numSupportedLangs = numSupportedLangs + 1
+        numSupportedLangsForDebug = numSupportedLangsForDebug + 1
         supportedLanguagesIndex[#supportedLanguagesIndex + 1] = supportedLanguage
+    else
+        --e.g. if langJP is not supported, but it's an unofficial language, then we need to increase the counter +1 for the debug routines here! Else a random language would be skipped...
+        if nonOfficialLanguages[supportedLanguage] then
+            numSupportedLangsForDebug = numSupportedLangsForDebug + 1
+        end
     end
 end
 lib.numSupportedLangs = numSupportedLangs
+lib.numSupportedLangsForDebug = numSupportedLangsForDebug
 table.sort(supportedLanguagesIndex)
 lib.supportedLanguagesIndex = supportedLanguagesIndex
 
