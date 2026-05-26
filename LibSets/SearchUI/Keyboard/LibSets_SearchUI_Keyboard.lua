@@ -673,6 +673,7 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
         LSM_comboBoxOptionsDLCID.customSortKeys = SORT_BY_ALL
         LSM_comboBoxOptionsDLCID.customSortKey  = getCurrentDLCIDSortKey()
         LSM_comboBoxOptionsDLCID.customSortFunc = DLCIDCustomSortFunc
+        LSM_comboBoxOptionsDLCID.enableSort = true --Show the filterHeader's sortContainer with the v^ buttons
         self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.DCLIdFiltersControl, LSM_comboBoxOptionsDLCID)
     end
     DLCIdDropdown:SetSortsItems(true)
