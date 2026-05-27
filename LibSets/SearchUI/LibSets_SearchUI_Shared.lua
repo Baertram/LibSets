@@ -1589,7 +1589,7 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
     AddCustomScrollableMenuHeader(GetString(SI_GAMEPAD_BANK_FILTER_HEADER))
     local dlcDropdownFilterSubmenu = {
         {
-            label = "Sort by name",
+            label = getLocalizedText("sortByName"),
             callback = function()
                 lib.svData.setSearchDLCDropdownSortBy = 1
                 --todo 260525 rebuild the DLCs filter dropdown sortOrder
@@ -1600,7 +1600,7 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
             buttonGroup = 3,
         },
         {
-            label = "Sort by date of release",
+            label = getLocalizedText("sortByDateOfRelease"),
             callback = function()
                 lib.svData.setSearchDLCDropdownSortBy = 2
                 --todo 260525 rebuild the DLCs filter dropdown sortOrder
@@ -1700,6 +1700,7 @@ function LibSets_SearchUI_Shared:ShowSettingsMenu(anchorControl)
                 function(comboBox, itemName, item, checked, data)
                     --OnClick_CheckBoxLabel(moc(), "setSearchShowSetNamesInEnglishToo", selfVar)
                     lib.svData.setSearchShowSetNamesInEnglishToo = checked
+                    selfVar.resultsList:RefreshData()
                 end, function() return lib.svData.setSearchShowSetNamesInEnglishToo end)
         --setMenuItemCheckboxState(cbShowSetNamesInEnglishTooIndex, lib.svData.setSearchShowSetNamesInEnglishToo)
     end
