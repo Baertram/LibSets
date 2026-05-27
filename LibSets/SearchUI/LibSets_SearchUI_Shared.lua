@@ -1381,18 +1381,17 @@ function LibSets_SearchUI_Shared:HideItemLinkTooltip()
 end
 
 
-function LibSets_SearchUI_Shared:ShowItemLinkPopupTooltip(parent, data, auto)
+function LibSets_SearchUI_Shared:ShowItemLinkPopupTooltip(parent, data)
     self:HideItemLinkPopupTooltip()
-    auto = auto or false
-
     if data == nil or data.itemLink == nil then return end
 
     local TT_control = TT_Popup
     local anchor1, offsetX, offsetY, anchor2
 
+    local setSearchPopupTooltipPosition = lib.svData.setSearchPopupTooltipPosition
+    local auto = setSearchPopupTooltipPosition == -1
+
     if not auto then
-        local setSearchPopupTooltipPosition = lib.svData.setSearchPopupTooltipPosition
-        if setSearchPopupTooltipPosition == -1 then return end
         if setSearchPopupTooltipPosition == LEFT then
             anchor1 = RIGHT
             anchor2 = LEFT
@@ -1759,7 +1758,7 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             label = autoStr, --Automatic
             callback =function()
                 lib.svData.setSearchPopupTooltipPosition = -1
-                self:ShowItemLinkPopupTooltip(owningWindow, data, true)
+                self:ShowItemLinkPopupTooltip(owningWindow, data)
             end,
             entryType = LSM_ENTRY_TYPE_RADIOBUTTON,
             buttonGroup = 2,
@@ -1776,7 +1775,6 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             checked = function() return lib.svData.setSearchPopupTooltipPosition == LEFT end,
             callback = function()
                 lib.svData.setSearchPopupTooltipPosition = LEFT
-                --self:ShowItemLinkPopupTooltip(owningWindow, data, RIGHT, -10, nil, LEFT)
                 self:ShowItemLinkPopupTooltip(owningWindow, data)
             end
         },
@@ -1787,7 +1785,6 @@ function LibSets_SearchUI_Shared:ShowRowContextMenu(rowControl)
             checked = function() return lib.svData.setSearchPopupTooltipPosition == RIGHT end,
             callback =function()
                 lib.svData.setSearchPopupTooltipPosition = RIGHT
-                --self:ShowItemLinkPopupTooltip(owningWindow, data, RIGHT, -10, nil, LEFT)
                 self:ShowItemLinkPopupTooltip(owningWindow, data)
             end
         },
