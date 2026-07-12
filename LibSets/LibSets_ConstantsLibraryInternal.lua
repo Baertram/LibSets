@@ -174,6 +174,10 @@ local langPL = "pl"
 --The supported languages of this library
 local fallbackLang             = langEN
 lib.fallbackLang               = fallbackLang
+
+--Custom language addon checks
+local LibSets_iEsoPLEnabled = (EsoPL ~= nil or EsoPLUI ~= nil and true) or false --Eso PL POlish check
+
 --During debugging these languages will be scanned for their setNames and an automatic langauge switch and reloadUI will
 --be done -> If the value == true
 local supportedLanguages       = {
@@ -181,14 +185,20 @@ local supportedLanguages       = {
     [langEN] = true,
     [langES] = true,
     [langFR] = true,
-    [langPL] = true, --todo: Added 2024-09-24,NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
     [langRU] = true,
     [langZH] = true,
     [langJP] = true,
+---------------------------
+------Custom languages-----
+---------------------------
+    [langPL] = LibSets_iEsoPLEnabled, --(Added 2024-09-24 by tomkolp, NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
+                     --But 2026-07-12 if enabled the auto completion is showing missing jp, ru, zh and pl all of sudden (due to missing setnames I guess)
+                     ---> Only disable the non-official flag if the ESOPL addon is properly loaded
+
 }
 lib.supportedLanguages         = supportedLanguages
 
---The languages which use a special client or custom addon, so debug functions need to skip existing data within LibSets.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] e.g.!
+--The languages which use a special client or custom addon, so debug functions need to skip existing data within LibSets.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] e.g.
 local nonOfficialLanguages = {
     [langPL] = true,
 }
@@ -219,6 +229,7 @@ lib.supportedLanguagesIndex = supportedLanguagesIndex
 --Sorted table of supported languages which does not change it's index!
 -->Can be used as a LibAddonMenu choices table, see function LibSets.GetSupportedLanguageChoices()
 local supportedLanguageChoices, supportedLanguageChoicesValues
+--Maximum list of supported language choices
 supportedLanguageChoices = {
     [1] = langDE,
     [2] = langEN,
@@ -226,10 +237,20 @@ supportedLanguageChoices = {
     [4] = langFR,
     [5] = langRU,
     [6] = langZH,
-    [7] = langPL,
-    [8] = langJP,
+    [7] = langJP,
+-----------------------
+--  Custom languages
+-----------------------
+    [8] = langPL,
 }
 supportedLanguageChoicesValues = {}
+--Check if any of the maximum list is disabled, or the language is currently not supported due to the not-enabled language addon
+for idx, lang in ipairs(supportedLanguageChoices) do
+    if not supportedLanguages[lang] or nonOfficialLanguages[lang] then
+        table.remove(supportedLanguageChoices, idx)
+    end
+end
+--Build the supported language choices values table, with same index
 for langId=1, #supportedLanguageChoices, 1 do
     supportedLanguageChoicesValues[langId] = langId
 end

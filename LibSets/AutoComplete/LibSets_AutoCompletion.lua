@@ -20,6 +20,7 @@ local zostrlow = zo_strlower
 local clientLang =      lib.clientLang
 local fallbackLang =    lib.fallbackLang
 --local doesClientLangEqualFallbackLang = (clientLang == fallbackLang and true) or false
+local nonOfficialLanguages = lib.nonOfficialLanguages
 local localization       = lib.localization
 local supportedLanguages = lib.supportedLanguages
 local supportedLanguagesIndex = lib.supportedLanguagesIndex
@@ -144,7 +145,7 @@ local function buildAutoComplete(command, langToUse)
                     local otherLanguagesNoDuplicateSetName          = {} -- Only a temp table
                     local alreadyAddedCleanTranslatedSetNames       = {} -- The resultsList for the autocomplete provider
                     local alreadyAddedCleanTranslatedSetNamesLookup = {} -- The lookupList for the autocomplete provider
-                    for langIdx, lang in pairs(supportedLanguagesIndex) do
+                    for langIdx, lang in ipairs(supportedLanguagesIndex) do
                         if supportedLanguages[lang] == true then
                             local otherLanguageSetName = cachedSetNames[setId][lang]
                             if otherLanguageSetName ~= nil and otherLanguageSetName ~= "" then
@@ -170,9 +171,9 @@ local function buildAutoComplete(command, langToUse)
                             otherLanguagesNoDuplicateSetName[cleanTranslatedSetName] = langStr
                         end
                         for cleanTranslatedSetNameLoop, langStrLoop in pairs(otherLanguagesNoDuplicateSetName) do
-                            local label                                                               = strfor("%s|caaaaaa - %s", cleanTranslatedSetNameLoop, langStrLoop)
+                            local label = strfor("%s|caaaaaa - %s", cleanTranslatedSetNameLoop, langStrLoop)
                             alreadyAddedCleanTranslatedSetNames[zostrlow(cleanTranslatedSetNameLoop)] = label
-                            alreadyAddedCleanTranslatedSetNamesLookup[label]                          = cleanTranslatedSetNameLoop
+                            alreadyAddedCleanTranslatedSetNamesLookup[label] = cleanTranslatedSetNameLoop
                         end
                     end
                     local autocomplete = MyAutoCompleteProvider:New(alreadyAddedCleanTranslatedSetNames, alreadyAddedCleanTranslatedSetNamesLookup, langToUse)
@@ -200,7 +201,7 @@ function lib.buildLSCSetSearchAutoComplete()
     buildAutoComplete(lib.commandsLsp["all"], clientLang)
 
     --Add auto completion for all other languages
-    for _, lang in pairs(supportedLanguagesIndex) do
+    for _, lang in ipairs(supportedLanguagesIndex) do
         if supportedLanguages[lang] == true then
             local langStr = tostring(lang)
             local transForLang = localization[langStr]
