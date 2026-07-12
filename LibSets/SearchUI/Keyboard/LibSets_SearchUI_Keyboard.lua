@@ -214,6 +214,19 @@ function LibSets_SearchUI_Keyboard:Initialize(control)
         [self.dropLocationsFiltersControl] =                "dropLocations",
         [self.numBonusFiltersControl] =                     "numBonuses",
     }
+    self.multiSelectFilterTypeNameToDropdown = {
+        ["setTypes"] = self.setTypeFiltersControl                     ,
+        ["armorTypes"] = self.armorTypeFiltersControl                    ,
+        ["weaponTypes"] =                   self.weaponTypeFiltersControl,
+        ["equipmentTypes"] =                self.equipmentTypeFiltersControl,
+        ["DLCIds"] =                        self.DCLIdFiltersControl,
+        ["enchantSearchCategoryTypes"] =    self.enchantSearchCategoryTypeFiltersControl,
+        ["favorites"] = self.favoritesFiltersControl                   ,
+        ["dropZones"] = self.dropZoneFiltersControl                    ,
+        ["dropMechanics"] = self.dropMechanicsFiltersControl               ,
+        ["dropLocations"] =  self.dropLocationsFiltersControl               ,
+        ["numBonuses"] = self.numBonusFiltersControl                    ,
+    }
     --Default minimum width and maximum width of the multiselect controls: This minX will always be kept as minimum even if the UI is resized
     -->If the UI is resized the new width will be calculated based on minX mulitplied with a factor "current TLC width divided by default TLC width"
     self.multiSelectMinAndMaxData = {}
@@ -449,19 +462,41 @@ end
 ------------------------------------------------
 --- Filters
 ------------------------------------------------
-local SORT_BY_FILTERTYPE_NUMERIC =  { ["filterType"]    = { isNumeric = true } }
-local SORT_BY_NAMECLEAN =           { ["nameClean"]     = {} }
-local function sortFilterComboBox(comboBox, sortType, suppressRebuild)
-    --Sort the entries of setTypeDropdown by their entry.filterType?
-    if sortType == "filterType" then
-        table.sort(comboBox.m_sortedItems, function(item1, item2)
-            return ZO_TableOrderingFunction(item1, item2, "filterType", SORT_BY_FILTERTYPE_NUMERIC, comboBox.m_sortOrder)
-        end)
-    elseif sortType == "nameClean" then
-        table.sort(comboBox.m_sortedItems, function(item1, item2)
-            return ZO_TableOrderingFunction(item1, item2, "nameClean", SORT_BY_NAMECLEAN, comboBox.m_sortOrder)
-        end)
+local SORT_BY_FILTERTYPE_NUMERIC =  { ["filterType"] = { isNumeric = true } }
+local SORT_BY_RELEASE_DATE_TIMESTAMP_NUMERIC =  { ["releaseDateTimeStamp"] = { isNumeric = true } }
+local SORT_BY_NAMECLEAN =           { ["nameClean"] = {} }
+local SORT_BY_ALL =  { ["filterType"] = { isNumeric = true }, ["releaseDateTimeStamp"] = { isNumeric = true }, ["nameClean"] = {} }
+local sortTypeToSortData = {
+    ["filterType"] = SORT_BY_ALL, --SORT_BY_FILTERTYPE_NUMERIC,
+    ["releaseDateTimeStamp"] = SORT_BY_ALL, -- SORT_BY_RELEASE_DATE_TIMESTAMP_NUMERIC
+    ["nameClean"] = SORT_BY_ALL, --SORT_BY_NAMECLEAN,
+}
+local function sortFilterComboBox(comboBox, sortKey, suppressRebuild)
+    local sortKeyData = sortKey
+    if type(sortKey) == "function" then
+        sortKeyData = sortKey(comboBox)
     end
+    --Sort the entries of setTypeDropdown by their entry.filterType?
+    local sortKeys = sortTypeToSortData[sortKeyData]
+    if not sortKeys then
+        d("[LibSets]Errors: Sortkeys not found for Set Search UI Keyboard - comboBox: " .. tos((comboBox.m_container ~= nil and comboBox.m_container:GetName()) or comboBox) .. ", sortKey: " .. tos(sortKey) .. ", sortKeyData: " ..tos(sortKeyData))
+        return
+    end
+    table.sort(comboBox.m_sortedItems, function(item1, item2)
+        return ZO_TableOrderingFunction(item1, item2, sortKeyData, sortKeys, comboBox.m_sortOrder)
+    end)
+
+--[[
+    lib._debugSortFilterComboBox = lib._debugSortFilterComboBox or {}
+    lib._debugSortFilterComboBox[comboBox.m_container:GetName()] = {
+        comboBox = comboBox,
+        name = comboBox.m_container:GetName(),
+        sortKey = sortKey,
+        sortKeys = sortKeys,
+        sortOrder = comboBox.m_sortOrder,
+        _sortedData = ZO_ShallowTableCopy(comboBox.m_sortedItems)
+    }
+]]
     if not suppressRebuild then
         if comboBox:IsDropdownVisible() then
             comboBox:ShowDropdown()
@@ -626,6 +661,19 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             end
             return found
         end
+
+        local function getCurrentDLCIDSortKey()
+            return (lib.svData.setSearchDLCDropdownSortBy == 2 and "releaseDateTimeStamp") or "nameClean"
+        end
+        local function DLCIDCustomSortFunc(item1, item2, comboBoxObject)
+            local sortKey = getCurrentDLCIDSortKey()
+            sortFilterComboBox(comboBoxObject, sortKey, false)
+        end
+        --todo 260525 added customSort data to LSM options for DLCID dropdown (needed LSM version 2.43!)
+        LSM_comboBoxOptionsDLCID.customSortKeys = SORT_BY_ALL
+        LSM_comboBoxOptionsDLCID.customSortKey  = getCurrentDLCIDSortKey()
+        LSM_comboBoxOptionsDLCID.customSortFunc = DLCIDCustomSortFunc
+        LSM_comboBoxOptionsDLCID.enableSort = true --Show the filterHeader's sortContainer with the v^ buttons
         self.LSM_Dropdowns[self.multiSelectFilterDropdownToSearchParamName[self.DCLIdFiltersControl]] = AddCustomScrollableComboBoxDropdownMenu(filters, self.DCLIdFiltersControl, LSM_comboBoxOptionsDLCID)
     end
     DLCIdDropdown:SetSortsItems(true)
@@ -641,8 +689,13 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
             DLCIdDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
     end
-    sortFilterComboBox(DLCIdDropdown, "nameClean")
+    DLCIdDropdown._sortFunc = function()
+        --260525 enable sorting by releaseDateTimeStamp or nameClean, via settings menu
+        return
+    end
 
+    --sortFilterComboBox(DLCIdDropdown, DLCIdDropdown._sortFunc)
+    DLCIdDropdown:SetSortsItems(true) --disable sorting after initial sort was done!)
 
     -- Initialize the enchantment search category Types multiselect combobox.
     local enchantmentSearchCategoryTypeDropdown = ZO_ComboBox_ObjectFromContainer(self.enchantSearchCategoryTypeFiltersControl)
@@ -856,6 +909,17 @@ function LibSets_SearchUI_Keyboard:InitializeFilters()
     end
 end
 
+function LibSets_SearchUI_Keyboard:UpdateDropdownSort(comboBoxType, sortType, suppressRebuild)
+    --todo 260525
+    local comboBox = self.multiSelectFilterTypeNameToDropdown[comboBoxType] --Get self.DCLIdFiltersControl via the comboBoxType "DLCIds"
+    if not comboBox then return end
+    local dropdown = ZO_ComboBox_ObjectFromContainer(comboBox)
+    if not dropdown then return end
+
+    dropdown:SetSortsItems(true)
+    sortFilterComboBox(dropdown, (sortType ~= nil and sortType) or dropdown._sortFunc , suppressRebuild)
+    --dropdown:SetSortsItems(false) --Important: Disabling sorting again so next open does not resort it by default sortKeys "name", as updating the sortKeys and m_sortType manually will somehow fail and raise errors at ZO_ComboBox_Base:UpdateItems -> ZO_TableOrderingFunction
+end
 
 function LibSets_SearchUI_Keyboard:GetSelectedMultiSelectDropdownFilters(multiSelectDropdown)
     local selectedFilterTypes = {}
@@ -1074,12 +1138,13 @@ end
 ------------------------------------------------
 function LibSets_SearchUI_Keyboard:OnRowMouseEnter(rowControl)
     self.resultsList:Row_OnMouseEnter(rowControl)
+    local data = rowControl.data
+    self.tooltipControl.data = data
+    local shownLeftOfControl = self:ShowItemLinkTooltip(rowControl, data)
 
-    self.tooltipControl.data = rowControl.data
-    local shownLeftOfControl = self:ShowItemLinkTooltip(rowControl, rowControl.data)
     --Depending on position of the itemLinkTooltip -> show the setDropLocation on the other side of the set search UI
     -->If there is the space. Else show it centered below the set search UI
-    self:ShowSetDropLocationTooltip(rowControl, rowControl.data, shownLeftOfControl)
+    self:ShowSetDropLocationTooltip(rowControl, data, shownLeftOfControl)
 end
 
 function LibSets_SearchUI_Keyboard:OnRowMouseExit(rowControl)
@@ -1118,6 +1183,7 @@ local currentWidth, currentHeight
 local updateListColumnWithCounter = 0
 function LibSets_SearchUI_Keyboard_TopLevel_OnResize(self, resizeStart, forceResizeNow)
     ZO_Tooltips_HideTextTooltip()
+    LibSets_SearchUI_Shared_BringWindowToTop()
     local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
     if resizeStart then
         currentWidth, currentHeight = self:GetDimensions()
@@ -1145,6 +1211,7 @@ end
 
 function LibSets_SearchUI_Keyboard_TopLevel_OnMove(self, moveStart)
     ZO_Tooltips_HideTextTooltip()
+    LibSets_SearchUI_Shared_BringWindowToTop()
     local libSetsSearchUIKeyboardObject = self._object -- LIBSETS_SEARCH_UI_KEYBOARD
     if not moveStart then
         libSetsSearchUIKeyboardObject:SaveSearchUIPositionAndSize(self)

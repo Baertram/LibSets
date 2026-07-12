@@ -118,12 +118,14 @@ local possibleDlcIds = {
     [39] = "DLC_FEAST_OF_SHADOWS",
     [40] = "DLC_SEASONS_OF_THE_WORMCULT2",
     [41] = "DLC_SEASON0",
+    --[42] = "DLC_SEASON0_PART2",
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
     ---DLC_+++
     --possibleDlcIds[#possibleDlcIds + 1] = "DLC_***"
+    possibleDlcIds[#possibleDlcIds + 1] = "DLC_SEASON0_PART2" --42
 end
 --Loop over the possible DLC ids and create them in the global table _G
 for dlcId, dlcName in ipairs(possibleDlcIds) do
@@ -148,94 +150,96 @@ end
 --Internal collectible example ids of the ESO DLCs and chapters (first collectible found from each DLC category)
 -->https://eso-hub.com/en/dlc / https://en.uesp.net/wiki/Online:Chapters /
 lib.dlcAndChapterCollectibleIds = {
-    --Base game
-    [DLC_BASE_GAME] =               {collectibleId=-1, achievementCategoryId=-1, type=DLC_TYPE_BASE_GAME, releaseDate=1396569600}, --text ok 260331
-    --Imperial city
-    [DLC_IMPERIAL_CITY] =           {collectibleId=154, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1440979200}, --text ok 260331
-    --Orsinium
-    [DLC_ORSINIUM] =                {collectibleId=215, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1446422400}, --text ok 260331
-    --Thieves Guild
-    [DLC_THIEVES_GUILD] =           {collectibleId=254, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1457308800}, --text ok 260331
-    --Dark Brotherhood
-    [DLC_DARK_BROTHERHOOD] =        {collectibleId=306, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1464652800}, --text ok 260331
-    --Shadows of the Hist
-    [DLC_SHADOWS_OF_THE_HIST] =     {collectibleId=nil, achievementCategoryId=43, type=DLC_TYPE_DUNGEONS, releaseDate=1470009600}, --text ok 260331
-    --Morrowind
-    [DLC_MORROWIND] =               {collectibleId=593, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1496620800},  --text ok 260331
-    --Horns of the Reach
-    [DLC_HORNS_OF_THE_REACH] =      {collectibleId=nil, achievementCategoryId=42, type=DLC_TYPE_DUNGEONS, releaseDate=1502668800}, --text ok 260331
-    --Clockwork City
-    [DLC_CLOCKWORK_CITY] =          {collectibleId=1240, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1508716800}, --text ok 260331
-    --Dragon Bones
-    [DLC_DRAGON_BONES] =            {collectibleId=nil, achievementCategoryId=40, type=DLC_TYPE_DUNGEONS, releaseDate=1518393600},  --text ok 260331
-    --Summerset
-    [DLC_SUMMERSET] =               {collectibleId=5107, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1528156800}, --text ok 260331
-    --Wolfhunter
-    [DLC_WOLFHUNTER] =              {collectibleId=nil, achievementCategoryId=39, type=DLC_TYPE_DUNGEONS, releaseDate=1534118400}, --text ok 260331
-    --Murkmire
-    [DLC_MURKMIRE] =                {collectibleId=5755, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1540166400}, --text ok 260331
-    --Wrathstone
-    [DLC_WRATHSTONE] =              {collectibleId=nil, achievementCategoryId=37, type=DLC_TYPE_DUNGEONS, releaseDate=1551052800}, --text ok 260331
-    --Elsweyr
-    [DLC_ELSWEYR] =                 {collectibleId=5843, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1558310400}, --text ok 260331
-    --Scalebreaker
-    [DLC_SCALEBREAKER] =            {collectibleId=nil, achievementCategoryId=36, type=DLC_TYPE_DUNGEONS, releaseDate=1565568000}, --text ok 260331
-    --Dragonhold
-    [DLC_DRAGONHOLD] =              {collectibleId=6920, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1571616000},  --text ok 260331
-    --Harrowstorm
-    [DLC_HARROWSTORM] =             {collectibleId=nil, achievementCategoryId=34, type=DLC_TYPE_DUNGEONS, releaseDate=1582502400}, --text ok 260331
-    --Greymoor
-    [DLC_GREYMOOR] =                {collectibleId=7466, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1590451200}, --text ok 260331
-    --Stonethorn
-    [DLC_STONETHORN] =              {collectibleId=nil, achievementCategoryId=33, type=DLC_TYPE_DUNGEONS, releaseDate=1598227200}, --text ok 260331
-    --Markarth
-    [DLC_MARKARTH] =                {collectibleId=8388, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1604275200}, --text ok 260331
-    --Flames of Ambition
-    [DLC_FLAMES_OF_AMBITION] =      {collectibleId=nil, achievementCategoryId=31, type=DLC_TYPE_DUNGEONS, releaseDate=1615161600}, --text ok 260331
-    --Blackwood
-    [DLC_BLACKWOOD] =               {collectibleId=8659, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1622505600}, --text ok 260331
-    --Waking Flames
-    [DLC_WAKING_FLAME] =            {collectibleId=nil, achievementCategoryId=30, type=DLC_TYPE_DUNGEONS, releaseDate=1635724800}, --text ok 260331
-    --Deadlands
-    [DLC_DEADLANDS] =               {collectibleId=9365, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1635724800}, --text ok 260331
-    --Ascending Tide
-    [DLC_ASCENDING_TIDE] =          {collectibleId=nil, achievementCategoryId=28, type=DLC_TYPE_DUNGEONS, releaseDate=1647216000}, --text ok 260331
-    --High Isle
-    [DLC_HIGH_ISLE] =               {collectibleId=10053, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1654473600},  --text ok 260331
-    --Lost Depths
-    [DLC_LOST_DEPTHS] =             {collectibleId=nil, achievementCategoryId=27, type=DLC_TYPE_DUNGEONS, releaseDate=1661126400}, --text ok 260331
-    --Firesong
-    [DLC_FIRESONG] =                {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS, releaseDate=1667260800}, --text ok 260331
-    --Scribes of Fate
-    [DLC_SCRIBES_OF_FATE] =         {collectibleId=nil, achievementCategoryId=25, type=DLC_TYPE_DUNGEONS, releaseDate=1678662000}, --text ok 260331
-    --Necrom
-    [DLC_NECROM] =                  {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000},  --text ok 260331
-    --Update 39 QOL patch
-    [NO_DLC_UPDATE39] =             {name="Update 39", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1692604800}, --August 21st 2023 --text ok 260331
-    --Update 40
-    [NO_DLC_SECRET_OF_THE_TELVANNI] = {name="Update 40: Secret of the Telvanni", achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1698663600}, --Ocotber 30th 2023 --text ok 260331
-    --Update 41
-    [DLC_SCIONS_OF_ITHELIA] =       {collectibleId=nil, achievementCategoryId=24, type=DLC_TYPE_DUNGEONS, releaseDate=1709294400}, --March 11th 2024  --text ok 260331
-    --Update 42
-    [DLC_GOLD_ROAD] =               {collectibleId=11871, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1717365600}, --June 3rd 2024 --text ok 260331
-    --Update 43 House tours and QOL patch
-    [NO_DLC_UPDATE43] =             {name="Update 43", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1724068800}, --August 19th 2024 --text ok 260331
-    --Update 44 new Battleground types and QOL patch
-    [NO_DLC_UPDATE44] =             {name="Update 44", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1730116800}, --October 28th 2024 --text ok 260331
-    --Fallen Banners
-    [DLC_FALLEN_BANNERS] =          {collectibleId=nil, achievementCategoryId=23, type=DLC_TYPE_DUNGEONS, releaseDate=1741608000}, --March 10th 2025 --text ok 260331
-    --Seasons of the Wormcult Part1
-    [DLC_SEASONS_OF_THE_WORMCULT1] = {collectibleId=nil, achievementCategoryId=13, type=DLC_TYPE_SEASON_PART, releaseDate=1748865600}, --June 2nd 2025 --text ok 260331
-    --Feast of Shadows
-    [DLC_FEAST_OF_SHADOWS] =        {collectibleId=nil, achievementCategoryId=22, type=DLC_TYPE_DUNGEONS, releaseDate=1755511200}, -- August 18th 2025  --text ok 260331
-    --Seasons of the Wormcult Part2
-    [DLC_SEASONS_OF_THE_WORMCULT2] = {collectibleId=nil, achievementCategoryId=13, type=DLC_TYPE_SEASON_PART, releaseDate=1760702400}, --October 17th 2025  --text ok 260331
-    --Season 0
-    --Add achievementCategoryIndex or collectibleID! --> There is no mathcing string in the game...
-    [DLC_SEASON0]                  = {name="Season 0", type=DLC_TYPE_SEASON_PART, releaseDate=1773057600} -- March 9th 2026 --todo text missing 260331
+    --[0]]--Base game
+      [DLC_BASE_GAME] =               {collectibleId=-1, achievementCategoryId=-1, type=DLC_TYPE_BASE_GAME, releaseDate=1396569600}, --text ok 260525
+    --[2]]--Imperial city
+      [DLC_IMPERIAL_CITY] =           {collectibleId=154, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1440979200}, --text ok 260525
+    --[3]]--Orsinium (Wrothgar)
+      [DLC_ORSINIUM] =                {collectibleId=215, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1446422400}, --text ok 260525
+    --[4]]--Thieves Guild
+      [DLC_THIEVES_GUILD] =           {collectibleId=254, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1457308800}, --text ok 260525
+    --[5]]--Dark Brotherhood
+      [DLC_DARK_BROTHERHOOD] =        {collectibleId=306, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1464652800}, --text ok 260525
+    --[6]]--Shadows of the Hist
+      [DLC_SHADOWS_OF_THE_HIST] =     {collectibleId=nil, name="Shadows of the Hist", type=DLC_TYPE_DUNGEONS, releaseDate=1470009600}, --text not ok 260525 !!!
+    --[6]]--Morrowind (Vvardenfell)
+      [DLC_MORROWIND] =               {collectibleId=593, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1496620800},  --text ok 260525
+    --[7]]--Horns of the Reach
+      [DLC_HORNS_OF_THE_REACH] =      {collectibleId=nil, name="Horns of the Reach", type=DLC_TYPE_DUNGEONS, releaseDate=1502668800}, --text not ok 260525 !!!
+    --[8]]--Clockwork City
+      [DLC_CLOCKWORK_CITY] =          {collectibleId=1240, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1508716800}, --text ok 260525
+    --[9]]--Dragon Bones
+      [DLC_DRAGON_BONES] =            {collectibleId=nil, name="Dragon Bones", type=DLC_TYPE_DUNGEONS, releaseDate=1518393600},  --text not ok 260525 !!!
+    --[10]]--Summerset
+      [DLC_SUMMERSET] =               {collectibleId=5107, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1528156800}, --text ok 260525
+    --[11]]--Wolfhunter
+      [DLC_WOLFHUNTER] =              {collectibleId=nil, name="Wolfhunter", type=DLC_TYPE_DUNGEONS, releaseDate=1534118400}, --text not ok 260525 !!!
+    --[12]]--Murkmire
+      [DLC_MURKMIRE] =                {collectibleId=5755, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1540166400}, --text ok 260525
+    --[13]]--Wrathstone
+      [DLC_WRATHSTONE] =              {collectibleId=nil, name="Wrathstone", type=DLC_TYPE_DUNGEONS, releaseDate=1551052800}, --text not ok 260525 !!!
+    --[14]]--Elsweyr
+      [DLC_ELSWEYR] =                 {collectibleId=5843, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1558310400}, --text ok 260525
+    --[15]]--Scalebreaker
+      [DLC_SCALEBREAKER] =            {collectibleId=nil, name="Scalebreaker", type=DLC_TYPE_DUNGEONS, releaseDate=1565568000}, --text not ok 260525 !!!
+    --[16]]--Dragonhold
+      [DLC_DRAGONHOLD] =              {collectibleId=6920, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1571616000},  --text ok 260525
+    --[17]]--Harrowstorm
+      [DLC_HARROWSTORM] =             {collectibleId=nil, name="Harrowstorm", type=DLC_TYPE_DUNGEONS, releaseDate=1582502400}, --text not ok 260525 !!!
+    --[18]]--Greymoor
+      [DLC_GREYMOOR] =                {collectibleId=7466, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1590451200}, --text ok 260525
+    --[19]]--Stonethorn
+      [DLC_STONETHORN] =              {collectibleId=nil, name="Stonethorn", type=DLC_TYPE_DUNGEONS, releaseDate=1598227200}, --text not ok 260525 !!!
+    --[20]]--Markarth
+      [DLC_MARKARTH] =                {collectibleId=8388, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1604275200}, --text ok 260525
+    --[21]]--Flames of Ambition
+      [DLC_FLAMES_OF_AMBITION] =      {collectibleId=nil, name="Flames of Ambition", type=DLC_TYPE_DUNGEONS, releaseDate=1615161600}, --text not ok 260525 !!!
+    --[22]]--Blackwood
+      [DLC_BLACKWOOD] =               {collectibleId=8659, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1622505600}, --text ok 260525
+    --[23]]--Waking Flames
+      [DLC_WAKING_FLAME] =            {collectibleId=nil, name="Waking Flame", type=DLC_TYPE_DUNGEONS, releaseDate=1635724800}, --text not ok 260525 !!!
+    --[24]]--Deadlands
+      [DLC_DEADLANDS] =               {collectibleId=9365, achievementCategoryId=nil, type=DLC_TYPE_ZONE, releaseDate=1635724800}, --text ok 260525
+    --[25]]--Ascending Tide
+      [DLC_ASCENDING_TIDE] =          {collectibleId=nil, name="Ascending Tide", type=DLC_TYPE_DUNGEONS, releaseDate=1647216000}, --text not ok 260525 !!!
+    --[26]]--High Isle
+      [DLC_HIGH_ISLE] =               {collectibleId=10053, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1654473600},  --text ok 260525
+    --[27]]--Lost Depths
+      [DLC_LOST_DEPTHS] =             {collectibleId=nil, name="Lost Depths", type=DLC_TYPE_DUNGEONS, releaseDate=1661126400}, --text not ok 260525 !!!
+    --[28]]--Firesong
+      [DLC_FIRESONG] =                {collectibleId=10660, achievementCategoryId=nil, type=DLC_TYPE_DUNGEONS, releaseDate=1667260800}, --text ok 260525
+    --[29]]--Scribes of Fate
+      [DLC_SCRIBES_OF_FATE] =         {collectibleId=nil, name="Scribes of Fate", type=DLC_TYPE_DUNGEONS, releaseDate=1678662000}, --text not ok 260525 !!!
+    --[30]]--Necrom
+      [DLC_NECROM] =                  {collectibleId=10475, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1685916000},  --text ok 260525
+    --[31]]--Update 39 QOL patch
+      [NO_DLC_UPDATE39] =             {name="Update 39", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1692604800}, --August 21st 2023 --text ok 260525
+    --[32]]--Update 40
+      [NO_DLC_SECRET_OF_THE_TELVANNI]={name="Update 40: Secret of the Telvanni", achievementCategoryId=nil, type=DLC_TYPE_NORMAL_PATCH, releaseDate=1698663600}, --Ocotber 30th 2023 --text ok 260525
+    --[33]]--Update 41
+      [DLC_SCIONS_OF_ITHELIA] =       {collectibleId=nil, name="Scions of Ithelia", type=DLC_TYPE_DUNGEONS, releaseDate=1709294400}, --March 11th 2024  --text not ok 260525 !!!
+    --[34]]--Update 42
+      [DLC_GOLD_ROAD] =               {collectibleId=11871, achievementCategoryId=nil, type=DLC_TYPE_CHAPTER, releaseDate=1717365600}, --June 3rd 2024 --text ok 260525
+    --[35]]--Update 43 House tours and QOL patch
+      [NO_DLC_UPDATE43] =             {name="Update 43", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1724068800}, --August 19th 2024 --text ok 260525
+    --[36]]--Update 44 new Battleground types and QOL patch
+      [NO_DLC_UPDATE44] =             {name="Update 44", type=DLC_TYPE_NORMAL_PATCH, releaseDate=1730116800}, --October 28th 2024 --text ok 260525
+    --[37]]--Fallen Banners
+      [DLC_FALLEN_BANNERS] =          {collectibleId=nil, name="Fallen Banners", type=DLC_TYPE_DUNGEONS, releaseDate=1741608000}, --March 10th 2025 --text not ok 260525 !!!
+    --[38]]--Seasons of the Wormcult Part1
+      [DLC_SEASONS_OF_THE_WORMCULT1] = {collectibleId=nil, name="Seasons of the Wormcult 1", type=DLC_TYPE_SEASON_PART, releaseDate=1748865600}, --June 2nd 2025 --text not ok 260525 !!!
+    --[39]]--Feast of Shadows
+      [DLC_FEAST_OF_SHADOWS] =        {collectibleId=nil, name="Feast of Shadows", type=DLC_TYPE_DUNGEONS, releaseDate=1755511200}, -- August 18th 2025  --text not ok 260525 !!!
+    --[40]]--Seasons of the Wormcult Part2
+      [DLC_SEASONS_OF_THE_WORMCULT2] = {collectibleId=nil, name="Seasons of the Wormcult 2", type=DLC_TYPE_SEASON_PART, releaseDate=1760702400}, --October 17th 2025  --text not ok 260525 !!!
+    --[41]]--Season 0
+      [DLC_SEASON0]                  = {name="Season 0", type=DLC_TYPE_SEASON_PART, releaseDate=1773057600}, -- March 9th 2026 --text ok 260525
+    --[42]]--Season 0 Part 2
+      --[DLC_SEASON0_PART2]            = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400}, -- June 8th 2026 --text ok 260525
 }
 if checkIfPTSAPIVersionIsLive() then
-    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {collectibleId=<nilable:number>, achievementCategoryId=<nilable:number>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
+    --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {name=<string:nilable>, collectibleId=<number:nilable>, achievementCategoryId=<number:nilable>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}
+    lib.dlcAndChapterCollectibleIds[DLC_SEASON0_PART2] = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400} ---- June 8th 2026
 end
 
 local function cleanDLCTimeStamp(releaseDateTimestamp, withoutColon)
@@ -351,3 +355,4 @@ for i = 1, GetNumClasses(), 1 do
     end
 end
 lib.classData = classData
+--lib.classSets = {}

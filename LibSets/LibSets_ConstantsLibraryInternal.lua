@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.90
+local MAJOR, MINOR = "LibSets", 0.93
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -26,7 +26,7 @@ LibSets                              = {} --Creation of the global variable
 local lib                            = LibSets
 
 --Are we on a console?
-local IsConsole = IsConsoleUI()
+local IsConsole = ZO_IsConsoleOrGameCoreUI()
 lib.IsConsole = IsConsole
 lib.SearchUI = {
     name = MAJOR .. "_SearchUI",
@@ -83,16 +83,19 @@ lib.customContextMenuEntries = {
 ---------------------------------------------------------------------------------
 local APIVersions                    = {}
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
---!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
+
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
 lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-21)
+
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
---!!!!!!!!!!! Update this if a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 ------------------------------------------------------------------------------------------------------------------------
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -108,7 +111,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-2
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the value here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101049 -- Patch U49 "Season 0" (2026-01-21)
+APIVersions["PTS"]                   = 101050 -- Patch U50 "Season 0 Part 2" (2026-04-15)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
@@ -181,27 +184,34 @@ local supportedLanguages       = {
     [langPL] = true, --todo: Added 2024-09-24,NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
     [langRU] = true,
     [langZH] = true,
-    [langJP] = false, --TODO: Working on: Waiting for SetNames & other translations (by Calamath e.g.)
+    [langJP] = true,
 }
 lib.supportedLanguages         = supportedLanguages
 
 --The languages which use a special client or custom addon, so debug functions need to skip existing data within LibSets.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] e.g.!
 local nonOfficialLanguages = {
     [langPL] = true,
-    [langJP] = true,
 }
 lib.nonOfficialLanguages = nonOfficialLanguages
 
 
 local numSupportedLangs        = 0
+local numSupportedLangsForDebug = 0
 local supportedLanguagesIndex = {}
 for supportedLanguage, isSupported in pairs(supportedLanguages) do
     if isSupported == true then
         numSupportedLangs = numSupportedLangs + 1
+        numSupportedLangsForDebug = numSupportedLangsForDebug + 1
         supportedLanguagesIndex[#supportedLanguagesIndex + 1] = supportedLanguage
+    else
+        --e.g. if langJP is not supported, but it's an unofficial language, then we need to increase the counter +1 for the debug routines here! Else a random language would be skipped...
+        if nonOfficialLanguages[supportedLanguage] then
+            numSupportedLangsForDebug = numSupportedLangsForDebug + 1
+        end
     end
 end
 lib.numSupportedLangs = numSupportedLangs
+lib.numSupportedLangsForDebug = numSupportedLangsForDebug
 table.sort(supportedLanguagesIndex)
 lib.supportedLanguagesIndex = supportedLanguagesIndex
 
@@ -217,7 +227,7 @@ supportedLanguageChoices = {
     [5] = langRU,
     [6] = langZH,
     [7] = langPL,
-    --[xx] = langJP, --not supported yet JP
+    [8] = langJP,
 }
 supportedLanguageChoicesValues = {}
 for langId=1, #supportedLanguageChoices, 1 do
@@ -990,6 +1000,7 @@ local possibleDropMechanics         = {
     [37] = "LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE", -- Endless/Infinite Archive dungeon
     [38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT", -- Golden Pursuit/Goldene Vorhaben
     [39] = "LIBSETS_DROP_MECHANIC_NIGHT_MARKET", --Night Market/Nachtmarkt
+    [40] = "LIBSETS_DROP_MECHANIC_ZONE_STORYLINE", --Zone story line/Zonen Geschichte
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -1045,6 +1056,8 @@ local LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS = LIBSETS_DROP_MECHANIC_CYRO
 local LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE = LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE
 local LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT = LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT
 local LIBSETS_DROP_MECHANIC_NIGHT_MARKET = LIBSETS_DROP_MECHANIC_NIGHT_MARKET
+local LIBSETS_DROP_MECHANIC_ZONE_STORYLINE = LIBSETS_DROP_MECHANIC_ZONE_STORYLINE
+local LIBSETS_DROP_MECHANIC_ANTIQUITIES = LIBSETS_DROP_MECHANIC_ANTIQUITIES
 
 
 lib.allowedDropMechanics              = { }
@@ -1102,6 +1115,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Weynon Priorei, bei Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil: Stadt Cheydinhal / Weynon Priorei, bei Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Auftragstafeln",
+        [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                       = "Zonen Geschichte",
     },
     [langEN] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Rewards for the worthy",
@@ -1137,6 +1151,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHORROL_WEYNON_PRIORY]  = "Cyrodiil: Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CITY_CYRODIIL_CHEYDINHAL_CHORROL_WEYNON_PRIORY] = "Cyrodiil City: Cheydinhal / Weynon Priory, Chorrol",
         [LIBSETS_DROP_MECHANIC_CYRODIIL_BOARD_MISSIONS]              = "Cyrodiil Board missions",
+        [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                       = "Zone Storyline",
         --Will be used in other languages via setmetatable below!
         [LIBSETS_DROP_MECHANIC_ANTIQUITIES]                          = GetString(SI_GUILDACTIVITYATTRIBUTEVALUE11),
         [LIBSETS_DROP_MECHANIC_BATTLEGROUND_VENDOR]                  = GetString(SI_LEADERBOARDTYPE4) .. " " .. GetString(SI_MAPDISPLAYFILTER2), --Battleground vendors
@@ -1375,6 +1390,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Truhe, welche man bei einem TelVar Ausrüstungs Händler in der eigenne Fraktionsbasis in der Kaiserstadt Kanalisation für TelVar Steine eintauschen kann.",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Truhe, welche man bei einem Elite Gear Händler in Cyrodiil (Östliches Elsweyr Tor, Südliches Hochfels Tor, Nördliches Morrowind Tor), oder in Vvardenfall für Schlachtfelder (Ald Carac, Foyada Quarry, Ularra), für Allianzpunkte kaufen kann.",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "Alle Bosse: Hände, Taille, Füße, Brust, Schultern, Kopf, Beine\nLetzte Bosse: Waffen, Schild\nQuest Belohnung: Schmuck, Waffe, Schild (Gebunden beim Aufheben)",
+        [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                    = "Erhalte es, durch die Zonen Geschichte",
     },
     [langEN] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Rewards for the worthy (" .. cyrodiilAndBattlegroundText .. " mail) - Contains only newest item sets!\nAs new sets continue to get added, older sets will be removed here and added into other Cyrodiil sources:\nAll PvP item sets will now drop from Cyrodiil delves, dolmens and board missions.\nTown Daily Quest and Merchants will be divided by Light, Medium and Heavy. Exception: Cheydinhal and Chorrol/Weynon Priory reward any set.\nAll PvP sets are available as individual containers on both Town Merchants and Elite Gear Vendors.\nDelves will drop waist and feet item sets\nDolmens will drop jewelry\nBoard Missions will drop all other armor pieces.\nBounty and Scout missions will award armor pieces.\nBattle and Warfront missions will reward weapon slot pieces.",
@@ -1386,6 +1402,7 @@ lib.dropMechanicIdToNameTooltip   = {
         [LIBSETS_DROP_MECHANIC_TELVAR_EQUIPMENT_LOCKBOX_MERCHANT] = "Chest that can be exchanged for TelVar Stones at a TelVar equipment vendor in your faction's base, in the Imperial City sewers.",
         [LIBSETS_DROP_MECHANIC_AP_ELITE_GEAR_LOCKBOX_MERCHANT]    = "Chest that can be exchanged for Alliance Points at a elite gear lockbox merchant in Cyrodiil (Eastern Elsweyr Gate, Southern High Rock Gate, Northern Morrowind Gate), or a battleground merchant in Vvardenfell (Ald Carac, Foyada Quarry, Ularra)",
         [LIBSETS_DROP_MECHANIC_TRIAL_BOSS]                        = "All bosses: Hands, Waist, Feet, Chest, Shoulder, Head, Legs\nFinal bosses: Weapon, Shield\nQuest reward containers: Jewelry, Weapon, Shield (Binds on pickup))",
+        [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                    = "You can acquire it by going through the zone storyline",
     },
     [langES] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]   = "Recompensa por el mérito (" .. cyrodiilAndBattlegroundText .. " mail) - ¡Contiene solo conjuntos de artículos más nuevos!\nA medida que se sigan agregando nuevos conjuntos, los conjuntos más antiguos se eliminarán aquí y se agregarán a otras fuentes de Cyrodiil:\nTodos los conjuntos de elementos PvP ahora aparecerán en las excavaciones, dólmenes y misiones de tablero de Cyrodiil.\nLas misiones diarias de la ciudad y los comerciantes se dividirán por Luz , Medio y Pesado. Excepción: Cheydinhal y Chorrol/Weynon Priory recompensan cualquier conjunto.\nTodos los conjuntos PvP están disponibles como contenedores individuales tanto en los comerciantes de la ciudad como en los vendedores de equipo de élite.\nLos excavadores arrojarán conjuntos de artículos para cintura y pies\nLos dólmenes arrojarán joyas\nLas misiones del tablero arrojarán todos otras piezas de armadura.\nLas misiones de recompensa y exploración otorgarán piezas de armadura.\nLas misiones de batalla y frente de guerra recompensarán piezas de ranuras para armas.",
@@ -1505,8 +1522,9 @@ lib.localization                 = {
         slashCommandDescription         = "Suche übersetzte Set Namen",
         slashCommandDescriptionClient   = "Suche Set ID/Namen (Spiel Sprache)",
         previewTT                = "Set Vorschau",
-        previewTT_TT             = "Benutze den SlashCommand /lsp <setId> oder /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set Namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste per TAB Taste/Maus ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.",
-        previewTT_SetSearch_TT   = "\n\n\nBenutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zuverstecken.",
+        previewTT_TT             = "Benutze den SlashCommand /lsp <setName oder setID> um eine Vorschau von einem Gegenstand dieses Sets zu erhalten.\n\nWenn du LibSlashCommander aktiv hast wird dir bei der Eingabe des Set Namens/der ID bereits eine Liste der passenden Sets zur Auswahl angezeigt.\nIst ein Set in der Liste per TAB Taste/Maus ausgewählt (Name steht im Chat Feld) kann mit der \'Leerzeichen\' Taste der Setname in anderen Sprachen angezeigt werden. Klick auf den SetNamen in der anderen Sprache oder presse die Enter Taste, um den SetNamen in deiner aktiven Sprache und der ausgewählten anderen Sprache in der Chat Eingabebox anzuzeigen, so dass du diese markieren und kopieren kannst.",
+        setSearchTT              = "Set Suche",
+        previewTT_SetSearch_TT   = "Benutze den SlashCommand /lss <setName oder ID> um die Set Such Oberfläche zu zeigen/zu verstecken. Alternativ kann auch der SlashCommand /libsetssearch verwendet werden.",
         previewTTToChatToo       = "Vorschau ItemLink in den Chat",
         previewTTToChatToo_TT    = "Wenn diese Option aktiviert ist wird der ItemLink des Vorschau Set Gegenstandes auch in deine Chat Eingabebox gesendet, damit du diesen jemanden schicken/ihn mit der Maus und STRG+C in deine Zwischenablage kopieren kannst.",
         headerUIStuff            = "Benutzer Oberfläche",
@@ -1524,7 +1542,7 @@ lib.localization                 = {
         nameTextSearch = "(+/-)Name/ID , getrennt",
         nameTextSearchTT = "Gib mehrere Namen/IDs durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Namen/die ID in der Textsuche ein- bzw. auszuschließen.",
         bonusTextSearch = "(+/-)Bonus , getrennt",
-        bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.\nFüge :<bonusZeilen#> hinzu, um den Bonus explizit in einer der Bonuszeilen zu suchen\n\nBeispiele:\n+krit,-leben findet alle Sets mit Bonus Text Krit (z.B. Kritische Chance) aber ohne Text Leben\n+krit:2 Findet alle sets mit 2. Bonuszeile Text krit",
+        bonusTextSearchTT = "Gib mehrere Bonus durch Komma (,) getrennt ein.\nVerwende ein vorangestelltes + oder - um den Bonus in der Textsuche ein- bzw. auszuschließen.\nFüge :<bonusZeilen#> hinzu, um den Bonus explizit in einer der Bonuszeilen zu suchen\n\nBeispiele:\n+krit,-leben findet alle Sets mit Bonus Text Krit (z.B. Kritische Chance) aber ohne Text Leben\n+krit:2 Findet alle Sets mit 2. Bonuszeile Text krit",
         showAsText =        "Zeige als Text",
         showAsTextWithIcons = "Zeige als Text (mit Symbolen)",
         textBoxFilterTooltips = "Text Filter: Tooltips",
@@ -1534,6 +1552,15 @@ lib.localization                 = {
         popupTooltip                = "Angehefteter Tooltip",
         setInfos                    = "Set Infos",
         showAsTooltip               = "Zeige als Tooltip",
+        setSearchDropLocationTooltipPos = "Tooltip Position",
+        auto = GetString(SI_KEYBINDDISPLAYMODE2),
+        top = "Oben",
+        right = "Rechts",
+        bottom = "Unten",
+        left = "Links",
+        sortByDateOfRelease = "Sortieren nach Releasedatum",
+        sortByName = "Sortieren nach Name",
+        DLCDropdown = "DLCs",
         showCurrentZoneSets         = "Zeige Sets der aktuellen Zone",
         clearHistory                = "Historie leeren",
         wayshrines                  = "Wegschreine",
@@ -1544,6 +1571,7 @@ lib.localization                 = {
         headerItemLinks             = "Set ItemLinks",
         addSetCollectionsSearchItemLink = "Set Items: Kontextmenü-> Set Sammlungen",
         setCollectionsSearchItemLink = "Zeige %q in: Set-Sammlungen",
+        headerSlashCommands = "Chat Kommandos",
         --Set search favorite categories
         star = "Favorit (Stern)",
         --PvE
@@ -1626,8 +1654,9 @@ lib.localization                 = {
         slashCommandDescription         = "Search translations of set names",
         slashCommandDescriptionClient   = "Search set ID/names (game client language)",
         previewTT                = "Set preview",
-        previewTT_TT             = "Use the SlashCommand /lsp <setId> or /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is written to the chat entry editbox) via the TAB key/mouse you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.",
-        previewTT_SetSearch_TT   = "\n\n\nUse the SlashCommand /lss <setname or setId> to show/hide the set search UI.",
+        previewTT_TT             = "Use the SlashCommand /lsp <setName or setId> to get a preview tooltip of a set item.\n\nIf you got LibSlashCommander enabled the set names will show a list of possible entries as you type the name/id already.\nWas a set selected (name is written to the chat entry editbox) via the TAB key/mouse you can show the translated set names in other languages via the \'space\' key. Pressing the return key on that setName in another language (or clicking it) will show the current client language setName and the other chosen language setName in the chat edit box so you can mark and copy it.",
+        setSearchTT              = "Set Search",
+        previewTT_SetSearch_TT   = "Use the SlashCommand /lss <setname or setId> to show/hide the set search UI. Alternatively you can use the slash command /libsetssearch too.",
         previewTTToChatToo       = "Preview itemLink to chat",
         previewTTToChatToo_TT    = "With this setting enabled the preview itemlink of the set item will be send to your chat edit box too, so you can post it/mark it with your mouse an copy it to your clipboard using CTRL+C.",
         headerUIStuff            = "UI",
@@ -1655,6 +1684,15 @@ lib.localization                 = {
         popupTooltip                = "Popup tooltip",
         setInfos                    = "Set infos",
         showAsTooltip               = "Show as tooltip",
+        setSearchDropLocationTooltipPos = "Tooltip position",
+        auto = GetString(SI_KEYBINDDISPLAYMODE2),
+        top = "Top",
+        right = "Right",
+        bottom = "Bottom",
+        left = "Left",
+        sortByDateOfRelease = "Sort by date of release",
+        sortByName = "Sort by name",
+        DLCDropdown = "DLCs",
         showCurrentZoneSets         = "Show current zone\'s sets",
         clearHistory                = "Clear history",
         wayshrines                  = "Wayshrines",
@@ -1669,6 +1707,7 @@ lib.localization                 = {
         headerItemLinks             = "Set ItemLinks",
         addSetCollectionsSearchItemLink = "Set Items: Contextmenu-> Set Collections",
         setCollectionsSearchItemLink = "Show %q in: Set-Collections",
+        headerSlashCommands = "Slash Commands",
         --Set search favorite categories
         star = "Favorite (star)",
         --PvE
@@ -1770,7 +1809,7 @@ lib.localization                 = {
         slashCommandDescription         = "Rechercher des traductions de noms d'ensembles",
         slashCommandDescriptionClient   = "Rechercher des ID/noms d'ensembles (langue du client de jeu)",
         previewTT                = "Aperçu de l'ensemble",
-        previewTT_TT             = "Utilisez la commande /lsp <setId> ou /lsp <Nom ou setId de l'ensemble> pour obtenir un aperçu de l'ensemble dans une info-bulle.\n\nSi vous avez activé LibSlashCommander, les noms d'ensembles afficheront déjà une liste d'entrées possibles lorsque vous tapez le nom/id.\nSi un ensemble est sélectionné (le nom est écrit dans la boîte d'édition de texte du chat) via la touche TAB/souris, vous pouvez afficher les noms d'ensembles traduits dans d'autres langues via la touche \'espace\'. Appuyer sur la touche de retour sur ce nom d'ensemble dans une autre langue (ou le cliquer) affichera le nom d'ensemble actuel dans la langue du client et l'autre nom d'ensemble choisi dans la boîte d'édition du chat afin que vous puissiez le sélectionner et le copier.\n\n\nUtilisez la commande /lss <nom ou setId de l'ensemble> pour afficher/masquer l'interface de recherche d'ensembles.",
+        previewTT_TT             = "Utilisez la commande /lsp <Nom ou setId de l'ensemble> pour obtenir un aperçu de l'ensemble dans une info-bulle.\n\nSi vous avez activé LibSlashCommander, les noms d'ensembles afficheront déjà une liste d'entrées possibles lorsque vous tapez le nom/id.\nSi un ensemble est sélectionné (le nom est écrit dans la boîte d'édition de texte du chat) via la touche TAB/souris, vous pouvez afficher les noms d'ensembles traduits dans d'autres langues via la touche \'espace\'. Appuyer sur la touche de retour sur ce nom d'ensemble dans une autre langue (ou le cliquer) affichera le nom d'ensemble actuel dans la langue du client et l'autre nom d'ensemble choisi dans la boîte d'édition du chat afin que vous puissiez le sélectionner et le copier.\n\n\nUtilisez la commande /lss <nom ou setId de l'ensemble> pour afficher/masquer l'interface de recherche d'ensembles.",
         previewTTToChatToo       = "Aperçu de l'objet vers le chat",
         previewTTToChatToo_TT    = "Avec ce paramètre activé, l'aperçu de l'objet de l'ensemble sera également envoyé dans votre boîte d'édition du chat, afin que vous puissiez le poster/sélectionner avec la souris et le copier dans votre presse-papiers en utilisant CTRL+C.",
         headerUIStuff            = "Interface utilisateur",
@@ -1855,7 +1894,7 @@ lib.localization                 = {
         slashCommandDescription         = "Wyszukaj tłumaczenia nazw zestawów",
         slashCommandDescriptionClient   = "Wyszukaj ID/nazwę zestawu (język klienta gry)",
         previewTT                = "Podgląd zestawu",
-        previewTT_TT             = "Użyj komendy /lsp <IdZestawu> lub /lsp <nazwaZestawu lub IdZestawu> aby wyświetlić podgląd podpowiedzi przedmiotu z tego Zestawu. \n\nJeśli masz włączony LibSlashCommander, po wprowadzeniu nazwy/Id zestawu, zostanie wyświetlona lista pasujących zestawów do wyboru.\n\nJeśli nazwa Zestawu została zaznaczona (nazwa jest wyświetlana w polu tekstowym Czatu) za pomocą klawisza TAB/myszy, można wyświetlić tłumaczenie nazwy tego Zestawu na inne języki za pomocą przycisku \'Spacja\'.\n Naciśnij klawisz Enter na nazwie Zestawu wyświetlonej w innym języku (lub kliknij ją), żeby wyświetlić, w polu tekstowym Czatu, nazwę tego Zestawu w bieżącym języku klienta gry oraz w wybranym innym języku, dzięki czemu możesz je zaznaczyć i skopiować.\n\nUżyj komendy /lss <nazwaZestawu lub IdZestawu> żeby wyświetlić/ukryć Interfejs wyszukiwania Zestawów.",
+        previewTT_TT             = "Użyj komendy /lsp <nazwaZestawu lub IdZestawu> aby wyświetlić podgląd podpowiedzi przedmiotu z tego Zestawu. \n\nJeśli masz włączony LibSlashCommander, po wprowadzeniu nazwy/Id zestawu, zostanie wyświetlona lista pasujących zestawów do wyboru.\n\nJeśli nazwa Zestawu została zaznaczona (nazwa jest wyświetlana w polu tekstowym Czatu) za pomocą klawisza TAB/myszy, można wyświetlić tłumaczenie nazwy tego Zestawu na inne języki za pomocą przycisku \'Spacja\'.\n Naciśnij klawisz Enter na nazwie Zestawu wyświetlonej w innym języku (lub kliknij ją), żeby wyświetlić, w polu tekstowym Czatu, nazwę tego Zestawu w bieżącym języku klienta gry oraz w wybranym innym języku, dzięki czemu możesz je zaznaczyć i skopiować.\n\nUżyj komendy /lss <nazwaZestawu lub IdZestawu> żeby wyświetlić/ukryć Interfejs wyszukiwania Zestawów.",
         previewTTToChatToo       = "Wyświetl link do podglądu przedmiotu na Czacie",
         previewTTToChatToo_TT    = "Po włączeniu tego ustawienia link do podglądu przedmiotu z Zestawu zostanie również wyświetlony w polu tekstowym Czatu, dzięki czemu możesz go komuś wysłać/zaznaczyć za pomocą myszy i skopiować do schowka za pomocą CTRL+C.",
         headerUIStuff            = "INTERFEJS",
@@ -1990,7 +2029,7 @@ lib.localization                 = {
         slashCommandDescription         = "查找套装名的翻译",
         slashCommandDescriptionClient   = "查找套装ID/名称 (根据客户端语言)",
         previewTT                = "套装预览",
-        previewTT_TT             = "使用斜杠指令 /lsp <套装ID> or /lsp <套装名 或 套装ID> 来获取套装的预览提示.\n\n如果你拥有并启用了LibSlashCommander, 套装ID/套装名会自动在列表中补全.\n你可以通过空格键来显示在聊天输入框中通过TAB/鼠标选中的套装的翻译后名称. 在其他语言的套装名上按回退键(或点击它)会显示对应当前客户端语言的套装名并在聊天输入框中显示其他语言的名称以便你复制使用.\n\n\n使用斜杠命令 /lss <套装名 或 套装ID> 来展示/隐藏 查找界面.",
+        previewTT_TT             = "使用斜杠指令 /lsp <套装名 或 套装ID> 来获取套装的预览提示.\n\n如果你拥有并启用了LibSlashCommander, 套装ID/套装名会自动在列表中补全.\n你可以通过空格键来显示在聊天输入框中通过TAB/鼠标选中的套装的翻译后名称. 在其他语言的套装名上按回退键(或点击它)会显示对应当前客户端语言的套装名并在聊天输入框中显示其他语言的名称以便你复制使用.\n\n\n使用斜杠命令 /lss <套装名 或 套装ID> 来展示/隐藏 查找界面.",
         previewTTToChatToo       = "发送物品预览链接到聊天栏",
         previewTTToChatToo_TT    = "当此选项启用时, 预览的物品链接也会被发送到聊天输入框, 以便你发送/复制它.",
         headerUIStuff            = "UI",
@@ -2113,6 +2152,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                     = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds",
     [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                      = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds",
     [LIBSETS_DROP_MECHANIC_NIGHT_MARKET]                        = "/esoui/art/treeicons/nightmarket_down.dds",
+    [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                      = "/esoui/art/journal/gamepad/gp_questtypeicon_zonestory.dds",
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
