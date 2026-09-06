@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.92
+local MAJOR, MINOR = "LibSets", 0.94
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -90,7 +90,7 @@ local APIVersions                    = {}
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-21)
+lib.lastSetsPreloadedCheckAPIVersion = 101050 -- Patch U50 "Season 0 Part 2" (2026-04-15)
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -111,7 +111,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-2
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the value here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101050 -- Patch U50 "Season 0 Part 2" (2026-04-15)
+APIVersions["PTS"]                   = 101051 -- Patch U51 "Season 2" (2026-09-06)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
@@ -184,14 +184,13 @@ local supportedLanguages       = {
     [langPL] = true, --todo: Added 2024-09-24,NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
     [langRU] = true,
     [langZH] = true,
-    [langJP] = false, --TODO: Working on: Waiting for SetNames & other translations (by Calamath e.g.)
+    [langJP] = true,
 }
 lib.supportedLanguages         = supportedLanguages
 
 --The languages which use a special client or custom addon, so debug functions need to skip existing data within LibSets.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] e.g.!
 local nonOfficialLanguages = {
     [langPL] = true,
-    [langJP] = true,
 }
 lib.nonOfficialLanguages = nonOfficialLanguages
 
@@ -228,7 +227,7 @@ supportedLanguageChoices = {
     [5] = langRU,
     [6] = langZH,
     [7] = langPL,
-    --[xx] = langJP, --not supported yet JP
+    [8] = langJP,
 }
 supportedLanguageChoicesValues = {}
 for langId=1, #supportedLanguageChoices, 1 do
