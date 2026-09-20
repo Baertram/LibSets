@@ -82,8 +82,9 @@ lib.customContextMenuEntries = {
 
 ---------------------------------------------------------------------------------
 local APIVersions                    = {}
+------------------------------------------------------------------------------------------------------------------------
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
---!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-- !!!!!!!!!!! Update this "AFTER a new scan of set data was done" on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
@@ -91,14 +92,11 @@ local APIVersions                    = {}
 
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
 lib.lastSetsPreloadedCheckAPIVersion = 101051 -- Patch U51 "Season 2 Part 0" (2026-09-26)
-
---^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
---!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-------------------------------------------------------------------------------------------------------------------------
+
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
---!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-- !!!!!!!!!! Update this "as PTS increases to a new APIVersion" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The current PTS APIVersion
 --Update this in order to let the API comparison function "checkIfPTSAPIVersionIsLive" work properly and recognize what version
@@ -112,7 +110,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101051 -- Patch U51 "Season 2 Part 0" (20
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
 APIVersions["PTS"]                   = 101051 -- Patch U51 "Season 2" (2026-09-20)
-local APIVersionPTS                  = tonumber(APIVersions["PTS"])
+--^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
 --> Change currentSimulatedPTSAPIversion to the proper current PTS APIversion in that case
@@ -139,6 +137,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 --Check if the PTS APIVersion is now live
+local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 local function checkIfPTSAPIVersionIsLive()
     return (APIVersionLive >= APIVersionPTS) or false
 end
