@@ -342,6 +342,7 @@ local possibleSetTypes                                 = {
     [13] = "LIBSETS_SETTYPE_IMPERIALCITY_MONSTER", --"Imperial City Monster"
     [14] = "LIBSETS_SETTYPE_CYRODIIL_MONSTER", --"Cyrodiil Monster"
     [15] = "LIBSETS_SETTYPE_CLASS",  --Class specific
+    [16] = "LIBSETS_SETTYPE_SOLO_MONSTER", --Solo Dungeon Monster
 }
 --SetTypes only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -372,6 +373,7 @@ local LIBSETS_SETTYPE_MYTHIC = LIBSETS_SETTYPE_MYTHIC
 local LIBSETS_SETTYPE_IMPERIALCITY_MONSTER = LIBSETS_SETTYPE_IMPERIALCITY_MONSTER
 local LIBSETS_SETTYPE_CYRODIIL_MONSTER = LIBSETS_SETTYPE_CYRODIIL_MONSTER
 local LIBSETS_SETTYPE_CLASS = LIBSETS_SETTYPE_CLASS
+local LIBSETS_SETTYPE_SOLO_MONSTER = LIBSETS_SETTYPE_SOLO_MONSTER
 
 
 lib.allowedSetTypes             = {}
@@ -380,6 +382,8 @@ for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
 end
 ------------------------------------------------------------------------------------------------------------------------
 --Mapping between the LibSets setType and the used internal library table and counter variable
+--> The entry below will create 1 table in LibSets with the value of key LIBSETS_TABLEKEY_TABLENAME, e.g.
+--> LibSets.arenaSets
 --------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets setTyps !!!
 --------------------------------------------------------------------------
@@ -429,6 +433,9 @@ lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_CLASS]                         = {
         [LIBSETS_TABLEKEY_TABLENAME] = "classSets",
     },
+    [LIBSETS_SETTYPE_SOLO_MONSTER]                  = {
+        [LIBSETS_TABLEKEY_TABLENAME] = "soloMonsterSets",
+    }
 }
 --setTypeToLibraryInternalVariableNames only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -654,6 +661,16 @@ local setTypesToName = {
         [langJP] = "クラス固有の",
         [langRU] = "Зависит от класса",
         [langZH] = "职业限定",
+    },
+    [LIBSETS_SETTYPE_SOLO_MONSTER]                       = {
+        [langDE] = "Solo Monster",
+        [langEN] = "Solo Monster",
+        [langES] = "Solo Monstruo",
+        [langFR] = "Solo Monstre",
+        [langPL] = "Solo Potwór",
+        [langJP] = "ソロモンスター",
+        [langRU] = "Соло Монстр",
+        [langZH] = "独奏 怪物",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
@@ -1001,6 +1018,7 @@ local possibleDropMechanics         = {
     [38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT", -- Golden Pursuit/Goldene Vorhaben
     [39] = "LIBSETS_DROP_MECHANIC_NIGHT_MARKET", --Night Market/Nachtmarkt
     [40] = "LIBSETS_DROP_MECHANIC_ZONE_STORYLINE", --Zone story line/Zonen Geschichte
+    [41] = "LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS", --Bosses in Solo Dungeons/Bosse in Solo Verliessen
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -1058,6 +1076,7 @@ local LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT = LIBSETS_DROP_MECHANIC_GOLDEN_PURSUI
 local LIBSETS_DROP_MECHANIC_NIGHT_MARKET = LIBSETS_DROP_MECHANIC_NIGHT_MARKET
 local LIBSETS_DROP_MECHANIC_ZONE_STORYLINE = LIBSETS_DROP_MECHANIC_ZONE_STORYLINE
 local LIBSETS_DROP_MECHANIC_ANTIQUITIES = LIBSETS_DROP_MECHANIC_ANTIQUITIES
+local LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS = LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS
 
 
 lib.allowedDropMechanics              = { }
@@ -1159,6 +1178,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
         [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                       = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
         [LIBSETS_DROP_MECHANIC_NIGHT_MARKET]                         = zogcn(4485), --Night Market
+        [LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS]                    = zocstrfor(GetString(SI_ZONECOMPLETIONTYPE_SHORTDESCRIPTION5), GetString(SI_ZONEDISPLAYTYPE14)), --Defeat the boss in Solo Dungeon
     },
     [langES] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
@@ -2153,6 +2173,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                      = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds",
     [LIBSETS_DROP_MECHANIC_NIGHT_MARKET]                        = "/esoui/art/treeicons/nightmarket_down.dds",
     [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                      = "/esoui/art/journal/gamepad/gp_questtypeicon_zonestory.dds",
+    [LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS]                   = "/esoui/art/mappins/mapkey_solo_dungeon.dds",
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",

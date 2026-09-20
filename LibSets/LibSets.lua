@@ -2234,6 +2234,16 @@ function lib.IsMonsterSet(setId)
     return lib.monsterSets[setId] ~= nil or false
 end
 
+--Returns true if the setId provided is a solo dungeon monster set
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isSoloDungeonMonsterSet
+function lib.IsSoloMonsterSet(setId)
+    if setId == nil then return end
+    if not checkIfSetsAreLoadedProperly(setId) then return end
+    return lib.soloMonsterSets[setId] ~= nil or false
+end
+
+
 --Returns true if the setId provided is a dungeon set
 --> Parameters: setId number: The set's setId
 --> Returns:    boolean isDungeonSet

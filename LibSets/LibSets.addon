@@ -2,7 +2,7 @@
 ## Check file LibSets.lua with information how to update the library with new content.
 ## Short description: All data for the update comes from
 ## API functions and scanned info ingame, stored to the LibSets.lua SavedVariables file.
-## The data needs to be transfered to the Excel LibSets_SetData.xlsx file afterwards.
+## The data needs to be transfered to the Excel LibSets_SetData.xlsm file afterwards.
 ## (Attention: The excel Uses forumlas cross the different tabs! So always respect and drag&drop the formulas for new rows!)
 
 ## Title: LibSets
