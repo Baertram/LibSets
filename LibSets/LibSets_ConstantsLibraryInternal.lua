@@ -90,7 +90,7 @@ local APIVersions                    = {}
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101050 -- Patch U50 "Season 0 Part 2" (2026-04-15)
+lib.lastSetsPreloadedCheckAPIVersion = 101051 -- Patch U51 "Season 2 Part 0" (2026-09-26)
 
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -111,7 +111,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101050 -- Patch U50 "Season 0 Part 2" (20
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the value here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101051 -- Patch U51 "Season 2" (2026-09-06)
+APIVersions["PTS"]                   = 101051 -- Patch U51 "Season 2" (2026-09-20)
 local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
@@ -2204,8 +2204,10 @@ local setTypeToTexture                 = {
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster"
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = "/esoui/art/icons/quest_head_monster_011.dds", --"Cyrodiil monster"
     [LIBSETS_SETTYPE_CLASS]                         = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds", --"Class specific -> Endless Archive" -> Will be using classIcon at tooltip!
+    [LIBSETS_SETTYPE_SOLO_MONSTER]                  = "/esoui/art/icons/solodungeon/solodungeon_monster_blank.dds", --"Solo Dungeon Monster"
     ["vet_dung"]                                    = "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds", --"Veteran Dungeon"
     ["undaunted chest"]                             = "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
+    ["vet_solo_dung"]                               = "/esoui/art/journal/leaderboard_indexicon_solo_dungeon_over.dds", --"Veteran Solo Dungeon"
 }
 lib.setTypeToTexture                   = setTypeToTexture
 
