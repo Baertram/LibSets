@@ -2529,7 +2529,7 @@ local function loadLAMSettingsMenu()
             end,
             default =   defaultSettings.addSetCollectionsSearchItemLink,
             disabled =  function()
-                return lib.LCM == nil
+                return lib.libCustomMenu == nil
             end,
             requiresReload = true,
             width =     "full",
