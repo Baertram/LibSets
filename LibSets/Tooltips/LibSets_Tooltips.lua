@@ -120,7 +120,6 @@ local dropMechanicTabTheSame = nil
 local dropMechanicIdToTexture =             lib.dropMechanicIdToTexture
 local setTypeToTexture =                    lib.setTypeToTexture
 local vetDungTexture =                      setTypeToTexture["vet_dung"]
-local vetSoloDungTexture =                  setTypeToTexture["vet_solo_dung"]
 local undauntedChestTexture =               setTypeToTexture["undaunted chest"]
 --local imperialCityTexture =                 setTypeToTexture[LIBSETS_SETTYPE_IMPERIALCITY]
 local setTypeToDropZoneLocalizationStr =    lib.setTypeToDropZoneLocalizationStr
@@ -150,7 +149,6 @@ local imperialCityStr =         localization.dropZoneImperialCity
 local imperialSewersStr =       localization.dropZoneImperialSewers
 local cyrodiilStr =             localization.dropZoneCyrodiil
 local veteranDungeonIconStr =   zoitf(vetDungTexture, 24, 24, dungeonStr, nil)
-local soloVeteranDungeonIconStr = zoitf(vetSoloDungTexture, 24, 24, dungeonStr, nil)
 --local bossStr =                 localization.boss
 --local setTypeStr =              localization.setType
 local reconstructionCostsStr =  localization.reconstructionCosts
@@ -177,24 +175,24 @@ local LIBSETS_TABLEKEY_DROPMECHANIC = LIBSETS_TABLEKEY_DROPMECHANIC
 local LIBSETS_SETTYPE_CYRODIIL_MONSTER = LIBSETS_SETTYPE_CYRODIIL_MONSTER
 local LIBSETS_SETTYPE_IMPERIALCITY_MONSTER = LIBSETS_SETTYPE_IMPERIALCITY_MONSTER
 local LIBSETS_SETTYPE_MONSTER = LIBSETS_SETTYPE_MONSTER
-local LIBSETS_SETTYPE_SOLO_MONSTER = LIBSETS_SETTYPE_SOLO_MONSTER
 local LIBSETS_SETTYPE_CRAFTED = LIBSETS_SETTYPE_CRAFTED
 
-local monsterSetTypesForUndauntedChest = {
-    [LIBSETS_SETTYPE_MONSTER]       = true,
-    [LIBSETS_SETTYPE_SOLO_MONSTER]  = true,
+--[[
+local monsterSetTypes = {
+    [LIBSETS_SETTYPE_MONSTER] =                 true,
+    [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    true,
+    [LIBSETS_SETTYPE_CYRODIIL_MONSTER] =        true,
 }
+]]
 local monsterSetTypeToVeteranStr = {
     [LIBSETS_SETTYPE_MONSTER] =                 veteranDungeonIconStr,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialCityStr,
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER] =        cyrodiilStr,
-    [LIBSETS_SETTYPE_SOLO_MONSTER] =            soloVeteranDungeonIconStr,
 }
 local monsterSetTypeToNoVeteranStr = {
     [LIBSETS_SETTYPE_MONSTER] =                 undauntedChestStr,
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER] =    imperialSewersStr,
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER] =        cyrodiilStr,
-    [LIBSETS_SETTYPE_SOLO_MONSTER] =            undauntedChestStr,
 }
 
 
@@ -667,7 +665,7 @@ end
 local function addNonVeteranUndauntedChestName(setType, undauntedChestId, buildTextures)
     if not setType or not undauntedChestId or undauntedChestId == "" or undauntedChestId <= 0 then return "" end
     buildTextures = buildTextures or false
-    if monsterSetTypesForUndauntedChest[setType] then
+    if setType == LIBSETS_SETTYPE_MONSTER then
         local undauntedChestName = undauntedChestIdNames[undauntedChestId]
         local undauntedChestTextureAndName
         if tooltipTextures == true or buildTextures == true then
@@ -1633,7 +1631,7 @@ local function buildSetDataText(setData, itemLink, forTooltip)
             setDropLocationsTextClean = setDropLocationsText
 
             --If not for the tooltip but for the set search UI: Also build missing other data for the UI
-            _, _, _, setDropOverallTextsPerZone, _, _, _, setDropOverallTextsPerZoneClean = buildSetDropMechanicInfo(setData, itemLink, forTooltip)
+            local _, _, _, setDropOverallTextsPerZone, _, _, _, setDropOverallTextsPerZoneClean = buildSetDropMechanicInfo(setData, itemLink, forTooltip)
             ----------------------------------------------------------------------------------------------------------------
         else
             --Non custom tooltip: Defined by LibSets
@@ -2529,7 +2527,7 @@ local function loadLAMSettingsMenu()
             end,
             default =   defaultSettings.addSetCollectionsSearchItemLink,
             disabled =  function()
-                return lib.libCustomMenu == nil
+                return lib.LCM == nil
             end,
             requiresReload = true,
             width =     "full",
