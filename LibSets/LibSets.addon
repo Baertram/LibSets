@@ -2,18 +2,18 @@
 ## Check file LibSets.lua with information how to update the library with new content.
 ## Short description: All data for the update comes from
 ## API functions and scanned info ingame, stored to the LibSets.lua SavedVariables file.
-## The data needs to be transfered to the Excel LibSets_SetData.xlsx file afterwards.
+## The data needs to be transfered to the Excel LibSets_SetData.xlsm file afterwards.
 ## (Attention: The excel Uses forumlas cross the different tabs! So always respect and drag&drop the formulas for new rows!)
 
 ## Title: LibSets
 ## Description: List of all ingame sets and functions to check what set type they are, set names, itemIds, drop locations, etc.
 ## Author: Baertram
-## APIVersion: 101050 101051
-## Version: 0.9.3
-## AddOnVersion: 0009030
+## APIVersion: 101052 101053
+## Version: 0.9.5
+## AddOnVersion: 0009050
 ## IsLibrary: true
 ## SavedVariables: LibSets_SV_Data LibSets_SV_DEBUG_Data
-## OptionalDependsOn: LibAddonMenu-2.0 LibCustomMenu LibHarvensAddonSettings LibScrollableMenu LibSlashCommander LibZone EsoPL
+## OptionalDependsOn: LibAddonMenu-2.0 LibCustomMenu LibHarvensAddonSettings LibScrollableMenu LibSlashCommander LibZone
 
 # This Add-On is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries. All rights reserved.
 

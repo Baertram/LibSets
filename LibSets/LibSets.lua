@@ -367,6 +367,9 @@ local DLC_TYPE_DUNGEONS = DLC_TYPE_DUNGEONS
 
 local emptySetItemLinkPattern = "|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h"
 
+local svDebugData = lib.svDebugData
+
+
 --Libraries
 local LCM --LibCustomMenu
 local LSM -- LibScrollableMenu
@@ -1035,7 +1038,7 @@ local function decompressSetIdItemIds(setId, isNonESOSet)
 	if CachedSetItemIdsTable[setId] then
 		return CachedSetItemIdsTable[setId]
 	end
-    local svDebugData = lib.svDebugData
+    svDebugData = svDebugData or lib.svDebugData
 
     if isNonESOSet == nil then
         isNoESOSet = isNoESOSet or lib.IsNoESOSet
@@ -2242,6 +2245,16 @@ function lib.IsMonsterSet(setId)
     if not checkIfSetsAreLoadedProperly(setId) then return end
     return lib.monsterSets[setId] ~= nil or false
 end
+
+--Returns true if the setId provided is a solo dungeon monster set
+--> Parameters: setId number: The set's setId
+--> Returns:    boolean isSoloDungeonMonsterSet
+function lib.IsSoloMonsterSet(setId)
+    if setId == nil then return end
+    if not checkIfSetsAreLoadedProperly(setId) then return end
+    return lib.soloMonsterSets[setId] ~= nil or false
+end
+
 
 --Returns true if the setId provided is a dungeon set
 --> Parameters: setId number: The set's setId

@@ -1,5 +1,5 @@
 --Library base values: Name, Version
-local MAJOR, MINOR = "LibSets", 0.93
+local MAJOR, MINOR = "LibSets", 0.95
 
 --local ZOs variables
 local zocstrfor    = ZO_CachedStrFormat
@@ -82,23 +82,21 @@ lib.customContextMenuEntries = {
 
 ---------------------------------------------------------------------------------
 local APIVersions                    = {}
+------------------------------------------------------------------------------------------------------------------------
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
---!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-- !!!!!!!!!!! Update this "AFTER a new scan of set data was done" on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The last checked API version for the setsData in file "LibSets_Data.lua", see table "lib.setDataPreloaded = { ..."
 -->Update here !!! AFTER !!! a new scan of the set itemIds was done -> See LibSets_Data.lua, description in this file
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-21)
-
---^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
---!!!!!!!!!!! Update this AFTER a new scan of set data was done on the new APIversion at the PTS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+lib.lastSetsPreloadedCheckAPIVersion = 101051 -- Patch U51 "Season 2 Part 0" (2026-09-26)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-------------------------------------------------------------------------------------------------------------------------
+
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
---!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Update this if PTS increases to a new APIVersion !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-- !!!!!!!!!! Update this "as PTS increases to a new APIVersion" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 --The current PTS APIVersion
 --Update this in order to let the API comparison function "checkIfPTSAPIVersionIsLive" work properly and recognize what version
@@ -111,8 +109,8 @@ lib.lastSetsPreloadedCheckAPIVersion = 101049 -- Patch U49 "Season 0" (2026-01-2
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the value here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101050 -- Patch U50 "Season 0 Part 2" (2026-04-15)
-local APIVersionPTS                  = tonumber(APIVersions["PTS"])
+APIVersions["PTS"]                   = 101051 -- Patch U51 "Season 2" (2026-09-20)
+--^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
 --> Change currentSimulatedPTSAPIversion to the proper current PTS APIversion in that case
@@ -139,6 +137,7 @@ local APIVersionLive                 = tonumber(APIVersions["live"])
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 --Check if the PTS APIVersion is now live
+local APIVersionPTS                  = tonumber(APIVersions["PTS"])
 local function checkIfPTSAPIVersionIsLive()
     return (APIVersionLive >= APIVersionPTS) or false
 end
@@ -174,10 +173,6 @@ local langPL = "pl"
 --The supported languages of this library
 local fallbackLang             = langEN
 lib.fallbackLang               = fallbackLang
-
---Custom language addon checks
-local LibSets_iEsoPLEnabled = (EsoPL ~= nil or EsoPLUI ~= nil and true) or false --Eso PL POlish check
-
 --During debugging these languages will be scanned for their setNames and an automatic langauge switch and reloadUI will
 --be done -> If the value == true
 local supportedLanguages       = {
@@ -185,20 +180,14 @@ local supportedLanguages       = {
     [langEN] = true,
     [langES] = true,
     [langFR] = true,
+    [langPL] = true, --todo: Added 2024-09-24,NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
     [langRU] = true,
     [langZH] = true,
     [langJP] = true,
----------------------------
-------Custom languages-----
----------------------------
-    [langPL] = LibSets_iEsoPLEnabled, --(Added 2024-09-24 by tomkolp, NOT WORKING PROPERLY with debug functions if custom language addon for PL is not installed!
-                     --But 2026-07-12 if enabled the auto completion is showing missing jp, ru, zh and pl all of sudden (due to missing setnames I guess)
-                     ---> Only disable the non-official flag if the ESOPL addon is properly loaded
-
 }
 lib.supportedLanguages         = supportedLanguages
 
---The languages which use a special client or custom addon, so debug functions need to skip existing data within LibSets.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] e.g.
+--The languages which use a special client or custom addon, so debug functions need to skip existing data within LibSets.setDataPreloaded[LIBSETS_TABLEKEY_SETNAMES] e.g.!
 local nonOfficialLanguages = {
     [langPL] = true,
 }
@@ -229,7 +218,6 @@ lib.supportedLanguagesIndex = supportedLanguagesIndex
 --Sorted table of supported languages which does not change it's index!
 -->Can be used as a LibAddonMenu choices table, see function LibSets.GetSupportedLanguageChoices()
 local supportedLanguageChoices, supportedLanguageChoicesValues
---Maximum list of supported language choices
 supportedLanguageChoices = {
     [1] = langDE,
     [2] = langEN,
@@ -237,20 +225,10 @@ supportedLanguageChoices = {
     [4] = langFR,
     [5] = langRU,
     [6] = langZH,
-    [7] = langJP,
------------------------
---  Custom languages
------------------------
-    [8] = langPL,
+    [7] = langPL,
+    [8] = langJP,
 }
 supportedLanguageChoicesValues = {}
---Check if any of the maximum list is disabled, or the language is currently not supported due to the not-enabled language addon
-for idx, lang in ipairs(supportedLanguageChoices) do
-    if not supportedLanguages[lang] or nonOfficialLanguages[lang] then
-        table.remove(supportedLanguageChoices, idx)
-    end
-end
---Build the supported language choices values table, with same index
 for langId=1, #supportedLanguageChoices, 1 do
     supportedLanguageChoicesValues[langId] = langId
 end
@@ -363,6 +341,7 @@ local possibleSetTypes                                 = {
     [13] = "LIBSETS_SETTYPE_IMPERIALCITY_MONSTER", --"Imperial City Monster"
     [14] = "LIBSETS_SETTYPE_CYRODIIL_MONSTER", --"Cyrodiil Monster"
     [15] = "LIBSETS_SETTYPE_CLASS",  --Class specific
+    [16] = "LIBSETS_SETTYPE_SOLO_MONSTER", --Solo Dungeon Monster
 }
 --SetTypes only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -393,6 +372,7 @@ local LIBSETS_SETTYPE_MYTHIC = LIBSETS_SETTYPE_MYTHIC
 local LIBSETS_SETTYPE_IMPERIALCITY_MONSTER = LIBSETS_SETTYPE_IMPERIALCITY_MONSTER
 local LIBSETS_SETTYPE_CYRODIIL_MONSTER = LIBSETS_SETTYPE_CYRODIIL_MONSTER
 local LIBSETS_SETTYPE_CLASS = LIBSETS_SETTYPE_CLASS
+local LIBSETS_SETTYPE_SOLO_MONSTER = LIBSETS_SETTYPE_SOLO_MONSTER
 
 
 lib.allowedSetTypes             = {}
@@ -401,6 +381,8 @@ for i = LIBSETS_SETTYPE_ITERATION_BEGIN, LIBSETS_SETTYPE_ITERATION_END do
 end
 ------------------------------------------------------------------------------------------------------------------------
 --Mapping between the LibSets setType and the used internal library table and counter variable
+--> The entry below will create 1 table in LibSets with the value of key LIBSETS_TABLEKEY_TABLENAME, e.g.
+--> LibSets.arenaSets
 --------------------------------------------------------------------------
 --!!! Attention: Change this table if you add/remove LibSets setTyps !!!
 --------------------------------------------------------------------------
@@ -450,6 +432,9 @@ lib.setTypeToLibraryInternalVariableNames = {
     [LIBSETS_SETTYPE_CLASS]                         = {
         [LIBSETS_TABLEKEY_TABLENAME] = "classSets",
     },
+    [LIBSETS_SETTYPE_SOLO_MONSTER]                  = {
+        [LIBSETS_TABLEKEY_TABLENAME] = "soloMonsterSets",
+    }
 }
 --setTypeToLibraryInternalVariableNames only available on current PTS, or automatically available if PTS->live
 if checkIfPTSAPIVersionIsLive() then
@@ -675,6 +660,16 @@ local setTypesToName = {
         [langJP] = "クラス固有の",
         [langRU] = "Зависит от класса",
         [langZH] = "职业限定",
+    },
+    [LIBSETS_SETTYPE_SOLO_MONSTER]                       = {
+        [langDE] = "Solo Monster",
+        [langEN] = "Solo Monster",
+        [langES] = "Solo Monstruo",
+        [langFR] = "Solo Monstre",
+        [langPL] = "Solo Potwór",
+        [langJP] = "ソロモンスター",
+        [langRU] = "Соло Монстр",
+        [langZH] = "独奏 怪物",
     },
 }
 --Translations only available on current PTS, or automatically available if PTS->live
@@ -1022,6 +1017,7 @@ local possibleDropMechanics         = {
     [38] = "LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT", -- Golden Pursuit/Goldene Vorhaben
     [39] = "LIBSETS_DROP_MECHANIC_NIGHT_MARKET", --Night Market/Nachtmarkt
     [40] = "LIBSETS_DROP_MECHANIC_ZONE_STORYLINE", --Zone story line/Zonen Geschichte
+    [41] = "LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS", --Bosses in Solo Dungeons/Bosse in Solo Verliessen
 }
 --Enable DLCids that are not live yet e.g. only on PTS
 if checkIfPTSAPIVersionIsLive() then
@@ -1079,6 +1075,7 @@ local LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT = LIBSETS_DROP_MECHANIC_GOLDEN_PURSUI
 local LIBSETS_DROP_MECHANIC_NIGHT_MARKET = LIBSETS_DROP_MECHANIC_NIGHT_MARKET
 local LIBSETS_DROP_MECHANIC_ZONE_STORYLINE = LIBSETS_DROP_MECHANIC_ZONE_STORYLINE
 local LIBSETS_DROP_MECHANIC_ANTIQUITIES = LIBSETS_DROP_MECHANIC_ANTIQUITIES
+local LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS = LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS
 
 
 lib.allowedDropMechanics              = { }
@@ -1180,6 +1177,7 @@ lib.dropMechanicIdToName          = {
         [LIBSETS_DROP_MECHANIC_ENDLESS_ARCHIVE]                      = GetString(SI_ZONEDISPLAYTYPE12),
         [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                       = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
         [LIBSETS_DROP_MECHANIC_NIGHT_MARKET]                         = zogcn(4485), --Night Market
+        [LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS]                    = zocstrfor(GetString(SI_ZONECOMPLETIONTYPE_SHORTDESCRIPTION5), GetString(SI_ZONEDISPLAYTYPE14)), --Defeat the boss in Solo Dungeon
     },
     [langES] = {
         [LIBSETS_DROP_MECHANIC_MAIL_PVP_REWARDS_FOR_THE_WORTHY]      = "Recompensa por el mérito",
@@ -2174,6 +2172,7 @@ local dropMechanicIdToTexture          = {
     [LIBSETS_DROP_MECHANIC_GOLDEN_PURSUIT]                      = "/esoui/art/lfg/lfg_indexicon_promotionalevents_up.dds",
     [LIBSETS_DROP_MECHANIC_NIGHT_MARKET]                        = "/esoui/art/treeicons/nightmarket_down.dds",
     [LIBSETS_DROP_MECHANIC_ZONE_STORYLINE]                      = "/esoui/art/journal/gamepad/gp_questtypeicon_zonestory.dds",
+    [LIBSETS_DROP_MECHANIC_SOLO_DUNGEON_BOSS]                   = "/esoui/art/mappins/mapkey_solo_dungeon.dds",
 
     --["veteran dungeon"] =     "/esoui/art/lfg/lfg_veterandungeon_up.dds", --"/esoui/art/leveluprewards/levelup_veteran_dungeon.dds"
     --["undaunted"] =           "/esoui/art/icons/servicetooltipicons/gamepad/gp_servicetooltipicon_undaunted.dds",
@@ -2204,8 +2203,10 @@ local setTypeToTexture                 = {
     [LIBSETS_SETTYPE_IMPERIALCITY_MONSTER]          = "/esoui/art/icons/quest_head_monster_012.dds", --"Imperial City monster"
     [LIBSETS_SETTYPE_CYRODIIL_MONSTER]              = "/esoui/art/icons/quest_head_monster_011.dds", --"Cyrodiil monster"
     [LIBSETS_SETTYPE_CLASS]                         = "/esoui/art/icons/poi/poi_endlessdungeon_incomplete.dds", --"Class specific -> Endless Archive" -> Will be using classIcon at tooltip!
+    [LIBSETS_SETTYPE_SOLO_MONSTER]                  = "/esoui/art/icons/solodungeon/solodungeon_monster_blank.dds", --"Solo Dungeon Monster"
     ["vet_dung"]                                    = "/esoui/art/lfg/gamepad/lfg_activityicon_veterandungeon.dds", --"Veteran Dungeon"
     ["undaunted chest"]                             = "/esoui/art/icons/housing_uni_con_undauntedchestsml001.dds",
+    ["vet_solo_dung"]                               = "/esoui/art/journal/leaderboard_indexicon_solo_dungeon_over.dds", --"Veteran Solo Dungeon"
 }
 lib.setTypeToTexture                   = setTypeToTexture
 

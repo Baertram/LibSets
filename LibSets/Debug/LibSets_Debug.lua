@@ -1432,7 +1432,6 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
     local alreadyFinished = false
 
     LoadSavedVariables()
-
     --Is the function called the 1st time for the current APIversion?
     --or is it executed after a reloadui e.g.?
     lib.svDebugData.DebugGetAllData = lib.svDebugData.DebugGetAllData or {}
@@ -1454,7 +1453,7 @@ function lib.DebugGetAllData(resetApiData, noItemIds, onlyNames)
     d(libPrefix .. ">>>DebugGetAllData START for API \'" ..  tos(apiVersion) .. "\' - newRun: " .. tos(newRun) .. ", resetApiData: " ..tos(resetApiData) .. ", noItemIds: " ..tos(noItemIds))
 
     lib.debugGetAllDataIsRunning = true
-    
+
     if not alreadyFinished then
         if newRun == true then
             debugResetSavedVariables(true, onlyNames)
