@@ -1035,6 +1035,8 @@ local function decompressSetIdItemIds(setId, isNonESOSet)
 	if CachedSetItemIdsTable[setId] then
 		return CachedSetItemIdsTable[setId]
 	end
+    local svDebugData = lib.svDebugData
+
     if isNonESOSet == nil then
         isNoESOSet = isNoESOSet or lib.IsNoESOSet
         isNonESOSet = isNoESOSet(setId)
@@ -1046,6 +1048,13 @@ local function decompressSetIdItemIds(setId, isNonESOSet)
         preloadedSetItemIdsCompressed = preloaded[LIBSETS_TABLEKEY_SETITEMIDS]
     end
     local IdSource = preloadedSetItemIdsCompressed[setId]
+	-- If not found in preloaded data, check SavedVariables for debug data
+    -->But only do that while the Debug funcitons reloaduing the UI to get the new data is currently active!
+	if lib.debugGetAllDataIsRunning and not IdSource then
+		if svDebugData and svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED] then
+			IdSource = svDebugData[LIBSETS_TABLEKEY_SETITEMIDS_COMPRESSED][setId]
+		end
+	end
 	if not IdSource then return end
 	local workingTable = {}
 	for j = 1, #IdSource do
