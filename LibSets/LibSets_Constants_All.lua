@@ -120,6 +120,7 @@ local possibleDlcIds = {
     [41] = "DLC_SEASON0",
     [42] = "DLC_SEASON0_PART2", --API101050
     [43] = "DLC_SEASON2_PART0", --API101051
+    [44] = "DLC_SEASON2_PART1", --API101052
 }
 lib.possibleDlcIds = possibleDlcIds
 --Enable DLCids that are not live yet e.g. only on PTS
@@ -238,7 +239,9 @@ lib.dlcAndChapterCollectibleIds = {
     --[42]]--Season 0 Part 2
       [DLC_SEASON0_PART2]            = {name="Season 0, Part 2", type=DLC_TYPE_SEASON_PART, releaseDate=1780898400}, -- June 8th 2026 --text ok 260525
     --[43]]--Season 2 Part 0
-      [DLC_SEASON2_PART0]            = {name="Season 2, Part 0", type=DLC_TYPE_SEASON_PART, releaseDate=1790596800}, -- SeptemberJune 28th 2026 --text ok 260906
+      [DLC_SEASON2_PART0]            = {name="Season 2, Part 0", type=DLC_TYPE_SEASON_PART, releaseDate=1790596800}, -- September 28th 2026 --text ok 260906
+    --[44]]--Season 2 Part 1
+      [DLC_SEASON2_PART1]            = {name="Season 2, Part 1", type=DLC_TYPE_SEASON_PART, releaseDate=1800356400}, -- January 19th 2027 --text todo 261101
 }
 if checkIfPTSAPIVersionIsLive() then
     --lib.dlcAndChapterCollectibleIds[DLC_<name_here>] = {name=<string:nilable>, collectibleId=<number:nilable>, achievementCategoryId=<number:nilable>, type=DLC_TYPE_xxx, releaseDate=<timeStampOfReleaseDate>}

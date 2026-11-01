@@ -10,9 +10,10 @@ local zogcn     = GetCollectibleName
 --Check if the library was loaded before already + chat output
 function IsLibSetsAlreadyLoaded(outputMsg)
     outputMsg = outputMsg or false
-    if LibSets ~= nil and LibSets.fullyLoaded == true then
+    local libSets = LibSets
+    if libSets ~= nil and libSets.fullyLoaded == true then
         --Was an older version loaded?
-        local loadedVersion = LibSets.version
+        local loadedVersion = libSets.version
         if loadedVersion < MINOR then return false end
         if outputMsg == true then d("[" .. MAJOR .. "]Library was already loaded before, with version " .. tostring(loadedVersion) .. "!") end
         return true
@@ -26,13 +27,14 @@ LibSets                              = {} --Creation of the global variable
 local lib                            = LibSets
 
 --Are we on a console?
+local LibSetsSearchUI_TLCPrefix = "LibSets_SearchUI_TLC_"
 local IsConsole = ZO_IsConsoleOrGameCoreUI()
 lib.IsConsole = IsConsole
 lib.SearchUI = {
     name = MAJOR .. "_SearchUI",
     controlName = {
-        [false] = "LibSets_SearchUI_TLC_Keyboard",
-        [true]  = "LibSets_SearchUI_TLC_Gamepad",
+        [false] = LibSetsSearchUI_TLCPrefix.."Keyboard",
+        [true]  = LibSetsSearchUI_TLCPrefix.."Gamepad",
     },
     control = {
         [false] = nil, --Keyboard: LibSets_SearchUI_TLC_Keyboard Updated as keyboard search UI is initialized
@@ -91,7 +93,7 @@ local APIVersions                    = {}
 -->above the sub-table ["setItemIds"] (data from debug function LibSets.DebugScanAllSetData())
 
 ---->This variable is only used for visual output within the table lib.setDataPreloaded["lastSetsCheckAPIVersion"]
-lib.lastSetsPreloadedCheckAPIVersion = 101051 -- Patch U51 "Season 2 Part 0" (2026-09-26)
+lib.lastSetsPreloadedCheckAPIVersion = 101052 -- Patch U52 (2026-11-01)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
@@ -109,7 +111,7 @@ lib.lastSetsPreloadedCheckAPIVersion = 101051 -- Patch U51 "Season 2 Part 0" (20
 -- newer API patch. But as soon as the PTS was updated the both might differ and you need to update the value here if you plan
 -- to test on PTS and live with the same files
 --APIVersions["PTS"] = lib.lastSetsPreloadedCheckAPIVersion
-APIVersions["PTS"]                   = 101051 -- Patch U51 "Season 2" (2026-09-20)
+APIVersions["PTS"]                   = 101052 -- Patch U52 (2026-11-01)
 --^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -- Uncomment to return the proper value if current PTS "once again" returns the old live value...
